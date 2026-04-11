@@ -75,25 +75,7 @@ function getNv75Reference(role: Nv75Role, school: Nv75School) {
 
 function HelpHint({ text }: { text: string }) {
   return (
-    <span
-      title={text}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: 18,
-        height: 18,
-        marginLeft: 6,
-        borderRadius: "50%",
-        background: "#e2e8f0",
-        color: "#0f172a",
-        fontSize: 12,
-        fontWeight: 700,
-        cursor: "help",
-        verticalAlign: "middle",
-      }}
-      aria-label={text}
-    >
+    <span title={text} className="help-hint" aria-label={text}>
       i
     </span>
   );
@@ -102,28 +84,15 @@ function HelpHint({ text }: { text: string }) {
 
 function HeroStat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div
-      style={{
-        background: "rgba(255,255,255,0.9)",
-        border: "1px solid rgba(148,163,184,0.25)",
-        borderRadius: 18,
-        padding: "14px 16px",
-        boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
-        backdropFilter: "blur(10px)",
-      }}
-    >
-      <div style={{ fontSize: 12, color: "#475569", marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a", lineHeight: 1.1 }}>{value}</div>
+    <div className="hero-stat">
+      <div className="hero-stat__label">{label}</div>
+      <div className="hero-stat__value">{value}</div>
     </div>
   );
 }
 
 function SectionLead({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="muted-text" style={{ marginTop: 6, marginBottom: 18, maxWidth: 900 }}>
-      {children}
-    </p>
-  );
+  return <p className="section-lead muted-text">{children}</p>;
 }
 
 function createEmptyPsychRow(id: number): PsychRow {
@@ -697,68 +666,29 @@ export default function App() {
   };
 
   return (
-    <div className="app-shell" style={{ background: "linear-gradient(180deg, #f8fafc 0%, #eef4ff 48%, #f8fafc 100%)", minHeight: "100vh" }}>
-      <div className="container" style={{ paddingTop: 24, paddingBottom: 40 }}>
-        <header
-          className="hero"
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            padding: 28,
-            borderRadius: 28,
-            background: "linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #38bdf8 100%)",
-            color: "white",
-            boxShadow: "0 24px 60px rgba(15,23,42,0.18)",
-            marginBottom: 20,
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              right: -40,
-              top: -40,
-              width: 220,
-              height: 220,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.08)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              right: 140,
-              bottom: -70,
-              width: 180,
-              height: 180,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.10)",
-            }}
-          />
+    <div className="app-shell app-shell--gradient">
+      <div className="container container--app">
+        <header className="hero hero--feature">
+          <div className="hero__orb hero__orb--one" />
+          <div className="hero__orb hero__orb--two" />
 
-          <div className="pill" style={{ background: "rgba(255,255,255,0.14)", color: "white", border: "1px solid rgba(255,255,255,0.22)" }}>
+          <div className="pill pill--hero">
             Kalkulačka pro základní školy
           </div>
 
-          <div className="grid two" style={{ alignItems: "start", gap: 24 }}>
+          <div className="grid two hero__grid">
             <div>
-              <h1 style={{ fontSize: 40, lineHeight: 1.05, margin: "10px 0 12px" }}>
+              <h1 className="hero__title">
                 Přehledný průvodce výpočtem PHmax, PHAmax a PHPmax
               </h1>
-              <p style={{ fontSize: 17, lineHeight: 1.65, maxWidth: 760, color: "rgba(255,255,255,0.92)" }}>
+              <p className="hero__text">
                 Aplikace spojuje rozcestník, ukázkové situace, metodické nápovědy a samotný výpočet.
                 Hodí se pro ředitele škol, zřizovatele i další uživatele, kteří potřebují rychle ověřit
                 vstupy a porozumět výsledku.
               </p>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gap: 12,
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                alignSelf: "stretch",
-              }}
-            >
+            <div className="hero__stats">
               <HeroStat label="Aktivní modul" value={tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"} />
               <HeroStat label="Zvolený režim" value={MODE_CONFIG[mode].label} />
               <HeroStat label="Výsledek PHmax" value={totalPhmax} />
@@ -766,24 +696,10 @@ export default function App() {
             </div>
           </div>
 
-          <div
-            className="toolbar"
-            style={{
-              marginTop: 24,
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 12,
-              alignItems: "end",
-              background: "rgba(255,255,255,0.10)",
-              border: "1px solid rgba(255,255,255,0.16)",
-              borderRadius: 22,
-              padding: 16,
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <button className="btn ghost" onClick={() => window.print()} style={{ background: "white", color: "#0f172a" }}>Tisk</button>
-            <div className="field" style={{ minWidth: 340, flex: "1 1 340px" }}>
-              <span style={{ color: "rgba(255,255,255,0.88)" }}>Ukázkový příklad</span>
+          <div className="toolbar toolbar--hero">
+            <button className="btn ghost btn--light" onClick={() => window.print()}>Tisk</button>
+            <div className="field field--hero-select">
+              <span className="field__label field__label--hero">Ukázkový příklad</span>
               <select value={selectedExample} onChange={(e) => loadExample(e.target.value as ExampleKey)}>
                 <option value="">Vyberte ukázkový příklad…</option>
                 <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
@@ -801,14 +717,14 @@ export default function App() {
             <button className="btn" onClick={handleExportJson}>Export JSON</button>
           </div>
 
-          <p className="muted-text" style={{ color: "rgba(255,255,255,0.86)", marginTop: 12 }}>
+          <p className="muted-text hero__note">
             Ukázkové příklady vycházejí z typických situací v metodice a z logiky jednotlivých výpočtů.
             Po načtení je můžete upravit podle vlastní školy.
           </p>
         </header>
 
-        <section className="card" style={{ borderRadius: 24, boxShadow: "0 16px 40px rgba(15,23,42,0.06)", border: "1px solid #dbeafe" }}>
-          <h2 style={{ marginBottom: 0 }}>Rychlý rozcestník</h2>
+        <section className="card card--accent">
+          <h2 className="section-title">Rychlý rozcestník</h2>
           <SectionLead>
             Nejste si jistí, kde začít? Vyberte situaci, která se nejvíc blíží vaší škole. Aplikace vás přesměruje na správnou část kalkulačky a vyplní odpovídající ukázkový příklad.
           </SectionLead>
@@ -836,8 +752,8 @@ export default function App() {
           </div>
         </section>
 
-        <section className="card" style={{ borderRadius: 24, boxShadow: "0 16px 40px rgba(15,23,42,0.06)" }}>
-          <h2 style={{ marginBottom: 0 }}>Typ školy a režim výpočtu</h2>
+        <section className="card card--elevated">
+          <h2 className="section-title">Typ školy a režim výpočtu</h2>
           <SectionLead>
             Tady vyberete, jaký typ výpočtu chcete zobrazit. Rozcestník výše vám může s výběrem pomoci.
           </SectionLead>
@@ -910,44 +826,20 @@ export default function App() {
         )}
 
         {warnings.length > 0 && (
-          <section className="card warning" style={{ borderRadius: 22, border: "1px solid #fecaca", background: "linear-gradient(180deg, #fff7ed 0%, #fff 100%)", boxShadow: "0 10px 30px rgba(248,113,113,0.10)" }}>
+          <section className="card warning card--warning">
             <h2>Kontrola vstupů</h2>
             {warnings.map((w, i) => <div key={i}>• {w}</div>)}
           </section>
         )}
 
-        <div
-          className="tabs"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: 10,
-            padding: 10,
-            background: "rgba(255,255,255,0.86)",
-            borderRadius: 22,
-            boxShadow: "0 12px 30px rgba(15,23,42,0.06)",
-            position: "sticky",
-            top: 12,
-            zIndex: 5,
-            backdropFilter: "blur(8px)",
-            marginBottom: 18,
-          }}
-        >
-          <button className={tab === "phmax" ? "tab active" : "tab"} onClick={() => setTab("phmax")} style={{ fontWeight: 700 }}>PHmax</button>
-          <button className={tab === "pha" ? "tab active" : "tab"} onClick={() => setTab("pha")} style={{ fontWeight: 700 }}>PHAmax</button>
-          <button className={tab === "php" ? "tab active" : "tab"} onClick={() => setTab("php")} style={{ fontWeight: 700 }}>PHPmax</button>
+        <div className="tabs tabs--sticky">
+          <button className={tab === "phmax" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("phmax")}>PHmax</button>
+          <button className={tab === "pha" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("pha")}>PHAmax</button>
+          <button className={tab === "php" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("php")}>PHPmax</button>
         </div>
 
-                <section
-          className="card"
-          style={{
-            borderRadius: 24,
-            background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
-            boxShadow: "0 18px 40px rgba(15,23,42,0.06)",
-            marginBottom: 18,
-          }}
-        >
-          <h2 style={{ marginBottom: 0 }}>Aktuální přehled výsledků</h2>
+                <section className="card card--summary">
+          <h2 className="section-title">Aktuální přehled výsledků</h2>
           <SectionLead>
             Výsledky se přepočítávají průběžně podle zadaných údajů. Každý modul se stanovuje samostatně.
           </SectionLead>
@@ -1287,7 +1179,7 @@ export default function App() {
               <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax</button>
             </div>
 
-            <section className="card muted" style={{ borderRadius: 24, background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)", boxShadow: "0 18px 40px rgba(15,23,42,0.06)" }}>
+            <section className="card muted card--summary">
               <h2>Souhrn výsledků PHmax</h2>
               <div className="grid four">
                 <ResultCard label="Běžné třídy" value={basicPhmax} />
@@ -1360,7 +1252,7 @@ export default function App() {
               Postup výpočtu (kroky A–D): rozhodné počty, očištění dat, výpočet a interpretace. Najeďte na ikonu „i“ u nadpisů pro stručnou metodickou nápovědu.
             </p>
 
-            <div className="tabs" style={{ marginBottom: 16 }}>
+            <div className="tabs tabs--compact">
               <button className={phpWizardStep === "a" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("a")}>
                 A. Vstupy
               </button>
@@ -1484,7 +1376,7 @@ export default function App() {
           </section>
         )}
 
-        <section className="card muted" style={{ borderRadius: 24, background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)", boxShadow: "0 18px 40px rgba(15,23,42,0.06)" }}>
+        <section className="card muted card--summary">
           <h2>Celkový přehled</h2>
           <p className="muted-text">Výsledky PHmax, PHAmax a PHPmax se stanovují samostatně. Součet níže slouží jen pro orientaci.</p>
           <p className="muted-text">PHmax, PHAmax – asistenti pedagoga a PHPmax – metodický výpočet se stanovují odděleně. Součet níže je přehledový.</p>
