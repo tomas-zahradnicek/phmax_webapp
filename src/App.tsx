@@ -48,6 +48,7 @@ type Nv75Role = "ucitel" | "reditel";
 type Nv75School = "plavecka_skola";
 type ExampleKey = "" | "phmax_bezna_zs" | "phpmax_tri_roky" | "psychiatricka_nemocnice" | "smisene_tridy" | "pripravna_trida" | "mala_skola_pod_limitem" | "skola_s_odecty_phpmax" | "inkluzivni_skola";
 type WizardChoice = "" | "php_small" | "php_deductions" | "ph_inclusion" | "ph_psych" | "ph_mixed" | "ph_prep";
+type DataMode = "own" | "example";
 
 function clampNonNegative(value: number) {
   return Math.max(0, Number.isFinite(value) ? value : 0);
@@ -109,6 +110,46 @@ function createEmptyMixedRow(id: number): MixedRow {
 
 function createEmptyPhaRow(id: number): PhaRow {
   return { id, kind: "zs1", classes: 0, pupils: 0 };
+}
+
+
+const GLOSSARY_TERMS = [
+  { term: "PHmax", description: "Maximální počet hodin přímé pedagogické činnosti financovaný podle typu tříd a dalších částí školy." },
+  { term: "PHAmax", description: "Maximální rozsah podpory asistenta pedagoga podle příslušných kategorií tříd." },
+  { term: "PHPmax", description: "Maximální rozsah poradenských hodin financovaný podle rozhodného počtu žáků a metodických pravidel." },
+  { term: "Rozhodná hodnota", description: "Výchozí hodnota, ze které se v metodice počítá další zařazení nebo výsledek." },
+  { term: "Očištěná hodnota", description: "Hodnota po odečtení žáků, kteří se do výpočtu nezapočítávají." },
+  { term: "Pásmo", description: "Interval v tabulce, do kterého výsledek spadá a podle kterého se určí hodnota." },
+  { term: "§ 16 odst. 9", description: "Třídy nebo vzdělávání podle speciálního režimu podle školského zákona." },
+  { term: "Přípravná třída", description: "Součást výpočtu PHmax, kde se pracuje s počtem dětí v přípravné třídě." },
+  { term: "Přípravný stupeň ZŠS", description: "Samostatně posuzovaná část základní školy speciální s vlastním pravidlem výpočtu." },
+] as const;
+
+function buildShareText(data: {
+  modeLabel: string;
+  tab: string;
+  totalPhmax: number;
+  totalPha: number;
+  totalPhp: number;
+  warnings: string[];
+  inputMode: DataMode;
+}) {
+  const rows = [
+    "Shrnutí kalkulačky ZŠ",
+    "",
+    `Režim: ${data.modeLabel}`,
+    `Aktivní modul: ${data.tab}`,
+    `Práce s údaji: ${data.inputMode === "example" ? "ukázkový příklad" : "vlastní škola"}`,
+    "",
+    `Výsledek PHmax: ${data.totalPhmax}`,
+    `Výsledek PHAmax: ${data.totalPha}`,
+    `Výsledek PHPmax: ${data.totalPhp}`,
+  ];
+  if (data.warnings.length) {
+    rows.push("", "Upozornění:");
+    data.warnings.forEach((item) => rows.push(`- ${item}`));
+  }
+  return rows.join("\n");
 }
 
 export default function App() {
@@ -192,6 +233,9 @@ export default function App() {
   const [nv75TeacherMax, setNv75TeacherMax] = useState(30);
   const [selectedExample, setSelectedExample] = useState<ExampleKey>("");
   const [wizardChoice, setWizardChoice] = useState<WizardChoice>("");
+  const [dataMode, setDataMode] = useState<DataMode>("own");
+  const [glossaryOpen, setGlossaryOpen] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string>("");
 
   const isFull = basicType === "full_more_than_2" || basicType === "full_max_2";
 
@@ -409,6 +453,7 @@ export default function App() {
     resetNv75();
     setSelectedExample("");
     setWizardChoice("");
+    setDataMode("own");
     setTab("phmax");
   };
 
@@ -475,6 +520,7 @@ export default function App() {
   const loadExample = (example: ExampleKey) => {
     setSelectedExample(example);
     if (!example) return;
+    setDataMode("example");
 
     resetAll();
 
@@ -604,6 +650,204 @@ export default function App() {
     }
   };
 
+
+  const buildSnapshot = () => ({
+    tab,
+    mode,
+    basicType,
+    basic1Classes,
+    basic1Pupils,
+    basic2Classes,
+    basic2Pupils,
+    incl1Classes,
+    incl1Pupils,
+    incl2Classes,
+    incl2Pupils,
+    psychRows,
+    minorityType,
+    minority1Classes,
+    minority1Pupils,
+    minority2Classes,
+    minority2Pupils,
+    gymRows,
+    mixedRows,
+    special1Classes,
+    special1Pupils,
+    special2Classes,
+    special2Pupils,
+    specialIIClasses,
+    specialIIPupils,
+    prepClasses,
+    prepChildren,
+    prepSpecialClasses,
+    prepSpecialChildren,
+    p38First,
+    p38Second,
+    p41First,
+    p41Second,
+    phaRows,
+    phpYear1,
+    phpYear2,
+    phpYear3,
+    phpWizardStep,
+    phpMethodMode,
+    phpExcludedAbroad,
+    phpExcludedForeignSchoolCz,
+    phpExcludedIndividual,
+    phpExcludedSchool,
+    selectedExample,
+    wizardChoice,
+    dataMode,
+  });
+
+  const restoreSnapshot = () => {
+    try {
+      const raw = localStorage.getItem("edu-cz-zs-calculator-state");
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      if (s.tab) setTab(s.tab);
+      if (s.mode) setMode(s.mode);
+      if (s.basicType) setBasicType(s.basicType);
+      setBasic1Classes(s.basic1Classes ?? 0);
+      setBasic1Pupils(s.basic1Pupils ?? 0);
+      setBasic2Classes(s.basic2Classes ?? 0);
+      setBasic2Pupils(s.basic2Pupils ?? 0);
+      setIncl1Classes(s.incl1Classes ?? 0);
+      setIncl1Pupils(s.incl1Pupils ?? 0);
+      setIncl2Classes(s.incl2Classes ?? 0);
+      setIncl2Pupils(s.incl2Pupils ?? 0);
+      setPsychRows(s.psychRows ?? []);
+      if (s.minorityType) setMinorityType(s.minorityType);
+      setMinority1Classes(s.minority1Classes ?? 0);
+      setMinority1Pupils(s.minority1Pupils ?? 0);
+      setMinority2Classes(s.minority2Classes ?? 0);
+      setMinority2Pupils(s.minority2Pupils ?? 0);
+      setGymRows(s.gymRows ?? []);
+      setMixedRows(s.mixedRows ?? []);
+      setSpecial1Classes(s.special1Classes ?? 0);
+      setSpecial1Pupils(s.special1Pupils ?? 0);
+      setSpecial2Classes(s.special2Classes ?? 0);
+      setSpecial2Pupils(s.special2Pupils ?? 0);
+      setSpecialIIClasses(s.specialIIClasses ?? 0);
+      setSpecialIIPupils(s.specialIIPupils ?? 0);
+      setPrepClasses(s.prepClasses ?? 0);
+      setPrepChildren(s.prepChildren ?? 0);
+      setPrepSpecialClasses(s.prepSpecialClasses ?? 0);
+      setPrepSpecialChildren(s.prepSpecialChildren ?? 0);
+      setP38First(s.p38First ?? 0);
+      setP38Second(s.p38Second ?? 0);
+      setP41First(s.p41First ?? 0);
+      setP41Second(s.p41Second ?? 0);
+      setPhaRows(s.phaRows ?? []);
+      setPhpYear1(s.phpYear1 ?? 0);
+      setPhpYear2(s.phpYear2 ?? 0);
+      setPhpYear3(s.phpYear3 ?? 0);
+      if (s.phpWizardStep) setPhpWizardStep(s.phpWizardStep);
+      if (s.phpMethodMode) setPhpMethodMode(s.phpMethodMode);
+      setPhpExcludedAbroad(s.phpExcludedAbroad ?? 0);
+      setPhpExcludedForeignSchoolCz(s.phpExcludedForeignSchoolCz ?? 0);
+      setPhpExcludedIndividual(s.phpExcludedIndividual ?? 0);
+      setPhpExcludedSchool(Boolean(s.phpExcludedSchool));
+      setSelectedExample(s.selectedExample ?? "");
+      setWizardChoice(s.wizardChoice ?? "");
+      setDataMode(s.dataMode ?? "own");
+    } catch (error) {
+      console.error("Nepodařilo se obnovit uložená data.", error);
+    }
+  };
+
+  const clearStoredSnapshot = () => {
+    localStorage.removeItem("edu-cz-zs-calculator-state");
+    setLastSavedAt("");
+  };
+
+  const saveSnapshotManually = () => {
+    localStorage.setItem("edu-cz-zs-calculator-state", JSON.stringify(buildSnapshot()));
+    setLastSavedAt(new Date().toLocaleString("cs-CZ"));
+  };
+
+  const copySummaryToClipboard = async () => {
+    const text = buildShareText({
+      modeLabel: MODE_CONFIG[mode].label,
+      tab: tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax",
+      totalPhmax,
+      totalPha,
+      totalPhp,
+      warnings,
+      inputMode: dataMode,
+    });
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.error("Nepodařilo se zkopírovat shrnutí.", error);
+    }
+  };
+
+  const printSummaryWindow = () => {
+    const text = buildShareText({
+      modeLabel: MODE_CONFIG[mode].label,
+      tab: tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax",
+      totalPhmax,
+      totalPha,
+      totalPhp,
+      warnings,
+      inputMode: dataMode,
+    }).replace(/\n/g, "<br />");
+    const win = window.open("", "_blank", "width=900,height=700");
+    if (!win) return;
+    win.document.write(`<html><head><title>Shrnutí kalkulačky ZŠ</title><style>body{font-family:Inter,Arial,sans-serif;padding:24px;line-height:1.6;color:#0f172a}h1{font-size:24px} .box{border:1px solid #cbd5e1;border-radius:16px;padding:20px;background:#fff}</style></head><body><h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div></body></html>`);
+    win.document.close();
+    win.focus();
+    win.print();
+  };
+
+  const goToSection = (sectionId: string) => {
+    const element = document.querySelector(`[data-section="${sectionId}"]`);
+    if (element instanceof HTMLElement) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const validationIssues = (() => {
+    const issues: { section: string; label: string }[] = [];
+    if (tab === "phmax") {
+      if (basic1Classes === 0 && basic2Classes === 0 && incl1Classes === 0 && incl2Classes === 0 && psychRows.length === 0 && minority1Classes === 0 && gymRows.length === 0 && mixedRows.length === 0 && special1Classes === 0 && special2Classes === 0 && specialIIClasses === 0 && prepClasses === 0 && prepSpecialClasses === 0) {
+        issues.push({ section: "basic", label: "Vyplňte alespoň jednu relevantní sekci v PHmax." });
+      }
+    }
+    if (tab === "pha" && phaRows.length === 0) {
+      issues.push({ section: "pha", label: "Přidejte alespoň jeden řádek do PHAmax." });
+    }
+    if (tab === "php") {
+      if (phpYear1 === 0 && phpYear2 === 0 && phpYear3 === 0) {
+        issues.push({ section: "php", label: "Zadejte počty žáků pro PHPmax." });
+      }
+    }
+    return issues;
+  })();
+
+  const incompleteSections = new Set(validationIssues.map((item) => item.section)).size;
+  const firstIssueSection = validationIssues[0]?.section ?? "";
+  const hasIssue = (sectionId: string) => validationIssues.some((item) => item.section === sectionId);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("edu-cz-zs-calculator-state", JSON.stringify(buildSnapshot()));
+      setLastSavedAt(new Date().toLocaleString("cs-CZ"));
+    } catch (error) {
+      console.error("Nepodařilo se uložit průběžná data.", error);
+    }
+  }, [
+    tab, mode, basicType, basic1Classes, basic1Pupils, basic2Classes, basic2Pupils,
+    incl1Classes, incl1Pupils, incl2Classes, incl2Pupils, psychRows, minorityType,
+    minority1Classes, minority1Pupils, minority2Classes, minority2Pupils, gymRows, mixedRows,
+    special1Classes, special1Pupils, special2Classes, special2Pupils, specialIIClasses,
+    specialIIPupils, prepClasses, prepChildren, prepSpecialClasses, prepSpecialChildren,
+    p38First, p38Second, p41First, p41Second, phaRows, phpYear1, phpYear2, phpYear3,
+    phpWizardStep, phpMethodMode, phpExcludedAbroad, phpExcludedForeignSchoolCz,
+    phpExcludedIndividual, phpExcludedSchool, selectedExample, wizardChoice, dataMode
+  ]);
+
   const summaryRows = [
     ["Běžné třídy ZŠ", basicPhmax],
     ["Třídy podle § 16 odst. 9", inclPhmax],
@@ -711,8 +955,13 @@ export default function App() {
                 <option value="inkluzivni_skola">PHmax – škola s inkluzí (§ 16)</option>
               </select>
             </div>
+            <button className="btn ghost" onClick={saveSnapshotManually}>Uložit rozpracované údaje</button>
+            <button className="btn ghost" onClick={restoreSnapshot}>Obnovit poslední verzi</button>
+            <button className="btn ghost" onClick={clearStoredSnapshot}>Vymazat uložená data</button>
             <button className="btn ghost" onClick={resetAll}>Vymazat všechny údaje</button>
             <button className="btn ghost" onClick={handleExportCsv}>Export CSV</button>
+            <button className="btn ghost" onClick={copySummaryToClipboard}>Kopírovat shrnutí</button>
+            <button className="btn ghost" onClick={printSummaryWindow}>Tisk shrnutí</button>
             <button className="btn" onClick={handleExportJson}>Export JSON</button>
           </div>
 
@@ -769,7 +1018,7 @@ export default function App() {
         </section>
 
 
-        <section className="card card--accent section-card section-card--guide">
+        <section className="card card--accent section-card section-card--guide" data-section="guide">
           <h2 className="section-title">Rychlý rozcestník</h2>
           <SectionLead>
             Nejste si jistí, kde začít? Vyberte situaci, která se nejvíc blíží vaší škole. Aplikace vás přesměruje na správnou část kalkulačky a vyplní odpovídající ukázkový příklad.
@@ -798,7 +1047,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="card card--elevated section-card section-card--setup">
+        <section className="card card--elevated section-card section-card--setup" data-section="setup">
           <h2 className="section-title">Typ školy a režim výpočtu</h2>
           <SectionLead>
             Tady vyberete, jaký typ výpočtu chcete zobrazit. Rozcestník výše vám může s výběrem pomoci.
@@ -828,7 +1077,12 @@ export default function App() {
         {warnings.length > 0 && (
           <section className="card warning card--warning">
             <h2>Kontrola vstupů</h2>
-            {warnings.map((w, i) => <div key={i}>• {w}</div>)}
+            {validationIssues.map((item, i) => (
+              <div key={`v-${i}`} className="warning-row">
+                • {item.label} <button type="button" className="status-link" onClick={() => goToSection(item.section)}>Přejít</button>
+              </div>
+            ))}
+            {warnings.map((w, i) => <div key={`w-${i}`}>• {w}</div>)}
           </section>
         )}
 
@@ -843,6 +1097,17 @@ export default function App() {
           <SectionLead>
             Výsledky se přepočítávají průběžně podle zadaných údajů. Každý modul se stanovuje samostatně.
           </SectionLead>
+          <div className="results-panel__meta">
+            <span className="status-badge status-badge--neutral">Aktivní modul: {tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"}</span>
+            <span className={`status-badge ${incompleteSections > 0 ? "status-badge--warning" : "status-badge--ok"}`}>
+              {incompleteSections > 0 ? `Nevyplněné části: ${incompleteSections}` : "Všechny hlavní části jsou vyplněné"}
+            </span>
+            {firstIssueSection ? (
+              <button type="button" className="status-link" onClick={() => goToSection(firstIssueSection)}>
+                Přejít na první nevyplněnou část
+              </button>
+            ) : null}
+          </div>
           <div className="grid four">
             <HeroStat label="Výsledek PHmax" value={totalPhmax} />
             <HeroStat label="Výsledek PHAmax" value={totalPha} />
@@ -854,7 +1119,7 @@ export default function App() {
 {tab === "phmax" && (
           <div className="stack">
             {(hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) && (
-              <section className="card section-card section-card--module section-card--module-basic">
+              <section className={`card section-card section-card--module section-card--module-basic${hasIssue("basic") ? " card--needs-attention" : ""}`} data-section="basic">
                 <h2>Běžné třídy ZŠ</h2>
 
                 {hasSection("school_variant_first_stage_only") ? (
@@ -1169,7 +1434,7 @@ export default function App() {
         )}
 
         {tab === "pha" && (
-          <section className="card section-card section-card--pha">
+          <section className={`card section-card section-card--pha${hasIssue("pha") ? " card--needs-attention" : ""}`} data-section="pha">
             <h2>PHAmax – asistenti pedagoga</h2>
             <table className="table">
               <thead>
@@ -1218,7 +1483,7 @@ export default function App() {
         )}
 
         {tab === "php" && (
-          <section className="card section-card section-card--php">
+          <section className={`card section-card section-card--php${hasIssue("php") ? " card--needs-attention" : ""}`} data-section="php">
             <h2>PHPmax – metodický výpočet <HelpHint text="PHPmax se stanoví podle průměrného počtu žáků za předcházející tři roky. Do tohoto počtu se nezapočítávají žáci vzdělávaní v zahraničí, v zahraniční škole v ČR a v individuálním vzdělávání." /></h2>
             <p className="muted-text">
               Postup výpočtu (kroky A–D): rozhodné počty, očištění dat, výpočet a interpretace. Najeďte na ikonu „i“ u nadpisů pro stručnou metodickou nápovědu.
@@ -1359,6 +1624,28 @@ export default function App() {
             <ResultCard label="Přehledový součet" value={round2(totalPhmax + totalPha + totalPhp)} />
           </div>
         </section>
+        {glossaryOpen && (
+          <div className="glossary-modal" role="dialog" aria-modal="true">
+            <div className="glossary-modal__backdrop" onClick={() => setGlossaryOpen(false)} />
+            <div className="glossary-modal__panel">
+              <div className="glossary-modal__head">
+                <div>
+                  <h2 className="section-title">Slovníček pojmů</h2>
+                  <p className="muted-text">Krátké vysvětlení pojmů, které se v aplikaci opakují.</p>
+                </div>
+                <button type="button" className="icon-btn" onClick={() => setGlossaryOpen(false)}>✕</button>
+              </div>
+              <div className="glossary-list">
+                {GLOSSARY_TERMS.map((item) => (
+                  <div key={item.term} className="glossary-item">
+                    <div className="glossary-item__term">{item.term}</div>
+                    <div className="glossary-item__desc">{item.description}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
