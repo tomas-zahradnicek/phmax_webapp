@@ -84,5 +84,4 @@ export type FieldKey =
   | "p41First"
   | "p41Second"
   | "phpYear1"
-  | "phpYear2"
-} as const;
+  | "phpYear2";
