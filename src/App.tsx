@@ -513,12 +513,12 @@ export default function App() {
           <p>
             Vite + React + TypeScript. Aplikace obsahuje formuláře pro běžné třídy, § 16 odst. 9,
             ZŠ speciální, menšinové školy, psychiatrickou nemocnici, víceletá gymnázia, PHAmax,
-            PHPmax v metodickém rozpadu A–D, resety po jednotlivých záložkách a samostatný orientační panel pro NV 75/2005.
+            PHPmax v metodickém rozpadu A–D, samostatné mazání údajů po jednotlivých záložkách a samostatný orientační panel pro NV 75/2005.
           </p>
           <div className="toolbar">
             <button className="btn ghost" onClick={() => window.print()}>Tisk</button>
-            <button className="btn ghost" onClick={loadDemoData}>Načíst ukázková data</button>
-            <button className="btn ghost" onClick={resetAll}>Reset vše</button>
+            <button className="btn ghost" onClick={loadDemoData}>Vyplnit ukázkový příklad</button>
+            <button className="btn ghost" onClick={resetAll}>Vymazat všechny údaje</button>
             <button className="btn ghost" onClick={handleExportCsv}>Export CSV</button>
             <button className="btn" onClick={handleExportJson}>Export JSON</button>
           </div>
@@ -552,7 +552,7 @@ export default function App() {
           <section className="card">
             <h2>NV 75/2005 – orientační panel</h2>
             <p className="muted-text">
-              Samostatný režim pro rychlé ověření rozsahu přímé pedagogické činnosti.
+              Samostatný režim pro orientační ověření rozsahu přímé pedagogické činnosti.
             </p>
 
             <div className="grid two">
@@ -580,7 +580,7 @@ export default function App() {
             )}
 
             <div className="toolbar">
-              <button className="btn ghost" onClick={resetNv75}>Reset NV 75/2005</button>
+              <button className="btn ghost" onClick={resetNv75}>Vymazat údaje NV 75/2005</button>
             </div>
 
             <div className="grid three">
@@ -715,7 +715,7 @@ export default function App() {
                     <tbody>
                       {psychComputedRows.length === 0 ? (
                         <tr>
-                          <td colSpan={9} className="muted-text">Zatím není přidána žádná skupina.</td>
+                          <td colSpan={9} className="muted-text">Zatím není přidán žádný řádek.</td>
                         </tr>
                       ) : psychComputedRows.map((row) => (
                         <tr key={row.id}>
@@ -743,7 +743,7 @@ export default function App() {
                       ))}
                     </tbody>
                   </table>
-                  <button className="btn ghost" onClick={addPsych}>Přidat skupinu</button>
+                  <button className="btn ghost" onClick={addPsych}>Přidat řádek</button>
                 </section>
               )}
 
@@ -795,7 +795,7 @@ export default function App() {
                     <tbody>
                       {gymComputedRows.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className="muted-text">Zatím není přidána žádná skupina.</td>
+                          <td colSpan={8} className="muted-text">Zatím není přidán žádný řádek.</td>
                         </tr>
                       ) : gymComputedRows.map((row) => (
                         <tr key={row.id}>
@@ -818,7 +818,7 @@ export default function App() {
                       ))}
                     </tbody>
                   </table>
-                  <button className="btn ghost" onClick={addGym}>Přidat skupinu</button>
+                  <button className="btn ghost" onClick={addGym}>Přidat řádek</button>
                 </section>
               )}
 
@@ -834,7 +834,7 @@ export default function App() {
                     <tbody>
                       {mixedRows.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="muted-text">Zatím není přidána žádná skupina.</td>
+                          <td colSpan={5} className="muted-text">Zatím není přidán žádný řádek.</td>
                         </tr>
                       ) : mixedRows.map((row) => (
                         <tr key={row.id}>
@@ -857,7 +857,7 @@ export default function App() {
                       ))}
                     </tbody>
                   </table>
-                  <button className="btn ghost" onClick={addMixed}>Přidat skupinu</button>
+                  <button className="btn ghost" onClick={addMixed}>Přidat řádek</button>
                 </section>
               )}
             </div>
@@ -930,7 +930,7 @@ export default function App() {
             )}
 
             <div className="toolbar">
-              <button className="btn ghost" onClick={resetPhmax}>Reset PHmax</button>
+              <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax</button>
             </div>
 
             <section className="card muted">
@@ -962,7 +962,7 @@ export default function App() {
               <tbody>
                 {phaComputedRows.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="muted-text">Zatím není přidána žádná skupina.</td>
+                    <td colSpan={8} className="muted-text">Zatím není přidán žádný řádek.</td>
                   </tr>
                 ) : phaComputedRows.map((row) => (
                   <tr key={row.id}>
@@ -992,8 +992,8 @@ export default function App() {
               </tbody>
             </table>
             <div className="toolbar">
-              <button className="btn ghost" onClick={addPha}>Přidat skupinu</button>
-              <button className="btn ghost" onClick={resetPha}>Reset PHAmax</button>
+              <button className="btn ghost" onClick={addPha}>Přidat řádek</button>
+              <button className="btn ghost" onClick={resetPha}>Vymazat údaje PHAmax</button>
               <ResultCard label="PHAmax celkem" value={totalPha} />
             </div>
           </section>
@@ -1022,7 +1022,7 @@ export default function App() {
             </div>
 
             <div className="toolbar">
-              <button className="btn ghost" onClick={resetPhp}>Reset PHPmax</button>
+              <button className="btn ghost" onClick={resetPhp}>Vymazat údaje PHPmax</button>
             </div>
 
             <div className="checks">
@@ -1041,7 +1041,7 @@ export default function App() {
                   checked={phpMethodMode === "short_period"}
                   onChange={() => setPhpMethodMode("short_period")}
                 />
-                Použít kratší období místo 3 let
+                Použít kratší období než 3 roky
               </label>
             </div>
 
@@ -1076,7 +1076,7 @@ export default function App() {
                       checked={phpExcludedSchool}
                       onChange={(e) => setPhpExcludedSchool(e.target.checked)}
                     />
-                    Škola je vyloučená z PHPmax
+                    Tato škola se do PHPmax nezapočítává
                   </label>
                 </div>
                 <div className="grid three">
