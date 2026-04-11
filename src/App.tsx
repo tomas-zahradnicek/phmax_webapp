@@ -46,6 +46,7 @@ type PhpWizardStep = "a" | "b" | "c" | "d";
 type PhpMethodMode = "three_year_avg" | "short_period";
 type Nv75Role = "ucitel" | "reditel";
 type Nv75School = "plavecka_skola";
+type ExampleKey = "" | "phmax_bezna_zs" | "phpmax_tri_roky" | "psychiatricka_nemocnice" | "smisene_tridy" | "pripravna_trida";
 
 function clampNonNegative(value: number) {
   return Math.max(0, Number.isFinite(value) ? value : 0);
@@ -192,6 +193,7 @@ export default function App() {
   const [nv75School, setNv75School] = useState<Nv75School>("plavecka_skola");
   const [nv75TeacherMin, setNv75TeacherMin] = useState(22);
   const [nv75TeacherMax, setNv75TeacherMax] = useState(30);
+  const [selectedExample, setSelectedExample] = useState<ExampleKey>("");
 
   const isFull = basicType === "full_more_than_2" || basicType === "full_max_2";
 
@@ -470,6 +472,62 @@ export default function App() {
     resetNv75();
   };
 
+
+  const loadExample = (example: ExampleKey) => {
+    setSelectedExample(example);
+    if (!example) return;
+
+    resetAll();
+
+    if (example === "phmax_bezna_zs") {
+      setTab("phmax");
+      setBasicType("full_more_than_2");
+      setBasic1Classes(10);
+      setBasic1Pupils(250);
+      setBasic2Classes(8);
+      setBasic2Pupils(225);
+      return;
+    }
+
+    if (example === "phpmax_tri_roky") {
+      setTab("php");
+      setPhpWizardStep("a");
+      setPhpMethodMode("three_year_avg");
+      setPhpYear1(260);
+      setPhpYear2(272);
+      setPhpYear3(281);
+      setPhpExcludedAbroad(5);
+      setPhpExcludedForeignSchoolCz(3);
+      setPhpExcludedIndividual(2);
+      return;
+    }
+
+    if (example === "psychiatricka_nemocnice") {
+      setTab("phmax");
+      setPsychRows([
+        { id: 1, kind: "psych1", mode: "higher_of_two", currentPupils: 7, currentClasses: 1, prevPupils: 6, prevClasses: 1 },
+      ]);
+      return;
+    }
+
+    if (example === "smisene_tridy") {
+      setTab("phmax");
+      setMixedRows([
+        { id: 1, stage: "first", majority: "zs", classes: 2, pupils: 18 },
+      ]);
+      return;
+    }
+
+    if (example === "pripravna_trida") {
+      setTab("phmax");
+      setPrepClasses(1);
+      setPrepChildren(12);
+      setPrepSpecialClasses(1);
+      setPrepSpecialChildren(4);
+      return;
+    }
+  };
+
   const summaryRows = [
     ["Běžné třídy ZŠ", basicPhmax],
     ["Třídy podle § 16 odst. 9", inclPhmax],
@@ -543,11 +601,24 @@ export default function App() {
           </p>
           <div className="toolbar">
             <button className="btn ghost" onClick={() => window.print()}>Tisk</button>
-            <button className="btn ghost" onClick={loadDemoData}>Vyplnit ukázkový příklad</button>
+            <div className="field" style={{ minWidth: 320 }}>
+              <span>Ukázkový příklad</span>
+              <select value={selectedExample} onChange={(e) => loadExample(e.target.value as ExampleKey)}>
+                <option value="">Vyberte ukázkový příklad…</option>
+                <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
+                <option value="phpmax_tri_roky">PHPmax – tříletý průměr a odečty</option>
+                <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
+                <option value="smisene_tridy">PHmax – smíšené třídy</option>
+                <option value="pripravna_trida">PHmax – přípravná třída a přípravný stupeň ZŠS</option>
+              </select>
+            </div>
             <button className="btn ghost" onClick={resetAll}>Vymazat všechny údaje</button>
             <button className="btn ghost" onClick={handleExportCsv}>Export CSV</button>
             <button className="btn" onClick={handleExportJson}>Export JSON</button>
           </div>
+          <p className="muted-text">
+            Ukázkové příklady vycházejí z typických situací v metodice a z logiky jednotlivých výpočtů. Po načtení je můžete upravit podle vlastní školy.
+          </p>
         </header>
 
         <section className="card">
