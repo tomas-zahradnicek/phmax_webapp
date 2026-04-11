@@ -18,7 +18,13 @@ export function isNv75Mode(mode: CalculatorMode): boolean {
 
 export function isPhmaxMode(mode: CalculatorMode): boolean {
   return [
-    "phmax_full_zs","phmax_first_stage_only","phmax_full_zs_sec16","phmax_dominant_field",
-    "phmax_psychiatric","phmax_minority_language","phmax_multiyear_gym","phmax_extras_38_41_prep",
+    "phmax_full_zs",
+    "phmax_first_stage_only",
+    "phmax_full_zs_sec16",
+    "phmax_dominant_field",
+    "phmax_psychiatric",
+    "phmax_minority_language",
+    "phmax_multiyear_gym",
+    "phmax_extras_38_41_prep",
   ].includes(mode);
 }

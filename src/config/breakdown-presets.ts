@@ -14,7 +14,14 @@ export const BREAKDOWN_PRESETS: Record<CalculatorMode, BreakdownPreset> = {
   phmax_minority_language: { mode: "phmax_minority_language", categories: ["minority_first", "minority_second"] },
   phmax_multiyear_gym: { mode: "phmax_multiyear_gym", categories: ["gym_first", "gym_second"] },
   phmax_extras_38_41_prep: { mode: "phmax_extras_38_41_prep", categories: ["prep", "prep_special", "par38_first", "par38_second", "par41_first", "par41_second"] },
-  phamax_zs_sec16_special: { mode: "phamax_zs_sec16_special", categories: ["pha_rvp_zs_first_ad1","pha_rvp_zs_first_ad2","pha_rvp_zs_second_ad1","pha_rvp_zs_second_ad2","pha_rvp_zss_i_first_ad1","pha_rvp_zss_i_first_ad2","pha_rvp_zss_i_second_ad1","pha_rvp_zss_i_second_ad2","pha_rvp_zss_ii_ad1","pha_rvp_zss_ii_ad2"] },
+  phamax_zs_sec16_special: {
+    mode: "phamax_zs_sec16_special",
+    categories: [
+      "pha_rvp_zs_first_ad1","pha_rvp_zs_first_ad2","pha_rvp_zs_second_ad1","pha_rvp_zs_second_ad2",
+      "pha_rvp_zss_i_first_ad1","pha_rvp_zss_i_first_ad2","pha_rvp_zss_i_second_ad1","pha_rvp_zss_i_second_ad2",
+      "pha_rvp_zss_ii_ad1","pha_rvp_zss_ii_ad2",
+    ],
+  },
   phpmax_basic_school: { mode: "phpmax_basic_school", categories: ["php_total"] },
   nv75_teacher: { mode: "nv75_teacher", categories: ["nv75_teacher"] },
   nv75_headteacher: { mode: "nv75_headteacher", categories: ["nv75_headteacher"] },

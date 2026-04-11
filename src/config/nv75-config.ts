@@ -30,14 +30,6 @@ export const NV75_TEACHER_VALUES: Record<Nv75TeacherMode, { label: string; value
   teacher_prep_special_stage: { label: "Učitel přípravného stupně ZŠ speciální", value: "20 až 22" },
 };
 
-export const NV75_HEADTEACHER_RULES = {
-  head_first_stage: [{ min: 1, max: 6, value: 12 }, { min: 7, max: 10, value: 10 }, { min: 11, max: Infinity, value: 8 }],
-  head_second_stage: [{ min: 0, max: 9, value: 8 }, { min: 10, max: 18, value: 7 }, { min: 19, max: 23, value: 6 }, { min: 24, max: Infinity, value: 5 }],
-  head_first_and_second: [{ min: 0, max: 9, value: 8 }, { min: 10, max: 18, value: 7 }, { min: 19, max: 23, value: 6 }, { min: 24, max: Infinity, value: 5 }],
-  head_sec16_first_stage: [{ min: 1, max: 6, value: 12 }, { min: 7, max: 10, value: 9 }, { min: 11, max: Infinity, value: 7 }],
-  head_sec16_first_and_second: [{ min: 0, max: 9, value: 7 }, { min: 10, max: 14, value: 6 }, { min: 15, max: 18, value: 5 }, { min: 19, max: Infinity, value: 4 }],
-} as const;
-
 export const NV75_DEPUTY_RULES = [
   { min: 5, max: 6, value: 9 },
   { min: 7, max: 14, value: 11 },

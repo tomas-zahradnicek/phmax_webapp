@@ -1,7 +1,7 @@
 import type { CalculatorMode } from "./calculator-config";
 
-export function normalizeStateForMode<T extends Record<string, unknown>>(mode: CalculatorMode, state: T): T {
-  const next = { ...state, mode };
+export function normalizeStateForMode(mode: CalculatorMode, state: Record<string, unknown>) {
+  const next: Record<string, unknown> = { ...state, mode };
 
   if (mode === "phmax_first_stage_only") {
     next.basicType = "first_only_3";
