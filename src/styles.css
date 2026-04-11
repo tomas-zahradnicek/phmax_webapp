@@ -1625,3 +1625,81 @@ input[type="radio"] {
     display: none;
   }
 }
+
+
+/* Detail methodology mapping in cards */
+
+.number-field--entry {
+  background: linear-gradient(180deg, rgba(239,246,255,0.92) 0%, rgba(255,255,255,0.98) 100%);
+  border-color: rgba(96, 165, 250, 0.22);
+}
+
+.number-field--entry .number-field__label::before {
+  content: "Krok A";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.10);
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.result-card__type {
+  display: inline-flex;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.result-card__type--a {
+  background: rgba(37, 99, 235, 0.10);
+  color: #1d4ed8;
+}
+
+.result-card__type--b {
+  background: rgba(14, 165, 233, 0.10);
+  color: #0369a1;
+}
+
+.result-card__type--c {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.result-card__type--d {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+
+.result-card__type--warning {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+.result-card--step-a {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,1) 100%);
+}
+
+.result-card--step-b {
+  background: linear-gradient(180deg, rgba(240,249,255,0.98) 0%, rgba(255,255,255,1) 100%);
+}
+
+.result-card--step-c {
+  background: linear-gradient(180deg, rgba(255,251,235,0.96) 0%, rgba(255,255,255,1) 100%);
+}
+
+.result-card--step-d {
+  background: linear-gradient(180deg, rgba(240,253,244,0.96) 0%, rgba(255,255,255,1) 100%);
+}
+
+.result-card--step-warning {
+  background: linear-gradient(180deg, rgba(254,242,242,0.96) 0%, rgba(255,255,255,1) 100%);
+}

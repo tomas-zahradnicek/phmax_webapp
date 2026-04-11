@@ -18,12 +18,7 @@ type ResultCardProps = {
   hint?: string;
 };
 
-const toneMeta: Record<NonNullable<ResultCardProps["tone"]>, string> = {
-  default: "Zadání",
-  primary: "Průběžný výpočet",
-  success: "Dílčí výsledek",
-  warning: "Upozornění",
-};
+type MethodStep = "a" | "b" | "c" | "d" | "warning";
 
 function HintBadge({ text }: { text: string }) {
   return (
@@ -31,6 +26,76 @@ function HintBadge({ text }: { text: string }) {
       i
     </span>
   );
+}
+
+function inferMethodStep(label: string, tone: NonNullable<ResultCardProps["tone"]>): MethodStep {
+  const value = label.toLowerCase();
+
+  if (tone === "warning") return "warning";
+
+  if (
+    value.includes("výsledek") ||
+    value.includes("celkem") ||
+    value.includes("počet tříd ×") ||
+    value.includes("přehledový součet")
+  ) {
+    return "d";
+  }
+
+  if (
+    value.includes("pásmo") ||
+    value.includes("na 1 třídu") ||
+    value.includes("zařazení do pásma") ||
+    value.includes("hodnota podle pásma")
+  ) {
+    return "c";
+  }
+
+  if (
+    value.includes("průměr") ||
+    value.includes("rozhodná hodnota") ||
+    value.includes("očištěná hodnota") ||
+    value.includes("součet nezapočítávaných")
+  ) {
+    return "b";
+  }
+
+  return "a";
+}
+
+function stepMeta(step: MethodStep) {
+  if (step === "a") {
+    return {
+      text: "Krok A · vstupní údaje",
+      className: "result-card__type result-card__type--a",
+    };
+  }
+
+  if (step === "b") {
+    return {
+      text: "Krok B · průměrný počet žáků",
+      className: "result-card__type result-card__type--b",
+    };
+  }
+
+  if (step === "c") {
+    return {
+      text: "Krok C · pásmo a PHmax",
+      className: "result-card__type result-card__type--c",
+    };
+  }
+
+  if (step === "d") {
+    return {
+      text: "Krok D · výsledná hodnota",
+      className: "result-card__type result-card__type--d",
+    };
+  }
+
+  return {
+    text: "Upozornění",
+    className: "result-card__type result-card__type--warning",
+  };
 }
 
 export function NumberField({
@@ -46,7 +111,7 @@ export function NumberField({
   const isEmptyLikeZero = value === 0;
 
   return (
-    <label className="number-field">
+    <label className="number-field number-field--entry">
       <span className="number-field__label">
         <span>{label}</span>
         {hint ? <HintBadge text={hint} /> : null}
@@ -68,7 +133,7 @@ export function NumberField({
             onChange(Number.isFinite(next) ? next : 0);
           }}
         />
-              </div>
+      </div>
 
       <div className="number-field__meta">
         <span className="number-field__hint">
@@ -99,11 +164,14 @@ export function ResultCard({
   tone = "default",
   hint,
 }: ResultCardProps) {
+  const step = inferMethodStep(label, tone);
+  const meta = stepMeta(step);
+
   return (
-    <div className={`result-card result-card--${tone}`}>
+    <div className={`result-card result-card--${tone} result-card--step-${step}`}>
       <div className="result-card__head">
         <div>
-          <div className="result-card__type">{toneMeta[tone]}</div>
+          <div className={meta.className}>{meta.text}</div>
           <div className="result-card__label">{label}</div>
         </div>
         {hint ? <HintBadge text={hint} /> : null}
