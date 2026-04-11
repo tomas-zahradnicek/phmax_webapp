@@ -19,9 +19,9 @@ type ResultCardProps = {
 };
 
 const toneMeta: Record<NonNullable<ResultCardProps["tone"]>, string> = {
-  default: "Vstup",
-  primary: "Mezivýsledek",
-  success: "Výsledek",
+  default: "Zadání",
+  primary: "Průběžný výpočet",
+  success: "Dílčí výsledek",
   warning: "Upozornění",
 };
 
@@ -54,7 +54,7 @@ export function NumberField({
 
       <div className="number-field__control number-field__control--large">
         <input
-          className={`number-field__input${isEmptyLikeZero ? " is-empty" : ""}`}
+          className={`number-field__input${isEmptyLikeZero ? " is-empty" : ""}${disabled ? " is-disabled" : ""}`}
           type="number"
           inputMode="numeric"
           min={min}

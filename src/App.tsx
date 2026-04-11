@@ -211,6 +211,16 @@ export default function App() {
 
   const [mixedRows, setMixedRows] = useState<MixedRow[]>([]);
 
+  const [mixedMethodFirstZsPupils, setMixedMethodFirstZsPupils] = useState(0);
+  const [mixedMethodFirstZsClasses, setMixedMethodFirstZsClasses] = useState(0);
+  const [mixedMethodFirstSpecialPupils, setMixedMethodFirstSpecialPupils] = useState(0);
+  const [mixedMethodFirstSpecialClasses, setMixedMethodFirstSpecialClasses] = useState(0);
+  const [mixedMethodSecondZsPupils, setMixedMethodSecondZsPupils] = useState(0);
+  const [mixedMethodSecondZsClasses, setMixedMethodSecondZsClasses] = useState(0);
+  const [mixedMethodSecondSpecialPupils, setMixedMethodSecondSpecialPupils] = useState(0);
+  const [mixedMethodSecondSpecialClasses, setMixedMethodSecondSpecialClasses] = useState(0);
+
+
   const [special1Classes, setSpecial1Classes] = useState(0);
   const [special1Pupils, setSpecial1Pupils] = useState(0);
   const [special2Classes, setSpecial2Classes] = useState(0);
@@ -361,6 +371,25 @@ export default function App() {
       return sum + row.classes * band.value;
     }, 0)
   );
+
+  const mixedMethodFirstZsAvg = mixedMethodFirstZsClasses > 0 ? mixedMethodFirstZsPupils / mixedMethodFirstZsClasses : 0;
+  const mixedMethodSecondZsAvg = mixedMethodSecondZsClasses > 0 ? mixedMethodSecondZsPupils / mixedMethodSecondZsClasses : 0;
+  const mixedMethodFirstSpecialAvg = mixedMethodFirstSpecialClasses > 0 ? mixedMethodFirstSpecialPupils / mixedMethodFirstSpecialClasses : 0;
+  const mixedMethodSecondSpecialAvg = mixedMethodSecondSpecialClasses > 0 ? mixedMethodSecondSpecialPupils / mixedMethodSecondSpecialClasses : 0;
+
+  const mixedMethodFirstZsBand = pickBand(mixedMethodFirstZsAvg, B9_B10.first);
+  const mixedMethodSecondZsBand = pickBand(mixedMethodSecondZsAvg, B9_B10.second);
+  const mixedMethodFirstSpecialBand = pickBand(mixedMethodFirstSpecialAvg, B26_B28.special1);
+  const mixedMethodSecondSpecialBand = pickBand(mixedMethodSecondSpecialAvg, B26_B28.special2);
+
+  const mixedMethodFirstZsResult = round2(mixedMethodFirstZsClasses * mixedMethodFirstZsBand.value);
+  const mixedMethodSecondZsResult = round2(mixedMethodSecondZsClasses * mixedMethodSecondZsBand.value);
+  const mixedMethodFirstSpecialResult = round2(mixedMethodFirstSpecialClasses * mixedMethodFirstSpecialBand.value);
+  const mixedMethodSecondSpecialResult = round2(mixedMethodSecondSpecialClasses * mixedMethodSecondSpecialBand.value);
+  const mixedMethodFirstTotal = round2(mixedMethodFirstZsResult + mixedMethodFirstSpecialResult);
+  const mixedMethodSecondTotal = round2(mixedMethodSecondZsResult + mixedMethodSecondSpecialResult);
+  const mixedMethodTotal = round2(mixedMethodFirstTotal + mixedMethodSecondTotal);
+
   const extrasPhmax = round2(prepClassPhmax + prepSpecialPhmax + par38Phmax + par41Phmax);
   const totalPhmax = round2(basicPhmax + inclPhmax + psychPhmax + minorityPhmax + gymPhmax + specialPhmax + mixedPhmax + extrasPhmax);
 
@@ -438,6 +467,15 @@ export default function App() {
     setMixedRows([]);
 
     setSpecial1Classes(0);
+    setMixedMethodFirstZsPupils(0);
+    setMixedMethodFirstZsClasses(0);
+    setMixedMethodFirstSpecialPupils(0);
+    setMixedMethodFirstSpecialClasses(0);
+    setMixedMethodSecondZsPupils(0);
+    setMixedMethodSecondZsClasses(0);
+    setMixedMethodSecondSpecialPupils(0);
+    setMixedMethodSecondSpecialClasses(0);
+
     setSpecial1Pupils(0);
     setSpecial2Classes(0);
     setSpecial2Pupils(0);
@@ -592,9 +630,14 @@ export default function App() {
     if (example === "smisene_tridy") {
       setMode(findModeBySections("dominant_c_first"));
       setTab("phmax");
-      setMixedRows([
-        { id: 1, stage: "first", majority: "zs", classes: 2, pupils: 18 },
-      ]);
+      setMixedMethodFirstZsPupils(47);
+      setMixedMethodFirstZsClasses(4);
+      setMixedMethodFirstSpecialPupils(26);
+      setMixedMethodFirstSpecialClasses(3);
+      setMixedMethodSecondZsPupils(38);
+      setMixedMethodSecondZsClasses(3);
+      setMixedMethodSecondSpecialPupils(31);
+      setMixedMethodSecondSpecialClasses(4);
       return;
     }
 
@@ -906,7 +949,9 @@ export default function App() {
     ["ZŠ s jazykem národnostní menšiny – 2. stupeň", minority2Phmax],
     ["ZŠ s jazykem národnostní menšiny – celkem", minorityPhmax],
     ["Nižší ročníky víceletých gymnázií", gymPhmax],
-    ["Smíšené třídy § 16 odst. 9 a ZŠ speciální", mixedPhmax],
+    ["Smíšené třídy § 16 odst. 9 a ZŠ speciální – 1. stupeň", mixedMethodFirstTotal || mixedRows.filter((row) => row.stage === "first").reduce((sum, row) => { const avg = row.classes > 0 ? row.pupils / row.classes : 0; const band = row.majority === "zs" ? pickBand(avg, B9_B10.first) : pickBand(avg, B26_B28.special1); return sum + row.classes * band.value; }, 0)],
+    ["Smíšené třídy § 16 odst. 9 a ZŠ speciální – 2. stupeň", mixedMethodSecondTotal || mixedRows.filter((row) => row.stage === "second").reduce((sum, row) => { const avg = row.classes > 0 ? row.pupils / row.classes : 0; const band = row.majority === "zs" ? pickBand(avg, B9_B10.second) : pickBand(avg, B26_B28.special2); return sum + row.classes * band.value; }, 0)],
+    ["Smíšené třídy § 16 odst. 9 a ZŠ speciální – celkem", mixedMethodTotal || mixedPhmax],
     ["ZŠ speciální – I. díl 1. stupeň", special1PhmaxPart],
     ["ZŠ speciální – I. díl 2. stupeň", special2PhmaxPart],
     ["ZŠ speciální – II. díl", specialIIPhmaxPart],
@@ -1170,8 +1215,10 @@ export default function App() {
                       <div className="grid two">
                         <NumberField label="Počet tříd" value={basic1Classes} onChange={setBasic1Classes} />
                         <NumberField label="Počet žáků" value={basic1Pupils} onChange={setBasic1Pupils} />
-                        <ResultCard label="Průměr" value={round2(basic1Avg)} />
-                        <ResultCard label="Pásmo / PHmax" value={`${basicFirstBand.label} / ${basicFirstBand.value}`} />
+                        <ResultCard label="Průměrný počet žáků ve třídě" value={round2(basic1Avg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax na 1 třídu" value={`${basicFirstBand.label} / ${basicFirstBand.value}`} tone="primary" />
+                        <ResultCard label="Výsledek PHmax – 1. stupeň" value={basic1Phmax} tone="success" />
+                        <ResultCard label="Počet tříd × PHmax" value={`${basic1Classes} × ${basicFirstBand.value}`} tone="success" />
                       </div>
                     </div>
                   )}
@@ -1182,8 +1229,10 @@ export default function App() {
                       <div className="grid two">
                         <NumberField label="Počet tříd" value={basic2Classes} onChange={setBasic2Classes} />
                         <NumberField label="Počet žáků" value={basic2Pupils} onChange={setBasic2Pupils} />
-                        <ResultCard label="Průměr" value={round2(basic2Avg)} />
-                        <ResultCard label="Pásmo / PHmax" value={`${basicSecondBand.label} / ${basicSecondBand.value}`} />
+                        <ResultCard label="Průměrný počet žáků ve třídě" value={round2(basic2Avg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax na 1 třídu" value={`${basicSecondBand.label} / ${basicSecondBand.value}`} tone="primary" />
+                        <ResultCard label="Výsledek PHmax – 2. stupeň" value={basic2Phmax} tone="success" />
+                        <ResultCard label="Počet tříd × PHmax" value={`${basic2Classes} × ${basicSecondBand.value}`} tone="success" />
                       </div>
                     </div>
                   )}
@@ -1194,6 +1243,14 @@ export default function App() {
                   {hasSection("par38") && <ResultCard label="§ 38 – výsledek" value={par38Phmax} tone="success" />}
                   {hasSection("par41") && <ResultCard label="§ 41 – výsledek" value={par41Phmax} tone="success" />}
                 </div>
+
+                {(hasSection("basic_first") || hasSection("basic_second")) && (
+                  <div className="grid three section-results-strip">
+                    {hasSection("basic_first") ? <ResultCard label="PHmax – 1. stupeň" value={basic1Phmax} tone="success" /> : null}
+                    {hasSection("basic_second") ? <ResultCard label="PHmax – 2. stupeň" value={basic2Phmax} tone="success" /> : null}
+                    <ResultCard label="PHmax – běžné třídy celkem" value={basicPhmax} tone="success" />
+                  </div>
+                )}
               </section>
             )}
 
@@ -1206,8 +1263,10 @@ export default function App() {
                       <>
                         <NumberField label="1. stupeň – třídy" value={sec16FirstClasses} onChange={setSec16FirstClasses} />
                         <NumberField label="1. stupeň – žáci" value={sec16FirstPupils} onChange={setSec16FirstPupils} />
-                        <ResultCard label="1. stupeň – průměr" value={round2(incl1Avg)} />
-                        <ResultCard label="1. stupeň – PHmax" value={`${sec16FirstBand.label} / ${sec16FirstBand.value}`} />
+                        <ResultCard label="1. stupeň – průměrný počet žáků" value={round2(incl1Avg)} tone="primary" />
+                        <ResultCard label="1. stupeň – pásmo a PHmax na 1 třídu" value={`${sec16FirstBand.label} / ${sec16FirstBand.value}`} tone="primary" />
+                        <ResultCard label="1. stupeň – výsledek PHmax" value={incl1Phmax} tone="success" />
+                        <ResultCard label="1. stupeň – počet tříd × PHmax" value={`${incl1Classes} × ${incl1Band.value}`} tone="success" />
                       </>
                     )}
 
@@ -1215,10 +1274,17 @@ export default function App() {
                       <>
                         <NumberField label="2. stupeň – třídy" value={sec16SecondClasses} onChange={setSec16SecondClasses} />
                         <NumberField label="2. stupeň – žáci" value={sec16SecondPupils} onChange={setSec16SecondPupils} />
-                        <ResultCard label="2. stupeň – průměr" value={round2(incl2Avg)} />
-                        <ResultCard label="2. stupeň – PHmax" value={`${sec16SecondBand.label} / ${sec16SecondBand.value}`} />
+                        <ResultCard label="2. stupeň – průměrný počet žáků" value={round2(incl2Avg)} tone="primary" />
+                        <ResultCard label="2. stupeň – pásmo a PHmax na 1 třídu" value={`${sec16SecondBand.label} / ${sec16SecondBand.value}`} tone="primary" />
+                        <ResultCard label="2. stupeň – výsledek PHmax" value={incl2Phmax} tone="success" />
+                        <ResultCard label="2. stupeň – počet tříd × PHmax" value={`${incl2Classes} × ${incl2Band.value}`} tone="success" />
                       </>
                     )}
+                  </div>
+                  <div className="grid three section-results-strip">
+                    {hasSection("sec16_first") ? <ResultCard label="PHmax § 16/9 – 1. stupeň" value={incl1Phmax} tone="success" /> : null}
+                    {hasSection("sec16_second") ? <ResultCard label="PHmax § 16/9 – 2. stupeň" value={incl2Phmax} tone="success" /> : null}
+                    <ResultCard label="PHmax § 16/9 – celkem" value={inclPhmax} tone="success" />
                   </div>
                 </section>
               )}
@@ -1229,16 +1295,22 @@ export default function App() {
                 <div className="grid two">
                   <NumberField label="I. díl 1. stupeň – třídy" value={special1Classes} onChange={setSpecial1Classes} />
                   <NumberField label="I. díl 1. stupeň – žáci" value={special1Pupils} onChange={setSpecial1Pupils} />
-                  <ResultCard label="I. díl 1. stupeň" value={`${special1Band.label} / ${special1Band.value}`} />
-                  <ResultCard label="Průměr" value={round2(special1Avg)} />
+                  <ResultCard label="I. díl 1. stupeň – pásmo a PHmax na 1 třídu" value={`${special1Band.label} / ${special1Band.value}`} tone="primary" />
+                  <ResultCard label="I. díl 1. stupeň – průměrný počet žáků" value={round2(special1Avg)} tone="primary" />
                   <NumberField label="I. díl 2. stupeň – třídy" value={special2Classes} onChange={setSpecial2Classes} />
                   <NumberField label="I. díl 2. stupeň – žáci" value={special2Pupils} onChange={setSpecial2Pupils} />
-                  <ResultCard label="I. díl 2. stupeň" value={`${special2Band.label} / ${special2Band.value}`} />
-                  <ResultCard label="Průměr" value={round2(special2Avg)} />
+                  <ResultCard label="I. díl 2. stupeň – pásmo a PHmax na 1 třídu" value={`${special2Band.label} / ${special2Band.value}`} tone="primary" />
+                  <ResultCard label="I. díl 2. stupeň – průměrný počet žáků" value={round2(special2Avg)} tone="primary" />
                   <NumberField label="II. díl – třídy" value={specialIIClasses} onChange={setSpecialIIClasses} />
                   <NumberField label="II. díl – žáci" value={specialIIPupils} onChange={setSpecialIIPupils} />
-                  <ResultCard label="II. díl" value={`${specialIIBand.label} / ${specialIIBand.value}`} />
-                  <ResultCard label="Průměr" value={round2(specialIIAvg)} />
+                  <ResultCard label="II. díl – pásmo a PHmax na 1 třídu" value={`${specialIIBand.label} / ${specialIIBand.value}`} tone="primary" />
+                  <ResultCard label="II. díl – průměrný počet žáků" value={round2(specialIIAvg)} tone="primary" />
+                </div>
+                <div className="grid four section-results-strip">
+                  <ResultCard label="PHmax ZŠ speciální – I. díl 1. stupeň" value={special1PhmaxPart} tone="success" />
+                  <ResultCard label="PHmax ZŠ speciální – I. díl 2. stupeň" value={special2PhmaxPart} tone="success" />
+                  <ResultCard label="PHmax ZŠ speciální – II. díl" value={specialIIPhmaxPart} tone="success" />
+                  <ResultCard label="PHmax ZŠ speciální – celkem" value={specialPhmax} tone="success" />
                 </div>
               </section>
               )}
@@ -1305,8 +1377,10 @@ export default function App() {
                       <div className="grid two">
                         <NumberField label="Počet tříd" value={minority1Classes} onChange={setMinority1Classes} />
                         <NumberField label="Počet žáků" value={minority1Pupils} onChange={setMinority1Pupils} />
-                        <ResultCard label="Průměr" value={round2(minority1Avg)} />
-                        <ResultCard label="PHmax" value={`${minority1Band.label} / ${minority1Band.value}`} />
+                        <ResultCard label="Průměrný počet žáků ve třídě" value={round2(minority1Avg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax na 1 třídu" value={`${minority1Band.label} / ${minority1Band.value}`} tone="primary" />
+                        <ResultCard label="Výsledek PHmax – 1. stupeň" value={minority1Phmax} tone="success" />
+                        <ResultCard label="Počet tříd × PHmax" value={`${minority1Classes} × ${minority1Band.value}`} tone="success" />
                       </div>
                     </div>
                     {minorityType === "minorityFull1" && hasSection("minority_second") && (
@@ -1315,11 +1389,18 @@ export default function App() {
                         <div className="grid two">
                           <NumberField label="Počet tříd" value={minority2Classes} onChange={setMinority2Classes} />
                           <NumberField label="Počet žáků" value={minority2Pupils} onChange={setMinority2Pupils} />
-                          <ResultCard label="Průměr" value={round2(minority2Avg)} />
-                          <ResultCard label="PHmax" value={`${minority2Band.label} / ${minority2Band.value}`} />
+                          <ResultCard label="Průměrný počet žáků ve třídě" value={round2(minority2Avg)} tone="primary" />
+                          <ResultCard label="Pásmo a PHmax na 1 třídu" value={`${minority2Band.label} / ${minority2Band.value}`} tone="primary" />
+                          <ResultCard label="Výsledek PHmax – 2. stupeň" value={minority2Phmax} tone="success" />
+                          <ResultCard label="Počet tříd × PHmax" value={`${minority2Classes} × ${minority2Band.value}`} tone="success" />
                         </div>
                       </div>
                     )}
+                  </div>
+                  <div className="grid three section-results-strip">
+                    <ResultCard label="PHmax – jazyk menšiny 1. stupeň" value={minority1Phmax} tone="success" />
+                    {minorityType === "minorityFull1" && hasSection("minority_second") ? <ResultCard label="PHmax – jazyk menšiny 2. stupeň" value={minority2Phmax} tone="success" /> : <ResultCard label="PHmax – jazyk menšiny 2. stupeň" value="—" tone="primary" />}
+                    <ResultCard label="PHmax – jazyk menšiny celkem" value={minorityPhmax} tone="success" />
                   </div>
                 </section>
               )}
@@ -1367,41 +1448,65 @@ export default function App() {
 
               {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
                 <section className="card section-card section-card--module section-card--module-mixed">
-                  <h2>Smíšené třídy § 16 odst. 9 a ZŠ speciální <HelpHint text="U smíšených tříd záleží na tom, který obor ve třídě převažuje. Podle převažujícího oboru se vybere odpovídající pásmo pro výpočet PHmax." /></h2>
-                  <p className="muted-text">Najeďte na ikonu „i“ u nadpisu pro stručnou metodickou nápovědu.</p>
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Stupeň</th><th>Převažující obor</th><th>Třídy</th><th>Žáci</th><th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mixedRows.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
-                        </tr>
-                      ) : mixedRows.map((row) => (
-                        <tr key={row.id}>
-                          <td>
-                            <select value={row.stage} onChange={(e) => updateMixed(row.id, "stage", e.target.value)}>
-                              <option value="first">1. stupeň</option>
-                              <option value="second">2. stupeň</option>
-                            </select>
-                          </td>
-                          <td>
-                            <select value={row.majority} onChange={(e) => updateMixed(row.id, "majority", e.target.value)}>
-                              <option value="zs">79-01-C/01</option>
-                              <option value="special">79-01-B/01 nebo shoda</option>
-                            </select>
-                          </td>
-                          <td><input type="number" value={row.classes} onChange={(e) => updateMixed(row.id, "classes", Number(e.target.value) || 0)} /></td>
-                          <td><input type="number" value={row.pupils} onChange={(e) => updateMixed(row.id, "pupils", Number(e.target.value) || 0)} /></td>
-                          <td><button className="icon-btn" onClick={() => removeMixed(row.id)}>✕</button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <button className="btn ghost" onClick={addMixed}>Přidat třídu / řádek</button>
+                  <h2>Smíšené třídy § 16 odst. 9 a ZŠ speciální <HelpHint text="Podle metodiky se tyto třídy posuzují samostatně podle převažujícího oboru vzdělání. Pokud ve třídě převažuje obor 79-01-C/01, použijí se řádky B9 až B10. Pokud převažuje 79-01-B/01 nebo je počet žáků shodný, použijí se řádky B26 až B28." /></h2>
+                  <p className="muted-text">Modelový postup odpovídá schématu metodiky: A. vstupní údaje, B. průměrný počet žáků, C. přiřazení pásma, D. dílčí a celkový výsledek.</p>
+
+                  <div className="grid two">
+                    <div className="subcard subcard--input">
+                      <h3>1. stupeň</h3>
+                      <div className="grid two">
+                        <NumberField label="Počet žáků ve třídách s převažujícím oborem 79-01-C/01" value={mixedMethodFirstZsPupils} onChange={setMixedMethodFirstZsPupils} />
+                        <NumberField label="Počet tříd s převažujícím oborem 79-01-C/01" value={mixedMethodFirstZsClasses} onChange={setMixedMethodFirstZsClasses} />
+                        <NumberField label="Počet žáků ve třídách s převažujícím oborem 79-01-B/01" value={mixedMethodFirstSpecialPupils} onChange={setMixedMethodFirstSpecialPupils} />
+                        <NumberField label="Počet tříd s převažujícím oborem 79-01-B/01" value={mixedMethodFirstSpecialClasses} onChange={setMixedMethodFirstSpecialClasses} />
+                      </div>
+
+                      <div className="grid two section-results-strip">
+                        <ResultCard label="Průměr – třídy s převažujícím 79-01-C/01" value={round2(mixedMethodFirstZsAvg)} tone="primary" />
+                        <ResultCard label="PHmax pro 1. stupeň (B9)" value={`${mixedMethodFirstZsBand.label} / ${mixedMethodFirstZsBand.value}`} tone="primary" />
+                        <ResultCard label="Průměr – třídy s převažujícím 79-01-B/01" value={round2(mixedMethodFirstSpecialAvg)} tone="primary" />
+                        <ResultCard label="PHmax pro 1. stupeň ZŠ speciální (B26)" value={`${mixedMethodFirstSpecialBand.label} / ${mixedMethodFirstSpecialBand.value}`} tone="primary" />
+                      </div>
+
+                      <div className="grid three section-results-strip">
+                        <ResultCard label="Výsledek – 1. stupeň, 79-01-C/01" value={mixedMethodFirstZsResult} tone="success" />
+                        <ResultCard label="Výsledek – 1. stupeň, 79-01-B/01" value={mixedMethodFirstSpecialResult} tone="success" />
+                        <ResultCard label="PHmax – 1. stupeň celkem" value={mixedMethodFirstTotal} tone="success" />
+                      </div>
+                    </div>
+
+                    <div className="subcard subcard--input">
+                      <h3>2. stupeň</h3>
+                      <div className="grid two">
+                        <NumberField label="Počet žáků ve třídách s převažujícím oborem 79-01-C/01" value={mixedMethodSecondZsPupils} onChange={setMixedMethodSecondZsPupils} />
+                        <NumberField label="Počet tříd s převažujícím oborem 79-01-C/01" value={mixedMethodSecondZsClasses} onChange={setMixedMethodSecondZsClasses} />
+                        <NumberField label="Počet žáků ve třídách s převažujícím oborem 79-01-B/01" value={mixedMethodSecondSpecialPupils} onChange={setMixedMethodSecondSpecialPupils} />
+                        <NumberField label="Počet tříd s převažujícím oborem 79-01-B/01" value={mixedMethodSecondSpecialClasses} onChange={setMixedMethodSecondSpecialClasses} />
+                      </div>
+
+                      <div className="grid two section-results-strip">
+                        <ResultCard label="Průměr – třídy s převažujícím 79-01-C/01" value={round2(mixedMethodSecondZsAvg)} tone="primary" />
+                        <ResultCard label="PHmax pro 2. stupeň (B10)" value={`${mixedMethodSecondZsBand.label} / ${mixedMethodSecondZsBand.value}`} tone="primary" />
+                        <ResultCard label="Průměr – třídy s převažujícím 79-01-B/01" value={round2(mixedMethodSecondSpecialAvg)} tone="primary" />
+                        <ResultCard label="PHmax pro 2. stupeň ZŠ speciální (B27)" value={`${mixedMethodSecondSpecialBand.label} / ${mixedMethodSecondSpecialBand.value}`} tone="primary" />
+                      </div>
+
+                      <div className="grid three section-results-strip">
+                        <ResultCard label="Výsledek – 2. stupeň, 79-01-C/01" value={mixedMethodSecondZsResult} tone="success" />
+                        <ResultCard label="Výsledek – 2. stupeň, 79-01-B/01" value={mixedMethodSecondSpecialResult} tone="success" />
+                        <ResultCard label="PHmax – 2. stupeň celkem" value={mixedMethodSecondTotal} tone="success" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid two section-results-strip">
+                    <ResultCard label="PHmax – smíšené třídy 1. stupeň" value={mixedMethodFirstTotal} tone="success" />
+                    <ResultCard label="PHmax – smíšené třídy 2. stupeň" value={mixedMethodSecondTotal} tone="success" />
+                  </div>
+
+                  <div className="grid one section-results-strip">
+                    <ResultCard label="PHmax – smíšené třídy celkem" value={mixedMethodTotal} tone="success" />
+                  </div>
                 </section>
               )}
             </div>
@@ -1414,8 +1519,8 @@ export default function App() {
                     <>
                       <NumberField label="Přípravné třídy – počet tříd" value={prepClasses} onChange={setPrepClasses} />
                       <NumberField label="Přípravné třídy – počet dětí" value={prepChildren} onChange={setPrepChildren} />
-                      <ResultCard label="Přípravná třída" value={`${prepAvg < 10 ? "méně než 10 dětí" : "10 a více dětí"} / ${prepPh}`} />
-                      <ResultCard label="Mezisoučet" value={round2(prepClasses * prepPh)} />
+                      <ResultCard label="Přípravná třída – pásmo a PHmax na 1 třídu" value={`${prepAvg < 10 ? "méně než 10 dětí" : "10 a více dětí"} / ${prepPh}`} tone="primary" />
+                      <ResultCard label="Výsledek – přípravná třída" value={round2(prepClasses * prepPh)} tone="success" />
                     </>
                   )}
 
@@ -1423,8 +1528,8 @@ export default function App() {
                     <>
                       <NumberField label="Přípravný stupeň ZŠS – počet tříd" value={prepSpecialClasses} onChange={setPrepSpecialClasses} />
                       <NumberField label="Přípravný stupeň ZŠS – počet dětí" value={prepSpecialChildren} onChange={setPrepSpecialChildren} />
-                      <ResultCard label="Přípravný stupeň" value={`${prepSpecialAvg < 4 ? "méně než 4 žáci" : "4 a více žáků"} / ${prepSpecialPh}`} />
-                      <ResultCard label="Mezisoučet" value={round2(prepSpecialClasses * prepSpecialPh)} />
+                      <ResultCard label="Přípravný stupeň – pásmo a PHmax na 1 třídu" value={`${prepSpecialAvg < 4 ? "méně než 4 žáci" : "4 a více žáků"} / ${prepSpecialPh}`} tone="primary" />
+                      <ResultCard label="Výsledek – přípravný stupeň ZŠS" value={round2(prepSpecialClasses * prepSpecialPh)} tone="success" />
                     </>
                   )}
 
@@ -1441,6 +1546,12 @@ export default function App() {
                       <NumberField label="§ 41 – 2. stupeň" value={p41Second} onChange={setP41Second} />
                     </>
                   )}
+                </div>
+                <div className="grid four section-results-strip">
+                  {hasSection("prep_class") ? <ResultCard label="PHmax – přípravná třída" value={prepClassPhmax} tone="success" /> : null}
+                  {hasSection("prep_special") ? <ResultCard label="PHmax – přípravný stupeň ZŠS" value={prepSpecialPhmax} tone="success" /> : null}
+                  {hasSection("par38") ? <ResultCard label="PHmax – § 38" value={par38Phmax} tone="success" /> : null}
+                  {hasSection("par41") ? <ResultCard label="PHmax – § 41" value={par41Phmax} tone="success" /> : null}
                 </div>
               </section>
             )}
