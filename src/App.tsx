@@ -292,9 +292,9 @@ export default function App() {
   const warnings: string[] = [];
   if (basicType === "full_max_2" && basic1Classes > 0 && basic1Classes < 5) warnings.push("U úplné ZŠ s nejvýše 2 třídami v každém ročníku bývá obvykle na 1. stupni nejméně 5 běžných tříd.");
   if (basicType.startsWith("first_only_") && basic2Classes > 0) warnings.push("U neúplné ZŠ tvořené jen 1. stupněm se 2. stupeň do výpočtu běžných tříd nezadává.");
-  if (phpExcludedTotal > phpBaseValue && !phpExcludedSchool) warnings.push("Součet nezapočítávaných žáků je vyšší než rozhodná hodnota pro PHPmax.");
-  if (phpAdjustedValue > 0 && phpAdjustedValue < 180 && !phpExcludedSchool) warnings.push("PHPmax vychází 0, protože očištěný rozhodný počet žáků je pod hranicí 180.");
-  if (phpExcludedSchool) warnings.push("Škola je označena jako vyloučená z PHPmax, proto je výsledek 0.");
+  if (phpExcludedTotal > phpBaseValue && !phpExcludedSchool) warnings.push("Součet nezapočítávaných žáků je vyšší než rozhodná hodnota pro PHPmax – metodický výpočet.");
+  if (phpAdjustedValue > 0 && phpAdjustedValue < 180 && !phpExcludedSchool) warnings.push("PHPmax – metodický výpočet vychází 0, protože očištěný rozhodný počet žáků je pod hranicí 180.");
+  if (phpExcludedSchool) warnings.push("Škola je označena jako vyloučená z PHPmax – metodický výpočet, proto je výsledek 0.");
   if (MODE_CONFIG[mode].group === "nv75" && nv75Role === "ucitel" && !nv75TeacherRangeValid) warnings.push("U NV 75/2005 musí být horní hranice učitele větší nebo rovna dolní hranici.");
   if (minorityType !== "minorityFull1" && minority2Classes > 0) warnings.push("U menšinové školy zadané jen pro 1. stupeň se 2. stupeň nezapočítá.");
 
@@ -452,13 +452,13 @@ export default function App() {
     ["Nižší ročníky víceletých gymnázií", gymPhmax],
     ["Smíšené třídy § 16 odst. 9 a ZŠ speciální", mixedPhmax],
     ["Základní škola speciální", specialPhmax],
-    ["Samostatné položky PHmax", extrasPhmax],
-    ["PHmax celkem", totalPhmax],
-    ["PHAmax", totalPha],
-    ["PHPmax – rozhodná hodnota", phpBaseValue],
-    ["PHPmax – vyloučené skupiny", phpExcludedTotal],
-    ["PHPmax – očištěná hodnota", phpAdjustedValue],
-    ["PHPmax celkem", totalPhp],
+    ["Samostatné položky PHmax – výpočet podle typu tříd", extrasPhmax],
+    ["PHmax – výpočet podle typu tříd celkem", totalPhmax],
+    ["PHAmax – asistenti pedagoga", totalPha],
+    ["PHPmax – metodický výpočet – rozhodná hodnota", phpBaseValue],
+    ["PHPmax – metodický výpočet – vyloučené skupiny", phpExcludedTotal],
+    ["PHPmax – metodický výpočet – očištěná hodnota", phpAdjustedValue],
+    ["PHPmax – metodický výpočet celkem", totalPhp],
   ] as const;
 
   const handleExportJson = () => {
@@ -508,12 +508,12 @@ export default function App() {
     <div className="app-shell">
       <div className="container">
         <header className="hero">
-          <div className="pill">PHmax kalkulačka ZŠ</div>
+          <div className="pill">PHmax – výpočet podle typu tříd kalkulačka ZŠ</div>
           <h1>Hotová webová aplikace ke spuštění</h1>
           <p>
             Vite + React + TypeScript. Aplikace obsahuje formuláře pro běžné třídy, § 16 odst. 9,
-            ZŠ speciální, menšinové školy, psychiatrickou nemocnici, víceletá gymnázia, PHAmax,
-            PHPmax v metodickém rozpadu A–D, samostatné mazání údajů po jednotlivých záložkách a samostatný orientační panel pro NV 75/2005.
+            ZŠ speciální, menšinové školy, psychiatrickou nemocnici, víceletá gymnázia, PHAmax – asistenti pedagoga,
+            PHPmax – metodický výpočet v metodickém rozpadu A–D, samostatné mazání údajů po jednotlivých záložkách a samostatný orientační panel pro NV 75/2005.
           </p>
           <div className="toolbar">
             <button className="btn ghost" onClick={() => window.print()}>Tisk</button>
@@ -550,9 +550,9 @@ export default function App() {
 
         {MODE_CONFIG[mode].group === "nv75" && (
           <section className="card">
-            <h2>NV 75/2005 – orientační panel</h2>
+            <h2>NV 75/2005 – orientační přehled</h2>
             <p className="muted-text">
-              Samostatný režim pro orientační ověření rozsahu přímé pedagogické činnosti.
+              Tento režim slouží k orientačnímu ověření rozsahu přímé pedagogické činnosti.
             </p>
 
             <div className="grid two">
@@ -602,9 +602,9 @@ export default function App() {
         )}
 
         <div className="tabs">
-          <button className={tab === "phmax" ? "tab active" : "tab"} onClick={() => setTab("phmax")}>PHmax</button>
-          <button className={tab === "pha" ? "tab active" : "tab"} onClick={() => setTab("pha")}>PHAmax</button>
-          <button className={tab === "php" ? "tab active" : "tab"} onClick={() => setTab("php")}>PHPmax</button>
+          <button className={tab === "phmax" ? "tab active" : "tab"} onClick={() => setTab("phmax")}>PHmax – výpočet podle typu tříd</button>
+          <button className={tab === "pha" ? "tab active" : "tab"} onClick={() => setTab("pha")}>PHAmax – asistenti pedagoga</button>
+          <button className={tab === "php" ? "tab active" : "tab"} onClick={() => setTab("php")}>PHPmax – metodický výpočet</button>
         </div>
 
         {tab === "phmax" && (
@@ -635,7 +635,7 @@ export default function App() {
                         <NumberField label="Počet tříd" value={basic1Classes} onChange={setBasic1Classes} />
                         <NumberField label="Počet žáků" value={basic1Pupils} onChange={setBasic1Pupils} />
                         <ResultCard label="Průměr" value={round2(basic1Avg)} />
-                        <ResultCard label="Pásmo / PHmax" value={`${basicFirstBand.label} / ${basicFirstBand.value}`} />
+                        <ResultCard label="Pásmo / PHmax – výpočet podle typu tříd" value={`${basicFirstBand.label} / ${basicFirstBand.value}`} />
                       </div>
                     </div>
                   )}
@@ -647,7 +647,7 @@ export default function App() {
                         <NumberField label="Počet tříd" value={basic2Classes} onChange={setBasic2Classes} />
                         <NumberField label="Počet žáků" value={basic2Pupils} onChange={setBasic2Pupils} />
                         <ResultCard label="Průměr" value={round2(basic2Avg)} />
-                        <ResultCard label="Pásmo / PHmax" value={`${basicSecondBand.label} / ${basicSecondBand.value}`} />
+                        <ResultCard label="Pásmo / PHmax – výpočet podle typu tříd" value={`${basicSecondBand.label} / ${basicSecondBand.value}`} />
                       </div>
                     </div>
                   )}
@@ -665,7 +665,7 @@ export default function App() {
                         <NumberField label="1. stupeň – třídy" value={sec16FirstClasses} onChange={setSec16FirstClasses} />
                         <NumberField label="1. stupeň – žáci" value={sec16FirstPupils} onChange={setSec16FirstPupils} />
                         <ResultCard label="1. stupeň – průměr" value={round2(incl1Avg)} />
-                        <ResultCard label="1. stupeň – PHmax" value={`${sec16FirstBand.label} / ${sec16FirstBand.value}`} />
+                        <ResultCard label="1. stupeň – PHmax – výpočet podle typu tříd" value={`${sec16FirstBand.label} / ${sec16FirstBand.value}`} />
                       </>
                     )}
 
@@ -674,7 +674,7 @@ export default function App() {
                         <NumberField label="2. stupeň – třídy" value={sec16SecondClasses} onChange={setSec16SecondClasses} />
                         <NumberField label="2. stupeň – žáci" value={sec16SecondPupils} onChange={setSec16SecondPupils} />
                         <ResultCard label="2. stupeň – průměr" value={round2(incl2Avg)} />
-                        <ResultCard label="2. stupeň – PHmax" value={`${sec16SecondBand.label} / ${sec16SecondBand.value}`} />
+                        <ResultCard label="2. stupeň – PHmax – výpočet podle typu tříd" value={`${sec16SecondBand.label} / ${sec16SecondBand.value}`} />
                       </>
                     )}
                   </div>
@@ -715,7 +715,7 @@ export default function App() {
                     <tbody>
                       {psychComputedRows.length === 0 ? (
                         <tr>
-                          <td colSpan={9} className="muted-text">Zatím není přidán žádný řádek.</td>
+                          <td colSpan={9} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat řádek“.</td>
                         </tr>
                       ) : psychComputedRows.map((row) => (
                         <tr key={row.id}>
@@ -763,7 +763,7 @@ export default function App() {
                         <NumberField label="Počet tříd" value={minority1Classes} onChange={setMinority1Classes} />
                         <NumberField label="Počet žáků" value={minority1Pupils} onChange={setMinority1Pupils} />
                         <ResultCard label="Průměr" value={round2(minority1Avg)} />
-                        <ResultCard label="PHmax" value={`${minority1Band.label} / ${minority1Band.value}`} />
+                        <ResultCard label="PHmax – výpočet podle typu tříd" value={`${minority1Band.label} / ${minority1Band.value}`} />
                       </div>
                     </div>
                     {minorityType === "minorityFull1" && hasSection("minority_second") && (
@@ -773,7 +773,7 @@ export default function App() {
                           <NumberField label="Počet tříd" value={minority2Classes} onChange={setMinority2Classes} />
                           <NumberField label="Počet žáků" value={minority2Pupils} onChange={setMinority2Pupils} />
                           <ResultCard label="Průměr" value={round2(minority2Avg)} />
-                          <ResultCard label="PHmax" value={`${minority2Band.label} / ${minority2Band.value}`} />
+                          <ResultCard label="PHmax – výpočet podle typu tříd" value={`${minority2Band.label} / ${minority2Band.value}`} />
                         </div>
                       </div>
                     )}
@@ -789,13 +789,13 @@ export default function App() {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th>Typ</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHmax / třída</th><th>Mezisoučet</th><th></th>
+                        <th>Typ</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHmax – výpočet podle typu tříd / třída</th><th>Mezisoučet</th><th></th>
                       </tr>
                     </thead>
                     <tbody>
                       {gymComputedRows.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className="muted-text">Zatím není přidán žádný řádek.</td>
+                          <td colSpan={8} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat řádek“.</td>
                         </tr>
                       ) : gymComputedRows.map((row) => (
                         <tr key={row.id}>
@@ -834,7 +834,7 @@ export default function App() {
                     <tbody>
                       {mixedRows.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="muted-text">Zatím není přidán žádný řádek.</td>
+                          <td colSpan={5} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat řádek“.</td>
                         </tr>
                       ) : mixedRows.map((row) => (
                         <tr key={row.id}>
@@ -864,7 +864,7 @@ export default function App() {
 
             {(hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) && (
               <section className="card">
-                <h2>Samostatné položky PHmax</h2>
+                <h2>Samostatné položky PHmax – výpočet podle typu tříd</h2>
                 <div className="grid four">
                   {hasSection("prep_class") && (
                     <>
@@ -930,11 +930,11 @@ export default function App() {
             )}
 
             <div className="toolbar">
-              <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax</button>
+              <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax – výpočet podle typu tříd</button>
             </div>
 
             <section className="card muted">
-              <h2>Souhrn PHmax</h2>
+              <h2>Souhrn výsledků výsledků PHmax – výpočet podle typu tříd</h2>
               <div className="grid four">
                 <ResultCard label="Běžné třídy" value={basicPhmax} />
                 <ResultCard label="§ 16 odst. 9" value={inclPhmax} />
@@ -944,7 +944,7 @@ export default function App() {
                 <ResultCard label="Smíšené třídy" value={mixedPhmax} />
                 <ResultCard label="ZŠ speciální" value={specialPhmax} />
                 <ResultCard label="Samostatné položky" value={extrasPhmax} />
-                <ResultCard label="PHmax celkem" value={totalPhmax} />
+                <ResultCard label="PHmax – výpočet podle typu tříd celkem" value={totalPhmax} />
               </div>
             </section>
           </div>
@@ -952,17 +952,17 @@ export default function App() {
 
         {tab === "pha" && (
           <section className="card">
-            <h2>PHAmax</h2>
+            <h2>PHAmax – asistenti pedagoga</h2>
             <table className="table">
               <thead>
                 <tr>
-                  <th>Typ třídy</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHAmax / třída</th><th>Mezisoučet</th><th></th>
+                  <th>Typ třídy</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHAmax – asistenti pedagoga / třída</th><th>Mezisoučet</th><th></th>
                 </tr>
               </thead>
               <tbody>
                 {phaComputedRows.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="muted-text">Zatím není přidán žádný řádek.</td>
+                    <td colSpan={8} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat řádek“.</td>
                   </tr>
                 ) : phaComputedRows.map((row) => (
                   <tr key={row.id}>
@@ -993,17 +993,17 @@ export default function App() {
             </table>
             <div className="toolbar">
               <button className="btn ghost" onClick={addPha}>Přidat řádek</button>
-              <button className="btn ghost" onClick={resetPha}>Vymazat údaje PHAmax</button>
-              <ResultCard label="PHAmax celkem" value={totalPha} />
+              <button className="btn ghost" onClick={resetPha}>Vymazat údaje PHAmax – asistenti pedagoga</button>
+              <ResultCard label="PHAmax – asistenti pedagoga celkem" value={totalPha} />
             </div>
           </section>
         )}
 
         {tab === "php" && (
           <section className="card">
-            <h2>PHPmax</h2>
+            <h2>PHPmax – metodický výpočet</h2>
             <p className="muted-text">
-              Metodický rozpad A–D: rozhodné počty, očištění dat, výpočet a interpretace.
+              Postup výpočtu (kroky A–D): rozhodné počty, očištění dat, výpočet a interpretace.
             </p>
 
             <div className="tabs" style={{ marginBottom: 16 }}>
@@ -1022,7 +1022,7 @@ export default function App() {
             </div>
 
             <div className="toolbar">
-              <button className="btn ghost" onClick={resetPhp}>Vymazat údaje PHPmax</button>
+              <button className="btn ghost" onClick={resetPhp}>Vymazat údaje PHPmax – metodický výpočet</button>
             </div>
 
             <div className="checks">
@@ -1047,7 +1047,7 @@ export default function App() {
 
             {phpWizardStep === "a" && (
               <>
-                <h3>Rozhodné počty žáků</h3>
+                <h3>Zadání počtu žáků</h3>
                 <div className="grid three">
                   <NumberField label="Počet žáků – rok 1" value={phpYear1} onChange={setPhpYear1} />
                   <NumberField label="Počet žáků – rok 2" value={phpYear2} onChange={setPhpYear2} />
@@ -1056,14 +1056,14 @@ export default function App() {
                 <div className="grid three">
                   <ResultCard label="Metoda" value={phpMethodMode === "three_year_avg" ? "Průměr za 3 roky" : "Kratší období"} />
                   <ResultCard label="Rozhodná hodnota" value={phpBaseValue} />
-                  <ResultCard label="Stav školy" value={phpExcludedSchool ? "Vyloučená z PHPmax" : "Standardní posouzení"} />
+                  <ResultCard label="Stav školy" value={phpExcludedSchool ? "Vyloučená z PHPmax – metodický výpočet" : "Standardní posouzení"} />
                 </div>
               </>
             )}
 
             {phpWizardStep === "b" && (
               <>
-                <h3>Nezapočítávané skupiny žáků</h3>
+                <h3>Žáci nezapočítávaní do výpočtu</h3>
                 <div className="grid three">
                   <NumberField label="Vzdělávání v zahraničí" value={phpExcludedAbroad} onChange={setPhpExcludedAbroad} />
                   <NumberField label="Zahraniční škola v ČR" value={phpExcludedForeignSchoolCz} onChange={setPhpExcludedForeignSchoolCz} />
@@ -1076,7 +1076,7 @@ export default function App() {
                       checked={phpExcludedSchool}
                       onChange={(e) => setPhpExcludedSchool(e.target.checked)}
                     />
-                    Tato škola se do PHPmax nezapočítává
+                    Tato škola se do PHPmax – metodický výpočet nezapočítává
                   </label>
                 </div>
                 <div className="grid three">
@@ -1089,7 +1089,7 @@ export default function App() {
 
             {phpWizardStep === "c" && (
               <>
-                <h3>Výpočet PHPmax</h3>
+                <h3>Výpočet výsledné hodnoty PHPmax – metodický výpočet</h3>
                 <div className="grid three">
                   <ResultCard label="Rozhodná hodnota" value={phpBaseValue} />
                   <ResultCard label="Očištění" value={phpExcludedTotal} />
@@ -1097,15 +1097,15 @@ export default function App() {
                 </div>
                 <div className="grid three">
                   <ResultCard label="Pásmo" value={phpBand.label} />
-                  <ResultCard label="PHPmax" value={phpBand.value} />
-                  <ResultCard label="PHPmax celkem" value={totalPhp} />
+                  <ResultCard label="PHPmax – metodický výpočet" value={phpBand.value} />
+                  <ResultCard label="PHPmax – metodický výpočet celkem" value={totalPhp} />
                 </div>
               </>
             )}
 
             {phpWizardStep === "d" && (
               <>
-                <h3>Co výsledek znamená v praxi</h3>
+                <h3>Jak výsledek interpretovat v praxi</h3>
                 <div className="subcard">
                   <p className="muted-text">
                     1. Nejprve se určí rozhodná hodnota podle zvolené metody.
@@ -1117,13 +1117,13 @@ export default function App() {
                     3. Očištěná hodnota se porovná s pásmy PHP_TABLE.
                   </p>
                   <p className="muted-text">
-                    4. Pokud je škola vyloučená z PHPmax, výsledek je 0 bez ohledu na počty žáků.
+                    4. Pokud je škola vyloučená z PHPmax – metodický výpočet, výsledek je 0 bez ohledu na počty žáků.
                   </p>
                 </div>
                 <div className="grid three">
                   <ResultCard label="Rozhodná hodnota" value={phpBaseValue} />
                   <ResultCard label="Očištěná hodnota" value={phpAdjustedValue} />
-                  <ResultCard label="Výsledek PHPmax" value={totalPhp} />
+                  <ResultCard label="Výsledek PHPmax – metodický výpočet" value={totalPhp} />
                 </div>
               </>
             )}
@@ -1132,11 +1132,11 @@ export default function App() {
 
         <section className="card muted">
           <h2>Celkový přehled</h2>
-          <p className="muted-text">PHmax, PHAmax a PHPmax se stanovují odděleně. Součet níže je přehledový.</p>
+          <p className="muted-text">PHmax – výpočet podle typu tříd, PHAmax – asistenti pedagoga a PHPmax – metodický výpočet se stanovují odděleně. Součet níže je přehledový.</p>
           <div className="grid four">
-            <ResultCard label="PHmax" value={totalPhmax} />
-            <ResultCard label="PHAmax" value={totalPha} />
-            <ResultCard label="PHPmax" value={totalPhp} />
+            <ResultCard label="PHmax – výpočet podle typu tříd" value={totalPhmax} />
+            <ResultCard label="PHAmax – asistenti pedagoga" value={totalPha} />
+            <ResultCard label="PHPmax – metodický výpočet" value={totalPhp} />
             <ResultCard label="Orientační součet" value={round2(totalPhmax + totalPha + totalPhp)} />
           </div>
         </section>
