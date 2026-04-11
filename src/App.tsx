@@ -90,6 +90,26 @@ function HelpHint({ text }: { text: string }) {
 }
 
 
+
+function GlossaryIconButton({
+  onClick,
+}: {
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="glossary-icon-btn"
+      onClick={onClick}
+      title="Otevřít slovníček pojmů"
+      aria-label="Otevřít slovníček pojmů"
+    >
+      <span className="glossary-icon-btn__book" aria-hidden="true">📘</span>
+      <span className="glossary-icon-btn__label">Slovníček</span>
+    </button>
+  );
+}
+
 function HeroStat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="hero-stat">
@@ -1068,7 +1088,7 @@ export default function App() {
                 <button className="btn btn--compact btn--light" onClick={() => window.print()}>Tisk</button>
                 <button className="btn btn--compact btn--soft" onClick={saveSnapshotManually}>Uložit</button>
                 <button className="btn btn--compact btn--soft" onClick={restoreSnapshot}>Obnovit</button>
-                <button className="btn btn--compact btn--soft" onClick={() => setGlossaryOpen(true)}>Slovníček</button>
+                <GlossaryIconButton onClick={() => setGlossaryOpen(true)} />
               </div>
             </div>
 
@@ -1224,7 +1244,7 @@ export default function App() {
                 <section className="card card--summary section-card section-card--live-results">
           <h2 className="section-title">Aktuální přehled výsledků</h2>
           <SectionLead>
-            Výsledky se přepočítávají průběžně podle zadaných údajů. Každý modul se stanovuje samostatně.
+            Výsledky navazují na metodický postup A–D: vstupní údaje, výpočet průměru, určení pásma a výsledná hodnota. Každý modul se stanovuje samostatně.
           </SectionLead>
           <div className="results-panel__meta">
             <span className="status-badge status-badge--neutral">Aktivní modul: {tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"}</span>

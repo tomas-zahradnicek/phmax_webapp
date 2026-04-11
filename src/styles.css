@@ -1533,3 +1533,95 @@ input[type="radio"] {
     width: auto;
   }
 }
+
+
+/* Glossary icon button */
+
+.glossary-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.14);
+  color: white;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 700;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.glossary-icon-btn:hover {
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.28);
+  transform: translateY(-1px);
+}
+
+.glossary-icon-btn__book {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.glossary-icon-btn__label {
+  white-space: nowrap;
+}
+
+/* Methodology-style badges */
+
+.card-badge,
+.result-badge,
+.metric-badge {
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.card-badge--step-a,
+.result-badge--step-a,
+.metric-badge--step-a {
+  background: rgba(37, 99, 235, 0.10);
+  color: #1d4ed8;
+}
+
+.card-badge--step-b,
+.result-badge--step-b,
+.metric-badge--step-b {
+  background: rgba(14, 165, 233, 0.10);
+  color: #0369a1;
+}
+
+.card-badge--step-c,
+.result-badge--step-c,
+.metric-badge--step-c {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.card-badge--step-d,
+.result-badge--step-d,
+.metric-badge--step-d {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+
+@media (max-width: 900px) {
+  .glossary-icon-btn {
+    width: auto;
+  }
+
+  .glossary-icon-btn__label {
+    display: none;
+  }
+}
