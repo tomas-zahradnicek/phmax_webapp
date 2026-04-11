@@ -723,7 +723,7 @@ export default function App() {
           </p>
         </header>
 
-        <section className="card card--accent">
+        <section className="card card--accent section-card section-card--guide">
           <h2 className="section-title">Rychlý rozcestník</h2>
           <SectionLead>
             Nejste si jistí, kde začít? Vyberte situaci, která se nejvíc blíží vaší škole. Aplikace vás přesměruje na správnou část kalkulačky a vyplní odpovídající ukázkový příklad.
@@ -752,7 +752,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="card card--elevated">
+        <section className="card card--elevated section-card section-card--setup">
           <h2 className="section-title">Typ školy a režim výpočtu</h2>
           <SectionLead>
             Tady vyberete, jaký typ výpočtu chcete zobrazit. Rozcestník výše vám může s výběrem pomoci.
@@ -780,7 +780,7 @@ export default function App() {
         </section>
 
         {MODE_CONFIG[mode].group === "nv75" && (
-          <section className="card">
+          <section className="card section-card section-card--nv75">
             <h2>NV 75/2005 – orientační přehled</h2>
             <p className="muted-text">
               Tento režim slouží k orientačnímu ověření rozsahu přímé pedagogické činnosti.
@@ -838,7 +838,7 @@ export default function App() {
           <button className={tab === "php" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("php")}>PHPmax</button>
         </div>
 
-                <section className="card card--summary">
+                <section className="card card--summary section-card section-card--live-results">
           <h2 className="section-title">Aktuální přehled výsledků</h2>
           <SectionLead>
             Výsledky se přepočítávají průběžně podle zadaných údajů. Každý modul se stanovuje samostatně.
@@ -854,7 +854,7 @@ export default function App() {
 {tab === "phmax" && (
           <div className="stack">
             {(hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) && (
-              <section className="card">
+              <section className="card section-card section-card--module section-card--module-basic">
                 <h2>Běžné třídy ZŠ</h2>
 
                 {hasSection("school_variant_first_stage_only") ? (
@@ -901,7 +901,7 @@ export default function App() {
 
             <div className="grid two">
               {(hasSection("sec16_first") || hasSection("sec16_second")) && (
-                <section className="card">
+                <section className="card section-card section-card--module section-card--module-support">
                   <h2>Třídy podle § 16 odst. 9</h2>
                   <div className="grid two">
                     {hasSection("sec16_first") && (
@@ -926,7 +926,7 @@ export default function App() {
               )}
 
               {(hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) && (
-              <section className="card">
+              <section className="card section-card section-card--module section-card--module-special">
                 <h2>ZŠ speciální</h2>
                 <div className="grid two">
                   <NumberField label="I. díl 1. stupeň – třídy" value={special1Classes} onChange={setSpecial1Classes} />
@@ -948,7 +948,7 @@ export default function App() {
 
             <div className="grid two">
               {hasSection("psych_groups") && (
-                <section className="card">
+                <section className="card section-card section-card--module section-card--module-psych">
                   <h2>Škola při psychiatrické nemocnici <HelpHint text="U této části se pracuje s aktuálním údajem nebo s vyšší hodnotou z aktuálního a předchozího údaje podle zvoleného režimu. Výsledek se pak určí podle příslušného pásma pro 1. stupeň, 2. stupeň nebo společnou výuku." /></h2>
                   <p className="muted-text">Najeďte na ikonu „i“ u nadpisu pro stručnou metodickou nápovědu.</p>
                   <table className="table">
@@ -1029,7 +1029,7 @@ export default function App() {
 
             <div className="grid two">
               {hasSection("gym_groups") && (
-                <section className="card">
+                <section className="card section-card section-card--module section-card--module-gym">
                   <h2>Nižší ročníky víceletých gymnázií</h2>
                   <table className="table">
                     <thead>
@@ -1068,7 +1068,7 @@ export default function App() {
               )}
 
               {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
-                <section className="card">
+                <section className="card section-card section-card--module section-card--module-mixed">
                   <h2>Smíšené třídy § 16 odst. 9 a ZŠ speciální <HelpHint text="U smíšených tříd záleží na tom, který obor ve třídě převažuje. Podle převažujícího oboru se vybere odpovídající pásmo pro výpočet PHmax." /></h2>
                   <p className="muted-text">Najeďte na ikonu „i“ u nadpisu pro stručnou metodickou nápovědu.</p>
                   <table className="table">
@@ -1109,7 +1109,7 @@ export default function App() {
             </div>
 
             {(hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) && (
-              <section className="card">
+              <section className="card section-card section-card--module section-card--module-extras">
                 <h2>Samostatné položky PHmax</h2>
                 <div className="grid four">
                   {hasSection("prep_class") && (
@@ -1148,28 +1148,28 @@ export default function App() {
             )}
 
             {hasSection("nv75_teacher_type") && (
-              <section className="card">
+              <section className="card section-card section-card--nv75-empty">
                 <h2>NV 75/2005 Sb. – učitel</h2>
                 <p className="muted-text">Formulář pro učitele doplníme v dalším kroku.</p>
               </section>
             )}
 
             {hasSection("nv75_headteacher_type") && (
-              <section className="card">
+              <section className="card section-card section-card--nv75-empty">
                 <h2>NV 75/2005 Sb. – ředitel školy</h2>
                 <p className="muted-text">Formulář pro ředitele doplníme v dalším kroku.</p>
               </section>
             )}
 
             {hasSection("nv75_deputy_units") && (
-              <section className="card">
+              <section className="card section-card section-card--nv75-empty">
                 <h2>NV 75/2005 Sb. – zástupce ředitele</h2>
                 <p className="muted-text">Formulář pro zástupce ředitele doplníme v dalším kroku.</p>
               </section>
             )}
 
             {hasSection("nv75_other_staff_type") && (
-              <section className="card">
+              <section className="card section-card section-card--nv75-empty">
                 <h2>NV 75/2005 Sb. – ostatní pedagogičtí pracovníci</h2>
                 <p className="muted-text">Formulář pro další role doplníme v dalším kroku.</p>
               </section>
@@ -1179,8 +1179,8 @@ export default function App() {
               <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax</button>
             </div>
 
-            <section className="card muted card--summary">
-              <h2>Souhrn výsledků PHmax</h2>
+            <section className="card muted card--summary section-card section-card--summary-phmax">
+              <h2 className="section-title">Souhrn výsledků PHmax</h2>
               <div className="grid four">
                 <ResultCard label="Běžné třídy" value={basicPhmax} />
                 <ResultCard label="§ 16 odst. 9" value={inclPhmax} />
@@ -1197,7 +1197,7 @@ export default function App() {
         )}
 
         {tab === "pha" && (
-          <section className="card">
+          <section className="card section-card section-card--pha">
             <h2>PHAmax – asistenti pedagoga</h2>
             <table className="table">
               <thead>
@@ -1246,7 +1246,7 @@ export default function App() {
         )}
 
         {tab === "php" && (
-          <section className="card">
+          <section className="card section-card section-card--php">
             <h2>PHPmax – metodický výpočet <HelpHint text="PHPmax se stanoví podle průměrného počtu žáků za předcházející tři roky. Do tohoto počtu se nezapočítávají žáci vzdělávaní v zahraničí, v zahraniční škole v ČR a v individuálním vzdělávání." /></h2>
             <p className="muted-text">
               Postup výpočtu (kroky A–D): rozhodné počty, očištění dat, výpočet a interpretace. Najeďte na ikonu „i“ u nadpisů pro stručnou metodickou nápovědu.
@@ -1376,8 +1376,8 @@ export default function App() {
           </section>
         )}
 
-        <section className="card muted card--summary">
-          <h2>Celkový přehled</h2>
+        <section className="card muted card--summary section-card section-card--overview">
+          <h2 className="section-title">Celkový přehled</h2>
           <p className="muted-text">Výsledky PHmax, PHAmax a PHPmax se stanovují samostatně. Součet níže slouží jen pro orientaci.</p>
           <p className="muted-text">PHmax, PHAmax – asistenti pedagoga a PHPmax – metodický výpočet se stanovují odděleně. Součet níže je přehledový.</p>
           <div className="grid four">

@@ -579,7 +579,9 @@ input[type="radio"] {
   .hero__title { font-size: 2rem; }
   .result-value { font-size: 1.8rem; }
 }
-/* Add-on for styles_design_system_clean.css */
+
+
+/* UI components */
 
 .help-hint--ui {
   display: inline-flex;
@@ -748,4 +750,154 @@ input[type="radio"] {
 
 .result-card--warning .result-card__value {
   color: #b45309;
+}
+
+
+/* Section differentiation */
+
+.section-card {
+  position: relative;
+  overflow: hidden;
+  border-width: 1px;
+}
+
+.section-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 5px;
+  border-radius: 24px 24px 0 0;
+  background: linear-gradient(90deg, rgba(148,163,184,0.45), rgba(148,163,184,0.12));
+}
+
+.section-card::after {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -30px;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0.8;
+  filter: blur(4px);
+}
+
+.section-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.section-card--guide {
+  background: linear-gradient(180deg, #ffffff 0%, #f3f8ff 100%);
+  border-color: rgba(56, 189, 248, 0.28);
+}
+.section-card--guide::before { background: linear-gradient(90deg, #0ea5e9, #38bdf8); }
+.section-card--guide::after { background: radial-gradient(circle, rgba(56,189,248,0.18), transparent 70%); }
+
+.section-card--setup {
+  background: linear-gradient(180deg, #ffffff 0%, #f6f7ff 100%);
+  border-color: rgba(99, 102, 241, 0.22);
+}
+.section-card--setup::before { background: linear-gradient(90deg, #4f46e5, #818cf8); }
+.section-card--setup::after { background: radial-gradient(circle, rgba(99,102,241,0.16), transparent 70%); }
+
+.section-card--live-results,
+.section-card--summary-phmax,
+.section-card--overview {
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+}
+.section-card--live-results { border-color: rgba(139, 92, 246, 0.22); }
+.section-card--live-results::before { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+.section-card--live-results::after { background: radial-gradient(circle, rgba(167,139,250,0.16), transparent 70%); }
+
+.section-card--summary-phmax { border-color: rgba(37, 99, 235, 0.20); }
+.section-card--summary-phmax::before { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+.section-card--summary-phmax::after { background: radial-gradient(circle, rgba(96,165,250,0.14), transparent 70%); }
+
+.section-card--overview { border-color: rgba(16, 185, 129, 0.20); }
+.section-card--overview::before { background: linear-gradient(90deg, #059669, #34d399); }
+.section-card--overview::after { background: radial-gradient(circle, rgba(52,211,153,0.14), transparent 70%); }
+
+.section-card--module {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+}
+.section-card--module-basic { border-color: rgba(71, 85, 105, 0.18); }
+.section-card--module-basic::before { background: linear-gradient(90deg, #334155, #64748b); }
+.section-card--module-basic::after { background: radial-gradient(circle, rgba(148,163,184,0.14), transparent 70%); }
+
+.section-card--module-support { border-color: rgba(59, 130, 246, 0.18); }
+.section-card--module-support::before { background: linear-gradient(90deg, #2563eb, #38bdf8); }
+.section-card--module-support::after { background: radial-gradient(circle, rgba(56,189,248,0.14), transparent 70%); }
+
+.section-card--module-special { border-color: rgba(168, 85, 247, 0.18); }
+.section-card--module-special::before { background: linear-gradient(90deg, #9333ea, #c084fc); }
+.section-card--module-special::after { background: radial-gradient(circle, rgba(192,132,252,0.14), transparent 70%); }
+
+.section-card--module-psych { border-color: rgba(244, 63, 94, 0.18); }
+.section-card--module-psych::before { background: linear-gradient(90deg, #e11d48, #fb7185); }
+.section-card--module-psych::after { background: radial-gradient(circle, rgba(251,113,133,0.14), transparent 70%); }
+
+.section-card--module-minority { border-color: rgba(234, 88, 12, 0.18); }
+.section-card--module-minority::before { background: linear-gradient(90deg, #ea580c, #fb923c); }
+.section-card--module-minority::after { background: radial-gradient(circle, rgba(251,146,60,0.14), transparent 70%); }
+
+.section-card--module-gym { border-color: rgba(2, 132, 199, 0.18); }
+.section-card--module-gym::before { background: linear-gradient(90deg, #0369a1, #38bdf8); }
+.section-card--module-gym::after { background: radial-gradient(circle, rgba(56,189,248,0.14), transparent 70%); }
+
+.section-card--module-mixed { border-color: rgba(217, 119, 6, 0.18); }
+.section-card--module-mixed::before { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.section-card--module-mixed::after { background: radial-gradient(circle, rgba(251,191,36,0.14), transparent 70%); }
+
+.section-card--module-extras { border-color: rgba(20, 184, 166, 0.18); }
+.section-card--module-extras::before { background: linear-gradient(90deg, #0f766e, #2dd4bf); }
+.section-card--module-extras::after { background: radial-gradient(circle, rgba(45,212,191,0.14), transparent 70%); }
+
+.section-card--pha {
+  background: linear-gradient(180deg, #ffffff 0%, #f7fcff 100%);
+  border-color: rgba(14, 165, 233, 0.20);
+}
+.section-card--pha::before { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+.section-card--pha::after { background: radial-gradient(circle, rgba(56,189,248,0.14), transparent 70%); }
+
+.section-card--php {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border-color: rgba(37, 99, 235, 0.20);
+}
+.section-card--php::before { background: linear-gradient(90deg, #1d4ed8, #60a5fa); }
+.section-card--php::after { background: radial-gradient(circle, rgba(96,165,250,0.14), transparent 70%); }
+
+.section-card--nv75,
+.section-card--nv75-empty {
+  background: linear-gradient(180deg, #ffffff 0%, #faf7ff 100%);
+  border-color: rgba(124, 58, 237, 0.18);
+}
+.section-card--nv75::before,
+.section-card--nv75-empty::before { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+.section-card--nv75::after,
+.section-card--nv75-empty::after { background: radial-gradient(circle, rgba(167,139,250,0.14), transparent 70%); }
+
+.section-card .section-title {
+  margin-bottom: 0;
+}
+
+.section-card .subcard {
+  background: rgba(255,255,255,0.82);
+}
+
+.section-card--summary-phmax .result-card:last-child,
+.section-card--overview .result-card:last-child,
+.section-card--live-results .hero-stat:last-child {
+  box-shadow: 0 14px 30px rgba(15,23,42,0.09);
+}
+
+@media (max-width: 900px) {
+  .section-card::after {
+    width: 120px;
+    height: 120px;
+    top: -28px;
+    right: -24px;
+  }
 }
