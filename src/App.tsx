@@ -1080,56 +1080,46 @@ export default function App() {
           </div>
 
           <div className="hero-actions">
-
-  {/* ŘÁDEK 1 */}
-  <div className="hero-actions__top">
-
-    <div className="field field--hero-select hero-actions__example">
-      <span className="field__label field__label--hero">Ukázkový příklad</span>
-      <select
-        value={selectedExample}
-        onChange={(e) => loadExample(e.target.value as ExampleKey)}
-      >
-        <option value="">Vyberte ukázkový příklad…</option>
-        <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
-        <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
-        <option value="smisene_tridy">PHmax – smíšené třídy</option>
-        <option value="pripravna_trida">PHmax – přípravná třída</option>
-      </select>
-    </div>
-
-    <div className="hero-actions__group">
-      <button className="btn btn--light" onClick={() => window.print()}>Tisk</button>
-      <button className="btn ghost" onClick={saveSnapshotManually}>Uložit</button>
-      <button className="btn ghost" onClick={restoreSnapshot}>Obnovit</button>
-      <GlossaryIconButton onClick={() => setGlossaryOpen(true)} />
-    </div>
-
-  </div>
-
-  {/* ŘÁDEK 2 */}
-  <div className="hero-actions__bottom">
-
-    <div className="hero-actions__group">
-      <button className="btn ghost" onClick={clearStoredSnapshot}>
-        Vymazat uložená data
-      </button>
-      <button className="btn ghost" onClick={resetAll}>
-        Vymazat všechny údaje
-      </button>
-    </div>
-
-    <div className="hero-actions__group">
-      <button className="btn ghost" onClick={handleExportCsv}>CSV</button>
-      <button className="btn ghost" onClick={copySummaryToClipboard}>
-        Kopírovat shrnutí
-      </button>
-      <button className="btn ghost" onClick={printSummaryWindow}>
-        Tisk shrnutí
-      </button>
-    </div>
-
-  </div>
+            <div className="hero-actions__row hero-actions__row--primary">
+              <div className="field field--hero-select hero-actions__example">
+                <span className="field__label field__label--hero">Ukázkový příklad</span>
+                <select
+                  value={selectedExample}
+                  onChange={(e) => loadExample(e.target.value as ExampleKey)}
+                >
+                  <option value="">Vyberte ukázkový příklad…</option>
+                  <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
+                  <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
+                  <option value="smisene_tridy">PHmax – smíšené třídy</option>
+                  <option value="pripravna_trida">PHmax – přípravná třída</option>
+                </select>
+              </div>
+              <div className="hero-actions__group hero-actions__group--primary">
+                <button type="button" className="btn btn--light" onClick={() => window.print()}>Tisk</button>
+                <button type="button" className="btn ghost" onClick={saveSnapshotManually}>Uložit</button>
+                <button type="button" className="btn ghost" onClick={restoreSnapshot}>Obnovit</button>
+                <GlossaryIconButton onClick={() => setGlossaryOpen(true)} />
+              </div>
+            </div>
+            <div className="hero-actions__row hero-actions__row--tools">
+              <div className="hero-actions__group hero-actions__group--meta">
+                <button type="button" className="btn ghost" onClick={clearStoredSnapshot}>
+                  Vymazat uložená data
+                </button>
+                <button type="button" className="btn ghost" onClick={resetAll}>
+                  Vymazat všechny údaje
+                </button>
+              </div>
+              <div className="hero-actions__group hero-actions__group--exports">
+                <button type="button" className="btn ghost" onClick={handleExportCsv}>CSV</button>
+                <button type="button" className="btn ghost" onClick={copySummaryToClipboard}>
+                  Kopírovat shrnutí
+                </button>
+                <button type="button" className="btn ghost" onClick={printSummaryWindow}>
+                  Tisk shrnutí
+                </button>
+              </div>
+            </div>
           </div>
 
           <p className="muted-text hero__note">
@@ -1398,16 +1388,16 @@ export default function App() {
                 <div className="grid two">
                   <NumberField label="I. díl 1. stupeň – třídy" value={special1Classes} onChange={setSpecial1Classes} />
                   <NumberField label="I. díl 1. stupeň – žáci" value={special1Pupils} onChange={setSpecial1Pupils} />
-                  <ResultCard label="I. díl 1. stupeň – pásmo a PHmax na 1 třídu" value={`${special1Band.label} / ${special1Band.value}`} tone="primary" />
                   <ResultCard label="I. díl 1. stupeň – průměrný počet žáků" value={round2(special1Avg)} tone="primary" />
+                  <ResultCard label="I. díl 1. stupeň – pásmo a PHmax na 1 třídu" value={`${special1Band.label} / ${special1Band.value}`} tone="primary" />
                   <NumberField label="I. díl 2. stupeň – třídy" value={special2Classes} onChange={setSpecial2Classes} />
                   <NumberField label="I. díl 2. stupeň – žáci" value={special2Pupils} onChange={setSpecial2Pupils} />
-                  <ResultCard label="I. díl 2. stupeň – pásmo a PHmax na 1 třídu" value={`${special2Band.label} / ${special2Band.value}`} tone="primary" />
                   <ResultCard label="I. díl 2. stupeň – průměrný počet žáků" value={round2(special2Avg)} tone="primary" />
+                  <ResultCard label="I. díl 2. stupeň – pásmo a PHmax na 1 třídu" value={`${special2Band.label} / ${special2Band.value}`} tone="primary" />
                   <NumberField label="II. díl – třídy" value={specialIIClasses} onChange={setSpecialIIClasses} />
                   <NumberField label="II. díl – žáci" value={specialIIPupils} onChange={setSpecialIIPupils} />
-                  <ResultCard label="II. díl – pásmo a PHmax na 1 třídu" value={`${specialIIBand.label} / ${specialIIBand.value}`} tone="primary" />
                   <ResultCard label="II. díl – průměrný počet žáků" value={round2(specialIIAvg)} tone="primary" />
+                  <ResultCard label="II. díl – pásmo a PHmax na 1 třídu" value={`${specialIIBand.label} / ${specialIIBand.value}`} tone="primary" />
                 </div>
                 <div className="grid four section-results-strip">
                   <ResultCard label="PHmax ZŠ speciální – I. díl 1. stupeň" value={special1PhmaxPart} tone="success" />
@@ -1565,10 +1555,10 @@ export default function App() {
                       </div>
 
                       <div className="grid two section-results-strip">
-                        <ResultCard label="Průměr – třídy s převažujícím 79-01-C/01" value={round2(mixedMethodFirstZsAvg)} tone="primary" />
-                        <ResultCard label="PHmax pro 1. stupeň (B9)" value={`${mixedMethodFirstZsBand.label} / ${mixedMethodFirstZsBand.value}`} tone="primary" />
-                        <ResultCard label="Průměr – třídy s převažujícím 79-01-B/01" value={round2(mixedMethodFirstSpecialAvg)} tone="primary" />
-                        <ResultCard label="PHmax pro 1. stupeň ZŠ speciální (B26)" value={`${mixedMethodFirstSpecialBand.label} / ${mixedMethodFirstSpecialBand.value}`} tone="primary" />
+                        <ResultCard label="Průměr žáků/třídu · obor 79-01-C/01" value={round2(mixedMethodFirstZsAvg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax na 1 třídu · 1. st. (B9)" value={`${mixedMethodFirstZsBand.label} / ${mixedMethodFirstZsBand.value}`} tone="primary" />
+                        <ResultCard label="Průměr žáků/třídu · obor 79-01-B/01" value={round2(mixedMethodFirstSpecialAvg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax na 1 třídu · 1. st. ZŠ spec. (B26)" value={`${mixedMethodFirstSpecialBand.label} / ${mixedMethodFirstSpecialBand.value}`} tone="primary" />
                       </div>
 
                       <div className="grid three section-results-strip">
@@ -1588,10 +1578,10 @@ export default function App() {
                       </div>
 
                       <div className="grid two section-results-strip">
-                        <ResultCard label="Průměr – třídy s převažujícím 79-01-C/01" value={round2(mixedMethodSecondZsAvg)} tone="primary" />
-                        <ResultCard label="PHmax pro 2. stupeň (B10)" value={`${mixedMethodSecondZsBand.label} / ${mixedMethodSecondZsBand.value}`} tone="primary" />
-                        <ResultCard label="Průměr – třídy s převažujícím 79-01-B/01" value={round2(mixedMethodSecondSpecialAvg)} tone="primary" />
-                        <ResultCard label="PHmax pro 2. stupeň ZŠ speciální (B27)" value={`${mixedMethodSecondSpecialBand.label} / ${mixedMethodSecondSpecialBand.value}`} tone="primary" />
+                        <ResultCard label="Průměr žáků/třídu · obor 79-01-C/01" value={round2(mixedMethodSecondZsAvg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax na 1 třídu · 2. st. (B10)" value={`${mixedMethodSecondZsBand.label} / ${mixedMethodSecondZsBand.value}`} tone="primary" />
+                        <ResultCard label="Průměr žáků/třídu · obor 79-01-B/01" value={round2(mixedMethodSecondSpecialAvg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax na 1 třídu · 2. st. ZŠ spec. (B27)" value={`${mixedMethodSecondSpecialBand.label} / ${mixedMethodSecondSpecialBand.value}`} tone="primary" />
                       </div>
 
                       <div className="grid three section-results-strip">
@@ -1668,7 +1658,7 @@ export default function App() {
               <div className="grid four">
                 <ResultCard label="Běžné třídy" value={basicPhmax} />
                 <ResultCard label="§ 16 odst. 9" value={inclPhmax} />
-                <ResultCard label="Psychiatrická nemocnice" value={psychPhmax} />
+                <ResultCard label="Škola při psychiatrické nemocnici" value={psychPhmax} />
                 <ResultCard label="Jazyk menšiny" value={minorityPhmax} />
                 <ResultCard label="Víceletá gymnázia" value={gymPhmax} />
                 <ResultCard label="Smíšené třídy" value={mixedPhmax} />
