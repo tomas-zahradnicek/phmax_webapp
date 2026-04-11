@@ -42,6 +42,35 @@ function downloadTextFile(filename: string, content: string, mime = "text/plain;
 
 type TabKey = "phmax" | "pha" | "php";
 
+type PhpWizardStep = "a" | "b" | "c" | "d";
+type PhpMethodMode = "three_year_avg" | "short_period";
+type Nv75Role = "ucitel" | "reditel";
+type Nv75School = "plavecka_skola";
+
+function clampNonNegative(value: number) {
+  return Math.max(0, Number.isFinite(value) ? value : 0);
+}
+
+function sumNumbers(values: number[]) {
+  return values.reduce((acc, value) => acc + value, 0);
+}
+
+function getNv75Reference(role: Nv75Role, school: Nv75School) {
+  if (school === "plavecka_skola" && role === "ucitel") {
+    return {
+      label: "Učitel plavecké školy",
+      value: "22 až 30 hodin týdně",
+      note: "Rozpětí pro učitele plavecké školy.",
+    };
+  }
+
+  return {
+    label: "Ředitel plavecké školy",
+    value: "nejméně 3 hodiny týdně",
+    note: "Minimum pro ředitele plavecké školy.",
+  };
+}
+
 export default function App() {
   const [tab, setTab] = useState<TabKey>("phmax");
   const [mode, setMode] = useState<CalculatorMode>(DEFAULT_MODE);
@@ -115,8 +144,20 @@ export default function App() {
   const [phpYear1, setPhpYear1] = useState(260);
   const [phpYear2, setPhpYear2] = useState(272);
   const [phpYear3, setPhpYear3] = useState(281);
-  const [phpShortPeriod, setPhpShortPeriod] = useState(false);
+
+  const [phpWizardStep, setPhpWizardStep] = useState<PhpWizardStep>("a");
+  const [phpMethodMode, setPhpMethodMode] = useState<PhpMethodMode>("three_year_avg");
+
+  const [phpExcludedAbroad, setPhpExcludedAbroad] = useState(0);
+  const [phpExcludedForeignSchoolCz, setPhpExcludedForeignSchoolCz] = useState(0);
+  const [phpExcludedIndividual, setPhpExcludedIndividual] = useState(0);
+
   const [phpExcludedSchool, setPhpExcludedSchool] = useState(false);
+
+  const [nv75Role, setNv75Role] = useState<Nv75Role>("ucitel");
+  const [nv75School, setNv75School] = useState<Nv75School>("plavecka_skola");
+  const [nv75TeacherMin, setNv75TeacherMin] = useState(22);
+  const [nv75TeacherMax, setNv75TeacherMax] = useState(30);
 
   const isFull = basicType === "full_more_than_2" || basicType === "full_max_2";
 
@@ -221,14 +262,32 @@ export default function App() {
   });
   const totalPha = round2(phaComputedRows.reduce((s, r) => s + r.subtotal, 0));
 
-  const phpAvg = round2(phpShortPeriod ? Math.max(phpYear1, phpYear2, phpYear3) : (phpYear1 + phpYear2 + phpYear3) / 3);
-  const phpBand = phpExcludedSchool ? { label: "bez nároku", value: 0 } : pickBand(phpAvg, PHP_TABLE);
+  const phpBaseValue = round2(
+    phpMethodMode === "short_period"
+      ? Math.max(phpYear1, phpYear2, phpYear3)
+      : (phpYear1 + phpYear2 + phpYear3) / 3
+  );
+  const phpExcludedTotal = round2(
+    sumNumbers([
+      clampNonNegative(phpExcludedAbroad),
+      clampNonNegative(phpExcludedForeignSchoolCz),
+      clampNonNegative(phpExcludedIndividual),
+    ])
+  );
+  const phpAdjustedValue = round2(Math.max(0, phpBaseValue - phpExcludedTotal));
+  const phpBand = phpExcludedSchool ? { label: "bez nároku", value: 0 } : pickBand(phpAdjustedValue, PHP_TABLE);
   const totalPhp = round2(phpBand.value);
+
+  const nv75Reference = getNv75Reference(nv75Role, nv75School);
+  const nv75TeacherRangeValid = nv75TeacherMin <= nv75TeacherMax;
 
   const warnings: string[] = [];
   if (basicType === "full_max_2" && basic1Classes > 0 && basic1Classes < 5) warnings.push("U úplné ZŠ s nejvýše 2 třídami v každém ročníku bývá obvykle na 1. stupni nejméně 5 běžných tříd.");
   if (basicType.startsWith("first_only_") && basic2Classes > 0) warnings.push("U neúplné ZŠ tvořené jen 1. stupněm se 2. stupeň do výpočtu běžných tříd nezadává.");
-  if (phpAvg > 0 && phpAvg < 180 && !phpExcludedSchool) warnings.push("PHPmax vychází 0, protože průměrný počet žáků je pod hranicí 180.");
+  if (phpExcludedTotal > phpBaseValue && !phpExcludedSchool) warnings.push("Součet nezapočítávaných žáků je vyšší než rozhodná hodnota pro PHPmax.");
+  if (phpAdjustedValue > 0 && phpAdjustedValue < 180 && !phpExcludedSchool) warnings.push("PHPmax vychází 0, protože očištěný rozhodný počet žáků je pod hranicí 180.");
+  if (phpExcludedSchool) warnings.push("Škola je označena jako vyloučená z PHPmax, proto je výsledek 0.");
+  if (MODE_CONFIG[mode].group === "nv75" && nv75Role === "ucitel" && !nv75TeacherRangeValid) warnings.push("U NV 75/2005 musí být horní hranice učitele větší nebo rovna dolní hranici.");
   if (minorityType !== "minorityFull1" && minority2Classes > 0) warnings.push("U menšinové školy zadané jen pro 1. stupeň se 2. stupeň nezapočítá.");
 
   const addMixed = () => setMixedRows((prev) => [...prev, { id: Date.now(), stage: "first", majority: "zs", classes: 1, pupils: 8 }]);
@@ -257,16 +316,48 @@ export default function App() {
     ["Základní škola speciální", specialPhmax],
     ["Samostatné položky PHmax", extrasPhmax],
     ["PHmax celkem", totalPhmax],
-    ["PHAmax celkem", totalPha],
-    ["PHPmax", totalPhp],
-    ["Orientační součet", round2(totalPhmax + totalPha + totalPhp)],
+    ["PHAmax", totalPha],
+    ["PHPmax – rozhodná hodnota", phpBaseValue],
+    ["PHPmax – vyloučené skupiny", phpExcludedTotal],
+    ["PHPmax – očištěná hodnota", phpAdjustedValue],
+    ["PHPmax celkem", totalPhp],
   ] as const;
 
   const handleExportJson = () => {
     const payload = {
       module: "ZŠ",
       generatedAt: new Date().toISOString(),
+      mode,
+      tab,
       summary: Object.fromEntries(summaryRows.map(([label, value]) => [label, value])),
+      phpmaxMethodika: {
+        wizardStep: phpWizardStep,
+        methodMode: phpMethodMode,
+        years: {
+          year1: phpYear1,
+          year2: phpYear2,
+          year3: phpYear3,
+        },
+        excluded: {
+          abroad: phpExcludedAbroad,
+          foreignSchoolInCz: phpExcludedForeignSchoolCz,
+          individual: phpExcludedIndividual,
+        },
+        excludedSchool: phpExcludedSchool,
+        baseValue: phpBaseValue,
+        excludedTotal: phpExcludedTotal,
+        adjustedValue: phpAdjustedValue,
+        result: totalPhp,
+      },
+      nv75: MODE_CONFIG[mode].group === "nv75"
+        ? {
+            school: nv75School,
+            role: nv75Role,
+            teacherMin: nv75TeacherMin,
+            teacherMax: nv75TeacherMax,
+            reference: nv75Reference,
+          }
+        : null,
     };
     downloadTextFile("kalkulacka-zs-vypocet.json", JSON.stringify(payload, null, 2), "application/json;charset=utf-8");
   };
@@ -283,7 +374,8 @@ export default function App() {
           <h1>Hotová webová aplikace ke spuštění</h1>
           <p>
             Vite + React + TypeScript. Aplikace obsahuje formuláře pro běžné třídy, § 16 odst. 9,
-            ZŠ speciální, menšinové školy, psychiatrickou nemocnici, víceletá gymnázia, PHAmax a PHPmax.
+            ZŠ speciální, menšinové školy, psychiatrickou nemocnici, víceletá gymnázia, PHAmax,
+            PHPmax v metodickém rozpadu A–D a samostatný orientační panel pro NV 75/2005.
           </p>
           <div className="toolbar">
             <button className="btn ghost" onClick={() => window.print()}>Tisk</button>
@@ -315,6 +407,48 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        {MODE_CONFIG[mode].group === "nv75" && (
+          <section className="card">
+            <h2>NV 75/2005 – orientační panel</h2>
+            <p className="muted-text">
+              Samostatný režim pro rychlé ověření rozsahu přímé pedagogické činnosti.
+            </p>
+
+            <div className="grid two">
+              <div className="field">
+                <span>Typ školy</span>
+                <select value={nv75School} onChange={(e) => setNv75School(e.target.value as Nv75School)}>
+                  <option value="plavecka_skola">Plavecká škola</option>
+                </select>
+              </div>
+
+              <div className="field">
+                <span>Role</span>
+                <select value={nv75Role} onChange={(e) => setNv75Role(e.target.value as Nv75Role)}>
+                  <option value="ucitel">Učitel</option>
+                  <option value="reditel">Ředitel</option>
+                </select>
+              </div>
+            </div>
+
+            {nv75Role === "ucitel" && (
+              <div className="grid two">
+                <NumberField label="Dolní hranice" value={nv75TeacherMin} onChange={setNv75TeacherMin} />
+                <NumberField label="Horní hranice" value={nv75TeacherMax} onChange={setNv75TeacherMax} />
+              </div>
+            )}
+
+            <div className="grid three">
+              <ResultCard label="Reference" value={nv75Reference.label} />
+              <ResultCard
+                label="Rozsah"
+                value={nv75Role === "ucitel" ? `${nv75TeacherMin} až ${nv75TeacherMax} hodin týdně` : nv75Reference.value}
+              />
+              <ResultCard label="Poznámka" value={nv75Reference.note} />
+            </div>
+          </section>
+        )}
 
         {warnings.length > 0 && (
           <section className="card warning">
@@ -703,20 +837,127 @@ export default function App() {
         {tab === "php" && (
           <section className="card">
             <h2>PHPmax</h2>
-            <div className="grid three">
-              <NumberField label="Počet žáků – rok 1" value={phpYear1} onChange={setPhpYear1} />
-              <NumberField label="Počet žáků – rok 2" value={phpYear2} onChange={setPhpYear2} />
-              <NumberField label="Počet žáků – rok 3" value={phpYear3} onChange={setPhpYear3} />
+            <p className="muted-text">
+              Metodický rozpad A–D: rozhodné počty, očištění dat, výpočet a interpretace.
+            </p>
+
+            <div className="tabs" style={{ marginBottom: 16 }}>
+              <button className={phpWizardStep === "a" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("a")}>
+                A. Vstupy
+              </button>
+              <button className={phpWizardStep === "b" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("b")}>
+                B. Očištění
+              </button>
+              <button className={phpWizardStep === "c" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("c")}>
+                C. Výpočet
+              </button>
+              <button className={phpWizardStep === "d" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("d")}>
+                D. Výklad
+              </button>
             </div>
+
             <div className="checks">
-              <label><input type="checkbox" checked={phpShortPeriod} onChange={(e) => setPhpShortPeriod(e.target.checked)} /> Použít kratší období místo 3 let</label>
-              <label><input type="checkbox" checked={phpExcludedSchool} onChange={(e) => setPhpExcludedSchool(e.target.checked)} /> Škola je vyloučená z PHPmax</label>
+              <label>
+                <input
+                  type="radio"
+                  checked={phpMethodMode === "three_year_avg"}
+                  onChange={() => setPhpMethodMode("three_year_avg")}
+                />
+                Použít průměr za 3 roky
+              </label>
+
+              <label>
+                <input
+                  type="radio"
+                  checked={phpMethodMode === "short_period"}
+                  onChange={() => setPhpMethodMode("short_period")}
+                />
+                Použít kratší období místo 3 let
+              </label>
             </div>
-            <div className="grid three">
-              <ResultCard label="Průměr / zvolená hodnota" value={phpAvg} />
-              <ResultCard label="Pásmo / PHPmax" value={`${phpBand.label} / ${phpBand.value}`} />
-              <ResultCard label="PHPmax celkem" value={totalPhp} />
-            </div>
+
+            {phpWizardStep === "a" && (
+              <>
+                <h3>Rozhodné počty žáků</h3>
+                <div className="grid three">
+                  <NumberField label="Počet žáků – rok 1" value={phpYear1} onChange={setPhpYear1} />
+                  <NumberField label="Počet žáků – rok 2" value={phpYear2} onChange={setPhpYear2} />
+                  <NumberField label="Počet žáků – rok 3" value={phpYear3} onChange={setPhpYear3} />
+                </div>
+                <div className="grid three">
+                  <ResultCard label="Metoda" value={phpMethodMode === "three_year_avg" ? "Průměr za 3 roky" : "Kratší období"} />
+                  <ResultCard label="Rozhodná hodnota" value={phpBaseValue} />
+                  <ResultCard label="Stav školy" value={phpExcludedSchool ? "Vyloučená z PHPmax" : "Standardní posouzení"} />
+                </div>
+              </>
+            )}
+
+            {phpWizardStep === "b" && (
+              <>
+                <h3>Nezapočítávané skupiny žáků</h3>
+                <div className="grid three">
+                  <NumberField label="Vzdělávání v zahraničí" value={phpExcludedAbroad} onChange={setPhpExcludedAbroad} />
+                  <NumberField label="Zahraniční škola v ČR" value={phpExcludedForeignSchoolCz} onChange={setPhpExcludedForeignSchoolCz} />
+                  <NumberField label="Individuální vzdělávání" value={phpExcludedIndividual} onChange={setPhpExcludedIndividual} />
+                </div>
+                <div className="checks">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={phpExcludedSchool}
+                      onChange={(e) => setPhpExcludedSchool(e.target.checked)}
+                    />
+                    Škola je vyloučená z PHPmax
+                  </label>
+                </div>
+                <div className="grid three">
+                  <ResultCard label="Součet vyloučených žáků" value={phpExcludedTotal} />
+                  <ResultCard label="Rozhodná hodnota před očištěním" value={phpBaseValue} />
+                  <ResultCard label="Očištěná hodnota" value={phpAdjustedValue} />
+                </div>
+              </>
+            )}
+
+            {phpWizardStep === "c" && (
+              <>
+                <h3>Výpočet PHPmax</h3>
+                <div className="grid three">
+                  <ResultCard label="Rozhodná hodnota" value={phpBaseValue} />
+                  <ResultCard label="Očištění" value={phpExcludedTotal} />
+                  <ResultCard label="Očištěná hodnota" value={phpAdjustedValue} />
+                </div>
+                <div className="grid three">
+                  <ResultCard label="Pásmo" value={phpBand.label} />
+                  <ResultCard label="PHPmax" value={phpBand.value} />
+                  <ResultCard label="PHPmax celkem" value={totalPhp} />
+                </div>
+              </>
+            )}
+
+            {phpWizardStep === "d" && (
+              <>
+                <h3>Co výsledek znamená v praxi</h3>
+                <div className="subcard">
+                  <p className="muted-text">
+                    1. Nejprve se určí rozhodná hodnota podle zvolené metody.
+                  </p>
+                  <p className="muted-text">
+                    2. Poté se odečtou žáci, kteří se do výpočtu nezapočítávají.
+                  </p>
+                  <p className="muted-text">
+                    3. Očištěná hodnota se porovná s pásmy PHP_TABLE.
+                  </p>
+                  <p className="muted-text">
+                    4. Pokud je škola vyloučená z PHPmax, výsledek je 0 bez ohledu na počty žáků.
+                  </p>
+                </div>
+                <div className="grid three">
+                  <ResultCard label="Rozhodná hodnota" value={phpBaseValue} />
+                  <ResultCard label="Očištěná hodnota" value={phpAdjustedValue} />
+                  <ResultCard label="Výsledek PHPmax" value={totalPhp} />
+                </div>
+              </>
+            )}
           </section>
         )}
 
