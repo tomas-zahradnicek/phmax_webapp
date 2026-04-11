@@ -1066,7 +1066,7 @@ input[type="radio"] {
 
 @media (min-width: 900px) {
   .mixed-module__tables {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 560px), 1fr));
   }
 }
 
@@ -1125,13 +1125,19 @@ input[type="radio"] {
   vertical-align: bottom;
 }
 
-.mixed-sheet thead th:nth-child(1) { width: 26%; }
-.mixed-sheet thead th:nth-child(2) { width: 11%; }
-.mixed-sheet thead th:nth-child(3) { width: 11%; }
-.mixed-sheet thead th:nth-child(4) { width: 15%; }
-.mixed-sheet thead th:nth-child(5) { width: 13%; }
+/* Širší Žáci / Třídy – čísla a ovladače prohlížeče se vejdou */
+.mixed-sheet thead th:nth-child(1) { width: 22%; }
+.mixed-sheet thead th:nth-child(2) { width: 14%; }
+.mixed-sheet thead th:nth-child(3) { width: 14%; }
+.mixed-sheet thead th:nth-child(4) { width: 14%; }
+.mixed-sheet thead th:nth-child(5) { width: 12%; }
 .mixed-sheet thead th:nth-child(6) { width: 12%; }
 .mixed-sheet thead th:nth-child(7) { width: 12%; }
+
+.mixed-sheet td:nth-child(2),
+.mixed-sheet td:nth-child(3) {
+  min-width: 5.25rem;
+}
 
 .mixed-sheet tbody th[scope="row"] {
   text-align: left;
@@ -1168,14 +1174,27 @@ input[type="radio"] {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 8px 8px;
-  font-size: 1rem;
+  padding: 9px 11px;
+  font-size: 1.05rem;
   font-weight: 700;
   border-radius: 10px;
   border: 1px solid var(--line-strong);
   background: #fff;
   color: var(--text);
   font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+
+/* Bez nativních šipek u čísel – více místa pro hodnotu (Chrome, Edge, Firefox) */
+.mixed-sheet__input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.mixed-sheet__input[type="number"]::-webkit-outer-spin-button,
+.mixed-sheet__input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .mixed-sheet__input:focus {
