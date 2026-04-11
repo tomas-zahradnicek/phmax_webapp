@@ -18,6 +18,13 @@ type ResultCardProps = {
   hint?: string;
 };
 
+const toneMeta: Record<NonNullable<ResultCardProps["tone"]>, string> = {
+  default: "Vstup",
+  primary: "Mezivýsledek",
+  success: "Výsledek",
+  warning: "Upozornění",
+};
+
 function HintBadge({ text }: { text: string }) {
   return (
     <span className="help-hint help-hint--ui" title={text} aria-label={text}>
@@ -96,7 +103,10 @@ export function ResultCard({
   return (
     <div className={`result-card result-card--${tone}`}>
       <div className="result-card__head">
-        <div className="result-card__label">{label}</div>
+        <div>
+          <div className="result-card__type">{toneMeta[tone]}</div>
+          <div className="result-card__label">{label}</div>
+        </div>
         {hint ? <HintBadge text={hint} /> : null}
       </div>
 

@@ -901,3 +901,116 @@ input[type="radio"] {
     right: -24px;
   }
 }
+
+/* Guided flow + glossary */
+
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.step-badge__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+}
+
+.step-badge__label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.module-intro {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.glossary-inline {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.glossary-inline__item {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(148,163,184,0.2);
+  background: rgba(255,255,255,0.82);
+  box-shadow: 0 8px 18px rgba(15,23,42,0.04);
+}
+
+.glossary-inline__item strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #0f172a;
+}
+
+.glossary-inline__item span {
+  display: block;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+/* Tabs with tooltip alignment */
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Result cards by type */
+.result-card__type {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: rgba(148,163,184,0.14);
+  color: #475569;
+}
+
+.result-card--default .result-card__type {
+  background: rgba(148,163,184,0.14);
+  color: #475569;
+}
+
+.result-card--primary .result-card__type {
+  background: rgba(37,99,235,0.14);
+  color: #1d4ed8;
+}
+
+.result-card--success .result-card__type {
+  background: rgba(22,163,74,0.14);
+  color: #15803d;
+}
+
+.result-card--warning .result-card__type {
+  background: rgba(245,158,11,0.18);
+  color: #b45309;
+}
+
+@media (max-width: 900px) {
+  .glossary-inline {
+    grid-template-columns: 1fr;
+  }
+}
