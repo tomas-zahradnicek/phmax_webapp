@@ -135,6 +135,112 @@ function SectionLead({ children }: { children: React.ReactNode }) {
   return <p className="section-lead muted-text">{children}</p>;
 }
 
+type MixedBand = { label: string; value: number };
+
+type MixedStageTableProps = {
+  stageTitle: string;
+  methodNote: string;
+  zsPupils: number;
+  zsClasses: number;
+  zsAvg: number;
+  zsBand: MixedBand;
+  zsResult: number;
+  specPupils: number;
+  specClasses: number;
+  specAvg: number;
+  specBand: MixedBand;
+  specResult: number;
+  stageTotal: number;
+  setZsPupils: (n: number) => void;
+  setZsClasses: (n: number) => void;
+  setSpecPupils: (n: number) => void;
+  setSpecClasses: (n: number) => void;
+  emphasizeEmpty: boolean;
+};
+
+function MixedStageTable({
+  stageTitle,
+  methodNote,
+  zsPupils,
+  zsClasses,
+  zsAvg,
+  zsBand,
+  zsResult,
+  specPupils,
+  specClasses,
+  specAvg,
+  specBand,
+  specResult,
+  stageTotal,
+  setZsPupils,
+  setZsClasses,
+  setSpecPupils,
+  setSpecClasses,
+  emphasizeEmpty,
+}: MixedStageTableProps) {
+  const numInput = (value: number, onChange: (n: number) => void, aria: string) => (
+    <td>
+      <input
+        type="number"
+        min={0}
+        inputMode="numeric"
+        className={`mixed-sheet__input${emphasizeEmpty && value === 0 ? " mixed-sheet__input--empty" : ""}`}
+        value={value}
+        aria-label={aria}
+        onChange={(e) => onChange(Number(e.target.value) || 0)}
+      />
+    </td>
+  );
+
+  return (
+    <div className="mixed-sheet-panel">
+      <h3 className="mixed-sheet-panel__title">{stageTitle}</h3>
+      <p className="mixed-sheet-panel__note muted-text">{methodNote}</p>
+      <div className="mixed-sheet-scroll">
+        <table className="mixed-sheet">
+          <thead>
+            <tr>
+              <th scope="col">Obor / část výpočtu</th>
+              <th scope="col">Žáci</th>
+              <th scope="col">Třídy</th>
+              <th scope="col">Průměr žáků/třídu</th>
+              <th scope="col">Pásmo</th>
+              <th scope="col">PHmax / 1 třídu</th>
+              <th scope="col">Výsledek PHmax</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">79-01-C/01 (běžná ZŠ)</th>
+              {numInput(zsPupils, setZsPupils, `${stageTitle}: žáci, obor 79-01-C/01`)}
+              {numInput(zsClasses, setZsClasses, `${stageTitle}: třídy, obor 79-01-C/01`)}
+              <td className="mixed-sheet__num">{round2(zsAvg)}</td>
+              <td>{zsBand.label}</td>
+              <td className="mixed-sheet__num">{zsBand.value}</td>
+              <td className="mixed-sheet__num mixed-sheet__num--strong">{zsResult}</td>
+            </tr>
+            <tr>
+              <th scope="row">79-01-B/01 (ZŠ speciální)</th>
+              {numInput(specPupils, setSpecPupils, `${stageTitle}: žáci, obor 79-01-B/01`)}
+              {numInput(specClasses, setSpecClasses, `${stageTitle}: třídy, obor 79-01-B/01`)}
+              <td className="mixed-sheet__num">{round2(specAvg)}</td>
+              <td>{specBand.label}</td>
+              <td className="mixed-sheet__num">{specBand.value}</td>
+              <td className="mixed-sheet__num mixed-sheet__num--strong">{specResult}</td>
+            </tr>
+            <tr className="mixed-sheet__total-row">
+              <th scope="row" colSpan={6}>
+                PHmax za {stageTitle.toLowerCase()} (součet obou oborů)
+              </th>
+              <td className="mixed-sheet__num mixed-sheet__grand">{stageTotal}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function createEmptyPsychRow(id: number): PsychRow {
   return { id, kind: "psych1", mode: "higher_of_two", currentPupils: 0, currentClasses: 0, prevPupils: 0, prevClasses: 0 };
 }
@@ -1663,62 +1769,66 @@ export default function App() {
               {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
                 <section className="card section-card section-card--module section-card--module-mixed mixed-module" data-section="mixed">
                   <h2>Smíšené třídy § 16 odst. 9 a ZŠ speciální <HelpHint text="Podle metodiky se tyto třídy posuzují samostatně podle převažujícího oboru vzdělání. Pokud ve třídě převažuje obor 79-01-C/01, použijí se řádky B9 až B10. Pokud převažuje 79-01-B/01 nebo je počet žáků shodný, použijí se řádky B26 až B28." /></h2>
-                  <p className="muted-text">Modelový postup odpovídá schématu metodiky: A. vstupní údaje, B. průměrný počet žáků, C. přiřazení pásma, D. dílčí a celkový výsledek.</p>
+                  <p className="muted-text">
+                    Přehled v tabulkách: každý řádek je jeden obor (C/01 běžná ZŠ, B/01 ZŠ speciální). Sloupce vedou od vstupů přes průměr a pásmo až po dílčí PHmax; dole je součet za stupeň.
+                  </p>
 
-                  <div className="mixed-module__stages">
-                    <div className="mixed-module__stage subcard subcard--input">
-                      <h3 className="mixed-module__stage-title">1. stupeň</h3>
-                      <p className="mixed-module__stage-lead muted-text">Vstupy podle převažujícího oboru (B9/B26)</p>
-                      <div className="mixed-module__inputs">
-                        <NumberField label="Žáci · převaha oboru 79-01-C/01" value={mixedMethodFirstZsPupils} onChange={setMixedMethodFirstZsPupils} />
-                        <NumberField label="Třídy · převaha oboru 79-01-C/01" value={mixedMethodFirstZsClasses} onChange={setMixedMethodFirstZsClasses} />
-                        <NumberField label="Žáci · převaha oboru 79-01-B/01 (ZŠ spec.)" value={mixedMethodFirstSpecialPupils} onChange={setMixedMethodFirstSpecialPupils} />
-                        <NumberField label="Třídy · převaha oboru 79-01-B/01 (ZŠ spec.)" value={mixedMethodFirstSpecialClasses} onChange={setMixedMethodFirstSpecialClasses} />
-                      </div>
-
-                      <div className="mixed-module__bands">
-                        <ResultCard label="Průměr · 79-01-C/01" value={round2(mixedMethodFirstZsAvg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax · 1. st. (B9)" value={`${mixedMethodFirstZsBand.label} / ${mixedMethodFirstZsBand.value}`} tone="primary" />
-                        <ResultCard label="Průměr · 79-01-B/01" value={round2(mixedMethodFirstSpecialAvg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax · 1. st. ZŠ spec. (B26)" value={`${mixedMethodFirstSpecialBand.label} / ${mixedMethodFirstSpecialBand.value}`} tone="primary" />
-                      </div>
-
-                      <div className="mixed-module__totals">
-                        <ResultCard label="Výsledek · 1. st., 79-01-C/01" value={mixedMethodFirstZsResult} tone="success" />
-                        <ResultCard label="Výsledek · 1. st., 79-01-B/01" value={mixedMethodFirstSpecialResult} tone="success" />
-                        <ResultCard label="PHmax · 1. stupeň celkem" value={mixedMethodFirstTotal} tone="success" />
-                      </div>
-                    </div>
-
-                    <div className="mixed-module__stage subcard subcard--input">
-                      <h3 className="mixed-module__stage-title">2. stupeň</h3>
-                      <p className="mixed-module__stage-lead muted-text">Vstupy podle převažujícího oboru (B10/B27)</p>
-                      <div className="mixed-module__inputs">
-                        <NumberField label="Žáci · převaha oboru 79-01-C/01" value={mixedMethodSecondZsPupils} onChange={setMixedMethodSecondZsPupils} />
-                        <NumberField label="Třídy · převaha oboru 79-01-C/01" value={mixedMethodSecondZsClasses} onChange={setMixedMethodSecondZsClasses} />
-                        <NumberField label="Žáci · převaha oboru 79-01-B/01 (ZŠ spec.)" value={mixedMethodSecondSpecialPupils} onChange={setMixedMethodSecondSpecialPupils} />
-                        <NumberField label="Třídy · převaha oboru 79-01-B/01 (ZŠ spec.)" value={mixedMethodSecondSpecialClasses} onChange={setMixedMethodSecondSpecialClasses} />
-                      </div>
-
-                      <div className="mixed-module__bands">
-                        <ResultCard label="Průměr · 79-01-C/01" value={round2(mixedMethodSecondZsAvg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax · 2. st. (B10)" value={`${mixedMethodSecondZsBand.label} / ${mixedMethodSecondZsBand.value}`} tone="primary" />
-                        <ResultCard label="Průměr · 79-01-B/01" value={round2(mixedMethodSecondSpecialAvg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax · 2. st. ZŠ spec. (B27)" value={`${mixedMethodSecondSpecialBand.label} / ${mixedMethodSecondSpecialBand.value}`} tone="primary" />
-                      </div>
-
-                      <div className="mixed-module__totals">
-                        <ResultCard label="Výsledek · 2. st., 79-01-C/01" value={mixedMethodSecondZsResult} tone="success" />
-                        <ResultCard label="Výsledek · 2. st., 79-01-B/01" value={mixedMethodSecondSpecialResult} tone="success" />
-                        <ResultCard label="PHmax · 2. stupeň celkem" value={mixedMethodSecondTotal} tone="success" />
-                      </div>
-                    </div>
+                  <div className="mixed-module__tables">
+                    <MixedStageTable
+                      stageTitle="1. stupeň"
+                      methodNote="Metodika: řádky B9 (obor 79-01-C/01) a B26 (obor 79-01-B/01), 1. stupeň."
+                      zsPupils={mixedMethodFirstZsPupils}
+                      zsClasses={mixedMethodFirstZsClasses}
+                      zsAvg={mixedMethodFirstZsAvg}
+                      zsBand={mixedMethodFirstZsBand}
+                      zsResult={mixedMethodFirstZsResult}
+                      specPupils={mixedMethodFirstSpecialPupils}
+                      specClasses={mixedMethodFirstSpecialClasses}
+                      specAvg={mixedMethodFirstSpecialAvg}
+                      specBand={mixedMethodFirstSpecialBand}
+                      specResult={mixedMethodFirstSpecialResult}
+                      stageTotal={mixedMethodFirstTotal}
+                      setZsPupils={setMixedMethodFirstZsPupils}
+                      setZsClasses={setMixedMethodFirstZsClasses}
+                      setSpecPupils={setMixedMethodFirstSpecialPupils}
+                      setSpecClasses={setMixedMethodFirstSpecialClasses}
+                      emphasizeEmpty={validationHighlight}
+                    />
+                    <MixedStageTable
+                      stageTitle="2. stupeň"
+                      methodNote="Metodika: řádky B10 (obor 79-01-C/01) a B27 (obor 79-01-B/01), 2. stupeň."
+                      zsPupils={mixedMethodSecondZsPupils}
+                      zsClasses={mixedMethodSecondZsClasses}
+                      zsAvg={mixedMethodSecondZsAvg}
+                      zsBand={mixedMethodSecondZsBand}
+                      zsResult={mixedMethodSecondZsResult}
+                      specPupils={mixedMethodSecondSpecialPupils}
+                      specClasses={mixedMethodSecondSpecialClasses}
+                      specAvg={mixedMethodSecondSpecialAvg}
+                      specBand={mixedMethodSecondSpecialBand}
+                      specResult={mixedMethodSecondSpecialResult}
+                      stageTotal={mixedMethodSecondTotal}
+                      setZsPupils={setMixedMethodSecondZsPupils}
+                      setZsClasses={setMixedMethodSecondZsClasses}
+                      setSpecPupils={setMixedMethodSecondSpecialPupils}
+                      setSpecClasses={setMixedMethodSecondSpecialClasses}
+                      emphasizeEmpty={validationHighlight}
+                    />
                   </div>
 
-                  <div className="mixed-module__footer">
-                    <ResultCard label="PHmax – smíšené třídy 1. stupeň" value={mixedMethodFirstTotal} tone="success" />
-                    <ResultCard label="PHmax – smíšené třídy 2. stupeň" value={mixedMethodSecondTotal} tone="success" />
-                    <ResultCard label="PHmax – smíšené třídy celkem" value={mixedMethodTotal} tone="success" />
+                  <div className="mixed-totals-bar" role="group" aria-label="Souhrn PHmax – smíšené třídy">
+                    <div className="mixed-totals-bar__cell">
+                      <span className="mixed-totals-bar__label">1. stupeň</span>
+                      <span className="mixed-totals-bar__value">{mixedMethodFirstTotal}</span>
+                    </div>
+                    <div className="mixed-totals-bar__cell">
+                      <span className="mixed-totals-bar__label">2. stupeň</span>
+                      <span className="mixed-totals-bar__value">{mixedMethodSecondTotal}</span>
+                    </div>
+                    <div className="mixed-totals-bar__cell mixed-totals-bar__cell--grand">
+                      <span className="mixed-totals-bar__label">Celkem – smíšené třídy</span>
+                      <span className="mixed-totals-bar__value">{mixedMethodTotal}</span>
+                    </div>
                   </div>
                 </section>
               )}
