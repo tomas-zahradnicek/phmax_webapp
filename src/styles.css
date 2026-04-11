@@ -930,6 +930,10 @@ input[type="radio"] {
 .section-card--module-minority::before { background: linear-gradient(90deg, #ea580c, #fb923c); }
 .section-card--module-minority::after { background: radial-gradient(circle, rgba(251,146,60,0.14), transparent 70%); }
 
+.stack > .grid.two > .section-card--module-minority {
+  grid-column: 1 / -1;
+}
+
 .section-card--module-gym { border-color: rgba(2, 132, 199, 0.18); }
 .section-card--module-gym::before { background: linear-gradient(90deg, #0369a1, #38bdf8); }
 .section-card--module-gym::after { background: radial-gradient(circle, rgba(56,189,248,0.14), transparent 70%); }
