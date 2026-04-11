@@ -53,7 +53,18 @@ type PhpWizardStep = "a" | "b" | "c" | "d";
 type PhpMethodMode = "three_year_avg" | "short_period";
 type Nv75Role = "ucitel" | "reditel";
 type Nv75School = "plavecka_skola";
-type ExampleKey = "" | "phmax_bezna_zs" | "phpmax_tri_roky" | "psychiatricka_nemocnice" | "smisene_tridy" | "pripravna_trida" | "mala_skola_pod_limitem" | "skola_s_odecty_phpmax" | "inkluzivni_skola";
+type ExampleKey =
+  | ""
+  | "priloha_uplna_zs_sec16"
+  | "priloha_zs_1st_sec16"
+  | "phmax_bezna_zs"
+  | "phpmax_tri_roky"
+  | "psychiatricka_nemocnice"
+  | "smisene_tridy"
+  | "pripravna_trida"
+  | "mala_skola_pod_limitem"
+  | "skola_s_odecty_phpmax"
+  | "inkluzivni_skola";
 type WizardChoice = "" | "php_small" | "php_deductions" | "ph_inclusion" | "ph_psych" | "ph_mixed" | "ph_prep";
 type DataMode = "own" | "example";
 
@@ -569,8 +580,20 @@ export default function App() {
   const mixedMethodSecondTotal = round2(mixedMethodSecondZsResult + mixedMethodSecondSpecialResult);
   const mixedMethodTotal = round2(mixedMethodFirstTotal + mixedMethodSecondTotal);
 
+  const hasMixedMethodTableData =
+    mixedMethodFirstZsPupils > 0 ||
+    mixedMethodFirstZsClasses > 0 ||
+    mixedMethodFirstSpecialPupils > 0 ||
+    mixedMethodFirstSpecialClasses > 0 ||
+    mixedMethodSecondZsPupils > 0 ||
+    mixedMethodSecondZsClasses > 0 ||
+    mixedMethodSecondSpecialPupils > 0 ||
+    mixedMethodSecondSpecialClasses > 0;
+
+  const mixedForTotal = round2(hasMixedMethodTableData ? mixedMethodTotal : mixedPhmax);
+
   const extrasPhmax = round2(prepClassPhmax + prepSpecialPhmax + par38Phmax + par41Phmax);
-  const totalPhmax = round2(basicPhmax + inclPhmax + psychPhmax + minorityPhmax + gymPhmax + specialPhmax + mixedPhmax + extrasPhmax);
+  const totalPhmax = round2(basicPhmax + inclPhmax + psychPhmax + minorityPhmax + gymPhmax + specialPhmax + mixedForTotal + extrasPhmax);
 
   const phaComputedRows = phaRows.map((row) => {
     const avg = row.classes > 0 ? row.pupils / row.classes : 0;
@@ -766,15 +789,49 @@ export default function App() {
 
 
   const loadExample = (example: ExampleKey) => {
-    setSelectedExample(example);
-    if (!example) return;
-    setDataMode("example");
+    if (!example) {
+      setSelectedExample("");
+      setDataMode("own");
+      return;
+    }
 
-    resetAll();
+    resetPhmax();
+    resetPha();
+    resetPhp();
+    resetNv75();
+    setWizardChoice("");
+    setDataMode("example");
+    setSelectedExample(example);
+    setTab("phmax");
+
+    if (example === "priloha_uplna_zs_sec16") {
+      setMode(
+        findModeBySections("basic_first", "basic_second", "sec16_first", "sec16_second")
+      );
+      setBasicType("full_more_than_2");
+      setBasic1Classes(10);
+      setBasic1Pupils(250);
+      setBasic2Classes(8);
+      setBasic2Pupils(225);
+      setIncl1Classes(5);
+      setIncl1Pupils(40);
+      setIncl2Classes(4);
+      setIncl2Pupils(32);
+      return;
+    }
+
+    if (example === "priloha_zs_1st_sec16") {
+      setMode(findModeBySections("school_variant_first_stage_only", "sec16_first"));
+      setBasicType("first_only_3");
+      setBasic1Classes(3);
+      setBasic1Pupils(30);
+      setIncl1Classes(1);
+      setIncl1Pupils(6);
+      return;
+    }
 
     if (example === "phmax_bezna_zs") {
       setMode(getInitialPreferredMode());
-      setTab("phmax");
       setBasicType("full_more_than_2");
       setBasic1Classes(10);
       setBasic1Pupils(250);
@@ -799,7 +856,6 @@ export default function App() {
 
     if (example === "psychiatricka_nemocnice") {
       setMode(findModeBySections("psych_groups"));
-      setTab("phmax");
       setPsychRows([
         { id: 1, kind: "psych1", mode: "higher_of_two", currentPupils: 7, currentClasses: 1, prevPupils: 6, prevClasses: 1 },
       ]);
@@ -808,7 +864,6 @@ export default function App() {
 
     if (example === "smisene_tridy") {
       setMode(findModeBySections("dominant_c_first"));
-      setTab("phmax");
       setMixedMethodFirstZsPupils(47);
       setMixedMethodFirstZsClasses(4);
       setMixedMethodFirstSpecialPupils(26);
@@ -819,7 +874,6 @@ export default function App() {
       setMixedMethodSecondSpecialClasses(4);
       return;
     }
-
 
     if (example === "mala_skola_pod_limitem") {
       setMode(getInitialPreferredMode());
@@ -851,7 +905,6 @@ export default function App() {
 
     if (example === "inkluzivni_skola") {
       setMode(findModeBySections("basic_first", "sec16_first"));
-      setTab("phmax");
       setBasic1Classes(6);
       setBasic1Pupils(120);
       setBasic2Classes(5);
@@ -866,7 +919,6 @@ export default function App() {
 
     if (example === "pripravna_trida") {
       setMode(findModeBySections("prep_class"));
-      setTab("phmax");
       setPrepClasses(1);
       setPrepChildren(12);
       setPrepSpecialClasses(1);
@@ -1301,10 +1353,28 @@ export default function App() {
                 onChange={(e) => loadExample(e.target.value as ExampleKey)}
               >
                 <option value="">Vyberte ukázkový příklad…</option>
-                <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
-                <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
-                <option value="smisene_tridy">PHmax – smíšené třídy</option>
-                <option value="pripravna_trida">PHmax – přípravná třída</option>
+                <optgroup label="Příloha – modelové postupy PHmax">
+                  <option value="priloha_uplna_zs_sec16">
+                    Úplná ZŠ + třídy § 16/9 (obě st., 934 h dle modelu A–D)
+                  </option>
+                  <option value="priloha_zs_1st_sec16">
+                    ZŠ jen 1. stupeň + § 16/9 (92 h dle modelu A–D)
+                  </option>
+                  <option value="smisene_tridy">
+                    Smíšené třídy § 16/9 + obory C/01 a B/01 (570 h, příloha)
+                  </option>
+                </optgroup>
+                <optgroup label="PHmax – další ukázky">
+                  <option value="phmax_bezna_zs">Běžná úplná ZŠ bez § 16/9 v datech (jen běžné třídy)</option>
+                  <option value="inkluzivni_skola">Inkluzivní škola (běžné + § 16/9, jiná čísla než v příloze)</option>
+                  <option value="psychiatricka_nemocnice">Škola při psychiatrické nemocnici</option>
+                  <option value="pripravna_trida">Přípravná třída</option>
+                </optgroup>
+                <optgroup label="PHPmax – ukázky">
+                  <option value="phpmax_tri_roky">Tříletý průměr + dílčí nezapočtení žáků</option>
+                  <option value="mala_skola_pod_limitem">Menší škola pod limitem PHPmax</option>
+                  <option value="skola_s_odecty_phpmax">Škola s vyššími odečty žáků</option>
+                </optgroup>
               </select>
             </div>
             <div className="hero-actions__group hero-actions__group--primary">
@@ -1334,8 +1404,9 @@ export default function App() {
           </div>
 
           <p className="muted-text hero__note">
-            Ukázkové příklady vycházejí z typických situací v metodice a z logiky jednotlivých výpočtů.
-            Po načtení je můžete upravit podle vlastní školy.
+            V první skupině jsou čísla z modelových postupů v metodické příloze (včetně smíšených tříd 570 h).
+            Ostatní ukázky doplňují typické situace; kde se liší od přílohy, je to u položky uvedeno.
+            Po načtení můžete vše upravit podle vlastní školy.
           </p>
           <p className="muted-text hero__legal-note">
             Právní a metodický podklad aplikace: Metodika stanovení PHmax, PHAmax a PHPmax pro základní vzdělávání, nařízení vlády č. 123/2018 Sb. a vyhláška č. 48/2005 Sb.
@@ -1903,7 +1974,7 @@ export default function App() {
                 <ResultCard label="Škola při psychiatrické nemocnici" value={psychPhmax} />
                 <ResultCard label="Jazyk menšiny" value={minorityPhmax} />
                 <ResultCard label="Víceletá gymnázia" value={gymPhmax} />
-                <ResultCard label="Smíšené třídy" value={mixedPhmax} />
+                <ResultCard label="Smíšené třídy" value={mixedForTotal} />
                 <ResultCard label="ZŠ speciální" value={specialPhmax} />
                 <ResultCard label="Samostatné položky" value={extrasPhmax} />
                 <ResultCard label="Výsledek PHmax" tone="success" value={totalPhmax} />
