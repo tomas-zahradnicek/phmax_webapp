@@ -934,6 +934,108 @@ input[type="radio"] {
 .section-card--module-gym::before { background: linear-gradient(90deg, #0369a1, #38bdf8); }
 .section-card--module-gym::after { background: radial-gradient(circle, rgba(56,189,248,0.14), transparent 70%); }
 
+.stack > .grid.two > .section-card--module-gym {
+  grid-column: 1 / -1;
+}
+
+.gym-module__lead {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  max-width: 72ch;
+}
+
+.gym-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 0 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(2, 132, 199, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.section-card--module-gym .table.table--gym {
+  display: table;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+  margin: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.section-card--module-gym .table.table--gym thead th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 800;
+  color: #64748b;
+  padding: 10px 10px;
+  white-space: normal;
+  line-height: 1.25;
+  hyphens: auto;
+}
+
+.section-card--module-gym .table.table--gym tbody th,
+.section-card--module-gym .table.table--gym tbody td {
+  white-space: normal;
+  vertical-align: middle;
+  padding: 10px 10px;
+}
+
+.section-card--module-gym .table.table--gym td:nth-child(1) {
+  min-width: 10.5rem;
+  max-width: 18rem;
+}
+
+.section-card--module-gym .table.table--gym td:nth-child(1) select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.section-card--module-gym .table.table--gym td:nth-child(2) input,
+.section-card--module-gym .table.table--gym td:nth-child(3) input {
+  width: 100%;
+  max-width: 5rem;
+  min-width: 3rem;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.section-card--module-gym .table.table--gym td:nth-child(4),
+.section-card--module-gym .table.table--gym td:nth-child(5),
+.section-card--module-gym .table.table--gym td:nth-child(6),
+.section-card--module-gym .table.table--gym td:nth-child(7) {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #334155;
+}
+
+.section-card--module-gym .table.table--gym td:nth-child(8) {
+  width: 3rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.gym-module__add {
+  margin-top: 4px;
+}
+
+.gym-table__sr-head {
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+@media (min-width: 900px) {
+  .gym-table-scroll {
+    overflow-x: visible;
+  }
+}
+
 .section-card--module-mixed { border-color: rgba(217, 119, 6, 0.18); }
 .section-card--module-mixed::before { background: linear-gradient(90deg, #d97706, #fbbf24); }
 .section-card--module-mixed::after { background: radial-gradient(circle, rgba(251,191,36,0.14), transparent 70%); }

@@ -1730,12 +1730,23 @@ export default function App() {
               {hasSection("gym_groups") && (
                 <section className="card section-card section-card--module section-card--module-gym" data-section="gym">
                   <h2>Nižší ročníky víceletých gymnázií</h2>
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Typ</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHmax / třída</th><th>Mezisoučet</th><th></th>
-                      </tr>
-                    </thead>
+                  <p className="muted-text gym-module__lead">
+                    Každý řádek je jeden typ nižšího ročníku gymnázia. Zadejte třídy a žáci; průměr, pásmo a PHmax se dopočítají. Tabulka používá celou šířku karty – na velmi úzkém displeji se může zobrazit posuvník.
+                  </p>
+                  <div className="gym-table-scroll">
+                    <table className="table table--gym">
+                      <thead>
+                        <tr>
+                          <th scope="col">Typ gymnázia</th>
+                          <th scope="col">Třídy</th>
+                          <th scope="col">Žáci</th>
+                          <th scope="col">Průměr</th>
+                          <th scope="col">Pásmo</th>
+                          <th scope="col">PHmax / třída</th>
+                          <th scope="col">Mezisoučet</th>
+                          <th scope="col"><span className="gym-table__sr-head">Smazat</span></th>
+                        </tr>
+                      </thead>
                     <tbody>
                       {gymComputedRows.length === 0 ? (
                         <tr>
@@ -1761,8 +1772,9 @@ export default function App() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
-                  <button className="btn ghost" onClick={addGym}>Přidat třídu / řádek</button>
+                    </table>
+                  </div>
+                  <button type="button" className="btn ghost gym-module__add" onClick={addGym}>Přidat třídu / řádek</button>
                 </section>
               )}
 
