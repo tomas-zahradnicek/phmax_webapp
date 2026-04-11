@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   B13_MORE_THAN_2,
   B34_MAX_2,
@@ -971,13 +971,6 @@ export default function App() {
     win.print();
   };
 
-  const goToSection = (sectionId: string) => {
-    const element = document.querySelector(`[data-section="${sectionId}"]`);
-    if (element instanceof HTMLElement) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
   const validationIssues = (() => {
     const issues: { section: string; label: string }[] = [];
     if (tab === "phmax") {
@@ -999,6 +992,113 @@ export default function App() {
   const incompleteSections = new Set(validationIssues.map((item) => item.section)).size;
   const firstIssueSection = validationIssues[0]?.section ?? "";
   const hasIssue = (sectionId: string) => validationIssues.some((item) => item.section === sectionId);
+
+  const workspaceStickyRef = useRef<HTMLDivElement>(null);
+  const [activeScrollSection, setActiveScrollSection] = useState("");
+  const tabChangeSkipRef = useRef(true);
+
+  const goToSection = useCallback((sectionId: string) => {
+    const element = document.querySelector(`[data-section="${sectionId}"]`);
+    if (!element || !(element instanceof HTMLElement)) return;
+    const dock = workspaceStickyRef.current;
+    const offset = dock?.offsetHeight ?? 100;
+    const top = element.getBoundingClientRect().top + window.scrollY - offset - 12;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }, []);
+
+  const phmaxJumpSections = useMemo(() => {
+    const items: { id: string; label: string }[] = [
+      { id: "guide", label: "Rozcestník" },
+      { id: "setup", label: "Režim" },
+    ];
+    if (hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) {
+      items.push({ id: "basic", label: "Běžné třídy" });
+    }
+    if (hasSection("sec16_first") || hasSection("sec16_second")) items.push({ id: "sec16", label: "§ 16/9" });
+    if (hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) {
+      items.push({ id: "special", label: "ZŠ speciální" });
+    }
+    if (hasSection("psych_groups")) items.push({ id: "psych", label: "Psychiatrie" });
+    if (hasSection("minority_first")) items.push({ id: "minority", label: "Menšina" });
+    if (hasSection("gym_groups")) items.push({ id: "gym", label: "Gymnázia" });
+    if (hasSection("dominant_c_first") || hasSection("dominant_b_first")) items.push({ id: "mixed", label: "Smíšené" });
+    if (hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) {
+      items.push({ id: "extras", label: "Samostatné" });
+    }
+    items.push({ id: "phmax-summary", label: "Souhrn PHmax" });
+    return items;
+  }, [mode, visibleSections]);
+
+  const jumpSections = useMemo(() => {
+    if (tab === "pha") return [{ id: "pha", label: "PHAmax" }];
+    if (tab === "php") return [{ id: "php", label: "PHPmax" }];
+    return phmaxJumpSections;
+  }, [tab, phmaxJumpSections]);
+
+  useEffect(() => {
+    const updateActiveFromScroll = () => {
+      const dock = workspaceStickyRef.current;
+      const anchorY = (dock?.getBoundingClientRect().bottom ?? 100) + 6;
+      const candidates = Array.from(document.querySelectorAll<HTMLElement>("[data-section]"));
+      let best = "";
+      let bestScore = Infinity;
+      for (const el of candidates) {
+        const id = el.dataset.section;
+        if (!id) continue;
+        const r = el.getBoundingClientRect();
+        if (r.bottom < anchorY + 20) continue;
+        const score = Math.abs(r.top - anchorY);
+        if (score < bestScore) {
+          bestScore = score;
+          best = id;
+        }
+      }
+      if (best) setActiveScrollSection((prev) => (prev === best ? prev : best));
+    };
+
+    updateActiveFromScroll();
+    window.addEventListener("scroll", updateActiveFromScroll, { passive: true });
+    window.addEventListener("resize", updateActiveFromScroll);
+    return () => {
+      window.removeEventListener("scroll", updateActiveFromScroll);
+      window.removeEventListener("resize", updateActiveFromScroll);
+    };
+  }, [tab, mode, visibleSections]);
+
+  useEffect(() => {
+    const onFocusIn = (e: Event) => {
+      const t = e.target;
+      if (!(t instanceof HTMLElement)) return;
+      const sec = t.closest("[data-section]");
+      if (sec instanceof HTMLElement && sec.dataset.section) {
+        setActiveScrollSection(sec.dataset.section);
+      }
+    };
+    document.addEventListener("focusin", onFocusIn);
+    return () => document.removeEventListener("focusin", onFocusIn);
+  }, []);
+
+  useEffect(() => {
+    if (tabChangeSkipRef.current) {
+      tabChangeSkipRef.current = false;
+      return;
+    }
+    const targetId = tab === "phmax" ? "basic" : tab;
+    requestAnimationFrame(() => {
+      const el = (document.querySelector(`[data-section="${targetId}"]`) ??
+        document.querySelector(`[data-section="guide"]`)) as HTMLElement | null;
+      if (!el) return;
+      const dock = workspaceStickyRef.current;
+      const offset = dock?.getBoundingClientRect().height ?? 100;
+      const rect = el.getBoundingClientRect();
+      if (rect.top < offset + 12 || rect.bottom > window.innerHeight - 32) {
+        const top = rect.top + window.scrollY - offset - 12;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      }
+    });
+  }, [tab]);
+
+  const validationHighlight = validationIssues.length > 0;
 
   useEffect(() => {
     try {
@@ -1057,7 +1157,7 @@ export default function App() {
   };
 
   return (
-    <div className="app-shell app-shell--gradient">
+    <div className={`app-shell app-shell--gradient${validationHighlight ? " app-shell--validation-hint" : ""}`}>
       <div className="container container--app">
         <header className="hero hero--feature">
           <div className="hero__orb hero__orb--one" />
@@ -1256,35 +1356,51 @@ export default function App() {
           </section>
         )}
 
-        <div className="tabs tabs--sticky">
-          <button className={tab === "phmax" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("phmax")}>PHmax</button>
-          <button className={tab === "pha" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("pha")}>PHAmax</button>
-          <button className={tab === "php" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("php")}>PHPmax</button>
-        </div>
+        <div className="workspace-sticky" ref={workspaceStickyRef}>
+          <div className="tabs tabs--sticky">
+            <button type="button" className={tab === "phmax" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("phmax")}>PHmax</button>
+            <button type="button" className={tab === "pha" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("pha")}>PHAmax</button>
+            <button type="button" className={tab === "php" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("php")}>PHPmax</button>
+          </div>
 
-                <section className="card card--summary section-card section-card--live-results">
-          <h2 className="section-title">Aktuální přehled výsledků</h2>
-          <SectionLead>
-            Výsledky navazují na metodický postup A–D: vstupní údaje, výpočet průměru, určení pásma a výsledná hodnota. Každý modul se stanovuje samostatně.
-          </SectionLead>
-          <div className="results-panel__meta">
-            <span className="status-badge status-badge--neutral">Aktivní modul: {tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"}</span>
-            <span className={`status-badge ${incompleteSections > 0 ? "status-badge--warning" : "status-badge--ok"}`}>
-              {incompleteSections > 0 ? `Nevyplněné části: ${incompleteSections}` : "Všechny hlavní části jsou vyplněné"}
-            </span>
-            {firstIssueSection ? (
-              <button type="button" className="status-link" onClick={() => goToSection(firstIssueSection)}>
-                Přejít na první nevyplněnou část
-              </button>
+          <section className="card card--summary section-card section-card--live-results workspace-sticky__summary">
+            <h2 className="section-title">Aktuální přehled výsledků</h2>
+            <SectionLead>
+              Výsledky navazují na metodický postup A–D: vstupní údaje, výpočet průměru, určení pásma a výsledná hodnota. Každý modul se stanovuje samostatně.
+            </SectionLead>
+            <div className="results-panel__meta">
+              <span className="status-badge status-badge--neutral">Aktivní modul: {tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"}</span>
+              <span className={`status-badge ${incompleteSections > 0 ? "status-badge--warning" : "status-badge--ok"}`}>
+                {incompleteSections > 0 ? `Nevyplněné části: ${incompleteSections}` : "Všechny hlavní části jsou vyplněné"}
+              </span>
+              {firstIssueSection ? (
+                <button type="button" className="status-link" onClick={() => goToSection(firstIssueSection)}>
+                  Přejít na první nevyplněnou část
+                </button>
+              ) : null}
+            </div>
+            <div className="grid four workspace-sticky__stats">
+              <HeroStat label="Výsledek PHmax" value={totalPhmax} />
+              <HeroStat label="Výsledek PHAmax" value={totalPha} />
+              <HeroStat label="Výsledek PHPmax" value={totalPhp} />
+              <HeroStat label="Přehledový součet" value={round2(totalPhmax + totalPha + totalPhp)} />
+            </div>
+            {jumpSections.length > 1 ? (
+              <div className="section-jump-nav" role="navigation" aria-label="Skok na sekci výpočtu">
+                {jumpSections.map(({ id, label }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`section-jump-nav__btn${activeScrollSection === id ? " section-jump-nav__btn--active" : ""}`}
+                    onClick={() => goToSection(id)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             ) : null}
-          </div>
-          <div className="grid four">
-            <HeroStat label="Výsledek PHmax" value={totalPhmax} />
-            <HeroStat label="Výsledek PHAmax" value={totalPha} />
-            <HeroStat label="Výsledek PHPmax" value={totalPhp} />
-            <HeroStat label="Přehledový součet" value={round2(totalPhmax + totalPha + totalPhp)} />
-          </div>
-        </section>
+          </section>
+        </div>
 
 {tab === "phmax" && (
           <div className="stack">
@@ -1354,7 +1470,7 @@ export default function App() {
 
             <div className="grid two">
               {(hasSection("sec16_first") || hasSection("sec16_second")) && (
-                <section className="card section-card section-card--module section-card--module-support">
+                <section className="card section-card section-card--module section-card--module-support" data-section="sec16">
                   <h2>Třídy podle § 16 odst. 9</h2>
                   <div className="grid two">
                     {hasSection("sec16_first") && (
@@ -1388,7 +1504,7 @@ export default function App() {
               )}
 
               {(hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) && (
-              <section className="card section-card section-card--module section-card--module-special">
+              <section className="card section-card section-card--module section-card--module-special" data-section="special">
                 <h2>ZŠ speciální</h2>
                 <div className="grid two">
                   <NumberField label="I. díl 1. stupeň – třídy" value={special1Classes} onChange={setSpecial1Classes} />
@@ -1416,7 +1532,7 @@ export default function App() {
 
             <div className="grid two">
               {hasSection("psych_groups") && (
-                <section className="card section-card section-card--module section-card--module-psych">
+                <section className="card section-card section-card--module section-card--module-psych" data-section="psych">
                   <h2>Škola při psychiatrické nemocnici <HelpHint text="U této části se pracuje s aktuálním údajem nebo s vyšší hodnotou z aktuálního a předchozího údaje podle zvoleného režimu. Výsledek se pak určí podle příslušného pásma pro 1. stupeň, 2. stupeň nebo společnou výuku." /></h2>
                   <p className="muted-text">Najeďte na ikonu „i“ u nadpisu pro stručnou metodickou nápovědu.</p>
                   <table className="table">
@@ -1461,7 +1577,7 @@ export default function App() {
               )}
 
               {hasSection("minority_first") && (
-                <section className="card">
+                <section className="card section-card section-card--module section-card--module-minority" data-section="minority">
                   <h2>ZŠ s jazykem národnostní menšiny</h2>
                   <select value={minorityType} onChange={(e) => setMinorityType(e.target.value as keyof typeof B17_B21)}>
                     <option value="minority1">1 třída 1. stupně</option>
@@ -1506,7 +1622,7 @@ export default function App() {
 
             <div className="grid two">
               {hasSection("gym_groups") && (
-                <section className="card section-card section-card--module section-card--module-gym">
+                <section className="card section-card section-card--module section-card--module-gym" data-section="gym">
                   <h2>Nižší ročníky víceletých gymnázií</h2>
                   <table className="table">
                     <thead>
@@ -1545,7 +1661,7 @@ export default function App() {
               )}
 
               {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
-                <section className="card section-card section-card--module section-card--module-mixed">
+                <section className="card section-card section-card--module section-card--module-mixed" data-section="mixed">
                   <h2>Smíšené třídy § 16 odst. 9 a ZŠ speciální <HelpHint text="Podle metodiky se tyto třídy posuzují samostatně podle převažujícího oboru vzdělání. Pokud ve třídě převažuje obor 79-01-C/01, použijí se řádky B9 až B10. Pokud převažuje 79-01-B/01 nebo je počet žáků shodný, použijí se řádky B26 až B28." /></h2>
                   <p className="muted-text">Modelový postup odpovídá schématu metodiky: A. vstupní údaje, B. průměrný počet žáků, C. přiřazení pásma, D. dílčí a celkový výsledek.</p>
 
@@ -1610,7 +1726,7 @@ export default function App() {
             </div>
 
             {(hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) && (
-              <section className="card section-card section-card--module section-card--module-extras">
+              <section className="card section-card section-card--module section-card--module-extras" data-section="extras">
                 <h2>Samostatné položky PHmax</h2>
                 <div className="grid four">
                   {hasSection("prep_class") && (
@@ -1658,7 +1774,7 @@ export default function App() {
               <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax</button>
             </div>
 
-            <section className="card muted card--summary section-card section-card--summary-phmax">
+            <section className="card muted card--summary section-card section-card--summary-phmax" data-section="phmax-summary">
               <h2 className="section-title">Souhrn výsledků PHmax</h2>
               <div className="grid four">
                 <ResultCard label="Běžné třídy" value={basicPhmax} />
