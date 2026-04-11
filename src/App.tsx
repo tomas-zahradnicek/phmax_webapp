@@ -456,7 +456,7 @@ export default function App() {
     ["PHmax – výpočet podle typu tříd celkem", totalPhmax],
     ["PHAmax – asistenti pedagoga", totalPha],
     ["PHPmax – metodický výpočet – rozhodná hodnota", phpBaseValue],
-    ["PHPmax – metodický výpočet – vyloučené skupiny", phpExcludedTotal],
+    ["PHPmax – metodický výpočet – vyloučené třídy", phpExcludedTotal],
     ["PHPmax – metodický výpočet – očištěná hodnota", phpAdjustedValue],
     ["PHPmax – metodický výpočet celkem", totalPhp],
   ] as const;
@@ -715,7 +715,7 @@ export default function App() {
                     <tbody>
                       {psychComputedRows.length === 0 ? (
                         <tr>
-                          <td colSpan={9} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat řádek“.</td>
+                          <td colSpan={9} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
                         </tr>
                       ) : psychComputedRows.map((row) => (
                         <tr key={row.id}>
@@ -743,7 +743,7 @@ export default function App() {
                       ))}
                     </tbody>
                   </table>
-                  <button className="btn ghost" onClick={addPsych}>Přidat řádek</button>
+                  <button className="btn ghost" onClick={addPsych}>Přidat třídu / řádek</button>
                 </section>
               )}
 
@@ -795,7 +795,7 @@ export default function App() {
                     <tbody>
                       {gymComputedRows.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat řádek“.</td>
+                          <td colSpan={8} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
                         </tr>
                       ) : gymComputedRows.map((row) => (
                         <tr key={row.id}>
@@ -818,7 +818,7 @@ export default function App() {
                       ))}
                     </tbody>
                   </table>
-                  <button className="btn ghost" onClick={addGym}>Přidat řádek</button>
+                  <button className="btn ghost" onClick={addGym}>Přidat třídu / řádek</button>
                 </section>
               )}
 
@@ -834,7 +834,7 @@ export default function App() {
                     <tbody>
                       {mixedRows.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat řádek“.</td>
+                          <td colSpan={5} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
                         </tr>
                       ) : mixedRows.map((row) => (
                         <tr key={row.id}>
@@ -857,7 +857,7 @@ export default function App() {
                       ))}
                     </tbody>
                   </table>
-                  <button className="btn ghost" onClick={addMixed}>Přidat řádek</button>
+                  <button className="btn ghost" onClick={addMixed}>Přidat třídu / řádek</button>
                 </section>
               )}
             </div>
@@ -869,7 +869,7 @@ export default function App() {
                   {hasSection("prep_class") && (
                     <>
                       <NumberField label="Přípravné třídy – počet tříd" value={prepClasses} onChange={setPrepClasses} />
-                      <NumberField label="Přípravné třídy – počet dětí" value={prepChildren} onChange={setPrepChildren} />
+                      <NumberField label="Přípravné třídy – počet žáků" value={prepChildren} onChange={setPrepChildren} />
                       <ResultCard label="Přípravná třída" value={`${prepAvg < 10 ? "méně než 10" : "10 a více"} / ${prepPh}`} />
                       <ResultCard label="Mezisoučet" value={round2(prepClasses * prepPh)} />
                     </>
@@ -962,7 +962,7 @@ export default function App() {
               <tbody>
                 {phaComputedRows.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat řádek“.</td>
+                    <td colSpan={8} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
                   </tr>
                 ) : phaComputedRows.map((row) => (
                   <tr key={row.id}>
@@ -992,7 +992,7 @@ export default function App() {
               </tbody>
             </table>
             <div className="toolbar">
-              <button className="btn ghost" onClick={addPha}>Přidat řádek</button>
+              <button className="btn ghost" onClick={addPha}>Přidat třídu / řádek</button>
               <button className="btn ghost" onClick={resetPha}>Vymazat údaje PHAmax – asistenti pedagoga</button>
               <ResultCard label="PHAmax – asistenti pedagoga celkem" value={totalPha} />
             </div>
