@@ -71,6 +71,22 @@ function getNv75Reference(role: Nv75Role, school: Nv75School) {
   };
 }
 
+function createEmptyPsychRow(id: number): PsychRow {
+  return { id, kind: "psych1", mode: "higher_of_two", currentPupils: 0, currentClasses: 0, prevPupils: 0, prevClasses: 0 };
+}
+
+function createEmptyGymRow(id: number): GymRow {
+  return { id, kind: "gym8", classes: 0, pupils: 0 };
+}
+
+function createEmptyMixedRow(id: number): MixedRow {
+  return { id, stage: "first", majority: "zs", classes: 0, pupils: 0 };
+}
+
+function createEmptyPhaRow(id: number): PhaRow {
+  return { id, kind: "zs1", classes: 0, pupils: 0 };
+}
+
 export default function App() {
   const [tab, setTab] = useState<TabKey>("phmax");
   const [mode, setMode] = useState<CalculatorMode>(DEFAULT_MODE);
@@ -93,19 +109,17 @@ export default function App() {
   const hasSection = (section: FormSection) => visibleSections.includes(section);
 
   const [basicType, setBasicType] = useState<BasicType>("full_more_than_2");
-  const [basic1Classes, setBasic1Classes] = useState(10);
-  const [basic1Pupils, setBasic1Pupils] = useState(250);
-  const [basic2Classes, setBasic2Classes] = useState(8);
-  const [basic2Pupils, setBasic2Pupils] = useState(225);
+  const [basic1Classes, setBasic1Classes] = useState(0);
+  const [basic1Pupils, setBasic1Pupils] = useState(0);
+  const [basic2Classes, setBasic2Classes] = useState(0);
+  const [basic2Pupils, setBasic2Pupils] = useState(0);
 
   const [incl1Classes, setIncl1Classes] = useState(0);
   const [incl1Pupils, setIncl1Pupils] = useState(0);
   const [incl2Classes, setIncl2Classes] = useState(0);
   const [incl2Pupils, setIncl2Pupils] = useState(0);
 
-  const [psychRows, setPsychRows] = useState<PsychRow[]>([
-    { id: 1, kind: "psych1", mode: "higher_of_two", currentPupils: 7, currentClasses: 1, prevPupils: 6, prevClasses: 1 },
-  ]);
+  const [psychRows, setPsychRows] = useState<PsychRow[]>([]);
 
   const [minorityType, setMinorityType] = useState<keyof typeof B17_B21>("minority1");
   const [minority1Classes, setMinority1Classes] = useState(0);
@@ -113,13 +127,9 @@ export default function App() {
   const [minority2Classes, setMinority2Classes] = useState(0);
   const [minority2Pupils, setMinority2Pupils] = useState(0);
 
-  const [gymRows, setGymRows] = useState<GymRow[]>([
-    { id: 1, kind: "gym8", classes: 0, pupils: 0 },
-  ]);
+  const [gymRows, setGymRows] = useState<GymRow[]>([]);
 
-  const [mixedRows, setMixedRows] = useState<MixedRow[]>([
-    { id: 1, stage: "first", majority: "zs", classes: 0, pupils: 0 },
-  ]);
+  const [mixedRows, setMixedRows] = useState<MixedRow[]>([]);
 
   const [special1Classes, setSpecial1Classes] = useState(0);
   const [special1Pupils, setSpecial1Pupils] = useState(0);
@@ -137,13 +147,11 @@ export default function App() {
   const [p41First, setP41First] = useState(0);
   const [p41Second, setP41Second] = useState(0);
 
-  const [phaRows, setPhaRows] = useState<PhaRow[]>([
-    { id: 1, kind: "zs1", classes: 0, pupils: 0 },
-  ]);
+  const [phaRows, setPhaRows] = useState<PhaRow[]>([]);
 
-  const [phpYear1, setPhpYear1] = useState(260);
-  const [phpYear2, setPhpYear2] = useState(272);
-  const [phpYear3, setPhpYear3] = useState(281);
+  const [phpYear1, setPhpYear1] = useState(0);
+  const [phpYear2, setPhpYear2] = useState(0);
+  const [phpYear3, setPhpYear3] = useState(0);
 
   const [phpWizardStep, setPhpWizardStep] = useState<PhpWizardStep>("a");
   const [phpMethodMode, setPhpMethodMode] = useState<PhpMethodMode>("three_year_avg");
@@ -290,21 +298,151 @@ export default function App() {
   if (MODE_CONFIG[mode].group === "nv75" && nv75Role === "ucitel" && !nv75TeacherRangeValid) warnings.push("U NV 75/2005 musí být horní hranice učitele větší nebo rovna dolní hranici.");
   if (minorityType !== "minorityFull1" && minority2Classes > 0) warnings.push("U menšinové školy zadané jen pro 1. stupeň se 2. stupeň nezapočítá.");
 
-  const addMixed = () => setMixedRows((prev) => [...prev, { id: Date.now(), stage: "first", majority: "zs", classes: 1, pupils: 8 }]);
+  const addMixed = () => setMixedRows((prev) => [...prev, createEmptyMixedRow(Date.now())]);
   const updateMixed = (id: number, key: keyof MixedRow, value: string | number) => setMixedRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removeMixed = (id: number) => setMixedRows((prev) => prev.filter((r) => r.id !== id));
 
-  const addPha = () => setPhaRows((prev) => [...prev, { id: Date.now(), kind: "zs1", classes: 1, pupils: 6 }]);
+  const addPha = () => setPhaRows((prev) => [...prev, createEmptyPhaRow(Date.now())]);
   const updatePha = (id: number, key: keyof PhaRow, value: string | number) => setPhaRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removePha = (id: number) => setPhaRows((prev) => prev.filter((r) => r.id !== id));
 
-  const addPsych = () => setPsychRows((prev) => [...prev, { id: Date.now(), kind: "psych1", mode: "higher_of_two", currentPupils: 0, currentClasses: 0, prevPupils: 0, prevClasses: 0 }]);
+  const addPsych = () => setPsychRows((prev) => [...prev, createEmptyPsychRow(Date.now())]);
   const updatePsych = (id: number, key: keyof PsychRow, value: string | number) => setPsychRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removePsych = (id: number) => setPsychRows((prev) => prev.filter((r) => r.id !== id));
 
-  const addGym = () => setGymRows((prev) => [...prev, { id: Date.now(), kind: "gym8", classes: 1, pupils: 20 }]);
+  const addGym = () => setGymRows((prev) => [...prev, createEmptyGymRow(Date.now())]);
   const updateGym = (id: number, key: keyof GymRow, value: string | number) => setGymRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removeGym = (id: number) => setGymRows((prev) => prev.filter((r) => r.id !== id));
+
+
+  const resetPhmax = () => {
+    setBasicType("full_more_than_2");
+    setBasic1Classes(0);
+    setBasic1Pupils(0);
+    setBasic2Classes(0);
+    setBasic2Pupils(0);
+
+    setIncl1Classes(0);
+    setIncl1Pupils(0);
+    setIncl2Classes(0);
+    setIncl2Pupils(0);
+
+    setPsychRows([]);
+    setMinorityType("minority1");
+    setMinority1Classes(0);
+    setMinority1Pupils(0);
+    setMinority2Classes(0);
+    setMinority2Pupils(0);
+
+    setGymRows([]);
+    setMixedRows([]);
+
+    setSpecial1Classes(0);
+    setSpecial1Pupils(0);
+    setSpecial2Classes(0);
+    setSpecial2Pupils(0);
+    setSpecialIIClasses(0);
+    setSpecialIIPupils(0);
+
+    setPrepClasses(0);
+    setPrepChildren(0);
+    setPrepSpecialClasses(0);
+    setPrepSpecialChildren(0);
+    setP38First(0);
+    setP38Second(0);
+    setP41First(0);
+    setP41Second(0);
+  };
+
+  const resetPha = () => {
+    setPhaRows([]);
+  };
+
+  const resetPhp = () => {
+    setPhpWizardStep("a");
+    setPhpMethodMode("three_year_avg");
+    setPhpYear1(0);
+    setPhpYear2(0);
+    setPhpYear3(0);
+    setPhpExcludedAbroad(0);
+    setPhpExcludedForeignSchoolCz(0);
+    setPhpExcludedIndividual(0);
+    setPhpExcludedSchool(false);
+  };
+
+  const resetNv75 = () => {
+    setNv75Role("ucitel");
+    setNv75School("plavecka_skola");
+    setNv75TeacherMin(22);
+    setNv75TeacherMax(30);
+  };
+
+  const resetAll = () => {
+    resetPhmax();
+    resetPha();
+    resetPhp();
+    resetNv75();
+    setTab("phmax");
+  };
+
+  const loadDemoData = () => {
+    setMode(DEFAULT_MODE);
+    setTab("phmax");
+
+    setBasicType("full_more_than_2");
+    setBasic1Classes(10);
+    setBasic1Pupils(250);
+    setBasic2Classes(8);
+    setBasic2Pupils(225);
+
+    setIncl1Classes(0);
+    setIncl1Pupils(0);
+    setIncl2Classes(0);
+    setIncl2Pupils(0);
+
+    setPsychRows([
+      { id: 1, kind: "psych1", mode: "higher_of_two", currentPupils: 7, currentClasses: 1, prevPupils: 6, prevClasses: 1 },
+    ]);
+
+    setMinorityType("minority1");
+    setMinority1Classes(0);
+    setMinority1Pupils(0);
+    setMinority2Classes(0);
+    setMinority2Pupils(0);
+
+    setGymRows([createEmptyGymRow(1)]);
+    setMixedRows([createEmptyMixedRow(1)]);
+
+    setSpecial1Classes(0);
+    setSpecial1Pupils(0);
+    setSpecial2Classes(0);
+    setSpecial2Pupils(0);
+    setSpecialIIClasses(0);
+    setSpecialIIPupils(0);
+
+    setPrepClasses(0);
+    setPrepChildren(0);
+    setPrepSpecialClasses(0);
+    setPrepSpecialChildren(0);
+    setP38First(0);
+    setP38Second(0);
+    setP41First(0);
+    setP41Second(0);
+
+    setPhaRows([createEmptyPhaRow(1)]);
+
+    setPhpWizardStep("a");
+    setPhpMethodMode("three_year_avg");
+    setPhpYear1(260);
+    setPhpYear2(272);
+    setPhpYear3(281);
+    setPhpExcludedAbroad(0);
+    setPhpExcludedForeignSchoolCz(0);
+    setPhpExcludedIndividual(0);
+    setPhpExcludedSchool(false);
+
+    resetNv75();
+  };
 
   const summaryRows = [
     ["Běžné třídy ZŠ", basicPhmax],
@@ -375,10 +513,12 @@ export default function App() {
           <p>
             Vite + React + TypeScript. Aplikace obsahuje formuláře pro běžné třídy, § 16 odst. 9,
             ZŠ speciální, menšinové školy, psychiatrickou nemocnici, víceletá gymnázia, PHAmax,
-            PHPmax v metodickém rozpadu A–D a samostatný orientační panel pro NV 75/2005.
+            PHPmax v metodickém rozpadu A–D, resety po jednotlivých záložkách a samostatný orientační panel pro NV 75/2005.
           </p>
           <div className="toolbar">
             <button className="btn ghost" onClick={() => window.print()}>Tisk</button>
+            <button className="btn ghost" onClick={loadDemoData}>Načíst ukázková data</button>
+            <button className="btn ghost" onClick={resetAll}>Reset vše</button>
             <button className="btn ghost" onClick={handleExportCsv}>Export CSV</button>
             <button className="btn" onClick={handleExportJson}>Export JSON</button>
           </div>
@@ -438,6 +578,10 @@ export default function App() {
                 <NumberField label="Horní hranice" value={nv75TeacherMax} onChange={setNv75TeacherMax} />
               </div>
             )}
+
+            <div className="toolbar">
+              <button className="btn ghost" onClick={resetNv75}>Reset NV 75/2005</button>
+            </div>
 
             <div className="grid three">
               <ResultCard label="Reference" value={nv75Reference.label} />
@@ -569,7 +713,11 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {psychComputedRows.map((row) => (
+                      {psychComputedRows.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="muted-text">Zatím není přidána žádná skupina.</td>
+                        </tr>
+                      ) : psychComputedRows.map((row) => (
                         <tr key={row.id}>
                           <td>
                             <select value={row.kind} onChange={(e) => updatePsych(row.id, "kind", e.target.value)}>
@@ -645,7 +793,11 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {gymComputedRows.map((row) => (
+                      {gymComputedRows.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="muted-text">Zatím není přidána žádná skupina.</td>
+                        </tr>
+                      ) : gymComputedRows.map((row) => (
                         <tr key={row.id}>
                           <td>
                             <select value={row.kind} onChange={(e) => updateGym(row.id, "kind", e.target.value)}>
@@ -680,7 +832,11 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {mixedRows.map((row) => (
+                      {mixedRows.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="muted-text">Zatím není přidána žádná skupina.</td>
+                        </tr>
+                      ) : mixedRows.map((row) => (
                         <tr key={row.id}>
                           <td>
                             <select value={row.stage} onChange={(e) => updateMixed(row.id, "stage", e.target.value)}>
@@ -773,6 +929,10 @@ export default function App() {
               </section>
             )}
 
+            <div className="toolbar">
+              <button className="btn ghost" onClick={resetPhmax}>Reset PHmax</button>
+            </div>
+
             <section className="card muted">
               <h2>Souhrn PHmax</h2>
               <div className="grid four">
@@ -800,7 +960,11 @@ export default function App() {
                 </tr>
               </thead>
               <tbody>
-                {phaComputedRows.map((row) => (
+                {phaComputedRows.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="muted-text">Zatím není přidána žádná skupina.</td>
+                  </tr>
+                ) : phaComputedRows.map((row) => (
                   <tr key={row.id}>
                     <td>
                       <select value={row.kind} onChange={(e) => updatePha(row.id, "kind", e.target.value)}>
@@ -829,6 +993,7 @@ export default function App() {
             </table>
             <div className="toolbar">
               <button className="btn ghost" onClick={addPha}>Přidat skupinu</button>
+              <button className="btn ghost" onClick={resetPha}>Reset PHAmax</button>
               <ResultCard label="PHAmax celkem" value={totalPha} />
             </div>
           </section>
@@ -854,6 +1019,10 @@ export default function App() {
               <button className={phpWizardStep === "d" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("d")}>
                 D. Výklad
               </button>
+            </div>
+
+            <div className="toolbar">
+              <button className="btn ghost" onClick={resetPhp}>Reset PHPmax</button>
             </div>
 
             <div className="checks">
