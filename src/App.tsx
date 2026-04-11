@@ -46,7 +46,7 @@ type PhpWizardStep = "a" | "b" | "c" | "d";
 type PhpMethodMode = "three_year_avg" | "short_period";
 type Nv75Role = "ucitel" | "reditel";
 type Nv75School = "plavecka_skola";
-type ExampleKey = "" | "phmax_bezna_zs" | "phpmax_tri_roky" | "psychiatricka_nemocnice" | "smisene_tridy" | "pripravna_trida";
+type ExampleKey = "" | "phmax_bezna_zs" | "phpmax_tri_roky" | "psychiatricka_nemocnice" | "smisene_tridy" | "pripravna_trida" | "mala_skola_pod_limitem" | "skola_s_odecty_phpmax" | "inkluzivni_skola";
 
 function clampNonNegative(value: number) {
   return Math.max(0, Number.isFinite(value) ? value : 0);
@@ -518,6 +518,47 @@ export default function App() {
       return;
     }
 
+
+    if (example === "mala_skola_pod_limitem") {
+      setTab("php");
+      setPhpWizardStep("a");
+      setPhpMethodMode("three_year_avg");
+      setPhpYear1(120);
+      setPhpYear2(130);
+      setPhpYear3(125);
+      setPhpExcludedAbroad(0);
+      setPhpExcludedForeignSchoolCz(0);
+      setPhpExcludedIndividual(0);
+      return;
+    }
+
+    if (example === "skola_s_odecty_phpmax") {
+      setTab("php");
+      setPhpWizardStep("a");
+      setPhpMethodMode("three_year_avg");
+      setPhpYear1(300);
+      setPhpYear2(310);
+      setPhpYear3(305);
+      setPhpExcludedAbroad(15);
+      setPhpExcludedForeignSchoolCz(10);
+      setPhpExcludedIndividual(5);
+      return;
+    }
+
+    if (example === "inkluzivni_skola") {
+      setTab("phmax");
+      setBasic1Classes(6);
+      setBasic1Pupils(120);
+      setBasic2Classes(5);
+      setBasic2Pupils(110);
+
+      setIncl1Classes(2);
+      setIncl1Pupils(20);
+      setIncl2Classes(1);
+      setIncl2Pupils(10);
+      return;
+    }
+
     if (example === "pripravna_trida") {
       setTab("phmax");
       setPrepClasses(1);
@@ -610,6 +651,9 @@ export default function App() {
                 <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
                 <option value="smisene_tridy">PHmax – smíšené třídy</option>
                 <option value="pripravna_trida">PHmax – přípravná třída a přípravný stupeň ZŠS</option>
+                <option value="mala_skola_pod_limitem">PHPmax – malá škola pod limitem</option>
+                <option value="skola_s_odecty_phpmax">PHPmax – škola s odečty žáků</option>
+                <option value="inkluzivni_skola">PHmax – škola s inkluzí (§ 16)</option>
               </select>
             </div>
             <button className="btn ghost" onClick={resetAll}>Vymazat všechny údaje</button>
