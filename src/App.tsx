@@ -121,15 +121,56 @@ function createEmptyPhaRow(id: number): PhaRow {
 
 
 const GLOSSARY_TERMS = [
-  { term: "PHmax", description: "Maximální počet hodin přímé pedagogické činnosti financovaný podle typu tříd a dalších částí školy." },
-  { term: "PHAmax", description: "Maximální rozsah podpory asistenta pedagoga podle příslušných kategorií tříd." },
-  { term: "PHPmax", description: "Maximální rozsah poradenských hodin financovaný podle rozhodného počtu žáků a metodických pravidel." },
-  { term: "Rozhodná hodnota", description: "Výchozí hodnota, ze které se v metodice počítá další zařazení nebo výsledek." },
-  { term: "Očištěná hodnota", description: "Hodnota po odečtení žáků, kteří se do výpočtu nezapočítávají." },
-  { term: "Pásmo", description: "Interval v tabulce, do kterého výsledek spadá a podle kterého se určí hodnota." },
-  { term: "§ 16 odst. 9", description: "Třídy nebo vzdělávání podle speciálního režimu podle školského zákona." },
-  { term: "Přípravná třída", description: "Součást výpočtu PHmax, kde se pracuje s počtem dětí v přípravné třídě." },
-  { term: "Přípravný stupeň ZŠS", description: "Samostatně posuzovaná část základní školy speciální s vlastním pravidlem výpočtu." },
+  {
+    term: "PHmax",
+    description:
+      "Hodnota PHmax představuje maximální týdenní počet hodin vyučování v rozsahu podle rámcového vzdělávacího programu financovaný ze státního rozpočtu.",
+  },
+  {
+    term: "PHAmax",
+    description:
+      "Hodnota PHAmax představuje maximální týdenní počet hodin přímé pedagogické činnosti asistenta pedagoga financovaný ze státního rozpočtu ve školách a třídách zřízených podle § 16 odst. 9 školského zákona, speciálních a ve třídách přípravného stupně základní školy speciální.",
+  },
+  {
+    term: "PHPmax",
+    description:
+      "Hodnota PHPmax představuje maximální týdenní počet hodin přímé pedagogické činnosti zajišťované psychologem, speciálním pedagogem nebo sociálním pedagogem financovaný ze státního rozpočtu v základní škole v závislosti na průměrném počtu žáků.",
+  },
+  {
+    term: "Průměrný počet žáků ve třídě",
+    description:
+      "Základní vstup pro výpočet PHmax. Určuje se samostatně pro příslušnou charakteristiku třídy a podle něj se přiřazuje hodnota PHmax na 1 třídu.",
+  },
+  {
+    term: "Pásmo pro určení PHmax",
+    description:
+      "Pásmo se přiřadí podle průměrného počtu žáků ve třídě. Na jeho základě se určí hodnota PHmax pro danou charakteristiku třídy.",
+  },
+  {
+    term: "Třída zřízená podle § 16 odst. 9 školského zákona",
+    description:
+      "Pro třídy 16/9 se hodnota PHmax i PHAmax stanoví odděleně od ostatních tříd. V případě společné výuky žáků 1. a 2. stupně v jedné třídě se použijí hodnoty pro 2. stupeň.",
+  },
+  {
+    term: "Přípravná třída základní školy",
+    description:
+      "Hodnoty PHmax pro přípravnou třídu základní školy se počítají samostatně. Při více přípravných třídách se vypočte průměrný počet dětí v přípravné třídě a podle něj se stanoví hodnota PHmax.",
+  },
+  {
+    term: "Třída přípravného stupně základní školy speciální",
+    description:
+      "Hodnoty PHmax a PHAmax pro třídy přípravného stupně základní školy speciální se počítají samostatně. Při více třídách se vychází z průměrného počtu dětí v těchto třídách.",
+  },
+  {
+    term: "Žák vzdělávaný podle § 38 školského zákona",
+    description:
+      "Žák vzdělávaný podle § 38 školského zákona se nezapočítává do počtu žáků ve třídě rozhodného pro stanovení výše PHmax. Celková výše PHmax školy se však za každého takového žáka zvyšuje samostatně.",
+  },
+  {
+    term: "Žák vzdělávaný podle § 41 školského zákona",
+    description:
+      "Žák vzdělávaný podle § 41 školského zákona se nezapočítává do počtu žáků ve třídě rozhodného pro stanovení výše PHmax. Celková výše PHmax školy se za každého takového žáka zvyšuje samostatně.",
+  },
 ] as const;
 
 function buildShareText(data: {
@@ -1006,35 +1047,51 @@ export default function App() {
             </div>
           </div>
 
-          <div className="toolbar toolbar--hero">
-            <button className="btn ghost btn--light" onClick={() => window.print()}>Tisk</button>
-            <div className="field field--hero-select">
-              <span className="field__label field__label--hero">Ukázkový příklad</span>
-              <select value={selectedExample} onChange={(e) => loadExample(e.target.value as ExampleKey)}>
-                <option value="">Vyberte ukázkový příklad…</option>
-                <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
-                <option value="phpmax_tri_roky">PHPmax – tříletý průměr a odečty</option>
-                <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
-                <option value="smisene_tridy">PHmax – smíšené třídy</option>
-                <option value="pripravna_trida">PHmax – přípravná třída a přípravný stupeň ZŠS</option>
-                <option value="mala_skola_pod_limitem">PHPmax – malá škola pod limitem</option>
-                <option value="skola_s_odecty_phpmax">PHPmax – škola s odečty žáků</option>
-                <option value="inkluzivni_skola">PHmax – škola s inkluzí (§ 16)</option>
-              </select>
+          <div className="hero-actions">
+            <div className="hero-actions__row">
+              <div className="field field--hero-select field--hero-select-compact">
+                <span className="field__label field__label--hero">Ukázkový příklad</span>
+                <select value={selectedExample} onChange={(e) => loadExample(e.target.value as ExampleKey)}>
+                  <option value="">Vyberte ukázkový příklad…</option>
+                  <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
+                  <option value="phpmax_tri_roky">PHPmax – tříletý průměr a odečty</option>
+                  <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
+                  <option value="smisene_tridy">PHmax – smíšené třídy</option>
+                  <option value="pripravna_trida">PHmax – přípravná třída a přípravný stupeň ZŠS</option>
+                  <option value="mala_skola_pod_limitem">PHPmax – malá škola pod limitem</option>
+                  <option value="skola_s_odecty_phpmax">PHPmax – škola s odečty žáků</option>
+                  <option value="inkluzivni_skola">PHmax – škola s inkluzí (§ 16)</option>
+                </select>
+              </div>
+
+              <div className="hero-actions__group">
+                <button className="btn btn--compact btn--light" onClick={() => window.print()}>Tisk</button>
+                <button className="btn btn--compact btn--soft" onClick={saveSnapshotManually}>Uložit</button>
+                <button className="btn btn--compact btn--soft" onClick={restoreSnapshot}>Obnovit</button>
+                <button className="btn btn--compact btn--soft" onClick={() => setGlossaryOpen(true)}>Slovníček</button>
+              </div>
             </div>
-            <button className="btn ghost" onClick={saveSnapshotManually}>Uložit rozpracované údaje</button>
-            <button className="btn ghost" onClick={restoreSnapshot}>Obnovit poslední verzi</button>
-            <button className="btn ghost" onClick={clearStoredSnapshot}>Vymazat uložená data</button>
-            <button className="btn ghost" onClick={resetAll}>Vymazat všechny údaje</button>
-            <button className="btn ghost" onClick={() => setGlossaryOpen(true)}>Slovníček pojmů</button>
-            <button className="btn ghost" onClick={handleExportCsv}>Export CSV</button>
-            <button className="btn ghost" onClick={copySummaryToClipboard}>Kopírovat shrnutí</button>
-            <button className="btn ghost" onClick={printSummaryWindow}>Tisk shrnutí</button>
+
+            <div className="hero-actions__row hero-actions__row--secondary">
+              <div className="hero-actions__group hero-actions__group--meta">
+                <button className="btn btn--compact btn--ghost-muted" onClick={clearStoredSnapshot}>Vymazat uložená data</button>
+                <button className="btn btn--compact btn--ghost-muted" onClick={resetAll}>Vymazat všechny údaje</button>
+              </div>
+
+              <div className="hero-actions__group hero-actions__group--exports">
+                <button className="btn btn--compact btn--soft" onClick={handleExportCsv}>CSV</button>
+                <button className="btn btn--compact btn--soft" onClick={copySummaryToClipboard}>Kopírovat shrnutí</button>
+                <button className="btn btn--compact btn--soft" onClick={printSummaryWindow}>Tisk shrnutí</button>
+              </div>
+            </div>
           </div>
 
           <p className="muted-text hero__note">
             Ukázkové příklady vycházejí z typických situací v metodice a z logiky jednotlivých výpočtů.
             Po načtení je můžete upravit podle vlastní školy.
+          </p>
+          <p className="muted-text hero__legal-note">
+            Právní a metodický podklad aplikace: Metodika stanovení PHmax, PHAmax a PHPmax pro základní vzdělávání, nařízení vlády č. 123/2018 Sb. a vyhláška č. 48/2005 Sb.
           </p>
           <div className="hero-status">
             <div className="hero-status__item"><strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.</div>
@@ -1775,7 +1832,7 @@ export default function App() {
               <div className="glossary-modal__head">
                 <div>
                   <h2 className="section-title">Slovníček pojmů</h2>
-                  <p className="muted-text">Krátké vysvětlení pojmů, které se v aplikaci opakují.</p>
+                  <p className="muted-text">Pojmy jsou popsány podle metodiky a navazujících právních předpisů, ze kterých kalkulačka vychází.</p>
                 </div>
                 <button type="button" className="icon-btn" onClick={() => setGlossaryOpen(false)}>✕</button>
               </div>
