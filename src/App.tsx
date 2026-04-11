@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   B13_MORE_THAN_2,
   B34_MAX_2,
@@ -17,12 +17,11 @@ import {
   round2,
   exportCsv,
   BasicType,
-  MixedRow,
-  PhaRow,
-  PsychRow,
-  GymRow,
 } from "./phmax-zs-logic";
+
 import { NumberField, ResultCard } from "./phmax-zs-ui";
+
+// 🔴 NOVÉ – režimy
 import type { CalculatorMode, FormSection } from "./config/calculator-config";
 import { MODE_CONFIG } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
@@ -44,9 +43,16 @@ type TabKey = "phmax" | "pha" | "php";
 
 export default function App() {
   const [tab, setTab] = useState<TabKey>("phmax");
-  const [mode, setMode] = useState<CalculatorMode>(DEFAULT_MODE);
-  const visibleSections = useMemo(() => getVisibleSections(mode), [mode]);
-  const hasSection = (section: FormSection) => visibleSections.includes(section);
+ const [mode, setMode] = useState<CalculatorMode>(DEFAULT_MODE);
+
+const modeOptions = useMemo(() => {
+  return Object.values(MODE_CONFIG);
+}, []);
+
+const visibleSections = useMemo(() => getVisibleSections(mode), [mode]);
+
+const hasSection = (section: FormSection) =>
+  visibleSections.includes(section);
 
   const [basicType, setBasicType] = useState<BasicType>("full_more_than_2");
   const [basic1Classes, setBasic1Classes] = useState(10);
@@ -283,23 +289,25 @@ export default function App() {
             <div className="field">
               <span>Vyberte režim</span>
               <select
-                value={mode}
-                onChange={(e) => setMode(e.target.value as CalculatorMode)}
-              >
-                {Object.values(MODE_CONFIG).map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+        value={mode}
+        onChange={(e) => setMode(e.target.value as CalculatorMode)}
+      >
+        {modeOptions.map((item) => (
+          <option key={item.id} value={item.id}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+    </div>
 
-            <div className="subcard">
-              <h3>{MODE_CONFIG[mode].label}</h3>
-              <p className="muted-text">{MODE_CONFIG[mode].description}</p>
-            </div>
-          </div>
-        </section>
+    <div className="subcard">
+      <h3>{MODE_CONFIG[mode].label}</h3>
+      <p className="muted-text">
+        {MODE_CONFIG[mode].description}
+      </p>
+    </div>
+  </div>
+</section>
 
         {warnings.length > 0 && (
           <section className="card warning">
@@ -316,23 +324,23 @@ export default function App() {
 
         {tab === "phmax" && (
           <div className="stack">
-            {(hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) && (
+		{(hasSection("basic_first") || hasSection("basic_second")) && (
               <section className="card">
                 <h2>Běžné třídy ZŠ</h2>
 
                 {hasSection("school_variant_first_stage_only") ? (
-                  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
-                    <option value="first_only_1">Neúplná ZŠ – 1 třída 1. stupně</option>
-                    <option value="first_only_2">Neúplná ZŠ – 2 třídy 1. stupně</option>
-                    <option value="first_only_3">Neúplná ZŠ – 3 třídy 1. stupně</option>
-                    <option value="first_only_4">Neúplná ZŠ – 4 a více tříd 1. stupně</option>
-                  </select>
-                ) : (
-                  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
-                    <option value="full_more_than_2">Úplná ZŠ – více než 2 třídy v některém ročníku</option>
-                    <option value="full_max_2">Úplná ZŠ – nejvýše 2 třídy v každém ročníku</option>
-                  </select>
-                )}
+  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
+    <option value="first_only_1">Neúplná ZŠ – 1 třída</option>
+    <option value="first_only_2">Neúplná ZŠ – 2 třídy</option>
+    <option value="first_only_3">Neúplná ZŠ – 3 třídy</option>
+    <option value="first_only_4">Neúplná ZŠ – 4+</option>
+  </select>
+) : (
+  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
+    <option value="full_more_than_2">Úplná ZŠ – více než 2 třídy</option>
+    <option value="full_max_2">Úplná ZŠ – max 2 třídy</option>
+  </select>
+)}
 
                 <div className="grid two">
                   {hasSection("basic_first") && (
