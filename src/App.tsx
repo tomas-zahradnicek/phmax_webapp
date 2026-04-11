@@ -1130,20 +1130,7 @@ export default function App() {
     </div>
 
   </div>
-</div>
-
-            <div className="hero-actions__row hero-actions__row--secondary">
-              <div className="hero-actions__group hero-actions__group--meta">
-                <button className="btn btn--compact btn--ghost-muted" onClick={clearStoredSnapshot}>Vymazat uložená data</button>
-                <button className="btn btn--compact btn--ghost-muted" onClick={resetAll}>Vymazat všechny údaje</button>
-              </div>
-
-              <div className="hero-actions__group hero-actions__group--exports">
-                <button className="btn btn--compact btn--soft" onClick={handleExportCsv}>CSV</button>
-                <button className="btn btn--compact btn--soft" onClick={copySummaryToClipboard}>Kopírovat shrnutí</button>
-                <button className="btn btn--compact btn--soft" onClick={printSummaryWindow}>Tisk shrnutí</button>
-              </div>
-            </div>
+          </div>
 
           <p className="muted-text hero__note">
             Ukázkové příklady vycházejí z typických situací v metodice a z logiky jednotlivých výpočtů.
