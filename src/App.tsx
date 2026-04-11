@@ -1065,9 +1065,9 @@ export default function App() {
                 Přehledný průvodce výpočtem PHmax, PHAmax a PHPmax
               </h1>
               <p className="hero__text">
-                Aplikace spojuje rozcestník, ukázkové situace, metodické nápovědy a samotný výpočet. Soustředí se na PHmax, PHAmax a PHPmax.
-                Hodí se pro ředitele škol, zřizovatele i další uživatele, kteří potřebují rychle ověřit
-                vstupy a porozumět výsledku.
+                Aplikace spojuje rozcestník, ukázkové situace, metodické nápovědy a samotný výpočet.
+                Soustředí se na PHmax, PHAmax a PHPmax.
+                Hodí se zejména ředitelům a vedení škol.
               </p>
             </div>
 
@@ -1080,29 +1080,57 @@ export default function App() {
           </div>
 
           <div className="hero-actions">
-            <div className="hero-actions__row">
-              <div className="field field--hero-select field--hero-select-compact">
-                <span className="field__label field__label--hero">Ukázkový příklad</span>
-                <select value={selectedExample} onChange={(e) => loadExample(e.target.value as ExampleKey)}>
-                  <option value="">Vyberte ukázkový příklad…</option>
-                  <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
-                  <option value="phpmax_tri_roky">PHPmax – tříletý průměr a odečty</option>
-                  <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
-                  <option value="smisene_tridy">PHmax – smíšené třídy</option>
-                  <option value="pripravna_trida">PHmax – přípravná třída a přípravný stupeň ZŠS</option>
-                  <option value="mala_skola_pod_limitem">PHPmax – malá škola pod limitem</option>
-                  <option value="skola_s_odecty_phpmax">PHPmax – škola s odečty žáků</option>
-                  <option value="inkluzivni_skola">PHmax – škola s inkluzí (§ 16)</option>
-                </select>
-              </div>
 
-              <div className="hero-actions__group">
-                <button className="btn btn--compact btn--light" onClick={() => window.print()}>Tisk</button>
-                <button className="btn btn--compact btn--soft" onClick={saveSnapshotManually}>Uložit</button>
-                <button className="btn btn--compact btn--soft" onClick={restoreSnapshot}>Obnovit</button>
-                <GlossaryIconButton onClick={() => setGlossaryOpen(true)} />
-              </div>
-            </div>
+  {/* ŘÁDEK 1 */}
+  <div className="hero-actions__top">
+
+    <div className="field field--hero-select hero-actions__example">
+      <span className="field__label field__label--hero">Ukázkový příklad</span>
+      <select
+        value={selectedExample}
+        onChange={(e) => loadExample(e.target.value as ExampleKey)}
+      >
+        <option value="">Vyberte ukázkový příklad…</option>
+        <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
+        <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
+        <option value="smisene_tridy">PHmax – smíšené třídy</option>
+        <option value="pripravna_trida">PHmax – přípravná třída</option>
+      </select>
+    </div>
+
+    <div className="hero-actions__group">
+      <button className="btn btn--light" onClick={() => window.print()}>Tisk</button>
+      <button className="btn ghost" onClick={saveSnapshotManually}>Uložit</button>
+      <button className="btn ghost" onClick={restoreSnapshot}>Obnovit</button>
+      <GlossaryIconButton onClick={() => setGlossaryOpen(true)} />
+    </div>
+
+  </div>
+
+  {/* ŘÁDEK 2 */}
+  <div className="hero-actions__bottom">
+
+    <div className="hero-actions__group">
+      <button className="btn ghost" onClick={clearStoredSnapshot}>
+        Vymazat uložená data
+      </button>
+      <button className="btn ghost" onClick={resetAll}>
+        Vymazat všechny údaje
+      </button>
+    </div>
+
+    <div className="hero-actions__group">
+      <button className="btn ghost" onClick={handleExportCsv}>CSV</button>
+      <button className="btn ghost" onClick={copySummaryToClipboard}>
+        Kopírovat shrnutí
+      </button>
+      <button className="btn ghost" onClick={printSummaryWindow}>
+        Tisk shrnutí
+      </button>
+    </div>
+
+  </div>
+</div>
 
             <div className="hero-actions__row hero-actions__row--secondary">
               <div className="hero-actions__group hero-actions__group--meta">
