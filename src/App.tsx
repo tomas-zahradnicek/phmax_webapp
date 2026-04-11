@@ -99,6 +99,33 @@ function HelpHint({ text }: { text: string }) {
   );
 }
 
+
+function HeroStat({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        background: "rgba(255,255,255,0.9)",
+        border: "1px solid rgba(148,163,184,0.25)",
+        borderRadius: 18,
+        padding: "14px 16px",
+        boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
+        backdropFilter: "blur(10px)",
+      }}
+    >
+      <div style={{ fontSize: 12, color: "#475569", marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a", lineHeight: 1.1 }}>{value}</div>
+    </div>
+  );
+}
+
+function SectionLead({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="muted-text" style={{ marginTop: 6, marginBottom: 18, maxWidth: 900 }}>
+      {children}
+    </p>
+  );
+}
+
 function createEmptyPsychRow(id: number): PsychRow {
   return { id, kind: "psych1", mode: "higher_of_two", currentPupils: 0, currentClasses: 0, prevPupils: 0, prevClasses: 0 };
 }
@@ -617,8 +644,8 @@ export default function App() {
     ["Nižší ročníky víceletých gymnázií", gymPhmax],
     ["Smíšené třídy § 16 odst. 9 a ZŠ speciální", mixedPhmax],
     ["Základní škola speciální", specialPhmax],
-    ["Samostatné položky PHmax – výpočet podle typu tříd", extrasPhmax],
-    ["PHmax – výpočet podle typu tříd celkem", totalPhmax],
+    ["Samostatné položky PHmax", extrasPhmax],
+    ["Výsledek PHmax", totalPhmax],
     ["PHAmax – asistenti pedagoga", totalPha],
     ["PHPmax – metodický výpočet – rozhodná hodnota", phpBaseValue],
     ["PHPmax – metodický výpočet – vyloučené třídy", phpExcludedTotal],
@@ -670,20 +697,93 @@ export default function App() {
   };
 
   return (
-    <div className="app-shell">
-      <div className="container">
-        <header className="hero">
-          <div className="pill">PHmax – výpočet podle typu tříd kalkulačka ZŠ</div>
-          <h1>Hotová webová aplikace ke spuštění</h1>
-          <p>
-            Vite + React + TypeScript. Aplikace obsahuje formuláře pro běžné třídy, § 16 odst. 9,
-            ZŠ speciální, menšinové školy, psychiatrickou nemocnici, víceletá gymnázia, PHAmax – asistenti pedagoga,
-            PHPmax – metodický výpočet v metodickém rozpadu A–D, samostatné mazání údajů po jednotlivých záložkách a samostatný orientační panel pro NV 75/2005.
-          </p>
-          <div className="toolbar">
-            <button className="btn ghost" onClick={() => window.print()}>Tisk</button>
-            <div className="field" style={{ minWidth: 320 }}>
-              <span>Ukázkový příklad</span>
+    <div className="app-shell" style={{ background: "linear-gradient(180deg, #f8fafc 0%, #eef4ff 48%, #f8fafc 100%)", minHeight: "100vh" }}>
+      <div className="container" style={{ paddingTop: 24, paddingBottom: 40 }}>
+        <header
+          className="hero"
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            padding: 28,
+            borderRadius: 28,
+            background: "linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #38bdf8 100%)",
+            color: "white",
+            boxShadow: "0 24px 60px rgba(15,23,42,0.18)",
+            marginBottom: 20,
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              right: -40,
+              top: -40,
+              width: 220,
+              height: 220,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.08)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              right: 140,
+              bottom: -70,
+              width: 180,
+              height: 180,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.10)",
+            }}
+          />
+
+          <div className="pill" style={{ background: "rgba(255,255,255,0.14)", color: "white", border: "1px solid rgba(255,255,255,0.22)" }}>
+            Kalkulačka pro základní školy
+          </div>
+
+          <div className="grid two" style={{ alignItems: "start", gap: 24 }}>
+            <div>
+              <h1 style={{ fontSize: 40, lineHeight: 1.05, margin: "10px 0 12px" }}>
+                Přehledný průvodce výpočtem PHmax, PHAmax a PHPmax
+              </h1>
+              <p style={{ fontSize: 17, lineHeight: 1.65, maxWidth: 760, color: "rgba(255,255,255,0.92)" }}>
+                Aplikace spojuje rozcestník, ukázkové situace, metodické nápovědy a samotný výpočet.
+                Hodí se pro ředitele škol, zřizovatele i další uživatele, kteří potřebují rychle ověřit
+                vstupy a porozumět výsledku.
+              </p>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 12,
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                alignSelf: "stretch",
+              }}
+            >
+              <HeroStat label="Aktivní modul" value={tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"} />
+              <HeroStat label="Zvolený režim" value={MODE_CONFIG[mode].label} />
+              <HeroStat label="Výsledek PHmax" value={totalPhmax} />
+              <HeroStat label="Výsledek PHPmax" value={totalPhp} />
+            </div>
+          </div>
+
+          <div
+            className="toolbar"
+            style={{
+              marginTop: 24,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 12,
+              alignItems: "end",
+              background: "rgba(255,255,255,0.10)",
+              border: "1px solid rgba(255,255,255,0.16)",
+              borderRadius: 22,
+              padding: 16,
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <button className="btn ghost" onClick={() => window.print()} style={{ background: "white", color: "#0f172a" }}>Tisk</button>
+            <div className="field" style={{ minWidth: 340, flex: "1 1 340px" }}>
+              <span style={{ color: "rgba(255,255,255,0.88)" }}>Ukázkový příklad</span>
               <select value={selectedExample} onChange={(e) => loadExample(e.target.value as ExampleKey)}>
                 <option value="">Vyberte ukázkový příklad…</option>
                 <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
@@ -700,16 +800,18 @@ export default function App() {
             <button className="btn ghost" onClick={handleExportCsv}>Export CSV</button>
             <button className="btn" onClick={handleExportJson}>Export JSON</button>
           </div>
-          <p className="muted-text">
-            Ukázkové příklady vycházejí z typických situací v metodice a z logiky jednotlivých výpočtů. Po načtení je můžete upravit podle vlastní školy.
+
+          <p className="muted-text" style={{ color: "rgba(255,255,255,0.86)", marginTop: 12 }}>
+            Ukázkové příklady vycházejí z typických situací v metodice a z logiky jednotlivých výpočtů.
+            Po načtení je můžete upravit podle vlastní školy.
           </p>
         </header>
 
-        <section className="card">
-          <h2>Rychlý rozcestník</h2>
-          <p className="muted-text">
+        <section className="card" style={{ borderRadius: 24, boxShadow: "0 16px 40px rgba(15,23,42,0.06)", border: "1px solid #dbeafe" }}>
+          <h2 style={{ marginBottom: 0 }}>Rychlý rozcestník</h2>
+          <SectionLead>
             Nejste si jistí, kde začít? Vyberte situaci, která se nejvíc blíží vaší škole. Aplikace vás přesměruje na správnou část kalkulačky a vyplní odpovídající ukázkový příklad.
-          </p>
+          </SectionLead>
 
           <div className="grid two">
             <div className="field">
@@ -734,8 +836,11 @@ export default function App() {
           </div>
         </section>
 
-        <section className="card">
-          <h2>Typ školy / režim výpočtu</h2>
+        <section className="card" style={{ borderRadius: 24, boxShadow: "0 16px 40px rgba(15,23,42,0.06)" }}>
+          <h2 style={{ marginBottom: 0 }}>Typ školy a režim výpočtu</h2>
+          <SectionLead>
+            Tady vyberete, jaký typ výpočtu chcete zobrazit. Rozcestník výše vám může s výběrem pomoci.
+          </SectionLead>
           <div className="grid two">
             <div className="field">
               <span>Vyberte režim</span>
@@ -805,19 +910,56 @@ export default function App() {
         )}
 
         {warnings.length > 0 && (
-          <section className="card warning">
+          <section className="card warning" style={{ borderRadius: 22, border: "1px solid #fecaca", background: "linear-gradient(180deg, #fff7ed 0%, #fff 100%)", boxShadow: "0 10px 30px rgba(248,113,113,0.10)" }}>
             <h2>Kontrola vstupů</h2>
             {warnings.map((w, i) => <div key={i}>• {w}</div>)}
           </section>
         )}
 
-        <div className="tabs">
-          <button className={tab === "phmax" ? "tab active" : "tab"} onClick={() => setTab("phmax")}>PHmax – výpočet podle typu tříd</button>
-          <button className={tab === "pha" ? "tab active" : "tab"} onClick={() => setTab("pha")}>PHAmax – asistenti pedagoga</button>
-          <button className={tab === "php" ? "tab active" : "tab"} onClick={() => setTab("php")}>PHPmax – metodický výpočet</button>
+        <div
+          className="tabs"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            gap: 10,
+            padding: 10,
+            background: "rgba(255,255,255,0.86)",
+            borderRadius: 22,
+            boxShadow: "0 12px 30px rgba(15,23,42,0.06)",
+            position: "sticky",
+            top: 12,
+            zIndex: 5,
+            backdropFilter: "blur(8px)",
+            marginBottom: 18,
+          }}
+        >
+          <button className={tab === "phmax" ? "tab active" : "tab"} onClick={() => setTab("phmax")} style={{ fontWeight: 700 }}>PHmax</button>
+          <button className={tab === "pha" ? "tab active" : "tab"} onClick={() => setTab("pha")} style={{ fontWeight: 700 }}>PHAmax</button>
+          <button className={tab === "php" ? "tab active" : "tab"} onClick={() => setTab("php")} style={{ fontWeight: 700 }}>PHPmax</button>
         </div>
 
-        {tab === "phmax" && (
+                <section
+          className="card"
+          style={{
+            borderRadius: 24,
+            background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+            boxShadow: "0 18px 40px rgba(15,23,42,0.06)",
+            marginBottom: 18,
+          }}
+        >
+          <h2 style={{ marginBottom: 0 }}>Aktuální přehled výsledků</h2>
+          <SectionLead>
+            Výsledky se přepočítávají průběžně podle zadaných údajů. Každý modul se stanovuje samostatně.
+          </SectionLead>
+          <div className="grid four">
+            <HeroStat label="Výsledek PHmax" value={totalPhmax} />
+            <HeroStat label="Výsledek PHAmax" value={totalPha} />
+            <HeroStat label="Výsledek PHPmax" value={totalPhp} />
+            <HeroStat label="Přehledový součet" value={round2(totalPhmax + totalPha + totalPhp)} />
+          </div>
+        </section>
+
+{tab === "phmax" && (
           <div className="stack">
             {(hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) && (
               <section className="card">
@@ -845,7 +987,7 @@ export default function App() {
                         <NumberField label="Počet tříd" value={basic1Classes} onChange={setBasic1Classes} />
                         <NumberField label="Počet žáků" value={basic1Pupils} onChange={setBasic1Pupils} />
                         <ResultCard label="Průměr" value={round2(basic1Avg)} />
-                        <ResultCard label="Pásmo / PHmax – výpočet podle typu tříd" value={`${basicFirstBand.label} / ${basicFirstBand.value}`} />
+                        <ResultCard label="Pásmo / PHmax" value={`${basicFirstBand.label} / ${basicFirstBand.value}`} />
                       </div>
                     </div>
                   )}
@@ -857,7 +999,7 @@ export default function App() {
                         <NumberField label="Počet tříd" value={basic2Classes} onChange={setBasic2Classes} />
                         <NumberField label="Počet žáků" value={basic2Pupils} onChange={setBasic2Pupils} />
                         <ResultCard label="Průměr" value={round2(basic2Avg)} />
-                        <ResultCard label="Pásmo / PHmax – výpočet podle typu tříd" value={`${basicSecondBand.label} / ${basicSecondBand.value}`} />
+                        <ResultCard label="Pásmo / PHmax" value={`${basicSecondBand.label} / ${basicSecondBand.value}`} />
                       </div>
                     </div>
                   )}
@@ -875,7 +1017,7 @@ export default function App() {
                         <NumberField label="1. stupeň – třídy" value={sec16FirstClasses} onChange={setSec16FirstClasses} />
                         <NumberField label="1. stupeň – žáci" value={sec16FirstPupils} onChange={setSec16FirstPupils} />
                         <ResultCard label="1. stupeň – průměr" value={round2(incl1Avg)} />
-                        <ResultCard label="1. stupeň – PHmax – výpočet podle typu tříd" value={`${sec16FirstBand.label} / ${sec16FirstBand.value}`} />
+                        <ResultCard label="1. stupeň – PHmax" value={`${sec16FirstBand.label} / ${sec16FirstBand.value}`} />
                       </>
                     )}
 
@@ -884,7 +1026,7 @@ export default function App() {
                         <NumberField label="2. stupeň – třídy" value={sec16SecondClasses} onChange={setSec16SecondClasses} />
                         <NumberField label="2. stupeň – žáci" value={sec16SecondPupils} onChange={setSec16SecondPupils} />
                         <ResultCard label="2. stupeň – průměr" value={round2(incl2Avg)} />
-                        <ResultCard label="2. stupeň – PHmax – výpočet podle typu tříd" value={`${sec16SecondBand.label} / ${sec16SecondBand.value}`} />
+                        <ResultCard label="2. stupeň – PHmax" value={`${sec16SecondBand.label} / ${sec16SecondBand.value}`} />
                       </>
                     )}
                   </div>
@@ -974,7 +1116,7 @@ export default function App() {
                         <NumberField label="Počet tříd" value={minority1Classes} onChange={setMinority1Classes} />
                         <NumberField label="Počet žáků" value={minority1Pupils} onChange={setMinority1Pupils} />
                         <ResultCard label="Průměr" value={round2(minority1Avg)} />
-                        <ResultCard label="PHmax – výpočet podle typu tříd" value={`${minority1Band.label} / ${minority1Band.value}`} />
+                        <ResultCard label="PHmax" value={`${minority1Band.label} / ${minority1Band.value}`} />
                       </div>
                     </div>
                     {minorityType === "minorityFull1" && hasSection("minority_second") && (
@@ -984,7 +1126,7 @@ export default function App() {
                           <NumberField label="Počet tříd" value={minority2Classes} onChange={setMinority2Classes} />
                           <NumberField label="Počet žáků" value={minority2Pupils} onChange={setMinority2Pupils} />
                           <ResultCard label="Průměr" value={round2(minority2Avg)} />
-                          <ResultCard label="PHmax – výpočet podle typu tříd" value={`${minority2Band.label} / ${minority2Band.value}`} />
+                          <ResultCard label="PHmax" value={`${minority2Band.label} / ${minority2Band.value}`} />
                         </div>
                       </div>
                     )}
@@ -1000,7 +1142,7 @@ export default function App() {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th>Typ</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHmax – výpočet podle typu tříd / třída</th><th>Mezisoučet</th><th></th>
+                        <th>Typ</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHmax / třída</th><th>Mezisoučet</th><th></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1076,7 +1218,7 @@ export default function App() {
 
             {(hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) && (
               <section className="card">
-                <h2>Samostatné položky PHmax – výpočet podle typu tříd</h2>
+                <h2>Samostatné položky PHmax</h2>
                 <div className="grid four">
                   {hasSection("prep_class") && (
                     <>
@@ -1142,11 +1284,11 @@ export default function App() {
             )}
 
             <div className="toolbar">
-              <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax – výpočet podle typu tříd</button>
+              <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax</button>
             </div>
 
-            <section className="card muted">
-              <h2>Souhrn výsledků výsledků PHmax – výpočet podle typu tříd</h2>
+            <section className="card muted" style={{ borderRadius: 24, background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)", boxShadow: "0 18px 40px rgba(15,23,42,0.06)" }}>
+              <h2>Souhrn výsledků PHmax</h2>
               <div className="grid four">
                 <ResultCard label="Běžné třídy" value={basicPhmax} />
                 <ResultCard label="§ 16 odst. 9" value={inclPhmax} />
@@ -1156,7 +1298,7 @@ export default function App() {
                 <ResultCard label="Smíšené třídy" value={mixedPhmax} />
                 <ResultCard label="ZŠ speciální" value={specialPhmax} />
                 <ResultCard label="Samostatné položky" value={extrasPhmax} />
-                <ResultCard label="PHmax – výpočet podle typu tříd celkem" value={totalPhmax} />
+                <ResultCard label="Výsledek PHmax" value={totalPhmax} />
               </div>
             </section>
           </div>
@@ -1342,12 +1484,12 @@ export default function App() {
           </section>
         )}
 
-        <section className="card muted">
+        <section className="card muted" style={{ borderRadius: 24, background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)", boxShadow: "0 18px 40px rgba(15,23,42,0.06)" }}>
           <h2>Celkový přehled</h2>
           <p className="muted-text">Výsledky PHmax, PHAmax a PHPmax se stanovují samostatně. Součet níže slouží jen pro orientaci.</p>
-          <p className="muted-text">PHmax – výpočet podle typu tříd, PHAmax – asistenti pedagoga a PHPmax – metodický výpočet se stanovují odděleně. Součet níže je přehledový.</p>
+          <p className="muted-text">PHmax, PHAmax – asistenti pedagoga a PHPmax – metodický výpočet se stanovují odděleně. Součet níže je přehledový.</p>
           <div className="grid four">
-            <ResultCard label="PHmax – výpočet podle typu tříd" value={totalPhmax} />
+            <ResultCard label="PHmax" value={totalPhmax} />
             <ResultCard label="PHAmax – asistenti pedagoga" value={totalPha} />
             <ResultCard label="PHPmax – metodický výpočet" value={totalPhp} />
             <ResultCard label="Přehledový součet" value={round2(totalPhmax + totalPha + totalPhp)} />
