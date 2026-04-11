@@ -65,6 +65,18 @@ function sumNumbers(values: number[]) {
   return values.reduce((acc, value) => acc + value, 0);
 }
 
+function getInitialPreferredMode(): CalculatorMode {
+  const preferred = Object.values(MODE_CONFIG).find(
+    (item) =>
+      item.group === "phmax" &&
+      item.label.toLowerCase().includes("úplná zš") &&
+      !item.label.includes("§ 16")
+  );
+
+  return (preferred?.id ?? DEFAULT_MODE) as CalculatorMode;
+}
+
+
 function getNv75Reference(role: Nv75Role, school: Nv75School) {
   if (school === "plavecka_skola" && role === "ucitel") {
     return {
@@ -222,7 +234,7 @@ function buildShareText(data: {
 
 export default function App() {
   const [tab, setTab] = useState<TabKey>("phmax");
-  const [mode, setMode] = useState<CalculatorMode>(DEFAULT_MODE);
+  const [mode, setMode] = useState<CalculatorMode>(getInitialPreferredMode());
 
   const modeOptions = useMemo(() => {
     return Object.values(MODE_CONFIG).filter((item) => {
@@ -588,7 +600,7 @@ export default function App() {
   };
 
   const loadDemoData = () => {
-    setMode(DEFAULT_MODE);
+    setMode(getInitialPreferredMode());
     setTab("phmax");
 
     setBasicType("full_more_than_2");
@@ -655,7 +667,7 @@ export default function App() {
     resetAll();
 
     if (example === "phmax_bezna_zs") {
-      setMode(DEFAULT_MODE);
+      setMode(getInitialPreferredMode());
       setTab("phmax");
       setBasicType("full_more_than_2");
       setBasic1Classes(10);
@@ -666,7 +678,7 @@ export default function App() {
     }
 
     if (example === "phpmax_tri_roky") {
-      setMode(DEFAULT_MODE);
+      setMode(getInitialPreferredMode());
       setTab("php");
       setPhpWizardStep("a");
       setPhpMethodMode("three_year_avg");
@@ -704,7 +716,7 @@ export default function App() {
 
 
     if (example === "mala_skola_pod_limitem") {
-      setMode(DEFAULT_MODE);
+      setMode(getInitialPreferredMode());
       setTab("php");
       setPhpWizardStep("a");
       setPhpMethodMode("three_year_avg");
