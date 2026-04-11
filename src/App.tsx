@@ -1661,64 +1661,63 @@ export default function App() {
               )}
 
               {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
-                <section className="card section-card section-card--module section-card--module-mixed" data-section="mixed">
+                <section className="card section-card section-card--module section-card--module-mixed mixed-module" data-section="mixed">
                   <h2>Smíšené třídy § 16 odst. 9 a ZŠ speciální <HelpHint text="Podle metodiky se tyto třídy posuzují samostatně podle převažujícího oboru vzdělání. Pokud ve třídě převažuje obor 79-01-C/01, použijí se řádky B9 až B10. Pokud převažuje 79-01-B/01 nebo je počet žáků shodný, použijí se řádky B26 až B28." /></h2>
                   <p className="muted-text">Modelový postup odpovídá schématu metodiky: A. vstupní údaje, B. průměrný počet žáků, C. přiřazení pásma, D. dílčí a celkový výsledek.</p>
 
-                  <div className="grid two">
-                    <div className="subcard subcard--input">
-                      <h3>1. stupeň</h3>
-                      <div className="grid two">
-                        <NumberField label="Počet žáků ve třídách s převažujícím oborem 79-01-C/01" value={mixedMethodFirstZsPupils} onChange={setMixedMethodFirstZsPupils} />
-                        <NumberField label="Počet tříd s převažujícím oborem 79-01-C/01" value={mixedMethodFirstZsClasses} onChange={setMixedMethodFirstZsClasses} />
-                        <NumberField label="Počet žáků ve třídách s převažujícím oborem 79-01-B/01" value={mixedMethodFirstSpecialPupils} onChange={setMixedMethodFirstSpecialPupils} />
-                        <NumberField label="Počet tříd s převažujícím oborem 79-01-B/01" value={mixedMethodFirstSpecialClasses} onChange={setMixedMethodFirstSpecialClasses} />
+                  <div className="mixed-module__stages">
+                    <div className="mixed-module__stage subcard subcard--input">
+                      <h3 className="mixed-module__stage-title">1. stupeň</h3>
+                      <p className="mixed-module__stage-lead muted-text">Vstupy podle převažujícího oboru (B9/B26)</p>
+                      <div className="mixed-module__inputs">
+                        <NumberField label="Žáci · převaha oboru 79-01-C/01" value={mixedMethodFirstZsPupils} onChange={setMixedMethodFirstZsPupils} />
+                        <NumberField label="Třídy · převaha oboru 79-01-C/01" value={mixedMethodFirstZsClasses} onChange={setMixedMethodFirstZsClasses} />
+                        <NumberField label="Žáci · převaha oboru 79-01-B/01 (ZŠ spec.)" value={mixedMethodFirstSpecialPupils} onChange={setMixedMethodFirstSpecialPupils} />
+                        <NumberField label="Třídy · převaha oboru 79-01-B/01 (ZŠ spec.)" value={mixedMethodFirstSpecialClasses} onChange={setMixedMethodFirstSpecialClasses} />
                       </div>
 
-                      <div className="grid two section-results-strip">
-                        <ResultCard label="Průměr žáků/třídu · obor 79-01-C/01" value={round2(mixedMethodFirstZsAvg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax na 1 třídu · 1. st. (B9)" value={`${mixedMethodFirstZsBand.label} / ${mixedMethodFirstZsBand.value}`} tone="primary" />
-                        <ResultCard label="Průměr žáků/třídu · obor 79-01-B/01" value={round2(mixedMethodFirstSpecialAvg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax na 1 třídu · 1. st. ZŠ spec. (B26)" value={`${mixedMethodFirstSpecialBand.label} / ${mixedMethodFirstSpecialBand.value}`} tone="primary" />
+                      <div className="mixed-module__bands">
+                        <ResultCard label="Průměr · 79-01-C/01" value={round2(mixedMethodFirstZsAvg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax · 1. st. (B9)" value={`${mixedMethodFirstZsBand.label} / ${mixedMethodFirstZsBand.value}`} tone="primary" />
+                        <ResultCard label="Průměr · 79-01-B/01" value={round2(mixedMethodFirstSpecialAvg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax · 1. st. ZŠ spec. (B26)" value={`${mixedMethodFirstSpecialBand.label} / ${mixedMethodFirstSpecialBand.value}`} tone="primary" />
                       </div>
 
-                      <div className="grid three section-results-strip">
-                        <ResultCard label="Výsledek – 1. stupeň, 79-01-C/01" value={mixedMethodFirstZsResult} tone="success" />
-                        <ResultCard label="Výsledek – 1. stupeň, 79-01-B/01" value={mixedMethodFirstSpecialResult} tone="success" />
-                        <ResultCard label="PHmax – 1. stupeň celkem" value={mixedMethodFirstTotal} tone="success" />
+                      <div className="mixed-module__totals">
+                        <ResultCard label="Výsledek · 1. st., 79-01-C/01" value={mixedMethodFirstZsResult} tone="success" />
+                        <ResultCard label="Výsledek · 1. st., 79-01-B/01" value={mixedMethodFirstSpecialResult} tone="success" />
+                        <ResultCard label="PHmax · 1. stupeň celkem" value={mixedMethodFirstTotal} tone="success" />
                       </div>
                     </div>
 
-                    <div className="subcard subcard--input">
-                      <h3>2. stupeň</h3>
-                      <div className="grid two">
-                        <NumberField label="Počet žáků ve třídách s převažujícím oborem 79-01-C/01" value={mixedMethodSecondZsPupils} onChange={setMixedMethodSecondZsPupils} />
-                        <NumberField label="Počet tříd s převažujícím oborem 79-01-C/01" value={mixedMethodSecondZsClasses} onChange={setMixedMethodSecondZsClasses} />
-                        <NumberField label="Počet žáků ve třídách s převažujícím oborem 79-01-B/01" value={mixedMethodSecondSpecialPupils} onChange={setMixedMethodSecondSpecialPupils} />
-                        <NumberField label="Počet tříd s převažujícím oborem 79-01-B/01" value={mixedMethodSecondSpecialClasses} onChange={setMixedMethodSecondSpecialClasses} />
+                    <div className="mixed-module__stage subcard subcard--input">
+                      <h3 className="mixed-module__stage-title">2. stupeň</h3>
+                      <p className="mixed-module__stage-lead muted-text">Vstupy podle převažujícího oboru (B10/B27)</p>
+                      <div className="mixed-module__inputs">
+                        <NumberField label="Žáci · převaha oboru 79-01-C/01" value={mixedMethodSecondZsPupils} onChange={setMixedMethodSecondZsPupils} />
+                        <NumberField label="Třídy · převaha oboru 79-01-C/01" value={mixedMethodSecondZsClasses} onChange={setMixedMethodSecondZsClasses} />
+                        <NumberField label="Žáci · převaha oboru 79-01-B/01 (ZŠ spec.)" value={mixedMethodSecondSpecialPupils} onChange={setMixedMethodSecondSpecialPupils} />
+                        <NumberField label="Třídy · převaha oboru 79-01-B/01 (ZŠ spec.)" value={mixedMethodSecondSpecialClasses} onChange={setMixedMethodSecondSpecialClasses} />
                       </div>
 
-                      <div className="grid two section-results-strip">
-                        <ResultCard label="Průměr žáků/třídu · obor 79-01-C/01" value={round2(mixedMethodSecondZsAvg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax na 1 třídu · 2. st. (B10)" value={`${mixedMethodSecondZsBand.label} / ${mixedMethodSecondZsBand.value}`} tone="primary" />
-                        <ResultCard label="Průměr žáků/třídu · obor 79-01-B/01" value={round2(mixedMethodSecondSpecialAvg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax na 1 třídu · 2. st. ZŠ spec. (B27)" value={`${mixedMethodSecondSpecialBand.label} / ${mixedMethodSecondSpecialBand.value}`} tone="primary" />
+                      <div className="mixed-module__bands">
+                        <ResultCard label="Průměr · 79-01-C/01" value={round2(mixedMethodSecondZsAvg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax · 2. st. (B10)" value={`${mixedMethodSecondZsBand.label} / ${mixedMethodSecondZsBand.value}`} tone="primary" />
+                        <ResultCard label="Průměr · 79-01-B/01" value={round2(mixedMethodSecondSpecialAvg)} tone="primary" />
+                        <ResultCard label="Pásmo a PHmax · 2. st. ZŠ spec. (B27)" value={`${mixedMethodSecondSpecialBand.label} / ${mixedMethodSecondSpecialBand.value}`} tone="primary" />
                       </div>
 
-                      <div className="grid three section-results-strip">
-                        <ResultCard label="Výsledek – 2. stupeň, 79-01-C/01" value={mixedMethodSecondZsResult} tone="success" />
-                        <ResultCard label="Výsledek – 2. stupeň, 79-01-B/01" value={mixedMethodSecondSpecialResult} tone="success" />
-                        <ResultCard label="PHmax – 2. stupeň celkem" value={mixedMethodSecondTotal} tone="success" />
+                      <div className="mixed-module__totals">
+                        <ResultCard label="Výsledek · 2. st., 79-01-C/01" value={mixedMethodSecondZsResult} tone="success" />
+                        <ResultCard label="Výsledek · 2. st., 79-01-B/01" value={mixedMethodSecondSpecialResult} tone="success" />
+                        <ResultCard label="PHmax · 2. stupeň celkem" value={mixedMethodSecondTotal} tone="success" />
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid two section-results-strip">
+                  <div className="mixed-module__footer">
                     <ResultCard label="PHmax – smíšené třídy 1. stupeň" value={mixedMethodFirstTotal} tone="success" />
                     <ResultCard label="PHmax – smíšené třídy 2. stupeň" value={mixedMethodSecondTotal} tone="success" />
-                  </div>
-
-                  <div className="grid one section-results-strip">
                     <ResultCard label="PHmax – smíšené třídy celkem" value={mixedMethodTotal} tone="success" />
                   </div>
                 </section>

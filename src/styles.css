@@ -938,6 +938,84 @@ input[type="radio"] {
 .section-card--module-mixed::before { background: linear-gradient(90deg, #d97706, #fbbf24); }
 .section-card--module-mixed::after { background: radial-gradient(circle, rgba(251,191,36,0.14), transparent 70%); }
 
+/* Smíšené třídy – plná šířka stupňů, mřížka místo dvou úzkých sloupců */
+.mixed-module__stages {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 14px;
+}
+
+.mixed-module__stage.subcard {
+  height: auto;
+  min-height: 0;
+}
+
+.mixed-module__stage-title {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.mixed-module__stage-lead {
+  margin: -2px 0 0;
+  font-size: 0.86rem;
+}
+
+.mixed-module__inputs,
+.mixed-module__bands,
+.mixed-module__totals,
+.mixed-module__footer {
+  display: grid;
+  gap: 12px;
+}
+
+.mixed-module__inputs {
+  grid-template-columns: repeat(auto-fit, minmax(228px, 1fr));
+}
+
+.mixed-module__bands {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.mixed-module__totals {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.mixed-module__footer {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(217, 119, 6, 0.22);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+@media (min-width: 1000px) {
+  .mixed-module__inputs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mixed-module__bands {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mixed-module__totals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mixed-module__footer {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.section-card--module-mixed .mixed-module__inputs .number-field,
+.section-card--module-mixed .mixed-module__bands .result-card,
+.section-card--module-mixed .mixed-module__totals .result-card,
+.section-card--module-mixed .mixed-module__footer .result-card {
+  height: auto;
+  min-height: 0;
+}
+
 .section-card--module-extras { border-color: rgba(20, 184, 166, 0.18); }
 .section-card--module-extras::before { background: linear-gradient(90deg, #0f766e, #2dd4bf); }
 .section-card--module-extras::after { background: radial-gradient(circle, rgba(45,212,191,0.14), transparent 70%); }
