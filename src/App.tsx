@@ -17,11 +17,12 @@ import {
   round2,
   exportCsv,
   BasicType,
+  MixedRow,
+  PhaRow,
+  PsychRow,
+  GymRow,
 } from "./phmax-zs-logic";
-
 import { NumberField, ResultCard } from "./phmax-zs-ui";
-
-// 🔴 NOVÉ – režimy
 import type { CalculatorMode, FormSection } from "./config/calculator-config";
 import { MODE_CONFIG } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
@@ -43,16 +44,24 @@ type TabKey = "phmax" | "pha" | "php";
 
 export default function App() {
   const [tab, setTab] = useState<TabKey>("phmax");
- const [mode, setMode] = useState<CalculatorMode>(DEFAULT_MODE);
+  const [mode, setMode] = useState<CalculatorMode>(DEFAULT_MODE);
 
-const modeOptions = useMemo(() => {
-  return Object.values(MODE_CONFIG);
-}, []);
+  const modeOptions = useMemo(() => {
+    return Object.values(MODE_CONFIG).filter((item) => {
+      if (tab === "phmax") return item.group === "phmax" || item.group === "nv75";
+      if (tab === "pha") return item.group === "phamax";
+      return item.group === "phpmax";
+    });
+  }, [tab]);
 
-const visibleSections = useMemo(() => getVisibleSections(mode), [mode]);
+  useEffect(() => {
+    if (!modeOptions.some((item) => item.id === mode)) {
+      setMode(modeOptions[0]?.id ?? DEFAULT_MODE);
+    }
+  }, [mode, modeOptions]);
 
-const hasSection = (section: FormSection) =>
-  visibleSections.includes(section);
+  const visibleSections = useMemo(() => getVisibleSections(mode), [mode]);
+  const hasSection = (section: FormSection) => visibleSections.includes(section);
 
   const [basicType, setBasicType] = useState<BasicType>("full_more_than_2");
   const [basic1Classes, setBasic1Classes] = useState(10);
@@ -289,25 +298,23 @@ const hasSection = (section: FormSection) =>
             <div className="field">
               <span>Vyberte režim</span>
               <select
-        value={mode}
-        onChange={(e) => setMode(e.target.value as CalculatorMode)}
-      >
-        {modeOptions.map((item) => (
-          <option key={item.id} value={item.id}>
-            {item.label}
-          </option>
-        ))}
-      </select>
-    </div>
+                value={mode}
+                onChange={(e) => setMode(e.target.value as CalculatorMode)}
+              >
+                {modeOptions.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-    <div className="subcard">
-      <h3>{MODE_CONFIG[mode].label}</h3>
-      <p className="muted-text">
-        {MODE_CONFIG[mode].description}
-      </p>
-    </div>
-  </div>
-</section>
+            <div className="subcard">
+              <h3>{MODE_CONFIG[mode].label}</h3>
+              <p className="muted-text">{MODE_CONFIG[mode].description}</p>
+            </div>
+          </div>
+        </section>
 
         {warnings.length > 0 && (
           <section className="card warning">
@@ -324,23 +331,23 @@ const hasSection = (section: FormSection) =>
 
         {tab === "phmax" && (
           <div className="stack">
-		{(hasSection("basic_first") || hasSection("basic_second")) && (
+            {(hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) && (
               <section className="card">
                 <h2>Běžné třídy ZŠ</h2>
 
                 {hasSection("school_variant_first_stage_only") ? (
-  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
-    <option value="first_only_1">Neúplná ZŠ – 1 třída</option>
-    <option value="first_only_2">Neúplná ZŠ – 2 třídy</option>
-    <option value="first_only_3">Neúplná ZŠ – 3 třídy</option>
-    <option value="first_only_4">Neúplná ZŠ – 4+</option>
-  </select>
-) : (
-  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
-    <option value="full_more_than_2">Úplná ZŠ – více než 2 třídy</option>
-    <option value="full_max_2">Úplná ZŠ – max 2 třídy</option>
-  </select>
-)}
+                  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
+                    <option value="first_only_1">Neúplná ZŠ – 1 třída 1. stupně</option>
+                    <option value="first_only_2">Neúplná ZŠ – 2 třídy 1. stupně</option>
+                    <option value="first_only_3">Neúplná ZŠ – 3 třídy 1. stupně</option>
+                    <option value="first_only_4">Neúplná ZŠ – 4 a více tříd 1. stupně</option>
+                  </select>
+                ) : (
+                  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
+                    <option value="full_more_than_2">Úplná ZŠ – více než 2 třídy v některém ročníku</option>
+                    <option value="full_max_2">Úplná ZŠ – nejvýše 2 třídy v každém ročníku</option>
+                  </select>
+                )}
 
                 <div className="grid two">
                   {hasSection("basic_first") && (
@@ -396,6 +403,7 @@ const hasSection = (section: FormSection) =>
                 </section>
               )}
 
+              {(hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) && (
               <section className="card">
                 <h2>ZŠ speciální</h2>
                 <div className="grid two">
@@ -413,6 +421,7 @@ const hasSection = (section: FormSection) =>
                   <ResultCard label="Průměr" value={round2(specialIIAvg)} />
                 </div>
               </section>
+              )}
             </div>
 
             <div className="grid two">
@@ -475,7 +484,7 @@ const hasSection = (section: FormSection) =>
                         <ResultCard label="PHmax" value={`${minority1Band.label} / ${minority1Band.value}`} />
                       </div>
                     </div>
-                    {minorityType === "minorityFull1" && (
+                    {minorityType === "minorityFull1" && hasSection("minority_second") && (
                       <div className="subcard">
                         <h3>2. stupeň</h3>
                         <div className="grid two">
@@ -567,18 +576,37 @@ const hasSection = (section: FormSection) =>
               <section className="card">
                 <h2>Samostatné položky PHmax</h2>
                 <div className="grid four">
-                  <NumberField label="Přípravné třídy – počet tříd" value={prepClasses} onChange={setPrepClasses} />
-                  <NumberField label="Přípravné třídy – počet dětí" value={prepChildren} onChange={setPrepChildren} />
-                  <ResultCard label="Přípravná třída" value={`${prepAvg < 10 ? "méně než 10" : "10 a více"} / ${prepPh}`} />
-                  <ResultCard label="Mezisoučet" value={round2(prepClasses * prepPh)} />
-                  <NumberField label="Přípravný stupeň ZŠS – počet tříd" value={prepSpecialClasses} onChange={setPrepSpecialClasses} />
-                  <NumberField label="Přípravný stupeň ZŠS – počet žáků" value={prepSpecialChildren} onChange={setPrepSpecialChildren} />
-                  <ResultCard label="Přípravný stupeň" value={`${prepSpecialAvg < 4 ? "méně než 4" : "4 a více"} / ${prepSpecialPh}`} />
-                  <ResultCard label="Mezisoučet" value={round2(prepSpecialClasses * prepSpecialPh)} />
-                  <NumberField label="§ 38 – 1. stupeň" value={p38First} onChange={setP38First} />
-                  <NumberField label="§ 38 – 2. stupeň" value={p38Second} onChange={setP38Second} />
-                  <NumberField label="§ 41 – 1. stupeň" value={p41First} onChange={setP41First} />
-                  <NumberField label="§ 41 – 2. stupeň" value={p41Second} onChange={setP41Second} />
+                  {hasSection("prep_class") && (
+                    <>
+                      <NumberField label="Přípravné třídy – počet tříd" value={prepClasses} onChange={setPrepClasses} />
+                      <NumberField label="Přípravné třídy – počet dětí" value={prepChildren} onChange={setPrepChildren} />
+                      <ResultCard label="Přípravná třída" value={`${prepAvg < 10 ? "méně než 10" : "10 a více"} / ${prepPh}`} />
+                      <ResultCard label="Mezisoučet" value={round2(prepClasses * prepPh)} />
+                    </>
+                  )}
+
+                  {hasSection("prep_special") && (
+                    <>
+                      <NumberField label="Přípravný stupeň ZŠS – počet tříd" value={prepSpecialClasses} onChange={setPrepSpecialClasses} />
+                      <NumberField label="Přípravný stupeň ZŠS – počet žáků" value={prepSpecialChildren} onChange={setPrepSpecialChildren} />
+                      <ResultCard label="Přípravný stupeň" value={`${prepSpecialAvg < 4 ? "méně než 4" : "4 a více"} / ${prepSpecialPh}`} />
+                      <ResultCard label="Mezisoučet" value={round2(prepSpecialClasses * prepSpecialPh)} />
+                    </>
+                  )}
+
+                  {hasSection("par38") && (
+                    <>
+                      <NumberField label="§ 38 – 1. stupeň" value={p38First} onChange={setP38First} />
+                      <NumberField label="§ 38 – 2. stupeň" value={p38Second} onChange={setP38Second} />
+                    </>
+                  )}
+
+                  {hasSection("par41") && (
+                    <>
+                      <NumberField label="§ 41 – 1. stupeň" value={p41First} onChange={setP41First} />
+                      <NumberField label="§ 41 – 2. stupeň" value={p41Second} onChange={setP41Second} />
+                    </>
+                  )}
                 </div>
               </section>
             )}
