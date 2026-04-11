@@ -23,6 +23,10 @@ import {
   GymRow,
 } from "./phmax-zs-logic";
 import { NumberField, ResultCard } from "./phmax-zs-ui";
+import type { CalculatorMode, FormSection } from "./config/calculator-config";
+import { MODE_CONFIG } from "./config/calculator-config";
+import { getVisibleSections } from "./config/field-visibility";
+import { DEFAULT_MODE } from "./config/default-form-state";
 
 function downloadTextFile(filename: string, content: string, mime = "text/plain;charset=utf-8") {
   const blob = new Blob([content], { type: mime });
@@ -40,6 +44,10 @@ type TabKey = "phmax" | "pha" | "php";
 
 export default function App() {
   const [tab, setTab] = useState<TabKey>("phmax");
+  const [mode, setMode] = useState<CalculatorMode>(DEFAULT_MODE);
+  const visibleSections = useMemo(() => getVisibleSections(mode), [mode]);
+  const hasSection = (section: FormSection) => visibleSections.includes(section);
+
   const [basicType, setBasicType] = useState<BasicType>("full_more_than_2");
   const [basic1Classes, setBasic1Classes] = useState(10);
   const [basic1Pupils, setBasic1Pupils] = useState(250);
@@ -122,6 +130,19 @@ export default function App() {
 
   const incl1Band = pickBand(incl1Avg, B9_B10.first);
   const incl2Band = pickBand(incl2Avg, B9_B10.second);
+
+  const sec16FirstClasses = incl1Classes;
+  const sec16FirstPupils = incl1Pupils;
+  const sec16SecondClasses = incl2Classes;
+  const sec16SecondPupils = incl2Pupils;
+
+  const setSec16FirstClasses = setIncl1Classes;
+  const setSec16FirstPupils = setIncl1Pupils;
+  const setSec16SecondClasses = setIncl2Classes;
+  const setSec16SecondPupils = setIncl2Pupils;
+
+  const sec16FirstBand = incl1Band;
+  const sec16SecondBand = incl2Band;
 
   const psychComputedRows = psychRows.map((row) => {
     const avgCurrent = row.currentClasses > 0 ? row.currentPupils / row.currentClasses : 0;
@@ -256,6 +277,30 @@ export default function App() {
           </div>
         </header>
 
+        <section className="card">
+          <h2>Typ školy / režim výpočtu</h2>
+          <div className="grid two">
+            <div className="field">
+              <span>Vyberte režim</span>
+              <select
+                value={mode}
+                onChange={(e) => setMode(e.target.value as CalculatorMode)}
+              >
+                {Object.values(MODE_CONFIG).map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="subcard">
+              <h3>{MODE_CONFIG[mode].label}</h3>
+              <p className="muted-text">{MODE_CONFIG[mode].description}</p>
+            </div>
+          </div>
+        </section>
+
         {warnings.length > 0 && (
           <section className="card warning">
             <h2>Kontrola vstupů</h2>
@@ -271,54 +316,77 @@ export default function App() {
 
         {tab === "phmax" && (
           <div className="stack">
-            <section className="card">
-              <h2>Běžné třídy ZŠ</h2>
-              <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
-                <option value="full_more_than_2">Úplná ZŠ – více než 2 třídy v některém ročníku</option>
-                <option value="full_max_2">Úplná ZŠ – nejvýše 2 třídy v každém ročníku</option>
-                <option value="first_only_1">Neúplná ZŠ – 1 třída 1. stupně</option>
-                <option value="first_only_2">Neúplná ZŠ – 2 třídy 1. stupně</option>
-                <option value="first_only_3">Neúplná ZŠ – 3 třídy 1. stupně</option>
-                <option value="first_only_4">Neúplná ZŠ – 4 a více tříd 1. stupně</option>
-              </select>
-              <div className="grid two">
-                <div className="subcard">
-                  <h3>1. stupeň</h3>
-                  <div className="grid two">
-                    <NumberField label="Počet tříd" value={basic1Classes} onChange={setBasic1Classes} />
-                    <NumberField label="Počet žáků" value={basic1Pupils} onChange={setBasic1Pupils} />
-                    <ResultCard label="Průměr" value={round2(basic1Avg)} />
-                    <ResultCard label="Pásmo / PHmax" value={`${basicFirstBand.label} / ${basicFirstBand.value}`} />
-                  </div>
-                </div>
-                {isFull && (
-                  <div className="subcard">
-                    <h3>2. stupeň</h3>
-                    <div className="grid two">
-                      <NumberField label="Počet tříd" value={basic2Classes} onChange={setBasic2Classes} />
-                      <NumberField label="Počet žáků" value={basic2Pupils} onChange={setBasic2Pupils} />
-                      <ResultCard label="Průměr" value={round2(basic2Avg)} />
-                      <ResultCard label="Pásmo / PHmax" value={`${basicSecondBand.label} / ${basicSecondBand.value}`} />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            <div className="grid two">
+            {(hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) && (
               <section className="card">
-                <h2>Třídy podle § 16 odst. 9</h2>
+                <h2>Běžné třídy ZŠ</h2>
+
+                {hasSection("school_variant_first_stage_only") ? (
+                  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
+                    <option value="first_only_1">Neúplná ZŠ – 1 třída 1. stupně</option>
+                    <option value="first_only_2">Neúplná ZŠ – 2 třídy 1. stupně</option>
+                    <option value="first_only_3">Neúplná ZŠ – 3 třídy 1. stupně</option>
+                    <option value="first_only_4">Neúplná ZŠ – 4 a více tříd 1. stupně</option>
+                  </select>
+                ) : (
+                  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
+                    <option value="full_more_than_2">Úplná ZŠ – více než 2 třídy v některém ročníku</option>
+                    <option value="full_max_2">Úplná ZŠ – nejvýše 2 třídy v každém ročníku</option>
+                  </select>
+                )}
+
                 <div className="grid two">
-                  <NumberField label="1. stupeň – třídy" value={incl1Classes} onChange={setIncl1Classes} />
-                  <NumberField label="1. stupeň – žáci" value={incl1Pupils} onChange={setIncl1Pupils} />
-                  <ResultCard label="1. stupeň – průměr" value={round2(incl1Avg)} />
-                  <ResultCard label="1. stupeň – PHmax" value={`${incl1Band.label} / ${incl1Band.value}`} />
-                  <NumberField label="2. stupeň – třídy" value={incl2Classes} onChange={setIncl2Classes} />
-                  <NumberField label="2. stupeň – žáci" value={incl2Pupils} onChange={setIncl2Pupils} />
-                  <ResultCard label="2. stupeň – průměr" value={round2(incl2Avg)} />
-                  <ResultCard label="2. stupeň – PHmax" value={`${incl2Band.label} / ${incl2Band.value}`} />
+                  {hasSection("basic_first") && (
+                    <div className="subcard">
+                      <h3>1. stupeň</h3>
+                      <div className="grid two">
+                        <NumberField label="Počet tříd" value={basic1Classes} onChange={setBasic1Classes} />
+                        <NumberField label="Počet žáků" value={basic1Pupils} onChange={setBasic1Pupils} />
+                        <ResultCard label="Průměr" value={round2(basic1Avg)} />
+                        <ResultCard label="Pásmo / PHmax" value={`${basicFirstBand.label} / ${basicFirstBand.value}`} />
+                      </div>
+                    </div>
+                  )}
+
+                  {hasSection("basic_second") && (
+                    <div className="subcard">
+                      <h3>2. stupeň</h3>
+                      <div className="grid two">
+                        <NumberField label="Počet tříd" value={basic2Classes} onChange={setBasic2Classes} />
+                        <NumberField label="Počet žáků" value={basic2Pupils} onChange={setBasic2Pupils} />
+                        <ResultCard label="Průměr" value={round2(basic2Avg)} />
+                        <ResultCard label="Pásmo / PHmax" value={`${basicSecondBand.label} / ${basicSecondBand.value}`} />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </section>
+            )}
+
+            <div className="grid two">
+              {(hasSection("sec16_first") || hasSection("sec16_second")) && (
+                <section className="card">
+                  <h2>Třídy podle § 16 odst. 9</h2>
+                  <div className="grid two">
+                    {hasSection("sec16_first") && (
+                      <>
+                        <NumberField label="1. stupeň – třídy" value={sec16FirstClasses} onChange={setSec16FirstClasses} />
+                        <NumberField label="1. stupeň – žáci" value={sec16FirstPupils} onChange={setSec16FirstPupils} />
+                        <ResultCard label="1. stupeň – průměr" value={round2(incl1Avg)} />
+                        <ResultCard label="1. stupeň – PHmax" value={`${sec16FirstBand.label} / ${sec16FirstBand.value}`} />
+                      </>
+                    )}
+
+                    {hasSection("sec16_second") && (
+                      <>
+                        <NumberField label="2. stupeň – třídy" value={sec16SecondClasses} onChange={setSec16SecondClasses} />
+                        <NumberField label="2. stupeň – žáci" value={sec16SecondPupils} onChange={setSec16SecondPupils} />
+                        <ResultCard label="2. stupeň – průměr" value={round2(incl2Avg)} />
+                        <ResultCard label="2. stupeň – PHmax" value={`${sec16SecondBand.label} / ${sec16SecondBand.value}`} />
+                      </>
+                    )}
+                  </div>
+                </section>
+              )}
 
               <section className="card">
                 <h2>ZŠ speciální</h2>
@@ -340,162 +408,200 @@ export default function App() {
             </div>
 
             <div className="grid two">
-              <section className="card">
-                <h2>Škola při psychiatrické nemocnici</h2>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Typ</th><th>Zdroj</th><th>Akt. žáci</th><th>Akt. třídy</th><th>Před. žáci</th><th>Před. třídy</th><th>Průměr</th><th>Výsledek</th><th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {psychComputedRows.map((row) => (
-                      <tr key={row.id}>
-                        <td>
-                          <select value={row.kind} onChange={(e) => updatePsych(row.id, "kind", e.target.value)}>
-                            <option value="psych1">1. stupeň</option>
-                            <option value="psych2">2. stupeň</option>
-                            <option value="psychMix">1. a 2. stupeň společně</option>
-                          </select>
-                        </td>
-                        <td>
-                          <select value={row.mode} onChange={(e) => updatePsych(row.id, "mode", e.target.value)}>
-                            <option value="higher_of_two">Vyšší z obou údajů</option>
-                            <option value="current_only">Jen aktuální rok</option>
-                          </select>
-                        </td>
-                        <td><input type="number" value={row.currentPupils} onChange={(e) => updatePsych(row.id, "currentPupils", Number(e.target.value) || 0)} /></td>
-                        <td><input type="number" value={row.currentClasses} onChange={(e) => updatePsych(row.id, "currentClasses", Number(e.target.value) || 0)} /></td>
-                        <td><input type="number" value={row.prevPupils} onChange={(e) => updatePsych(row.id, "prevPupils", Number(e.target.value) || 0)} /></td>
-                        <td><input type="number" value={row.prevClasses} onChange={(e) => updatePsych(row.id, "prevClasses", Number(e.target.value) || 0)} /></td>
-                        <td>{row.usedAvg}</td>
-                        <td>{row.bandLabel} / {row.perClass}</td>
-                        <td><button className="icon-btn" onClick={() => removePsych(row.id)}>✕</button></td>
+              {hasSection("psych_groups") && (
+                <section className="card">
+                  <h2>Škola při psychiatrické nemocnici</h2>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Typ</th><th>Zdroj</th><th>Akt. žáci</th><th>Akt. třídy</th><th>Před. žáci</th><th>Před. třídy</th><th>Průměr</th><th>Výsledek</th><th></th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <button className="btn ghost" onClick={addPsych}>Přidat skupinu</button>
-              </section>
+                    </thead>
+                    <tbody>
+                      {psychComputedRows.map((row) => (
+                        <tr key={row.id}>
+                          <td>
+                            <select value={row.kind} onChange={(e) => updatePsych(row.id, "kind", e.target.value)}>
+                              <option value="psych1">1. stupeň</option>
+                              <option value="psych2">2. stupeň</option>
+                              <option value="psychMix">1. a 2. stupeň společně</option>
+                            </select>
+                          </td>
+                          <td>
+                            <select value={row.mode} onChange={(e) => updatePsych(row.id, "mode", e.target.value)}>
+                              <option value="higher_of_two">Vyšší z obou údajů</option>
+                              <option value="current_only">Jen aktuální rok</option>
+                            </select>
+                          </td>
+                          <td><input type="number" value={row.currentPupils} onChange={(e) => updatePsych(row.id, "currentPupils", Number(e.target.value) || 0)} /></td>
+                          <td><input type="number" value={row.currentClasses} onChange={(e) => updatePsych(row.id, "currentClasses", Number(e.target.value) || 0)} /></td>
+                          <td><input type="number" value={row.prevPupils} onChange={(e) => updatePsych(row.id, "prevPupils", Number(e.target.value) || 0)} /></td>
+                          <td><input type="number" value={row.prevClasses} onChange={(e) => updatePsych(row.id, "prevClasses", Number(e.target.value) || 0)} /></td>
+                          <td>{row.usedAvg}</td>
+                          <td>{row.bandLabel} / {row.perClass}</td>
+                          <td><button className="icon-btn" onClick={() => removePsych(row.id)}>✕</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button className="btn ghost" onClick={addPsych}>Přidat skupinu</button>
+                </section>
+              )}
 
-              <section className="card">
-                <h2>ZŠ s jazykem národnostní menšiny</h2>
-                <select value={minorityType} onChange={(e) => setMinorityType(e.target.value as keyof typeof B17_B21)}>
-                  <option value="minority1">1 třída 1. stupně</option>
-                  <option value="minority2">2 třídy 1. stupně</option>
-                  <option value="minority3">3 a více tříd 1. stupně</option>
-                  <option value="minorityFull1">Ročníky 1. i 2. stupně</option>
-                </select>
-                <div className="grid two">
-                  <div className="subcard">
-                    <h3>1. stupeň</h3>
-                    <div className="grid two">
-                      <NumberField label="Počet tříd" value={minority1Classes} onChange={setMinority1Classes} />
-                      <NumberField label="Počet žáků" value={minority1Pupils} onChange={setMinority1Pupils} />
-                      <ResultCard label="Průměr" value={round2(minority1Avg)} />
-                      <ResultCard label="PHmax" value={`${minority1Band.label} / ${minority1Band.value}`} />
-                    </div>
-                  </div>
-                  {minorityType === "minorityFull1" && (
+              {hasSection("minority_first") && (
+                <section className="card">
+                  <h2>ZŠ s jazykem národnostní menšiny</h2>
+                  <select value={minorityType} onChange={(e) => setMinorityType(e.target.value as keyof typeof B17_B21)}>
+                    <option value="minority1">1 třída 1. stupně</option>
+                    <option value="minority2">2 třídy 1. stupně</option>
+                    <option value="minority3">3 a více tříd 1. stupně</option>
+                    <option value="minorityFull1">Ročníky 1. i 2. stupně</option>
+                  </select>
+                  <div className="grid two">
                     <div className="subcard">
-                      <h3>2. stupeň</h3>
+                      <h3>1. stupeň</h3>
                       <div className="grid two">
-                        <NumberField label="Počet tříd" value={minority2Classes} onChange={setMinority2Classes} />
-                        <NumberField label="Počet žáků" value={minority2Pupils} onChange={setMinority2Pupils} />
-                        <ResultCard label="Průměr" value={round2(minority2Avg)} />
-                        <ResultCard label="PHmax" value={`${minority2Band.label} / ${minority2Band.value}`} />
+                        <NumberField label="Počet tříd" value={minority1Classes} onChange={setMinority1Classes} />
+                        <NumberField label="Počet žáků" value={minority1Pupils} onChange={setMinority1Pupils} />
+                        <ResultCard label="Průměr" value={round2(minority1Avg)} />
+                        <ResultCard label="PHmax" value={`${minority1Band.label} / ${minority1Band.value}`} />
                       </div>
                     </div>
-                  )}
-                </div>
-              </section>
+                    {minorityType === "minorityFull1" && (
+                      <div className="subcard">
+                        <h3>2. stupeň</h3>
+                        <div className="grid two">
+                          <NumberField label="Počet tříd" value={minority2Classes} onChange={setMinority2Classes} />
+                          <NumberField label="Počet žáků" value={minority2Pupils} onChange={setMinority2Pupils} />
+                          <ResultCard label="Průměr" value={round2(minority2Avg)} />
+                          <ResultCard label="PHmax" value={`${minority2Band.label} / ${minority2Band.value}`} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
             </div>
 
             <div className="grid two">
-              <section className="card">
-                <h2>Nižší ročníky víceletých gymnázií</h2>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Typ</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHmax / třída</th><th>Mezisoučet</th><th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {gymComputedRows.map((row) => (
-                      <tr key={row.id}>
-                        <td>
-                          <select value={row.kind} onChange={(e) => updateGym(row.id, "kind", e.target.value)}>
-                            <option value="gym6">Gymnázium šestileté</option>
-                            <option value="gym8">Gymnázium osmileté</option>
-                            <option value="sport8">Gymnázium sportovní 8leté</option>
-                            <option value="sport6">Gymnázium sportovní 6leté</option>
-                          </select>
-                        </td>
-                        <td><input type="number" value={row.classes} onChange={(e) => updateGym(row.id, "classes", Number(e.target.value) || 0)} /></td>
-                        <td><input type="number" value={row.pupils} onChange={(e) => updateGym(row.id, "pupils", Number(e.target.value) || 0)} /></td>
-                        <td>{row.avg}</td>
-                        <td>{row.bandLabel}</td>
-                        <td>{row.perClass}</td>
-                        <td>{row.subtotal}</td>
-                        <td><button className="icon-btn" onClick={() => removeGym(row.id)}>✕</button></td>
+              {hasSection("gym_groups") && (
+                <section className="card">
+                  <h2>Nižší ročníky víceletých gymnázií</h2>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Typ</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHmax / třída</th><th>Mezisoučet</th><th></th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <button className="btn ghost" onClick={addGym}>Přidat skupinu</button>
-              </section>
+                    </thead>
+                    <tbody>
+                      {gymComputedRows.map((row) => (
+                        <tr key={row.id}>
+                          <td>
+                            <select value={row.kind} onChange={(e) => updateGym(row.id, "kind", e.target.value)}>
+                              <option value="gym6">Gymnázium šestileté</option>
+                              <option value="gym8">Gymnázium osmileté</option>
+                              <option value="sport8">Gymnázium sportovní 8leté</option>
+                              <option value="sport6">Gymnázium sportovní 6leté</option>
+                            </select>
+                          </td>
+                          <td><input type="number" value={row.classes} onChange={(e) => updateGym(row.id, "classes", Number(e.target.value) || 0)} /></td>
+                          <td><input type="number" value={row.pupils} onChange={(e) => updateGym(row.id, "pupils", Number(e.target.value) || 0)} /></td>
+                          <td>{row.avg}</td>
+                          <td>{row.bandLabel}</td>
+                          <td>{row.perClass}</td>
+                          <td>{row.subtotal}</td>
+                          <td><button className="icon-btn" onClick={() => removeGym(row.id)}>✕</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button className="btn ghost" onClick={addGym}>Přidat skupinu</button>
+                </section>
+              )}
 
-              <section className="card">
-                <h2>Smíšené třídy § 16 odst. 9 a ZŠ speciální</h2>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Stupeň</th><th>Převažující obor</th><th>Třídy</th><th>Žáci</th><th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mixedRows.map((row) => (
-                      <tr key={row.id}>
-                        <td>
-                          <select value={row.stage} onChange={(e) => updateMixed(row.id, "stage", e.target.value)}>
-                            <option value="first">1. stupeň</option>
-                            <option value="second">2. stupeň</option>
-                          </select>
-                        </td>
-                        <td>
-                          <select value={row.majority} onChange={(e) => updateMixed(row.id, "majority", e.target.value)}>
-                            <option value="zs">79-01-C/01</option>
-                            <option value="special">79-01-B/01 nebo shoda</option>
-                          </select>
-                        </td>
-                        <td><input type="number" value={row.classes} onChange={(e) => updateMixed(row.id, "classes", Number(e.target.value) || 0)} /></td>
-                        <td><input type="number" value={row.pupils} onChange={(e) => updateMixed(row.id, "pupils", Number(e.target.value) || 0)} /></td>
-                        <td><button className="icon-btn" onClick={() => removeMixed(row.id)}>✕</button></td>
+              {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
+                <section className="card">
+                  <h2>Smíšené třídy § 16 odst. 9 a ZŠ speciální</h2>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Stupeň</th><th>Převažující obor</th><th>Třídy</th><th>Žáci</th><th></th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <button className="btn ghost" onClick={addMixed}>Přidat skupinu</button>
-              </section>
+                    </thead>
+                    <tbody>
+                      {mixedRows.map((row) => (
+                        <tr key={row.id}>
+                          <td>
+                            <select value={row.stage} onChange={(e) => updateMixed(row.id, "stage", e.target.value)}>
+                              <option value="first">1. stupeň</option>
+                              <option value="second">2. stupeň</option>
+                            </select>
+                          </td>
+                          <td>
+                            <select value={row.majority} onChange={(e) => updateMixed(row.id, "majority", e.target.value)}>
+                              <option value="zs">79-01-C/01</option>
+                              <option value="special">79-01-B/01 nebo shoda</option>
+                            </select>
+                          </td>
+                          <td><input type="number" value={row.classes} onChange={(e) => updateMixed(row.id, "classes", Number(e.target.value) || 0)} /></td>
+                          <td><input type="number" value={row.pupils} onChange={(e) => updateMixed(row.id, "pupils", Number(e.target.value) || 0)} /></td>
+                          <td><button className="icon-btn" onClick={() => removeMixed(row.id)}>✕</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button className="btn ghost" onClick={addMixed}>Přidat skupinu</button>
+                </section>
+              )}
             </div>
 
-            <section className="card">
-              <h2>Samostatné položky PHmax</h2>
-              <div className="grid four">
-                <NumberField label="Přípravné třídy – počet tříd" value={prepClasses} onChange={setPrepClasses} />
-                <NumberField label="Přípravné třídy – počet dětí" value={prepChildren} onChange={setPrepChildren} />
-                <ResultCard label="Přípravná třída" value={`${prepAvg < 10 ? "méně než 10" : "10 a více"} / ${prepPh}`} />
-                <ResultCard label="Mezisoučet" value={round2(prepClasses * prepPh)} />
-                <NumberField label="Přípravný stupeň ZŠS – počet tříd" value={prepSpecialClasses} onChange={setPrepSpecialClasses} />
-                <NumberField label="Přípravný stupeň ZŠS – počet žáků" value={prepSpecialChildren} onChange={setPrepSpecialChildren} />
-                <ResultCard label="Přípravný stupeň" value={`${prepSpecialAvg < 4 ? "méně než 4" : "4 a více"} / ${prepSpecialPh}`} />
-                <ResultCard label="Mezisoučet" value={round2(prepSpecialClasses * prepSpecialPh)} />
-                <NumberField label="§ 38 – 1. stupeň" value={p38First} onChange={setP38First} />
-                <NumberField label="§ 38 – 2. stupeň" value={p38Second} onChange={setP38Second} />
-                <NumberField label="§ 41 – 1. stupeň" value={p41First} onChange={setP41First} />
-                <NumberField label="§ 41 – 2. stupeň" value={p41Second} onChange={setP41Second} />
-              </div>
-            </section>
+            {(hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) && (
+              <section className="card">
+                <h2>Samostatné položky PHmax</h2>
+                <div className="grid four">
+                  <NumberField label="Přípravné třídy – počet tříd" value={prepClasses} onChange={setPrepClasses} />
+                  <NumberField label="Přípravné třídy – počet dětí" value={prepChildren} onChange={setPrepChildren} />
+                  <ResultCard label="Přípravná třída" value={`${prepAvg < 10 ? "méně než 10" : "10 a více"} / ${prepPh}`} />
+                  <ResultCard label="Mezisoučet" value={round2(prepClasses * prepPh)} />
+                  <NumberField label="Přípravný stupeň ZŠS – počet tříd" value={prepSpecialClasses} onChange={setPrepSpecialClasses} />
+                  <NumberField label="Přípravný stupeň ZŠS – počet žáků" value={prepSpecialChildren} onChange={setPrepSpecialChildren} />
+                  <ResultCard label="Přípravný stupeň" value={`${prepSpecialAvg < 4 ? "méně než 4" : "4 a více"} / ${prepSpecialPh}`} />
+                  <ResultCard label="Mezisoučet" value={round2(prepSpecialClasses * prepSpecialPh)} />
+                  <NumberField label="§ 38 – 1. stupeň" value={p38First} onChange={setP38First} />
+                  <NumberField label="§ 38 – 2. stupeň" value={p38Second} onChange={setP38Second} />
+                  <NumberField label="§ 41 – 1. stupeň" value={p41First} onChange={setP41First} />
+                  <NumberField label="§ 41 – 2. stupeň" value={p41Second} onChange={setP41Second} />
+                </div>
+              </section>
+            )}
+
+            {hasSection("nv75_teacher_type") && (
+              <section className="card">
+                <h2>NV 75/2005 Sb. – učitel</h2>
+                <p className="muted-text">Formulář pro učitele doplníme v dalším kroku.</p>
+              </section>
+            )}
+
+            {hasSection("nv75_headteacher_type") && (
+              <section className="card">
+                <h2>NV 75/2005 Sb. – ředitel školy</h2>
+                <p className="muted-text">Formulář pro ředitele doplníme v dalším kroku.</p>
+              </section>
+            )}
+
+            {hasSection("nv75_deputy_units") && (
+              <section className="card">
+                <h2>NV 75/2005 Sb. – zástupce ředitele</h2>
+                <p className="muted-text">Formulář pro zástupce ředitele doplníme v dalším kroku.</p>
+              </section>
+            )}
+
+            {hasSection("nv75_other_staff_type") && (
+              <section className="card">
+                <h2>NV 75/2005 Sb. – ostatní pedagogičtí pracovníci</h2>
+                <p className="muted-text">Formulář pro další role doplníme v dalším kroku.</p>
+              </section>
+            )}
 
             <section className="card muted">
               <h2>Souhrn PHmax</h2>
