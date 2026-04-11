@@ -1144,7 +1144,6 @@ export default function App() {
                 <button className="btn btn--compact btn--soft" onClick={printSummaryWindow}>Tisk shrnutí</button>
               </div>
             </div>
-          </div>
 
           <p className="muted-text hero__note">
             Ukázkové příklady vycházejí z typických situací v metodice a z logiky jednotlivých výpočtů.
