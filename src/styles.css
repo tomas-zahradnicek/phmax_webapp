@@ -1321,3 +1321,113 @@ input[type="radio"] {
     border-color: #f59e0b !important;
   }
 }
+
+
+/* Header action layout */
+.hero-actions {
+  margin-top: 24px;
+  display: grid;
+  gap: 12px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 22px;
+  padding: 16px;
+  backdrop-filter: blur(8px);
+}
+
+.hero-actions__top,
+.hero-actions__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+
+.hero-actions__example {
+  flex: 1 1 340px;
+  min-width: 280px;
+}
+
+.hero-actions .btn {
+  min-height: 46px;
+}
+
+.hero-actions .btn.ghost {
+  background: rgba(255,255,255,0.96);
+}
+
+@media (max-width: 900px) {
+  .hero-actions__top,
+  .hero-actions__bottom {
+    align-items: stretch;
+  }
+  .hero-actions__top .btn,
+  .hero-actions__bottom .btn {
+    width: 100%;
+  }
+  .hero-actions__example {
+    min-width: 100%;
+  }
+}
+
+/* Bigger number fields */
+.number-field {
+  min-width: 0;
+}
+
+.number-field__control--large {
+  align-items: stretch;
+}
+
+.number-field__input {
+  min-height: 64px;
+  padding: 14px 16px;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.number-field__meta {
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.number-field__hint {
+  line-height: 1.35;
+}
+
+.result-card__value {
+  white-space: normal;
+}
+
+.section-results {
+  margin-top: 16px;
+}
+
+/* Better print button spacing retained */
+
+.result-card__type {
+  display: inline-flex;
+  margin-bottom: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  background: rgba(148,163,184,0.12);
+  color: #475569;
+}
+
+.result-card--primary .result-card__type {
+  background: rgba(37,99,235,0.10);
+  color: #1d4ed8;
+}
+
+.result-card--success .result-card__type {
+  background: rgba(22,163,74,0.10);
+  color: #15803d;
+}
+
+.result-card--warning .result-card__type {
+  background: rgba(245,158,11,0.12);
+  color: #b45309;
+}

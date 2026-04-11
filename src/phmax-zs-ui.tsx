@@ -52,7 +52,7 @@ export function NumberField({
         {hint ? <HintBadge text={hint} /> : null}
       </span>
 
-      <div className="number-field__control">
+      <div className="number-field__control number-field__control--large">
         <input
           className={`number-field__input${isEmptyLikeZero ? " is-empty" : ""}`}
           type="number"
@@ -68,8 +68,7 @@ export function NumberField({
             onChange(Number.isFinite(next) ? next : 0);
           }}
         />
-        <div className="number-field__suffix">číslo</div>
-      </div>
+              </div>
 
       <div className="number-field__meta">
         <span className="number-field__hint">

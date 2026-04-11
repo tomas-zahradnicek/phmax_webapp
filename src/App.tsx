@@ -15,7 +15,6 @@ import {
   PHP_TABLE,
   pickBand,
   round2,
-  exportCsv,
   BasicType,
   MixedRow,
   PhaRow,
@@ -181,6 +180,14 @@ export default function App() {
   const visibleSections = useMemo(() => getVisibleSections(mode), [mode]);
   const hasSection = (section: FormSection) => visibleSections.includes(section);
 
+  const findModeBySections = (...sections: FormSection[]): CalculatorMode => {
+    const candidate = Object.values(MODE_CONFIG).find((item) =>
+      item.group === "phmax" && sections.every((section) => getVisibleSections(item.id).includes(section))
+    );
+    return (candidate?.id ?? DEFAULT_MODE) as CalculatorMode;
+  };
+
+
   const [basicType, setBasicType] = useState<BasicType>("full_more_than_2");
   const [basic1Classes, setBasic1Classes] = useState(0);
   const [basic1Pupils, setBasic1Pupils] = useState(0);
@@ -323,6 +330,21 @@ export default function App() {
   const prepSpecialAvg = prepSpecialClasses > 0 ? prepSpecialChildren / prepSpecialClasses : 0;
   const prepSpecialPh = prepSpecialAvg < 4 ? 10 : 40;
 
+  const basic1Phmax = round2(basic1Classes * basicFirstBand.value);
+  const basic2Phmax = round2(isFull ? basic2Classes * basicSecondBand.value : 0);
+  const incl1Phmax = round2(incl1Classes * incl1Band.value);
+  const incl2Phmax = round2(incl2Classes * incl2Band.value);
+  const minority1Phmax = round2(minority1Classes * minority1Band.value);
+  const minority2Phmax = round2(minorityType === "minorityFull1" ? minority2Classes * minority2Band.value : 0);
+  const special1PhmaxPart = round2(special1Classes * special1Band.value);
+  const special2PhmaxPart = round2(special2Classes * special2Band.value);
+  const specialIIPhmaxPart = round2(specialIIClasses * specialIIBand.value);
+  const prepClassPhmax = round2(prepClasses * prepPh);
+  const prepSpecialPhmax = round2(prepSpecialClasses * prepSpecialPh);
+  const par38Phmax = round2(p38First * 0.25 + p38Second * 0.5);
+  const par41Phmax = round2(p41First * 0.25 + p41Second * 0.5);
+
+
   const basicPhmax = round2(basic1Classes * basicFirstBand.value + (isFull ? basic2Classes * basicSecondBand.value : 0));
   const inclPhmax = round2(incl1Classes * incl1Band.value + incl2Classes * incl2Band.value);
   const psychPhmax = round2(psychComputedRows.reduce((s, r) => s + r.subtotal, 0));
@@ -339,7 +361,7 @@ export default function App() {
       return sum + row.classes * band.value;
     }, 0)
   );
-  const extrasPhmax = round2(prepClasses * prepPh + prepSpecialClasses * prepSpecialPh + p38First * 0.25 + p38Second * 0.5 + p41First * 0.25 + p41Second * 0.5);
+  const extrasPhmax = round2(prepClassPhmax + prepSpecialPhmax + par38Phmax + par41Phmax);
   const totalPhmax = round2(basicPhmax + inclPhmax + psychPhmax + minorityPhmax + gymPhmax + specialPhmax + mixedPhmax + extrasPhmax);
 
   const phaComputedRows = phaRows.map((row) => {
@@ -534,6 +556,7 @@ export default function App() {
     resetAll();
 
     if (example === "phmax_bezna_zs") {
+      setMode(DEFAULT_MODE);
       setTab("phmax");
       setBasicType("full_more_than_2");
       setBasic1Classes(10);
@@ -544,6 +567,7 @@ export default function App() {
     }
 
     if (example === "phpmax_tri_roky") {
+      setMode(DEFAULT_MODE);
       setTab("php");
       setPhpWizardStep("a");
       setPhpMethodMode("three_year_avg");
@@ -557,6 +581,7 @@ export default function App() {
     }
 
     if (example === "psychiatricka_nemocnice") {
+      setMode(findModeBySections("psych_groups"));
       setTab("phmax");
       setPsychRows([
         { id: 1, kind: "psych1", mode: "higher_of_two", currentPupils: 7, currentClasses: 1, prevPupils: 6, prevClasses: 1 },
@@ -565,6 +590,7 @@ export default function App() {
     }
 
     if (example === "smisene_tridy") {
+      setMode(findModeBySections("dominant_c_first"));
       setTab("phmax");
       setMixedRows([
         { id: 1, stage: "first", majority: "zs", classes: 2, pupils: 18 },
@@ -574,6 +600,7 @@ export default function App() {
 
 
     if (example === "mala_skola_pod_limitem") {
+      setMode(DEFAULT_MODE);
       setTab("php");
       setPhpWizardStep("a");
       setPhpMethodMode("three_year_avg");
@@ -587,6 +614,7 @@ export default function App() {
     }
 
     if (example === "skola_s_odecty_phpmax") {
+      setMode(DEFAULT_MODE);
       setTab("php");
       setPhpWizardStep("a");
       setPhpMethodMode("three_year_avg");
@@ -600,6 +628,7 @@ export default function App() {
     }
 
     if (example === "inkluzivni_skola") {
+      setMode(findModeBySections("basic_first", "sec16_first"));
       setTab("phmax");
       setBasic1Classes(6);
       setBasic1Pupils(120);
@@ -614,6 +643,7 @@ export default function App() {
     }
 
     if (example === "pripravna_trida") {
+      setMode(findModeBySections("prep_class"));
       setTab("phmax");
       setPrepClasses(1);
       setPrepChildren(12);
@@ -865,61 +895,35 @@ export default function App() {
   ]);
 
   const summaryRows = [
-    ["Běžné třídy ZŠ", basicPhmax],
-    ["Třídy podle § 16 odst. 9", inclPhmax],
+    ["Běžné třídy ZŠ – 1. stupeň", basic1Phmax],
+    ["Běžné třídy ZŠ – 2. stupeň", basic2Phmax],
+    ["Běžné třídy ZŠ – celkem", basicPhmax],
+    ["Třídy podle § 16 odst. 9 – 1. stupeň", incl1Phmax],
+    ["Třídy podle § 16 odst. 9 – 2. stupeň", incl2Phmax],
+    ["Třídy podle § 16 odst. 9 – celkem", inclPhmax],
     ["Škola při psychiatrické nemocnici", psychPhmax],
-    ["ZŠ s jazykem národnostní menšiny", minorityPhmax],
+    ["ZŠ s jazykem národnostní menšiny – 1. stupeň", minority1Phmax],
+    ["ZŠ s jazykem národnostní menšiny – 2. stupeň", minority2Phmax],
+    ["ZŠ s jazykem národnostní menšiny – celkem", minorityPhmax],
     ["Nižší ročníky víceletých gymnázií", gymPhmax],
     ["Smíšené třídy § 16 odst. 9 a ZŠ speciální", mixedPhmax],
-    ["Základní škola speciální", specialPhmax],
-    ["Samostatné položky PHmax", extrasPhmax],
+    ["ZŠ speciální – I. díl 1. stupeň", special1PhmaxPart],
+    ["ZŠ speciální – I. díl 2. stupeň", special2PhmaxPart],
+    ["ZŠ speciální – II. díl", specialIIPhmaxPart],
+    ["ZŠ speciální – celkem", specialPhmax],
+    ["Samostatné položky – přípravná třída", prepClassPhmax],
+    ["Samostatné položky – přípravný stupeň ZŠS", prepSpecialPhmax],
+    ["Samostatné položky – § 38", par38Phmax],
+    ["Samostatné položky – § 41", par41Phmax],
+    ["Samostatné položky PHmax – celkem", extrasPhmax],
     ["Výsledek PHmax", totalPhmax],
-    ["PHAmax – asistenti pedagoga", totalPha],
-    ["PHPmax – metodický výpočet – rozhodná hodnota", phpBaseValue],
-    ["PHPmax – metodický výpočet – vyloučené třídy", phpExcludedTotal],
-    ["PHPmax – metodický výpočet – očištěná hodnota", phpAdjustedValue],
-    ["PHPmax – metodický výpočet celkem", totalPhp],
+    ["Výsledek PHAmax", totalPha],
+    ["PHPmax – rozhodná hodnota", phpBaseValue],
+    ["PHPmax – nezapočítávaní žáci", phpExcludedTotal],
+    ["PHPmax – očištěná hodnota", phpAdjustedValue],
+    ["Výsledek PHPmax", totalPhp],
   ] as const;
 
-  const handleExportJson = () => {
-    const payload = {
-      module: "ZŠ",
-      generatedAt: new Date().toISOString(),
-      mode,
-      tab,
-      summary: Object.fromEntries(summaryRows.map(([label, value]) => [label, value])),
-      phpmaxMethodika: {
-        wizardStep: phpWizardStep,
-        methodMode: phpMethodMode,
-        years: {
-          year1: phpYear1,
-          year2: phpYear2,
-          year3: phpYear3,
-        },
-        excluded: {
-          abroad: phpExcludedAbroad,
-          foreignSchoolInCz: phpExcludedForeignSchoolCz,
-          individual: phpExcludedIndividual,
-        },
-        excludedSchool: phpExcludedSchool,
-        baseValue: phpBaseValue,
-        excludedTotal: phpExcludedTotal,
-        adjustedValue: phpAdjustedValue,
-        result: totalPhp,
-      },
-      nv75: MODE_CONFIG[mode].group === "nv75"
-        ? {
-            school: nv75School,
-            role: nv75Role,
-            teacherMin: nv75TeacherMin,
-            teacherMax: nv75TeacherMax,
-            reference: nv75Reference,
-          }
-        : null,
-    };
-    downloadTextFile("kalkulacka-zs-vypocet.json", JSON.stringify(payload, null, 2), "application/json;charset=utf-8");
-    setUiNotice("JSON slouží pro technické předání dat, archivaci nebo další strojové zpracování.");
-  };
 
   const handleExportCsv = () => {
     downloadTextFile("kalkulacka-zs-souhrn.csv", exportCsvLocalized(summaryRows), "text/csv;charset=utf-8");
@@ -981,7 +985,6 @@ export default function App() {
             <button className="btn ghost" onClick={handleExportCsv}>Export CSV</button>
             <button className="btn ghost" onClick={copySummaryToClipboard}>Kopírovat shrnutí</button>
             <button className="btn ghost" onClick={printSummaryWindow}>Tisk shrnutí</button>
-            <button className="btn" onClick={handleExportJson}>Export JSON</button>
           </div>
 
           <p className="muted-text hero__note">
@@ -991,7 +994,6 @@ export default function App() {
           <div className="hero-status">
             <div className="hero-status__item"><strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.</div>
             <div className="hero-status__item"><strong>Poslední uložení:</strong> {lastSavedAt || "zatím neproběhlo"}</div>
-            <div className="hero-status__item"><strong>Export JSON:</strong> pro technické předání dat nebo archivaci.</div>
             {uiNotice ? <div className="hero-status__item hero-status__item--notice">{uiNotice}</div> : null}
           </div>
         </header>
@@ -1185,6 +1187,12 @@ export default function App() {
                       </div>
                     </div>
                   )}
+                </div>
+                <div className="grid four section-results">
+                  {hasSection("prep_class") && <ResultCard label="Přípravná třída – výsledek" value={prepClassPhmax} tone="success" />}
+                  {hasSection("prep_special") && <ResultCard label="Přípravný stupeň ZŠS – výsledek" value={prepSpecialPhmax} tone="success" />}
+                  {hasSection("par38") && <ResultCard label="§ 38 – výsledek" value={par38Phmax} tone="success" />}
+                  {hasSection("par41") && <ResultCard label="§ 41 – výsledek" value={par41Phmax} tone="success" />}
                 </div>
               </section>
             )}
@@ -1452,7 +1460,7 @@ export default function App() {
                 <ResultCard label="Smíšené třídy" value={mixedPhmax} />
                 <ResultCard label="ZŠ speciální" value={specialPhmax} />
                 <ResultCard label="Samostatné položky" value={extrasPhmax} />
-                <ResultCard label="Výsledek PHmax" value={totalPhmax} />
+                <ResultCard label="Výsledek PHmax" tone="success" value={totalPhmax} />
               </div>
             </section>
           </div>
@@ -1646,7 +1654,7 @@ export default function App() {
             <ResultCard label="PHmax" value={totalPhmax} />
             <ResultCard label="PHAmax – asistenti pedagoga" value={totalPha} />
             <ResultCard label="PHPmax – metodický výpočet" value={totalPhp} />
-            <ResultCard label="Přehledový součet" value={round2(totalPhmax + totalPha + totalPhp)} />
+            <ResultCard label="Přehledový součet" tone="success" value={round2(totalPhmax + totalPha + totalPhp)} />
           </div>
         </section>
         {glossaryOpen && (
