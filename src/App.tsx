@@ -47,6 +47,7 @@ type PhpMethodMode = "three_year_avg" | "short_period";
 type Nv75Role = "ucitel" | "reditel";
 type Nv75School = "plavecka_skola";
 type ExampleKey = "" | "phmax_bezna_zs" | "phpmax_tri_roky" | "psychiatricka_nemocnice" | "smisene_tridy" | "pripravna_trida" | "mala_skola_pod_limitem" | "skola_s_odecty_phpmax" | "inkluzivni_skola";
+type WizardChoice = "" | "php_small" | "php_deductions" | "ph_inclusion" | "ph_psych" | "ph_mixed" | "ph_prep";
 
 function clampNonNegative(value: number) {
   return Math.max(0, Number.isFinite(value) ? value : 0);
@@ -194,6 +195,7 @@ export default function App() {
   const [nv75TeacherMin, setNv75TeacherMin] = useState(22);
   const [nv75TeacherMax, setNv75TeacherMax] = useState(30);
   const [selectedExample, setSelectedExample] = useState<ExampleKey>("");
+  const [wizardChoice, setWizardChoice] = useState<WizardChoice>("");
 
   const isFull = basicType === "full_more_than_2" || basicType === "full_max_2";
 
@@ -410,6 +412,8 @@ export default function App() {
     resetPha();
     resetPhp();
     resetNv75();
+    setSelectedExample("");
+    setWizardChoice("");
     setTab("phmax");
   };
 
@@ -569,6 +573,42 @@ export default function App() {
     }
   };
 
+
+  const applyWizardChoice = (choice: WizardChoice) => {
+    setWizardChoice(choice);
+    if (!choice) return;
+
+    if (choice === "php_small") {
+      loadExample("mala_skola_pod_limitem");
+      return;
+    }
+
+    if (choice === "php_deductions") {
+      loadExample("skola_s_odecty_phpmax");
+      return;
+    }
+
+    if (choice === "ph_inclusion") {
+      loadExample("inkluzivni_skola");
+      return;
+    }
+
+    if (choice === "ph_psych") {
+      loadExample("psychiatricka_nemocnice");
+      return;
+    }
+
+    if (choice === "ph_mixed") {
+      loadExample("smisene_tridy");
+      return;
+    }
+
+    if (choice === "ph_prep") {
+      loadExample("pripravna_trida");
+      return;
+    }
+  };
+
   const summaryRows = [
     ["Běžné třídy ZŠ", basicPhmax],
     ["Třídy podle § 16 odst. 9", inclPhmax],
@@ -664,6 +704,35 @@ export default function App() {
             Ukázkové příklady vycházejí z typických situací v metodice a z logiky jednotlivých výpočtů. Po načtení je můžete upravit podle vlastní školy.
           </p>
         </header>
+
+        <section className="card">
+          <h2>Rychlý rozcestník</h2>
+          <p className="muted-text">
+            Nejste si jistí, kde začít? Vyberte situaci, která se nejvíc blíží vaší škole. Aplikace vás přesměruje na správnou část kalkulačky a vyplní odpovídající ukázkový příklad.
+          </p>
+
+          <div className="grid two">
+            <div className="field">
+              <span>Jakou situaci chcete řešit?</span>
+              <select value={wizardChoice} onChange={(e) => applyWizardChoice(e.target.value as WizardChoice)}>
+                <option value="">Vyberte situaci…</option>
+                <option value="php_small">Máme menší školu a chceme zjistit PHPmax</option>
+                <option value="php_deductions">Máme žáky, kteří se do PHPmax nezapočítávají</option>
+                <option value="ph_inclusion">Jsme škola s inkluzí a třídami podle § 16</option>
+                <option value="ph_psych">Jsme škola při psychiatrické nemocnici</option>
+                <option value="ph_mixed">Máme smíšené třídy</option>
+                <option value="ph_prep">Máme přípravnou třídu nebo přípravný stupeň ZŠS</option>
+              </select>
+            </div>
+
+            <div className="subcard">
+              <h3>Co rozcestník udělá</h3>
+              <p className="muted-text">
+                Vybere vhodnou záložku a načte příklad, který odpovídá zvolené situaci. Potom můžete všechna data ručně upravit podle vlastní školy.
+              </p>
+            </div>
+          </div>
+        </section>
 
         <section className="card">
           <h2>Typ školy / režim výpočtu</h2>
