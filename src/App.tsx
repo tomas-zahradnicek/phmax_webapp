@@ -869,7 +869,7 @@ export default function App() {
                   {hasSection("prep_class") && (
                     <>
                       <NumberField label="Přípravné třídy – počet tříd" value={prepClasses} onChange={setPrepClasses} />
-                      <NumberField label="Přípravné třídy – počet žáků" value={prepChildren} onChange={setPrepChildren} />
+                      <NumberField label="Přípravné třídy – počet dětí" value={prepChildren} onChange={setPrepChildren} />
                       <ResultCard label="Přípravná třída" value={`${prepAvg < 10 ? "méně než 10" : "10 a více"} / ${prepPh}`} />
                       <ResultCard label="Mezisoučet" value={round2(prepClasses * prepPh)} />
                     </>
@@ -878,7 +878,7 @@ export default function App() {
                   {hasSection("prep_special") && (
                     <>
                       <NumberField label="Přípravný stupeň ZŠS – počet tříd" value={prepSpecialClasses} onChange={setPrepSpecialClasses} />
-                      <NumberField label="Přípravný stupeň ZŠS – počet žáků" value={prepSpecialChildren} onChange={setPrepSpecialChildren} />
+                      <NumberField label="Přípravný stupeň ZŠS – počet dětí" value={prepSpecialChildren} onChange={setPrepSpecialChildren} />
                       <ResultCard label="Přípravný stupeň" value={`${prepSpecialAvg < 4 ? "méně než 4" : "4 a více"} / ${prepSpecialPh}`} />
                       <ResultCard label="Mezisoučet" value={round2(prepSpecialClasses * prepSpecialPh)} />
                     </>
