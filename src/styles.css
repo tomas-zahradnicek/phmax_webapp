@@ -1040,12 +1040,30 @@ input[type="radio"] {
 .section-card--module-mixed::before { background: linear-gradient(90deg, #d97706, #fbbf24); }
 .section-card--module-mixed::after { background: radial-gradient(circle, rgba(251,191,36,0.14), transparent 70%); }
 
-/* Smíšené třídy – tabulkový přehled místo mřížky malých karet */
+.stack > .grid.two > .section-card--module-mixed {
+  grid-column: 1 / -1;
+}
+
+.mixed-module__lead {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  max-width: 72ch;
+}
+
+/* Smíšené třídy – tabulkový přehled; na širší obrazovce vedle sebe */
 .mixed-module__tables {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
   gap: 22px;
   margin-top: 16px;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .mixed-module__tables {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));
+  }
 }
 
 .mixed-sheet-panel {
@@ -1079,42 +1097,61 @@ input[type="radio"] {
 
 .mixed-sheet {
   width: 100%;
-  min-width: 640px;
+  min-width: 0;
+  max-width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.35;
 }
 
 .mixed-sheet thead th {
   text-align: left;
-  padding: 11px 12px;
+  padding: 10px 10px;
   font-weight: 800;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #64748b;
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   border-bottom: 1px solid #e2e8f0;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.25;
+  hyphens: auto;
+  vertical-align: bottom;
 }
+
+.mixed-sheet thead th:nth-child(1) { width: 26%; }
+.mixed-sheet thead th:nth-child(2) { width: 11%; }
+.mixed-sheet thead th:nth-child(3) { width: 11%; }
+.mixed-sheet thead th:nth-child(4) { width: 15%; }
+.mixed-sheet thead th:nth-child(5) { width: 13%; }
+.mixed-sheet thead th:nth-child(6) { width: 12%; }
+.mixed-sheet thead th:nth-child(7) { width: 12%; }
 
 .mixed-sheet tbody th[scope="row"] {
   text-align: left;
-  padding: 12px 14px;
+  padding: 10px 12px;
   font-weight: 700;
   color: #92400e;
   background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
   border-bottom: 1px solid #fde68a;
   white-space: normal;
-  max-width: 12rem;
+  word-break: break-word;
 }
 
 .mixed-sheet td {
-  padding: 10px 12px;
+  padding: 9px 10px;
   border-bottom: 1px solid #e5e7eb;
   vertical-align: middle;
   color: #334155;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.mixed-sheet td.mixed-sheet__num {
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .mixed-sheet tbody tr:last-child td,
@@ -1124,10 +1161,11 @@ input[type="radio"] {
 
 .mixed-sheet__input {
   width: 100%;
-  min-width: 4.5rem;
-  max-width: 7rem;
-  padding: 8px 10px;
-  font-size: 1.05rem;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 8px 8px;
+  font-size: 1rem;
   font-weight: 700;
   border-radius: 10px;
   border: 1px solid var(--line-strong);

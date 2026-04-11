@@ -1781,7 +1781,7 @@ export default function App() {
               {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
                 <section className="card section-card section-card--module section-card--module-mixed mixed-module" data-section="mixed">
                   <h2>Smíšené třídy § 16 odst. 9 a ZŠ speciální <HelpHint text="Podle metodiky se tyto třídy posuzují samostatně podle převažujícího oboru vzdělání. Pokud ve třídě převažuje obor 79-01-C/01, použijí se řádky B9 až B10. Pokud převažuje 79-01-B/01 nebo je počet žáků shodný, použijí se řádky B26 až B28." /></h2>
-                  <p className="muted-text">
+                  <p className="muted-text mixed-module__lead">
                     Přehled v tabulkách: každý řádek je jeden obor (C/01 běžná ZŠ, B/01 ZŠ speciální). Sloupce vedou od vstupů přes průměr a pásmo až po dílčí PHmax; dole je součet za stupeň.
                   </p>
 
