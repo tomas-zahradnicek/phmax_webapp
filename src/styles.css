@@ -1178,3 +1178,146 @@ input[type="radio"] {
     gap: 8px;
   }
 }
+
+
+/* Storage/status/glossary/print fixes */
+
+.hero-status {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+}
+
+.hero-status__item {
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.hero-status__item strong {
+  color: white;
+}
+
+.hero-status__item--notice {
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.14);
+  font-weight: 600;
+}
+
+.glossary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: -4px 0 18px;
+}
+
+.glossary-chip {
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.glossary-chip:hover {
+  background: rgba(37, 99, 235, 0.12);
+}
+
+.glossary-strip__text {
+  color: #64748b;
+  font-size: 0.92rem;
+}
+
+@media print {
+  :root,
+  body,
+  .app-shell,
+  .container {
+    background: white !important;
+  }
+
+  .hero__orb,
+  .toolbar,
+  .tabs,
+  .checks,
+  .glossary-strip,
+  .glossary-modal,
+  .icon-btn,
+  .btn,
+  .help-hint,
+  .hero-status,
+  .card--onboarding,
+  .card--accent,
+  .card--elevated,
+  .section-card--guide,
+  .section-card--setup {
+    display: none !important;
+  }
+
+  .container {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .hero,
+  .card,
+  .subcard,
+  .result-card,
+  .number-field {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    backdrop-filter: none !important;
+  }
+
+  .hero {
+    display: block !important;
+    padding: 0 0 12px !important;
+    margin-bottom: 12px !important;
+    border: none !important;
+  }
+
+  .hero .pill {
+    display: none !important;
+  }
+
+  .hero h1 {
+    color: #111827 !important;
+    font-size: 22pt !important;
+    line-height: 1.2 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .hero p {
+    color: #374151 !important;
+  }
+
+  .grid.two,
+  .grid.three,
+  .grid.four {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .table {
+    display: table !important;
+    overflow: visible !important;
+  }
+
+  .table th,
+  .table td {
+    white-space: normal !important;
+  }
+
+  .warning {
+    background: white !important;
+    border-color: #f59e0b !important;
+  }
+}

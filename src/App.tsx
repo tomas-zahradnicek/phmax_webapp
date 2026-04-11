@@ -40,6 +40,14 @@ function downloadTextFile(filename: string, content: string, mime = "text/plain;
   URL.revokeObjectURL(url);
 }
 
+function exportCsvLocalized(rows: readonly (readonly [string, string | number])[]) {
+  const escapeCell = (value: string | number) =>
+    `"${String(value).replace(/"/g, '""')}"`;
+  const body = rows.map(([label, value]) => [escapeCell(label), escapeCell(value)].join(";")).join("\r\n");
+  return "\ufeff" + ["Položka;Hodnota", body].join("\r\n");
+}
+
+
 type TabKey = "phmax" | "pha" | "php";
 
 type PhpWizardStep = "a" | "b" | "c" | "d";
@@ -236,6 +244,7 @@ export default function App() {
   const [dataMode, setDataMode] = useState<DataMode>("own");
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string>("");
+  const [uiNotice, setUiNotice] = useState<string>("");
 
   const isFull = basicType === "full_more_than_2" || basicType === "full_max_2";
 
@@ -703,7 +712,10 @@ export default function App() {
   const restoreSnapshot = () => {
     try {
       const raw = localStorage.getItem("edu-cz-zs-calculator-state");
-      if (!raw) return;
+      if (!raw) {
+        setUiNotice("Nebyla nalezena žádná uložená data.");
+        return;
+      }
       const s = JSON.parse(raw);
       if (s.tab) setTab(s.tab);
       if (s.mode) setMode(s.mode);
@@ -751,19 +763,23 @@ export default function App() {
       setSelectedExample(s.selectedExample ?? "");
       setWizardChoice(s.wizardChoice ?? "");
       setDataMode(s.dataMode ?? "own");
+      setUiNotice("Uložená data byla obnovena.");
     } catch (error) {
       console.error("Nepodařilo se obnovit uložená data.", error);
+      setUiNotice("Obnovení uložených dat se nepodařilo.");
     }
   };
 
   const clearStoredSnapshot = () => {
     localStorage.removeItem("edu-cz-zs-calculator-state");
     setLastSavedAt("");
+    setUiNotice("Uložená data byla vymazána.");
   };
 
   const saveSnapshotManually = () => {
     localStorage.setItem("edu-cz-zs-calculator-state", JSON.stringify(buildSnapshot()));
     setLastSavedAt(new Date().toLocaleString("cs-CZ"));
+    setUiNotice("Rozpracované údaje byly uloženy.");
   };
 
   const copySummaryToClipboard = async () => {
@@ -902,10 +918,12 @@ export default function App() {
         : null,
     };
     downloadTextFile("kalkulacka-zs-vypocet.json", JSON.stringify(payload, null, 2), "application/json;charset=utf-8");
+    setUiNotice("JSON slouží pro technické předání dat, archivaci nebo další strojové zpracování.");
   };
 
   const handleExportCsv = () => {
-    downloadTextFile("kalkulacka-zs-souhrn.csv", exportCsv(summaryRows), "text/csv;charset=utf-8");
+    downloadTextFile("kalkulacka-zs-souhrn.csv", exportCsvLocalized(summaryRows), "text/csv;charset=utf-8");
+    setUiNotice("Souhrn byl exportován do CSV ve formátu vhodném pro české prostředí.");
   };
 
   return (
@@ -959,6 +977,7 @@ export default function App() {
             <button className="btn ghost" onClick={restoreSnapshot}>Obnovit poslední verzi</button>
             <button className="btn ghost" onClick={clearStoredSnapshot}>Vymazat uložená data</button>
             <button className="btn ghost" onClick={resetAll}>Vymazat všechny údaje</button>
+            <button className="btn ghost" onClick={() => setGlossaryOpen(true)}>Slovníček pojmů</button>
             <button className="btn ghost" onClick={handleExportCsv}>Export CSV</button>
             <button className="btn ghost" onClick={copySummaryToClipboard}>Kopírovat shrnutí</button>
             <button className="btn ghost" onClick={printSummaryWindow}>Tisk shrnutí</button>
@@ -969,6 +988,12 @@ export default function App() {
             Ukázkové příklady vycházejí z typických situací v metodice a z logiky jednotlivých výpočtů.
             Po načtení je můžete upravit podle vlastní školy.
           </p>
+          <div className="hero-status">
+            <div className="hero-status__item"><strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.</div>
+            <div className="hero-status__item"><strong>Poslední uložení:</strong> {lastSavedAt || "zatím neproběhlo"}</div>
+            <div className="hero-status__item"><strong>Export JSON:</strong> pro technické předání dat nebo archivaci.</div>
+            {uiNotice ? <div className="hero-status__item hero-status__item--notice">{uiNotice}</div> : null}
+          </div>
         </header>
 
         <section className="card card--onboarding section-card section-card--onboarding">
