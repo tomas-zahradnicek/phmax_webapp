@@ -960,10 +960,10 @@ export default function App() {
     win.document.write(
       `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí kalkulačky ZŠ</title>` +
         `<style>` +
-        `@page{margin:12mm 14mm;size:A4}` +
-        `body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0;font-size:10pt;line-height:1.45;color:#0f172a}` +
-        `h1{font-size:14pt;margin:0 0 10px;font-weight:800}` +
-        `.box{border:1px solid #94a3b8;border-radius:8px;padding:12px 14px;background:#fff}` +
+        `@page{margin:10mm 12mm;size:A4}` +
+        `body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0;font-size:9pt;line-height:1.4;color:#0f172a}` +
+        `h1{font-size:12pt;margin:0 0 8px;font-weight:800}` +
+        `.box{border:1px solid #94a3b8;border-radius:6px;padding:10px 12px;background:#fff}` +
         `</style></head><body><h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div></body></html>`,
     );
     win.document.close();
@@ -1088,45 +1088,42 @@ export default function App() {
           </div>
 
           <div className="hero-actions">
-            <div className="hero-actions__row hero-actions__row--primary">
-              <div className="field field--hero-select hero-actions__example">
-                <span className="field__label field__label--hero">Ukázkový příklad</span>
-                <select
-                  value={selectedExample}
-                  onChange={(e) => loadExample(e.target.value as ExampleKey)}
-                >
-                  <option value="">Vyberte ukázkový příklad…</option>
-                  <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
-                  <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
-                  <option value="smisene_tridy">PHmax – smíšené třídy</option>
-                  <option value="pripravna_trida">PHmax – přípravná třída</option>
-                </select>
-              </div>
-              <div className="hero-actions__group hero-actions__group--primary">
-                <button type="button" className="btn btn--light" onClick={() => window.print()}>Tisk</button>
-                <button type="button" className="btn ghost" onClick={saveSnapshotManually}>Uložit</button>
-                <button type="button" className="btn ghost" onClick={restoreSnapshot}>Obnovit</button>
-                <GlossaryIconButton onClick={() => setGlossaryOpen(true)} />
-              </div>
+            <div className="field field--hero-select hero-actions__example">
+              <span className="field__label field__label--hero">Ukázkový příklad</span>
+              <select
+                value={selectedExample}
+                onChange={(e) => loadExample(e.target.value as ExampleKey)}
+              >
+                <option value="">Vyberte ukázkový příklad…</option>
+                <option value="phmax_bezna_zs">PHmax – běžná úplná ZŠ</option>
+                <option value="psychiatricka_nemocnice">PHmax – škola při psychiatrické nemocnici</option>
+                <option value="smisene_tridy">PHmax – smíšené třídy</option>
+                <option value="pripravna_trida">PHmax – přípravná třída</option>
+              </select>
             </div>
-            <div className="hero-actions__row hero-actions__row--tools">
-              <div className="hero-actions__group hero-actions__group--meta">
-                <button type="button" className="btn ghost" onClick={clearStoredSnapshot}>
-                  Vymazat uložená data
-                </button>
-                <button type="button" className="btn ghost" onClick={resetAll}>
-                  Vymazat všechny údaje
-                </button>
-              </div>
-              <div className="hero-actions__group hero-actions__group--exports">
-                <button type="button" className="btn ghost" onClick={handleExportCsv}>CSV</button>
-                <button type="button" className="btn ghost" onClick={copySummaryToClipboard}>
-                  Kopírovat shrnutí
-                </button>
-                <button type="button" className="btn ghost" onClick={printSummaryWindow}>
-                  Tisk shrnutí
-                </button>
-              </div>
+            <div className="hero-actions__group hero-actions__group--primary">
+              <button type="button" className="btn btn--light" onClick={() => window.print()}>Tisk</button>
+              <button type="button" className="btn ghost" onClick={saveSnapshotManually}>Uložit</button>
+              <button type="button" className="btn ghost" onClick={restoreSnapshot}>Obnovit</button>
+              <GlossaryIconButton onClick={() => setGlossaryOpen(true)} />
+            </div>
+            <hr className="hero-actions__divider" aria-hidden="true" />
+            <div className="hero-actions__group hero-actions__group--meta">
+              <button type="button" className="btn ghost" onClick={clearStoredSnapshot}>
+                Vymazat uložená data
+              </button>
+              <button type="button" className="btn ghost" onClick={resetAll}>
+                Vymazat všechny údaje
+              </button>
+            </div>
+            <div className="hero-actions__group hero-actions__group--exports">
+              <button type="button" className="btn ghost" onClick={handleExportCsv}>CSV</button>
+              <button type="button" className="btn ghost" onClick={copySummaryToClipboard}>
+                Kopírovat shrnutí
+              </button>
+              <button type="button" className="btn ghost" onClick={printSummaryWindow}>
+                Tisk shrnutí
+              </button>
             </div>
           </div>
 
