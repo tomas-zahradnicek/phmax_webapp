@@ -957,7 +957,15 @@ export default function App() {
     }).replace(/\n/g, "<br />");
     const win = window.open("", "_blank", "width=900,height=700");
     if (!win) return;
-    win.document.write(`<html><head><title>Shrnutí kalkulačky ZŠ</title><style>body{font-family:Inter,Arial,sans-serif;padding:24px;line-height:1.6;color:#0f172a}h1{font-size:24px} .box{border:1px solid #cbd5e1;border-radius:16px;padding:20px;background:#fff}</style></head><body><h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div></body></html>`);
+    win.document.write(
+      `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí kalkulačky ZŠ</title>` +
+        `<style>` +
+        `@page{margin:12mm 14mm;size:A4}` +
+        `body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0;font-size:10pt;line-height:1.45;color:#0f172a}` +
+        `h1{font-size:14pt;margin:0 0 10px;font-weight:800}` +
+        `.box{border:1px solid #94a3b8;border-radius:8px;padding:12px 14px;background:#fff}` +
+        `</style></head><body><h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div></body></html>`,
+    );
     win.document.close();
     win.focus();
     win.print();
