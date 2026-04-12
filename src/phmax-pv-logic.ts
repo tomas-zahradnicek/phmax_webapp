@@ -48,6 +48,76 @@ export const PHMAX_PV_INTERNAT: readonly (readonly number[])[] = [
 
 export const PHMAX_PV_ZDRAVOTNICKY_NA_TRIDU = 31;
 
+/** Popisy pásma „průměrná doba provozu“ podle přílohy metodiky (tabulka 1). */
+export const PV_POLODENNI_BAND_OPTIONS: readonly string[] = [
+  "od 4 h do méně než 4,5 h",
+  "od 4,5 h včetně do méně než 5 h",
+  "od 5 h včetně do méně než 5,5 h",
+  "od 5,5 h včetně do méně než 6 h",
+  "od 6 h včetně do 6,5 h včetně",
+];
+
+/** Tabulka 2 — sloupce v pořadí jako v příloze. */
+export const PV_CELODENNI_BAND_OPTIONS: readonly string[] = [
+  "nad 6,5 h do méně než 7 h",
+  "od 7 h včetně do méně než 7,5 h",
+  "od 7,5 h včetně do méně než 8 h",
+  "od 8 h včetně do méně než 8,5 h",
+  "od 8,5 h včetně do méně než 9 h",
+  "od 9 h včetně do méně než 9,5 h",
+  "od 9,5 h včetně do méně než 10 h",
+  "od 10 h včetně do méně než 10,5 h",
+  "od 10,5 h včetně do méně než 11 h",
+  "od 11 h včetně do méně než 11,5 h",
+  "od 11,5 h včetně do méně než 12 h",
+  "12 h (a více)",
+];
+
+/** Tabulka 3. */
+export const PV_INTERNAT_BAND_OPTIONS: readonly string[] = [
+  "od 20 h včetně do méně než 20,5 h",
+  "od 20,5 h včetně do méně než 21 h",
+  "od 21 h včetně do méně než 21,5 h",
+  "od 21,5 h včetně do méně než 22 h",
+  "od 22 h včetně a více",
+];
+
+/** Střed pásma pro výpočet PHAmax (provoz &lt; 8 h/den → krácení poměrem doba/8). */
+export const PV_POLODENNI_REP_HOURS: readonly number[] = [4.25, 4.75, 5.25, 5.75, 6.25];
+export const PV_CELODENNI_REP_HOURS: readonly number[] = [
+  6.75, 7.25, 7.75, 8.25, 8.75, 9.25, 9.75, 10.25, 10.75, 11.25, 11.75, 12,
+];
+export const PV_INTERNAT_REP_HOURS: readonly number[] = [20.25, 20.75, 21.25, 21.75, 22.5];
+
+export function getPvMaxClassCount(provoz: PvProvozKind): number {
+  if (provoz === "internat") return PHMAX_PV_INTERNAT.length;
+  if (provoz === "zdravotnicke") return 30;
+  return 12;
+}
+
+/** Počet pásem doby pro daný druh provozu (0 u MŠ při zdrav. zařízení). */
+export function getPvDurationBandCount(provoz: PvProvozKind): number {
+  if (provoz === "polodenni") return PV_POLODENNI_BAND_OPTIONS.length;
+  if (provoz === "celodenni") return PV_CELODENNI_BAND_OPTIONS.length;
+  if (provoz === "internat") return PV_INTERNAT_BAND_OPTIONS.length;
+  return 0;
+}
+
+export function getPvDurationBandLabel(provoz: PvProvozKind, bandIndex: number): string {
+  if (provoz === "polodenni") return PV_POLODENNI_BAND_OPTIONS[bandIndex] ?? "";
+  if (provoz === "celodenni") return PV_CELODENNI_BAND_OPTIONS[bandIndex] ?? "";
+  if (provoz === "internat") return PV_INTERNAT_BAND_OPTIONS[bandIndex] ?? "";
+  return "";
+}
+
+/** Hodnota doby pro PHAmax; u zdravotnického zařízení konzervativně 8 h (odkaz na „plnou“ dobu pro krácení AP). */
+export function representativeHoursForPvBand(provoz: PvProvozKind, bandIndex: number): number {
+  if (provoz === "zdravotnicke") return 8;
+  if (provoz === "polodenni") return PV_POLODENNI_REP_HOURS[bandIndex] ?? 6.25;
+  if (provoz === "celodenni") return PV_CELODENNI_REP_HOURS[bandIndex] ?? 12;
+  return PV_INTERNAT_REP_HOURS[bandIndex] ?? 22.5;
+}
+
 export type PvLookupIssue = { code: string; message: string };
 
 export type PvBaseResult = {
@@ -66,14 +136,6 @@ export function polodenniDurationColumnIndex(avgHoursPerDay: number): number | n
   return 4;
 }
 
-const POLODENNI_LABELS = [
-  "4 h ≤ doba < 4,5 h",
-  "4,5 h ≤ doba < 5 h",
-  "5 h ≤ doba < 5,5 h",
-  "5,5 h ≤ doba < 6 h",
-  "6 h ≤ doba ≤ 6,5 h",
-] as const;
-
 /** Sloupec celodenního provozu (nad 6,5 h do 12 h včetně). */
 export function celodenniDurationColumnIndex(avgHoursPerDay: number): number | null {
   if (avgHoursPerDay <= 6.5) return null;
@@ -91,21 +153,6 @@ export function celodenniDurationColumnIndex(avgHoursPerDay: number): number | n
   return 11;
 }
 
-const CELODENNI_LABELS = [
-  "6,5 h < doba < 7 h",
-  "7 h ≤ doba < 7,5 h",
-  "7,5 h ≤ doba < 8 h",
-  "8 h ≤ doba < 8,5 h",
-  "8,5 h ≤ doba < 9 h",
-  "9 h ≤ doba < 9,5 h",
-  "9,5 h ≤ doba < 10 h",
-  "10 h ≤ doba < 10,5 h",
-  "10,5 h ≤ doba < 11 h",
-  "11 h ≤ doba < 11,5 h",
-  "11,5 h ≤ doba < 12 h",
-  "12 h (a více)",
-] as const;
-
 export function internatDurationColumnIndex(avgHoursPerDay: number): number | null {
   if (avgHoursPerDay < 20) return null;
   if (avgHoursPerDay >= 20 && avgHoursPerDay < 20.5) return 0;
@@ -115,21 +162,17 @@ export function internatDurationColumnIndex(avgHoursPerDay: number): number | nu
   return 4;
 }
 
-const INTERNAT_LABELS = [
-  "20 h ≤ doba < 20,5 h",
-  "20,5 h ≤ doba < 21 h",
-  "21 h ≤ doba < 21,5 h",
-  "21,5 h ≤ doba < 22 h",
-  "22 h a více",
-] as const;
-
+/**
+ * Vyhledání PHmax z tabulek 1–3 podle indexu sloupce (pásma doby) z přílohy metodiky.
+ * U polodenního / celodenního / internátního provozu vždy vybírejte pásmo ze selectu odpovídající příloze.
+ */
 export function getPhmaxPvBase(params: {
   provoz: PvProvozKind;
   classCount: number;
-  avgHoursPerDay: number;
+  durationBandIndex: number;
 }): { data: PvBaseResult | null; issues: PvLookupIssue[] } {
   const issues: PvLookupIssue[] = [];
-  const { provoz, classCount, avgHoursPerDay } = params;
+  const { provoz, classCount, durationBandIndex } = params;
 
   if (classCount < 1) {
     issues.push({ code: "classes", message: "Zadejte počet tříd alespoň 1." });
@@ -147,15 +190,16 @@ export function getPhmaxPvBase(params: {
     };
   }
 
+  const bandCount = getPvDurationBandCount(provoz);
+  if (durationBandIndex < 0 || durationBandIndex >= bandCount) {
+    issues.push({ code: "duration", message: "Vyberte pásmo průměrné doby provozu z příslušné tabulky metodiky." });
+    return { data: null, issues };
+  }
+
+  const col = durationBandIndex;
+  const label = getPvDurationBandLabel(provoz, col);
+
   if (provoz === "polodenni") {
-    const col = polodenniDurationColumnIndex(avgHoursPerDay);
-    if (col === null) {
-      issues.push({
-        code: "duration",
-        message: "Polodenní provoz: průměrná doba musí být od 4 h do 6,5 h včetně (dle tabulky 1).",
-      });
-      return { data: null, issues };
-    }
     if (classCount > PHMAX_PV_POLODENNI.length) {
       issues.push({
         code: "classes",
@@ -167,21 +211,13 @@ export function getPhmaxPvBase(params: {
       data: {
         basePhmax: PHMAX_PV_POLODENNI[classCount - 1][col],
         durationColumnIndex: col,
-        durationColumnLabel: POLODENNI_LABELS[col],
+        durationColumnLabel: label,
       },
       issues,
     };
   }
 
   if (provoz === "celodenni") {
-    const col = celodenniDurationColumnIndex(avgHoursPerDay);
-    if (col === null) {
-      issues.push({
-        code: "duration",
-        message: "Celodenní provoz: průměrná doba musí být vyšší než 6,5 h (tabulka 2). Do 6,5 h včetně patří polodenní tabulka.",
-      });
-      return { data: null, issues };
-    }
     if (classCount > PHMAX_PV_CELODENNI.length) {
       issues.push({
         code: "classes",
@@ -193,20 +229,12 @@ export function getPhmaxPvBase(params: {
       data: {
         basePhmax: PHMAX_PV_CELODENNI[classCount - 1][col],
         durationColumnIndex: col,
-        durationColumnLabel: CELODENNI_LABELS[col],
+        durationColumnLabel: label,
       },
       issues,
     };
   }
 
-  const col = internatDurationColumnIndex(avgHoursPerDay);
-  if (col === null) {
-    issues.push({
-      code: "duration",
-      message: "Internátní provoz: průměrná doba musí být nejméně 20 h denně (tabulka 3).",
-    });
-    return { data: null, issues };
-  }
   if (classCount > PHMAX_PV_INTERNAT.length) {
     issues.push({
       code: "classes",
@@ -218,7 +246,7 @@ export function getPhmaxPvBase(params: {
     data: {
       basePhmax: PHMAX_PV_INTERNAT[classCount - 1][col],
       durationColumnIndex: col,
-      durationColumnLabel: INTERNAT_LABELS[col],
+      durationColumnLabel: label,
     },
     issues,
   };
@@ -246,7 +274,7 @@ export function getPhaMaxPv(sec16ClassCount: number, avgHoursPerDayForWorkplace:
 export function computePvPhmaxTotal(params: {
   provoz: PvProvozKind;
   classCount: number;
-  avgHoursPerDay: number;
+  durationBandIndex: number;
   sec16ClassCount: number;
   languageGroupCount: number;
 }): {
@@ -259,7 +287,7 @@ export function computePvPhmaxTotal(params: {
   const { data: base, issues: lookupIssues } = getPhmaxPvBase({
     provoz: params.provoz,
     classCount: params.classCount,
-    avgHoursPerDay: params.avgHoursPerDay,
+    durationBandIndex: params.durationBandIndex,
   });
   const issues = [...lookupIssues];
   const sec16Bonus = phmaxPvSec16Bonus(params.sec16ClassCount);

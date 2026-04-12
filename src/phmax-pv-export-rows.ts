@@ -10,19 +10,22 @@ export function buildPhmaxPvExportRows(input: {
   provozLabel: string;
   provoz: PvProvozKind;
   classCount: number;
-  avgHours: number;
+  durationBandLabel: string;
   sec16Count: number;
   languageGroups: number;
   computed: PvExportComputed;
   phaMax: number | null;
 }): PhmaxPvExportRow[] {
-  const { provozLabel, provoz, classCount, avgHours, sec16Count, languageGroups, computed, phaMax } = input;
+  const { provozLabel, provoz, classCount, durationBandLabel, sec16Count, languageGroups, computed, phaMax } = input;
 
   const rows: PhmaxPvExportRow[] = [
     ["=== PHmax / PHAmax předškolní vzdělávání — export ===", ""],
     ["Druh provozu", provozLabel],
-    ["Počet tříd", classCount],
-    ["Průměrná denní doba provozu (hodiny)", provoz === "zdravotnicke" ? "— (u zdravotnického zařízení se nezadává)" : avgHours],
+    ["Počet tříd pracoviště MŠ (v daném druhu provozu)", classCount],
+    [
+      "Pásmo průměrné doby provozu pracoviště (sloupec přílohy)",
+      provoz === "zdravotnicke" ? "— (tabulka 31 h/třídu, bez výběru doby)" : durationBandLabel,
+    ],
     ["Počet tříd § 16 odst. 9 školského zákona", sec16Count],
     ["Počet skupin jazykové přípravy", languageGroups],
   ];

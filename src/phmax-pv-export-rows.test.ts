@@ -1,24 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { exportCsvLocalized } from "./export-utils";
 import { buildPhmaxPvExportRows } from "./phmax-pv-export-rows";
-import { computePvPhmaxTotal, getPhaMaxPv } from "./phmax-pv-logic";
+import { computePvPhmaxTotal, getPhaMaxPv, getPvDurationBandLabel, representativeHoursForPvBand } from "./phmax-pv-logic";
 
 describe("buildPhmaxPvExportRows (smoke / export)", () => {
   it("obsahuje druh provozu, PHmax celkem a CSV hlavičku", () => {
+    const bandIdx = 7;
     const computed = computePvPhmaxTotal({
       provoz: "celodenni",
       classCount: 4,
-      avgHoursPerDay: 10,
+      durationBandIndex: bandIdx,
       sec16ClassCount: 1,
       languageGroupCount: 0,
     });
-    const phaMax = getPhaMaxPv(1, 10);
+    const phaMax = getPhaMaxPv(1, representativeHoursForPvBand("celodenni", bandIdx));
 
     const rows = buildPhmaxPvExportRows({
       provozLabel: "Celodenní provoz (tabulka 2)",
       provoz: "celodenni",
       classCount: 4,
-      avgHours: 10,
+      durationBandLabel: getPvDurationBandLabel("celodenni", bandIdx),
       sec16Count: 1,
       languageGroups: 0,
       computed,
@@ -40,7 +41,7 @@ describe("buildPhmaxPvExportRows (smoke / export)", () => {
     const computed = computePvPhmaxTotal({
       provoz: "celodenni",
       classCount: 0,
-      avgHoursPerDay: 10,
+      durationBandIndex: 0,
       sec16ClassCount: 0,
       languageGroupCount: 0,
     });
@@ -49,7 +50,7 @@ describe("buildPhmaxPvExportRows (smoke / export)", () => {
       provozLabel: "Celodenní provoz (tabulka 2)",
       provoz: "celodenni",
       classCount: 0,
-      avgHours: 10,
+      durationBandLabel: getPvDurationBandLabel("celodenni", 0),
       sec16Count: 0,
       languageGroups: 0,
       computed,
@@ -66,7 +67,7 @@ describe("buildPhmaxPvExportRows (smoke / export)", () => {
     const computed = computePvPhmaxTotal({
       provoz: "zdravotnicke",
       classCount: 2,
-      avgHoursPerDay: 0,
+      durationBandIndex: 0,
       sec16ClassCount: 0,
       languageGroupCount: 0,
     });
@@ -75,13 +76,13 @@ describe("buildPhmaxPvExportRows (smoke / export)", () => {
       provozLabel: "MŠ při zdravotnickém zařízení",
       provoz: "zdravotnicke",
       classCount: 2,
-      avgHours: 0,
+      durationBandLabel: "",
       sec16Count: 0,
       languageGroups: 0,
       computed,
       phaMax: null,
     });
 
-    expect(rows.some(([k, v]) => k.includes("Průměrná denní doba") && String(v).includes("nezadává"))).toBe(true);
+    expect(rows.some(([k, v]) => k.includes("Pásmo průměrné doby") && String(v).includes("31 h"))).toBe(true);
   });
 });

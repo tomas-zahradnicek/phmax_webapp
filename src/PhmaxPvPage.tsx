@@ -9,8 +9,38 @@ import { buildPhmaxPvExportRows } from "./phmax-pv-export-rows";
 import {
   computePvPhmaxTotal,
   getPhaMaxPv,
+  getPvDurationBandLabel,
+  getPvMaxClassCount,
+  PV_CELODENNI_BAND_OPTIONS,
+  PV_INTERNAT_BAND_OPTIONS,
+  PV_POLODENNI_BAND_OPTIONS,
+  representativeHoursForPvBand,
   type PvProvozKind,
 } from "./phmax-pv-logic";
+
+function pvDurationBandTableNo(provoz: PvProvozKind): string {
+  if (provoz === "polodenni") return "1";
+  if (provoz === "celodenni") return "2";
+  if (provoz === "internat") return "3";
+  return "";
+}
+
+function pvBandSelectOptions(provoz: PvProvozKind): { value: number; label: string }[] {
+  const arr =
+    provoz === "polodenni"
+      ? PV_POLODENNI_BAND_OPTIONS
+      : provoz === "celodenni"
+        ? PV_CELODENNI_BAND_OPTIONS
+        : provoz === "internat"
+          ? PV_INTERNAT_BAND_OPTIONS
+          : [];
+  return arr.map((label, value) => ({ value, label }));
+}
+
+function defaultDurationBandIndex(provoz: PvProvozKind): number {
+  if (provoz === "celodenni") return 7;
+  return 0;
+}
 
 type PhmaxPvPageProps = {
   productView: ProductView;
@@ -27,27 +57,31 @@ const PROVOZ_OPTIONS: { value: PvProvozKind; label: string }[] = [
 export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [provoz, setProvoz] = useState<PvProvozKind>("celodenni");
   const [classCount, setClassCount] = useState(4);
-  const [avgHours, setAvgHours] = useState(10);
+  const [durationBandIndex, setDurationBandIndex] = useState(() => defaultDurationBandIndex("celodenni"));
   const [sec16Count, setSec16Count] = useState(0);
   const [languageGroups, setLanguageGroups] = useState(0);
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
+
+  const maxClasses = getPvMaxClassCount(provoz);
+  const durationBandLabel = getPvDurationBandLabel(provoz, durationBandIndex);
+  const hoursForPha = representativeHoursForPvBand(provoz, durationBandIndex);
 
   const computed = useMemo(
     () =>
       computePvPhmaxTotal({
         provoz,
         classCount,
-        avgHoursPerDay: avgHours,
+        durationBandIndex,
         sec16ClassCount: sec16Count,
         languageGroupCount: languageGroups,
       }),
-    [provoz, classCount, avgHours, sec16Count, languageGroups]
+    [provoz, classCount, durationBandIndex, sec16Count, languageGroups]
   );
 
   const phaMax = useMemo(() => {
     if (sec16Count <= 0) return null;
-    return getPhaMaxPv(sec16Count, avgHours);
-  }, [sec16Count, avgHours]);
+    return getPhaMaxPv(sec16Count, hoursForPha);
+  }, [sec16Count, hoursForPha]);
 
   const provozLabel = useMemo(() => PROVOZ_OPTIONS.find((o) => o.value === provoz)?.label ?? provoz, [provoz]);
 
@@ -57,13 +91,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         provozLabel,
         provoz,
         classCount,
-        avgHours,
+        durationBandLabel: provoz === "zdravotnicke" ? "" : durationBandLabel,
         sec16Count,
         languageGroups,
         computed,
         phaMax,
       }),
-    [provozLabel, classCount, avgHours, provoz, sec16Count, languageGroups, computed, phaMax]
+    [provozLabel, classCount, durationBandLabel, provoz, sec16Count, languageGroups, computed, phaMax]
   );
 
   const handleExportCsv = useCallback(() => {
@@ -113,7 +147,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       <QuickOnboarding storageKey="phmax-pv-onboarding" title="Jedno pracoviště MŠ">
         <p>
           Jeden průchod formulářem = jeden řádek podle metodiky: vybraný <strong>druh provozu</strong>, počet tříd v něm
-          a průměrná denní doba tohoto pracoviště. Máte-li <strong>odloučená pracoviště</strong> nebo na jednom místě
+          a <strong>pásmo průměrné denní doby provozu</strong> (sloupec tabulky 1–3 z přílohy). Máte-li{" "}
+          <strong>odloučená pracoviště</strong> nebo na jednom místě
           současně např. celodenní i polodenní provoz, každou kombinaci zadejte zvlášť a dílčí PHmax sečtěte (jako
           součet řádků „Pracoviště 1 / 2 …“ v metodické tabulce). Krácení PHmax dle § 1d odst. 3 vyhl. 14/2005 zde
           neřešíme.
@@ -150,7 +185,15 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             <h3>Druh provozu</h3>
             <label className="field">
               <span>Typ</span>
-              <select value={provoz} onChange={(e) => setProvoz(e.target.value as PvProvozKind)}>
+              <select
+                value={provoz}
+                onChange={(e) => {
+                  const next = e.target.value as PvProvozKind;
+                  setProvoz(next);
+                  setDurationBandIndex(defaultDurationBandIndex(next));
+                  setClassCount((c) => Math.min(Math.max(1, c), getPvMaxClassCount(next)));
+                }}
+              >
                 {PROVOZ_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
                     {o.label}
@@ -159,26 +202,34 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               </select>
             </label>
             <NumberField
-              label="Počet tříd (včetně běžných i speciálních v daném druhu provozu)"
+              label={`Počet tříd pracoviště MŠ v tomto druhu provozu (1–${maxClasses} dle přílohy)`}
               value={classCount}
               onChange={setClassCount}
               min={1}
-              max={30}
+              max={maxClasses}
             />
             {provoz !== "zdravotnicke" ? (
-              <NumberField
-                label="Průměrná denní doba provozu pracoviště (hodiny)"
-                value={avgHours}
-                onChange={setAvgHours}
-                min={0}
-                max={24}
-                step={0.25}
-                hint="Zaokrouhlit na desetinná místa podle reality; tabulka rozpozná pásmo."
-              />
+              <label className="field">
+                <span>
+                  Průměrná doba provozu pracoviště v hodinách za den — sloupec tabulky {pvDurationBandTableNo(provoz)}{" "}
+                  přílohy metodiky
+                </span>
+                <select
+                  value={durationBandIndex}
+                  onChange={(e) => setDurationBandIndex(Number(e.target.value))}
+                  aria-label="Pásmo průměrné doby provozu podle přílohy"
+                >
+                  {pvBandSelectOptions(provoz).map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
             ) : (
               <p className="muted-text" style={{ marginTop: 8, fontSize: "0.88rem" }}>
-                U MŠ při zdravotnickém zařízení je PHmax <strong>31 hodin/třídu</strong> týdně — délka provozu se do
-                této tabulky nezadává.
+                U MŠ při zdravotnickém zařízení je PHmax <strong>31 hodin/třídu</strong> týdně — tabulky 1–3 se
+                nepoužívají.
               </p>
             )}
           </div>
@@ -221,12 +272,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 <td className="app-data-table__num">{classCount}</td>
               </tr>
               <tr>
-                <td>Průměrná denní doba provozu pracoviště</td>
+                <td>Pásmo průměrné doby provozu (sloupec přílohy)</td>
                 <td>
                   {provoz === "zdravotnicke" ? (
-                    <span className="muted-text">Nezadává se (tabulka 31 h/třídu)</span>
+                    <span className="muted-text">— (31 h/třídu, bez výběru pásma)</span>
                   ) : (
-                    <span className="app-data-table__num">{avgHours} h</span>
+                    durationBandLabel
                   )}
                 </td>
               </tr>
@@ -306,7 +357,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 <tr>
                   <td>
                     PHAmax dle metodiky v4
-                    <span className="app-data-table__hint">Při provozu kratším než 8 h/den se krátí poměrem doba/8.</span>
+                    <span className="app-data-table__hint">
+                      Pro krácení se použije střed zvoleného pásma doby ({hoursForPha.toLocaleString("cs-CZ")} h/den);
+                      při provozu pod 8 h/den poměrem doba/8 (metodika v4).
+                    </span>
                   </td>
                   <td className="app-data-table__num app-data-table__num--emph">{phaMax}</td>
                 </tr>
