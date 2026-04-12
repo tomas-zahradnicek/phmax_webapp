@@ -266,6 +266,52 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         </p>
       </QuickOnboarding>
 
+      <section className="card muted section-card" aria-label="Součtový přehled pracovišť">
+        <h2 className="section-title">Součtový přehled pracovišť</h2>
+        <p className="muted-text" style={{ marginTop: 0 }}>
+          Součty níže odpovídají pouze řádkům zadaným v této kalkulačce. Údaje z jiných pracovišť nebo výpočtů zapište a
+          sečtěte samostatně podle metodiky (jeden dílčí výpočet na kombinaci místa a druhu provozu).
+        </p>
+        <div className="table-scroll" style={{ overflowX: "auto" }}>
+          <table className="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Označení / provoz</th>
+                <th scope="col">PHmax</th>
+                <th scope="col">PHAmax</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rowComputations.map((c, i) => (
+                <tr key={c.row.id}>
+                  <td>{i + 1}</td>
+                  <td>
+                    {c.row.label.trim() || `Pracoviště ${i + 1}`}
+                    <span className="muted-text"> — {c.provozLabel}</span>
+                  </td>
+                  <td>{c.computed.totalPhmax != null ? c.computed.totalPhmax : "—"}</td>
+                  <td>{c.phaMax != null ? c.phaMax : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row" colSpan={2}>
+                  Celkem (zobrazená pracoviště)
+                </th>
+                <td>
+                  <strong>{aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}</strong>
+                </td>
+                <td>
+                  <strong>{aggregate.phaSum > 0 ? aggregate.phaSum : "—"}</strong>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
       <section className="card section-card section-card--sd">
         <h2 className="section-title">Vstupy (pracoviště)</h2>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>

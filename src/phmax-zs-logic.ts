@@ -144,6 +144,38 @@ export const B9_B10 = {
   ],
 } as const;
 
+/** ZŠ při zdravotnickém zařízení mimo psychiatrickou nemocnici – řádky B11–B13 (metodika ZV v5). */
+export const B11_B13 = {
+  health1: [
+    { label: "3 a méně", test: (x: number) => x <= 3, value: 9 },
+    { label: "více než 3 – méně než 6", test: (x: number) => x > 3 && x < 6, value: 15 },
+    { label: "6 – méně než 10", test: (x: number) => x >= 6 && x < 10, value: 19 },
+    { label: "10 a více", test: (x: number) => x >= 10, value: 22 },
+  ],
+  health2: [
+    { label: "3 a méně", test: (x: number) => x <= 3, value: 12 },
+    { label: "více než 3 – méně než 6", test: (x: number) => x > 3 && x < 6, value: 20 },
+    { label: "6 – méně než 10", test: (x: number) => x >= 6 && x < 10, value: 24 },
+    { label: "10 a více", test: (x: number) => x >= 10, value: 28 },
+  ],
+  healthMix: [
+    { label: "3 a méně", test: (x: number) => x <= 3, value: 12 },
+    { label: "více než 3 – méně než 6", test: (x: number) => x > 3 && x < 6, value: 20 },
+    { label: "6 – méně než 10", test: (x: number) => x >= 6 && x < 10, value: 24 },
+    { label: "10 a více", test: (x: number) => x >= 10, value: 28 },
+  ],
+} as const;
+
+export type HealthRow = {
+  id: number;
+  kind: keyof typeof B11_B13;
+  mode: "higher_of_two" | "current_only";
+  currentPupils: number;
+  currentClasses: number;
+  prevPupils: number;
+  prevClasses: number;
+};
+
 export const B14_B16 = {
   psych1: [
     { label: "méně než 6", test: (x: number) => x < 6, value: 15 },
@@ -310,6 +342,11 @@ export const PHA_TABLE = {
   zssIIHeavy: [
     { label: "méně než 4", test: (x: number) => x < 4, value: 0 },
     { label: "4 a více", test: (x: number) => x >= 4, value: 63 },
+  ],
+  /** Přípravný stupeň základní školy speciální – řádek B45 (metodika ZV v5). */
+  zssPrep: [
+    { label: "méně než 4", test: (x: number) => x < 4, value: 0 },
+    { label: "4 a více", test: (x: number) => x >= 4, value: 20 },
   ],
 } as const;
 

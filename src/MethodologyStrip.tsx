@@ -10,7 +10,15 @@ export function MethodologyStrip() {
       <ul className="methodology-strip__list">
         <li>
           <strong>Základní vzdělávání (ZŠ):</strong> metodika PHmax / PHAmax / PHPmax pro ZV, verze 5 (březen 2026); NV
-          č. 123/2018 Sb.; vyhl. č. 48/2005 Sb.
+          č. 123/2018 Sb.; vyhl. č. 48/2005 Sb.;{" "}
+          <a href="https://www.zakonyprolidi.cz/cs/2005-75" target="_blank" rel="noopener noreferrer" className="status-link">
+            NV č. 75/2005 Sb.
+          </a>{" "}
+          (rozsah přímé výuky);{" "}
+          <a href="https://www.zakonyprolidi.cz/cs/2004-561" target="_blank" rel="noopener noreferrer" className="status-link">
+            zákon č. 561/2004 Sb. (školský zákon)
+          </a>
+          .
         </li>
         <li>
           <strong>Školní družina:</strong> příloha k vyhl. č. 74/2005 Sb., o zájmovém vzdělávání — tabulka PHmax podle

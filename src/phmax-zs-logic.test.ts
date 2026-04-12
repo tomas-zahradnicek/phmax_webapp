@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  B11_B13,
   B13_MORE_THAN_2,
   B9_B10,
+  PHA_TABLE,
   PHP_TABLE,
   n,
   pickBand,
@@ -49,6 +51,25 @@ describe("pickBand", () => {
     expect(pickBand(300, PHP_TABLE).value).toBe(19);
     expect(pickBand(999, PHP_TABLE).value).toBe(48);
     expect(pickBand(1000, PHP_TABLE).value).toBe(60);
+  });
+
+  it("B11 – ZŠ při zdrav. zař., 1. stupeň (hranice 3, 6, 10)", () => {
+    expect(pickBand(3, B11_B13.health1).value).toBe(9);
+    expect(pickBand(3.01, B11_B13.health1).value).toBe(15);
+    expect(pickBand(5.99, B11_B13.health1).value).toBe(15);
+    expect(pickBand(6, B11_B13.health1).value).toBe(19);
+    expect(pickBand(9.99, B11_B13.health1).value).toBe(19);
+    expect(pickBand(10, B11_B13.health1).value).toBe(22);
+  });
+
+  it("B12 – 2. stupeň (stejné intervaly, jiné hodnoty)", () => {
+    expect(pickBand(3, B11_B13.health2).value).toBe(12);
+    expect(pickBand(10, B11_B13.health2).value).toBe(28);
+  });
+
+  it("PHA B45 – přípravný stupeň ZŠS (zssPrep, hranice 4)", () => {
+    expect(pickBand(3.99, PHA_TABLE.zssPrep).value).toBe(0);
+    expect(pickBand(4, PHA_TABLE.zssPrep).value).toBe(20);
   });
 
   it("bez shody vrátí výchozí pásmo s hodnotou 0", () => {

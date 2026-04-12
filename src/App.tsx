@@ -1,5 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  B11_B13,
   B13_MORE_THAN_2,
   B34_MAX_2,
   B5,
@@ -16,6 +17,7 @@ import {
   pickBand,
   round2,
   BasicType,
+  HealthRow,
   MixedRow,
   PhaRow,
   PsychRow,
@@ -29,6 +31,7 @@ import { DEFAULT_MODE } from "./config/default-form-state";
 import { GlossaryDialog } from "./GlossaryDialog";
 import { exportCsvLocalized, downloadTextFile } from "./export-utils";
 import { MethodologyStrip } from "./MethodologyStrip";
+import { QuickOnboarding } from "./QuickOnboarding";
 import { PhmaxPvPage } from "./PhmaxPvPage";
 import { PhmaxSdPage } from "./PhmaxSdPage";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -36,6 +39,31 @@ import { HeroStat } from "./HeroStat";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
+
+const ZS_ONBOARDING_KEY = "phmax-zs-onboarding";
+const NAMED_SNAPSHOTS_LS_KEY = "edu-cz-zs-named-snapshots-v1";
+const MAX_NAMED_SNAPSHOTS = 10;
+
+type NamedZsSnapshot = { id: string; name: string; savedAt: string; snapshot: Record<string, unknown> };
+
+function readNamedSnapshotsFromLs(): NamedZsSnapshot[] {
+  try {
+    const raw = localStorage.getItem(NAMED_SNAPSHOTS_LS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { items?: NamedZsSnapshot[] };
+    return Array.isArray(parsed.items) ? parsed.items : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeNamedSnapshotsToLs(items: NamedZsSnapshot[]) {
+  try {
+    localStorage.setItem(NAMED_SNAPSHOTS_LS_KEY, JSON.stringify({ items }));
+  } catch {
+    /* ignore */
+  }
+}
 
 function readInitialProductView(): ProductView {
   if (typeof window === "undefined") return "zs";
@@ -62,8 +90,17 @@ type ExampleKey =
   | "mala_skola_pod_limitem"
   | "skola_s_odecty_phpmax"
   | "inkluzivni_skola"
-  | "priloha_phamax_uplna_zs_sec16_zss";
-type WizardChoice = "" | "php_small" | "php_deductions" | "ph_inclusion" | "ph_psych" | "ph_mixed" | "ph_prep";
+  | "priloha_phamax_uplna_zs_sec16_zss"
+  | "zdravotnicke_zs";
+type WizardChoice =
+  | ""
+  | "php_small"
+  | "php_deductions"
+  | "ph_inclusion"
+  | "ph_psych"
+  | "ph_health"
+  | "ph_mixed"
+  | "ph_prep";
 type DataMode = "own" | "example";
 
 function clampNonNegative(value: number) {
@@ -248,6 +285,10 @@ function createEmptyPsychRow(id: number): PsychRow {
   return { id, kind: "psych1", mode: "higher_of_two", currentPupils: 0, currentClasses: 0, prevPupils: 0, prevClasses: 0 };
 }
 
+function createEmptyHealthRow(id: number): HealthRow {
+  return { id, kind: "health1", mode: "higher_of_two", currentPupils: 0, currentClasses: 0, prevPupils: 0, prevClasses: 0 };
+}
+
 function createEmptyGymRow(id: number): GymRow {
   return { id, kind: "gym8", classes: 0, pupils: 0 };
 }
@@ -322,10 +363,14 @@ function buildShareText(data: {
   totalPhp: number;
   warnings: string[];
   inputMode: DataMode;
+  exportLabel?: string;
 }) {
   const rows = [
     "Shrnutí kalkulačky ZŠ",
     "",
+    ...(data.exportLabel?.trim()
+      ? [`Označení / škola: ${data.exportLabel.trim()}`, ""]
+      : []),
     `Režim: ${data.modeLabel}`,
     `Aktivní modul: ${data.tab}`,
     `Práce s údaji: ${data.inputMode === "example" ? "ukázkový příklad" : "vlastní škola"}`,
@@ -382,6 +427,7 @@ export default function App() {
   const [incl2Pupils, setIncl2Pupils] = useState(0);
 
   const [psychRows, setPsychRows] = useState<PsychRow[]>([]);
+  const [healthRows, setHealthRows] = useState<HealthRow[]>([]);
 
   const [minorityType, setMinorityType] = useState<keyof typeof B17_B21>("minority1");
   const [minority1Classes, setMinority1Classes] = useState(0);
@@ -458,6 +504,17 @@ export default function App() {
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string>("");
   const [uiNotice, setUiNotice] = useState<string>("");
+  const [exportLabel, setExportLabel] = useState("");
+  const [namedSnapshots, setNamedSnapshots] = useState<NamedZsSnapshot[]>([]);
+  const [selectedNamedId, setSelectedNamedId] = useState("");
+  const [namedSaveName, setNamedSaveName] = useState("");
+  const [zsGuideOpen, setZsGuideOpen] = useState(() => {
+    try {
+      return localStorage.getItem(ZS_ONBOARDING_KEY) !== "1";
+    } catch {
+      return true;
+    }
+  });
 
   const isFull = basicType === "full_more_than_2" || basicType === "full_max_2";
 
@@ -516,6 +573,22 @@ export default function App() {
     };
   });
 
+  const healthComputedRows = healthRows.map((row) => {
+    const avgCurrent = row.currentClasses > 0 ? row.currentPupils / row.currentClasses : 0;
+    const avgPrev = row.prevClasses > 0 ? row.prevPupils / row.prevClasses : 0;
+    const usedAvg = row.mode === "current_only" ? avgCurrent : Math.max(avgCurrent, avgPrev);
+    const band = pickBand(usedAvg, B11_B13[row.kind]);
+    return {
+      ...row,
+      avgCurrent: round2(avgCurrent),
+      avgPrev: round2(avgPrev),
+      usedAvg: round2(usedAvg),
+      bandLabel: band.label,
+      perClass: band.value,
+      subtotal: round2(row.currentClasses * band.value),
+    };
+  });
+
   const minority1Avg = minority1Classes > 0 ? minority1Pupils / minority1Classes : 0;
   const minority1Band = pickBand(minority1Avg, B17_B21[minorityType]);
   const minority2Avg = minority2Classes > 0 ? minority2Pupils / minority2Classes : 0;
@@ -554,6 +627,7 @@ export default function App() {
   const basicPhmax = round2(basic1Classes * basicFirstBand.value + (isFull ? basic2Classes * basicSecondBand.value : 0));
   const inclPhmax = round2(incl1Classes * incl1Band.value + incl2Classes * incl2Band.value);
   const psychPhmax = round2(psychComputedRows.reduce((s, r) => s + r.subtotal, 0));
+  const healthPhmax = round2(healthComputedRows.reduce((s, r) => s + r.subtotal, 0));
   const minorityPhmax = round2(minority1Classes * minority1Band.value + (minorityType === "minorityFull1" ? minority2Classes * minority2Band.value : 0));
   const gymPhmax = round2(gymComputedRows.reduce((s, r) => s + r.subtotal, 0));
   const specialPhmax = round2(special1Classes * special1Band.value + special2Classes * special2Band.value + specialIIClasses * specialIIBand.value);
@@ -599,7 +673,9 @@ export default function App() {
   const mixedForTotal = round2(hasMixedMethodTableData ? mixedMethodTotal : mixedPhmax);
 
   const extrasPhmax = round2(prepClassPhmax + prepSpecialPhmax + par38Phmax + par41Phmax);
-  const totalPhmax = round2(basicPhmax + inclPhmax + psychPhmax + minorityPhmax + gymPhmax + specialPhmax + mixedForTotal + extrasPhmax);
+  const totalPhmax = round2(
+    basicPhmax + inclPhmax + psychPhmax + healthPhmax + minorityPhmax + gymPhmax + specialPhmax + mixedForTotal + extrasPhmax
+  );
 
   const phaComputedRows = phaRows.map((row) => {
     const avg = row.classes > 0 ? row.pupils / row.classes : 0;
@@ -647,6 +723,11 @@ export default function App() {
   const updatePsych = (id: number, key: keyof PsychRow, value: string | number) => setPsychRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removePsych = (id: number) => setPsychRows((prev) => prev.filter((r) => r.id !== id));
 
+  const addHealth = () => setHealthRows((prev) => [...prev, createEmptyHealthRow(Date.now())]);
+  const updateHealth = (id: number, key: keyof HealthRow, value: string | number) =>
+    setHealthRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
+  const removeHealth = (id: number) => setHealthRows((prev) => prev.filter((r) => r.id !== id));
+
   const addGym = () => setGymRows((prev) => [...prev, createEmptyGymRow(Date.now())]);
   const updateGym = (id: number, key: keyof GymRow, value: string | number) => setGymRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removeGym = (id: number) => setGymRows((prev) => prev.filter((r) => r.id !== id));
@@ -665,6 +746,7 @@ export default function App() {
     setIncl2Pupils(0);
 
     setPsychRows([]);
+    setHealthRows([]);
     setMinorityType("minority1");
     setMinority1Classes(0);
     setMinority1Pupils(0);
@@ -731,6 +813,7 @@ export default function App() {
     setSelectedExample("");
     setWizardChoice("");
     setDataMode("own");
+    setExportLabel("");
     setTab("phmax");
   };
 
@@ -882,6 +965,14 @@ export default function App() {
       return;
     }
 
+    if (example === "zdravotnicke_zs") {
+      setMode(findModeBySections("health_groups"));
+      setHealthRows([
+        { id: 1, kind: "health1", mode: "higher_of_two", currentPupils: 8, currentClasses: 1, prevPupils: 7, prevClasses: 1 },
+      ]);
+      return;
+    }
+
     if (example === "smisene_tridy") {
       setMode(findModeBySections("dominant_c_first"));
       setMixedMethodFirstZsPupils(47);
@@ -972,6 +1063,11 @@ export default function App() {
       return;
     }
 
+    if (choice === "ph_health") {
+      loadExample("zdravotnicke_zs");
+      return;
+    }
+
     if (choice === "ph_mixed") {
       loadExample("smisene_tridy");
       return;
@@ -997,6 +1093,8 @@ export default function App() {
     incl2Classes,
     incl2Pupils,
     psychRows,
+    healthRows,
+    exportLabel,
     minorityType,
     minority1Classes,
     minority1Pupils,
@@ -1045,6 +1143,70 @@ export default function App() {
     mixedMethodSecondSpecialClasses,
   });
 
+  const applySnapshotPayload = (s: Record<string, unknown>, notice: string) => {
+    if (s.tab) setTab(s.tab as TabKey);
+    if (s.mode) setMode(s.mode as CalculatorMode);
+    if (s.basicType) setBasicType(s.basicType as BasicType);
+    setBasic1Classes((s.basic1Classes as number) ?? 0);
+    setBasic1Pupils((s.basic1Pupils as number) ?? 0);
+    setBasic2Classes((s.basic2Classes as number) ?? 0);
+    setBasic2Pupils((s.basic2Pupils as number) ?? 0);
+    setIncl1Classes((s.incl1Classes as number) ?? 0);
+    setIncl1Pupils((s.incl1Pupils as number) ?? 0);
+    setIncl2Classes((s.incl2Classes as number) ?? 0);
+    setIncl2Pupils((s.incl2Pupils as number) ?? 0);
+    setPsychRows((s.psychRows as PsychRow[]) ?? []);
+    setHealthRows((s.healthRows as HealthRow[]) ?? []);
+    setExportLabel(typeof s.exportLabel === "string" ? s.exportLabel : "");
+    if (s.minorityType) setMinorityType(s.minorityType as keyof typeof B17_B21);
+    setMinority1Classes((s.minority1Classes as number) ?? 0);
+    setMinority1Pupils((s.minority1Pupils as number) ?? 0);
+    setMinority2Classes((s.minority2Classes as number) ?? 0);
+    setMinority2Pupils((s.minority2Pupils as number) ?? 0);
+    setGymRows((s.gymRows as GymRow[]) ?? []);
+    setMixedRows((s.mixedRows as MixedRow[]) ?? []);
+    setSpecial1Classes((s.special1Classes as number) ?? 0);
+    setSpecial1Pupils((s.special1Pupils as number) ?? 0);
+    setSpecial2Classes((s.special2Classes as number) ?? 0);
+    setSpecial2Pupils((s.special2Pupils as number) ?? 0);
+    setSpecialIIClasses((s.specialIIClasses as number) ?? 0);
+    setSpecialIIPupils((s.specialIIPupils as number) ?? 0);
+    setPrepClasses((s.prepClasses as number) ?? 0);
+    setPrepChildren((s.prepChildren as number) ?? 0);
+    setPrepSpecialClasses((s.prepSpecialClasses as number) ?? 0);
+    setPrepSpecialChildren((s.prepSpecialChildren as number) ?? 0);
+    setP38First((s.p38First as number) ?? 0);
+    setP38Second((s.p38Second as number) ?? 0);
+    setP41First((s.p41First as number) ?? 0);
+    setP41Second((s.p41Second as number) ?? 0);
+    setPhaRows((s.phaRows as PhaRow[]) ?? []);
+    setPhpYear1((s.phpYear1 as number) ?? 0);
+    setPhpYear2((s.phpYear2 as number) ?? 0);
+    setPhpYear3((s.phpYear3 as number) ?? 0);
+    if (s.phpWizardStep) setPhpWizardStep(s.phpWizardStep as PhpWizardStep);
+    if (s.phpMethodMode) setPhpMethodMode(s.phpMethodMode as PhpMethodMode);
+    setPhpExcludedAbroad((s.phpExcludedAbroad as number) ?? 0);
+    setPhpExcludedForeignSchoolCz((s.phpExcludedForeignSchoolCz as number) ?? 0);
+    setPhpExcludedIndividual((s.phpExcludedIndividual as number) ?? 0);
+    setPhpExcludedSchool(Boolean(s.phpExcludedSchool));
+    setSelectedExample((s.selectedExample as ExampleKey) ?? "");
+    setWizardChoice((s.wizardChoice as WizardChoice) ?? "");
+    setDataMode((s.dataMode as DataMode) ?? "own");
+    setNv75Role(s.nv75Role === "reditel" ? "reditel" : "ucitel");
+    setNv75School(s.nv75School === "plavecka_skola" ? "plavecka_skola" : "plavecka_skola");
+    setNv75TeacherMin(typeof s.nv75TeacherMin === "number" ? s.nv75TeacherMin : 22);
+    setNv75TeacherMax(typeof s.nv75TeacherMax === "number" ? s.nv75TeacherMax : 30);
+    setMixedMethodFirstZsPupils((s.mixedMethodFirstZsPupils as number) ?? 0);
+    setMixedMethodFirstZsClasses((s.mixedMethodFirstZsClasses as number) ?? 0);
+    setMixedMethodFirstSpecialPupils((s.mixedMethodFirstSpecialPupils as number) ?? 0);
+    setMixedMethodFirstSpecialClasses((s.mixedMethodFirstSpecialClasses as number) ?? 0);
+    setMixedMethodSecondZsPupils((s.mixedMethodSecondZsPupils as number) ?? 0);
+    setMixedMethodSecondZsClasses((s.mixedMethodSecondZsClasses as number) ?? 0);
+    setMixedMethodSecondSpecialPupils((s.mixedMethodSecondSpecialPupils as number) ?? 0);
+    setMixedMethodSecondSpecialClasses((s.mixedMethodSecondSpecialClasses as number) ?? 0);
+    setUiNotice(notice);
+  };
+
   const restoreSnapshot = () => {
     try {
       const raw = localStorage.getItem("edu-cz-zs-calculator-state");
@@ -1052,66 +1214,8 @@ export default function App() {
         setUiNotice("Nebyla nalezena žádná uložená data.");
         return;
       }
-      const s = JSON.parse(raw);
-      if (s.tab) setTab(s.tab);
-      if (s.mode) setMode(s.mode);
-      if (s.basicType) setBasicType(s.basicType);
-      setBasic1Classes(s.basic1Classes ?? 0);
-      setBasic1Pupils(s.basic1Pupils ?? 0);
-      setBasic2Classes(s.basic2Classes ?? 0);
-      setBasic2Pupils(s.basic2Pupils ?? 0);
-      setIncl1Classes(s.incl1Classes ?? 0);
-      setIncl1Pupils(s.incl1Pupils ?? 0);
-      setIncl2Classes(s.incl2Classes ?? 0);
-      setIncl2Pupils(s.incl2Pupils ?? 0);
-      setPsychRows(s.psychRows ?? []);
-      if (s.minorityType) setMinorityType(s.minorityType);
-      setMinority1Classes(s.minority1Classes ?? 0);
-      setMinority1Pupils(s.minority1Pupils ?? 0);
-      setMinority2Classes(s.minority2Classes ?? 0);
-      setMinority2Pupils(s.minority2Pupils ?? 0);
-      setGymRows(s.gymRows ?? []);
-      setMixedRows(s.mixedRows ?? []);
-      setSpecial1Classes(s.special1Classes ?? 0);
-      setSpecial1Pupils(s.special1Pupils ?? 0);
-      setSpecial2Classes(s.special2Classes ?? 0);
-      setSpecial2Pupils(s.special2Pupils ?? 0);
-      setSpecialIIClasses(s.specialIIClasses ?? 0);
-      setSpecialIIPupils(s.specialIIPupils ?? 0);
-      setPrepClasses(s.prepClasses ?? 0);
-      setPrepChildren(s.prepChildren ?? 0);
-      setPrepSpecialClasses(s.prepSpecialClasses ?? 0);
-      setPrepSpecialChildren(s.prepSpecialChildren ?? 0);
-      setP38First(s.p38First ?? 0);
-      setP38Second(s.p38Second ?? 0);
-      setP41First(s.p41First ?? 0);
-      setP41Second(s.p41Second ?? 0);
-      setPhaRows(s.phaRows ?? []);
-      setPhpYear1(s.phpYear1 ?? 0);
-      setPhpYear2(s.phpYear2 ?? 0);
-      setPhpYear3(s.phpYear3 ?? 0);
-      if (s.phpWizardStep) setPhpWizardStep(s.phpWizardStep);
-      if (s.phpMethodMode) setPhpMethodMode(s.phpMethodMode);
-      setPhpExcludedAbroad(s.phpExcludedAbroad ?? 0);
-      setPhpExcludedForeignSchoolCz(s.phpExcludedForeignSchoolCz ?? 0);
-      setPhpExcludedIndividual(s.phpExcludedIndividual ?? 0);
-      setPhpExcludedSchool(Boolean(s.phpExcludedSchool));
-      setSelectedExample(s.selectedExample ?? "");
-      setWizardChoice(s.wizardChoice ?? "");
-      setDataMode(s.dataMode ?? "own");
-      setNv75Role(s.nv75Role === "reditel" ? "reditel" : "ucitel");
-      setNv75School(s.nv75School === "plavecka_skola" ? "plavecka_skola" : "plavecka_skola");
-      setNv75TeacherMin(typeof s.nv75TeacherMin === "number" ? s.nv75TeacherMin : 22);
-      setNv75TeacherMax(typeof s.nv75TeacherMax === "number" ? s.nv75TeacherMax : 30);
-      setMixedMethodFirstZsPupils(s.mixedMethodFirstZsPupils ?? 0);
-      setMixedMethodFirstZsClasses(s.mixedMethodFirstZsClasses ?? 0);
-      setMixedMethodFirstSpecialPupils(s.mixedMethodFirstSpecialPupils ?? 0);
-      setMixedMethodFirstSpecialClasses(s.mixedMethodFirstSpecialClasses ?? 0);
-      setMixedMethodSecondZsPupils(s.mixedMethodSecondZsPupils ?? 0);
-      setMixedMethodSecondZsClasses(s.mixedMethodSecondZsClasses ?? 0);
-      setMixedMethodSecondSpecialPupils(s.mixedMethodSecondSpecialPupils ?? 0);
-      setMixedMethodSecondSpecialClasses(s.mixedMethodSecondSpecialClasses ?? 0);
-      setUiNotice("Uložená data byla obnovena.");
+      const s = JSON.parse(raw) as Record<string, unknown>;
+      applySnapshotPayload(s, "Uložená data byla obnovena.");
     } catch (error) {
       console.error("Nepodařilo se obnovit uložená data.", error);
       setUiNotice("Obnovení uložených dat se nepodařilo.");
@@ -1130,6 +1234,61 @@ export default function App() {
     setUiNotice("Rozpracované údaje byly uloženy.");
   };
 
+  useEffect(() => {
+    setNamedSnapshots(readNamedSnapshotsFromLs());
+  }, []);
+
+  const saveNamedSnapshot = () => {
+    const name = namedSaveName.trim() || new Date().toLocaleString("cs-CZ");
+    const id = `n-${Date.now()}`;
+    const snapshot = buildSnapshot() as unknown as Record<string, unknown>;
+    const item: NamedZsSnapshot = { id, name, savedAt: new Date().toISOString(), snapshot };
+    const next = [item, ...namedSnapshots].slice(0, MAX_NAMED_SNAPSHOTS);
+    setNamedSnapshots(next);
+    writeNamedSnapshotsToLs(next);
+    setNamedSaveName("");
+    setUiNotice(`Záloha „${name}“ uložena do seznamu (max. ${MAX_NAMED_SNAPSHOTS}).`);
+  };
+
+  const restoreNamedSnapshot = () => {
+    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!item) {
+      setUiNotice("Vyberte pojmenovanou zálohu v seznamu.");
+      return;
+    }
+    applySnapshotPayload(item.snapshot, `Obnovena záloha „${item.name}“.`);
+  };
+
+  const deleteNamedSnapshot = () => {
+    if (!selectedNamedId) {
+      setUiNotice("Vyberte zálohu ke smazání.");
+      return;
+    }
+    const next = namedSnapshots.filter((x) => x.id !== selectedNamedId);
+    setNamedSnapshots(next);
+    writeNamedSnapshotsToLs(next);
+    setSelectedNamedId("");
+    setUiNotice("Pojmenovaná záloha byla smazána.");
+  };
+
+  const dismissZsGuide = () => {
+    try {
+      localStorage.setItem(ZS_ONBOARDING_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    setZsGuideOpen(false);
+  };
+
+  const openZsGuide = () => {
+    try {
+      localStorage.removeItem(ZS_ONBOARDING_KEY);
+    } catch {
+      /* ignore */
+    }
+    setZsGuideOpen(true);
+  };
+
   const copySummaryToClipboard = async () => {
     const text = buildShareText({
       modeLabel: MODE_CONFIG[mode].label,
@@ -1139,6 +1298,7 @@ export default function App() {
       totalPhp,
       warnings,
       inputMode: dataMode,
+      exportLabel,
     });
     try {
       await navigator.clipboard.writeText(text);
@@ -1156,6 +1316,7 @@ export default function App() {
       totalPhp,
       warnings,
       inputMode: dataMode,
+      exportLabel,
     }).replace(/\n/g, "<br />");
     const win = window.open("", "_blank", "width=900,height=700");
     if (!win) return;
@@ -1176,7 +1337,22 @@ export default function App() {
   const validationIssues = (() => {
     const issues: { section: string; label: string }[] = [];
     if (tab === "phmax") {
-      if (basic1Classes === 0 && basic2Classes === 0 && incl1Classes === 0 && incl2Classes === 0 && psychRows.length === 0 && minority1Classes === 0 && gymRows.length === 0 && mixedRows.length === 0 && special1Classes === 0 && special2Classes === 0 && specialIIClasses === 0 && prepClasses === 0 && prepSpecialClasses === 0) {
+      if (
+        basic1Classes === 0 &&
+        basic2Classes === 0 &&
+        incl1Classes === 0 &&
+        incl2Classes === 0 &&
+        psychRows.length === 0 &&
+        healthRows.length === 0 &&
+        minority1Classes === 0 &&
+        gymRows.length === 0 &&
+        mixedRows.length === 0 &&
+        special1Classes === 0 &&
+        special2Classes === 0 &&
+        specialIIClasses === 0 &&
+        prepClasses === 0 &&
+        prepSpecialClasses === 0
+      ) {
         issues.push({ section: "basic", label: "Vyplňte alespoň jednu relevantní sekci v PHmax." });
       }
     }
@@ -1222,6 +1398,7 @@ export default function App() {
       items.push({ id: "special", label: "ZŠ speciální" });
     }
     if (hasSection("psych_groups")) items.push({ id: "psych", label: "Psychiatrie" });
+    if (hasSection("health_groups")) items.push({ id: "health", label: "Zdravotnické zařízení" });
     if (hasSection("minority_first")) items.push({ id: "minority", label: "Menšina" });
     if (hasSection("gym_groups")) items.push({ id: "gym", label: "Gymnázia" });
     if (hasSection("dominant_c_first") || hasSection("dominant_b_first")) items.push({ id: "mixed", label: "Smíšené" });
@@ -1319,7 +1496,7 @@ export default function App() {
     }
   }, [
     tab, mode, basicType, basic1Classes, basic1Pupils, basic2Classes, basic2Pupils,
-    incl1Classes, incl1Pupils, incl2Classes, incl2Pupils, psychRows, minorityType,
+    incl1Classes, incl1Pupils, incl2Classes, incl2Pupils, psychRows, healthRows, exportLabel, minorityType,
     minority1Classes, minority1Pupils, minority2Classes, minority2Pupils, gymRows, mixedRows,
     special1Classes, special1Pupils, special2Classes, special2Pupils, specialIIClasses,
     specialIIPupils, prepClasses, prepChildren, prepSpecialClasses, prepSpecialChildren,
@@ -1340,6 +1517,7 @@ export default function App() {
     ["Třídy podle § 16 odst. 9 – 2. stupeň", incl2Phmax],
     ["Třídy podle § 16 odst. 9 – celkem", inclPhmax],
     ["Škola při psychiatrické nemocnici", psychPhmax],
+    ["ZŠ při zdravotnickém zařízení (mimo psychiatrii), ř. B11–B13", healthPhmax],
     ["ZŠ s jazykem národnostní menšiny – 1. stupeň", minority1Phmax],
     ["ZŠ s jazykem národnostní menšiny – 2. stupeň", minority2Phmax],
     ["ZŠ s jazykem národnostní menšiny – celkem", minorityPhmax],
@@ -1373,6 +1551,7 @@ export default function App() {
       ["Metodický podklad (orientačně)", METHODIKA_VERSION_LABEL],
       ["Režim výpočtu (typ školy)", MODE_CONFIG[mode].label],
       ["Aktivní záložka při exportu", tabLabel],
+      ["Označení exportu / škola", exportLabel.trim() || "—"],
       ["Průvodce (volba scénáře)", wizardChoice || "—"],
       ["Práce s údaji", dataMode === "example" ? "ukázkový příklad" : "vlastní škola"],
       ["Identifikátor ukázkového příkladu", selectedExample || "—"],
@@ -1395,6 +1574,7 @@ export default function App() {
       ["Metodický podklad (orientačně)", METHODIKA_VERSION_LABEL],
       ["Režim výpočtu (typ školy)", MODE_CONFIG[mode].label],
       ["Aktivní záložka při exportu", tabLabel],
+      ["Označení exportu / škola", exportLabel.trim() || "—"],
       ["Průvodce (volba scénáře)", wizardChoice || "—"],
       ["Práce s údaji", dataMode === "example" ? "ukázkový příklad" : "vlastní škola"],
       ["Identifikátor ukázkového příkladu", selectedExample || "—"],
@@ -1410,6 +1590,7 @@ export default function App() {
       ["§ 16/9 – 2. st. třídy", incl2Classes],
       ["§ 16/9 – 2. st. žáci", incl2Pupils],
       ["Psychiatrická škola – počet řádků", psychRows.length],
+      ["ZŠ při zdrav. zař. (B11–B13) – počet řádků", healthRows.length],
       ["Menšina – variant (kód)", minorityType],
       ["Menšina – 1. st. třídy / žáci", `${minority1Classes} / ${minority1Pupils}`],
       ["Menšina – 2. st. třídy / žáci", `${minority2Classes} / ${minority2Pupils}`],
@@ -1458,6 +1639,19 @@ export default function App() {
         out.push([`Psych ${i + 1} – použitý průměr žáků/třídu`, r.usedAvg]);
         out.push([`Psych ${i + 1} – pásmo / PHmax na 1 třídu`, `${r.bandLabel} / ${r.perClass}`]);
         out.push([`Psych ${i + 1} – řádkový výsledek PHmax`, r.subtotal]);
+      });
+    }
+    if (healthRows.length > 0) {
+      out.push(["", ""]);
+      out.push(["=== ZŠ při zdravotnickém zařízení (B11–B13) – řádky ===", ""]);
+      healthComputedRows.forEach((r, i) => {
+        out.push([`ZdrZař ${i + 1} – typ (kód)`, r.kind]);
+        out.push([`ZdrZař ${i + 1} – režim průměru`, r.mode === "current_only" ? "jen aktuální" : "vyšší ze dvou"]);
+        out.push([`ZdrZař ${i + 1} – aktuální žáci / třídy`, `${r.currentPupils} / ${r.currentClasses}`]);
+        out.push([`ZdrZař ${i + 1} – předchozí žáci / třídy`, `${r.prevPupils} / ${r.prevClasses}`]);
+        out.push([`ZdrZař ${i + 1} – použitý průměr žáků/třídu`, r.usedAvg]);
+        out.push([`ZdrZař ${i + 1} – pásmo / PHmax na 1 třídu`, `${r.bandLabel} / ${r.perClass}`]);
+        out.push([`ZdrZař ${i + 1} – řádkový výsledek PHmax`, r.subtotal]);
       });
     }
     if (gymRows.length > 0) {
@@ -1602,11 +1796,12 @@ export default function App() {
                   <option value="phmax_bezna_zs">Běžná úplná ZŠ bez § 16/9 v datech (jen běžné třídy)</option>
                   <option value="inkluzivni_skola">Inkluzivní škola (běžné + § 16/9, jiná čísla než v příloze)</option>
                   <option value="psychiatricka_nemocnice">Škola při psychiatrické nemocnici</option>
+                  <option value="zdravotnicke_zs">ZŠ při zdravotnickém zařízení (mimo psychiatrii, B11–B13)</option>
                   <option value="pripravna_trida">Přípravná třída</option>
                 </optgroup>
                 <optgroup label="Příloha – PHAmax (asistenti pedagoga)">
                   <option value="priloha_phamax_uplna_zs_sec16_zss">
-                    Úplná ZŠ § 16/9 + ZŠ speciální, rozlišení AD1/AD2 (474 h, ř. B35–B43 dle metodiky v5)
+                    Úplná ZŠ § 16/9 + ZŠ speciální, rozlišení AD1/AD2 (474 h, ř. B35–B44 dle metodiky v5)
                   </option>
                 </optgroup>
                 <optgroup label="PHPmax – ukázky">
@@ -1630,6 +1825,52 @@ export default function App() {
                 Vymazat všechny údaje
               </button>
             </div>
+            <div className="hero-actions__group hero-actions__group--named muted-text" style={{ flexWrap: "wrap", gap: "8px", alignItems: "center", width: "100%" }}>
+              <label className="field field--inline" style={{ flex: "1 1 220px", margin: 0 }}>
+                <span className="field__label">Označení pro export</span>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="např. název školy, školní rok…"
+                  value={exportLabel}
+                  onChange={(e) => setExportLabel(e.target.value)}
+                  aria-label="Označení pro export a shrnutí"
+                />
+              </label>
+              <input
+                type="text"
+                className="input"
+                style={{ flex: "1 1 160px" }}
+                placeholder="Název zálohy"
+                value={namedSaveName}
+                onChange={(e) => setNamedSaveName(e.target.value)}
+                aria-label="Název pojmenované zálohy"
+              />
+              <button type="button" className="btn ghost" onClick={saveNamedSnapshot}>
+                Uložit do seznamu
+              </button>
+              <select
+                className="input"
+                style={{ flex: "1 1 200px" }}
+                value={selectedNamedId}
+                onChange={(e) => setSelectedNamedId(e.target.value)}
+                aria-label="Vybrat uloženou zálohu"
+              >
+                <option value="">Vyberte uloženou zálohu…</option>
+                {namedSnapshots.map((n) => (
+                  <option key={n.id} value={n.id}>
+                    {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
+                  </option>
+                ))}
+              </select>
+              <button type="button" className="btn ghost" onClick={restoreNamedSnapshot}>
+                Obnovit vybranou
+              </button>
+              <button type="button" className="btn ghost" onClick={deleteNamedSnapshot}>
+                Smazat vybranou
+              </button>
+            </div>
+
             <div className="hero-actions__group hero-actions__group--exports">
               <button type="button" className="btn ghost" onClick={handleExportCsv}>
                 CSV
@@ -1663,9 +1904,25 @@ export default function App() {
           <div className="hero-status">
             <div className="hero-status__item"><strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.</div>
             <div className="hero-status__item"><strong>Poslední uložení:</strong> {lastSavedAt || "zatím neproběhlo"}</div>
+            <div className="hero-status__item">
+              <button type="button" className="btn ghost" style={{ padding: "2px 8px", fontSize: "0.9em" }} onClick={openZsGuide}>
+                Znovu zobrazit úvodní návod
+              </button>
+            </div>
             {uiNotice ? <div className="hero-status__item hero-status__item--notice">{uiNotice}</div> : null}
           </div>
         </header>
+
+        <QuickOnboarding title="Úvod k kalkulačce ZŠ" open={zsGuideOpen} onDismiss={dismissZsGuide}>
+          <p>
+            <strong>PHmax</strong> zadejte podle typu školy v rozbalovacím režimu; u specialit (psychiatrie, zdravotnické zařízení,
+            menšina, gymnázia…) přepněte na odpovídající položku. <strong>PHAmax</strong> a <strong>PHPmax</strong> mají vlastní záložky.
+          </p>
+          <p>
+            Průměry u škol při zdravotnickém zařízení a psychiatrii počítá aplikace jako vyšší z minulého roku a aktuálního sběru — doplňte oba sloupce, pokud je znáte.
+            Pojmenované zálohy (max. {MAX_NAMED_SNAPSHOTS}) drží celý stav včetně záložky a pole „Označení pro export“.
+          </p>
+        </QuickOnboarding>
 
         <section className="card card--onboarding section-card section-card--onboarding">
           <div className="onboarding">
@@ -1729,6 +1986,7 @@ export default function App() {
                 <option value="php_deductions">Máme žáky, kteří se do PHPmax nezapočítávají</option>
                 <option value="ph_inclusion">Jsme škola s inkluzí a třídami podle § 16</option>
                 <option value="ph_psych">Jsme škola při psychiatrické nemocnici</option>
+                <option value="ph_health">Jsme ZŠ při zdravotnickém zařízení (ne psychiatrie)</option>
                 <option value="ph_mixed">Máme smíšené třídy</option>
                 <option value="ph_prep">Máme přípravnou třídu nebo přípravný stupeň ZŠS</option>
               </select>
@@ -2013,6 +2271,56 @@ export default function App() {
                 </section>
               )}
 
+              {hasSection("health_groups") && (
+                <section className="card section-card section-card--module section-card--module-psych" data-section="health">
+                  <h2>
+                    ZŠ při zdravotnickém zařízení (mimo psychiatrii){" "}
+                    <HelpHint text="Řádky B11–B13 dle metodiky ZV v5. Průměr žáků ve třídě se stanoví jako vyšší z průměru za předchozí školní rok a z údaje k aktuálnímu sběru (stejná logika jako u psychiatrické školy). B11 = 1. stupeň, B12 = 2. stupeň, B13 = společná výuka 1. a 2. stupně." />
+                  </h2>
+                  <p className="muted-text">Nezahrnuje školy při psychiatrické nemocnici – ty mají samostatný režim (B14–B16).</p>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Typ</th><th>Zdroj</th><th>Akt. žáci</th><th>Akt. třídy</th><th>Před. žáci</th><th>Před. třídy</th><th>Průměr</th><th>Výsledek</th><th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {healthComputedRows.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
+                        </tr>
+                      ) : healthComputedRows.map((row) => (
+                        <tr key={row.id}>
+                          <td>
+                            <select value={row.kind} onChange={(e) => updateHealth(row.id, "kind", e.target.value)}>
+                              <option value="health1">1. stupeň (ř. B11)</option>
+                              <option value="health2">2. stupeň (ř. B12)</option>
+                              <option value="healthMix">1. a 2. stupeň společně (ř. B13)</option>
+                            </select>
+                          </td>
+                          <td>
+                            <select value={row.mode} onChange={(e) => updateHealth(row.id, "mode", e.target.value)}>
+                              <option value="higher_of_two">Vyšší z obou údajů</option>
+                              <option value="current_only">Jen aktuální rok</option>
+                            </select>
+                          </td>
+                          <td><input type="number" value={row.currentPupils} onChange={(e) => updateHealth(row.id, "currentPupils", Number(e.target.value) || 0)} /></td>
+                          <td><input type="number" value={row.currentClasses} onChange={(e) => updateHealth(row.id, "currentClasses", Number(e.target.value) || 0)} /></td>
+                          <td><input type="number" value={row.prevPupils} onChange={(e) => updateHealth(row.id, "prevPupils", Number(e.target.value) || 0)} /></td>
+                          <td><input type="number" value={row.prevClasses} onChange={(e) => updateHealth(row.id, "prevClasses", Number(e.target.value) || 0)} /></td>
+                          <td>{row.usedAvg}</td>
+                          <td>{row.bandLabel} / {row.perClass}</td>
+                          <td><button type="button" className="icon-btn" onClick={() => removeHealth(row.id)}>✕</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button type="button" className="btn ghost" onClick={addHealth}>
+                    Přidat třídu / řádek
+                  </button>
+                </section>
+              )}
+
               {hasSection("minority_first") && (
                 <section className="card section-card section-card--module section-card--module-minority" data-section="minority">
                   <h2>ZŠ s jazykem národnostní menšiny</h2>
@@ -2232,6 +2540,7 @@ export default function App() {
                 <ResultCard label="Běžné třídy" value={basicPhmax} />
                 <ResultCard label="§ 16 odst. 9" value={inclPhmax} />
                 <ResultCard label="Škola při psychiatrické nemocnici" value={psychPhmax} />
+                <ResultCard label="ZŠ při zdrav. zař. (B11–B13)" value={healthPhmax} />
                 <ResultCard label="Jazyk menšiny" value={minorityPhmax} />
                 <ResultCard label="Víceletá gymnázia" value={gymPhmax} />
                 <ResultCard label="Smíšené třídy" value={mixedForTotal} />
@@ -2248,7 +2557,7 @@ export default function App() {
             <h2>PHAmax – asistenti pedagoga</h2>
             <p className="muted-text">
               U tříd § 16/9 a ZŠ speciální podle metodiky (NV č. 123/2018 Sb., vyhl. č. 48/2005 Sb.) rozlišujte příznak třídy: AD1 (ostatní zdravotní postižení dle § 16 odst. 9) vs. AD2 (těžší varianty – tělesné postižení, PVCH, souběžné postižení, autismus).
-              Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v5; průměr žáků ve skupině stejného typu určí pásmo a hodnotu PHAmax na třídu.
+              Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v5; průměr žáků ve skupině stejného typu určí pásmo a hodnotu PHAmax na třídu. Přípravný stupeň ZŠ speciální je řádek B45 (samostatná volba).
             </p>
             <table className="table">
               <thead>
@@ -2275,6 +2584,7 @@ export default function App() {
                         <option value="zss2Heavy">ZŠ speciální I. díl – 2. stupeň, těžší varianty (ř. B42)</option>
                         <option value="zssII">ZŠ speciální II. díl (ř. B43)</option>
                         <option value="zssIIHeavy">ZŠ speciální II. díl, těžší varianty (ř. B44)</option>
+                        <option value="zssPrep">Přípravný stupeň ZŠ speciální (ř. B45)</option>
                       </select>
                     </td>
                     <td><input type="number" value={row.classes} onChange={(e) => updatePha(row.id, "classes", Number(e.target.value) || 0)} /></td>
