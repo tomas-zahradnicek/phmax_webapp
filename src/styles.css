@@ -193,6 +193,59 @@ button.pill--hero-toggle--active {
   margin-bottom: 0;
 }
 
+.sd-phmax-breakdown-scroll {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #0f172a;
+}
+
+.sd-phmax-breakdown {
+  width: 100%;
+  min-width: 280px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  background: #fff;
+}
+
+.sd-phmax-breakdown th,
+.sd-phmax-breakdown td {
+  border: 1px solid #0f172a;
+  padding: 10px 14px;
+  vertical-align: middle;
+}
+
+.sd-phmax-breakdown__corner {
+  background: #e2e8f0;
+  width: 38%;
+}
+
+.sd-phmax-breakdown__head-num,
+.sd-phmax-breakdown__label,
+.sd-phmax-breakdown__total th {
+  background: #e2e8f0;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: left;
+}
+
+.sd-phmax-breakdown__head-num {
+  text-align: center;
+}
+
+.sd-phmax-breakdown__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  background: #fff;
+  color: #0f172a;
+}
+
+.sd-phmax-breakdown__total th,
+.sd-phmax-breakdown__total td {
+  background: #f1f5f9;
+  font-weight: 800;
+}
+
 .hero--feature {
   position: relative;
   overflow: hidden;

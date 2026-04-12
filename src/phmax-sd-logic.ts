@@ -12,6 +12,23 @@ export const PHMAX_SD_BY_DEPARTMENTS: readonly number[] = [
 
 export const SD_MAX_DEPARTMENTS_IN_TABLE = PHMAX_SD_BY_DEPARTMENTS.length;
 
+/**
+ * Hodiny PHmax připadající na i-té oddělení podle pořadí v příloze vyhl. č. 74/2005 Sb.
+ * (cyklus 32,5 → 25 → 22,5 → 17,5 h opakovaný pro oddělení 1, 2, 3, 4, 5…).
+ */
+export const SD_DEPARTMENT_HOUR_CYCLE: readonly number[] = [32.5, 25, 22.5, 17.5];
+
+export function getPhmaxSdHourForDepartmentOrder(order1Based: number): number {
+  const i = (order1Based - 1) % SD_DEPARTMENT_HOUR_CYCLE.length;
+  return SD_DEPARTMENT_HOUR_CYCLE[i];
+}
+
+/** Rozpad celkového PHmax na jednotlivá oddělení (řádek tabulky pro daný počet oddělení). */
+export function getPhmaxSdBreakdown(departmentCount: number): readonly number[] | null {
+  if (departmentCount < 1 || departmentCount > PHMAX_SD_BY_DEPARTMENTS.length) return null;
+  return Array.from({ length: departmentCount }, (_, k) => getPhmaxSdHourForDepartmentOrder(k + 1));
+}
+
 export function getPhmaxSdBase(departmentCount: number): number | null {
   if (departmentCount < 1 || departmentCount > PHMAX_SD_BY_DEPARTMENTS.length) return null;
   return PHMAX_SD_BY_DEPARTMENTS[departmentCount - 1];

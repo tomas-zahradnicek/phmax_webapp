@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   PHMAX_SD_BY_DEPARTMENTS,
   getPhmaxSdBase,
+  getPhmaxSdBreakdown,
+  getPhmaxSdHourForDepartmentOrder,
   reducedPhmaxIfUnderStaffed,
   suggestedDepartmentsFromPupils,
 } from "./phmax-sd-logic";
@@ -54,5 +56,24 @@ describe("getPhmaxSdBase", () => {
   it("vrací null mimo tabulku", () => {
     expect(getPhmaxSdBase(0)).toBeNull();
     expect(getPhmaxSdBase(22)).toBeNull();
+  });
+});
+
+describe("getPhmaxSdBreakdown", () => {
+  it("1. a 2. oddělení odpovídají příloze (32,5 a 25)", () => {
+    expect(getPhmaxSdHourForDepartmentOrder(1)).toBe(32.5);
+    expect(getPhmaxSdHourForDepartmentOrder(2)).toBe(25);
+    expect(getPhmaxSdBreakdown(2)).toEqual([32.5, 25]);
+  });
+
+  it("součet řádků se rovná PHmax z tabulky pro 1–21 oddělení", () => {
+    for (let n = 1; n <= 21; n++) {
+      const parts = getPhmaxSdBreakdown(n);
+      const total = getPhmaxSdBase(n);
+      expect(parts).not.toBeNull();
+      expect(total).not.toBeNull();
+      const sum = parts!.reduce((a, b) => a + b, 0);
+      expect(sum).toBeCloseTo(total!, 10);
+    }
   });
 });

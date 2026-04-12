@@ -1,12 +1,18 @@
 import React, { useMemo, useState } from "react";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { NumberField, ResultCard } from "./phmax-zs-ui";
+import { round2 } from "./phmax-zs-logic";
 import {
   SD_MAX_DEPARTMENTS_IN_TABLE,
   getPhmaxSdBase,
+  getPhmaxSdBreakdown,
   reducedPhmaxIfUnderStaffed,
   suggestedDepartmentsFromPupils,
 } from "./phmax-sd-logic";
+
+function formatSdHours(value: number) {
+  return value.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 type PhmaxSdPageProps = {
   productView: ProductView;
@@ -32,6 +38,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   }, [basePhmax, pupils, effectiveDepts]);
 
   const avgPerDept = effectiveDepts > 0 && pupils > 0 ? Math.round((pupils / effectiveDepts) * 100) / 100 : 0;
+
+  const breakdown = useMemo(() => getPhmaxSdBreakdown(effectiveDepts), [effectiveDepts]);
 
   const tableWarning =
     effectiveDepts > SD_MAX_DEPARTMENTS_IN_TABLE
@@ -132,6 +140,63 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <p className="muted-text">Zadejte platný počet oddělení (1–{SD_MAX_DEPARTMENTS_IN_TABLE}).</p>
           )}
         </div>
+
+        {breakdown != null && breakdown.length > 0 && basePhmax != null ? (
+          <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
+            <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
+              Rozpad PHmax podle oddělení
+            </h3>
+            <p className="muted-text" style={{ marginBottom: 12, fontSize: "0.88rem" }}>
+              Hodiny podle přílohy k vyhlášce č. 74/2005 Sb. (stejně jako ve sloupcích tabulky pro váš počet oddělení).
+              Pořadí odpovídá 1. až n-tému oddělení v této tabulce.
+            </p>
+            <div className="sd-phmax-breakdown-scroll">
+              <table className="sd-phmax-breakdown">
+                <thead>
+                  <tr>
+                    <th scope="col" className="sd-phmax-breakdown__corner" />
+                    <th scope="col" className="sd-phmax-breakdown__head-num">
+                      PHmax
+                    </th>
+                    {reduction.applied ? (
+                      <th scope="col" className="sd-phmax-breakdown__head-num">
+                        Po krácení (orient.)
+                      </th>
+                    ) : null}
+                  </tr>
+                </thead>
+                <tbody>
+                  {breakdown.map((hours, index) => (
+                    <tr key={index}>
+                      <th scope="row" className="sd-phmax-breakdown__label">
+                        Oddělení {index + 1}
+                      </th>
+                      <td className="sd-phmax-breakdown__num">{formatSdHours(hours)}</td>
+                      {reduction.applied ? (
+                        <td className="sd-phmax-breakdown__num">
+                          {formatSdHours(round2(hours * reduction.factor))}
+                        </td>
+                      ) : null}
+                    </tr>
+                  ))}
+                  <tr className="sd-phmax-breakdown__total">
+                    <th scope="row">Celkem</th>
+                    <td className="sd-phmax-breakdown__num">{formatSdHours(basePhmax)}</td>
+                    {reduction.applied ? (
+                      <td className="sd-phmax-breakdown__num">{formatSdHours(reduction.adjusted)}</td>
+                    ) : null}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {reduction.applied ? (
+              <p className="muted-text" style={{ marginTop: 10, fontSize: "0.82rem" }}>
+                Koeficient krácení: {reduction.factor.toFixed(4)}. Jako celkový strop po krácení platí součet v řádku
+                Celkem ({formatSdHours(reduction.adjusted)} h); rozpad sloupců je poměrný podklad.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         {tableWarning ? <p className="card card--warning" style={{ marginTop: 16, padding: 14 }}>{tableWarning}</p> : null}
 
