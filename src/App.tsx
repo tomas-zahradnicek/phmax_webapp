@@ -2252,43 +2252,45 @@ export default function App() {
                 <section className="card section-card section-card--module section-card--module-psych" data-section="psych">
                   <h2>Škola při psychiatrické nemocnici <HelpHint text="U této části se pracuje s aktuálním údajem nebo s vyšší hodnotou z aktuálního a předchozího údaje podle zvoleného režimu. Výsledek se pak určí podle příslušného pásma pro 1. stupeň, 2. stupeň nebo společnou výuku." /></h2>
                   <p className="muted-text">Najeďte na ikonu „i“ u nadpisu pro stručnou metodickou nápovědu.</p>
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Typ</th><th>Zdroj</th><th>Akt. žáci</th><th>Akt. třídy</th><th>Před. žáci</th><th>Před. třídy</th><th>Průměr</th><th>Výsledek</th><th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {psychComputedRows.length === 0 ? (
+                  <div className="table-outer table-outer--auto-wide" role="region" aria-label="Tabulka školy při psychiatrické nemocnici">
+                    <table className="table">
+                      <thead>
                         <tr>
-                          <td colSpan={9} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
+                          <th>Typ</th><th>Zdroj</th><th>Akt. žáci</th><th>Akt. třídy</th><th>Před. žáci</th><th>Před. třídy</th><th>Průměr</th><th>Výsledek</th><th></th>
                         </tr>
-                      ) : psychComputedRows.map((row) => (
-                        <tr key={row.id}>
-                          <td>
-                            <select value={row.kind} onChange={(e) => updatePsych(row.id, "kind", e.target.value)}>
-                              <option value="psych1">1. stupeň</option>
-                              <option value="psych2">2. stupeň</option>
-                              <option value="psychMix">1. a 2. stupeň společně</option>
-                            </select>
-                          </td>
-                          <td>
-                            <select value={row.mode} onChange={(e) => updatePsych(row.id, "mode", e.target.value)}>
-                              <option value="higher_of_two">Vyšší z obou údajů</option>
-                              <option value="current_only">Jen aktuální rok</option>
-                            </select>
-                          </td>
-                          <td><input type="number" value={row.currentPupils} onChange={(e) => updatePsych(row.id, "currentPupils", Number(e.target.value) || 0)} /></td>
-                          <td><input type="number" value={row.currentClasses} onChange={(e) => updatePsych(row.id, "currentClasses", Number(e.target.value) || 0)} /></td>
-                          <td><input type="number" value={row.prevPupils} onChange={(e) => updatePsych(row.id, "prevPupils", Number(e.target.value) || 0)} /></td>
-                          <td><input type="number" value={row.prevClasses} onChange={(e) => updatePsych(row.id, "prevClasses", Number(e.target.value) || 0)} /></td>
-                          <td>{row.usedAvg}</td>
-                          <td>{row.bandLabel} / {row.perClass}</td>
-                          <td><button className="icon-btn" onClick={() => removePsych(row.id)}>✕</button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {psychComputedRows.length === 0 ? (
+                          <tr>
+                            <td colSpan={9} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
+                          </tr>
+                        ) : psychComputedRows.map((row) => (
+                          <tr key={row.id}>
+                            <td>
+                              <select value={row.kind} onChange={(e) => updatePsych(row.id, "kind", e.target.value)}>
+                                <option value="psych1">1. stupeň</option>
+                                <option value="psych2">2. stupeň</option>
+                                <option value="psychMix">1. a 2. stupeň společně</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select value={row.mode} onChange={(e) => updatePsych(row.id, "mode", e.target.value)}>
+                                <option value="higher_of_two">Vyšší z obou údajů</option>
+                                <option value="current_only">Jen aktuální rok</option>
+                              </select>
+                            </td>
+                            <td><input type="number" value={row.currentPupils} onChange={(e) => updatePsych(row.id, "currentPupils", Number(e.target.value) || 0)} /></td>
+                            <td><input type="number" value={row.currentClasses} onChange={(e) => updatePsych(row.id, "currentClasses", Number(e.target.value) || 0)} /></td>
+                            <td><input type="number" value={row.prevPupils} onChange={(e) => updatePsych(row.id, "prevPupils", Number(e.target.value) || 0)} /></td>
+                            <td><input type="number" value={row.prevClasses} onChange={(e) => updatePsych(row.id, "prevClasses", Number(e.target.value) || 0)} /></td>
+                            <td>{row.usedAvg}</td>
+                            <td>{row.bandLabel} / {row.perClass}</td>
+                            <td><button className="icon-btn" onClick={() => removePsych(row.id)}>✕</button></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                   <button className="btn ghost" onClick={addPsych}>Přidat třídu / řádek</button>
                 </section>
               )}
@@ -2300,43 +2302,45 @@ export default function App() {
                     <HelpHint text="Řádky B11–B13 dle metodiky ZV v5. Průměr žáků ve třídě se stanoví jako vyšší z průměru za předchozí školní rok a z údaje k aktuálnímu sběru (stejná logika jako u psychiatrické školy). B11 = 1. stupeň, B12 = 2. stupeň, B13 = společná výuka 1. a 2. stupně." />
                   </h2>
                   <p className="muted-text">Nezahrnuje školy při psychiatrické nemocnici – ty mají samostatný režim (B14–B16).</p>
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Typ</th><th>Zdroj</th><th>Akt. žáci</th><th>Akt. třídy</th><th>Před. žáci</th><th>Před. třídy</th><th>Průměr</th><th>Výsledek</th><th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {healthComputedRows.length === 0 ? (
+                  <div className="table-outer table-outer--auto-wide" role="region" aria-label="Tabulka ZŠ při zdravotnickém zařízení">
+                    <table className="table">
+                      <thead>
                         <tr>
-                          <td colSpan={9} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
+                          <th>Typ</th><th>Zdroj</th><th>Akt. žáci</th><th>Akt. třídy</th><th>Před. žáci</th><th>Před. třídy</th><th>Průměr</th><th>Výsledek</th><th></th>
                         </tr>
-                      ) : healthComputedRows.map((row) => (
-                        <tr key={row.id}>
-                          <td>
-                            <select value={row.kind} onChange={(e) => updateHealth(row.id, "kind", e.target.value)}>
-                              <option value="health1">1. stupeň (ř. B11)</option>
-                              <option value="health2">2. stupeň (ř. B12)</option>
-                              <option value="healthMix">1. a 2. stupeň společně (ř. B13)</option>
-                            </select>
-                          </td>
-                          <td>
-                            <select value={row.mode} onChange={(e) => updateHealth(row.id, "mode", e.target.value)}>
-                              <option value="higher_of_two">Vyšší z obou údajů</option>
-                              <option value="current_only">Jen aktuální rok</option>
-                            </select>
-                          </td>
-                          <td><input type="number" value={row.currentPupils} onChange={(e) => updateHealth(row.id, "currentPupils", Number(e.target.value) || 0)} /></td>
-                          <td><input type="number" value={row.currentClasses} onChange={(e) => updateHealth(row.id, "currentClasses", Number(e.target.value) || 0)} /></td>
-                          <td><input type="number" value={row.prevPupils} onChange={(e) => updateHealth(row.id, "prevPupils", Number(e.target.value) || 0)} /></td>
-                          <td><input type="number" value={row.prevClasses} onChange={(e) => updateHealth(row.id, "prevClasses", Number(e.target.value) || 0)} /></td>
-                          <td>{row.usedAvg}</td>
-                          <td>{row.bandLabel} / {row.perClass}</td>
-                          <td><button type="button" className="icon-btn" onClick={() => removeHealth(row.id)}>✕</button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {healthComputedRows.length === 0 ? (
+                          <tr>
+                            <td colSpan={9} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
+                          </tr>
+                        ) : healthComputedRows.map((row) => (
+                          <tr key={row.id}>
+                            <td>
+                              <select value={row.kind} onChange={(e) => updateHealth(row.id, "kind", e.target.value)}>
+                                <option value="health1">1. stupeň (ř. B11)</option>
+                                <option value="health2">2. stupeň (ř. B12)</option>
+                                <option value="healthMix">1. a 2. stupeň společně (ř. B13)</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select value={row.mode} onChange={(e) => updateHealth(row.id, "mode", e.target.value)}>
+                                <option value="higher_of_two">Vyšší z obou údajů</option>
+                                <option value="current_only">Jen aktuální rok</option>
+                              </select>
+                            </td>
+                            <td><input type="number" value={row.currentPupils} onChange={(e) => updateHealth(row.id, "currentPupils", Number(e.target.value) || 0)} /></td>
+                            <td><input type="number" value={row.currentClasses} onChange={(e) => updateHealth(row.id, "currentClasses", Number(e.target.value) || 0)} /></td>
+                            <td><input type="number" value={row.prevPupils} onChange={(e) => updateHealth(row.id, "prevPupils", Number(e.target.value) || 0)} /></td>
+                            <td><input type="number" value={row.prevClasses} onChange={(e) => updateHealth(row.id, "prevClasses", Number(e.target.value) || 0)} /></td>
+                            <td>{row.usedAvg}</td>
+                            <td>{row.bandLabel} / {row.perClass}</td>
+                            <td><button type="button" className="icon-btn" onClick={() => removeHealth(row.id)}>✕</button></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                   <button type="button" className="btn ghost" onClick={addHealth}>
                     Přidat třídu / řádek
                   </button>
@@ -2581,45 +2585,47 @@ export default function App() {
               U tříd § 16/9 a ZŠ speciální podle metodiky (NV č. 123/2018 Sb., vyhl. č. 48/2005 Sb.) rozlišujte příznak třídy: AD1 (ostatní zdravotní postižení dle § 16 odst. 9) vs. AD2 (těžší varianty – tělesné postižení, PVCH, souběžné postižení, autismus).
               Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v5; průměr žáků ve skupině stejného typu určí pásmo a hodnotu PHAmax na třídu. Přípravný stupeň ZŠ speciální je řádek B45 (samostatná volba).
             </p>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Typ třídy</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHAmax – asistenti pedagoga / třída</th><th>Mezisoučet</th><th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {phaComputedRows.length === 0 ? (
+            <div className="table-outer table-outer--pha table-outer--auto-wide" role="region" aria-label="Tabulka PHAmax – asistenti pedagoga">
+              <table className="table">
+                <thead>
                   <tr>
-                    <td colSpan={8} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
+                    <th>Typ třídy</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHAmax – asistenti pedagoga / třída</th><th>Mezisoučet</th><th></th>
                   </tr>
-                ) : phaComputedRows.map((row) => (
-                  <tr key={row.id}>
-                    <td>
-                      <select value={row.kind} onChange={(e) => updatePha(row.id, "kind", e.target.value)}>
-                        <option value="zs1">ZŠ §16/9 – 1. stupeň (ř. B35)</option>
-                        <option value="zs1Heavy">ZŠ §16/9 – 1. stupeň, těžší varianty (ř. B36)</option>
-                        <option value="zs2">ZŠ §16/9 – 2. stupeň (ř. B37)</option>
-                        <option value="zs2Heavy">ZŠ §16/9 – 2. stupeň, těžší varianty (ř. B38)</option>
-                        <option value="zss1">ZŠ speciální I. díl – 1. stupeň (ř. B39)</option>
-                        <option value="zss1Heavy">ZŠ speciální I. díl – 1. stupeň, těžší varianty (ř. B40)</option>
-                        <option value="zss2">ZŠ speciální I. díl – 2. stupeň (ř. B41)</option>
-                        <option value="zss2Heavy">ZŠ speciální I. díl – 2. stupeň, těžší varianty (ř. B42)</option>
-                        <option value="zssII">ZŠ speciální II. díl (ř. B43)</option>
-                        <option value="zssIIHeavy">ZŠ speciální II. díl, těžší varianty (ř. B44)</option>
-                        <option value="zssPrep">Přípravný stupeň ZŠ speciální (ř. B45)</option>
-                      </select>
-                    </td>
-                    <td><input type="number" value={row.classes} onChange={(e) => updatePha(row.id, "classes", Number(e.target.value) || 0)} /></td>
-                    <td><input type="number" value={row.pupils} onChange={(e) => updatePha(row.id, "pupils", Number(e.target.value) || 0)} /></td>
-                    <td>{row.avg}</td>
-                    <td>{row.bandLabel}</td>
-                    <td>{row.perClass}</td>
-                    <td>{row.subtotal}</td>
-                    <td><button className="icon-btn" onClick={() => removePha(row.id)}>✕</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {phaComputedRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
+                    </tr>
+                  ) : phaComputedRows.map((row) => (
+                    <tr key={row.id}>
+                      <td>
+                        <select value={row.kind} onChange={(e) => updatePha(row.id, "kind", e.target.value)}>
+                          <option value="zs1">ZŠ §16/9 – 1. stupeň (ř. B35)</option>
+                          <option value="zs1Heavy">ZŠ §16/9 – 1. stupeň, těžší varianty (ř. B36)</option>
+                          <option value="zs2">ZŠ §16/9 – 2. stupeň (ř. B37)</option>
+                          <option value="zs2Heavy">ZŠ §16/9 – 2. stupeň, těžší varianty (ř. B38)</option>
+                          <option value="zss1">ZŠ speciální I. díl – 1. stupeň (ř. B39)</option>
+                          <option value="zss1Heavy">ZŠ speciální I. díl – 1. stupeň, těžší varianty (ř. B40)</option>
+                          <option value="zss2">ZŠ speciální I. díl – 2. stupeň (ř. B41)</option>
+                          <option value="zss2Heavy">ZŠ speciální I. díl – 2. stupeň, těžší varianty (ř. B42)</option>
+                          <option value="zssII">ZŠ speciální II. díl (ř. B43)</option>
+                          <option value="zssIIHeavy">ZŠ speciální II. díl, těžší varianty (ř. B44)</option>
+                          <option value="zssPrep">Přípravný stupeň ZŠ speciální (ř. B45)</option>
+                        </select>
+                      </td>
+                      <td><input type="number" value={row.classes} onChange={(e) => updatePha(row.id, "classes", Number(e.target.value) || 0)} /></td>
+                      <td><input type="number" value={row.pupils} onChange={(e) => updatePha(row.id, "pupils", Number(e.target.value) || 0)} /></td>
+                      <td>{row.avg}</td>
+                      <td>{row.bandLabel}</td>
+                      <td>{row.perClass}</td>
+                      <td>{row.subtotal}</td>
+                      <td><button className="icon-btn" onClick={() => removePha(row.id)}>✕</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <div className="toolbar">
               <button className="btn ghost" onClick={addPha}>Přidat třídu / řádek</button>
               <button className="btn ghost" onClick={resetPha}>Vymazat údaje PHAmax – asistenti pedagoga</button>
