@@ -2974,6 +2974,163 @@ input[type="radio"] {
     padding: 8px !important;
   }
 
+  /* Smíšené třídy – bez horizontálního scrollu, tabulka na šířku stránky, panely pod sebou */
+  .mixed-sheet-scroll {
+    overflow: visible !important;
+    -webkit-overflow-scrolling: auto !important;
+    max-width: 100% !important;
+  }
+
+  .mixed-module__tables {
+    grid-template-columns: 1fr !important;
+    gap: 5px !important;
+    margin-top: 4px !important;
+  }
+
+  .mixed-module__lead {
+    font-size: 6.75pt !important;
+    line-height: 1.25 !important;
+    margin-bottom: 4px !important;
+    max-width: none !important;
+  }
+
+  .mixed-sheet {
+    table-layout: fixed !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 6pt !important;
+    line-height: 1.15 !important;
+  }
+
+  .mixed-sheet thead th {
+    font-size: 5.25pt !important;
+    padding: 1px 2px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .mixed-sheet thead th:nth-child(n) {
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .mixed-sheet tbody th[scope="row"] {
+    padding: 2px 3px !important;
+    font-size: 5.75pt !important;
+  }
+
+  .mixed-sheet td {
+    padding: 1px 2px !important;
+    font-size: 6pt !important;
+  }
+
+  .mixed-sheet td:nth-child(2),
+  .mixed-sheet td:nth-child(3) {
+    min-width: 0 !important;
+  }
+
+  .mixed-sheet td.mixed-sheet__num {
+    white-space: normal !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .mixed-sheet__input {
+    padding: 1px 3px !important;
+    font-size: 6.5pt !important;
+    min-height: 0 !important;
+    line-height: 1.1 !important;
+  }
+
+  .mixed-sheet__num--strong,
+  .mixed-sheet__grand {
+    font-size: 7pt !important;
+  }
+
+  .mixed-sheet-panel__title {
+    font-size: 8pt !important;
+    margin: 0 0 2px !important;
+  }
+
+  .mixed-sheet-panel__note {
+    font-size: 6pt !important;
+    margin: 0 0 3px !important;
+    line-height: 1.25 !important;
+  }
+
+  .mixed-totals-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 3px !important;
+    margin-top: 5px !important;
+    padding-top: 5px !important;
+    border-top-width: 1px !important;
+  }
+
+  .mixed-totals-bar__cell {
+    padding: 3px 5px !important;
+    border-radius: 5px !important;
+    gap: 2px !important;
+    box-shadow: none !important;
+  }
+
+  .mixed-totals-bar__label {
+    font-size: 5.5pt !important;
+    letter-spacing: 0 !important;
+  }
+
+  .mixed-totals-bar__value {
+    font-size: 9pt !important;
+  }
+
+  /* Gymnázia – zrušení min-width tabulky kvůli ořezu v tisku */
+  .gym-table-scroll {
+    overflow: visible !important;
+  }
+
+  .section-card--module-gym .table.table--gym {
+    min-width: 0 !important;
+    font-size: 6pt !important;
+  }
+
+  .section-card--module-gym .table.table--gym thead th {
+    font-size: 5.5pt !important;
+    padding: 2px 3px !important;
+  }
+
+  .section-card--module-gym .table.table--gym tbody th,
+  .section-card--module-gym .table.table--gym tbody td {
+    padding: 2px 3px !important;
+  }
+
+  .section-card--module-gym .table.table--gym td:nth-child(1) {
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .section-card--module-gym .table.table--gym td:nth-child(2) input,
+  .section-card--module-gym .table.table--gym td:nth-child(3) input {
+    max-width: none !important;
+    min-width: 0 !important;
+    padding: 2px 3px !important;
+    font-size: 6.5pt !important;
+  }
+
+  /* Celkový přehled – čtyři karty 2×2, kratší úvodní texty */
+  .section-card--overview .grid.four {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .section-card--overview > .muted-text {
+    font-size: 6pt !important;
+    margin: 1px 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Široké dvousloupce v hlavním stacku PHmax (psychiatrie + zdrav. zař. + …) pod sebou */
+  .stack > .grid.two {
+    grid-template-columns: 1fr !important;
+  }
+
   .hero-stat,
   .results-panel__meta,
   .status-badge,
