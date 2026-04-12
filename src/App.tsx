@@ -27,6 +27,7 @@ import { MODE_CONFIG } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
 import { DEFAULT_MODE } from "./config/default-form-state";
 import { GlossaryDialog } from "./GlossaryDialog";
+import { PhmaxPvPage } from "./PhmaxPvPage";
 import { PhmaxSdPage } from "./PhmaxSdPage";
 import { ProductViewPills } from "./ProductViewPills";
 
@@ -463,8 +464,8 @@ export default function App() {
   const [dataMode, setDataMode] = useState<DataMode>("own");
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
-  const [productView, setProductViewState] = useState<"zs" | "sd">("zs");
-  const setProductView = useCallback((v: "zs" | "sd") => {
+  const [productView, setProductViewState] = useState<"zs" | "sd" | "pv">("zs");
+  const setProductView = useCallback((v: "zs" | "sd" | "pv") => {
     setProductViewState(v);
     window.scrollTo(0, 0);
   }, []);
@@ -1506,6 +1507,16 @@ export default function App() {
   const scrollToWorkspaceDock = () => {
     workspaceStickyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  if (productView === "pv") {
+    return (
+      <div className="app-shell app-shell--gradient">
+        <div className="container container--app">
+          <PhmaxPvPage productView={productView} setProductView={setProductView} />
+        </div>
+      </div>
+    );
+  }
 
   if (productView === "sd") {
     return (
