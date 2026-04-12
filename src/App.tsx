@@ -41,7 +41,12 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { TableOuter } from "./TableOuter";
 import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { TABLE_SCROLL_HINT } from "./calculator-ui-constants";
+import {
+  APP_AUTHOR_CREDIT_LINE,
+  APP_AUTHOR_EMAIL,
+  APP_AUTHOR_EXPORT_ROWS,
+  TABLE_SCROLL_HINT,
+} from "./calculator-ui-constants";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
@@ -310,6 +315,7 @@ function buildShareText(data: {
     rows.push("", "Upozornění:");
     data.warnings.forEach((item) => rows.push(`- ${item}`));
   }
+  rows.push("", APP_AUTHOR_CREDIT_LINE);
   return rows.join("\n");
 }
 
@@ -1502,6 +1508,7 @@ export default function App() {
         "Poznámka",
         "Úplný dvousloupcový výpis (vstupy, výstupy, detaily PHAmax / psych / gym / smíšené) je na listu „Hodnoty“.",
       ],
+      ["Vytvořil", `Mgr. Tomáš Zahradníček (${APP_AUTHOR_EMAIL})`],
     ];
   };
 
@@ -1623,6 +1630,7 @@ export default function App() {
         out.push([`Smíšené ${i + 1} – řádkový výsledek PHmax`, linePhmax]);
       });
     }
+    out.push(...APP_AUTHOR_EXPORT_ROWS);
     return out;
   };
 
@@ -2795,7 +2803,7 @@ export default function App() {
           <HeroStatusBar lastSavedAt={lastSavedAt} notice={uiNotice} variant="zs" placement="footer" />
           <p className="zs-app-footer__author muted-text">
             Vytvořil{" "}
-            <a href="mailto:tomas.zahradnicek.hradec@gmail.com">Mgr. Tomáš Zahradníček</a>
+            <a href={`mailto:${APP_AUTHOR_EMAIL}`}>Mgr. Tomáš Zahradníček</a>
           </p>
         </footer>
 

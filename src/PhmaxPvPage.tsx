@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { APP_AUTHOR_CREDIT_LINE, APP_AUTHOR_EMAIL } from "./calculator-ui-constants";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { HeroStatusBar } from "./HeroStatusBar";
@@ -243,6 +244,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         contextRows: [
           ["Aplikace", "PHmax / PHAmax předškolní vzdělávání"],
           ["Čas exportu", new Date().toLocaleString("cs-CZ")],
+          ["Vytvořil", `Mgr. Tomáš Zahradníček (${APP_AUTHOR_EMAIL})`],
         ],
         valueRows: exportRows,
         filename: exportFilenameStamped("phmax-pv", "xlsx"),
@@ -316,6 +318,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       `PHAmax celkem: ${aggregate.phaSum > 0 ? aggregate.phaSum : "—"}`,
       "",
       aggregate.incomplete ? "* PHmax nezahrnuje pracoviště s neplatným vstupem." : "",
+      "",
+      APP_AUTHOR_CREDIT_LINE,
     ]
       .filter(Boolean)
       .join("\n");

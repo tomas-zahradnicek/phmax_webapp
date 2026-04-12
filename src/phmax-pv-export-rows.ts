@@ -1,3 +1,4 @@
+import { APP_AUTHOR_EXPORT_ROWS } from "./calculator-ui-constants";
 import type { PvProvozKind } from "./phmax-pv-logic";
 
 export type PhmaxPvExportRow = readonly [string, string | number];
@@ -104,5 +105,6 @@ export function buildPhmaxPvMultiExportRows(
     out.push(["PHAmax celkem (součet pracovišť s § 16 třídami, h/týden)", totals.phaSum]);
   }
 
+  out.push(...APP_AUTHOR_EXPORT_ROWS);
   return out;
 }

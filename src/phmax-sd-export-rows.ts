@@ -1,3 +1,4 @@
+import { APP_AUTHOR_EXPORT_ROWS } from "./calculator-ui-constants";
 import { round2 } from "./phmax-zs-logic";
 
 export type PhmaxSdExportRow = readonly [string, string | number];
@@ -60,5 +61,6 @@ export function buildPhmaxSdExportRows(input: {
   }
 
   if (tableWarning) rows.push(["Upozornění", tableWarning]);
+  rows.push(...APP_AUTHOR_EXPORT_ROWS);
   return rows;
 }

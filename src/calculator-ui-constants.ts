@@ -13,3 +13,15 @@ export const BROWSER_STORAGE_HINT_ZS =
 /** Krátká poznámka k horizontálnímu posuvu širokých tabulek (ZŠ). */
 export const TABLE_SCROLL_HINT =
   "Na užším displeji tabulku posuňte do stran nebo použijte vodorovný posuvník.";
+
+/** Autor aplikace — e-mail a texty do exportů / shrnutí. */
+export const APP_AUTHOR_EMAIL = "tomas.zahradnicek.hradec@gmail.com";
+
+/** Řádka pro kopírování shrnutí a textový tisk. */
+export const APP_AUTHOR_CREDIT_LINE = `Vytvořil Mgr. Tomáš Zahradníček (${APP_AUTHOR_EMAIL})`;
+
+/** Dva řádky na konec CSV a listu „Hodnoty“ v XLSX. */
+export const APP_AUTHOR_EXPORT_ROWS: readonly (readonly [string, string | number])[] = [
+  ["", ""],
+  ["Vytvořil", `Mgr. Tomáš Zahradníček (${APP_AUTHOR_EMAIL})`],
+];
