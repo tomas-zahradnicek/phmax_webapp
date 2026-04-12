@@ -45,6 +45,7 @@ import {
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_EMAIL,
   APP_AUTHOR_EXPORT_ROWS,
+  APP_AUTHOR_PRINT_FOOTER,
   TABLE_SCROLL_HINT,
 } from "./calculator-ui-constants";
 
@@ -2804,8 +2805,11 @@ export default function App() {
         <footer className="zs-app-footer">
           <HeroStatusBar lastSavedAt={lastSavedAt} notice={uiNotice} variant="zs" placement="footer" />
           <p className="zs-app-footer__author muted-text">
-            Vytvořil{" "}
-            <a href={`mailto:${APP_AUTHOR_EMAIL}`}>Mgr. Tomáš Zahradníček</a>
+            <span className="zs-app-footer__author--screen">
+              Vytvořil{" "}
+              <a href={`mailto:${APP_AUTHOR_EMAIL}`}>Mgr. Tomáš Zahradníček</a>
+            </span>
+            <span className="zs-app-footer__author--print">{APP_AUTHOR_PRINT_FOOTER}</span>
           </p>
         </footer>
 

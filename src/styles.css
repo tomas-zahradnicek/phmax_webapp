@@ -2552,6 +2552,10 @@ input[type="radio"] {
   font-weight: 600;
 }
 
+.zs-app-footer__author--print {
+  display: none;
+}
+
 .error-boundary {
   margin: 16px 0;
   padding: 20px 22px;
@@ -2626,7 +2630,6 @@ input[type="radio"] {
   .btn,
   .help-hint,
   .hero-status,
-  .zs-app-footer,
   .hero-actions,
   .hero__stats,
   .results-panel__meta,
@@ -3136,6 +3139,34 @@ input[type="radio"] {
   .status-badge,
   .status-link {
     font-size: 8.5pt !important;
+  }
+
+  /* ZŠ: zápatí s autorem (stav ukládání zůstává skrytý přes .hero-status) */
+  .zs-app-footer {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    margin-top: 10px !important;
+    margin-bottom: 0 !important;
+    padding-top: 6px !important;
+    border-top: 1px solid #94a3b8 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .zs-app-footer__author {
+    font-size: 7.5pt !important;
+    text-align: center !important;
+    color: #475569 !important;
+    margin: 0 !important;
+  }
+
+  .zs-app-footer__author--screen {
+    display: none !important;
+  }
+
+  .zs-app-footer__author--print {
+    display: block !important;
   }
 
   a[href]::after {

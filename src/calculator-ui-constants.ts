@@ -20,6 +20,9 @@ export const APP_AUTHOR_EMAIL = "tomas.zahradnicek.hradec@gmail.com";
 /** Řádka pro kopírování shrnutí a textový tisk. */
 export const APP_AUTHOR_CREDIT_LINE = `Vytvořil Mgr. Tomáš Zahradníček (${APP_AUTHOR_EMAIL})`;
 
+/** Zápatí při tisku stránky (ZŠ). */
+export const APP_AUTHOR_PRINT_FOOTER = `Vytvořil Mgr. Tomáš Zahradníček [${APP_AUTHOR_EMAIL}]`;
+
 /** Dva řádky na konec CSV a listu „Hodnoty“ v XLSX. */
 export const APP_AUTHOR_EXPORT_ROWS: readonly (readonly [string, string | number])[] = [
   ["", ""],
