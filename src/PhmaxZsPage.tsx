@@ -1616,7 +1616,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <div className="hero__orb hero__orb--two" />
 
           <div className="hero__pills-row">
-            <ProductViewPills compact productView={productView} setProductView={setProductView} />
+            <ProductViewPills productView={productView} setProductView={setProductView} />
             <div className="hero__pills-row-trailing">
               <GlossaryIconButton
                 ref={glossaryTriggerRef}

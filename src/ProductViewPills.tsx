@@ -6,8 +6,6 @@ export type ProductView = "zs" | "sd" | "pv";
 type ProductViewPillsProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
-  /** Krátké popisky PV / ŠD / ZŠ v hero; plný název je v zápatí (HeroStatusBar). */
-  compact?: boolean;
 };
 
 const PILL_SHORT: Record<ProductView, string> = {
@@ -18,7 +16,7 @@ const PILL_SHORT: Record<ProductView, string> = {
 
 const TAB_ORDER: ProductView[] = ["pv", "sd", "zs"];
 
-export function ProductViewPills({ productView, setProductView, compact }: ProductViewPillsProps) {
+export function ProductViewPills({ productView, setProductView }: ProductViewPillsProps) {
   const moveSelection = useCallback(
     (from: ProductView, delta: number) => {
       const i = TAB_ORDER.indexOf(from);
@@ -60,7 +58,7 @@ export function ProductViewPills({ productView, setProductView, compact }: Produ
         onClick={() => setProductView("pv")}
         onKeyDown={(e) => onTabListKeyDown(e, "pv")}
       >
-        {compact ? PILL_SHORT.pv : PRODUCT_CALCULATOR_TITLES.pv}
+        {PILL_SHORT.pv}
       </button>
       <button
         type="button"
@@ -73,7 +71,7 @@ export function ProductViewPills({ productView, setProductView, compact }: Produ
         onClick={() => setProductView("sd")}
         onKeyDown={(e) => onTabListKeyDown(e, "sd")}
       >
-        {compact ? PILL_SHORT.sd : PRODUCT_CALCULATOR_TITLES.sd}
+        {PILL_SHORT.sd}
       </button>
       <button
         type="button"
@@ -86,7 +84,7 @@ export function ProductViewPills({ productView, setProductView, compact }: Produ
         onClick={() => setProductView("zs")}
         onKeyDown={(e) => onTabListKeyDown(e, "zs")}
       >
-        {compact ? PILL_SHORT.zs : PRODUCT_CALCULATOR_TITLES.zs}
+        {PILL_SHORT.zs}
       </button>
     </div>
   );
