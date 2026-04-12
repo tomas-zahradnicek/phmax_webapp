@@ -1339,6 +1339,28 @@ export default function App() {
     ["Výsledek PHPmax", totalPhp],
   ];
 
+  const buildXlsxContextRows = (): [string, string | number][] => {
+    const tabLabel = tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax";
+    return [
+      ["Název exportu", "Kalkulačka ZŠ – souhrn (XLSX)"],
+      ["Datum a čas exportu (ISO)", new Date().toISOString()],
+      ["Datum a čas exportu (místní)", new Date().toLocaleString("cs-CZ")],
+      ["Metodický podklad (orientačně)", METHODIKA_VERSION_LABEL],
+      ["Režim výpočtu (typ školy)", MODE_CONFIG[mode].label],
+      ["Aktivní záložka při exportu", tabLabel],
+      ["Průvodce (volba scénáře)", wizardChoice || "—"],
+      ["Práce s údaji", dataMode === "example" ? "ukázkový příklad" : "vlastní škola"],
+      ["Identifikátor ukázkového příkladu", selectedExample || "—"],
+      ["", ""],
+      ["Varování", warnings.length ? warnings.join(" | ") : "—"],
+      ["", ""],
+      [
+        "Poznámka",
+        "Úplný dvousloupcový výpis (vstupy, výstupy, detaily PHAmax / psych / gym / smíšené) je na listu „Hodnoty“.",
+      ],
+    ];
+  };
+
   const buildExtendedCsvRows = (): readonly (readonly [string, string | number])[] => {
     const tabLabel = tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax";
     const head: [string, string | number][] = [
@@ -1450,6 +1472,21 @@ export default function App() {
     setUiNotice("Rozšířený souhrn byl exportován do CSV (vstupy, výstupy, PHAmax a podrobné řádky dle potřeby).");
   };
 
+  const handleExportXlsx = async () => {
+    try {
+      const { downloadCalculatorXlsx } = await import("./export-xlsx");
+      await downloadCalculatorXlsx({
+        contextRows: buildXlsxContextRows(),
+        valueRows: buildExtendedCsvRows(),
+        filename: "kalkulacka-zs-souhrn.xlsx",
+      });
+      setUiNotice("Byl stažen soubor Excel (XLSX): list „Kontext“ a list „Hodnoty“.");
+    } catch (error) {
+      console.error(error);
+      setUiNotice("Export do Excelu se nepodařil – zkuste znovu nebo použijte CSV.");
+    }
+  };
+
   const scrollToWorkspaceDock = () => {
     workspaceStickyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -1539,7 +1576,12 @@ export default function App() {
               </button>
             </div>
             <div className="hero-actions__group hero-actions__group--exports">
-              <button type="button" className="btn ghost" onClick={handleExportCsv}>CSV</button>
+              <button type="button" className="btn ghost" onClick={handleExportCsv}>
+                CSV
+              </button>
+              <button type="button" className="btn ghost" onClick={() => void handleExportXlsx()}>
+                Stáhnout Excel
+              </button>
               <button type="button" className="btn ghost" onClick={copySummaryToClipboard}>
                 Kopírovat shrnutí
               </button>
