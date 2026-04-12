@@ -1630,7 +1630,9 @@ export default function App() {
         out.push([`Smíšené ${i + 1} – řádkový výsledek PHmax`, linePhmax]);
       });
     }
-    out.push(...APP_AUTHOR_EXPORT_ROWS);
+    for (const row of APP_AUTHOR_EXPORT_ROWS) {
+      out.push([row[0], row[1]]);
+    }
     return out;
   };
 
