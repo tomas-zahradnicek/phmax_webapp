@@ -327,15 +327,22 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
         <div className="hero-actions hero-actions--stacked">
           <div className="hero-actions--stacked__row">
-            <button type="button" className="btn btn--light" onClick={() => window.print()}>
-              Tisk
-            </button>
-            <button type="button" className="btn ghost" onClick={saveSdSnapshotManually}>
-              Uložit
-            </button>
-            <button type="button" className="btn ghost" onClick={restoreSdSnapshot}>
-              Obnovit
-            </button>
+            <span className="hero-actions__cluster" role="group" aria-label="Tisk">
+              <button type="button" className="btn btn--light" onClick={() => window.print()}>
+                Tisk
+              </button>
+              <button type="button" className="btn btn--light" onClick={printSdSummary}>
+                Tisk shrnutí
+              </button>
+            </span>
+            <span className="hero-actions__cluster hero-actions__cluster--after" role="group" aria-label="Ukládání">
+              <button type="button" className="btn ghost" onClick={saveSdSnapshotManually}>
+                Uložit
+              </button>
+              <button type="button" className="btn ghost" onClick={restoreSdSnapshot}>
+                Obnovit
+              </button>
+            </span>
           </div>
           <div className="hero-actions--stacked__row hero-actions__group--meta">
             <button type="button" className="btn ghost" onClick={clearSdStoredSnapshot}>
@@ -361,9 +368,6 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             </button>
             <button type="button" className="btn ghost" onClick={() => void copySdSummary()}>
               Kopírovat shrnutí
-            </button>
-            <button type="button" className="btn ghost" onClick={printSdSummary}>
-              Tisk shrnutí
             </button>
           </div>
         </div>

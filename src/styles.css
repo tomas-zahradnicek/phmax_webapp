@@ -445,6 +445,9 @@ button.pill--hero-toggle--active {
   gap: 8px;
   max-width: min(100%, 520px);
   margin-left: auto;
+  /* Bez natažení na výšku levého sloupce — karty jen podle obsahu */
+  align-self: start;
+  align-items: start;
 }
 
 .hero__stats--compact.hero__stats--pv {
@@ -469,18 +472,22 @@ button.pill--hero-toggle--active {
 }
 
 .hero-stat--compact {
-  padding: 10px 12px;
-  border-radius: 14px;
+  padding: 8px 10px;
+  border-radius: 12px;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+  min-height: 0;
 }
 
 .hero-stat--compact .hero-stat__label {
-  font-size: 11px;
-  margin-bottom: 4px;
+  font-size: 10px;
+  line-height: 1.25;
+  margin-bottom: 2px;
+  letter-spacing: 0.01em;
 }
 
 .hero-stat--compact .hero-stat__value {
-  font-size: 16px;
+  font-size: 15px;
+  line-height: 1.2;
 }
 
 /* Panel tisk / uložení / export pod hero u PV a ŠD */
@@ -506,6 +513,29 @@ button.pill--hero-toggle--active {
 
 .hero-actions.hero-actions--stacked .hero-actions__group--meta {
   justify-content: flex-start;
+}
+
+/* Skupiny tlačítek v jednom řádku (tisk + export) */
+.hero-actions__cluster {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.hero-actions__cluster--after {
+  padding-left: 12px;
+  margin-left: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 560px) {
+  .hero-actions__cluster--after {
+    padding-left: 0;
+    margin-left: 0;
+    border-left: none;
+    width: 100%;
+  }
 }
 
 .help-hint {

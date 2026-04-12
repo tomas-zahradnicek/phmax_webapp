@@ -402,15 +402,22 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
         <div className="hero-actions hero-actions--stacked">
           <div className="hero-actions--stacked__row">
-            <button type="button" className="btn btn--light" onClick={() => window.print()}>
-              Tisk
-            </button>
-            <button type="button" className="btn ghost" onClick={savePvSnapshotManually}>
-              Uložit
-            </button>
-            <button type="button" className="btn ghost" onClick={restorePvSnapshot}>
-              Obnovit
-            </button>
+            <span className="hero-actions__cluster" role="group" aria-label="Tisk">
+              <button type="button" className="btn btn--light" onClick={() => window.print()}>
+                Tisk
+              </button>
+              <button type="button" className="btn btn--light" onClick={printPvSummary}>
+                Tisk shrnutí
+              </button>
+            </span>
+            <span className="hero-actions__cluster hero-actions__cluster--after" role="group" aria-label="Ukládání">
+              <button type="button" className="btn ghost" onClick={savePvSnapshotManually}>
+                Uložit
+              </button>
+              <button type="button" className="btn ghost" onClick={restorePvSnapshot}>
+                Obnovit
+              </button>
+            </span>
           </div>
           <div className="hero-actions--stacked__row hero-actions__group--meta">
             <button type="button" className="btn ghost" onClick={clearPvStoredSnapshot}>
@@ -436,9 +443,6 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             </button>
             <button type="button" className="btn ghost" onClick={() => void copyPvSummary()}>
               Kopírovat shrnutí
-            </button>
-            <button type="button" className="btn ghost" onClick={printPvSummary}>
-              Tisk shrnutí
             </button>
           </div>
         </div>
