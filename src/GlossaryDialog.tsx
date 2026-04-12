@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
-export type GlossaryTerm = { term: string; description: string };
+export type GlossaryTerm = { term: string; description: React.ReactNode };
 
 type GlossaryDialogProps = {
   open: boolean;

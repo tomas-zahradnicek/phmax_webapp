@@ -245,15 +245,42 @@ const GLOSSARY_TERMS = [
   },
   {
     term: "Žák vzdělávaný podle § 38 školského zákona",
-    description:
-      "Žák vzdělávaný podle § 38 školského zákona se nezapočítává do počtu žáků ve třídě rozhodného pro stanovení výše PHmax. Celková výše PHmax školy se však za každého takového žáka zvyšuje samostatně.",
+    description: (
+      <>
+        Žák podle § 38 se nezapočítává do počtu žáků ve třídě rozhodné pro PHmax těchto tříd; celkové PHmax školy se za každého žáka{" "}
+        <strong>1. stupně navýší o 0,25 h</strong> a <strong>2. stupně o 0,5 h</strong> týdně (zadání v sekci Samostatné položky PHmax). Aplikace
+        počítá jen toto číselné navýšení — neřeší nerovnoměrné rozvržení přímé pedagogické činnosti v průběhu roku; k úvazku a PČ viz{" "}
+        <a
+          href="https://www.msmt.cz/dokumenty/pravni-vyklad-k-23-zakona-opedagogickych-pracovnicich"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="status-link"
+        >
+          výklad MŠMT k § 23 zákona o pedagogických pracovnících
+        </a>
+        .
+      </>
+    ),
   },
   {
     term: "Žák vzdělávaný podle § 41 školského zákona",
-    description:
-      "Žák vzdělávaný podle § 41 školského zákona se nezapočítává do počtu žáků ve třídě rozhodného pro stanovení výše PHmax. Celková výše PHmax školy se za každého takového žáka zvyšuje samostatně.",
+    description: (
+      <>
+        Stejně jako u § 38 se žák nezapočítává do průměru rozhodné třídy; celkové PHmax školy se za každého žáka{" "}
+        <strong>1. stupně navýší o 0,25 h</strong> a <strong>2. stupně o 0,5 h</strong> týdně. Platí stejná poznámka k rozvržení PČ a odkaz na{" "}
+        <a
+          href="https://www.msmt.cz/dokumenty/pravni-vyklad-k-23-zakona-opedagogickych-pracovnicich"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="status-link"
+        >
+          výklad MŠMT k § 23 zákona o pedagogických pracovnících
+        </a>
+        .
+      </>
+    ),
   },
-] as const;
+];
 
 function buildShareText(data: {
   modeLabel: string;
@@ -1841,6 +1868,9 @@ export default function App() {
           <p>
             <strong>PHmax</strong> zadejte podle typu školy v rozbalovacím režimu; u specialit (psychiatrie, zdravotnické zařízení,
             menšina, gymnázia…) přepněte na odpovídající položku. <strong>PHAmax</strong> a <strong>PHPmax</strong> mají vlastní záložky.
+            Žáky podle <strong>§ 38</strong> a <strong>§ 41</strong> školského zákona (navýšení PHmax o 0,25 / 0,5 h podle stupně) zadejte v sekci{" "}
+            <strong>Samostatné položky PHmax</strong> — u většiny režimů ZŠ je přímo pod hlavními tabulkami; přípravné třídy a přípravný stupeň ZŠS
+            jsou navíc v režimu „PHmax – přípravné třídy, přípravný stupeň, § 38 a § 41“.
           </p>
           <p>
             Průměry u škol při zdravotnickém zařízení a psychiatrii počítá aplikace jako vyšší z minulého roku a aktuálního sběru — doplňte oba sloupce, pokud je znáte.
@@ -2425,7 +2455,12 @@ export default function App() {
 
             {(hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) && (
               <section className="card section-card section-card--module section-card--module-extras" data-section="extras">
-                <h2>Samostatné položky PHmax</h2>
+                <h2>
+                  {hasSection("prep_class") || hasSection("prep_special")
+                    ? "Samostatné položky PHmax"
+                    : "§ 38 a § 41 školského zákona (navýšení PHmax)"}{" "}
+                  <HelpHint text="Za žáka podle § 38 nebo § 41 se celkové PHmax školy navyšuje o 0,25 h (1. stupeň) nebo 0,5 h (2. stupeň) na žáka; tito žáci se nezapočítávají do průměru třídy pro tabulky B1–B28. Aplikace neřeší rozvržení hodin do týdnů — k přímé pedagogické činnosti a úvazku viz výklad MŠMT: https://www.msmt.cz/dokumenty/pravni-vyklad-k-23-zakona-opedagogickych-pracovnicich" />
+                </h2>
                 <div className="grid four">
                   {hasSection("prep_class") && (
                     <>
@@ -2483,7 +2518,38 @@ export default function App() {
                 <ResultCard label="Víceletá gymnázia" value={gymPhmax} />
                 <ResultCard label="Smíšené třídy" value={mixedForTotal} />
                 <ResultCard label="ZŠ speciální" value={specialPhmax} />
-                <ResultCard label="Samostatné položky" value={extrasPhmax} />
+                {(() => {
+                  const extraDetailRows: { key: string; label: string; value: number }[] = [];
+                  if (prepClassPhmax > 0) {
+                    extraDetailRows.push({ key: "prep", label: "Samostatné – přípravná třída", value: prepClassPhmax });
+                  }
+                  if (prepSpecialPhmax > 0) {
+                    extraDetailRows.push({
+                      key: "prepSp",
+                      label: "Samostatné – přípravný stupeň ZŠS",
+                      value: prepSpecialPhmax,
+                    });
+                  }
+                  if (par38Phmax > 0) {
+                    extraDetailRows.push({ key: "p38", label: "Samostatné – § 38", value: par38Phmax });
+                  }
+                  if (par41Phmax > 0) {
+                    extraDetailRows.push({ key: "p41", label: "Samostatné – § 41", value: par41Phmax });
+                  }
+                  if (extraDetailRows.length === 0) {
+                    return <ResultCard label="Samostatné položky" value={extrasPhmax} />;
+                  }
+                  return (
+                    <>
+                      {extraDetailRows.map((r) => (
+                        <ResultCard key={r.key} label={r.label} value={r.value} />
+                      ))}
+                      {extraDetailRows.length > 1 ? (
+                        <ResultCard label="Samostatné položky celkem" value={extrasPhmax} />
+                      ) : null}
+                    </>
+                  );
+                })()}
                 <ResultCard label="Výsledek PHmax" tone="success" value={totalPhmax} />
               </div>
             </section>
