@@ -149,6 +149,20 @@ textarea:focus-visible {
   border-color: rgba(255,255,255,0.22);
 }
 
+.hero__pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.hero__pills-row .hero__product-pills {
+  margin-bottom: 0;
+  flex: 1 1 280px;
+}
+
 .hero__product-pills {
   display: flex;
   flex-wrap: wrap;
@@ -162,15 +176,23 @@ button.pill--hero-toggle {
   cursor: pointer;
   font: inherit;
   margin-bottom: 0;
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 9px 16px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.42);
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
-    box-shadow 160ms ease;
+    box-shadow 160ms ease,
+    color 160ms ease;
 }
 
 button.pill--hero-toggle:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
 button.pill--hero-toggle:focus-visible {
@@ -179,9 +201,43 @@ button.pill--hero-toggle:focus-visible {
 }
 
 button.pill--hero-toggle--active {
-  background: rgba(255, 255, 255, 0.28);
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.94);
+  color: #0f172a;
+  border-color: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+}
+
+.btn.btn--hero-help {
+  flex-shrink: 0;
+  font-weight: 700;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  border: 2px solid rgba(255, 255, 255, 0.98);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+}
+
+.btn.btn--hero-help:hover {
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
+}
+
+.btn.btn--pv-add-workplace {
+  font-weight: 700;
+  padding: 11px 18px;
+  border-radius: 999px;
+  color: #1e3a8a;
+  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  border: 2px solid #3b82f6;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.28);
+}
+
+.btn.btn--pv-add-workplace:hover {
+  background: linear-gradient(180deg, #fff 0%, #eff6ff 100%);
+  border-color: #2563eb;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
 }
 
 .hero__title--sd {

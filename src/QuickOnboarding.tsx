@@ -1,30 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 
 type QuickOnboardingProps = {
-  storageKey: string;
   title: string;
   children: React.ReactNode;
+  open: boolean;
+  onDismiss: () => void;
 };
 
-export function QuickOnboarding({ storageKey, title, children }: QuickOnboardingProps) {
-  const [hidden, setHidden] = useState(() => {
-    try {
-      return localStorage.getItem(storageKey) === "1";
-    } catch {
-      return false;
-    }
-  });
-
-  const dismiss = () => {
-    try {
-      localStorage.setItem(storageKey, "1");
-    } catch {
-      /* ignore */
-    }
-    setHidden(true);
-  };
-
-  if (hidden) return null;
+export function QuickOnboarding({ title, children, open, onDismiss }: QuickOnboardingProps) {
+  if (!open) return null;
 
   return (
     <div className="card card--onboarding onboarding--quick" style={{ marginBottom: 18 }}>
@@ -32,7 +16,7 @@ export function QuickOnboarding({ storageKey, title, children }: QuickOnboarding
         <h2 className="section-title" style={{ marginBottom: 0 }}>
           {title}
         </h2>
-        <button type="button" className="btn ghost" onClick={dismiss}>
+        <button type="button" className="btn ghost" onClick={onDismiss}>
           Skrýt návod
         </button>
       </div>

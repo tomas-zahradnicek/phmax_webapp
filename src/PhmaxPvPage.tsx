@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
+import { HeroStat } from "./HeroStat";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
@@ -56,6 +57,8 @@ type PhmaxPvPageProps = {
   setProductView: (v: ProductView) => void;
 };
 
+const PV_ONBOARDING_KEY = "phmax-pv-onboarding";
+
 const PROVOZ_OPTIONS: { value: PvProvozKind; label: string }[] = [
   { value: "polodenni", label: "Polodenní provoz (tabulka 1)" },
   { value: "celodenni", label: "Celodenní provoz (tabulka 2)" },
@@ -96,6 +99,31 @@ function createInitialPvRow(): PvWorkplaceRowState {
 export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [rows, setRows] = useState<PvWorkplaceRowState[]>(() => [createInitialPvRow()]);
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(() => {
+    try {
+      return localStorage.getItem(PV_ONBOARDING_KEY) !== "1";
+    } catch {
+      return true;
+    }
+  });
+
+  const dismissGuide = useCallback(() => {
+    try {
+      localStorage.setItem(PV_ONBOARDING_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    setGuideOpen(false);
+  }, []);
+
+  const openGuide = useCallback(() => {
+    try {
+      localStorage.removeItem(PV_ONBOARDING_KEY);
+    } catch {
+      /* ignore */
+    }
+    setGuideOpen(true);
+  }, []);
 
   const patchRow = useCallback((id: string, patch: Partial<PvWorkplaceRowState>) => {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
@@ -187,20 +215,48 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
 
-        <ProductViewPills productView={productView} setProductView={setProductView} />
+        <div className="hero__pills-row">
+          <ProductViewPills productView={productView} setProductView={setProductView} />
+          <button
+            type="button"
+            className="btn btn--hero-help"
+            onClick={() => (guideOpen ? dismissGuide() : openGuide())}
+            aria-expanded={guideOpen}
+          >
+            {guideOpen ? "Skrýt nápovědu" : "Nápověda"}
+          </button>
+        </div>
 
-        <h1 className="hero__title hero__title--sd">PHmax a PHAmax – předškolní vzdělávání</h1>
-        <p className="hero__text hero__text--sd">
-          Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a{" "}
-          <strong>vyhlášky č. 14/2005 Sb.</strong> Každé <strong>číslované pracoviště</strong> ve formuláři (Pracoviště 1, 2…) odpovídá jedné kombinaci{" "}
-          <strong>místa (nebo jeho části) a druhu provozu</strong> — stejně jako jeden řádek v tabulkové pomůcce MŠMT. U
-          právnické osoby s více skutečnými pracovišti nebo více druhy provozu přidejte další položku;{" "}
-          <strong>součet PHmax</strong> z pracovišť odpovídá celkovému PHmax (po sečtení dílčích výpočtů dle metodiky).
-          Údaje vycházejí z matrice M 1 (dříve S 1-01); u MŠ při zdravotnickém zařízení z výkazu S 4-01.
-        </p>
+        <div className="grid two hero__grid">
+          <div>
+            <h1 className="hero__title hero__title--sd">PHmax a PHAmax – předškolní vzdělávání</h1>
+            <p className="hero__text hero__text--sd">
+              Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a{" "}
+              <strong>vyhlášky č. 14/2005 Sb.</strong> Každé <strong>číslované pracoviště</strong> ve formuláři
+              (Pracoviště 1, 2…) odpovídá jedné kombinaci <strong>místa (nebo jeho části) a druhu provozu</strong> —
+              stejně jako jeden řádek v tabulkové pomůcce MŠMT. U právnické osoby s více skutečnými pracovišti nebo více
+              druhy provozu přidejte další položku; <strong>součet PHmax</strong> z pracovišť odpovídá celkovému PHmax
+              (po sečtení dílčích výpočtů dle metodiky). Údaje vycházejí z matrice M 1 (dříve S 1-01); u MŠ při
+              zdravotnickém zařízení z výkazu S 4-01.
+            </p>
+            {aggregate.incomplete ? (
+              <p className="hero__note hero__text--sd" style={{ marginTop: 10 }}>
+                * Součet PHmax nezahrnuje pracoviště s neplatným vstupem — opravte je v tabulce níže.
+              </p>
+            ) : null}
+          </div>
+          <div className="hero__stats">
+            <HeroStat label="Počet pracovišť ve výpočtu" value={rows.length} />
+            <HeroStat
+              label="PHmax celkem"
+              value={aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}
+            />
+            <HeroStat label="PHAmax celkem" value={aggregate.phaSum > 0 ? aggregate.phaSum : "—"} />
+          </div>
+        </div>
       </header>
 
-      <QuickOnboarding storageKey="phmax-pv-onboarding" title="Pracoviště MŠ">
+      <QuickOnboarding title="Pracoviště MŠ" open={guideOpen} onDismiss={dismissGuide}>
         <p>
           Každé <strong>Pracoviště 1, 2…</strong> = vybraný <strong>druh provozu</strong>, počet tříd v něm, případně
           navýšení dle vyhlášky a <strong>průměrnou denní dobu provozu v hodinách</strong> (zařadí se do sloupce tabulky
@@ -487,7 +543,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         </div>
 
         <div style={{ marginTop: 16 }}>
-          <button type="button" className="btn ghost" onClick={addRow}>
+          <button type="button" className="btn btn--pv-add-workplace" onClick={addRow}>
             Přidat pracoviště (další kombinace místo / druhu provozu)
           </button>
         </div>

@@ -32,6 +32,7 @@ import { MethodologyStrip } from "./MethodologyStrip";
 import { PhmaxPvPage } from "./PhmaxPvPage";
 import { PhmaxSdPage } from "./PhmaxSdPage";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
+import { HeroStat } from "./HeroStat";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
@@ -134,15 +135,6 @@ const GlossaryIconButton = forwardRef<HTMLButtonElement, { onClick: () => void }
     </button>
   );
 });
-
-function HeroStat({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="hero-stat">
-      <div className="hero-stat__label">{label}</div>
-      <div className="hero-stat__value">{value}</div>
-    </div>
-  );
-}
 
 function SectionLead({ children }: { children: React.ReactNode }) {
   return <p className="section-lead muted-text">{children}</p>;

@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
+import { HeroStat } from "./HeroStat";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
@@ -24,11 +25,38 @@ type PhmaxSdPageProps = {
   setProductView: (v: ProductView) => void;
 };
 
+const SD_ONBOARDING_KEY = "phmax-sd-onboarding";
+
 export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const [pupils, setPupils] = useState(0);
   const [manualDepts, setManualDepts] = useState(false);
   const [departments, setDepartments] = useState(1);
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(() => {
+    try {
+      return localStorage.getItem(SD_ONBOARDING_KEY) !== "1";
+    } catch {
+      return true;
+    }
+  });
+
+  const dismissGuide = useCallback(() => {
+    try {
+      localStorage.setItem(SD_ONBOARDING_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    setGuideOpen(false);
+  }, []);
+
+  const openGuide = useCallback(() => {
+    try {
+      localStorage.removeItem(SD_ONBOARDING_KEY);
+    } catch {
+      /* ignore */
+    }
+    setGuideOpen(true);
+  }, []);
 
   const suggested = useMemo(() => suggestedDepartmentsFromPupils(pupils), [pupils]);
   const effectiveDepts = manualDepts ? departments : suggested;
@@ -108,19 +136,49 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
 
-        <ProductViewPills productView={productView} setProductView={setProductView} />
+        <div className="hero__pills-row">
+          <ProductViewPills productView={productView} setProductView={setProductView} />
+          <button
+            type="button"
+            className="btn btn--hero-help"
+            onClick={() => (guideOpen ? dismissGuide() : openGuide())}
+            aria-expanded={guideOpen}
+          >
+            {guideOpen ? "Skrýt nápovědu" : "Nápověda"}
+          </button>
+        </div>
 
-        <h1 className="hero__title hero__title--sd">PHmax ve školní družině</h1>
-        <p className="hero__text hero__text--sd">
-          Orientační výpočet podle{" "}
-          <strong>vyhlášky č. 74/2005 Sb., o zájmovém vzdělávání</strong> (zejména § 10 a{" "}
-          <strong>přílohy s tabulkou</strong> týdenního nejvyššího rozsahu přímé pedagogické činnosti / PHmax podle
-          počtu oddělení) a metodických pokynů MŠMT. U „speciálních“ oddělení dle § 16 školského zákona a u méně než
-          čtyř oddělení platí další pravidla — vždy vycházejte z úplného znění vyhlášky a metodiky.
-        </p>
+        <div className="grid two hero__grid">
+          <div>
+            <h1 className="hero__title hero__title--sd">PHmax ve školní družině</h1>
+            <p className="hero__text hero__text--sd">
+              Orientační výpočet podle{" "}
+              <strong>vyhlášky č. 74/2005 Sb., o zájmovém vzdělávání</strong> (zejména § 10 a{" "}
+              <strong>přílohy s tabulkou</strong> týdenního nejvyššího rozsahu přímé pedagogické činnosti / PHmax podle
+              počtu oddělení) a metodických pokynů MŠMT. U „speciálních“ oddělení dle § 16 školského zákona a u méně než
+              čtyř oddělení platí další pravidla — vždy vycházejte z úplného znění vyhlášky a metodiky.
+            </p>
+          </div>
+          <div className="hero__stats">
+            <HeroStat label="Účastníci (1. st.)" value={pupils} />
+            <HeroStat label="Oddělení" value={effectiveDepts} />
+            <HeroStat
+              label="PHmax"
+              value={basePhmax != null ? formatSdHours(reduction.adjusted) : "—"}
+            />
+            <HeroStat
+              label="Krácení § 10 odst. 2"
+              value={
+                reduction.applied
+                  ? `ano (${(Math.round(reduction.factor * 1000) / 10).toLocaleString("cs-CZ")} %)`
+                  : "ne"
+              }
+            />
+          </div>
+        </div>
       </header>
 
-      <QuickOnboarding storageKey="phmax-sd-onboarding" title="Jak s touto kalkulačkou pracovat">
+      <QuickOnboarding title="Jak s touto kalkulačkou pracovat" open={guideOpen} onDismiss={dismissGuide}>
         <p>
           Vyplňte počet účastníků a případně počet oddělení (jinak se dopočítá dělením 27). Výsledek vychází z přílohy k
           vyhlášce č. 74/2005 Sb.; u průměru pod 20 na oddělení může aplikovat orientační krácení dle § 10 odst. 2.
