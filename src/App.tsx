@@ -27,6 +27,9 @@ import { MODE_CONFIG } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
 import { DEFAULT_MODE } from "./config/default-form-state";
 
+/** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
+const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
+
 function downloadTextFile(filename: string, content: string, mime = "text/plain;charset=utf-8") {
   const blob = new Blob([content], { type: mime });
   const url = URL.createObjectURL(blob);
@@ -1173,6 +1176,7 @@ export default function App() {
 
   const workspaceStickyRef = useRef<HTMLDivElement>(null);
   const [activeScrollSection, setActiveScrollSection] = useState("");
+  const [showScrollTools, setShowScrollTools] = useState(false);
   const tabChangeSkipRef = useRef(true);
 
   const goToSection = useCallback((sectionId: string) => {
@@ -1257,6 +1261,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const onWinScroll = () => setShowScrollTools(window.scrollY > 380);
+    onWinScroll();
+    window.addEventListener("scroll", onWinScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onWinScroll);
+  }, []);
+
+  useEffect(() => {
     if (tabChangeSkipRef.current) {
       tabChangeSkipRef.current = false;
       return;
@@ -1296,7 +1307,7 @@ export default function App() {
     phpExcludedIndividual, phpExcludedSchool, selectedExample, wizardChoice, dataMode
   ]);
 
-  const summaryRows = [
+  const summaryRows: readonly (readonly [string, string | number])[] = [
     ["Běžné třídy ZŠ – 1. stupeň", basic1Phmax],
     ["Běžné třídy ZŠ – 2. stupeň", basic2Phmax],
     ["Běžné třídy ZŠ – celkem", basicPhmax],
@@ -1326,12 +1337,121 @@ export default function App() {
     ["PHPmax – nezapočítávaní žáci", phpExcludedTotal],
     ["PHPmax – očištěná hodnota", phpAdjustedValue],
     ["Výsledek PHPmax", totalPhp],
-  ] as const;
+  ];
 
+  const buildExtendedCsvRows = (): readonly (readonly [string, string | number])[] => {
+    const tabLabel = tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax";
+    const head: [string, string | number][] = [
+      ["=== Export kalkulačky ZŠ – rozšířený ===", ""],
+      ["Datum a čas exportu (ISO)", new Date().toISOString()],
+      ["Datum a čas exportu (místní)", new Date().toLocaleString("cs-CZ")],
+      ["Metodický podklad (orientačně)", METHODIKA_VERSION_LABEL],
+      ["Režim výpočtu (typ školy)", MODE_CONFIG[mode].label],
+      ["Aktivní záložka při exportu", tabLabel],
+      ["Průvodce (volba scénáře)", wizardChoice || "—"],
+      ["Práce s údaji", dataMode === "example" ? "ukázkový příklad" : "vlastní škola"],
+      ["Identifikátor ukázkového příkladu", selectedExample || "—"],
+      ["", ""],
+      ["=== PHmax – vstupy (agregované) ===", ""],
+      ["basicType (kód)", basicType],
+      ["Běžné třídy – 1. st. počet tříd", basic1Classes],
+      ["Běžné třídy – 1. st. počet žáků", basic1Pupils],
+      ["Běžné třídy – 2. st. počet tříd", basic2Classes],
+      ["Běžné třídy – 2. st. počet žáků", basic2Pupils],
+      ["§ 16/9 – 1. st. třídy", incl1Classes],
+      ["§ 16/9 – 1. st. žáci", incl1Pupils],
+      ["§ 16/9 – 2. st. třídy", incl2Classes],
+      ["§ 16/9 – 2. st. žáci", incl2Pupils],
+      ["Psychiatrická škola – počet řádků", psychRows.length],
+      ["Menšina – variant (kód)", minorityType],
+      ["Menšina – 1. st. třídy / žáci", `${minority1Classes} / ${minority1Pupils}`],
+      ["Menšina – 2. st. třídy / žáci", `${minority2Classes} / ${minority2Pupils}`],
+      ["Gymnázia – počet řádků", gymRows.length],
+      ["Smíšené (legacy řádky) – počet", mixedRows.length],
+      ["Smíšené tab. – 1. st. C/01 žáci / třídy", `${mixedMethodFirstZsPupils} / ${mixedMethodFirstZsClasses}`],
+      ["Smíšené tab. – 1. st. B/01 žáci / třídy", `${mixedMethodFirstSpecialPupils} / ${mixedMethodFirstSpecialClasses}`],
+      ["Smíšené tab. – 2. st. C/01 žáci / třídy", `${mixedMethodSecondZsPupils} / ${mixedMethodSecondZsClasses}`],
+      ["Smíšené tab. – 2. st. B/01 žáci / třídy", `${mixedMethodSecondSpecialPupils} / ${mixedMethodSecondSpecialClasses}`],
+      ["ZŠ speciální I. díl – 1. st. třídy / žáci", `${special1Classes} / ${special1Pupils}`],
+      ["ZŠ speciální I. díl – 2. st. třídy / žáci", `${special2Classes} / ${special2Pupils}`],
+      ["ZŠ speciální II. díl třídy / žáci", `${specialIIClasses} / ${specialIIPupils}`],
+      ["Přípravná třída třídy / děti", `${prepClasses} / ${prepChildren}`],
+      ["Přípravný stupeň ZŠS třídy / děti", `${prepSpecialClasses} / ${prepSpecialChildren}`],
+      ["§ 38 žáci 1. st. / 2. st.", `${p38First} / ${p38Second}`],
+      ["§ 41 žáci 1. st. / 2. st.", `${p41First} / ${p41Second}`],
+      ["", ""],
+      ["=== PHPmax – vstupy ===", ""],
+      ["PHP metoda", phpMethodMode === "three_year_avg" ? "tříletý průměr" : "kratší období"],
+      ["PHP rok 1 / 2 / 3 žáci", `${phpYear1} / ${phpYear2} / ${phpYear3}`],
+      ["PHP nezapoč. zahraničí / ZŠ v ČR / individuální", `${phpExcludedAbroad} / ${phpExcludedForeignSchoolCz} / ${phpExcludedIndividual}`],
+      ["PHP škola vyloučena z výpočtu", phpExcludedSchool ? "ano" : "ne"],
+      ["", ""],
+      ["=== Varování ===", warnings.length ? warnings.join(" | ") : "—"],
+      ["", ""],
+      ["=== Souhrnné výstupy ===", ""],
+    ];
+    const out: [string, string | number][] = [...head, ...summaryRows.map((r) => [r[0], r[1]] as [string, string | number])];
+    if (phaRows.length > 0) {
+      out.push(["", ""]);
+      out.push(["=== PHAmax – jednotlivé řádky ===", ""]);
+      phaRows.forEach((r, i) => {
+        out.push([`PHA ${i + 1} – typ (kód)`, r.kind]);
+        out.push([`PHA ${i + 1} – třídy`, r.classes]);
+        out.push([`PHA ${i + 1} – žáci`, r.pupils]);
+      });
+    }
+    if (psychRows.length > 0) {
+      out.push(["", ""]);
+      out.push(["=== Psychiatrická škola – jednotlivé řádky ===", ""]);
+      psychComputedRows.forEach((r, i) => {
+        out.push([`Psych ${i + 1} – typ (kód)`, r.kind]);
+        out.push([`Psych ${i + 1} – režim průměru`, r.mode === "current_only" ? "jen aktuální" : "vyšší ze dvou"]);
+        out.push([`Psych ${i + 1} – aktuální žáci / třídy`, `${r.currentPupils} / ${r.currentClasses}`]);
+        out.push([`Psych ${i + 1} – předchozí žáci / třídy`, `${r.prevPupils} / ${r.prevClasses}`]);
+        out.push([`Psych ${i + 1} – použitý průměr žáků/třídu`, r.usedAvg]);
+        out.push([`Psych ${i + 1} – pásmo / PHmax na 1 třídu`, `${r.bandLabel} / ${r.perClass}`]);
+        out.push([`Psych ${i + 1} – řádkový výsledek PHmax`, r.subtotal]);
+      });
+    }
+    if (gymRows.length > 0) {
+      out.push(["", ""]);
+      out.push(["=== Nižší ročníky gymnázií – jednotlivé řádky ===", ""]);
+      gymComputedRows.forEach((r, i) => {
+        out.push([`Gym ${i + 1} – typ (kód)`, r.kind]);
+        out.push([`Gym ${i + 1} – třídy / žáci`, `${r.classes} / ${r.pupils}`]);
+        out.push([`Gym ${i + 1} – průměr žáků/třídu`, r.avg]);
+        out.push([`Gym ${i + 1} – pásmo / PHmax na 1 třídu`, `${r.bandLabel} / ${r.perClass}`]);
+        out.push([`Gym ${i + 1} – řádkový výsledek PHmax`, r.subtotal]);
+      });
+    }
+    if (mixedRows.length > 0) {
+      out.push(["", ""]);
+      out.push(["=== Smíšené třídy (legacy řádky) ===", ""]);
+      mixedRows.forEach((row, i) => {
+        const avg = row.classes > 0 ? row.pupils / row.classes : 0;
+        const band =
+          row.majority === "zs"
+            ? pickBand(avg, row.stage === "first" ? B9_B10.first : B9_B10.second)
+            : pickBand(avg, row.stage === "first" ? B26_B28.special1 : B26_B28.special2);
+        const linePhmax = round2(row.classes * band.value);
+        out.push([`Smíšené ${i + 1} – stupeň (kód)`, row.stage]);
+        out.push([`Smíšené ${i + 1} – převažující obor (kód)`, row.majority]);
+        out.push([`Smíšené ${i + 1} – třídy / žáci`, `${row.classes} / ${row.pupils}`]);
+        out.push([`Smíšené ${i + 1} – průměr žáků/třídu`, round2(avg)]);
+        out.push([`Smíšené ${i + 1} – pásmo / PHmax na 1 třídu`, `${band.label} / ${band.value}`]);
+        out.push([`Smíšené ${i + 1} – řádkový výsledek PHmax`, linePhmax]);
+      });
+    }
+    return out;
+  };
 
   const handleExportCsv = () => {
-    downloadTextFile("kalkulacka-zs-souhrn.csv", exportCsvLocalized(summaryRows), "text/csv;charset=utf-8");
-    setUiNotice("Souhrn byl exportován do CSV ve formátu vhodném pro české prostředí.");
+    downloadTextFile("kalkulacka-zs-souhrn.csv", exportCsvLocalized(buildExtendedCsvRows()), "text/csv;charset=utf-8");
+    setUiNotice("Rozšířený souhrn byl exportován do CSV (vstupy, výstupy, PHAmax a podrobné řádky dle potřeby).");
+  };
+
+  const scrollToWorkspaceDock = () => {
+    workspaceStickyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -1435,7 +1555,7 @@ export default function App() {
             Ostatní ukázky doplňují typické situace; po načtení můžete vše upravit podle vlastní školy.
           </p>
           <p className="muted-text hero__legal-note">
-            Právní a metodický podklad aplikace: Metodika stanovení PHmax, PHAmax a PHPmax pro základní vzdělávání, nařízení vlády č. 123/2018 Sb. a vyhláška č. 48/2005 Sb.
+            Právní a metodický podklad aplikace: Metodika stanovení PHmax, PHAmax a PHPmax pro základní vzdělávání (aktuálně typicky verze 5 / 2026), nařízení vlády č. 123/2018 Sb. a vyhláška č. 48/2005 Sb. Aplikace slouží k orientačnímu výpočtu; nejedná se o oficiální výstup zřizovatele.
           </p>
           <div className="hero-status">
             <div className="hero-status__item"><strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.</div>
@@ -1559,7 +1679,7 @@ export default function App() {
           </section>
         )}
 
-        <div className="workspace-sticky" ref={workspaceStickyRef}>
+        <div className="workspace-sticky" id="workspace-results-dock" ref={workspaceStickyRef}>
           <div className="tabs tabs--sticky">
             <button type="button" className={tab === "phmax" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("phmax")}>PHmax</button>
             <button type="button" className={tab === "pha" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("pha")}>PHAmax</button>
@@ -1587,6 +1707,17 @@ export default function App() {
               <HeroStat label="Výsledek PHAmax" value={totalPha} />
               <HeroStat label="Výsledek PHPmax" value={totalPhp} />
               <HeroStat label="Přehledový součet" value={round2(totalPhmax + totalPha + totalPhp)} />
+            </div>
+            <div
+              className={`workspace-sticky__module-total workspace-sticky__module-total--${tab}`}
+              aria-label="Zvýrazněný výsledek aktivní záložky"
+            >
+              <span className="workspace-sticky__module-total-label">
+                {tab === "phmax" ? "Aktivní modul · PHmax" : tab === "pha" ? "Aktivní modul · PHAmax" : "Aktivní modul · PHPmax"}
+              </span>
+              <span className="workspace-sticky__module-total-value">
+                {tab === "phmax" ? totalPhmax : tab === "pha" ? totalPha : totalPhp}
+              </span>
             </div>
             {jumpSections.length > 1 ? (
               <div className="section-jump-nav" role="navigation" aria-label="Skok na sekci výpočtu">
@@ -2193,7 +2324,7 @@ export default function App() {
           </section>
         )}
 
-        <section className="card muted card--summary section-card section-card--overview">
+        <section className="card muted card--summary section-card section-card--overview" data-section="overview">
           <h2 className="section-title">Celkový přehled</h2>
           <p className="muted-text">Výsledky PHmax, PHAmax a PHPmax se stanovují samostatně. Součet níže slouží jen pro orientaci.</p>
           <p className="muted-text">PHmax, PHAmax – asistenti pedagoga a PHPmax – metodický výpočet se stanovují odděleně. Součet níže je přehledový.</p>
@@ -2204,6 +2335,25 @@ export default function App() {
             <ResultCard label="Přehledový součet" tone="success" value={round2(totalPhmax + totalPha + totalPhp)} />
           </div>
         </section>
+        {showScrollTools ? (
+          <div className="scroll-tools" role="toolbar" aria-label="Rychlá navigace po stránce">
+            <button type="button" className="scroll-tools__btn" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+              Nahoru
+            </button>
+            <button type="button" className="scroll-tools__btn" onClick={scrollToWorkspaceDock}>
+              Přehled výsledků
+            </button>
+            {tab === "phmax" ? (
+              <button type="button" className="scroll-tools__btn" onClick={() => goToSection("phmax-summary")}>
+                Souhrnná tabulka
+              </button>
+            ) : null}
+            <button type="button" className="scroll-tools__btn" onClick={() => goToSection("overview")}>
+              Celkový přehled
+            </button>
+          </div>
+        ) : null}
+
         {glossaryOpen && (
           <div className="glossary-modal" role="dialog" aria-modal="true">
             <div className="glossary-modal__backdrop" onClick={() => setGlossaryOpen(false)} />
