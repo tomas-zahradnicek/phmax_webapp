@@ -224,6 +224,29 @@ button.pill--hero-toggle--active {
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
 }
 
+/* Slovníček v horní liště ZŠ (stejná pozice jako Nápověda u PV/ŠD) */
+.hero__pills-row .glossary-icon-btn--hero {
+  flex-shrink: 0;
+  min-height: auto;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  border: 2px solid rgba(255, 255, 255, 0.98);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+}
+
+.hero__pills-row .glossary-icon-btn--hero:hover {
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
+  transform: none;
+}
+
+.hero__pills-row .glossary-icon-btn--hero .glossary-icon-btn__label {
+  color: #0f172a;
+}
+
 .btn.btn--pv-add-workplace {
   font-weight: 700;
   padding: 11px 18px;
@@ -2747,6 +2770,10 @@ input[type="radio"] {
 
   .glossary-icon-btn__label {
     display: none;
+  }
+
+  .hero__pills-row .glossary-icon-btn--hero .glossary-icon-btn__label {
+    display: inline;
   }
 }
 

@@ -117,15 +117,13 @@ function HelpHint({ text }: { text: string }) {
 
 
 
-const GlossaryIconButton = forwardRef<HTMLButtonElement, { onClick: () => void }>(function GlossaryIconButton(
-  { onClick },
-  ref
-) {
+const GlossaryIconButton = forwardRef<HTMLButtonElement, { onClick: () => void; className?: string }>(
+  function GlossaryIconButton({ onClick, className }, ref) {
   return (
     <button
       ref={ref}
       type="button"
-      className="glossary-icon-btn"
+      className={["glossary-icon-btn", className].filter(Boolean).join(" ")}
       onClick={onClick}
       title="Otevřít slovníček pojmů"
       aria-label="Otevřít slovníček pojmů"
@@ -1523,7 +1521,14 @@ export default function App() {
           <div className="hero__orb hero__orb--one" />
           <div className="hero__orb hero__orb--two" />
 
-          <ProductViewPills productView={productView} setProductView={setProductView} />
+          <div className="hero__pills-row">
+            <ProductViewPills productView={productView} setProductView={setProductView} />
+            <GlossaryIconButton
+              ref={glossaryTriggerRef}
+              className="glossary-icon-btn--hero"
+              onClick={() => setGlossaryOpen(true)}
+            />
+          </div>
 
           <div className="grid two hero__grid">
             <div>
@@ -1587,7 +1592,6 @@ export default function App() {
               <button type="button" className="btn btn--light" onClick={() => window.print()}>Tisk</button>
               <button type="button" className="btn ghost" onClick={saveSnapshotManually}>Uložit</button>
               <button type="button" className="btn ghost" onClick={restoreSnapshot}>Obnovit</button>
-              <GlossaryIconButton ref={glossaryTriggerRef} onClick={() => setGlossaryOpen(true)} />
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions__group hero-actions__group--meta">
