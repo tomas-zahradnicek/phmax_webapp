@@ -27,6 +27,8 @@ import { MODE_CONFIG } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
 import { DEFAULT_MODE } from "./config/default-form-state";
 import { GlossaryDialog } from "./GlossaryDialog";
+import { PhmaxSdPage } from "./PhmaxSdPage";
+import { ProductViewPills } from "./ProductViewPills";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
@@ -461,6 +463,11 @@ export default function App() {
   const [dataMode, setDataMode] = useState<DataMode>("own");
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
+  const [productView, setProductViewState] = useState<"zs" | "sd">("zs");
+  const setProductView = useCallback((v: "zs" | "sd") => {
+    setProductViewState(v);
+    window.scrollTo(0, 0);
+  }, []);
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string>("");
   const [uiNotice, setUiNotice] = useState<string>("");
@@ -1500,6 +1507,16 @@ export default function App() {
     workspaceStickyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  if (productView === "sd") {
+    return (
+      <div className="app-shell app-shell--gradient">
+        <div className="container container--app">
+          <PhmaxSdPage productView={productView} setProductView={setProductView} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`app-shell app-shell--gradient${validationHighlight ? " app-shell--validation-hint" : ""}`}>
       <div className="container container--app">
@@ -1507,9 +1524,7 @@ export default function App() {
           <div className="hero__orb hero__orb--one" />
           <div className="hero__orb hero__orb--two" />
 
-          <div className="pill pill--hero">
-            Kalkulačka pro základní školy
-          </div>
+          <ProductViewPills productView={productView} setProductView={setProductView} />
 
           <div className="grid two hero__grid">
             <div>

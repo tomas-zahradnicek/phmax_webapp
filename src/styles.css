@@ -149,6 +149,50 @@ textarea:focus-visible {
   border-color: rgba(255,255,255,0.22);
 }
 
+.hero__product-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+button.pill--hero-toggle {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  margin-bottom: 0;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+button.pill--hero-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+button.pill--hero-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+button.pill--hero-toggle--active {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.hero__title--sd {
+  margin-top: 4px;
+}
+
+.hero__text--sd {
+  max-width: 920px;
+  margin-bottom: 0;
+}
+
 .hero--feature {
   position: relative;
   overflow: hidden;
