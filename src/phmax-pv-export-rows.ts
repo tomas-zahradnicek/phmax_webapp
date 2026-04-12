@@ -61,22 +61,22 @@ export type PvMultiExportItem = {
   phaMax: number | null;
 };
 
-/** Export více řádků výpočtu (pracoviště / druh provozu) a součty. */
+/** Export více pracovišť výpočtu (kombinace místo / druh provozu) a součty. */
 export function buildPhmaxPvMultiExportRows(
   items: ReadonlyArray<PvMultiExportItem>,
   totals: { phmaxSum: number; phaSum: number; incomplete: boolean }
 ): PhmaxPvExportRow[] {
   const out: PhmaxPvExportRow[] = [
-    ["=== PHmax / PHAmax předškolní vzdělávání — export (více řádků) ===", ""],
-    ["Počet řádků výpočtu", items.length],
+    ["=== PHmax / PHAmax předškolní vzdělávání — export (více pracovišť) ===", ""],
+    ["Počet pracovišť ve výpočtu", items.length],
     ["", ""],
   ];
 
   for (const item of items) {
     const header =
       item.label.trim() !== ""
-        ? `--- Řádek ${item.index} — ${item.label.trim()} ---`
-        : `--- Řádek ${item.index} ---`;
+        ? `--- Pracoviště ${item.index} — ${item.label.trim()} ---`
+        : `--- Pracoviště ${item.index} ---`;
     out.push([header, ""]);
     const block = buildPhmaxPvExportRows({
       provozLabel: item.provozLabel,
@@ -92,16 +92,16 @@ export function buildPhmaxPvMultiExportRows(
     out.push(["", ""]);
   }
 
-  out.push(["=== SOUČET (právnická osoba / všechny řádky) ===", ""]);
+  out.push(["=== SOUČET (právnická osoba / všechna pracoviště) ===", ""]);
   if (totals.incomplete) {
     out.push([
       "Poznámka k součtu PHmax",
-      "Do součtu nejsou započítány řádky s chybou vstupu — opravte je nebo je vynechte.",
+      "Do součtu nejsou započítána pracoviště s chybou vstupu — opravte je nebo je vynechte.",
     ]);
   }
   out.push(["PHmax celkem (součet dílčích PHmax, h/týden)", totals.phmaxSum]);
   if (totals.phaSum > 0) {
-    out.push(["PHAmax celkem (součet řádků s § 16 třídami, h/týden)", totals.phaSum]);
+    out.push(["PHAmax celkem (součet pracovišť s § 16 třídami, h/týden)", totals.phaSum]);
   }
 
   return out;

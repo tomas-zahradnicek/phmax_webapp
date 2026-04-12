@@ -132,7 +132,7 @@ describe("buildPhmaxPvMultiExportRows", () => {
       { phmaxSum: (a.totalPhmax ?? 0) + (b.totalPhmax ?? 0), phaSum: 0, incomplete: false }
     );
 
-    expect(rows.some(([k]) => String(k).includes("více řádků"))).toBe(true);
+    expect(rows.some(([k]) => String(k).includes("více pracovišť"))).toBe(true);
     expect(rows.some(([k, v]) => k.includes("SOUČET") && v === "")).toBe(true);
     expect(rows.some(([k, v]) => k.includes("PHmax celkem (součet") && v === (a.totalPhmax ?? 0) + (b.totalPhmax ?? 0))).toBe(
       true

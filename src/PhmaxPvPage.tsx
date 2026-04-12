@@ -192,26 +192,26 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         <h1 className="hero__title hero__title--sd">PHmax a PHAmax – předškolní vzdělávání</h1>
         <p className="hero__text hero__text--sd">
           Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a{" "}
-          <strong>vyhlášky č. 14/2005 Sb.</strong> Každý <strong>řádek</strong> ve formuláři odpovídá jedné kombinaci{" "}
-          <strong>pracoviště (nebo jeho části) a druhu provozu</strong> — stejně jako jeden řádek v tabulkové pomůcce
-          MŠMT. U právnické osoby s více pracovišti nebo více druhy provozu zadejte více řádků;{" "}
-          <strong>součet PHmax</strong> z řádků odpovídá celkovému PHmax (po sečtení dílčích výpočtů dle metodiky).
+          <strong>vyhlášky č. 14/2005 Sb.</strong> Každé <strong>číslované pracoviště</strong> ve formuláři (Pracoviště 1, 2…) odpovídá jedné kombinaci{" "}
+          <strong>místa (nebo jeho části) a druhu provozu</strong> — stejně jako jeden řádek v tabulkové pomůcce MŠMT. U
+          právnické osoby s více skutečnými pracovišti nebo více druhy provozu přidejte další položku;{" "}
+          <strong>součet PHmax</strong> z pracovišť odpovídá celkovému PHmax (po sečtení dílčích výpočtů dle metodiky).
           Údaje vycházejí z matrice M 1 (dříve S 1-01); u MŠ při zdravotnickém zařízení z výkazu S 4-01.
         </p>
       </header>
 
-      <QuickOnboarding storageKey="phmax-pv-onboarding" title="Řádky výpočtu MŠ">
+      <QuickOnboarding storageKey="phmax-pv-onboarding" title="Pracoviště MŠ">
         <p>
-          Jeden <strong>řádek</strong> = vybraný <strong>druh provozu</strong>, počet tříd v něm, případně navýšení dle
-          vyhlášky a <strong>průměrnou denní dobu provozu v hodinách</strong> (zařadí se do sloupce tabulky 1–3 přílohy).
-          Máte-li <strong>odloučená pracoviště</strong> nebo na jednom místě např. celodenní i polodenní provoz, přidejte
-          řádek pro každou kombinaci — v souhrnné tabulce uvidíte dílčí PHmax i <strong>součet</strong>. Krácení PHmax dle
-          § 1d odst. 3 vyhl. 14/2005 zde neřešíme.
+          Každé <strong>Pracoviště 1, 2…</strong> = vybraný <strong>druh provozu</strong>, počet tříd v něm, případně
+          navýšení dle vyhlášky a <strong>průměrnou denní dobu provozu v hodinách</strong> (zařadí se do sloupce tabulky
+          1–3 přílohy). Máte-li <strong>odloučená pracoviště</strong> nebo na jednom místě např. celodenní i polodenní
+          provoz, přidejte další pracoviště pro každou kombinaci — v souhrnné tabulce uvidíte dílčí PHmax i{" "}
+          <strong>součet</strong>. Krácení PHmax dle § 1d odst. 3 vyhl. 14/2005 zde neřešíme.
         </p>
       </QuickOnboarding>
 
       <section className="card section-card section-card--sd">
-        <h2 className="section-title">Vstupy (řádky výpočtu)</h2>
+        <h2 className="section-title">Vstupy (pracoviště)</h2>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
           <button type="button" className="btn ghost" onClick={handleExportCsv}>
             CSV
@@ -247,7 +247,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   }}
                 >
                   <h3 className="section-title" style={{ fontSize: "1.05rem", margin: 0, flex: "1 1 200px" }}>
-                    Řádek {index + 1}
+                    Pracoviště {index + 1}
                     {row.label.trim() ? ` — ${row.label.trim()}` : ""}
                   </h3>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end", flex: "1 1 280px" }}>
@@ -265,10 +265,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                       type="button"
                       className="btn ghost"
                       disabled={rows.length <= 1}
-                      aria-label={`Odstranit řádek ${index + 1}`}
+                      aria-label={`Odstranit pracoviště ${index + 1}`}
                       onClick={() => removeRow(row.id)}
                     >
-                      Odstranit řádek
+                      Odstranit pracoviště
                     </button>
                   </div>
                 </div>
@@ -348,11 +348,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 ) : null}
 
                 <details className="pv-row-details">
-                  <summary>Detail řádku {index + 1} — vstupy a dílčí PHmax</summary>
-                  <div className="app-table-wrap" role="region" aria-label={`Přehled vstupů řádku ${index + 1}`}>
+                  <summary>
+                    Detail Pracoviště {index + 1} – vstupy a dílčí PHmax
+                  </summary>
+                  <div className="app-table-wrap" role="region" aria-label={`Přehled vstupů pracoviště ${index + 1}`}>
                     <table className="app-data-table">
                       <caption className="app-data-table__caption">
-                        Vstupy — řádek {index + 1} ({provozLabel}
+                        Vstupy — pracoviště {index + 1} ({provozLabel}
                         {row.label.trim() ? `, ${row.label.trim()}` : ""})
                       </caption>
                       <thead>
@@ -402,15 +404,15 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
                   {computed.issues.map((issue, i) => (
                     <p key={`${row.id}-${issue.code}-${i}`} className="card card--warning" style={{ marginTop: 14, padding: 12 }}>
-                      <strong>Řádek {index + 1}:</strong> {issue.message}
+                      <strong>Pracoviště {index + 1}:</strong> {issue.message}
                     </p>
                   ))}
 
                   {computed.base ? (
-                    <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHmax řádek ${index + 1}`}>
+                    <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHmax pracoviště ${index + 1}`}>
                       <table className="app-data-table app-data-table--results">
                         <caption className="app-data-table__caption">
-                          Výpočet PHmax pro řádek {index + 1} (hodiny týdně)
+                          Výpočet PHmax pro pracoviště {index + 1} (hodiny týdně)
                         </caption>
                         <thead>
                           <tr>
@@ -439,7 +441,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                         {computed.totalPhmax != null ? (
                           <tfoot>
                             <tr className="app-data-table__total-row">
-                              <th scope="row">PHmax celkem (tento řádek)</th>
+                              <th scope="row">PHmax celkem (toto pracoviště)</th>
                               <td className="app-data-table__num app-data-table__num--emph">{computed.totalPhmax}</td>
                             </tr>
                           </tfoot>
@@ -448,14 +450,14 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                     </div>
                   ) : (
                     !computed.issues.length && (
-                      <p className="muted-text section-results">Upravte vstupy řádku {index + 1} pro výpočet základního PHmax.</p>
+                      <p className="muted-text section-results">Upravte vstupy pracoviště {index + 1} pro výpočet základního PHmax.</p>
                     )
                   )}
 
                   {phaMax != null ? (
-                    <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHAmax řádek ${index + 1}`}>
+                    <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHAmax pracoviště ${index + 1}`}>
                       <table className="app-data-table app-data-table--pha">
-                        <caption className="app-data-table__caption">PHAmax — řádek {index + 1} (asistenti pedagoga, § 16)</caption>
+                        <caption className="app-data-table__caption">PHAmax — pracoviště {index + 1} (asistenti pedagoga, § 16)</caption>
                         <thead>
                           <tr>
                             <th scope="col">Položka</th>
@@ -467,7 +469,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                             <td>
                               PHAmax dle metodiky v4
                               <span className="app-data-table__hint">
-                                Použije se průměrná doba tohoto řádku ({hoursForPha.toLocaleString("cs-CZ")} h/den); při
+                                Použije se průměrná doba tohoto pracoviště ({hoursForPha.toLocaleString("cs-CZ")} h/den); při
                                 provozu pod 8 h/den krácení poměrem doba/8. U MŠ při zdravotnickém zařízení odkaz 8
                                 h/den.
                               </span>
@@ -486,7 +488,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
         <div style={{ marginTop: 16 }}>
           <button type="button" className="btn ghost" onClick={addRow}>
-            Přidat řádek (další pracoviště / druh provozu)
+            Přidat pracoviště (další kombinace místo / druhu provozu)
           </button>
         </div>
 
@@ -496,16 +498,16 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               c.computed.issues.map((issue, j) => ({ issue, i, j, id: c.row.id }))
             ).map((x, idx) => (
               <p key={`${x.id}-warn-${x.issue.code}-${x.j}`} style={{ margin: idx === 0 ? 0 : "10px 0 0" }}>
-                <strong>Řádek {x.i + 1}:</strong> {x.issue.message}
+                <strong>Pracoviště {x.i + 1}:</strong> {x.issue.message}
               </p>
             ))}
           </div>
         ) : null}
 
-        <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label="Souhrn všech řádků výpočtu">
+        <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label="Souhrn všech pracovišť výpočtu">
           <table className="app-data-table app-data-table--results">
             <caption className="app-data-table__caption">
-              Souhrn — dílčí PHmax podle řádků a součet (hodiny týdně)
+              Souhrn — dílčí PHmax podle pracovišť a součet (hodiny týdně)
             </caption>
             <thead>
               <tr>
@@ -520,7 +522,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 </th>
                 <th scope="col">Pásmo doby</th>
                 <th scope="col" className="app-data-table__num">
-                  PHmax řádku
+                  Dílčí PHmax
                 </th>
                 <th scope="col" className="app-data-table__num">
                   PHAmax
@@ -558,7 +560,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             <tfoot>
               <tr className="app-data-table__total-row">
                 <th scope="row" colSpan={6}>
-                  PHmax celkem (součet řádků){aggregate.incomplete ? " *" : ""}
+                  PHmax celkem (součet pracovišť){aggregate.incomplete ? " *" : ""}
                 </th>
                 <td className="app-data-table__num app-data-table__num--emph">{aggregate.phmaxSum}</td>
                 <td className="app-data-table__num app-data-table__num--emph">
@@ -571,8 +573,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
         {aggregate.incomplete ? (
           <p className="muted-text" style={{ marginTop: 10, fontSize: "0.9rem" }}>
-            * Do součtu PHmax jsou započítány jen řádky bez chyby vstupu. Ostatní opravte nebo řádek odstraňte, pokud ho
-            nepotřebujete.
+            * Do součtu PHmax jsou započítána jen pracoviště bez chyby vstupu. Ostatní opravte nebo příslušné pracoviště
+            odstraňte, pokud ho nepotřebujete.
           </p>
         ) : null}
 
