@@ -216,22 +216,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               min={1}
               max={maxClasses}
             />
-            {provoz !== "zdravotnicke" ? (
-              <NumberField
-                label={`Průměrná doba provozu pracoviště v hodinách za den (tabulka ${pvDurationBandTableNo(provoz)} přílohy)`}
-                value={avgHours}
-                onChange={setAvgHours}
-                min={avgMeta.min}
-                max={avgMeta.max}
-                step={avgMeta.step}
-                hint={avgMeta.hint}
-              />
-            ) : (
+            {provoz === "zdravotnicke" ? (
               <p className="muted-text" style={{ marginTop: 8, fontSize: "0.88rem" }}>
                 U MŠ při zdravotnickém zařízení je PHmax <strong>31 hodin/třídu</strong> týdně — tabulky 1–3 se
                 nepoužívají.
               </p>
-            )}
+            ) : null}
           </div>
 
           <div className="subcard">
@@ -252,6 +242,23 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             />
           </div>
         </div>
+
+        {provoz !== "zdravotnicke" ? (
+          <div className="subcard pv-input-duration">
+            <h3 className="section-title" style={{ fontSize: "1.02rem", marginBottom: 10 }}>
+              Průměrná doba provozu (tabulka {pvDurationBandTableNo(provoz)} přílohy)
+            </h3>
+            <NumberField
+              label="Průměrná doba provozu pracoviště v hodinách za den"
+              value={avgHours}
+              onChange={setAvgHours}
+              min={avgMeta.min}
+              max={avgMeta.max}
+              step={avgMeta.step}
+              hint={avgMeta.hint}
+            />
+          </div>
+        ) : null}
 
         <div className="app-table-wrap" role="region" aria-label="Přehled zadaných vstupů">
           <table className="app-data-table">

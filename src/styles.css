@@ -2841,9 +2841,18 @@ input[type="radio"] {
 }
 
 .subcard,
-.number-field,
 .result-card {
   height: 100%;
+}
+
+/* NumberField v subkartách: výška auto, jinak globální height:100% rozbije více polí pod sebou (např. PV). */
+.subcard > .number-field {
+  height: auto;
+  min-height: 0;
+}
+
+.section-card--sd .pv-input-duration {
+  margin-top: 16px;
 }
 
 .subcard .grid.two,
