@@ -47,3 +47,62 @@ export function buildPhmaxPvExportRows(input: {
 
   return rows;
 }
+
+export type PvMultiExportItem = {
+  index: number;
+  label: string;
+  provozLabel: string;
+  provoz: PvProvozKind;
+  classCount: number;
+  avgHoursPerDay: number;
+  sec16Count: number;
+  languageGroups: number;
+  computed: PvExportComputed;
+  phaMax: number | null;
+};
+
+/** Export více řádků výpočtu (pracoviště / druh provozu) a součty. */
+export function buildPhmaxPvMultiExportRows(
+  items: ReadonlyArray<PvMultiExportItem>,
+  totals: { phmaxSum: number; phaSum: number; incomplete: boolean }
+): PhmaxPvExportRow[] {
+  const out: PhmaxPvExportRow[] = [
+    ["=== PHmax / PHAmax předškolní vzdělávání — export (více řádků) ===", ""],
+    ["Počet řádků výpočtu", items.length],
+    ["", ""],
+  ];
+
+  for (const item of items) {
+    const header =
+      item.label.trim() !== ""
+        ? `--- Řádek ${item.index} — ${item.label.trim()} ---`
+        : `--- Řádek ${item.index} ---`;
+    out.push([header, ""]);
+    const block = buildPhmaxPvExportRows({
+      provozLabel: item.provozLabel,
+      provoz: item.provoz,
+      classCount: item.classCount,
+      avgHoursPerDay: item.avgHoursPerDay,
+      sec16Count: item.sec16Count,
+      languageGroups: item.languageGroups,
+      computed: item.computed,
+      phaMax: item.phaMax,
+    });
+    out.push(...block.slice(1));
+    out.push(["", ""]);
+  }
+
+  out.push(["=== SOUČET (právnická osoba / všechny řádky) ===", ""]);
+  if (totals.incomplete) {
+    out.push([
+      "Poznámka k součtu PHmax",
+      "Do součtu nejsou započítány řádky s chybou vstupu — opravte je nebo je vynechte.",
+    ]);
+  }
+  out.push(["PHmax celkem (součet dílčích PHmax, h/týden)", totals.phmaxSum]);
+  if (totals.phaSum > 0) {
+    out.push(["PHAmax celkem (součet řádků s § 16 třídami, h/týden)", totals.phaSum]);
+  }
+
+  return out;
+}

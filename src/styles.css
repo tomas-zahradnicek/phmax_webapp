@@ -2855,6 +2855,31 @@ input[type="radio"] {
   margin-top: 16px;
 }
 
+.pv-workplace-rows .pv-workplace-row + .pv-workplace-row {
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.section-card--sd .pv-row-details {
+  margin-top: 16px;
+}
+
+.section-card--sd .pv-row-details > summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.04);
+  color: #1e293b;
+  list-style-position: outside;
+}
+
+.section-card--sd .pv-row-details[open] > summary {
+  margin-bottom: 12px;
+}
+
 .subcard .grid.two,
 .subcard .grid.three,
 .subcard .grid.four,

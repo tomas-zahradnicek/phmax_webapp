@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { exportCsvLocalized } from "./export-utils";
-import { buildPhmaxPvExportRows } from "./phmax-pv-export-rows";
+import { buildPhmaxPvExportRows, buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
 import { computePvPhmaxTotal, getPhaMaxPv } from "./phmax-pv-logic";
 
 describe("buildPhmaxPvExportRows (smoke / export)", () => {
@@ -83,5 +83,87 @@ describe("buildPhmaxPvExportRows (smoke / export)", () => {
     });
 
     expect(rows.some(([k, v]) => k.includes("Průměrná doba provozu") && String(v).includes("—"))).toBe(true);
+  });
+});
+
+describe("buildPhmaxPvMultiExportRows", () => {
+  it("spojí dva řádky a uvede součet PHmax", () => {
+    const a = computePvPhmaxTotal({
+      provoz: "celodenni",
+      classCount: 4,
+      avgHoursPerDay: 10,
+      sec16ClassCount: 0,
+      languageGroupCount: 0,
+    });
+    const b = computePvPhmaxTotal({
+      provoz: "polodenni",
+      classCount: 2,
+      avgHoursPerDay: 5,
+      sec16ClassCount: 0,
+      languageGroupCount: 0,
+    });
+    const rows = buildPhmaxPvMultiExportRows(
+      [
+        {
+          index: 1,
+          label: "Pobočka A",
+          provozLabel: "Celodenní",
+          provoz: "celodenni",
+          classCount: 4,
+          avgHoursPerDay: 10,
+          sec16Count: 0,
+          languageGroups: 0,
+          computed: a,
+          phaMax: null,
+        },
+        {
+          index: 2,
+          label: "",
+          provozLabel: "Polodenní",
+          provoz: "polodenni",
+          classCount: 2,
+          avgHoursPerDay: 5,
+          sec16Count: 0,
+          languageGroups: 0,
+          computed: b,
+          phaMax: null,
+        },
+      ],
+      { phmaxSum: (a.totalPhmax ?? 0) + (b.totalPhmax ?? 0), phaSum: 0, incomplete: false }
+    );
+
+    expect(rows.some(([k]) => String(k).includes("více řádků"))).toBe(true);
+    expect(rows.some(([k, v]) => k.includes("SOUČET") && v === "")).toBe(true);
+    expect(rows.some(([k, v]) => k.includes("PHmax celkem (součet") && v === (a.totalPhmax ?? 0) + (b.totalPhmax ?? 0))).toBe(
+      true
+    );
+  });
+
+  it("při neúplném součtu přidá poznámku", () => {
+    const bad = computePvPhmaxTotal({
+      provoz: "celodenni",
+      classCount: 0,
+      avgHoursPerDay: 10,
+      sec16ClassCount: 0,
+      languageGroupCount: 0,
+    });
+    const rows = buildPhmaxPvMultiExportRows(
+      [
+        {
+          index: 1,
+          label: "",
+          provozLabel: "Celodenní",
+          provoz: "celodenni",
+          classCount: 0,
+          avgHoursPerDay: 10,
+          sec16Count: 0,
+          languageGroups: 0,
+          computed: bad,
+          phaMax: null,
+        },
+      ],
+      { phmaxSum: 0, phaSum: 0, incomplete: true }
+    );
+    expect(rows.some(([k]) => k.includes("Poznámka k součtu PHmax"))).toBe(true);
   });
 });
