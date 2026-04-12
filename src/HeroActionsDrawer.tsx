@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useMatchMedia } from "./useMatchMedia";
 
 type HeroActionsDrawerProps = {
@@ -60,29 +61,37 @@ export function HeroActionsDrawer({
           {triggerLabel}
         </button>
       </div>
-      {open ? (
-        <>
-          <div
-            className="hero-actions-panel-backdrop"
-            role="presentation"
-            onClick={() => setOpen(false)}
-          />
-          <aside
-            className="hero-actions-panel-drawer"
-            role="dialog"
-            aria-modal="true"
-            aria-label={drawerTitle}
-          >
-            <header className="hero-actions-panel-drawer__head">
-              <h2 className="hero-actions-panel-drawer__title">{drawerTitle}</h2>
-              <button type="button" className="btn ghost btn--drawer-close" onClick={() => setOpen(false)}>
-                Zavřít
-              </button>
-            </header>
-            <div className="hero-actions-panel-drawer__body">{children}</div>
-          </aside>
-        </>
-      ) : null}
+      {open && typeof document !== "undefined"
+        ? createPortal(
+            <div className="hero-actions-panel-portal-root">
+              <div
+                className="hero-actions-panel-backdrop"
+                role="presentation"
+                onClick={() => setOpen(false)}
+              />
+              <aside
+                className="hero-actions-panel-drawer"
+                role="dialog"
+                aria-modal="true"
+                aria-label={drawerTitle}
+              >
+                <header className="hero-actions-panel-drawer__head">
+                  <h2 className="hero-actions-panel-drawer__title">{drawerTitle}</h2>
+                  <button
+                    type="button"
+                    className="btn ghost btn--drawer-close"
+                    onClick={() => setOpen(false)}
+                    aria-label="Zavřít panel akcí"
+                  >
+                    Zavřít
+                  </button>
+                </header>
+                <div className="hero-actions-panel-drawer__body">{children}</div>
+              </aside>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }
