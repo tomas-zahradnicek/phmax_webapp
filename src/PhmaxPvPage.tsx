@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
+import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { HeroStat } from "./HeroStat";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
@@ -397,50 +398,52 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         </div>
 
         <div className="hero-actions hero-actions--stacked">
-          <div className="hero-actions--stacked__row">
-            <span className="hero-actions__cluster" role="group" aria-label="Tisk">
-              <button type="button" className="btn btn--light" onClick={() => window.print()}>
-                Tisk
+          <HeroActionsDrawer triggerLabel="Akce, tisk, uložení a export…" drawerTitle="Akce a export">
+            <div className="hero-actions--stacked__row">
+              <span className="hero-actions__cluster" role="group" aria-label="Tisk">
+                <button type="button" className="btn btn--light" onClick={() => window.print()}>
+                  Tisk
+                </button>
+                <button type="button" className="btn btn--light" onClick={printPvSummary}>
+                  Tisk shrnutí
+                </button>
+              </span>
+              <span className="hero-actions__cluster hero-actions__cluster--after" role="group" aria-label="Ukládání">
+                <button type="button" className="btn ghost" onClick={savePvSnapshotManually}>
+                  Uložit
+                </button>
+                <button type="button" className="btn ghost" onClick={restorePvSnapshot}>
+                  Obnovit
+                </button>
+              </span>
+            </div>
+            <div className="hero-actions--stacked__row hero-actions__group--meta">
+              <button type="button" className="btn ghost" onClick={clearPvStoredSnapshot}>
+                Vymazat uložená data
               </button>
-              <button type="button" className="btn btn--light" onClick={printPvSummary}>
-                Tisk shrnutí
+              <button type="button" className="btn ghost" onClick={resetPvAll}>
+                Vymazat všechny údaje
               </button>
-            </span>
-            <span className="hero-actions__cluster hero-actions__cluster--after" role="group" aria-label="Ukládání">
-              <button type="button" className="btn ghost" onClick={savePvSnapshotManually}>
-                Uložit
+            </div>
+            <hr className="hero-actions__divider" aria-hidden="true" />
+            <div className="hero-actions--stacked__row">
+              <button type="button" className="btn ghost" onClick={handleExportCsv}>
+                CSV
               </button>
-              <button type="button" className="btn ghost" onClick={restorePvSnapshot}>
-                Obnovit
+              <button
+                type="button"
+                className="btn ghost"
+                disabled={xlsxExportBusy}
+                aria-busy={xlsxExportBusy}
+                onClick={() => void handleExportXlsx()}
+              >
+                {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
               </button>
-            </span>
-          </div>
-          <div className="hero-actions--stacked__row hero-actions__group--meta">
-            <button type="button" className="btn ghost" onClick={clearPvStoredSnapshot}>
-              Vymazat uložená data
-            </button>
-            <button type="button" className="btn ghost" onClick={resetPvAll}>
-              Vymazat všechny údaje
-            </button>
-          </div>
-          <hr className="hero-actions__divider" aria-hidden="true" />
-          <div className="hero-actions--stacked__row">
-            <button type="button" className="btn ghost" onClick={handleExportCsv}>
-              CSV
-            </button>
-            <button
-              type="button"
-              className="btn ghost"
-              disabled={xlsxExportBusy}
-              aria-busy={xlsxExportBusy}
-              onClick={() => void handleExportXlsx()}
-            >
-              {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
-            </button>
-            <button type="button" className="btn ghost" onClick={() => void copyPvSummary()}>
-              Kopírovat shrnutí
-            </button>
-          </div>
+              <button type="button" className="btn ghost" onClick={() => void copyPvSummary()}>
+                Kopírovat shrnutí
+              </button>
+            </div>
+          </HeroActionsDrawer>
         </div>
 
         <div className="hero-status">

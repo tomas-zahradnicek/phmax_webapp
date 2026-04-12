@@ -36,6 +36,7 @@ import { PhmaxPvPage } from "./PhmaxPvPage";
 import { PhmaxSdPage } from "./PhmaxSdPage";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
+import { HeroActionsDrawer } from "./HeroActionsDrawer";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
@@ -1816,96 +1817,107 @@ export default function App() {
                 </optgroup>
               </select>
             </div>
-            <div className="hero-actions__group hero-actions__group--primary">
-              <button type="button" className="btn btn--light" onClick={() => window.print()}>Tisk</button>
-              <button type="button" className="btn ghost" onClick={saveSnapshotManually}>Uložit</button>
-              <button type="button" className="btn ghost" onClick={restoreSnapshot}>Obnovit</button>
-            </div>
-            <hr className="hero-actions__divider" aria-hidden="true" />
-            <div className="hero-actions__group hero-actions__group--meta">
-              <button type="button" className="btn ghost" onClick={clearStoredSnapshot}>
-                Vymazat uložená data
-              </button>
-              <button type="button" className="btn ghost" onClick={resetAll}>
-                Vymazat všechny údaje
-              </button>
-            </div>
-            <div className="hero-actions__group hero-actions__group--named">
-              <div className="hero-named-grid" aria-label="Export a pojmenované zálohy">
-                <label className="hero-named-field hero-named-field--export">
-                  <span className="field__label field__label--hero-named">Označení pro export</span>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="např. název školy, školní rok…"
-                    value={exportLabel}
-                    onChange={(e) => setExportLabel(e.target.value)}
-                    aria-label="Označení pro export a shrnutí"
-                  />
-                </label>
-                <label className="hero-named-field hero-named-field--backup-name">
-                  <span className="field__label field__label--hero-named">Název zálohy</span>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="např. stav 2026/27"
-                    value={namedSaveName}
-                    onChange={(e) => setNamedSaveName(e.target.value)}
-                    aria-label="Název pojmenované zálohy"
-                  />
-                </label>
-                <div className="hero-named-field hero-named-field--save">
-                  <span className="hero-named-field__btn-slot" aria-hidden="true" />
-                  <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
-                    Uložit do seznamu
-                  </button>
-                </div>
-                <div className="hero-named-field hero-named-field--select">
-                  <select
-                    className="input"
-                    value={selectedNamedId}
-                    onChange={(e) => setSelectedNamedId(e.target.value)}
-                    aria-label="Vybrat uloženou zálohu"
-                  >
-                    <option value="">Vyberte uloženou zálohu…</option>
-                    {namedSnapshots.map((n) => (
-                      <option key={n.id} value={n.id}>
-                        {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="hero-named-field hero-named-field--restore-delete">
-                  <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
-                    Obnovit vybranou
-                  </button>
-                  <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
-                    Smazat vybranou
-                  </button>
+            <HeroActionsDrawer
+              triggerLabel="Akce, tisk, uložení a export…"
+              drawerTitle="Akce a export"
+            >
+              <div className="hero-actions__group hero-actions__group--primary">
+                <button type="button" className="btn btn--light" onClick={() => window.print()}>
+                  Tisk
+                </button>
+                <button type="button" className="btn ghost" onClick={saveSnapshotManually}>
+                  Uložit
+                </button>
+                <button type="button" className="btn ghost" onClick={restoreSnapshot}>
+                  Obnovit
+                </button>
+              </div>
+              <hr className="hero-actions__divider" aria-hidden="true" />
+              <div className="hero-actions__group hero-actions__group--meta">
+                <button type="button" className="btn ghost" onClick={clearStoredSnapshot}>
+                  Vymazat uložená data
+                </button>
+                <button type="button" className="btn ghost" onClick={resetAll}>
+                  Vymazat všechny údaje
+                </button>
+              </div>
+              <div className="hero-actions__group hero-actions__group--named">
+                <div className="hero-named-grid" aria-label="Export a pojmenované zálohy">
+                  <label className="hero-named-field hero-named-field--export">
+                    <span className="field__label field__label--hero-named">Označení pro export</span>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="např. název školy, školní rok…"
+                      value={exportLabel}
+                      onChange={(e) => setExportLabel(e.target.value)}
+                      aria-label="Označení pro export a shrnutí"
+                    />
+                  </label>
+                  <label className="hero-named-field hero-named-field--backup-name">
+                    <span className="field__label field__label--hero-named">Název zálohy</span>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="např. stav 2026/27"
+                      value={namedSaveName}
+                      onChange={(e) => setNamedSaveName(e.target.value)}
+                      aria-label="Název pojmenované zálohy"
+                    />
+                  </label>
+                  <div className="hero-named-field hero-named-field--save">
+                    <span className="hero-named-field__btn-slot" aria-hidden="true" />
+                    <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
+                      Uložit do seznamu
+                    </button>
+                  </div>
+                  <div className="hero-named-field hero-named-field--select">
+                    <select
+                      className="input"
+                      value={selectedNamedId}
+                      onChange={(e) => setSelectedNamedId(e.target.value)}
+                      aria-label="Vybrat uloženou zálohu"
+                    >
+                      <option value="">Vyberte uloženou zálohu…</option>
+                      {namedSnapshots.map((n) => (
+                        <option key={n.id} value={n.id}>
+                          {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="hero-named-field hero-named-field--restore-delete">
+                    <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
+                      Obnovit vybranou
+                    </button>
+                    <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
+                      Smazat vybranou
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="hero-actions__group hero-actions__group--exports">
-              <button type="button" className="btn ghost" onClick={handleExportCsv}>
-                CSV
-              </button>
-              <button
-                type="button"
-                className="btn ghost"
-                disabled={xlsxExportBusy}
-                aria-busy={xlsxExportBusy}
-                onClick={() => void handleExportXlsx()}
-              >
-                {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
-              </button>
-              <button type="button" className="btn ghost" onClick={copySummaryToClipboard}>
-                Kopírovat shrnutí
-              </button>
-              <button type="button" className="btn ghost" onClick={printSummaryWindow}>
-                Tisk shrnutí
-              </button>
-            </div>
+              <div className="hero-actions__group hero-actions__group--exports">
+                <button type="button" className="btn ghost" onClick={handleExportCsv}>
+                  CSV
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  disabled={xlsxExportBusy}
+                  aria-busy={xlsxExportBusy}
+                  onClick={() => void handleExportXlsx()}
+                >
+                  {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
+                </button>
+                <button type="button" className="btn ghost" onClick={copySummaryToClipboard}>
+                  Kopírovat shrnutí
+                </button>
+                <button type="button" className="btn ghost" onClick={printSummaryWindow}>
+                  Tisk shrnutí
+                </button>
+              </div>
+            </HeroActionsDrawer>
           </div>
 
           <p className="muted-text hero__note">
