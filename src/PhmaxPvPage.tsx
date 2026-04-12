@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   APP_AUTHOR_CREDIT_LINE,
+  APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
+import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { HeroStatusBar } from "./HeroStatusBar";
@@ -249,7 +251,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         contextRows: [
           ["Aplikace", "PHmax / PHAmax předškolní vzdělávání"],
           ["Čas exportu", new Date().toLocaleString("cs-CZ")],
-          ["Vytvořil", `Mgr. Tomáš Zahradníček (${APP_AUTHOR_EMAIL})`],
+          ["Vytvořil:", `${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`],
         ],
         valueRows: exportRows,
         filename: exportFilenameStamped("phmax-pv", "xlsx"),
@@ -340,13 +342,14 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   }, [buildPvSummaryText]);
 
   const printPvSummary = useCallback(() => {
-    const text = buildPvSummaryText().replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
+    const plain = stripAppAuthorCreditFromPlainSummary(buildPvSummaryText());
+    const text = plain.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
     const win = window.open("", "_blank", "width=900,height=700");
     if (!win) return;
     win.document.write(
       `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí PHmax PV</title>` +
-        `<style>body{font-family:system-ui,Segoe UI,sans-serif;margin:16px;font-size:11pt;line-height:1.45;color:#0f172a}</style>` +
-        `</head><body><h1 style="font-size:13pt">Shrnutí – předškolní vzdělávání</h1><p>${text}</p></body></html>`,
+        `<style>body{font-family:system-ui,Segoe UI,sans-serif;margin:16px;font-size:11pt;line-height:1.45;color:#0f172a}a{color:#1d4ed8}</style>` +
+        `</head><body><h1 style="font-size:13pt">Shrnutí – předškolní vzdělávání</h1><p>${text}</p>${getAppAuthorPrintFooterHtml()}</body></html>`,
     );
     win.document.close();
     win.focus();

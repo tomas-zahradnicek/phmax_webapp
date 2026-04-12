@@ -24,14 +24,16 @@ export const TABLE_SCROLL_HINT =
 /** Autor aplikace — e-mail a texty do exportů / shrnutí. */
 export const APP_AUTHOR_EMAIL = "tomas.zahradnicek.hradec@gmail.com";
 
-/** Řádka pro kopírování shrnutí a textový tisk. */
-export const APP_AUTHOR_CREDIT_LINE = `Vytvořil Mgr. Tomáš Zahradníček (${APP_AUTHOR_EMAIL})`;
+export const APP_AUTHOR_DISPLAY_NAME = "Mgr. Tomáš Zahradníček";
 
-/** Stejné znění jako v zápatí stránky (bez HTML; pro případné textové výstupy). */
-export const APP_AUTHOR_PRINT_FOOTER = `Vytvořil: Mgr. Tomáš Zahradníček [${APP_AUTHOR_EMAIL}]`;
+/** Řádka pro kopírování shrnutí, CSV a čistě textové výstupy (e-mail v závorce). */
+export const APP_AUTHOR_CREDIT_LINE = `Vytvořil: ${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`;
+
+/** Textová varianta bez HTML (archivní název). */
+export const APP_AUTHOR_PRINT_FOOTER = APP_AUTHOR_CREDIT_LINE;
 
 /** Dva řádky na konec CSV a listu „Hodnoty“ v XLSX. */
 export const APP_AUTHOR_EXPORT_ROWS: readonly (readonly [string, string | number])[] = [
   ["", ""],
-  ["Vytvořil", `Mgr. Tomáš Zahradníček (${APP_AUTHOR_EMAIL})`],
+  ["Vytvořil:", `${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`],
 ];

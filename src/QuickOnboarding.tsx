@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useId, useRef } from "react";
 
 type QuickOnboardingProps = {
   title: string;
@@ -19,6 +19,28 @@ export function QuickOnboarding({
   anchorId,
   dismissButtonLabel = "Skrýt návod",
 }: QuickOnboardingProps) {
+  const dismissRef = useRef<HTMLButtonElement>(null);
+  const reactId = useId();
+  const titleId = anchorId ? `${anchorId}-title` : `quick-onboarding-title-${reactId.replace(/:/g, "")}`;
+
+  useEffect(() => {
+    if (!open) return;
+    const id = window.requestAnimationFrame(() => dismissRef.current?.focus());
+    return () => window.cancelAnimationFrame(id);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onDismiss();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onDismiss]);
+
   if (!open) return null;
 
   return (
@@ -26,12 +48,15 @@ export function QuickOnboarding({
       id={anchorId}
       className="card card--onboarding onboarding--quick"
       style={{ marginBottom: 18 }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
     >
       <div className="onboarding-quick__head">
-        <h2 className="section-title" style={{ marginBottom: 0 }}>
+        <h2 id={titleId} className="section-title" style={{ marginBottom: 0 }}>
           {title}
         </h2>
-        <button type="button" className="btn ghost" onClick={onDismiss}>
+        <button ref={dismissRef} type="button" className="btn ghost" onClick={onDismiss}>
           {dismissButtonLabel}
         </button>
       </div>

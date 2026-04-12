@@ -42,39 +42,20 @@ import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
 import {
   APP_AUTHOR_CREDIT_LINE,
+  APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   APP_AUTHOR_EXPORT_ROWS,
   PRODUCT_CALCULATOR_TITLES,
   TABLE_SCROLL_HINT,
 } from "./calculator-ui-constants";
+import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
+import { useZsNamedSnapshots } from "./useZsNamedSnapshots";
+import { MAX_NAMED_SNAPSHOTS } from "./zs-named-snapshots";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
 
 const ZS_ONBOARDING_KEY = "phmax-zs-onboarding";
-const NAMED_SNAPSHOTS_LS_KEY = "edu-cz-zs-named-snapshots-v1";
-const MAX_NAMED_SNAPSHOTS = 10;
-
-type NamedZsSnapshot = { id: string; name: string; savedAt: string; snapshot: Record<string, unknown> };
-
-function readNamedSnapshotsFromLs(): NamedZsSnapshot[] {
-  try {
-    const raw = localStorage.getItem(NAMED_SNAPSHOTS_LS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as { items?: NamedZsSnapshot[] };
-    return Array.isArray(parsed.items) ? parsed.items : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeNamedSnapshotsToLs(items: NamedZsSnapshot[]) {
-  try {
-    localStorage.setItem(NAMED_SNAPSHOTS_LS_KEY, JSON.stringify({ items }));
-  } catch {
-    /* ignore */
-  }
-}
 
 type TabKey = "phmax" | "pha" | "php";
 
@@ -424,9 +405,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [lastSavedAt, setLastSavedAt] = useState<string>("");
   const [uiNotice, setUiNotice] = useState<string>("");
   const [exportLabel, setExportLabel] = useState("");
-  const [namedSnapshots, setNamedSnapshots] = useState<NamedZsSnapshot[]>([]);
-  const [selectedNamedId, setSelectedNamedId] = useState("");
-  const [namedSaveName, setNamedSaveName] = useState("");
   const [zsGuideOpen, setZsGuideOpen] = useState(() => {
     try {
       return localStorage.getItem(ZS_ONBOARDING_KEY) !== "1";
@@ -1126,6 +1104,17 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     setUiNotice(notice);
   };
 
+  const {
+    namedSnapshots,
+    selectedNamedId,
+    setSelectedNamedId,
+    namedSaveName,
+    setNamedSaveName,
+    saveNamedSnapshot,
+    restoreNamedSnapshot,
+    deleteNamedSnapshot,
+  } = useZsNamedSnapshots({ buildSnapshot, applySnapshotPayload, setUiNotice });
+
   const restoreSnapshot = () => {
     try {
       const raw = localStorage.getItem("edu-cz-zs-calculator-state");
@@ -1151,43 +1140,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     localStorage.setItem("edu-cz-zs-calculator-state", JSON.stringify(buildSnapshot()));
     setLastSavedAt(new Date().toLocaleString("cs-CZ"));
     setUiNotice("Rozpracované údaje byly uloženy.");
-  };
-
-  useEffect(() => {
-    setNamedSnapshots(readNamedSnapshotsFromLs());
-  }, []);
-
-  const saveNamedSnapshot = () => {
-    const name = namedSaveName.trim() || new Date().toLocaleString("cs-CZ");
-    const id = `n-${Date.now()}`;
-    const snapshot = buildSnapshot() as unknown as Record<string, unknown>;
-    const item: NamedZsSnapshot = { id, name, savedAt: new Date().toISOString(), snapshot };
-    const next = [item, ...namedSnapshots].slice(0, MAX_NAMED_SNAPSHOTS);
-    setNamedSnapshots(next);
-    writeNamedSnapshotsToLs(next);
-    setNamedSaveName("");
-    setUiNotice(`Záloha „${name}“ uložena do seznamu (max. ${MAX_NAMED_SNAPSHOTS}).`);
-  };
-
-  const restoreNamedSnapshot = () => {
-    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
-    if (!item) {
-      setUiNotice("Vyberte pojmenovanou zálohu v seznamu.");
-      return;
-    }
-    applySnapshotPayload(item.snapshot, `Obnovena záloha „${item.name}“.`);
-  };
-
-  const deleteNamedSnapshot = () => {
-    if (!selectedNamedId) {
-      setUiNotice("Vyberte zálohu ke smazání.");
-      return;
-    }
-    const next = namedSnapshots.filter((x) => x.id !== selectedNamedId);
-    setNamedSnapshots(next);
-    writeNamedSnapshotsToLs(next);
-    setSelectedNamedId("");
-    setUiNotice("Pojmenovaná záloha byla smazána.");
   };
 
   const dismissZsGuide = () => {
@@ -1240,16 +1192,19 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   };
 
   const printSummaryWindow = () => {
-    const text = buildShareText({
-      modeLabel: MODE_CONFIG[mode].label,
-      tab: tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax",
-      totalPhmax,
-      totalPha,
-      totalPhp,
-      warnings,
-      inputMode: dataMode,
-      exportLabel,
-    }).replace(/\n/g, "<br />");
+    const plain = stripAppAuthorCreditFromPlainSummary(
+      buildShareText({
+        modeLabel: MODE_CONFIG[mode].label,
+        tab: tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax",
+        totalPhmax,
+        totalPha,
+        totalPhp,
+        warnings,
+        inputMode: dataMode,
+        exportLabel,
+      }),
+    );
+    const text = plain.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
     const win = window.open("", "_blank", "width=900,height=700");
     if (!win) return;
     win.document.write(
@@ -1259,7 +1214,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         `body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0;font-size:9pt;line-height:1.4;color:#0f172a}` +
         `h1{font-size:12pt;margin:0 0 8px;font-weight:800}` +
         `.box{border:1px solid #94a3b8;border-radius:6px;padding:10px 12px;background:#fff}` +
-        `</style></head><body><h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div></body></html>`,
+        `a{color:#1d4ed8}` +
+        `</style></head><body><h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div>${getAppAuthorPrintFooterHtml()}</body></html>`,
     );
     win.document.close();
     win.focus();
@@ -1494,7 +1450,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         "Poznámka",
         "Úplný dvousloupcový výpis (vstupy, výstupy, detaily PHAmax / psych / gym / smíšené) je na listu „Hodnoty“.",
       ],
-      ["Vytvořil", `Mgr. Tomáš Zahradníček (${APP_AUTHOR_EMAIL})`],
+      ["Vytvořil:", `${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`],
     ];
   };
 
