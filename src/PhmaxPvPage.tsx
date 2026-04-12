@@ -195,24 +195,30 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           </p>
         ))}
 
-        <div className="grid two section-results" style={{ marginTop: 18 }}>
+        <div className="pv-result-blocks">
           {computed.base ? (
             <>
-              <ResultCard label="PHmax ze základní tabulky" value={computed.base.basePhmax} tone="success" />
-              <ResultCard label="Pásmo doby provozu" value={computed.base.durationColumnLabel} tone="primary" />
-              <ResultCard label="Příplatek § 16 odst. 9 (5 h × třídy)" value={computed.sec16Bonus} tone="primary" />
-              <ResultCard
-                label="Příplatek jazyková příprava (1 h × skupiny)"
-                value={computed.languageBonus}
-                tone="primary"
-              />
+              <div className="grid two section-results pv-result-blocks__pair">
+                <ResultCard label="PHmax ze základní tabulky" value={computed.base.basePhmax} tone="success" />
+                <ResultCard label="Pásmo doby provozu" value={computed.base.durationColumnLabel} tone="primary" />
+              </div>
+              <div className="grid two section-results pv-result-blocks__pair">
+                <ResultCard label="Příplatek § 16 odst. 9 (5 h × třídy)" value={computed.sec16Bonus} tone="primary" />
+                <ResultCard
+                  label="Příplatek jazyková příprava (1 h × skupiny)"
+                  value={computed.languageBonus}
+                  tone="primary"
+                />
+              </div>
               {computed.totalPhmax != null ? (
-                <ResultCard label="PHmax celkem (tomuto pracovišti)" value={computed.totalPhmax} tone="success" />
+                <div className="pv-result-blocks__total section-results">
+                  <ResultCard label="PHmax celkem (tomuto pracovišti)" value={computed.totalPhmax} tone="success" />
+                </div>
               ) : null}
             </>
           ) : (
             !computed.issues.length && (
-              <p className="muted-text">Upravte vstupy pro výpočet základního PHmax.</p>
+              <p className="muted-text section-results">Upravte vstupy pro výpočet základního PHmax.</p>
             )
           )}
         </div>

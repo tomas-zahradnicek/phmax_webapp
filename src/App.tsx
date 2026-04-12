@@ -2435,25 +2435,13 @@ export default function App() {
               Celkový přehled
             </button>
             <div className="scroll-tools__product-btns" role="group" aria-label="Přepnout typ kalkulačky">
-              <button
-                type="button"
-                className={`scroll-tools__btn${productView === "pv" ? " scroll-tools__btn--active" : ""}`}
-                onClick={() => setProductView("pv")}
-              >
+              <button type="button" className="scroll-tools__btn" onClick={() => setProductView("pv")}>
                 PV
               </button>
-              <button
-                type="button"
-                className={`scroll-tools__btn${productView === "sd" ? " scroll-tools__btn--active" : ""}`}
-                onClick={() => setProductView("sd")}
-              >
+              <button type="button" className="scroll-tools__btn" onClick={() => setProductView("sd")}>
                 ŠD
               </button>
-              <button
-                type="button"
-                className={`scroll-tools__btn${productView === "zs" ? " scroll-tools__btn--active" : ""}`}
-                onClick={() => setProductView("zs")}
-              >
+              <button type="button" className="scroll-tools__btn scroll-tools__btn--active" onClick={() => setProductView("zs")}>
                 ZŠ
               </button>
             </div>

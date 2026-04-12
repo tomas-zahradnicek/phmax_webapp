@@ -46,7 +46,8 @@ function inferMethodStep(label: string, tone: NonNullable<ResultCardProps["tone"
     value.includes("pásmo") ||
     value.includes("na 1 třídu") ||
     value.includes("zařazení do pásma") ||
-    value.includes("hodnota podle pásma")
+    value.includes("hodnota podle pásma") ||
+    value.includes("základní tabulky")
   ) {
     return "c";
   }

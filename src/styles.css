@@ -2385,6 +2385,26 @@ input[type="radio"] {
   margin-top: 16px;
 }
 
+/* PV: dvojice výsledkových karet na řádcích — stejná výška vlevo/vpravo */
+.pv-result-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 18px;
+}
+
+.pv-result-blocks__pair.section-results {
+  margin-top: 0;
+}
+
+.pv-result-blocks__pair + .pv-result-blocks__pair {
+  margin-top: 16px;
+}
+
+.pv-result-blocks__total.section-results {
+  margin-top: 16px;
+}
+
 /* Better print button spacing retained */
 
 .result-card__type {
