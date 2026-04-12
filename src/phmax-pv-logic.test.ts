@@ -8,15 +8,15 @@ import {
   polodenniDurationColumnIndex,
 } from "./phmax-pv-logic";
 
-describe("getPhmaxPvBase – příloha tabulky 1–3 (výběr pásma)", () => {
-  it("celodenní: 4 třídy, pásmo „10 h … 10,5 h“ (index 7) → 235", () => {
-    const r = getPhmaxPvBase({ provoz: "celodenni", classCount: 4, durationBandIndex: 7 });
+describe("getPhmaxPvBase – příloha tabulky 1–3 (průměrná doba v hodinách)", () => {
+  it("celodenní: 4 třídy, 10 h/den → 235", () => {
+    const r = getPhmaxPvBase({ provoz: "celodenni", classCount: 4, avgHoursPerDay: 10 });
     expect(r.data).not.toBeNull();
     expect(r.data!.basePhmax).toBe(235);
   });
 
-  it("celodenní: 4 třídy, pásmo „9,5 h … 10 h“ (index 6) → 225", () => {
-    const r = getPhmaxPvBase({ provoz: "celodenni", classCount: 4, durationBandIndex: 6 });
+  it("celodenní: 4 třídy, 9,5 h/den → 225", () => {
+    const r = getPhmaxPvBase({ provoz: "celodenni", classCount: 4, avgHoursPerDay: 9.5 });
     expect(r.data!.basePhmax).toBe(225);
   });
 
@@ -24,7 +24,7 @@ describe("getPhmaxPvBase – příloha tabulky 1–3 (výběr pásma)", () => {
     const t = computePvPhmaxTotal({
       provoz: "celodenni",
       classCount: 4,
-      durationBandIndex: 7,
+      avgHoursPerDay: 10,
       sec16ClassCount: 1,
       languageGroupCount: 0,
     });
@@ -32,7 +32,7 @@ describe("getPhmaxPvBase – příloha tabulky 1–3 (výběr pásma)", () => {
   });
 
   it("MŠ při zdravotnickém zařízení: 31 h × třídy", () => {
-    const r = getPhmaxPvBase({ provoz: "zdravotnicke", classCount: 3, durationBandIndex: 0 });
+    const r = getPhmaxPvBase({ provoz: "zdravotnicke", classCount: 3, avgHoursPerDay: 0 });
     expect(r.data!.basePhmax).toBe(3 * PHMAX_PV_ZDRAVOTNICKY_NA_TRIDU);
   });
 });
@@ -47,7 +47,7 @@ describe("PHAmax PV", () => {
   });
 });
 
-describe("pásma doby (mapování z desetinné hodiny — kontrola shody s přílohou)", () => {
+describe("pásma doby (shoda se sloupci přílohy)", () => {
   it("polodenní 6–6,5 h → poslední sloupec", () => {
     expect(polodenniDurationColumnIndex(6.5)).toBe(4);
     expect(polodenniDurationColumnIndex(4)).toBe(0);
@@ -57,11 +57,7 @@ describe("pásma doby (mapování z desetinné hodiny — kontrola shody s pří
     expect(celodenniDurationColumnIndex(6.5)).toBeNull();
   });
 
-  it("celodenní mezi 6,5 a 7 → první sloupec (index 0)", () => {
+  it("celodenní mezi 6,5 a 7 → první sloupec", () => {
     expect(celodenniDurationColumnIndex(6.75)).toBe(0);
-  });
-
-  it("10 h → sloupec index 7 (stejný jako volba v selectu)", () => {
-    expect(celodenniDurationColumnIndex(10)).toBe(7);
   });
 });
