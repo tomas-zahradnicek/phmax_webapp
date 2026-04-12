@@ -1,4 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
+import { MethodologyStrip } from "./MethodologyStrip";
+import { ProductFloatingNav } from "./ProductFloatingNav";
+import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { NumberField, ResultCard } from "./phmax-zs-ui";
 import { round2 } from "./phmax-zs-logic";
@@ -23,6 +27,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const [pupils, setPupils] = useState(0);
   const [manualDepts, setManualDepts] = useState(false);
   const [departments, setDepartments] = useState(1);
+  const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
 
   const suggested = useMemo(() => suggestedDepartmentsFromPupils(pupils), [pupils]);
   const effectiveDepts = manualDepts ? departments : suggested;
@@ -46,6 +51,72 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       ? `Tabulka PHmax v této aplikaci končí ${SD_MAX_DEPARTMENTS_IN_TABLE} odděleními — u vyššího počtu použijte přílohu vyhlášky.`
       : null;
 
+  const exportRows = useMemo((): [string, string | number][] => {
+    const rows: [string, string | number][] = [
+      ["=== PHmax školní družina — export ===", ""],
+      ["Počet přihlášených účastníků (žáci 1. st., pravidelná docházka)", pupils],
+      ["Počet oddělení (výpočet)", effectiveDepts],
+      ["Způsob určení oddělení", manualDepts ? "ruční zadání" : "automaticky ÷ 27 (nahoru)"],
+      ["Navržený počet oddělení (÷ 27)", suggested],
+      ["Průměr účastníků na oddělení", avgPerDept],
+    ];
+    if (basePhmax != null) {
+      rows.push(["PHmax základ z tabulky vyhl. 74/2005 (h/týden)", basePhmax]);
+      rows.push(["Krácení PHmax dle § 10 odst. 2 vyhl.", reduction.applied ? "ano" : "ne"]);
+      if (reduction.applied) {
+        rows.push(["Koeficient krácení", reduction.factor]);
+        rows.push(["PHmax po krácení (h/týden)", reduction.adjusted]);
+      }
+    }
+    if (breakdown != null && breakdown.length > 0 && basePhmax != null) {
+      rows.push(["--- Rozpad podle oddělení ---", ""]);
+      breakdown.forEach((hours, index) => {
+        rows.push([`Oddělení ${index + 1} — PHmax tabulkové (h)`, formatSdHours(hours)]);
+        if (reduction.applied) {
+          rows.push([`Oddělení ${index + 1} — po krácení orient. (h)`, formatSdHours(round2(hours * reduction.factor))]);
+        }
+      });
+      rows.push(["Celkem tabulkové PHmax (h)", formatSdHours(basePhmax)]);
+      if (reduction.applied) rows.push(["Celkem po krácení (h)", formatSdHours(reduction.adjusted)]);
+    }
+    if (tableWarning) rows.push(["Upozornění", tableWarning]);
+    return rows;
+  }, [
+    pupils,
+    effectiveDepts,
+    manualDepts,
+    suggested,
+    avgPerDept,
+    basePhmax,
+    reduction,
+    breakdown,
+    tableWarning,
+  ]);
+
+  const handleExportCsv = useCallback(() => {
+    downloadTextFile(exportFilenameStamped("phmax-sd", "csv"), exportCsvLocalized(exportRows), "text/csv;charset=utf-8");
+  }, [exportRows]);
+
+  const handleExportXlsx = useCallback(async () => {
+    if (xlsxExportBusy) return;
+    setXlsxExportBusy(true);
+    try {
+      const { downloadCalculatorXlsx } = await import("./export-xlsx");
+      await downloadCalculatorXlsx({
+        contextRows: [
+          ["Aplikace", "PHmax školní družina"],
+          ["Čas exportu", new Date().toLocaleString("cs-CZ")],
+        ],
+        valueRows: exportRows,
+        filename: exportFilenameStamped("phmax-sd", "xlsx"),
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setXlsxExportBusy(false);
+    }
+  }, [exportRows, xlsxExportBusy]);
+
   return (
     <>
       <header className="hero hero--feature">
@@ -64,8 +135,30 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         </p>
       </header>
 
+      <QuickOnboarding storageKey="phmax-sd-onboarding" title="Jak s touto kalkulačkou pracovat">
+        <p>
+          Vyplňte počet účastníků a případně počet oddělení (jinak se dopočítá dělením 27). Výsledek vychází z přílohy k
+          vyhlášce č. 74/2005 Sb.; u průměru pod 20 na oddělení může aplikovat orientační krácení dle § 10 odst. 2.
+          Složité případy (§ 16 školského zákona, méně než čtyři oddělení) musíte ověřit v plném znění předpisů.
+        </p>
+      </QuickOnboarding>
+
       <section className="card section-card section-card--sd">
         <h2 className="section-title">Vstupy</h2>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+          <button type="button" className="btn ghost" onClick={handleExportCsv}>
+            CSV
+          </button>
+          <button
+            type="button"
+            className="btn ghost"
+            disabled={xlsxExportBusy}
+            aria-busy={xlsxExportBusy}
+            onClick={() => void handleExportXlsx()}
+          >
+            {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
+          </button>
+        </div>
         <p className="section-lead muted-text">
           Počet účastníků = žáci 1. stupně ZŠ přihlášení k pravidelné denní docházce (pro krácení PHmax dle § 10 odst. 2).
           Počet oddělení pro nové oddělení nad první: průměr nad 27 účastníků → dělení počtem 27 a zaokrouhlení nahoru
@@ -201,20 +294,13 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         {tableWarning ? <p className="card card--warning" style={{ marginTop: 16, padding: 14 }}>{tableWarning}</p> : null}
 
         <p className="muted-text" style={{ marginTop: 20 }}>
-          <strong>Právní podklad:</strong>{" "}
-          <a
-            href="https://www.zakonyprolidi.cz/cs/2005-74"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="status-link"
-          >
-            Vyhláška č. 74/2005 Sb., o zájmovém vzdělávání
-          </a>{" "}
-          (v platném znění; čísla PHmax v kalkulačce odpovídají tabulce v příloze této vyhlášky). Doplňující výklad
-          poskytuje metodika MŠMT k PHmax školních družin. Aplikace nenahrazuje úřední výpočet ani výkazy (např. Z
-          2-01); u složitých případů (§ 16, méně než čtyři oddělení, výjimky zřizovatele) použijte úplné znění předpisů.
+          Aplikace nenahrazuje úřední výpočet ani výkazy (např. Z 2-01). U složitých případů (§ 16 školského zákona,
+          méně než čtyři oddělení, výjimky zřizovatele) vycházejte z úplného znění vyhlášky a metodiky — odkazy níže.
         </p>
       </section>
+
+      <MethodologyStrip />
+      <ProductFloatingNav active={productView} setProductView={setProductView} />
     </>
   );
 }

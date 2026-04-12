@@ -559,6 +559,79 @@ button.pill--hero-toggle--active {
   outline-offset: 2px;
 }
 
+.scroll-tools--with-product {
+  gap: 10px;
+}
+
+.scroll-tools__product-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(37, 99, 235, 0.15);
+}
+
+.scroll-tools__btn--active {
+  background: rgba(37, 99, 235, 0.14);
+  border-color: rgba(29, 78, 216, 0.55);
+  color: #1e3a8a;
+}
+
+.methodology-strip {
+  margin-top: 28px;
+  padding: 18px 20px;
+}
+
+.methodology-strip__title {
+  font-size: 1.05rem;
+  margin: 0 0 12px;
+  color: #0f172a;
+}
+
+.methodology-strip__list {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #334155;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.methodology-strip__list li + li {
+  margin-top: 8px;
+}
+
+.methodology-strip__note {
+  margin: 14px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.methodology-strip__code {
+  font-size: 0.82em;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.06);
+  font-family: ui-monospace, monospace;
+}
+
+.onboarding-quick__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.onboarding-quick__body {
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.onboarding-quick__body p {
+  margin: 0;
+}
+
 .section-jump-nav {
   display: flex;
   flex-wrap: wrap;

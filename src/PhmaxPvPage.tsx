@@ -1,4 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
+import { MethodologyStrip } from "./MethodologyStrip";
+import { ProductFloatingNav } from "./ProductFloatingNav";
+import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { NumberField, ResultCard } from "./phmax-zs-ui";
 import {
@@ -25,6 +29,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [avgHours, setAvgHours] = useState(10);
   const [sec16Count, setSec16Count] = useState(0);
   const [languageGroups, setLanguageGroups] = useState(0);
+  const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
 
   const computed = useMemo(
     () =>
@@ -43,6 +48,55 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     return getPhaMaxPv(sec16Count, avgHours);
   }, [sec16Count, avgHours]);
 
+  const provozLabel = useMemo(() => PROVOZ_OPTIONS.find((o) => o.value === provoz)?.label ?? provoz, [provoz]);
+
+  const exportRows = useMemo((): [string, string | number][] => {
+    const rows: [string, string | number][] = [
+      ["=== PHmax / PHAmax předškolní vzdělávání — export ===", ""],
+      ["Druh provozu", provozLabel],
+      ["Počet tříd", classCount],
+      ["Průměrná denní doba provozu (hodiny)", provoz === "zdravotnicke" ? "— (u zdravotnického zařízení se nezadává)" : avgHours],
+      ["Počet tříd § 16 odst. 9 školského zákona", sec16Count],
+      ["Počet skupin jazykové přípravy", languageGroups],
+    ];
+    computed.issues.forEach((issue, i) => {
+      rows.push([`Upozornění / chyba ${i + 1}`, issue.message]);
+    });
+    if (computed.base) {
+      rows.push(["PHmax ze základní tabulky (h/týden, toto pracoviště)", computed.base.basePhmax]);
+      rows.push(["Pásmo / sloupec doby provozu", computed.base.durationColumnLabel]);
+    }
+    rows.push(["Příplatek § 16 odst. 9 (5 h × třídy)", computed.sec16Bonus]);
+    rows.push(["Příplatek jazyková příprava (1 h × skupiny)", computed.languageBonus]);
+    if (computed.totalPhmax != null) rows.push(["PHmax celkem (h/týden, toto pracoviště)", computed.totalPhmax]);
+    if (phaMax != null) rows.push(["PHAmax § 16 třídy (h/týden, toto pracoviště)", phaMax]);
+    return rows;
+  }, [provozLabel, classCount, avgHours, provoz, sec16Count, languageGroups, computed, phaMax]);
+
+  const handleExportCsv = useCallback(() => {
+    downloadTextFile(exportFilenameStamped("phmax-pv", "csv"), exportCsvLocalized(exportRows), "text/csv;charset=utf-8");
+  }, [exportRows]);
+
+  const handleExportXlsx = useCallback(async () => {
+    if (xlsxExportBusy) return;
+    setXlsxExportBusy(true);
+    try {
+      const { downloadCalculatorXlsx } = await import("./export-xlsx");
+      await downloadCalculatorXlsx({
+        contextRows: [
+          ["Aplikace", "PHmax / PHAmax předškolní vzdělávání"],
+          ["Čas exportu", new Date().toLocaleString("cs-CZ")],
+        ],
+        valueRows: exportRows,
+        filename: exportFilenameStamped("phmax-pv", "xlsx"),
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setXlsxExportBusy(false);
+    }
+  }, [exportRows, xlsxExportBusy]);
+
   return (
     <>
       <header className="hero hero--feature">
@@ -60,8 +114,30 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         </p>
       </header>
 
+      <QuickOnboarding storageKey="phmax-pv-onboarding" title="Jedno pracoviště MŠ">
+        <p>
+          Údaje odpovídají jednomu pracovišti mateřské školy a jednomu druhu provozu — celkové PHmax právnické osoby
+          sečtěte přes pracoviště a druhy provozu. Krácení PHmax při výjimkách z nejnižšího počtu dětí (§ 1d odst. 3)
+          zde neřešíme.
+        </p>
+      </QuickOnboarding>
+
       <section className="card section-card section-card--sd">
         <h2 className="section-title">Vstupy (jedno pracoviště)</h2>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+          <button type="button" className="btn ghost" onClick={handleExportCsv}>
+            CSV
+          </button>
+          <button
+            type="button"
+            className="btn ghost"
+            disabled={xlsxExportBusy}
+            aria-busy={xlsxExportBusy}
+            onClick={() => void handleExportXlsx()}
+          >
+            {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
+          </button>
+        </div>
 
         <div className="grid two">
           <div className="subcard">
@@ -160,28 +236,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         ) : null}
 
         <p className="muted-text" style={{ marginTop: 22 }}>
-          <strong>Právní podklad:</strong>{" "}
-          <a
-            href="https://www.zakonyprolidi.cz/cs/2005-14"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="status-link"
-          >
-            Vyhláška č. 14/2005 Sb., o předškolním vzdělávání
-          </a>
-          . <strong>Metodika:</strong>{" "}
-          <a
-            href="https://edu.gov.cz/methodology/metodika-stanoveni-phmax-a-phamax-pro-predskolni-vzdelavani/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="status-link"
-          >
-            MŠMT – PHmax a PHAmax pro PV
-          </a>
-          . Krácení PHmax při výjimkách z nejnižšího počtu dětí (§ 1d odst. 3) v aplikaci neřešíme — nutno dopočítat
-          dle vyhlášky.
+          Krácení PHmax při výjimkách z nejnižšího počtu dětí (§ 1d odst. 3) v aplikaci neřešíme — nutno dopočítat dle
+          vyhlášky. Odkazy na předpisy a metodiku jsou v přehledu níže.
         </p>
       </section>
+
+      <MethodologyStrip />
+      <ProductFloatingNav active={productView} setProductView={setProductView} />
     </>
   );
 }

@@ -27,32 +27,21 @@ import { MODE_CONFIG } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
 import { DEFAULT_MODE } from "./config/default-form-state";
 import { GlossaryDialog } from "./GlossaryDialog";
+import { exportCsvLocalized, downloadTextFile } from "./export-utils";
+import { MethodologyStrip } from "./MethodologyStrip";
 import { PhmaxPvPage } from "./PhmaxPvPage";
 import { PhmaxSdPage } from "./PhmaxSdPage";
-import { ProductViewPills } from "./ProductViewPills";
+import { ProductViewPills, type ProductView } from "./ProductViewPills";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
 
-function downloadTextFile(filename: string, content: string, mime = "text/plain;charset=utf-8") {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+function readInitialProductView(): ProductView {
+  if (typeof window === "undefined") return "zs";
+  const p = new URLSearchParams(window.location.search).get("view");
+  if (p === "pv" || p === "sd" || p === "zs") return p;
+  return "zs";
 }
-
-function exportCsvLocalized(rows: readonly (readonly [string, string | number])[]) {
-  const escapeCell = (value: string | number) =>
-    `"${String(value).replace(/"/g, '""')}"`;
-  const body = rows.map(([label, value]) => [escapeCell(label), escapeCell(value)].join(";")).join("\r\n");
-  return "\ufeff" + ["Položka;Hodnota", body].join("\r\n");
-}
-
 
 type TabKey = "phmax" | "pha" | "php";
 
@@ -464,10 +453,17 @@ export default function App() {
   const [dataMode, setDataMode] = useState<DataMode>("own");
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
-  const [productView, setProductViewState] = useState<"zs" | "sd" | "pv">("zs");
-  const setProductView = useCallback((v: "zs" | "sd" | "pv") => {
+  const [productView, setProductViewState] = useState<ProductView>(() => readInitialProductView());
+  const setProductView = useCallback((v: ProductView) => {
     setProductViewState(v);
     window.scrollTo(0, 0);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("view", v);
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      /* ignore */
+    }
   }, []);
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string>("");
@@ -2419,7 +2415,11 @@ export default function App() {
           </div>
         </section>
         {showScrollTools ? (
-          <div className="scroll-tools" role="toolbar" aria-label="Rychlá navigace po stránce">
+          <div
+            className="scroll-tools scroll-tools--with-product"
+            role="toolbar"
+            aria-label="Rychlá navigace po stránce a přepnutí kalkulačky"
+          >
             <button type="button" className="scroll-tools__btn" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
               Nahoru
             </button>
@@ -2434,8 +2434,33 @@ export default function App() {
             <button type="button" className="scroll-tools__btn" onClick={() => goToSection("overview")}>
               Celkový přehled
             </button>
+            <div className="scroll-tools__product-btns" role="group" aria-label="Přepnout typ kalkulačky">
+              <button
+                type="button"
+                className={`scroll-tools__btn${productView === "pv" ? " scroll-tools__btn--active" : ""}`}
+                onClick={() => setProductView("pv")}
+              >
+                PV
+              </button>
+              <button
+                type="button"
+                className={`scroll-tools__btn${productView === "sd" ? " scroll-tools__btn--active" : ""}`}
+                onClick={() => setProductView("sd")}
+              >
+                ŠD
+              </button>
+              <button
+                type="button"
+                className={`scroll-tools__btn${productView === "zs" ? " scroll-tools__btn--active" : ""}`}
+                onClick={() => setProductView("zs")}
+              >
+                ZŠ
+              </button>
+            </div>
           </div>
         ) : null}
+
+        <MethodologyStrip />
 
         <GlossaryDialog
           open={glossaryOpen}
