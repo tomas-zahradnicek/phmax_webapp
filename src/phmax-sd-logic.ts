@@ -36,7 +36,7 @@ export function getPhmaxSdBase(departmentCount: number): number | null {
 
 /** Počet „běžných“ oddělení dle pravidla: účastníci ÷ 27, zaokrouhleno nahoru (metodika ŠD). */
 export function suggestedDepartmentsFromPupils(pupils: number): number {
-  if (pupils <= 0) return 1;
+  if (pupils <= 0) return 0;
   return Math.ceil(pupils / 27);
 }
 

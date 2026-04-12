@@ -27,7 +27,7 @@ export function ProductFloatingNav({ active, setProductView }: ProductFloatingNa
         <button
           type="button"
           className={`scroll-tools__btn${active === "pv" ? " scroll-tools__btn--active" : ""}`}
-          title="Předškolní vzdělávání"
+          title="Kalkulačka pro předškolní vzdělávání"
           onClick={() => setProductView("pv")}
         >
           PV
@@ -35,7 +35,7 @@ export function ProductFloatingNav({ active, setProductView }: ProductFloatingNa
         <button
           type="button"
           className={`scroll-tools__btn${active === "sd" ? " scroll-tools__btn--active" : ""}`}
-          title="PHmax – školní družina"
+          title="Kalkulačka pro školní družiny"
           onClick={() => setProductView("sd")}
         >
           ŠD

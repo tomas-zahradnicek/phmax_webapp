@@ -89,8 +89,8 @@ function createInitialPvRow(): PvWorkplaceRowState {
     id: newPvRowId(),
     label: "",
     provoz,
-    classCount: 4,
-    avgHours: defaultAvgHoursForProvoz(provoz),
+    classCount: 0,
+    avgHours: 0,
     sec16Count: 0,
     languageGroups: 0,
   };
@@ -340,8 +340,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                           const next = e.target.value as PvProvozKind;
                           patchRow(row.id, {
                             provoz: next,
-                            avgHours: defaultAvgHoursForProvoz(next),
-                            classCount: Math.min(Math.max(1, row.classCount), getPvMaxClassCount(next)),
+                            avgHours: 0,
+                            classCount: Math.min(Math.max(0, row.classCount), getPvMaxClassCount(next)),
                           });
                         }}
                       >
@@ -353,10 +353,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                       </select>
                     </label>
                     <NumberField
-                      label={`Počet tříd pracoviště MŠ v tomto druhu provozu (1–${maxClasses} dle přílohy)`}
+                      label={`Počet tříd pracoviště MŠ v tomto druhu provozu (0–${maxClasses}, dle přílohy platí ≥ 1 pro výpočet)`}
                       value={row.classCount}
                       onChange={(v) => patchRow(row.id, { classCount: v })}
-                      min={1}
+                      min={0}
                       max={maxClasses}
                     />
                     {row.provoz === "zdravotnicke" ? (

@@ -21,7 +21,7 @@ describe("PHMAX_SD_BY_DEPARTMENTS", () => {
 
 describe("suggestedDepartmentsFromPupils", () => {
   it("zaokrouhluje nahoru po 27", () => {
-    expect(suggestedDepartmentsFromPupils(0)).toBe(1);
+    expect(suggestedDepartmentsFromPupils(0)).toBe(0);
     expect(suggestedDepartmentsFromPupils(27)).toBe(1);
     expect(suggestedDepartmentsFromPupils(28)).toBe(2);
     expect(suggestedDepartmentsFromPupils(240)).toBe(9);

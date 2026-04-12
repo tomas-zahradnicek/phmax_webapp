@@ -17,7 +17,7 @@ export function ProductViewPills({ productView, setProductView }: ProductViewPil
         className={`pill pill--hero pill--hero-toggle${productView === "pv" ? " pill--hero-toggle--active" : ""}`}
         onClick={() => setProductView("pv")}
       >
-        Předškolní vzdělávání
+        Kalkulačka pro předškolní vzdělávání
       </button>
       <button
         type="button"
@@ -26,7 +26,7 @@ export function ProductViewPills({ productView, setProductView }: ProductViewPil
         className={`pill pill--hero pill--hero-toggle${productView === "sd" ? " pill--hero-toggle--active" : ""}`}
         onClick={() => setProductView("sd")}
       >
-        PHmax – školní družina
+        Kalkulačka pro školní družiny
       </button>
       <button
         type="button"

@@ -1031,6 +1031,18 @@ export default function App() {
     selectedExample,
     wizardChoice,
     dataMode,
+    nv75Role,
+    nv75School,
+    nv75TeacherMin,
+    nv75TeacherMax,
+    mixedMethodFirstZsPupils,
+    mixedMethodFirstZsClasses,
+    mixedMethodFirstSpecialPupils,
+    mixedMethodFirstSpecialClasses,
+    mixedMethodSecondZsPupils,
+    mixedMethodSecondZsClasses,
+    mixedMethodSecondSpecialPupils,
+    mixedMethodSecondSpecialClasses,
   });
 
   const restoreSnapshot = () => {
@@ -1087,6 +1099,18 @@ export default function App() {
       setSelectedExample(s.selectedExample ?? "");
       setWizardChoice(s.wizardChoice ?? "");
       setDataMode(s.dataMode ?? "own");
+      setNv75Role(s.nv75Role === "reditel" ? "reditel" : "ucitel");
+      setNv75School(s.nv75School === "plavecka_skola" ? "plavecka_skola" : "plavecka_skola");
+      setNv75TeacherMin(typeof s.nv75TeacherMin === "number" ? s.nv75TeacherMin : 22);
+      setNv75TeacherMax(typeof s.nv75TeacherMax === "number" ? s.nv75TeacherMax : 30);
+      setMixedMethodFirstZsPupils(s.mixedMethodFirstZsPupils ?? 0);
+      setMixedMethodFirstZsClasses(s.mixedMethodFirstZsClasses ?? 0);
+      setMixedMethodFirstSpecialPupils(s.mixedMethodFirstSpecialPupils ?? 0);
+      setMixedMethodFirstSpecialClasses(s.mixedMethodFirstSpecialClasses ?? 0);
+      setMixedMethodSecondZsPupils(s.mixedMethodSecondZsPupils ?? 0);
+      setMixedMethodSecondZsClasses(s.mixedMethodSecondZsClasses ?? 0);
+      setMixedMethodSecondSpecialPupils(s.mixedMethodSecondSpecialPupils ?? 0);
+      setMixedMethodSecondSpecialClasses(s.mixedMethodSecondSpecialClasses ?? 0);
       setUiNotice("Uložená data byla obnovena.");
     } catch (error) {
       console.error("Nepodařilo se obnovit uložená data.", error);
@@ -1301,7 +1325,11 @@ export default function App() {
     specialIIPupils, prepClasses, prepChildren, prepSpecialClasses, prepSpecialChildren,
     p38First, p38Second, p41First, p41Second, phaRows, phpYear1, phpYear2, phpYear3,
     phpWizardStep, phpMethodMode, phpExcludedAbroad, phpExcludedForeignSchoolCz,
-    phpExcludedIndividual, phpExcludedSchool, selectedExample, wizardChoice, dataMode
+    phpExcludedIndividual, phpExcludedSchool, selectedExample, wizardChoice, dataMode,
+    nv75Role, nv75School, nv75TeacherMin, nv75TeacherMax,
+    mixedMethodFirstZsPupils, mixedMethodFirstZsClasses, mixedMethodFirstSpecialPupils,
+    mixedMethodFirstSpecialClasses, mixedMethodSecondZsPupils, mixedMethodSecondZsClasses,
+    mixedMethodSecondSpecialPupils, mixedMethodSecondSpecialClasses,
   ]);
 
   const summaryRows: readonly (readonly [string, string | number])[] = [
