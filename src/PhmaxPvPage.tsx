@@ -5,6 +5,7 @@ import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { NumberField, ResultCard } from "./phmax-zs-ui";
+import { buildPhmaxPvExportRows } from "./phmax-pv-export-rows";
 import {
   computePvPhmaxTotal,
   getPhaMaxPv,
@@ -50,28 +51,20 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
   const provozLabel = useMemo(() => PROVOZ_OPTIONS.find((o) => o.value === provoz)?.label ?? provoz, [provoz]);
 
-  const exportRows = useMemo((): [string, string | number][] => {
-    const rows: [string, string | number][] = [
-      ["=== PHmax / PHAmax předškolní vzdělávání — export ===", ""],
-      ["Druh provozu", provozLabel],
-      ["Počet tříd", classCount],
-      ["Průměrná denní doba provozu (hodiny)", provoz === "zdravotnicke" ? "— (u zdravotnického zařízení se nezadává)" : avgHours],
-      ["Počet tříd § 16 odst. 9 školského zákona", sec16Count],
-      ["Počet skupin jazykové přípravy", languageGroups],
-    ];
-    computed.issues.forEach((issue, i) => {
-      rows.push([`Upozornění / chyba ${i + 1}`, issue.message]);
-    });
-    if (computed.base) {
-      rows.push(["PHmax ze základní tabulky (h/týden, toto pracoviště)", computed.base.basePhmax]);
-      rows.push(["Pásmo / sloupec doby provozu", computed.base.durationColumnLabel]);
-    }
-    rows.push(["Příplatek § 16 odst. 9 (5 h × třídy)", computed.sec16Bonus]);
-    rows.push(["Příplatek jazyková příprava (1 h × skupiny)", computed.languageBonus]);
-    if (computed.totalPhmax != null) rows.push(["PHmax celkem (h/týden, toto pracoviště)", computed.totalPhmax]);
-    if (phaMax != null) rows.push(["PHAmax § 16 třídy (h/týden, toto pracoviště)", phaMax]);
-    return rows;
-  }, [provozLabel, classCount, avgHours, provoz, sec16Count, languageGroups, computed, phaMax]);
+  const exportRows = useMemo(
+    () =>
+      buildPhmaxPvExportRows({
+        provozLabel,
+        provoz,
+        classCount,
+        avgHours,
+        sec16Count,
+        languageGroups,
+        computed,
+        phaMax,
+      }),
+    [provozLabel, classCount, avgHours, provoz, sec16Count, languageGroups, computed, phaMax]
+  );
 
   const handleExportCsv = useCallback(() => {
     downloadTextFile(exportFilenameStamped("phmax-pv", "csv"), exportCsvLocalized(exportRows), "text/csv;charset=utf-8");
