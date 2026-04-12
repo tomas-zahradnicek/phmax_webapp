@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
+import { HeroStatusBar } from "./HeroStatusBar";
 import { HeroStat } from "./HeroStat";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
@@ -327,7 +328,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         </div>
 
         <div className="hero-actions hero-actions--stacked">
-          <HeroActionsDrawer triggerLabel="Akce, tisk, uložení a export…" drawerTitle="Akce a export">
+          <HeroActionsDrawer>
             <div className="hero-actions--stacked__row">
               <span className="hero-actions__cluster" role="group" aria-label="Tisk">
                 <button type="button" className="btn btn--light" onClick={() => window.print()}>
@@ -375,15 +376,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </HeroActionsDrawer>
         </div>
 
-        <div className="hero-status">
-          <div className="hero-status__item">
-            <strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.
-          </div>
-          <div className="hero-status__item">
-            <strong>Poslední uložení:</strong> {lastSavedAt || "zatím neproběhlo"}
-          </div>
-          {uiNotice ? <div className="hero-status__item hero-status__item--notice">{uiNotice}</div> : null}
-        </div>
+        <HeroStatusBar lastSavedAt={lastSavedAt} notice={uiNotice} variant="sd" />
       </header>
 
       <QuickOnboarding title="Jak s touto kalkulačkou pracovat" open={guideOpen} onDismiss={dismissGuide}>

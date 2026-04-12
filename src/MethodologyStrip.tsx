@@ -6,6 +6,11 @@ import React from "react";
 export function MethodologyStrip() {
   return (
     <footer className="methodology-strip card muted" aria-label="Verze metodik a odkazy">
+      <p className="methodology-strip__app-line" role="note">
+        <strong>Aplikace:</strong> tři oddělené kalkulačky (ZŠ, školní družina, předškolní vzdělávání) v jednom rozhraní.
+        Verze metodik a předpisů jsou uvedeny u jednotlivých oborů níže. Výpočty jsou orientační; nejsou závazným výstupem
+        zřizovatele ani úřadu.
+      </p>
       <h2 className="methodology-strip__title">Verze metodik a předpisy</h2>
       <ul className="methodology-strip__list">
         <li>

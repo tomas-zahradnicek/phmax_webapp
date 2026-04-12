@@ -37,6 +37,11 @@ import { PhmaxSdPage } from "./PhmaxSdPage";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { TableOuter } from "./TableOuter";
+import { MixedStageTable } from "./MixedStageTable";
+import { HeroStatusBar } from "./HeroStatusBar";
+import { TABLE_SCROLL_HINT } from "./calculator-ui-constants";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
@@ -174,112 +179,6 @@ const GlossaryIconButton = forwardRef<HTMLButtonElement, { onClick: () => void; 
 
 function SectionLead({ children }: { children: React.ReactNode }) {
   return <p className="section-lead muted-text">{children}</p>;
-}
-
-type MixedBand = { label: string; value: number };
-
-type MixedStageTableProps = {
-  stageTitle: string;
-  methodNote: string;
-  zsPupils: number;
-  zsClasses: number;
-  zsAvg: number;
-  zsBand: MixedBand;
-  zsResult: number;
-  specPupils: number;
-  specClasses: number;
-  specAvg: number;
-  specBand: MixedBand;
-  specResult: number;
-  stageTotal: number;
-  setZsPupils: (n: number) => void;
-  setZsClasses: (n: number) => void;
-  setSpecPupils: (n: number) => void;
-  setSpecClasses: (n: number) => void;
-  emphasizeEmpty: boolean;
-};
-
-function MixedStageTable({
-  stageTitle,
-  methodNote,
-  zsPupils,
-  zsClasses,
-  zsAvg,
-  zsBand,
-  zsResult,
-  specPupils,
-  specClasses,
-  specAvg,
-  specBand,
-  specResult,
-  stageTotal,
-  setZsPupils,
-  setZsClasses,
-  setSpecPupils,
-  setSpecClasses,
-  emphasizeEmpty,
-}: MixedStageTableProps) {
-  const numInput = (value: number, onChange: (n: number) => void, aria: string) => (
-    <td>
-      <input
-        type="number"
-        min={0}
-        inputMode="numeric"
-        className={`mixed-sheet__input${emphasizeEmpty && value === 0 ? " mixed-sheet__input--empty" : ""}`}
-        value={value}
-        aria-label={aria}
-        onChange={(e) => onChange(Number(e.target.value) || 0)}
-      />
-    </td>
-  );
-
-  return (
-    <div className="mixed-sheet-panel">
-      <h3 className="mixed-sheet-panel__title">{stageTitle}</h3>
-      <p className="mixed-sheet-panel__note muted-text">{methodNote}</p>
-      <div className="mixed-sheet-scroll">
-        <table className="mixed-sheet">
-          <thead>
-            <tr>
-              <th scope="col">Obor / část výpočtu</th>
-              <th scope="col">Žáci</th>
-              <th scope="col">Třídy</th>
-              <th scope="col">Průměr žáků/třídu</th>
-              <th scope="col">Pásmo</th>
-              <th scope="col">PHmax / 1 třídu</th>
-              <th scope="col">Výsledek PHmax</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">79-01-C/01 (běžná ZŠ)</th>
-              {numInput(zsPupils, setZsPupils, `${stageTitle}: žáci, obor 79-01-C/01`)}
-              {numInput(zsClasses, setZsClasses, `${stageTitle}: třídy, obor 79-01-C/01`)}
-              <td className="mixed-sheet__num">{round2(zsAvg)}</td>
-              <td>{zsBand.label}</td>
-              <td className="mixed-sheet__num">{zsBand.value}</td>
-              <td className="mixed-sheet__num mixed-sheet__num--strong">{zsResult}</td>
-            </tr>
-            <tr>
-              <th scope="row">79-01-B/01 (ZŠ speciální)</th>
-              {numInput(specPupils, setSpecPupils, `${stageTitle}: žáci, obor 79-01-B/01`)}
-              {numInput(specClasses, setSpecClasses, `${stageTitle}: třídy, obor 79-01-B/01`)}
-              <td className="mixed-sheet__num">{round2(specAvg)}</td>
-              <td>{specBand.label}</td>
-              <td className="mixed-sheet__num">{specBand.value}</td>
-              <td className="mixed-sheet__num mixed-sheet__num--strong">{specResult}</td>
-            </tr>
-            <tr className="mixed-sheet__total-row">
-              <th scope="row" colSpan={6}>
-                PHmax za {stageTitle.toLowerCase()} (součet obou oborů)
-              </th>
-              <td className="mixed-sheet__num mixed-sheet__grand">{stageTotal}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
 }
 
 function createEmptyPsychRow(id: number): PsychRow {
@@ -1281,13 +1180,26 @@ export default function App() {
     setZsGuideOpen(false);
   };
 
-  const openZsGuide = () => {
-    try {
-      localStorage.removeItem(ZS_ONBOARDING_KEY);
-    } catch {
-      /* ignore */
+  const scrollZsGuideIntoView = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById("zs-quick-guide")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  }, []);
+
+  const toggleZsGuideFromHero = () => {
+    if (zsGuideOpen) {
+      dismissZsGuide();
+    } else {
+      try {
+        localStorage.removeItem(ZS_ONBOARDING_KEY);
+      } catch {
+        /* ignore */
+      }
+      setZsGuideOpen(true);
+      scrollZsGuideIntoView();
     }
-    setZsGuideOpen(true);
   };
 
   const copySummaryToClipboard = async () => {
@@ -1752,8 +1664,8 @@ export default function App() {
                 className="glossary-icon-btn--hero"
                 onClick={() => setGlossaryOpen(true)}
               />
-              <button type="button" className="btn btn--hero-guide" onClick={openZsGuide}>
-                Stručné pokyny
+              <button type="button" className="btn btn--hero-guide" onClick={toggleZsGuideFromHero}>
+                {zsGuideOpen ? "Skrýt nápovědu" : "Stručné pokyny"}
               </button>
             </div>
           </div>
@@ -1817,10 +1729,7 @@ export default function App() {
                 </optgroup>
               </select>
             </div>
-            <HeroActionsDrawer
-              triggerLabel="Akce, tisk, uložení a export…"
-              drawerTitle="Akce a export"
-            >
+            <HeroActionsDrawer>
               <div className="hero-actions__group hero-actions__group--primary">
                 <button type="button" className="btn btn--light" onClick={() => window.print()}>
                   Tisk
@@ -1919,23 +1828,16 @@ export default function App() {
               </div>
             </HeroActionsDrawer>
           </div>
-
-          <p className="muted-text hero__note">
-            V první skupině jsou čísla z modelových postupů PHmax v metodické příloze (včetně smíšených tříd 570 h).
-            Model s členěním tříd § 16/9 a ZŠ speciální podle příznaku AD1/AD2 a řádků B35–B43 je v metodice v5 uveden jako výpočet PHAmax (asistenti pedagoga) – najdete ho v ukázce „PHAmax“ v rozbalovači; aplikace po načtení přepne na záložku PHAmax.
-            Ostatní ukázky doplňují typické situace; po načtení můžete vše upravit podle vlastní školy.
-          </p>
-          <p className="muted-text hero__legal-note">
-            Právní a metodický podklad aplikace: Metodika stanovení PHmax, PHAmax a PHPmax pro základní vzdělávání (aktuálně typicky verze 5 / 2026), nařízení vlády č. 123/2018 Sb. a vyhláška č. 48/2005 Sb. Aplikace slouží k orientačnímu výpočtu; nejedná se o oficiální výstup zřizovatele.
-          </p>
-          <div className="hero-status">
-            <div className="hero-status__item"><strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.</div>
-            <div className="hero-status__item"><strong>Poslední uložení:</strong> {lastSavedAt || "zatím neproběhlo"}</div>
-            {uiNotice ? <div className="hero-status__item hero-status__item--notice">{uiNotice}</div> : null}
-          </div>
         </header>
 
-        <QuickOnboarding title="Stručné pokyny" open={zsGuideOpen} onDismiss={dismissZsGuide}>
+        <ErrorBoundary title="Obsah kalkulačky pro základní školy se nepodařilo zobrazit">
+        <QuickOnboarding
+          title="Stručné pokyny"
+          open={zsGuideOpen}
+          onDismiss={dismissZsGuide}
+          anchorId="zs-quick-guide"
+          dismissButtonLabel="Skrýt nápovědu"
+        >
           <p>
             <strong>PHmax</strong> zadejte podle typu školy v rozbalovacím režimu; u specialit (psychiatrie, zdravotnické zařízení,
             menšina, gymnázia…) přepněte na odpovídající položku. <strong>PHAmax</strong> a <strong>PHPmax</strong> mají vlastní záložky.
@@ -1943,6 +1845,15 @@ export default function App() {
           <p>
             Průměry u škol při zdravotnickém zařízení a psychiatrii počítá aplikace jako vyšší z minulého roku a aktuálního sběru — doplňte oba sloupce, pokud je znáte.
             Pojmenované zálohy (max. {MAX_NAMED_SNAPSHOTS}) drží celý stav včetně záložky a pole „Označení pro export“.
+          </p>
+          <p>
+            V první skupině ukázek jsou čísla z modelových postupů PHmax v metodické příloze (včetně smíšených tříd 570 h).
+            Model § 16/9 a ZŠ speciální (AD1/AD2, řádky B35–B43) je v metodice v5 jako PHAmax — v rozbalovači ukázka „PHAmax“; po načtení se otevře záložka PHAmax.
+            Ostatní ukázky doplňují typické situace; údaje můžete po načtení upravit.
+          </p>
+          <p>
+            <strong>Právní a metodický podklad:</strong> metodika PHmax, PHAmax a PHPmax pro ZV (typicky verze 5 / 2026), NV č. 123/2018 Sb., vyhl. č. 48/2005 Sb.
+            Aplikace slouží k orientačnímu výpočtu; nejedná se o oficiální výstup zřizovatele.
           </p>
         </QuickOnboarding>
 
@@ -2252,7 +2163,7 @@ export default function App() {
                 <section className="card section-card section-card--module section-card--module-psych" data-section="psych">
                   <h2>Škola při psychiatrické nemocnici <HelpHint text="U této části se pracuje s aktuálním údajem nebo s vyšší hodnotou z aktuálního a předchozího údaje podle zvoleného režimu. Výsledek se pak určí podle příslušného pásma pro 1. stupeň, 2. stupeň nebo společnou výuku." /></h2>
                   <p className="muted-text">Najeďte na ikonu „i“ u nadpisu pro stručnou metodickou nápovědu.</p>
-                  <div className="table-outer table-outer--auto-wide" role="region" aria-label="Tabulka školy při psychiatrické nemocnici">
+                  <TableOuter aria-label="Tabulka školy při psychiatrické nemocnici">
                     <table className="table">
                       <thead>
                         <tr>
@@ -2290,7 +2201,7 @@ export default function App() {
                         ))}
                       </tbody>
                     </table>
-                  </div>
+                  </TableOuter>
                   <button className="btn ghost" onClick={addPsych}>Přidat třídu / řádek</button>
                 </section>
               )}
@@ -2302,7 +2213,7 @@ export default function App() {
                     <HelpHint text="Řádky B11–B13 dle metodiky ZV v5. Průměr žáků ve třídě se stanoví jako vyšší z průměru za předchozí školní rok a z údaje k aktuálnímu sběru (stejná logika jako u psychiatrické školy). B11 = 1. stupeň, B12 = 2. stupeň, B13 = společná výuka 1. a 2. stupně." />
                   </h2>
                   <p className="muted-text">Nezahrnuje školy při psychiatrické nemocnici – ty mají samostatný režim (B14–B16).</p>
-                  <div className="table-outer table-outer--auto-wide" role="region" aria-label="Tabulka ZŠ při zdravotnickém zařízení">
+                  <TableOuter aria-label="Tabulka ZŠ při zdravotnickém zařízení">
                     <table className="table">
                       <thead>
                         <tr>
@@ -2340,7 +2251,7 @@ export default function App() {
                         ))}
                       </tbody>
                     </table>
-                  </div>
+                  </TableOuter>
                   <button type="button" className="btn ghost" onClick={addHealth}>
                     Přidat třídu / řádek
                   </button>
@@ -2399,6 +2310,7 @@ export default function App() {
                     Každý řádek je jeden typ nižšího ročníku gymnázia. Zadejte třídy a žáci; průměr, pásmo a PHmax se dopočítají. Tabulka používá celou šířku karty – na velmi úzkém displeji se může zobrazit posuvník.
                   </p>
                   <div className="gym-table-scroll">
+                    <p className="table-outer__hint table-outer__hint--inset">{TABLE_SCROLL_HINT}</p>
                     <table className="table table--gym">
                       <thead>
                         <tr>
@@ -2585,7 +2497,7 @@ export default function App() {
               U tříd § 16/9 a ZŠ speciální podle metodiky (NV č. 123/2018 Sb., vyhl. č. 48/2005 Sb.) rozlišujte příznak třídy: AD1 (ostatní zdravotní postižení dle § 16 odst. 9) vs. AD2 (těžší varianty – tělesné postižení, PVCH, souběžné postižení, autismus).
               Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v5; průměr žáků ve skupině stejného typu určí pásmo a hodnotu PHAmax na třídu. Přípravný stupeň ZŠ speciální je řádek B45 (samostatná volba).
             </p>
-            <div className="table-outer table-outer--pha table-outer--auto-wide" role="region" aria-label="Tabulka PHAmax – asistenti pedagoga">
+            <TableOuter variant="pha" aria-label="Tabulka PHAmax – asistenti pedagoga">
               <table className="table">
                 <thead>
                   <tr>
@@ -2625,7 +2537,7 @@ export default function App() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableOuter>
             <div className="toolbar">
               <button className="btn ghost" onClick={addPha}>Přidat třídu / řádek</button>
               <button className="btn ghost" onClick={resetPha}>Vymazat údaje PHAmax – asistenti pedagoga</button>
@@ -2776,6 +2688,7 @@ export default function App() {
             <ResultCard label="Přehledový součet" tone="success" value={round2(totalPhmax + totalPha + totalPhp)} />
           </div>
         </section>
+        </ErrorBoundary>
         {showScrollTools ? (
           <div
             className="scroll-tools scroll-tools--with-product"
@@ -2811,6 +2724,14 @@ export default function App() {
         ) : null}
 
         <MethodologyStrip />
+
+        <footer className="zs-app-footer">
+          <HeroStatusBar lastSavedAt={lastSavedAt} notice={uiNotice} variant="zs" placement="footer" />
+          <p className="zs-app-footer__author muted-text">
+            Vytvořil{" "}
+            <a href="mailto:tomas.zahradnicek.hradec@gmail.com">Mgr. Tomáš Zahradníček</a>
+          </p>
+        </footer>
 
         <GlossaryDialog
           open={glossaryOpen}
