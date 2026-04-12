@@ -440,6 +440,74 @@ button.pill--hero-toggle--active {
   line-height: 1.1;
 }
 
+/* Kompaktní souhrnné karty v hero (předškolní vzdělávání, školní družina) */
+.hero__stats--compact {
+  gap: 8px;
+  max-width: min(100%, 520px);
+  margin-left: auto;
+}
+
+.hero__stats--compact.hero__stats--pv {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.hero__stats--compact.hero__stats--sd {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 960px) {
+  .hero__stats--compact.hero__stats--sd {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: min(100%, 600px);
+  }
+}
+
+@media (max-width: 520px) {
+  .hero__stats--compact.hero__stats--pv {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hero-stat--compact {
+  padding: 10px 12px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.hero-stat--compact .hero-stat__label {
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.hero-stat--compact .hero-stat__value {
+  font-size: 16px;
+}
+
+/* Panel tisk / uložení / export pod hero u PV a ŠD */
+.hero-actions.hero-actions--stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  align-items: stretch;
+}
+
+.hero-actions.hero-actions--stacked .hero-actions__divider {
+  width: 100%;
+  margin: 2px 0;
+}
+
+.hero-actions--stacked__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.hero-actions.hero-actions--stacked .hero-actions__group--meta {
+  justify-content: flex-start;
+}
+
 .help-hint {
   display: inline-flex;
   align-items: center;

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroStat } from "./HeroStat";
 import { MethodologyStrip } from "./MethodologyStrip";
@@ -26,12 +26,44 @@ type PhmaxSdPageProps = {
 };
 
 const SD_ONBOARDING_KEY = "phmax-sd-onboarding";
+const SD_STORAGE_KEY = "edu-cz-sd-calculator-state";
+
+type SdPersistedSnapshot = {
+  pupils: number;
+  manualDepts: boolean;
+  departments: number;
+};
+
+function parseSdSnapshot(data: unknown): SdPersistedSnapshot | null {
+  if (!data || typeof data !== "object") return null;
+  const r = data as Record<string, unknown>;
+  const pupils = r.pupils;
+  const manualDepts = r.manualDepts;
+  const departments = r.departments;
+  if (typeof pupils !== "number" || !Number.isFinite(pupils) || pupils < 0) return null;
+  if (typeof manualDepts !== "boolean") return null;
+  if (typeof departments !== "number" || !Number.isFinite(departments) || departments < 1) return null;
+  return { pupils, manualDepts, departments };
+}
+
+function loadSdStateFromStorage(): SdPersistedSnapshot {
+  try {
+    const raw = localStorage.getItem(SD_STORAGE_KEY);
+    if (!raw) return { pupils: 0, manualDepts: false, departments: 1 };
+    const parsed = parseSdSnapshot(JSON.parse(raw));
+    return parsed ?? { pupils: 0, manualDepts: false, departments: 1 };
+  } catch {
+    return { pupils: 0, manualDepts: false, departments: 1 };
+  }
+}
 
 export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
-  const [pupils, setPupils] = useState(0);
-  const [manualDepts, setManualDepts] = useState(false);
-  const [departments, setDepartments] = useState(1);
+  const [pupils, setPupils] = useState(() => loadSdStateFromStorage().pupils);
+  const [manualDepts, setManualDepts] = useState(() => loadSdStateFromStorage().manualDepts);
+  const [departments, setDepartments] = useState(() => loadSdStateFromStorage().departments);
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState("");
+  const [uiNotice, setUiNotice] = useState("");
   const [guideOpen, setGuideOpen] = useState(() => {
     try {
       return localStorage.getItem(SD_ONBOARDING_KEY) !== "1";
@@ -123,12 +155,124 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         valueRows: exportRows,
         filename: exportFilenameStamped("phmax-sd", "xlsx"),
       });
+      setUiNotice("Byl stažen soubor Excel (XLSX).");
     } catch (e) {
       console.error(e);
+      setUiNotice("Export do Excelu se nepodařil.");
     } finally {
       setXlsxExportBusy(false);
     }
   }, [exportRows, xlsxExportBusy]);
+
+  const buildSdSnapshot = useCallback(
+    (): SdPersistedSnapshot => ({ pupils, manualDepts, departments }),
+    [pupils, manualDepts, departments],
+  );
+
+  const applySdSnapshot = useCallback((data: unknown) => {
+    const next = parseSdSnapshot(data);
+    if (next) {
+      setPupils(next.pupils);
+      setManualDepts(next.manualDepts);
+      setDepartments(next.departments);
+      setUiNotice("Data byla obnovena.");
+    } else {
+      setUiNotice("Uložená data nejsou ve očekávaném tvaru.");
+    }
+  }, []);
+
+  const saveSdSnapshotManually = useCallback(() => {
+    try {
+      localStorage.setItem(SD_STORAGE_KEY, JSON.stringify(buildSdSnapshot()));
+      setLastSavedAt(new Date().toLocaleString("cs-CZ"));
+      setUiNotice("Rozpracované údaje byly uloženy.");
+    } catch {
+      setUiNotice("Uložení se nepodařilo.");
+    }
+  }, [buildSdSnapshot]);
+
+  const restoreSdSnapshot = useCallback(() => {
+    try {
+      const raw = localStorage.getItem(SD_STORAGE_KEY);
+      if (!raw) {
+        setUiNotice("Nebyla nalezena žádná uložená data.");
+        return;
+      }
+      applySdSnapshot(JSON.parse(raw));
+    } catch {
+      setUiNotice("Obnovení uložených dat se nepodařilo.");
+    }
+  }, [applySdSnapshot]);
+
+  const clearSdStoredSnapshot = useCallback(() => {
+    try {
+      localStorage.removeItem(SD_STORAGE_KEY);
+      setLastSavedAt("");
+      setUiNotice("Uložená data v prohlížeči byla vymazána.");
+    } catch {
+      setUiNotice("Vymazání uložených dat se nepodařilo.");
+    }
+  }, []);
+
+  const resetSdAll = useCallback(() => {
+    setPupils(0);
+    setManualDepts(false);
+    setDepartments(1);
+    setUiNotice("Všechna vstupní data kalkulačky byla vymazána.");
+  }, []);
+
+  const buildSdSummaryText = useCallback(() => {
+    const phmaxLine =
+      basePhmax != null ? `PHmax (po krácení): ${formatSdHours(reduction.adjusted)}` : "PHmax: —";
+    const baseLine = basePhmax != null ? `PHmax (základ z tabulky): ${formatSdHours(basePhmax)}` : "";
+    const kraceni = reduction.applied
+      ? `ano (${(Math.round(reduction.factor * 1000) / 10).toLocaleString("cs-CZ")} %)`
+      : "ne";
+    return [
+      "Shrnutí – PHmax, školní družina",
+      "",
+      `Čas: ${new Date().toLocaleString("cs-CZ")}`,
+      `Účastníci (1. st.): ${pupils}`,
+      `Oddělení (výpočet): ${effectiveDepts}${manualDepts ? " (ruční zadání)" : ` (navrženo ${suggested})`}`,
+      baseLine,
+      phmaxLine,
+      `Krácení § 10 odst. 2: ${kraceni}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }, [pupils, effectiveDepts, manualDepts, suggested, basePhmax, reduction]);
+
+  const copySdSummary = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(buildSdSummaryText());
+      setUiNotice("Shrnutí bylo zkopírováno do schránky.");
+    } catch {
+      setUiNotice("Kopírování do schránky se nepodařilo.");
+    }
+  }, [buildSdSummaryText]);
+
+  const printSdSummary = useCallback(() => {
+    const text = buildSdSummaryText().replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
+    const win = window.open("", "_blank", "width=900,height=700");
+    if (!win) return;
+    win.document.write(
+      `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí PHmax ŠD</title>` +
+        `<style>body{font-family:system-ui,Segoe UI,sans-serif;margin:16px;font-size:11pt;line-height:1.45;color:#0f172a}</style>` +
+        `</head><body><h1 style="font-size:13pt">Shrnutí – školní družina</h1><p>${text}</p></body></html>`,
+    );
+    win.document.close();
+    win.focus();
+    win.print();
+  }, [buildSdSummaryText]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SD_STORAGE_KEY, JSON.stringify(buildSdSnapshot()));
+      setLastSavedAt(new Date().toLocaleString("cs-CZ"));
+    } catch {
+      /* ignore */
+    }
+  }, [buildSdSnapshot]);
 
   return (
     <>
@@ -138,14 +282,16 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
         <div className="hero__pills-row">
           <ProductViewPills productView={productView} setProductView={setProductView} />
-          <button
-            type="button"
-            className="btn btn--hero-help"
-            onClick={() => (guideOpen ? dismissGuide() : openGuide())}
-            aria-expanded={guideOpen}
-          >
-            {guideOpen ? "Skrýt nápovědu" : "Nápověda"}
-          </button>
+          <div className="hero__pills-row-trailing">
+            <button
+              type="button"
+              className="btn btn--hero-help"
+              onClick={() => (guideOpen ? dismissGuide() : openGuide())}
+              aria-expanded={guideOpen}
+            >
+              {guideOpen ? "Skrýt nápovědu" : "Nápověda"}
+            </button>
+          </div>
         </div>
 
         <div className="grid two hero__grid">
@@ -159,14 +305,16 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               čtyř oddělení platí další pravidla — vždy vycházejte z úplného znění vyhlášky a metodiky.
             </p>
           </div>
-          <div className="hero__stats">
-            <HeroStat label="Účastníci (1. st.)" value={pupils} />
-            <HeroStat label="Oddělení" value={effectiveDepts} />
+          <div className="hero__stats hero__stats--compact hero__stats--sd">
+            <HeroStat compact label="Účastníci (1. st.)" value={pupils} />
+            <HeroStat compact label="Oddělení" value={effectiveDepts} />
             <HeroStat
+              compact
               label="PHmax"
               value={basePhmax != null ? formatSdHours(reduction.adjusted) : "—"}
             />
             <HeroStat
+              compact
               label="Krácení § 10 odst. 2"
               value={
                 reduction.applied
@@ -175,6 +323,59 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               }
             />
           </div>
+        </div>
+
+        <div className="hero-actions hero-actions--stacked">
+          <div className="hero-actions--stacked__row">
+            <button type="button" className="btn btn--light" onClick={() => window.print()}>
+              Tisk
+            </button>
+            <button type="button" className="btn ghost" onClick={saveSdSnapshotManually}>
+              Uložit
+            </button>
+            <button type="button" className="btn ghost" onClick={restoreSdSnapshot}>
+              Obnovit
+            </button>
+          </div>
+          <div className="hero-actions--stacked__row hero-actions__group--meta">
+            <button type="button" className="btn ghost" onClick={clearSdStoredSnapshot}>
+              Vymazat uložená data
+            </button>
+            <button type="button" className="btn ghost" onClick={resetSdAll}>
+              Vymazat všechny údaje
+            </button>
+          </div>
+          <hr className="hero-actions__divider" aria-hidden="true" />
+          <div className="hero-actions--stacked__row">
+            <button type="button" className="btn ghost" onClick={handleExportCsv}>
+              CSV
+            </button>
+            <button
+              type="button"
+              className="btn ghost"
+              disabled={xlsxExportBusy}
+              aria-busy={xlsxExportBusy}
+              onClick={() => void handleExportXlsx()}
+            >
+              {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
+            </button>
+            <button type="button" className="btn ghost" onClick={() => void copySdSummary()}>
+              Kopírovat shrnutí
+            </button>
+            <button type="button" className="btn ghost" onClick={printSdSummary}>
+              Tisk shrnutí
+            </button>
+          </div>
+        </div>
+
+        <div className="hero-status">
+          <div className="hero-status__item">
+            <strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.
+          </div>
+          <div className="hero-status__item">
+            <strong>Poslední uložení:</strong> {lastSavedAt || "zatím neproběhlo"}
+          </div>
+          {uiNotice ? <div className="hero-status__item hero-status__item--notice">{uiNotice}</div> : null}
         </div>
       </header>
 
@@ -188,20 +389,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
       <section className="card section-card section-card--sd">
         <h2 className="section-title">Vstupy</h2>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-          <button type="button" className="btn ghost" onClick={handleExportCsv}>
-            CSV
-          </button>
-          <button
-            type="button"
-            className="btn ghost"
-            disabled={xlsxExportBusy}
-            aria-busy={xlsxExportBusy}
-            onClick={() => void handleExportXlsx()}
-          >
-            {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
-          </button>
-        </div>
+        <p className="muted-text" style={{ marginTop: 0, marginBottom: 12, fontSize: "0.9rem" }}>
+          Export do CSV a Excelu a kopírování shrnutí najdete v horní liště pod nadpisem stránky.
+        </p>
         <p className="section-lead muted-text">
           Počet účastníků = žáci 1. stupně ZŠ přihlášení k pravidelné denní docházce (pro krácení PHmax dle § 10 odst. 2).
           Počet oddělení pro nové oddělení nad první: průměr nad 27 účastníků → dělení počtem 27 a zaokrouhlení nahoru

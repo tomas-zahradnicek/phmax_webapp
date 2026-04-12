@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroStat } from "./HeroStat";
 import { MethodologyStrip } from "./MethodologyStrip";
@@ -58,6 +58,7 @@ type PhmaxPvPageProps = {
 };
 
 const PV_ONBOARDING_KEY = "phmax-pv-onboarding";
+const PV_STORAGE_KEY = "edu-cz-pv-calculator-state";
 
 const PROVOZ_OPTIONS: { value: PvProvozKind; label: string }[] = [
   { value: "polodenni", label: "Polodenní provoz (tabulka 1)" },
@@ -96,9 +97,51 @@ function createInitialPvRow(): PvWorkplaceRowState {
   };
 }
 
+function normalizePvRow(item: unknown): PvWorkplaceRowState | null {
+  if (!item || typeof item !== "object") return null;
+  const r = item as Record<string, unknown>;
+  const provoz = r.provoz;
+  if (!PROVOZ_OPTIONS.some((x) => x.value === provoz)) return null;
+  return {
+    id: typeof r.id === "string" ? r.id : newPvRowId(),
+    label: typeof r.label === "string" ? r.label : "",
+    provoz: provoz as PvProvozKind,
+    classCount: typeof r.classCount === "number" && Number.isFinite(r.classCount) ? Math.max(0, r.classCount) : 0,
+    avgHours: typeof r.avgHours === "number" && Number.isFinite(r.avgHours) ? Math.max(0, r.avgHours) : 0,
+    sec16Count: typeof r.sec16Count === "number" && Number.isFinite(r.sec16Count) ? Math.max(0, r.sec16Count) : 0,
+    languageGroups:
+      typeof r.languageGroups === "number" && Number.isFinite(r.languageGroups) ? Math.max(0, r.languageGroups) : 0,
+  };
+}
+
+function parsePvSnapshot(data: unknown): PvWorkplaceRowState[] | null {
+  if (!data || typeof data !== "object") return null;
+  const rowsRaw = (data as { rows?: unknown }).rows;
+  if (!Array.isArray(rowsRaw) || rowsRaw.length === 0) return null;
+  const out: PvWorkplaceRowState[] = [];
+  for (const item of rowsRaw) {
+    const row = normalizePvRow(item);
+    if (row) out.push(row);
+  }
+  return out.length ? out : null;
+}
+
+function loadPvRowsFromStorage(): PvWorkplaceRowState[] {
+  try {
+    const raw = localStorage.getItem(PV_STORAGE_KEY);
+    if (!raw) return [createInitialPvRow()];
+    const parsed = parsePvSnapshot(JSON.parse(raw));
+    return parsed ?? [createInitialPvRow()];
+  } catch {
+    return [createInitialPvRow()];
+  }
+}
+
 export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
-  const [rows, setRows] = useState<PvWorkplaceRowState[]>(() => [createInitialPvRow()]);
+  const [rows, setRows] = useState<PvWorkplaceRowState[]>(() => loadPvRowsFromStorage());
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState("");
+  const [uiNotice, setUiNotice] = useState("");
   const [guideOpen, setGuideOpen] = useState(() => {
     try {
       return localStorage.getItem(PV_ONBOARDING_KEY) !== "1";
@@ -202,12 +245,111 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         valueRows: exportRows,
         filename: exportFilenameStamped("phmax-pv", "xlsx"),
       });
+      setUiNotice("Byl stažen soubor Excel (XLSX).");
     } catch (e) {
       console.error(e);
+      setUiNotice("Export do Excelu se nepodařil.");
     } finally {
       setXlsxExportBusy(false);
     }
   }, [exportRows, xlsxExportBusy]);
+
+  const buildPvSnapshot = useCallback(() => ({ rows }), [rows]);
+
+  const applyPvSnapshot = useCallback((data: unknown) => {
+    const next = parsePvSnapshot(data);
+    if (next) {
+      setRows(next);
+      setUiNotice("Data byla obnovena.");
+    } else {
+      setUiNotice("Uložená data nejsou ve očekávaném tvaru.");
+    }
+  }, []);
+
+  const savePvSnapshotManually = useCallback(() => {
+    try {
+      localStorage.setItem(PV_STORAGE_KEY, JSON.stringify(buildPvSnapshot()));
+      setLastSavedAt(new Date().toLocaleString("cs-CZ"));
+      setUiNotice("Rozpracované údaje byly uloženy.");
+    } catch {
+      setUiNotice("Uložení se nepodařilo.");
+    }
+  }, [buildPvSnapshot]);
+
+  const restorePvSnapshot = useCallback(() => {
+    try {
+      const raw = localStorage.getItem(PV_STORAGE_KEY);
+      if (!raw) {
+        setUiNotice("Nebyla nalezena žádná uložená data.");
+        return;
+      }
+      applyPvSnapshot(JSON.parse(raw));
+    } catch {
+      setUiNotice("Obnovení uložených dat se nepodařilo.");
+    }
+  }, [applyPvSnapshot]);
+
+  const clearPvStoredSnapshot = useCallback(() => {
+    try {
+      localStorage.removeItem(PV_STORAGE_KEY);
+      setLastSavedAt("");
+      setUiNotice("Uložená data v prohlížeči byla vymazána.");
+    } catch {
+      setUiNotice("Vymazání uložených dat se nepodařilo.");
+    }
+  }, []);
+
+  const resetPvAll = useCallback(() => {
+    setRows([createInitialPvRow()]);
+    setUiNotice("Všechna vstupní data kalkulačky byla vymazána.");
+  }, []);
+
+  const buildPvSummaryText = useCallback(() => {
+    return [
+      "Shrnutí – PHmax a PHAmax, předškolní vzdělávání",
+      "",
+      `Čas: ${new Date().toLocaleString("cs-CZ")}`,
+      `Počet pracovišť ve výpočtu: ${rows.length}`,
+      `PHmax celkem: ${aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}`,
+      `PHAmax celkem: ${aggregate.phaSum > 0 ? aggregate.phaSum : "—"}`,
+      "",
+      aggregate.incomplete ? "* PHmax nezahrnuje pracoviště s neplatným vstupem." : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }, [rows.length, aggregate]);
+
+  const copyPvSummary = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(buildPvSummaryText());
+      setUiNotice("Shrnutí bylo zkopírováno do schránky.");
+    } catch {
+      setUiNotice("Kopírování do schránky se nepodařilo.");
+    }
+  }, [buildPvSummaryText]);
+
+  const printPvSummary = useCallback(() => {
+    const text = buildPvSummaryText().replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
+    const win = window.open("", "_blank", "width=900,height=700");
+    if (!win) return;
+    win.document.write(
+      `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí PHmax PV</title>` +
+        `<style>body{font-family:system-ui,Segoe UI,sans-serif;margin:16px;font-size:11pt;line-height:1.45;color:#0f172a}</style>` +
+        `</head><body><h1 style="font-size:13pt">Shrnutí – předškolní vzdělávání</h1><p>${text}</p></body></html>`,
+    );
+    win.document.close();
+    win.focus();
+    win.print();
+  }, [buildPvSummaryText]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PV_STORAGE_KEY, JSON.stringify(buildPvSnapshot()));
+      setLastSavedAt(new Date().toLocaleString("cs-CZ"));
+    } catch {
+      /* ignore */
+    }
+  }, [buildPvSnapshot]);
 
   return (
     <>
@@ -217,14 +359,16 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
         <div className="hero__pills-row">
           <ProductViewPills productView={productView} setProductView={setProductView} />
-          <button
-            type="button"
-            className="btn btn--hero-help"
-            onClick={() => (guideOpen ? dismissGuide() : openGuide())}
-            aria-expanded={guideOpen}
-          >
-            {guideOpen ? "Skrýt nápovědu" : "Nápověda"}
-          </button>
+          <div className="hero__pills-row-trailing">
+            <button
+              type="button"
+              className="btn btn--hero-help"
+              onClick={() => (guideOpen ? dismissGuide() : openGuide())}
+              aria-expanded={guideOpen}
+            >
+              {guideOpen ? "Skrýt nápovědu" : "Nápověda"}
+            </button>
+          </div>
         </div>
 
         <div className="grid two hero__grid">
@@ -245,14 +389,68 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               </p>
             ) : null}
           </div>
-          <div className="hero__stats">
-            <HeroStat label="Počet pracovišť ve výpočtu" value={rows.length} />
+          <div className="hero__stats hero__stats--compact hero__stats--pv">
+            <HeroStat compact label="Počet pracovišť ve výpočtu" value={rows.length} />
             <HeroStat
+              compact
               label="PHmax celkem"
               value={aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}
             />
-            <HeroStat label="PHAmax celkem" value={aggregate.phaSum > 0 ? aggregate.phaSum : "—"} />
+            <HeroStat compact label="PHAmax celkem" value={aggregate.phaSum > 0 ? aggregate.phaSum : "—"} />
           </div>
+        </div>
+
+        <div className="hero-actions hero-actions--stacked">
+          <div className="hero-actions--stacked__row">
+            <button type="button" className="btn btn--light" onClick={() => window.print()}>
+              Tisk
+            </button>
+            <button type="button" className="btn ghost" onClick={savePvSnapshotManually}>
+              Uložit
+            </button>
+            <button type="button" className="btn ghost" onClick={restorePvSnapshot}>
+              Obnovit
+            </button>
+          </div>
+          <div className="hero-actions--stacked__row hero-actions__group--meta">
+            <button type="button" className="btn ghost" onClick={clearPvStoredSnapshot}>
+              Vymazat uložená data
+            </button>
+            <button type="button" className="btn ghost" onClick={resetPvAll}>
+              Vymazat všechny údaje
+            </button>
+          </div>
+          <hr className="hero-actions__divider" aria-hidden="true" />
+          <div className="hero-actions--stacked__row">
+            <button type="button" className="btn ghost" onClick={handleExportCsv}>
+              CSV
+            </button>
+            <button
+              type="button"
+              className="btn ghost"
+              disabled={xlsxExportBusy}
+              aria-busy={xlsxExportBusy}
+              onClick={() => void handleExportXlsx()}
+            >
+              {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
+            </button>
+            <button type="button" className="btn ghost" onClick={() => void copyPvSummary()}>
+              Kopírovat shrnutí
+            </button>
+            <button type="button" className="btn ghost" onClick={printPvSummary}>
+              Tisk shrnutí
+            </button>
+          </div>
+        </div>
+
+        <div className="hero-status">
+          <div className="hero-status__item">
+            <strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.
+          </div>
+          <div className="hero-status__item">
+            <strong>Poslední uložení:</strong> {lastSavedAt || "zatím neproběhlo"}
+          </div>
+          {uiNotice ? <div className="hero-status__item hero-status__item--notice">{uiNotice}</div> : null}
         </div>
       </header>
 
@@ -314,20 +512,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
       <section className="card section-card section-card--sd">
         <h2 className="section-title">Vstupy (pracoviště)</h2>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-          <button type="button" className="btn ghost" onClick={handleExportCsv}>
-            CSV
-          </button>
-          <button
-            type="button"
-            className="btn ghost"
-            disabled={xlsxExportBusy}
-            aria-busy={xlsxExportBusy}
-            onClick={() => void handleExportXlsx()}
-          >
-            {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
-          </button>
-        </div>
+        <p className="section-lead muted-text" style={{ marginTop: 0 }}>
+          Export a tisk najdete v horní liště u nadpisu stránky.
+        </p>
 
         <div className="pv-workplace-rows">
           {rowComputations.map(({ row, computed, phaMax, provozLabel }, index) => {
