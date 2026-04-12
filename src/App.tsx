@@ -64,7 +64,8 @@ type ExampleKey =
   | "pripravna_trida"
   | "mala_skola_pod_limitem"
   | "skola_s_odecty_phpmax"
-  | "inkluzivni_skola";
+  | "inkluzivni_skola"
+  | "priloha_phamax_uplna_zs_sec16_zss";
 type WizardChoice = "" | "php_small" | "php_deductions" | "ph_inclusion" | "ph_psych" | "ph_mixed" | "ph_prep";
 type DataMode = "own" | "example";
 
@@ -84,6 +85,11 @@ function getInitialPreferredMode(): CalculatorMode {
       !item.label.includes("§ 16")
   );
 
+  return (preferred?.id ?? DEFAULT_MODE) as CalculatorMode;
+}
+
+function getInitialPhaMode(): CalculatorMode {
+  const preferred = Object.values(MODE_CONFIG).find((item) => item.group === "phamax");
   return (preferred?.id ?? DEFAULT_MODE) as CalculatorMode;
 }
 
@@ -840,6 +846,20 @@ export default function App() {
       return;
     }
 
+    if (example === "priloha_phamax_uplna_zs_sec16_zss") {
+      setMode(getInitialPhaMode());
+      setTab("pha");
+      setPhaRows([
+        { id: 1, kind: "zs1", classes: 2, pupils: 15 },
+        { id: 2, kind: "zs1Heavy", classes: 1, pupils: 7 },
+        { id: 3, kind: "zs2", classes: 3, pupils: 21 },
+        { id: 4, kind: "zss1Heavy", classes: 1, pupils: 6 },
+        { id: 5, kind: "zss2Heavy", classes: 2, pupils: 11 },
+        { id: 6, kind: "zssII", classes: 1, pupils: 6 },
+      ]);
+      return;
+    }
+
     if (example === "phpmax_tri_roky") {
       setMode(getInitialPreferredMode());
       setTab("php");
@@ -1341,6 +1361,7 @@ export default function App() {
               <HeroStat label="Aktivní modul" value={tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"} />
               <HeroStat label="Zvolený režim" value={MODE_CONFIG[mode].label} />
               <HeroStat label="Výsledek PHmax" value={totalPhmax} />
+              <HeroStat label="Výsledek PHAmax" value={totalPha} />
               <HeroStat label="Výsledek PHPmax" value={totalPhp} />
             </div>
           </div>
@@ -1369,6 +1390,11 @@ export default function App() {
                   <option value="inkluzivni_skola">Inkluzivní škola (běžné + § 16/9, jiná čísla než v příloze)</option>
                   <option value="psychiatricka_nemocnice">Škola při psychiatrické nemocnici</option>
                   <option value="pripravna_trida">Přípravná třída</option>
+                </optgroup>
+                <optgroup label="Příloha – PHAmax (asistenti pedagoga)">
+                  <option value="priloha_phamax_uplna_zs_sec16_zss">
+                    Úplná ZŠ § 16/9 + ZŠ speciální, rozlišení AD1/AD2 (474 h, ř. B35–B43 dle metodiky v5)
+                  </option>
                 </optgroup>
                 <optgroup label="PHPmax – ukázky">
                   <option value="phpmax_tri_roky">Tříletý průměr + dílčí nezapočtení žáků</option>
@@ -1404,9 +1430,9 @@ export default function App() {
           </div>
 
           <p className="muted-text hero__note">
-            V první skupině jsou čísla z modelových postupů v metodické příloze (včetně smíšených tříd 570 h).
-            Ostatní ukázky doplňují typické situace; kde se liší od přílohy, je to u položky uvedeno.
-            Po načtení můžete vše upravit podle vlastní školy.
+            V první skupině jsou čísla z modelových postupů PHmax v metodické příloze (včetně smíšených tříd 570 h).
+            Model s členěním tříd § 16/9 a ZŠ speciální podle příznaku AD1/AD2 a řádků B35–B43 je v metodice v5 uveden jako výpočet PHAmax (asistenti pedagoga) – najdete ho v ukázce „PHAmax“ v rozbalovači; aplikace po načtení přepne na záložku PHAmax.
+            Ostatní ukázky doplňují typické situace; po načtení můžete vše upravit podle vlastní školy.
           </p>
           <p className="muted-text hero__legal-note">
             Právní a metodický podklad aplikace: Metodika stanovení PHmax, PHAmax a PHPmax pro základní vzdělávání, nařízení vlády č. 123/2018 Sb. a vyhláška č. 48/2005 Sb.
@@ -1986,6 +2012,10 @@ export default function App() {
         {tab === "pha" && (
           <section className={`card section-card section-card--pha${hasIssue("pha") ? " card--needs-attention" : ""}`} data-section="pha">
             <h2>PHAmax – asistenti pedagoga</h2>
+            <p className="muted-text">
+              U tříd § 16/9 a ZŠ speciální podle metodiky (NV č. 123/2018 Sb., vyhl. č. 48/2005 Sb.) rozlišujte příznak třídy: AD1 (ostatní zdravotní postižení dle § 16 odst. 9) vs. AD2 (těžší varianty – tělesné postižení, PVCH, souběžné postižení, autismus).
+              Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v5; průměr žáků ve skupině stejného typu určí pásmo a hodnotu PHAmax na třídu.
+            </p>
             <table className="table">
               <thead>
                 <tr>
@@ -2001,16 +2031,16 @@ export default function App() {
                   <tr key={row.id}>
                     <td>
                       <select value={row.kind} onChange={(e) => updatePha(row.id, "kind", e.target.value)}>
-                        <option value="zs1">ZŠ §16/9 – 1. stupeň</option>
-                        <option value="zs1Heavy">ZŠ §16/9 – 1. stupeň, těžší varianty</option>
-                        <option value="zs2">ZŠ §16/9 – 2. stupeň</option>
-                        <option value="zs2Heavy">ZŠ §16/9 – 2. stupeň, těžší varianty</option>
-                        <option value="zss1">ZŠ speciální I. díl – 1. stupeň</option>
-                        <option value="zss1Heavy">ZŠ speciální I. díl – 1. stupeň, těžší varianty</option>
-                        <option value="zss2">ZŠ speciální I. díl – 2. stupeň</option>
-                        <option value="zss2Heavy">ZŠ speciální I. díl – 2. stupeň, těžší varianty</option>
-                        <option value="zssII">ZŠ speciální II. díl</option>
-                        <option value="zssIIHeavy">ZŠ speciální II. díl, těžší varianty</option>
+                        <option value="zs1">ZŠ §16/9 – 1. stupeň (ř. B35)</option>
+                        <option value="zs1Heavy">ZŠ §16/9 – 1. stupeň, těžší varianty (ř. B36)</option>
+                        <option value="zs2">ZŠ §16/9 – 2. stupeň (ř. B37)</option>
+                        <option value="zs2Heavy">ZŠ §16/9 – 2. stupeň, těžší varianty (ř. B38)</option>
+                        <option value="zss1">ZŠ speciální I. díl – 1. stupeň (ř. B39)</option>
+                        <option value="zss1Heavy">ZŠ speciální I. díl – 1. stupeň, těžší varianty (ř. B40)</option>
+                        <option value="zss2">ZŠ speciální I. díl – 2. stupeň (ř. B41)</option>
+                        <option value="zss2Heavy">ZŠ speciální I. díl – 2. stupeň, těžší varianty (ř. B42)</option>
+                        <option value="zssII">ZŠ speciální II. díl (ř. B43)</option>
+                        <option value="zssIIHeavy">ZŠ speciální II. díl, těžší varianty (ř. B44)</option>
                       </select>
                     </td>
                     <td><input type="number" value={row.classes} onChange={(e) => updatePha(row.id, "classes", Number(e.target.value) || 0)} /></td>
