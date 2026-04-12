@@ -11,6 +11,7 @@ export const BREAKDOWN_PRESETS: Record<CalculatorMode, BreakdownPreset> = {
   phmax_full_zs_sec16: { mode: "phmax_full_zs_sec16", categories: ["basic_first", "basic_second", "sec16_first", "sec16_second"] },
   phmax_dominant_field: { mode: "phmax_dominant_field", categories: ["dominant_c_first", "dominant_c_second", "dominant_b_first", "dominant_b_second"] },
   phmax_psychiatric: { mode: "phmax_psychiatric", categories: ["psych_first", "psych_second", "psych_mix"] },
+  phmax_health_facility: { mode: "phmax_health_facility", categories: ["health_first", "health_second", "health_mix"] },
   phmax_minority_language: { mode: "phmax_minority_language", categories: ["minority_first", "minority_second"] },
   phmax_multiyear_gym: { mode: "phmax_multiyear_gym", categories: ["gym_first", "gym_second"] },
   phmax_extras_38_41_prep: { mode: "phmax_extras_38_41_prep", categories: ["prep", "prep_special", "par38_first", "par38_second", "par41_first", "par41_second"] },

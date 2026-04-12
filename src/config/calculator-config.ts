@@ -6,6 +6,7 @@ export type CalculatorMode =
   | "phmax_full_zs_sec16"
   | "phmax_dominant_field"
   | "phmax_psychiatric"
+  | "phmax_health_facility"
   | "phmax_minority_language"
   | "phmax_multiyear_gym"
   | "phmax_extras_38_41_prep"
@@ -30,6 +31,7 @@ export type FormSection =
   | "dominant_b_first"
   | "dominant_b_second"
   | "psych_groups"
+  | "health_groups"
   | "minority_variant"
   | "minority_first"
   | "minority_second"
@@ -105,6 +107,9 @@ export type BreakdownCategory =
   | "psych_first"
   | "psych_second"
   | "psych_mix"
+  | "health_first"
+  | "health_second"
+  | "health_mix"
   | "minority_first"
   | "minority_second"
   | "gym_first"
@@ -232,6 +237,19 @@ export const MODE_CONFIG: Record<CalculatorMode, ModeConfig> = {
     group: "phmax",
     description: "Průměr se bere jako vyšší z předchozího roku a aktuálního sběru dat.",
     visibleSections: ["psych_groups"],
+    requiredFields: [],
+    methodSteps: ["A", "B", "C", "D"],
+    supportsMethodView: true,
+    supportsSimpleView: true,
+    hideTotalsFromOtherModules: true,
+    phpEligibility: "ineligible",
+  },
+  phmax_health_facility: {
+    id: "phmax_health_facility",
+    label: "PHmax – ZŠ při zdravotnickém zařízení (mimo psychiatrii)",
+    group: "phmax",
+    description: "Řádky B11–B13; průměr žáků ve třídě jako vyšší z minulého roku a aktuálního sběru (stejně jako u psychiatrie).",
+    visibleSections: ["health_groups"],
     requiredFields: [],
     methodSteps: ["A", "B", "C", "D"],
     supportsMethodView: true,

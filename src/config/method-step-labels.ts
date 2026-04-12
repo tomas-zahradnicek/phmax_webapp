@@ -6,6 +6,7 @@ export const METHOD_STEP_LABELS: Record<CalculatorMode, Partial<Record<MethodSte
   phmax_full_zs_sec16: { A: "Vstupní údaje – počty žáků, počty tříd", B: "Stanovení průměrného počtu žáků ve třídě (samostatně pro každý stupeň)", C: "Stanovení pásma pro určení PHmax", D: "Stanovení celkového maximálního počtu odučených hodin pro školu" },
   phmax_dominant_field: { A: "Vstupní údaje – počty žáků, počty tříd", B: "Stanovení průměrného počtu žáků ve třídě (samostatně podle převažujícího oboru vzdělání a stupně)", C: "Stanovení pásma pro určení PHmax", D: "Stanovení celkového maximálního počtu odučených hodin pro školu" },
   phmax_psychiatric: { A: "Vstupní údaje – počty žáků, počty tříd", B: "Stanovení průměrného počtu žáků ve třídě", C: "Stanovení pásma pro určení PHmax", D: "Stanovení celkového PHmax" },
+  phmax_health_facility: { A: "Vstupní údaje – počty žáků, počty tříd", B: "Stanovení průměrného počtu žáků ve třídě", C: "Stanovení pásma pro určení PHmax (B11–B13)", D: "Stanovení celkového PHmax" },
   phmax_minority_language: { A: "Vstupní údaje – počty žáků, počty tříd", B: "Stanovení průměrného počtu žáků ve třídě", C: "Stanovení pásma pro určení PHmax", D: "Stanovení celkového PHmax" },
   phmax_multiyear_gym: { A: "Vstupní údaje – počty žáků, počty tříd", B: "Stanovení průměrného počtu žáků ve třídě", C: "Stanovení pásma pro určení PHmax", D: "Stanovení celkového PHmax" },
   phmax_extras_38_41_prep: { A: "Vstupní údaje", C: "Přiřazení hodnoty PHmax", D: "Stanovení celkového PHmax" },

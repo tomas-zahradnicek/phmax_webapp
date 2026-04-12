@@ -23,6 +23,7 @@ export function isPhmaxMode(mode: CalculatorMode): boolean {
     "phmax_full_zs_sec16",
     "phmax_dominant_field",
     "phmax_psychiatric",
+    "phmax_health_facility",
     "phmax_minority_language",
     "phmax_multiyear_gym",
     "phmax_extras_38_41_prep",
