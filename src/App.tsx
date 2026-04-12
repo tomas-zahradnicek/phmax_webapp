@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   B13_MORE_THAN_2,
   B34_MAX_2,
@@ -26,6 +26,7 @@ import type { CalculatorMode, FormSection } from "./config/calculator-config";
 import { MODE_CONFIG } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
 import { DEFAULT_MODE } from "./config/default-form-state";
+import { GlossaryDialog } from "./GlossaryDialog";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
@@ -123,13 +124,13 @@ function HelpHint({ text }: { text: string }) {
 
 
 
-function GlossaryIconButton({
-  onClick,
-}: {
-  onClick: () => void;
-}) {
+const GlossaryIconButton = forwardRef<HTMLButtonElement, { onClick: () => void }>(function GlossaryIconButton(
+  { onClick },
+  ref
+) {
   return (
     <button
+      ref={ref}
       type="button"
       className="glossary-icon-btn"
       onClick={onClick}
@@ -140,7 +141,7 @@ function GlossaryIconButton({
       <span className="glossary-icon-btn__label">Slovníček</span>
     </button>
   );
-}
+});
 
 function HeroStat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -459,6 +460,8 @@ export default function App() {
   const [wizardChoice, setWizardChoice] = useState<WizardChoice>("");
   const [dataMode, setDataMode] = useState<DataMode>("own");
   const [glossaryOpen, setGlossaryOpen] = useState(false);
+  const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
+  const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string>("");
   const [uiNotice, setUiNotice] = useState<string>("");
 
@@ -1473,17 +1476,23 @@ export default function App() {
   };
 
   const handleExportXlsx = async () => {
+    if (xlsxExportBusy) return;
+    setXlsxExportBusy(true);
     try {
       const { downloadCalculatorXlsx } = await import("./export-xlsx");
+      const d = new Date();
+      const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       await downloadCalculatorXlsx({
         contextRows: buildXlsxContextRows(),
         valueRows: buildExtendedCsvRows(),
-        filename: "kalkulacka-zs-souhrn.xlsx",
+        filename: `kalkulacka-zs-souhrn-${stamp}.xlsx`,
       });
       setUiNotice("Byl stažen soubor Excel (XLSX): list „Kontext“ a list „Hodnoty“.");
     } catch (error) {
       console.error(error);
       setUiNotice("Export do Excelu se nepodařil – zkuste znovu nebo použijte CSV.");
+    } finally {
+      setXlsxExportBusy(false);
     }
   };
 
@@ -1564,7 +1573,7 @@ export default function App() {
               <button type="button" className="btn btn--light" onClick={() => window.print()}>Tisk</button>
               <button type="button" className="btn ghost" onClick={saveSnapshotManually}>Uložit</button>
               <button type="button" className="btn ghost" onClick={restoreSnapshot}>Obnovit</button>
-              <GlossaryIconButton onClick={() => setGlossaryOpen(true)} />
+              <GlossaryIconButton ref={glossaryTriggerRef} onClick={() => setGlossaryOpen(true)} />
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions__group hero-actions__group--meta">
@@ -1579,8 +1588,14 @@ export default function App() {
               <button type="button" className="btn ghost" onClick={handleExportCsv}>
                 CSV
               </button>
-              <button type="button" className="btn ghost" onClick={() => void handleExportXlsx()}>
-                Stáhnout Excel
+              <button
+                type="button"
+                className="btn ghost"
+                disabled={xlsxExportBusy}
+                aria-busy={xlsxExportBusy}
+                onClick={() => void handleExportXlsx()}
+              >
+                {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
               </button>
               <button type="button" className="btn ghost" onClick={copySummaryToClipboard}>
                 Kopírovat shrnutí
@@ -2396,28 +2411,12 @@ export default function App() {
           </div>
         ) : null}
 
-        {glossaryOpen && (
-          <div className="glossary-modal" role="dialog" aria-modal="true">
-            <div className="glossary-modal__backdrop" onClick={() => setGlossaryOpen(false)} />
-            <div className="glossary-modal__panel">
-              <div className="glossary-modal__head">
-                <div>
-                  <h2 className="section-title">Slovníček pojmů</h2>
-                  <p className="muted-text">Pojmy jsou popsány podle metodiky a navazujících právních předpisů, ze kterých kalkulačka vychází.</p>
-                </div>
-                <button type="button" className="icon-btn" onClick={() => setGlossaryOpen(false)}>✕</button>
-              </div>
-              <div className="glossary-list">
-                {GLOSSARY_TERMS.map((item) => (
-                  <div key={item.term} className="glossary-item">
-                    <div className="glossary-item__term">{item.term}</div>
-                    <div className="glossary-item__desc">{item.description}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        <GlossaryDialog
+          open={glossaryOpen}
+          onClose={() => setGlossaryOpen(false)}
+          terms={GLOSSARY_TERMS}
+          triggerRef={glossaryTriggerRef}
+        />
       </div>
     </div>
   );
