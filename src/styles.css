@@ -2721,11 +2721,24 @@ input[type="radio"] {
     display: none !important;
   }
 
-  .hero h1 {
+  /* ZŠ: úvodní odstavec pod nadpisem se netiskne (PV/ŠD mají hero__text--sd) */
+  .hero__text:not(.hero__text--sd) {
+    display: none !important;
+  }
+
+  /* Nadpis v hero na celou šířku stránky (druhý sloupec se stejně netiskne) */
+  .hero__grid.grid.two {
+    grid-template-columns: 1fr !important;
+  }
+
+  .hero h1,
+  .hero .hero__title {
     color: #111827 !important;
     font-size: 13pt !important;
     line-height: 1.18 !important;
     margin: 0 0 3px !important;
+    max-width: none !important;
+    width: 100% !important;
   }
 
   .hero p {
