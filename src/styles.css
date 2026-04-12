@@ -2077,6 +2077,24 @@ input[type="radio"] {
     margin: 0 0 4px !important;
   }
 
+  .app-table-wrap {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .app-data-table__caption {
+    font-size: 8pt !important;
+    padding: 6px 8px !important;
+  }
+
+  .app-data-table th,
+  .app-data-table td {
+    padding: 5px 8px !important;
+    font-size: 7.5pt !important;
+  }
+
   .result-card {
     padding: 4px 6px !important;
     min-height: 0 !important;
@@ -2385,24 +2403,103 @@ input[type="radio"] {
   margin-top: 16px;
 }
 
-/* PV: dvojice výsledkových karet na řádcích — stejná výška vlevo/vpravo */
-.pv-result-blocks {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+/* Tabulkové přehledy (PV a sdílené) */
+.app-table-wrap {
+  overflow-x: auto;
   margin-top: 18px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: var(--shadow-sm);
 }
 
-.pv-result-blocks__pair.section-results {
-  margin-top: 0;
+.app-table-wrap--spaced {
+  margin-top: 22px;
 }
 
-.pv-result-blocks__pair + .pv-result-blocks__pair {
-  margin-top: 16px;
+.app-data-table {
+  width: 100%;
+  min-width: min(100%, 320px);
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  line-height: 1.45;
 }
 
-.pv-result-blocks__total.section-results {
-  margin-top: 16px;
+.app-data-table__caption {
+  caption-side: top;
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: #0f172a;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(241, 245, 249, 0.88) 100%);
+}
+
+.app-data-table thead th {
+  text-align: left;
+  padding: 10px 16px;
+  background: rgba(241, 245, 249, 0.95);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #475569;
+  font-weight: 800;
+}
+
+.app-data-table tbody td,
+.app-data-table tbody th {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+  vertical-align: top;
+}
+
+.app-data-table tbody tr:last-child td,
+.app-data-table tbody tr:last-child th {
+  border-bottom: none;
+}
+
+.app-data-table--results tbody tr:nth-child(even) td {
+  background: rgba(248, 250, 252, 0.65);
+}
+
+.app-data-table__num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.app-data-table__num--emph {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #15803d;
+}
+
+.app-data-table tfoot .app-data-table__total-row th,
+.app-data-table tfoot .app-data-table__total-row td {
+  padding: 14px 16px;
+  border-top: 2px solid rgba(22, 163, 74, 0.38);
+  background: linear-gradient(180deg, rgba(209, 250, 229, 0.42) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.app-data-table tfoot .app-data-table__total-row th {
+  font-weight: 800;
+  text-align: left;
+}
+
+.app-data-table--pha tbody td {
+  background: rgba(245, 243, 255, 0.35);
+}
+
+.app-data-table__hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.4;
 }
 
 /* Better print button spacing retained */

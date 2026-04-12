@@ -39,7 +39,9 @@ export function MethodologyStrip() {
       </ul>
       <p className="methodology-strip__note muted-text">
         Aplikace slouží k orientačnímu výpočtu. Neřeší všechny výjimky (např. krácení PHmax u PV dle § 1d odst. 3,
-        speciální oddělení ŠD, více pracovišť najednou u PV — tam je třeba výpočet zopakovat a sečíst). Odkaz na
+        speciální oddělení ŠD). U předškolního vzdělávání: <strong>odloučená pracoviště</strong> a kombinace více druhů
+        provozu vyžadují podle metodiky <strong>samostatný výpočet pro každé pracoviště a druh provozu</strong> a následný
+        součet — kalkulačka PV jeden takový dílčí výpočet najednou; součet přes celou MŠ si uživatel vede sám. Odkaz na
         konkrétní kalkulačku: přidejte k adrese parametr <code className="methodology-strip__code">?view=zs</code>,{" "}
         <code className="methodology-strip__code">?view=sd</code> nebo <code className="methodology-strip__code">?view=pv</code>.
       </p>

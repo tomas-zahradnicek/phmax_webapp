@@ -4,7 +4,7 @@ import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
-import { NumberField, ResultCard } from "./phmax-zs-ui";
+import { NumberField } from "./phmax-zs-ui";
 import { buildPhmaxPvExportRows } from "./phmax-pv-export-rows";
 import {
   computePvPhmaxTotal,
@@ -100,18 +100,23 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
         <h1 className="hero__title hero__title--sd">PHmax a PHAmax – předškolní vzdělávání</h1>
         <p className="hero__text hero__text--sd">
-          Orientační výpočet pro <strong>jedno pracoviště</strong> mateřské školy podle metodiky stanovení PHmax a
-          PHAmax pro předškolní vzdělávání (verze 4, 2026) a{" "}
-          <strong>vyhlášky č. 14/2005 Sb.</strong> Celková PHmax právnické osoby = součet přes pracoviště a druhy
-          provozu. Údaje vycházejí z matrice M 1 (dříve S 1-01); u MŠ při zdravotnickém zařízení z výkazu S 4-01.
+          Orientační výpočet pro <strong>jedno pracoviště</strong> mateřské školy a <strong>jeden druh provozu</strong>{" "}
+          (řádek výpočtu dle metodiky) podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a{" "}
+          <strong>vyhlášky č. 14/2005 Sb.</strong> U MŠ s <strong>odloučenými pracovišti</strong> nebo s více druhy
+          provozu na různých místech platí: PHmax se stanoví zvlášť pro každé pracoviště a příslušný druh provozu,
+          celkové PHmax právnické osoby je <strong>součet</strong> těchto dílčích výpočtů — ten součet si zde musíte
+          vést ručně (každý průchod kalkulačkou = jeden řádek jako v tabulkové pomůcce MŠMT). Údaje vycházejí z matrice
+          M 1 (dříve S 1-01); u MŠ při zdravotnickém zařízení z výkazu S 4-01.
         </p>
       </header>
 
       <QuickOnboarding storageKey="phmax-pv-onboarding" title="Jedno pracoviště MŠ">
         <p>
-          Údaje odpovídají jednomu pracovišti mateřské školy a jednomu druhu provozu — celkové PHmax právnické osoby
-          sečtěte přes pracoviště a druhy provozu. Krácení PHmax při výjimkách z nejnižšího počtu dětí (§ 1d odst. 3)
-          zde neřešíme.
+          Jeden průchod formulářem = jeden řádek podle metodiky: vybraný <strong>druh provozu</strong>, počet tříd v něm
+          a průměrná denní doba tohoto pracoviště. Máte-li <strong>odloučená pracoviště</strong> nebo na jednom místě
+          současně např. celodenní i polodenní provoz, každou kombinaci zadejte zvlášť a dílčí PHmax sečtěte (jako
+          součet řádků „Pracoviště 1 / 2 …“ v metodické tabulce). Krácení PHmax dle § 1d odst. 3 vyhl. 14/2005 zde
+          neřešíme.
         </p>
       </QuickOnboarding>
 
@@ -130,6 +135,14 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           >
             {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
           </button>
+        </div>
+
+        <div className="card muted pv-workplaces-note" style={{ marginBottom: 18, padding: "14px 16px" }}>
+          <p className="muted-text" style={{ margin: 0, fontSize: "0.92rem", lineHeight: 1.55 }}>
+            <strong>Rozsah výpočtu:</strong> aplikace neobsahuje mřížku „všechna pracoviště najednou“ — odpovídá jedné
+            buňce výpočtu z metodiky (jedno pracoviště + jeden typ provozu). Postup při více pracovištích odpovídá
+            vyhlášce a metodice MŠMT: opakovaný výpočet a součet; náš přehled tabulkou níže to jen zpřehledňuje.
+          </p>
         </div>
 
         <div className="grid two">
@@ -189,48 +202,116 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           </div>
         </div>
 
+        <div className="app-table-wrap" role="region" aria-label="Přehled zadaných vstupů">
+          <table className="app-data-table">
+            <caption className="app-data-table__caption">Vstupy — jeden řádek výpočtu (jedno pracoviště, jeden druh provozu)</caption>
+            <thead>
+              <tr>
+                <th scope="col">Položka</th>
+                <th scope="col">Hodnota</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Druh provozu</td>
+                <td>{provozLabel}</td>
+              </tr>
+              <tr>
+                <td>Počet tříd v tomto druhu provozu</td>
+                <td className="app-data-table__num">{classCount}</td>
+              </tr>
+              <tr>
+                <td>Průměrná denní doba provozu pracoviště</td>
+                <td>
+                  {provoz === "zdravotnicke" ? (
+                    <span className="muted-text">Nezadává se (tabulka 31 h/třídu)</span>
+                  ) : (
+                    <span className="app-data-table__num">{avgHours} h</span>
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <td>Třídy zřízené podle § 16 odst. 9 školského zákona (+5 h PHmax / třídu)</td>
+                <td className="app-data-table__num">{sec16Count}</td>
+              </tr>
+              <tr>
+                <td>Skupiny jazykové přípravy (+1 h PHmax / skupinu, § 1d odst. 11 vyhl. 14/2005)</td>
+                <td className="app-data-table__num">{languageGroups}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         {computed.issues.map((issue, i) => (
           <p key={`${issue.code}-${i}`} className="card card--warning" style={{ marginTop: 14, padding: 12 }}>
             {issue.message}
           </p>
         ))}
 
-        <div className="pv-result-blocks">
-          {computed.base ? (
-            <>
-              <div className="grid two section-results pv-result-blocks__pair">
-                <ResultCard label="PHmax ze základní tabulky" value={computed.base.basePhmax} tone="success" />
-                <ResultCard label="Pásmo doby provozu" value={computed.base.durationColumnLabel} tone="primary" />
-              </div>
-              <div className="grid two section-results pv-result-blocks__pair">
-                <ResultCard label="Příplatek § 16 odst. 9 (5 h × třídy)" value={computed.sec16Bonus} tone="primary" />
-                <ResultCard
-                  label="Příplatek jazyková příprava (1 h × skupiny)"
-                  value={computed.languageBonus}
-                  tone="primary"
-                />
-              </div>
+        {computed.base ? (
+          <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label="Výsledek výpočtu PHmax">
+            <table className="app-data-table app-data-table--results">
+              <caption className="app-data-table__caption">
+                Výpočet PHmax pro tento řádek — toto pracoviště a tento druh provozu (hodiny týdně)
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Složka</th>
+                  <th scope="col">Hodnota</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>PHmax ze základní tabulky metodiky (příslušná tabulka 1–3 / MŠ u zdrav. zařízení)</td>
+                  <td className="app-data-table__num">{computed.base.basePhmax}</td>
+                </tr>
+                <tr>
+                  <td>Pásmo / sloupec průměrné denní doby provozu</td>
+                  <td>{computed.base.durationColumnLabel}</td>
+                </tr>
+                <tr>
+                  <td>Navýšení § 16 odst. 9 školského zákona (5 h × počet tříd)</td>
+                  <td className="app-data-table__num">{computed.sec16Bonus}</td>
+                </tr>
+                <tr>
+                  <td>Navýšení jazyková příprava (1 h × počet skupin)</td>
+                  <td className="app-data-table__num">{computed.languageBonus}</td>
+                </tr>
+              </tbody>
               {computed.totalPhmax != null ? (
-                <div className="pv-result-blocks__total section-results">
-                  <ResultCard label="PHmax celkem (tomuto pracovišti)" value={computed.totalPhmax} tone="success" />
-                </div>
+                <tfoot>
+                  <tr className="app-data-table__total-row">
+                    <th scope="row">PHmax celkem (tomuto pracovišti, tento druh provozu)</th>
+                    <td className="app-data-table__num app-data-table__num--emph">{computed.totalPhmax}</td>
+                  </tr>
+                </tfoot>
               ) : null}
-            </>
-          ) : (
-            !computed.issues.length && (
-              <p className="muted-text section-results">Upravte vstupy pro výpočet základního PHmax.</p>
-            )
-          )}
-        </div>
+            </table>
+          </div>
+        ) : (
+          !computed.issues.length && <p className="muted-text section-results">Upravte vstupy pro výpočet základního PHmax.</p>
+        )}
 
         {phaMax != null ? (
-          <div className="grid two section-results" style={{ marginTop: 12 }}>
-            <ResultCard
-              label="PHAmax (asistenti pedagoga, § 16 třídy, toto pracoviště)"
-              value={phaMax}
-              tone="success"
-              hint="Při provozu kratším než 8 h/den se krátí poměrem doba/8 (metodika v4)."
-            />
+          <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label="Výpočet PHAmax">
+            <table className="app-data-table app-data-table--pha">
+              <caption className="app-data-table__caption">PHAmax — asistenti pedagoga (§ 16 třídy, toto pracoviště)</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Položka</th>
+                  <th scope="col">Hodnota (h/týden)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    PHAmax dle metodiky v4
+                    <span className="app-data-table__hint">Při provozu kratším než 8 h/den se krátí poměrem doba/8.</span>
+                  </td>
+                  <td className="app-data-table__num app-data-table__num--emph">{phaMax}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         ) : null}
 
