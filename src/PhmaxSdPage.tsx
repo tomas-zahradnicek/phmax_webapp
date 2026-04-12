@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { APP_AUTHOR_CREDIT_LINE, APP_AUTHOR_EMAIL } from "./calculator-ui-constants";
+import {
+  APP_AUTHOR_CREDIT_LINE,
+  APP_AUTHOR_EMAIL,
+  PRODUCT_CALCULATOR_TITLES,
+} from "./calculator-ui-constants";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { HeroStatusBar } from "./HeroStatusBar";
@@ -288,7 +292,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         <div className="hero__orb hero__orb--two" />
 
         <div className="hero__pills-row">
-          <ProductViewPills productView={productView} setProductView={setProductView} />
+          <ProductViewPills compact productView={productView} setProductView={setProductView} />
           <div className="hero__pills-row-trailing">
             <button
               type="button"
@@ -381,7 +385,6 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </HeroActionsDrawer>
         </div>
 
-        <HeroStatusBar lastSavedAt={lastSavedAt} notice={uiNotice} variant="sd" />
       </header>
 
       <QuickOnboarding title="Jak s touto kalkulačkou pracovat" open={guideOpen} onDismiss={dismissGuide}>
@@ -539,6 +542,13 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
       <MethodologyStrip />
       <footer className="zs-app-footer">
+        <HeroStatusBar
+          productLabel={PRODUCT_CALCULATOR_TITLES.sd}
+          lastSavedAt={lastSavedAt}
+          notice={uiNotice}
+          variant="sd"
+          placement="footer"
+        />
         <AuthorCreditFooter />
       </footer>
       <ProductFloatingNav active={productView} setProductView={setProductView} />

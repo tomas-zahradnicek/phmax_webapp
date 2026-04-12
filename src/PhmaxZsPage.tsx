@@ -44,6 +44,7 @@ import {
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_EMAIL,
   APP_AUTHOR_EXPORT_ROWS,
+  PRODUCT_CALCULATOR_TITLES,
   TABLE_SCROLL_HINT,
 } from "./calculator-ui-constants";
 
@@ -1659,7 +1660,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <div className="hero__orb hero__orb--two" />
 
           <div className="hero__pills-row">
-            <ProductViewPills productView={productView} setProductView={setProductView} />
+            <ProductViewPills compact productView={productView} setProductView={setProductView} />
             <div className="hero__pills-row-trailing">
               <GlossaryIconButton
                 ref={glossaryTriggerRef}
@@ -2767,7 +2768,13 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         <MethodologyStrip />
 
         <footer className="zs-app-footer">
-          <HeroStatusBar lastSavedAt={lastSavedAt} notice={uiNotice} variant="zs" placement="footer" />
+          <HeroStatusBar
+            productLabel={PRODUCT_CALCULATOR_TITLES.zs}
+            lastSavedAt={lastSavedAt}
+            notice={uiNotice}
+            variant="zs"
+            placement="footer"
+          />
           <AuthorCreditFooter />
         </footer>
 

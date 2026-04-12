@@ -1,3 +1,10 @@
+/** Plné názvy produktů — zápatí a přístupnost u kompaktních záložek v hero. */
+export const PRODUCT_CALCULATOR_TITLES = {
+  pv: "Kalkulačka pro předškolní vzdělávání",
+  sd: "Kalkulačka pro školní družiny",
+  zs: "Kalkulačka pro základní školy",
+} as const;
+
 /** Sjednocené texty pro panel akcí (PV, ŠD, ZŠ na úzkém displeji). */
 export const HERO_ACTIONS_TRIGGER_LABEL = "Akce, tisk, uložení a export…";
 export const HERO_ACTIONS_DRAWER_TITLE = "Akce a export";
@@ -20,8 +27,8 @@ export const APP_AUTHOR_EMAIL = "tomas.zahradnicek.hradec@gmail.com";
 /** Řádka pro kopírování shrnutí a textový tisk. */
 export const APP_AUTHOR_CREDIT_LINE = `Vytvořil Mgr. Tomáš Zahradníček (${APP_AUTHOR_EMAIL})`;
 
-/** Zápatí při tisku stránky (ZŠ). */
-export const APP_AUTHOR_PRINT_FOOTER = `Vytvořil Mgr. Tomáš Zahradníček [${APP_AUTHOR_EMAIL}]`;
+/** Stejné znění jako v zápatí stránky (bez HTML; pro případné textové výstupy). */
+export const APP_AUTHOR_PRINT_FOOTER = `Vytvořil: Mgr. Tomáš Zahradníček [${APP_AUTHOR_EMAIL}]`;
 
 /** Dva řádky na konec CSV a listu „Hodnoty“ v XLSX. */
 export const APP_AUTHOR_EXPORT_ROWS: readonly (readonly [string, string | number])[] = [

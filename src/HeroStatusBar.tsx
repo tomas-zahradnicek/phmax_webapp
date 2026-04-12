@@ -10,16 +10,29 @@ type HeroStatusBarProps = {
   variant: "zs" | "pv" | "sd";
   /** V zápatí stránky (světlé pozadí) místo v modrém hero. */
   placement?: "hero" | "footer";
+  /** Plný název kalkulačky (stejně jako dřív v záložkách hero). */
+  productLabel?: string;
 };
 
 /**
- * Stav ukládání a hlášky — v hero (PV/ŠD/ZŠ) nebo v zápatí (ZŠ).
+ * Stav ukládání a hlášky — v hero (PV/ŠD) nebo v zápatí (ZŠ, PV, ŠD).
  */
-export function HeroStatusBar({ lastSavedAt, notice, variant, placement = "hero" }: HeroStatusBarProps) {
+export function HeroStatusBar({
+  lastSavedAt,
+  notice,
+  variant,
+  placement = "hero",
+  productLabel,
+}: HeroStatusBarProps) {
   const storageHint = variant === "zs" ? BROWSER_STORAGE_HINT_ZS : BROWSER_STORAGE_HINT_SIMPLE;
 
   return (
     <div className={placement === "footer" ? "hero-status hero-status--footer" : "hero-status"}>
+      {productLabel ? (
+        <div className="hero-status__item hero-status__item--product">
+          <strong>{productLabel}</strong>
+        </div>
+      ) : null}
       <div className="hero-status__item">
         <strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.
       </div>

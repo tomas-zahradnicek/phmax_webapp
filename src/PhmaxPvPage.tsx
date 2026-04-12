@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { APP_AUTHOR_CREDIT_LINE, APP_AUTHOR_EMAIL } from "./calculator-ui-constants";
+import {
+  APP_AUTHOR_CREDIT_LINE,
+  APP_AUTHOR_EMAIL,
+  PRODUCT_CALCULATOR_TITLES,
+} from "./calculator-ui-constants";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { HeroStatusBar } from "./HeroStatusBar";
@@ -451,8 +455,6 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             </div>
           </HeroActionsDrawer>
         </div>
-
-        <HeroStatusBar lastSavedAt={lastSavedAt} notice={uiNotice} variant="pv" />
       </header>
 
       <QuickOnboarding title="Nápověda — předškolní vzdělávání" open={guideOpen} onDismiss={dismissGuide}>
@@ -884,6 +886,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
       <MethodologyStrip />
       <footer className="zs-app-footer">
+        <HeroStatusBar
+          productLabel={PRODUCT_CALCULATOR_TITLES.pv}
+          lastSavedAt={lastSavedAt}
+          notice={uiNotice}
+          variant="pv"
+          placement="footer"
+        />
         <AuthorCreditFooter />
       </footer>
       <ProductFloatingNav active={productView} setProductView={setProductView} />
