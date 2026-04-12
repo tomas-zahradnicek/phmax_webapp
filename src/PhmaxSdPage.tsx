@@ -4,6 +4,7 @@ import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./e
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { HeroStat } from "./HeroStat";
+import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
@@ -537,6 +538,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       </section>
 
       <MethodologyStrip />
+      <footer className="zs-app-footer">
+        <AuthorCreditFooter />
+      </footer>
       <ProductFloatingNav active={productView} setProductView={setProductView} />
     </>
   );

@@ -2724,9 +2724,15 @@ input[type="radio"] {
     display: none !important;
   }
 
-  /* ZŠ: úvodní odstavec pod nadpisem se netiskne (PV/ŠD mají hero__text--sd) */
-  .hero__text:not(.hero__text--sd) {
+  /* Úvodní odstavce v hero se netisknou (kompaktní titulní blok napříč ZŠ / PV / ŠD) */
+  .hero__text {
     display: none !important;
+  }
+
+  /* PV / ŠD: horizontální scroll kontejnery ať se tabulky v tisku neuseknou */
+  .table-scroll,
+  .sd-phmax-breakdown-scroll {
+    overflow: visible !important;
   }
 
   /* Nadpis v hero na celou šířku stránky (druhý sloupec se stejně netiskne) */
