@@ -1042,25 +1042,52 @@ button.pill--hero-toggle--active {
   padding: 18px 20px;
 }
 
-.methodology-strip__app-line {
-  margin: 0 0 14px;
-  padding: 12px 14px;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: #334155;
-  background: rgba(241, 245, 249, 0.85);
-  border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
+.methodology-strip--collapsible {
+  padding: 0;
 }
 
-.methodology-strip__title {
+.methodology-strip__summary {
+  list-style: none;
+  padding: 14px 18px;
   font-size: 1.05rem;
-  margin: 0 0 12px;
+  font-weight: 700;
   color: #0f172a;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.methodology-strip__summary::-webkit-details-marker {
+  display: none;
+}
+
+.methodology-strip__summary::after {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  margin-top: -0.2em;
+  border-right: 2px solid #64748b;
+  border-bottom: 2px solid #64748b;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+details[open].methodology-strip--collapsible > .methodology-strip__summary::after {
+  transform: rotate(-135deg);
+  margin-top: 0.15em;
+}
+
+.methodology-strip__panel {
+  padding: 0 20px 18px;
+  border-top: 1px solid rgba(148, 163, 184, 0.28);
 }
 
 .methodology-strip__list {
-  margin: 0;
+  margin: 14px 0 0;
   padding-left: 1.25rem;
   color: #334155;
   font-size: 0.92rem;
@@ -2611,6 +2638,14 @@ input[type="radio"] {
   .section-card--guide,
   .section-card--setup {
     display: none !important;
+  }
+
+  details.methodology-strip--collapsible .methodology-strip__panel {
+    display: block !important;
+  }
+
+  details.methodology-strip--collapsible .methodology-strip__summary::after {
+    display: none;
   }
 
   .workspace-sticky {
