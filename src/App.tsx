@@ -1745,11 +1745,16 @@ export default function App() {
 
           <div className="hero__pills-row">
             <ProductViewPills productView={productView} setProductView={setProductView} />
-            <GlossaryIconButton
-              ref={glossaryTriggerRef}
-              className="glossary-icon-btn--hero"
-              onClick={() => setGlossaryOpen(true)}
-            />
+            <div className="hero__pills-row-trailing">
+              <GlossaryIconButton
+                ref={glossaryTriggerRef}
+                className="glossary-icon-btn--hero"
+                onClick={() => setGlossaryOpen(true)}
+              />
+              <button type="button" className="btn btn--hero-guide" onClick={openZsGuide}>
+                Stručné pokyny
+              </button>
+            </div>
           </div>
 
           <div className="grid two hero__grid">
@@ -1825,50 +1830,60 @@ export default function App() {
                 Vymazat všechny údaje
               </button>
             </div>
-            <div className="hero-actions__group hero-actions__group--named muted-text" style={{ flexWrap: "wrap", gap: "8px", alignItems: "center", width: "100%" }}>
-              <label className="field field--inline" style={{ flex: "1 1 220px", margin: 0 }}>
-                <span className="field__label">Označení pro export</span>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="např. název školy, školní rok…"
-                  value={exportLabel}
-                  onChange={(e) => setExportLabel(e.target.value)}
-                  aria-label="Označení pro export a shrnutí"
-                />
-              </label>
-              <input
-                type="text"
-                className="input"
-                style={{ flex: "1 1 160px" }}
-                placeholder="Název zálohy"
-                value={namedSaveName}
-                onChange={(e) => setNamedSaveName(e.target.value)}
-                aria-label="Název pojmenované zálohy"
-              />
-              <button type="button" className="btn ghost" onClick={saveNamedSnapshot}>
-                Uložit do seznamu
-              </button>
-              <select
-                className="input"
-                style={{ flex: "1 1 200px" }}
-                value={selectedNamedId}
-                onChange={(e) => setSelectedNamedId(e.target.value)}
-                aria-label="Vybrat uloženou zálohu"
-              >
-                <option value="">Vyberte uloženou zálohu…</option>
-                {namedSnapshots.map((n) => (
-                  <option key={n.id} value={n.id}>
-                    {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
-                  </option>
-                ))}
-              </select>
-              <button type="button" className="btn ghost" onClick={restoreNamedSnapshot}>
-                Obnovit vybranou
-              </button>
-              <button type="button" className="btn ghost" onClick={deleteNamedSnapshot}>
-                Smazat vybranou
-              </button>
+            <div className="hero-actions__group hero-actions__group--named">
+              <div className="hero-named-grid" aria-label="Export a pojmenované zálohy">
+                <label className="hero-named-field hero-named-field--export">
+                  <span className="field__label field__label--hero-named">Označení pro export</span>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="např. název školy, školní rok…"
+                    value={exportLabel}
+                    onChange={(e) => setExportLabel(e.target.value)}
+                    aria-label="Označení pro export a shrnutí"
+                  />
+                </label>
+                <label className="hero-named-field hero-named-field--backup-name">
+                  <span className="field__label field__label--hero-named">Název zálohy</span>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="např. stav 2026/27"
+                    value={namedSaveName}
+                    onChange={(e) => setNamedSaveName(e.target.value)}
+                    aria-label="Název pojmenované zálohy"
+                  />
+                </label>
+                <div className="hero-named-field hero-named-field--save">
+                  <span className="hero-named-field__btn-slot" aria-hidden="true" />
+                  <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
+                    Uložit do seznamu
+                  </button>
+                </div>
+                <div className="hero-named-field hero-named-field--select">
+                  <select
+                    className="input"
+                    value={selectedNamedId}
+                    onChange={(e) => setSelectedNamedId(e.target.value)}
+                    aria-label="Vybrat uloženou zálohu"
+                  >
+                    <option value="">Vyberte uloženou zálohu…</option>
+                    {namedSnapshots.map((n) => (
+                      <option key={n.id} value={n.id}>
+                        {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="hero-named-field hero-named-field--restore-delete">
+                  <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
+                    Obnovit vybranou
+                  </button>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
+                    Smazat vybranou
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="hero-actions__group hero-actions__group--exports">
@@ -1904,16 +1919,11 @@ export default function App() {
           <div className="hero-status">
             <div className="hero-status__item"><strong>Automatické ukládání:</strong> probíhá průběžně v tomto prohlížeči.</div>
             <div className="hero-status__item"><strong>Poslední uložení:</strong> {lastSavedAt || "zatím neproběhlo"}</div>
-            <div className="hero-status__item">
-              <button type="button" className="btn ghost" style={{ padding: "2px 8px", fontSize: "0.9em" }} onClick={openZsGuide}>
-                Znovu zobrazit úvodní návod
-              </button>
-            </div>
             {uiNotice ? <div className="hero-status__item hero-status__item--notice">{uiNotice}</div> : null}
           </div>
         </header>
 
-        <QuickOnboarding title="Úvod k kalkulačce ZŠ" open={zsGuideOpen} onDismiss={dismissZsGuide}>
+        <QuickOnboarding title="Stručné pokyny" open={zsGuideOpen} onDismiss={dismissZsGuide}>
           <p>
             <strong>PHmax</strong> zadejte podle typu školy v rozbalovacím režimu; u specialit (psychiatrie, zdravotnické zařízení,
             menšina, gymnázia…) přepněte na odpovídající položku. <strong>PHAmax</strong> a <strong>PHPmax</strong> mají vlastní záložky.
