@@ -2817,14 +2817,43 @@ input[type="radio"] {
     font-weight: 800 !important;
   }
 
+  /* Úsporný tisk polí „Krok A“ (NumberField) — bez natahování mřížkou */
+  .number-field {
+    padding: 3px 5px !important;
+    border-radius: 5px !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .number-field--entry .number-field__label::before {
+    font-size: 5.5pt !important;
+    padding: 0 3px !important;
+    margin-right: 3px !important;
+    line-height: 1.2 !important;
+  }
+
   .number-field__label {
-    font-size: 7.25pt !important;
+    font-size: 6.75pt !important;
+    margin-bottom: 2px !important;
+    gap: 3px !important;
+  }
+
+  .number-field__control,
+  .number-field__control--large {
+    min-height: 0 !important;
+    align-items: stretch !important;
   }
 
   .number-field__input {
-    min-height: 22px !important;
-    font-size: 9pt !important;
-    padding: 2px 4px !important;
+    min-height: 0 !important;
+    font-size: 8pt !important;
+    line-height: 1.15 !important;
+    padding: 2px 5px !important;
+    border-radius: 4px !important;
+  }
+
+  .section-card--module .number-field__input {
+    min-width: 0 !important;
   }
 
   .number-field__hint {
@@ -2833,6 +2862,33 @@ input[type="radio"] {
 
   .number-field__meta {
     display: none !important;
+  }
+
+  .subcard .grid.two > *,
+  .subcard .grid.three > *,
+  .subcard .grid.four > *,
+  .section-card .grid.two > *,
+  .section-card .grid.three > *,
+  .section-card .grid.four > * {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .grid,
+  .grid.two,
+  .grid.three,
+  .grid.four {
+    align-items: start !important;
+  }
+
+  .subcard,
+  .result-card {
+    height: auto !important;
+  }
+
+  .result-card__value {
+    min-height: 0 !important;
+    align-items: center !important;
   }
 
   .grid.two,
