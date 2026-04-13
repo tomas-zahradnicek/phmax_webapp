@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
-import { PRODUCT_CALCULATOR_TITLES } from "./calculator-ui-constants";
+import { PRODUCT_CALCULATOR_TITLES, type ProductViewCode } from "./calculator-ui-constants";
 
-export type ProductView = "zs" | "sd" | "pv";
+export type ProductView = ProductViewCode;
 
 type ProductViewPillsProps = {
   productView: ProductView;
@@ -12,9 +12,10 @@ const PILL_SHORT: Record<ProductView, string> = {
   pv: "PV",
   sd: "ŠD",
   zs: "ZŠ",
+  ss: "SŠ",
 };
 
-const TAB_ORDER: ProductView[] = ["pv", "sd", "zs"];
+const TAB_ORDER: ProductView[] = ["pv", "sd", "zs", "ss"];
 
 export function ProductViewPills({ productView, setProductView }: ProductViewPillsProps) {
   const moveSelection = useCallback(
@@ -39,7 +40,7 @@ export function ProductViewPills({ productView, setProductView }: ProductViewPil
         setProductView("pv");
       } else if (e.key === "End") {
         e.preventDefault();
-        setProductView("zs");
+        setProductView("ss");
       }
     },
     [moveSelection, setProductView],
@@ -85,6 +86,19 @@ export function ProductViewPills({ productView, setProductView }: ProductViewPil
         onKeyDown={(e) => onTabListKeyDown(e, "zs")}
       >
         {PILL_SHORT.zs}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        tabIndex={productView === "ss" ? 0 : -1}
+        aria-selected={productView === "ss"}
+        title={PRODUCT_CALCULATOR_TITLES.ss}
+        aria-label={PRODUCT_CALCULATOR_TITLES.ss}
+        className={`pill pill--hero pill--hero-toggle${productView === "ss" ? " pill--hero-toggle--active" : ""}`}
+        onClick={() => setProductView("ss")}
+        onKeyDown={(e) => onTabListKeyDown(e, "ss")}
+      >
+        {PILL_SHORT.ss}
       </button>
     </div>
   );

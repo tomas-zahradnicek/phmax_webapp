@@ -16,7 +16,7 @@ export function exportCsvLocalized(rows: readonly (readonly [string, string | nu
   return "\ufeff" + ["Položka;Hodnota", body].join("\r\n");
 }
 
-export function exportFilenameStamped(prefix: string, ext: "csv" | "xlsx") {
+export function exportFilenameStamped(prefix: string, ext: "csv" | "xlsx" | "json") {
   const d = new Date();
   const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   return `${prefix}-${stamp}.${ext}`;
