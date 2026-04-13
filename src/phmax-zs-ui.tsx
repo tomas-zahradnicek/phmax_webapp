@@ -6,7 +6,7 @@ const INPUT_OUTPUT_LEGEND_TEXT =
 const INPUT_OUTPUT_LEGEND_ARIA = "Legenda: vstupní pole oproti výstupním hodnotám";
 
 type NumberFieldProps = {
-  label: string;
+  label: React.ReactNode;
   value: number;
   onChange: (value: number) => void;
   min?: number;
@@ -17,7 +17,9 @@ type NumberFieldProps = {
 };
 
 type ResultCardProps = {
-  label: string;
+  label: React.ReactNode;
+  /** Pro určení „kroku“ metodiky (A–D), pokud `label` není řetězec. */
+  methodStepLabel?: string;
   value: React.ReactNode;
   tone?: "default" | "primary" | "success" | "warning";
   hint?: string;
@@ -34,7 +36,7 @@ function HintBadge({ text }: { text: string }) {
 }
 
 function inferMethodStep(label: string, tone: NonNullable<ResultCardProps["tone"]>): MethodStep {
-  const value = label.toLowerCase();
+  const value = String(label).toLowerCase();
 
   if (tone === "warning") return "warning";
 
@@ -119,7 +121,7 @@ export function NumberField({
   return (
     <label className="number-field number-field--entry">
       <span className="number-field__label">
-        <span>{label}</span>
+        <span className="number-field__label-inner">{label}</span>
         {hint ? <HintBadge text={hint} /> : null}
       </span>
 
@@ -166,11 +168,13 @@ export function NumberField({
 
 export function ResultCard({
   label,
+  methodStepLabel,
   value,
   tone = "default",
   hint,
 }: ResultCardProps) {
-  const step = inferMethodStep(label, tone);
+  const stepSource = methodStepLabel ?? (typeof label === "string" ? label : "");
+  const step = inferMethodStep(stepSource, tone);
   const meta = stepMeta(step);
 
   return (

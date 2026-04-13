@@ -31,6 +31,8 @@ import { DEFAULT_MODE } from "./config/default-form-state";
 import { GlossaryDialog } from "./GlossaryDialog";
 import { exportCsvLocalized, downloadTextFile } from "./export-utils";
 import { MethodologyStrip } from "./MethodologyStrip";
+import { ProductLegisContextPanel, ZsLegisRef } from "./PhmaxProductLegisUi";
+import { ZS_LEGIS_PARAGRAPH_TOOLTIPS } from "./phmax-zs-legislativa";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
@@ -42,6 +44,7 @@ import {
   IconCopy,
   IconCsv,
   IconExcel,
+  IconJson,
   IconPrint,
   IconPrintSummary,
   IconResetAll,
@@ -77,6 +80,9 @@ import {
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
 import { useZsNamedSnapshots } from "./useZsNamedSnapshots";
 import { MAX_NAMED_SNAPSHOTS } from "./zs-named-snapshots";
+import { createZsProductAuditProtocol, parseZsSnapshotAuditTotals } from "./phmax-product-audit";
+import { comparePhmaxProductVariants } from "./phmax-product-compare";
+import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "./phmax-product-audit-download";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
@@ -113,6 +119,45 @@ type WizardChoice =
   | "ph_mixed"
   | "ph_prep";
 type DataMode = "own" | "example";
+
+/** Viditelná legenda + doplněk k nativním tooltipům (`title`) u řádků v seznamech. */
+const ZS_GUIDE_NATIVE_TOOLTIP_LEGEND =
+  "U řádků s předpisy najděte myší na položku v seznamu — prohlížeč zobrazí krátký text (atribut title). U tečkovaných citací § v textu stránky použijte stejný postup jako v záložce „Legislativa a výklad (ZŠ)“ (hover nebo Tab).";
+
+const HERO_EXAMPLE_OPTION_TITLES: Partial<Record<Exclude<ExampleKey, "">, string>> = {
+  priloha_uplna_zs_sec16: ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"],
+  priloha_zs_1st_sec16: ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"],
+  smisene_tridy:
+    "Smíšené třídy § 16 odst. 9 (obor C/01) a ZŠ speciální (B/01) – v metodice řádky B9–B10 vs. B26–B28 podle převažujícího oboru; součet dle přílohy (např. 570 h).",
+  phmax_bezna_zs: ZS_LEGIS_PARAGRAPH_TOOLTIPS["nv123-priloha1"],
+  inkluzivni_skola: `${ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"]} Kombinace běžných tříd a § 16/9; čísla se mohou lišit od modelu v příloze.`,
+  psychiatricka_nemocnice:
+    "Škola při psychiatrické nemocnici – samostatné tabulky PHmax pro 1. stupeň, 2. stupeň nebo společnou výuku; průměr často jako vyšší z aktuálního a předchozího sběru (dle zvoleného režimu).",
+  zdravotnicke_zs:
+    "ZŠ při zdravotnickém zařízení mimo psychiatrii – řádky B11–B13 metodiky ZV, pásma podle průměru žáků ve třídě.",
+  pripravna_trida:
+    "Přípravná třída ZŠ a přípravný stupeň ZŠ speciální – PHmax se stanovuje samostatně (mimo součet běžných řádků B1–B28).",
+  priloha_phamax_uplna_zs_sec16_zss: `${ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"]} ${ZS_LEGIS_PARAGRAPH_TOOLTIPS["phamax-nv123"]}`,
+  phpmax_tri_roky:
+    "PHPmax – průměrný počet žáků za tři školní roky (nebo kratší období); část žáků lze z výpočtu vyloučit dle metodiky.",
+  mala_skola_pod_limitem: "Menší škola pod limitem pro PHPmax – v metodice ZV jiná pravidla pro určení PHPmax.",
+  skola_s_odecty_phpmax: "PHPmax se silnějšími odečty žáků nezapočítávaných do průměru dle metodiky.",
+};
+
+const WIZARD_CHOICE_TITLES: Record<Exclude<WizardChoice, "">, string> = {
+  php_small: "Menší škola – PHPmax se určí podle metodiky z průměrného počtu žáků a příslušných pásem.",
+  php_deductions:
+    "Žáci, kteří se do PHPmax nezapočítávají (zahraničí, individuální vzdělávání, školy v zahraničí v ČR apod.) – snížení vypočteného základu dle metodiky.",
+  ph_inclusion: ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"],
+  ph_psych:
+    "Škola při psychiatrické nemocnici – přepne na režim s tabulkami PHmax pro psychiatrickou školu a načte ukázková data.",
+  ph_health:
+    "ZŠ při zdravotnickém zařízení (ne psychiatrie) – řádky B11–B13, průměr žáků jako u psychiatrie dle zvoleného režimu.",
+  ph_mixed:
+    "Smíšené třídy § 16 odst. 9 a ZŠ speciální – tabulky podle převažujícího oboru vzdělání (B9–B10 vs. B26–B28).",
+  ph_prep:
+    "Přípravná třída základní školy nebo přípravný stupeň ZŠ speciální – samostatné položky PHmax v metodice.",
+};
 
 function clampNonNegative(value: number) {
   return Math.max(0, Number.isFinite(value) ? value : 0);
@@ -1080,6 +1125,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     mixedMethodSecondZsClasses,
     mixedMethodSecondSpecialPupils,
     mixedMethodSecondSpecialClasses,
+    _phmaxAuditTotals: {
+      totalPhmax,
+      totalPha,
+      totalPhp,
+      tab,
+    },
   });
 
   const applySnapshotPayload = (s: Record<string, unknown>, notice: string) => {
@@ -1317,14 +1368,16 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   }, []);
 
   const phmaxJumpSections = useMemo(() => {
-    const items: { id: string; label: string }[] = [
+    const items: { id: string; label: React.ReactNode }[] = [
       { id: "guide", label: "Rozcestník" },
       { id: "setup", label: "Režim" },
     ];
     if (hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) {
       items.push({ id: "basic", label: "Běžné třídy" });
     }
-    if (hasSection("sec16_first") || hasSection("sec16_second")) items.push({ id: "sec16", label: "§ 16/9" });
+    if (hasSection("sec16_first") || hasSection("sec16_second")) {
+      items.push({ id: "sec16", label: <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> });
+    }
     if (hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) {
       items.push({ id: "special", label: "ZŠ speciální" });
     }
@@ -1649,6 +1702,70 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     }
   };
 
+  const handleExportZsAuditJson = () => {
+    downloadPhmaxProductAuditJson(
+      createZsProductAuditProtocol({
+        formSnapshot: buildSnapshot() as Record<string, unknown>,
+        totals: {
+          totalPhmax,
+          breakdown: { totalPha, totalPhp },
+        },
+        validationIssues: [
+          ...warnings.map((w) => ({ severity: "warning" as const, message: w })),
+          ...validationIssues.map((v) => ({
+            severity: "info" as const,
+            code: v.section,
+            message: v.label,
+          })),
+        ],
+        narrative: `${tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"} — ${MODE_CONFIG[mode].label}${
+          exportLabel ? `; export: ${exportLabel}` : ""
+        }`,
+      }),
+      "zs",
+    );
+    setUiNotice("Stažen auditní protokol (JSON).");
+  };
+
+  const handleCompareZsWithNamedSnapshot = () => {
+    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!item) {
+      setUiNotice("Vyberte zálohu pro porovnání s aktuálním stavem.");
+      return;
+    }
+    const stored = parseZsSnapshotAuditTotals(item.snapshot);
+    if (!stored) {
+      setUiNotice(
+        "Vybraná záloha neobsahuje auditní součty. Obnovte ji ze seznamu a uložte znovu jako pojmenovanou zálohu.",
+      );
+      return;
+    }
+    const currentProtocol = createZsProductAuditProtocol({
+      formSnapshot: buildSnapshot() as Record<string, unknown>,
+      totals: { totalPhmax, breakdown: { totalPha, totalPhp } },
+      validationIssues: warnings.map((w) => ({ severity: "warning" as const, message: w })),
+      narrative: "Aktuální stav",
+    });
+    const namedProtocol = createZsProductAuditProtocol({
+      formSnapshot: {
+        namedBackup: item.name,
+        exportLabel: typeof item.snapshot.exportLabel === "string" ? item.snapshot.exportLabel : "",
+        tabAtSave: stored.tab,
+      },
+      totals: {
+        totalPhmax: stored.totalPhmax,
+        breakdown: { totalPha: stored.totalPha, totalPhp: stored.totalPhp },
+      },
+      narrative: item.name,
+    });
+    const cmp = comparePhmaxProductVariants([
+      { id: "current", label: "Aktuální stav", protocol: currentProtocol },
+      { id: "named", label: item.name, protocol: namedProtocol },
+    ]);
+    downloadPhmaxProductCompareJson(cmp, "zs");
+    setUiNotice(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
+  };
+
   const scrollToWorkspaceDock = () => {
     workspaceStickyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -1697,41 +1814,78 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
           <div className="hero-actions">
             <div className="field field--hero-select hero-actions__example">
-              <span className="field__label field__label--hero">Ukázkový příklad</span>
+              <span className="field__label field__label--hero" id="zs-hero-example-label">
+                Ukázkový příklad
+              </span>
               <select
+                id="zs-hero-example-select"
+                aria-labelledby="zs-hero-example-label"
+                aria-describedby="zs-hero-example-legend"
+                title="Ukázkové příklady z metodiky ZŠ. Najeďte na konkrétní řádek v seznamu pro stručný výklad situace a předpisů."
                 value={selectedExample}
                 onChange={(e) => loadExample(e.target.value as ExampleKey)}
               >
                 <option value="">Vyberte ukázkový příklad…</option>
                 <optgroup label="Příloha – modelové postupy PHmax">
-                  <option value="priloha_uplna_zs_sec16">
+                  <option
+                    value="priloha_uplna_zs_sec16"
+                    title={HERO_EXAMPLE_OPTION_TITLES.priloha_uplna_zs_sec16}
+                  >
                     Úplná ZŠ + třídy § 16/9 (obě st., 934 h dle modelu A–D)
                   </option>
-                  <option value="priloha_zs_1st_sec16">
+                  <option
+                    value="priloha_zs_1st_sec16"
+                    title={HERO_EXAMPLE_OPTION_TITLES.priloha_zs_1st_sec16}
+                  >
                     ZŠ jen 1. stupeň + § 16/9 (92 h dle modelu A–D)
                   </option>
-                  <option value="smisene_tridy">
+                  <option value="smisene_tridy" title={HERO_EXAMPLE_OPTION_TITLES.smisene_tridy}>
                     Smíšené třídy § 16/9 + obory C/01 a B/01 (570 h, příloha)
                   </option>
                 </optgroup>
                 <optgroup label="PHmax – další ukázky">
-                  <option value="phmax_bezna_zs">Běžná úplná ZŠ bez § 16/9 v datech (jen běžné třídy)</option>
-                  <option value="inkluzivni_skola">Inkluzivní škola (běžné + § 16/9, jiná čísla než v příloze)</option>
-                  <option value="psychiatricka_nemocnice">Škola při psychiatrické nemocnici</option>
-                  <option value="zdravotnicke_zs">ZŠ při zdravotnickém zařízení (mimo psychiatrii, B11–B13)</option>
-                  <option value="pripravna_trida">Přípravná třída</option>
+                  <option value="phmax_bezna_zs" title={HERO_EXAMPLE_OPTION_TITLES.phmax_bezna_zs}>
+                    Běžná úplná ZŠ bez § 16/9 v datech (jen běžné třídy)
+                  </option>
+                  <option value="inkluzivni_skola" title={HERO_EXAMPLE_OPTION_TITLES.inkluzivni_skola}>
+                    Inkluzivní škola (běžné + § 16/9, jiná čísla než v příloze)
+                  </option>
+                  <option
+                    value="psychiatricka_nemocnice"
+                    title={HERO_EXAMPLE_OPTION_TITLES.psychiatricka_nemocnice}
+                  >
+                    Škola při psychiatrické nemocnici
+                  </option>
+                  <option value="zdravotnicke_zs" title={HERO_EXAMPLE_OPTION_TITLES.zdravotnicke_zs}>
+                    ZŠ při zdravotnickém zařízení (mimo psychiatrii, B11–B13)
+                  </option>
+                  <option value="pripravna_trida" title={HERO_EXAMPLE_OPTION_TITLES.pripravna_trida}>
+                    Přípravná třída
+                  </option>
                 </optgroup>
                 <optgroup label="Příloha – PHAmax (asistenti pedagoga)">
-                  <option value="priloha_phamax_uplna_zs_sec16_zss">
+                  <option
+                    value="priloha_phamax_uplna_zs_sec16_zss"
+                    title={HERO_EXAMPLE_OPTION_TITLES.priloha_phamax_uplna_zs_sec16_zss}
+                  >
                     Úplná ZŠ § 16/9 + ZŠ speciální, rozlišení AD1/AD2 (474 h, ř. B35–B44 dle metodiky v5)
                   </option>
                 </optgroup>
                 <optgroup label="PHPmax – ukázky">
-                  <option value="phpmax_tri_roky">Tříletý průměr + dílčí nezapočtení žáků</option>
-                  <option value="mala_skola_pod_limitem">Menší škola pod limitem PHPmax</option>
-                  <option value="skola_s_odecty_phpmax">Škola s vyššími odečty žáků</option>
+                  <option value="phpmax_tri_roky" title={HERO_EXAMPLE_OPTION_TITLES.phpmax_tri_roky}>
+                    Tříletý průměr + dílčí nezapočtení žáků
+                  </option>
+                  <option value="mala_skola_pod_limitem" title={HERO_EXAMPLE_OPTION_TITLES.mala_skola_pod_limitem}>
+                    Menší škola pod limitem PHPmax
+                  </option>
+                  <option value="skola_s_odecty_phpmax" title={HERO_EXAMPLE_OPTION_TITLES.skola_s_odecty_phpmax}>
+                    Škola s vyššími odečty žáků
+                  </option>
                 </optgroup>
               </select>
+              <p id="zs-hero-example-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "44rem", lineHeight: 1.5 }}>
+                {ZS_GUIDE_NATIVE_TOOLTIP_LEGEND}
+              </p>
             </div>
             <HeroActionsDrawer>
               <div className="hero-actions__group hero-actions__group--primary">
@@ -1822,6 +1976,11 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                       Smazat zálohu
                     </button>
                   </div>
+                  <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                    <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareZsWithNamedSnapshot}>
+                      Porovnat aktuální stav se zálohou (JSON)…
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1853,6 +2012,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   icon={<IconPrintSummary />}
                   onClick={printSummaryWindow}
                 />
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Stáhnout auditní protokol (JSON)"
+                  icon={<IconJson />}
+                  onClick={handleExportZsAuditJson}
+                />
               </div>
             </HeroActionsDrawer>
           </div>
@@ -1876,6 +2041,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <p>
             Průměry u škol při zdravotnickém zařízení a psychiatrii počítá aplikace jako vyšší z minulého roku a aktuálního sběru – doplňte oba sloupce, pokud je znáte.
             Pojmenované zálohy (max. {MAX_NAMED_SNAPSHOTS}) drží celý stav včetně záložky a pole „Označení pro export“.
+            Srovnání aktuálního stavu se zálohou (JSON) používá uložené součty PHmax / PHAmax / PHPmax — u starších záloh z předchozí verze aplikace tuto položku znovu uložte.
           </p>
           <p>{EXPORT_ORIENTACNI_NOTE}</p>
           <p className="onboarding-hero-legend">
@@ -1884,11 +2050,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </p>
           <p>
             V první skupině ukázek jsou čísla z modelových postupů PHmax v metodické příloze (včetně smíšených tříd 570 h).
-            Model § 16/9 a ZŠ speciální (AD1/AD2, řádky B35–B43) je v metodice v5 jako PHAmax – v rozbalovači ukázka „PHAmax“; po načtení se otevře záložka PHAmax.
+            Model <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> a ZŠ speciální (AD1/AD2, řádky B35–B43) je v metodice v5 jako PHAmax – v rozbalovači ukázka „PHAmax“; po načtení se otevře záložka PHAmax.
             Ostatní ukázky doplňují typické situace; údaje můžete po načtení upravit.
           </p>
           <p>
-            <strong>Právní a metodický podklad:</strong> metodika PHmax, PHAmax a PHPmax pro ZV (typicky verze 5 / 2026), NV č. 123/2018 Sb., vyhl. č. 48/2005 Sb.
+            <strong>Právní a metodický podklad:</strong> metodika PHmax, PHAmax a PHPmax pro ZV (typicky verze 5 / 2026),{" "}
+            <ZsLegisRef citeId="nv123-1" label="NV č. 123/2018 Sb." />, <ZsLegisRef citeId="vyhl48" label="vyhl. č. 48/2005 Sb." />.
             Aplikace slouží k orientačnímu výpočtu; nejedná se o oficiální výstup zřizovatele.
           </p>
         </QuickOnboarding>
@@ -1949,17 +2116,41 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
           <div className="grid two">
             <div className="field">
-              <span>Jakou situaci chcete řešit?</span>
-              <select value={wizardChoice} onChange={(e) => applyWizardChoice(e.target.value as WizardChoice)}>
+              <span id="zs-wizard-choice-label">Jakou situaci chcete řešit?</span>
+              <select
+                id="zs-wizard-choice-select"
+                aria-labelledby="zs-wizard-choice-label"
+                aria-describedby="zs-wizard-choice-legend"
+                title="Rychlý rozcestník: po výběru se načte ukázka a přepne se záložka. Najeďte na řádek pro stručný popis situace."
+                value={wizardChoice}
+                onChange={(e) => applyWizardChoice(e.target.value as WizardChoice)}
+              >
                 <option value="">Vyberte situaci…</option>
-                <option value="php_small">Máme menší školu a chceme zjistit PHPmax</option>
-                <option value="php_deductions">Máme žáky, kteří se do PHPmax nezapočítávají</option>
-                <option value="ph_inclusion">Jsme škola s inkluzí a třídami podle § 16</option>
-                <option value="ph_psych">Jsme škola při psychiatrické nemocnici</option>
-                <option value="ph_health">Jsme ZŠ při zdravotnickém zařízení (ne psychiatrie)</option>
-                <option value="ph_mixed">Máme smíšené třídy</option>
-                <option value="ph_prep">Máme přípravnou třídu nebo přípravný stupeň ZŠS</option>
+                <option value="php_small" title={WIZARD_CHOICE_TITLES.php_small}>
+                  Máme menší školu a chceme zjistit PHPmax
+                </option>
+                <option value="php_deductions" title={WIZARD_CHOICE_TITLES.php_deductions}>
+                  Máme žáky, kteří se do PHPmax nezapočítávají
+                </option>
+                <option value="ph_inclusion" title={WIZARD_CHOICE_TITLES.ph_inclusion}>
+                  Jsme škola s inkluzí a třídami podle § 16
+                </option>
+                <option value="ph_psych" title={WIZARD_CHOICE_TITLES.ph_psych}>
+                  Jsme škola při psychiatrické nemocnici
+                </option>
+                <option value="ph_health" title={WIZARD_CHOICE_TITLES.ph_health}>
+                  Jsme ZŠ při zdravotnickém zařízení (ne psychiatrie)
+                </option>
+                <option value="ph_mixed" title={WIZARD_CHOICE_TITLES.ph_mixed}>
+                  Máme smíšené třídy
+                </option>
+                <option value="ph_prep" title={WIZARD_CHOICE_TITLES.ph_prep}>
+                  Máme přípravnou třídu nebo přípravný stupeň ZŠS
+                </option>
               </select>
+              <p id="zs-wizard-choice-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", lineHeight: 1.5 }}>
+                {ZS_GUIDE_NATIVE_TOOLTIP_LEGEND}
+              </p>
             </div>
 
             <div className="subcard">
@@ -1979,17 +2170,25 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <InputOutputLegend />
           <div className="grid two">
             <div className="field">
-              <span>Vyberte režim</span>
+              <span id="zs-mode-select-label">Vyberte režim</span>
               <select
+                id="zs-mode-select"
+                aria-labelledby="zs-mode-select-label"
+                aria-describedby="zs-mode-select-legend"
+                title="Režim určuje viditelné části kalkulačky. U každé položky v seznamu je po najetí myší stručný popis; detail aktivního režimu je vpravo."
                 value={mode}
                 onChange={(e) => setMode(e.target.value as CalculatorMode)}
               >
                 {modeOptions.map((item) => (
-                  <option key={item.id} value={item.id}>
+                  <option key={item.id} value={item.id} title={item.description}>
                     {item.label}
                   </option>
                 ))}
               </select>
+              <p id="zs-mode-select-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", lineHeight: 1.5 }}>
+                Každá položka seznamu má vlastní nápovědu (najetí na řádek). U předpisů lze použít i záložku „Legislativa a
+                výklad (ZŠ)“.
+              </p>
             </div>
 
             <div className="subcard">
@@ -2138,7 +2337,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             <div className="grid two">
               {(hasSection("sec16_first") || hasSection("sec16_second")) && (
                 <section className="card section-card section-card--module section-card--module-support" data-section="sec16">
-                  <h2>Třídy podle § 16 odst. 9</h2>
+                  <h2>
+                    Třídy podle <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" />
+                  </h2>
                   <div className="grid two">
                     {hasSection("sec16_first") && (
                       <>
@@ -2163,9 +2364,40 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                     )}
                   </div>
                   <div className="grid three section-results-strip">
-                    {hasSection("sec16_first") ? <ResultCard label="PHmax § 16/9 – 1. stupeň" value={incl1Phmax} tone="success" /> : null}
-                    {hasSection("sec16_second") ? <ResultCard label="PHmax § 16/9 – 2. stupeň" value={incl2Phmax} tone="success" /> : null}
-                    <ResultCard label="PHmax § 16/9 – celkem" value={inclPhmax} tone="success" />
+                    {hasSection("sec16_first") ? (
+                      <ResultCard
+                        methodStepLabel="PHmax § 16/9 – 1. stupeň"
+                        label={
+                          <>
+                            PHmax <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> – 1. stupeň
+                          </>
+                        }
+                        value={incl1Phmax}
+                        tone="success"
+                      />
+                    ) : null}
+                    {hasSection("sec16_second") ? (
+                      <ResultCard
+                        methodStepLabel="PHmax § 16/9 – 2. stupeň"
+                        label={
+                          <>
+                            PHmax <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> – 2. stupeň
+                          </>
+                        }
+                        value={incl2Phmax}
+                        tone="success"
+                      />
+                    ) : null}
+                    <ResultCard
+                      methodStepLabel="PHmax § 16/9 – celkem"
+                      label={
+                        <>
+                          PHmax <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> – celkem
+                        </>
+                      }
+                      value={inclPhmax}
+                      tone="success"
+                    />
                   </div>
                 </section>
               )}
@@ -2396,7 +2628,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
               {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
                 <section className="card section-card section-card--module section-card--module-mixed mixed-module" data-section="mixed">
-                  <h2>Smíšené třídy § 16 odst. 9 a ZŠ speciální <HelpHint text="Podle metodiky se tyto třídy posuzují samostatně podle převažujícího oboru vzdělání. Pokud ve třídě převažuje obor 79-01-C/01, použijí se řádky B9 až B10. Pokud převažuje 79-01-B/01 nebo je počet žáků shodný, použijí se řádky B26 až B28." /></h2>
+                  <h2>
+                    Smíšené třídy <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" /> a ZŠ speciální{" "}
+                    <HelpHint text="Podle metodiky se tyto třídy posuzují samostatně podle převažujícího oboru vzdělání. Pokud ve třídě převažuje obor 79-01-C/01, použijí se řádky B9 až B10. Pokud převažuje 79-01-B/01 nebo je počet žáků shodný, použijí se řádky B26 až B28." />
+                  </h2>
                   <p className="muted-text mixed-module__lead">
                     Přehled v tabulkách: každý řádek je jeden obor (C/01 běžná ZŠ, B/01 ZŠ speciální). Sloupce vedou od vstupů přes průměr a pásmo až po dílčí PHmax; dole je součet za stupeň.
                   </p>
@@ -2465,9 +2700,14 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             {(hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) && (
               <section className="card section-card section-card--module section-card--module-extras" data-section="extras">
                 <h2>
-                  {hasSection("prep_class") || hasSection("prep_special")
-                    ? "Samostatné položky PHmax"
-                    : "§ 38 a § 41 školského zákona (navýšení PHmax)"}{" "}
+                  {hasSection("prep_class") || hasSection("prep_special") ? (
+                    "Samostatné položky PHmax"
+                  ) : (
+                    <>
+                      <ZsLegisRef citeId="zs-par38" label="§ 38" /> a <ZsLegisRef citeId="zs-par41" label="§ 41" /> školského
+                      zákona (navýšení PHmax)
+                    </>
+                  )}{" "}
                   <HelpHint text="Za žáka podle § 38 nebo § 41 se celkové PHmax školy navyšuje o 0,25 h (1. stupeň) nebo 0,5 h (2. stupeň) na žáka; tito žáci se nezapočítávají do průměru třídy pro tabulky B1–B28. Aplikace neřeší rozvržení hodin do týdnů – k přímé pedagogické činnosti a úvazku viz výklad MŠMT: https://www.msmt.cz/dokumenty/pravni-vyklad-k-23-zakona-opedagogickych-pracovnicich" />
                 </h2>
                 <div className="grid four">
@@ -2491,23 +2731,77 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
                   {hasSection("par38") && (
                     <>
-                      <NumberField label="§ 38 – 1. stupeň" value={p38First} onChange={setP38First} />
-                      <NumberField label="§ 38 – 2. stupeň" value={p38Second} onChange={setP38Second} />
+                      <NumberField
+                        label={
+                          <>
+                            <ZsLegisRef citeId="zs-par38" label="§ 38" /> – 1. stupeň
+                          </>
+                        }
+                        value={p38First}
+                        onChange={setP38First}
+                      />
+                      <NumberField
+                        label={
+                          <>
+                            <ZsLegisRef citeId="zs-par38" label="§ 38" /> – 2. stupeň
+                          </>
+                        }
+                        value={p38Second}
+                        onChange={setP38Second}
+                      />
                     </>
                   )}
 
                   {hasSection("par41") && (
                     <>
-                      <NumberField label="§ 41 – 1. stupeň" value={p41First} onChange={setP41First} />
-                      <NumberField label="§ 41 – 2. stupeň" value={p41Second} onChange={setP41Second} />
+                      <NumberField
+                        label={
+                          <>
+                            <ZsLegisRef citeId="zs-par41" label="§ 41" /> – 1. stupeň
+                          </>
+                        }
+                        value={p41First}
+                        onChange={setP41First}
+                      />
+                      <NumberField
+                        label={
+                          <>
+                            <ZsLegisRef citeId="zs-par41" label="§ 41" /> – 2. stupeň
+                          </>
+                        }
+                        value={p41Second}
+                        onChange={setP41Second}
+                      />
                     </>
                   )}
                 </div>
                 <div className="grid four section-results-strip">
                   {hasSection("prep_class") ? <ResultCard label="PHmax – přípravná třída" value={prepClassPhmax} tone="success" /> : null}
                   {hasSection("prep_special") ? <ResultCard label="PHmax – přípravný stupeň ZŠS" value={prepSpecialPhmax} tone="success" /> : null}
-                  {hasSection("par38") ? <ResultCard label="PHmax – § 38" value={par38Phmax} tone="success" /> : null}
-                  {hasSection("par41") ? <ResultCard label="PHmax – § 41" value={par41Phmax} tone="success" /> : null}
+                  {hasSection("par38") ? (
+                    <ResultCard
+                      methodStepLabel="PHmax – § 38"
+                      label={
+                        <>
+                          PHmax – <ZsLegisRef citeId="zs-par38" label="§ 38" />
+                        </>
+                      }
+                      value={par38Phmax}
+                      tone="success"
+                    />
+                  ) : null}
+                  {hasSection("par41") ? (
+                    <ResultCard
+                      methodStepLabel="PHmax – § 41"
+                      label={
+                        <>
+                          PHmax – <ZsLegisRef citeId="zs-par41" label="§ 41" />
+                        </>
+                      }
+                      value={par41Phmax}
+                      tone="success"
+                    />
+                  ) : null}
                 </div>
               </section>
             )}
@@ -2520,7 +2814,11 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               <h2 className="section-title">Souhrn výsledků PHmax</h2>
               <div className="grid four">
                 <ResultCard label="Běžné třídy" value={basicPhmax} />
-                <ResultCard label="§ 16 odst. 9" value={inclPhmax} />
+                <ResultCard
+                  methodStepLabel="§ 16 odst. 9"
+                  label={<ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" />}
+                  value={inclPhmax}
+                />
                 <ResultCard label="Škola při psychiatrické nemocnici" value={psychPhmax} />
                 <ResultCard label="ZŠ při zdrav. zař. (B11–B13)" value={healthPhmax} />
                 <ResultCard label="Jazyk menšiny" value={minorityPhmax} />
@@ -2550,9 +2848,33 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   }
                   return (
                     <>
-                      {extraDetailRows.map((r) => (
-                        <ResultCard key={r.key} label={r.label} value={r.value} />
-                      ))}
+                      {extraDetailRows.map((r) =>
+                        r.key === "p38" ? (
+                          <ResultCard
+                            key={r.key}
+                            methodStepLabel={r.label}
+                            label={
+                              <>
+                                Samostatné – <ZsLegisRef citeId="zs-par38" label="§ 38" />
+                              </>
+                            }
+                            value={r.value}
+                          />
+                        ) : r.key === "p41" ? (
+                          <ResultCard
+                            key={r.key}
+                            methodStepLabel={r.label}
+                            label={
+                              <>
+                                Samostatné – <ZsLegisRef citeId="zs-par41" label="§ 41" />
+                              </>
+                            }
+                            value={r.value}
+                          />
+                        ) : (
+                          <ResultCard key={r.key} label={r.label} value={r.value} />
+                        ),
+                      )}
                       {extraDetailRows.length > 1 ? (
                         <ResultCard label="Samostatné položky celkem" value={extrasPhmax} />
                       ) : null}
@@ -2569,8 +2891,13 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <section className={`card section-card section-card--pha${hasIssue("pha") ? " card--needs-attention" : ""}`} data-section="pha">
             <h2>PHAmax – asistenti pedagoga</h2>
             <p className="muted-text">
-              U tříd § 16/9 a ZŠ speciální podle metodiky (NV č. 123/2018 Sb., vyhl. č. 48/2005 Sb.) rozlišujte příznak třídy: AD1 (ostatní zdravotní postižení dle § 16 odst. 9) vs. AD2 (těžší varianty – tělesné postižení, PVCH, souběžné postižení, autismus).
-              Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v5; průměr žáků ve skupině stejného typu určí pásmo a hodnotu PHAmax na třídu. Přípravný stupeň ZŠ speciální je řádek B45 (samostatná volba).
+              U tříd <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> a ZŠ speciální podle metodiky (
+              <ZsLegisRef citeId="nv123-1" label="NV č. 123/2018 Sb." />, <ZsLegisRef citeId="vyhl48" label="vyhl. č. 48/2005 Sb." />
+              ) rozlišujte příznak třídy: AD1 (ostatní zdravotní postižení dle{" "}
+              <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" />) vs. AD2 (těžší varianty – tělesné postižení, PVCH,
+              souběžné postižení, autismus). Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v5;
+              průměr žáků ve skupině stejného typu určí pásmo a hodnotu PHAmax na třídu. Přípravný stupeň ZŠ speciální je
+              řádek B45 (samostatná volba).
             </p>
             <InputOutputLegend compact />
             <TableOuter variant="pha" aria-label="Tabulka PHAmax – asistenti pedagoga">
@@ -2796,10 +3123,14 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               <button type="button" className="scroll-tools__btn scroll-tools__btn--active" onClick={() => setProductView("zs")}>
                 ZŠ
               </button>
+              <button type="button" className="scroll-tools__btn" onClick={() => setProductView("ss")}>
+                SŠ
+              </button>
             </div>
           </div>
         ) : null}
 
+        <ProductLegisContextPanel variant="zs" />
         <MethodologyStrip />
 
         <footer className="zs-app-footer">

@@ -23,6 +23,7 @@ import {
   IconCopy,
   IconCsv,
   IconExcel,
+  IconJson,
   IconPrint,
   IconPrintSummary,
   IconResetAll,
@@ -35,6 +36,7 @@ import { HeroStatusBar } from "./HeroStatusBar";
 import { HeroStat } from "./HeroStat";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { MethodologyStrip } from "./MethodologyStrip";
+import { ProductLegisContextPanel, SdLegisRef } from "./PhmaxProductLegisUi";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -48,6 +50,9 @@ import {
   reducedPhmaxIfUnderStaffed,
   suggestedDepartmentsFromPupils,
 } from "./phmax-sd-logic";
+import { createSdProductAuditProtocol } from "./phmax-product-audit";
+import { comparePhmaxProductVariants } from "./phmax-product-compare";
+import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "./phmax-product-audit-download";
 
 function formatSdHours(value: number) {
   return value.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -375,6 +380,38 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     win.print();
   }, [buildSdSummaryText]);
 
+  const buildSdAuditProtocol = useCallback(() => {
+    return createSdProductAuditProtocol({
+      pupilsFirstGrade: pupils,
+      manualDepts,
+      departments,
+    });
+  }, [pupils, manualDepts, departments]);
+
+  const handleExportAuditJson = useCallback(() => {
+    downloadPhmaxProductAuditJson(buildSdAuditProtocol(), "sd");
+    setUiNotice("Stažen auditní protokol (JSON).");
+  }, [buildSdAuditProtocol]);
+
+  const handleCompareWithNamedSnapshot = useCallback(() => {
+    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!item) {
+      setUiNotice("Vyberte v seznamu zálohu, kterou chcete porovnat s aktuálním stavem.");
+      return;
+    }
+    const protocolNamed = createSdProductAuditProtocol({
+      pupilsFirstGrade: item.snapshot.pupils,
+      manualDepts: item.snapshot.manualDepts,
+      departments: item.snapshot.departments,
+    });
+    const cmp = comparePhmaxProductVariants([
+      { id: "current", label: "Aktuální stav", protocol: buildSdAuditProtocol() },
+      { id: "named", label: item.name, protocol: protocolNamed },
+    ]);
+    downloadPhmaxProductCompareJson(cmp, "sd");
+    setUiNotice(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
+  }, [namedSnapshots, selectedNamedId, buildSdAuditProtocol]);
+
   useEffect(() => {
     try {
       localStorage.setItem(SD_STORAGE_KEY, JSON.stringify(buildSdSnapshot()));
@@ -504,6 +541,12 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 icon={<IconCopy />}
                 onClick={() => void copySdSummary()}
               />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Stáhnout auditní protokol (JSON)"
+                icon={<IconJson />}
+                onClick={handleExportAuditJson}
+              />
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions__group hero-actions__group--named">
@@ -546,6 +589,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                   </button>
                   <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
                     Smazat zálohu
+                  </button>
+                </div>
+                <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareWithNamedSnapshot}>
+                    Porovnat aktuální stav se zálohou (JSON)…
                   </button>
                 </div>
               </div>
@@ -711,11 +759,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         {tableWarning ? <p className="card card--warning" style={{ marginTop: 16, padding: 14 }}>{tableWarning}</p> : null}
 
         <p className="muted-text" style={{ marginTop: 20 }}>
-          Aplikace nenahrazuje úřední výpočet ani výkazy (např. Z 2-01). U složitých případů (§ 16 školského zákona,
-          méně než čtyři oddělení, výjimky zřizovatele) vycházejte z úplného znění vyhlášky a metodiky – odkazy níže.
+          Aplikace nenahrazuje úřední výpočet ani výkazy (např. Z 2-01). U složitých případů (
+          <SdLegisRef citeId="sd-skolsky-16" label="§ 16 školského zákona" />, méně než čtyři oddělení, výjimky zřizovatele)
+          vycházejte z úplného znění vyhlášky a metodiky – odkazy níže. Krácení PHmax dle{" "}
+          <SdLegisRef citeId="sd-10-2" label="§ 10 odst. 2 vyhl. 74" /> je v souhrnu výše.
         </p>
       </section>
 
+      <ProductLegisContextPanel variant="sd" />
       <MethodologyStrip />
       <footer className="zs-app-footer">
         <HeroStatusBar

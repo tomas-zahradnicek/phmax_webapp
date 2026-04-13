@@ -110,6 +110,30 @@ export function IconExcel() {
   );
 }
 
+export function IconJson() {
+  return (
+    <svg {...iconProps}>
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
+      <path d="M14 2v6h6" />
+      <text
+        x="12"
+        y="16.2"
+        textAnchor="middle"
+        fill="currentColor"
+        stroke="none"
+        style={{
+          fontSize: "6px",
+          fontWeight: 800,
+          fontFamily: 'system-ui, "Segoe UI", Roboto, sans-serif',
+          letterSpacing: "-0.02em",
+        }}
+      >
+        JSON
+      </text>
+    </svg>
+  );
+}
+
 export function IconCopy() {
   return (
     <svg {...iconProps}>

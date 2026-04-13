@@ -23,6 +23,7 @@ import {
   IconCopy,
   IconCsv,
   IconExcel,
+  IconJson,
   IconPrint,
   IconPrintSummary,
   IconResetAll,
@@ -34,11 +35,15 @@ import { HeroStatusBar } from "./HeroStatusBar";
 import { HeroStat } from "./HeroStat";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { MethodologyStrip } from "./MethodologyStrip";
+import { ProductLegisContextPanel, PvLegisRef } from "./PhmaxProductLegisUi";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
 import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
+import { createPvProductAuditProtocol } from "./phmax-product-audit";
+import { comparePhmaxProductVariants } from "./phmax-product-compare";
+import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "./phmax-product-audit-download";
 import { computePvPhmaxTotal, getPhaMaxPv, getPvMaxClassCount, type PvProvozKind } from "./phmax-pv-logic";
 import { round2 } from "./phmax-zs-logic";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
@@ -456,6 +461,48 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     win.print();
   }, [buildPvSummaryText]);
 
+  const buildPvAuditProtocol = useCallback(() => {
+    return createPvProductAuditProtocol(
+      rows.map((r) => ({
+        label: r.label.trim() || undefined,
+        provoz: r.provoz,
+        classCount: r.classCount,
+        avgHoursPerDay: r.avgHours,
+        sec16ClassCount: r.sec16Count,
+        languageGroupCount: r.languageGroups,
+      })),
+    );
+  }, [rows]);
+
+  const handleExportAuditJson = useCallback(() => {
+    downloadPhmaxProductAuditJson(buildPvAuditProtocol(), "pv");
+    setUiNotice("Stažen auditní protokol (JSON).");
+  }, [buildPvAuditProtocol]);
+
+  const handleCompareWithNamedSnapshot = useCallback(() => {
+    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!item) {
+      setUiNotice("Vyberte v seznamu zálohu, kterou chcete porovnat s aktuálním stavem.");
+      return;
+    }
+    const protocolNamed = createPvProductAuditProtocol(
+      item.snapshot.rows.map((r) => ({
+        label: r.label.trim() || undefined,
+        provoz: r.provoz,
+        classCount: r.classCount,
+        avgHoursPerDay: r.avgHours,
+        sec16ClassCount: r.sec16Count,
+        languageGroupCount: r.languageGroups,
+      })),
+    );
+    const cmp = comparePhmaxProductVariants([
+      { id: "current", label: "Aktuální stav", protocol: buildPvAuditProtocol() },
+      { id: "named", label: item.name, protocol: protocolNamed },
+    ]);
+    downloadPhmaxProductCompareJson(cmp, "pv");
+    setUiNotice(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
+  }, [namedSnapshots, selectedNamedId, buildPvAuditProtocol]);
+
   useEffect(() => {
     try {
       localStorage.setItem(PV_STORAGE_KEY, JSON.stringify(buildPvSnapshot()));
@@ -579,6 +626,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 icon={<IconCopy />}
                 onClick={() => void copyPvSummary()}
               />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Stáhnout auditní protokol (JSON)"
+                icon={<IconJson />}
+                onClick={handleExportAuditJson}
+              />
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions__group hero-actions__group--named">
@@ -621,6 +674,11 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   </button>
                   <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
                     Smazat zálohu
+                  </button>
+                </div>
+                <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareWithNamedSnapshot}>
+                    Porovnat aktuální stav se zálohou (JSON)…
                   </button>
                 </div>
               </div>
@@ -1059,11 +1117,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         ) : null}
 
         <p className="muted-text" style={{ marginTop: 22 }}>
-          Krácení PHmax při výjimkách z nejnižšího počtu dětí (§ 1d odst. 3) v aplikaci neřešíme – nutno dopočítat dle
-          vyhlášky. Odkazy na předpisy a metodiku jsou v přehledu níže.
+          Krácení PHmax při výjimkách z nejnižšího počtu dětí (<PvLegisRef citeId="pv-1d3" label="§ 1d odst. 3" />) v aplikaci
+          neřešíme – nutno dopočítat dle vyhlášky. Odkazy na předpisy a metodiku jsou v přehledu níže.
         </p>
       </section>
 
+      <ProductLegisContextPanel variant="pv" />
       <MethodologyStrip />
       <footer className="zs-app-footer">
         <HeroStatusBar
