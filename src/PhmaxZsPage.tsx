@@ -66,6 +66,14 @@ import {
   TABLE_SCROLL_HINT,
 } from "./calculator-ui-constants";
 import { APP_VERSION } from "./app-version";
+import {
+  confirmDestructive,
+  MSG_CONFIRM_CLEAR_BROWSER_STORAGE,
+  MSG_CONFIRM_ZS_RESET_ALL,
+  MSG_CONFIRM_ZS_RESET_PHA,
+  MSG_CONFIRM_ZS_RESET_PHMAX,
+  MSG_CONFIRM_ZS_RESET_PHP,
+} from "./confirm-destructive";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
 import { useZsNamedSnapshots } from "./useZsNamedSnapshots";
 import { MAX_NAMED_SNAPSHOTS } from "./zs-named-snapshots";
@@ -648,7 +656,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const removeGym = (id: number) => setGymRows((prev) => prev.filter((r) => r.id !== id));
 
 
-  const resetPhmax = () => {
+  const applyResetPhmax = () => {
     setBasicType("full_more_than_2");
     setBasic1Classes(0);
     setBasic1Pupils(0);
@@ -697,11 +705,21 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     setP41Second(0);
   };
 
-  const resetPha = () => {
+  const resetPhmax = () => {
+    if (!confirmDestructive(MSG_CONFIRM_ZS_RESET_PHMAX)) return;
+    applyResetPhmax();
+  };
+
+  const applyResetPha = () => {
     setPhaRows([]);
   };
 
-  const resetPhp = () => {
+  const resetPha = () => {
+    if (!confirmDestructive(MSG_CONFIRM_ZS_RESET_PHA)) return;
+    applyResetPha();
+  };
+
+  const applyResetPhp = () => {
     setPhpWizardStep("a");
     setPhpMethodMode("three_year_avg");
     setPhpYear1(0);
@@ -713,6 +731,11 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     setPhpExcludedSchool(false);
   };
 
+  const resetPhp = () => {
+    if (!confirmDestructive(MSG_CONFIRM_ZS_RESET_PHP)) return;
+    applyResetPhp();
+  };
+
   const resetNv75 = () => {
     setNv75Role("ucitel");
     setNv75School("plavecka_skola");
@@ -721,9 +744,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   };
 
   const resetAll = () => {
-    resetPhmax();
-    resetPha();
-    resetPhp();
+    if (!confirmDestructive(MSG_CONFIRM_ZS_RESET_ALL)) return;
+    applyResetPhmax();
+    applyResetPha();
+    applyResetPhp();
     resetNv75();
     setSelectedExample("");
     setWizardChoice("");
@@ -799,9 +823,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       return;
     }
 
-    resetPhmax();
-    resetPha();
-    resetPhp();
+    applyResetPhmax();
+    applyResetPha();
+    applyResetPhp();
     resetNv75();
     setWizardChoice("");
     setDataMode("example");
@@ -1149,6 +1173,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   };
 
   const clearStoredSnapshot = () => {
+    if (!confirmDestructive(MSG_CONFIRM_CLEAR_BROWSER_STORAGE)) return;
     localStorage.removeItem("edu-cz-zs-calculator-state");
     setLastSavedAt("");
     setUiNotice("Uložená data byla vymazána.");

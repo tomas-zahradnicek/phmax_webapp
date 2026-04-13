@@ -8,6 +8,12 @@ import {
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
+import {
+  confirmDestructive,
+  MSG_CONFIRM_CLEAR_BROWSER_STORAGE,
+  MSG_CONFIRM_RESET_FORM_ALL,
+  msgConfirmDeleteNamedBackup,
+} from "./confirm-destructive";
 import { buildExportMetaRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
@@ -380,6 +386,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       setUiNotice("Vyberte zálohu ke smazání.");
       return;
     }
+    const toDelete = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!toDelete) return;
+    if (!confirmDestructive(msgConfirmDeleteNamedBackup(toDelete.name))) return;
     setNamedSnapshots((prev) => {
       const next = prev.filter((x) => x.id !== selectedNamedId);
       writeNamedPvSnapshotsToLs(next);
@@ -387,9 +396,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     });
     setSelectedNamedId("");
     setUiNotice("Pojmenovaná záloha byla smazána.");
-  }, [selectedNamedId]);
+  }, [namedSnapshots, selectedNamedId]);
 
   const clearPvStoredSnapshot = useCallback(() => {
+    if (!confirmDestructive(MSG_CONFIRM_CLEAR_BROWSER_STORAGE)) return;
     try {
       localStorage.removeItem(PV_STORAGE_KEY);
       setLastSavedAt("");
@@ -400,6 +410,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   }, []);
 
   const resetPvAll = useCallback(() => {
+    if (!confirmDestructive(MSG_CONFIRM_RESET_FORM_ALL)) return;
     setRows([createInitialPvRow()]);
     setUiNotice("Všechna vstupní data kalkulačky byla vymazána.");
   }, []);

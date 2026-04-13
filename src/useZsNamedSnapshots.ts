@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { confirmDestructive, msgConfirmDeleteNamedBackup } from "./confirm-destructive";
 import {
   MAX_NAMED_SNAPSHOTS,
   type NamedZsSnapshot,
@@ -53,6 +54,9 @@ export function useZsNamedSnapshots({
       setUiNotice("Vyberte zálohu ke smazání.");
       return;
     }
+    const toDelete = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!toDelete) return;
+    if (!confirmDestructive(msgConfirmDeleteNamedBackup(toDelete.name))) return;
     setNamedSnapshots((prev) => {
       const next = prev.filter((x) => x.id !== selectedNamedId);
       writeNamedSnapshotsToLs(next);
@@ -60,7 +64,7 @@ export function useZsNamedSnapshots({
     });
     setSelectedNamedId("");
     setUiNotice("Pojmenovaná záloha byla smazána.");
-  }, [selectedNamedId, setUiNotice]);
+  }, [namedSnapshots, selectedNamedId, setUiNotice]);
 
   return {
     namedSnapshots,
