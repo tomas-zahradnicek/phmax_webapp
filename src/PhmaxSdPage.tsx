@@ -8,6 +8,20 @@ import {
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
+import {
+  HeroIconActionButton,
+  IconClearStored,
+  IconCopy,
+  IconCsv,
+  IconExcel,
+  IconPrint,
+  IconPrintSummary,
+  IconResetAll,
+  IconRestoreQuick,
+  IconSaveQuick,
+  IconSpinner,
+} from "./HeroActionIconButton";
+import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { HeroStat } from "./HeroStat";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
@@ -410,47 +424,71 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           <HeroActionsDrawer>
             <div className="hero-actions--stacked__row">
               <span className="hero-actions__cluster" role="group" aria-label="Tisk">
-                <button type="button" className="btn btn--light" onClick={() => window.print()}>
-                  Tisk
-                </button>
-                <button type="button" className="btn btn--light" onClick={printSdSummary}>
-                  Tisk shrnutí
-                </button>
+                <HeroIconActionButton
+                  className="btn btn--light"
+                  label="Tisk stránky"
+                  icon={<IconPrint />}
+                  onClick={() => window.print()}
+                />
+                <HeroIconActionButton
+                  className="btn btn--light"
+                  label="Tisk textového shrnutí"
+                  icon={<IconPrintSummary />}
+                  onClick={printSdSummary}
+                />
               </span>
               <span className="hero-actions__cluster hero-actions__cluster--after" role="group" aria-label="Ukládání">
-                <button type="button" className="btn ghost" onClick={saveSdSnapshotManually}>
-                  Rychle uložit
-                </button>
-                <button type="button" className="btn ghost" onClick={restoreSdSnapshot}>
-                  Rychle obnovit
-                </button>
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Rychle uložit průběh do prohlížeče"
+                  icon={<IconSaveQuick />}
+                  onClick={saveSdSnapshotManually}
+                />
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Rychle obnovit uložený průběh"
+                  icon={<IconRestoreQuick />}
+                  onClick={restoreSdSnapshot}
+                />
               </span>
             </div>
             <div className="hero-actions--stacked__row hero-actions__group--meta">
-              <button type="button" className="btn ghost" onClick={clearSdStoredSnapshot}>
-                Vymazat uložená data
-              </button>
-              <button type="button" className="btn ghost" onClick={resetSdAll}>
-                Vymazat všechny údaje
-              </button>
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Vymazat uložená data v prohlížeči"
+                icon={<IconClearStored />}
+                onClick={clearSdStoredSnapshot}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Vymazat všechny údaje ve formuláři"
+                icon={<IconResetAll />}
+                onClick={resetSdAll}
+              />
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions--stacked__row">
-              <button type="button" className="btn ghost" onClick={handleExportCsv}>
-                CSV
-              </button>
-              <button
-                type="button"
+              <HeroIconActionButton
                 className="btn ghost"
+                label="Exportovat data jako CSV"
+                icon={<IconCsv />}
+                onClick={handleExportCsv}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label={xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout shrnutí jako Excel (.xlsx)"}
+                icon={xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
                 disabled={xlsxExportBusy}
                 aria-busy={xlsxExportBusy}
+                showLabel={xlsxExportBusy}
                 onClick={() => void handleExportXlsx()}
-              >
-                {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
-              </button>
-              <button type="button" className="btn ghost" onClick={() => void copySdSummary()}>
-                Kopírovat shrnutí
-              </button>
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Kopírovat textové shrnutí do schránky"
+                icon={<IconCopy />}
+                onClick={() => void copySdSummary()}
+              />
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions__group hero-actions__group--named">
@@ -605,7 +643,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               Hodiny podle přílohy k vyhlášce č. 74/2005 Sb. (stejně jako ve sloupcích tabulky pro váš počet oddělení).
               Pořadí odpovídá 1. až n-tému oddělení v této tabulce.
             </p>
-            <div className="sd-phmax-breakdown-scroll">
+            <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
               <table className="sd-phmax-breakdown">
                 <thead>
                   <tr>
@@ -643,7 +681,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollGrabRegion>
             {reduction.applied ? (
               <p className="muted-text" style={{ marginTop: 10, fontSize: "0.82rem" }}>
                 Koeficient krácení: {reduction.factor.toFixed(4)}. Jako celkový strop po krácení platí součet v řádku

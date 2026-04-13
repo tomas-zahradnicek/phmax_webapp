@@ -8,6 +8,19 @@ import {
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
+import {
+  HeroIconActionButton,
+  IconClearStored,
+  IconCopy,
+  IconCsv,
+  IconExcel,
+  IconPrint,
+  IconPrintSummary,
+  IconResetAll,
+  IconRestoreQuick,
+  IconSaveQuick,
+  IconSpinner,
+} from "./HeroActionIconButton";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { HeroStat } from "./HeroStat";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
@@ -19,6 +32,7 @@ import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
 import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
 import { computePvPhmaxTotal, getPhaMaxPv, getPvMaxClassCount, type PvProvozKind } from "./phmax-pv-logic";
 import { round2 } from "./phmax-zs-logic";
+import { ScrollGrabRegion } from "./ScrollGrabRegion";
 
 function pvDurationBandTableNo(provoz: PvProvozKind): string {
   if (provoz === "polodenni") return "1";
@@ -481,47 +495,71 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           <HeroActionsDrawer>
             <div className="hero-actions--stacked__row">
               <span className="hero-actions__cluster" role="group" aria-label="Tisk">
-                <button type="button" className="btn btn--light" onClick={() => window.print()}>
-                  Tisk
-                </button>
-                <button type="button" className="btn btn--light" onClick={printPvSummary}>
-                  Tisk shrnutí
-                </button>
+                <HeroIconActionButton
+                  className="btn btn--light"
+                  label="Tisk stránky"
+                  icon={<IconPrint />}
+                  onClick={() => window.print()}
+                />
+                <HeroIconActionButton
+                  className="btn btn--light"
+                  label="Tisk textového shrnutí"
+                  icon={<IconPrintSummary />}
+                  onClick={printPvSummary}
+                />
               </span>
               <span className="hero-actions__cluster hero-actions__cluster--after" role="group" aria-label="Ukládání">
-                <button type="button" className="btn ghost" onClick={savePvSnapshotManually}>
-                  Rychle uložit
-                </button>
-                <button type="button" className="btn ghost" onClick={restorePvSnapshot}>
-                  Rychle obnovit
-                </button>
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Rychle uložit průběh do prohlížeče"
+                  icon={<IconSaveQuick />}
+                  onClick={savePvSnapshotManually}
+                />
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Rychle obnovit uložený průběh"
+                  icon={<IconRestoreQuick />}
+                  onClick={restorePvSnapshot}
+                />
               </span>
             </div>
             <div className="hero-actions--stacked__row hero-actions__group--meta">
-              <button type="button" className="btn ghost" onClick={clearPvStoredSnapshot}>
-                Vymazat uložená data
-              </button>
-              <button type="button" className="btn ghost" onClick={resetPvAll}>
-                Vymazat všechny údaje
-              </button>
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Vymazat uložená data v prohlížeči"
+                icon={<IconClearStored />}
+                onClick={clearPvStoredSnapshot}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Vymazat všechny údaje ve formuláři"
+                icon={<IconResetAll />}
+                onClick={resetPvAll}
+              />
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions--stacked__row">
-              <button type="button" className="btn ghost" onClick={handleExportCsv}>
-                CSV
-              </button>
-              <button
-                type="button"
+              <HeroIconActionButton
                 className="btn ghost"
+                label="Exportovat data jako CSV"
+                icon={<IconCsv />}
+                onClick={handleExportCsv}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label={xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout shrnutí jako Excel (.xlsx)"}
+                icon={xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
                 disabled={xlsxExportBusy}
                 aria-busy={xlsxExportBusy}
+                showLabel={xlsxExportBusy}
                 onClick={() => void handleExportXlsx()}
-              >
-                {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
-              </button>
-              <button type="button" className="btn ghost" onClick={() => void copyPvSummary()}>
-                Kopírovat shrnutí
-              </button>
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Kopírovat textové shrnutí do schránky"
+                icon={<IconCopy />}
+                onClick={() => void copyPvSummary()}
+              />
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions__group hero-actions__group--named">
@@ -596,7 +634,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           Součty níže odpovídají pouze řádkům zadaným v této kalkulačce. Údaje z jiných pracovišť nebo výpočtů zapište a
           sečtěte samostatně podle metodiky (jeden dílčí výpočet na kombinaci místa a druhu provozu).
         </p>
-        <div className="table-scroll">
+        <ScrollGrabRegion className="table-scroll">
           <table className="table">
             <thead>
               <tr>
@@ -633,7 +671,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               </tr>
             </tfoot>
           </table>
-        </div>
+        </ScrollGrabRegion>
       </section>
 
       <section className="card section-card section-card--sd">
@@ -770,7 +808,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   <summary>
                     Detail Pracoviště {index + 1} – vstupy a dílčí PHmax
                   </summary>
-                  <div className="app-table-wrap" role="region" aria-label={`Přehled vstupů pracoviště ${index + 1}`}>
+                  <ScrollGrabRegion className="app-table-wrap" role="region" aria-label={`Přehled vstupů pracoviště ${index + 1}`}>
                     <table className="app-data-table">
                       <caption className="app-data-table__caption">
                         Vstupy – pracoviště {index + 1} ({provozLabel}
@@ -819,7 +857,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                         </tr>
                       </tbody>
                     </table>
-                  </div>
+                  </ScrollGrabRegion>
 
                   {computed.issues.map((issue, i) => (
                     <p key={`${row.id}-${issue.code}-${i}`} className="card card--warning" style={{ marginTop: 14, padding: 12 }}>
@@ -828,7 +866,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   ))}
 
                   {computed.base ? (
-                    <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHmax pracoviště ${index + 1}`}>
+                    <ScrollGrabRegion className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHmax pracoviště ${index + 1}`}>
                       <table className="app-data-table app-data-table--results">
                         <caption className="app-data-table__caption">
                           Výpočet PHmax pro pracoviště {index + 1} (hodiny týdně)
@@ -866,7 +904,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                           </tfoot>
                         ) : null}
                       </table>
-                    </div>
+                    </ScrollGrabRegion>
                   ) : (
                     !computed.issues.length && (
                       <p className="muted-text section-results">Upravte vstupy pracoviště {index + 1} pro výpočet základního PHmax.</p>
@@ -874,7 +912,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   )}
 
                   {phaMax != null ? (
-                    <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHAmax pracoviště ${index + 1}`}>
+                    <ScrollGrabRegion className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHAmax pracoviště ${index + 1}`}>
                       <table className="app-data-table app-data-table--pha">
                         <caption className="app-data-table__caption">PHAmax – pracoviště {index + 1} (asistenti pedagoga, § 16)</caption>
                         <thead>
@@ -897,7 +935,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                           </tr>
                         </tbody>
                       </table>
-                    </div>
+                    </ScrollGrabRegion>
                   ) : null}
                 </details>
               </div>
@@ -923,7 +961,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           </div>
         ) : null}
 
-        <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label="Souhrn všech pracovišť výpočtu">
+        <ScrollGrabRegion className="app-table-wrap app-table-wrap--spaced" role="region" aria-label="Souhrn všech pracovišť výpočtu">
           <table className="app-data-table app-data-table--results">
             <caption className="app-data-table__caption">
               Souhrn – dílčí PHmax podle pracovišť a součet (hodiny týdně)
@@ -988,7 +1026,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               </tr>
             </tfoot>
           </table>
-        </div>
+        </ScrollGrabRegion>
 
         {aggregate.incomplete ? (
           <p className="muted-text" style={{ marginTop: 10, fontSize: "0.9rem" }}>

@@ -35,6 +35,20 @@ import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
+import { ScrollGrabRegion } from "./ScrollGrabRegion";
+import {
+  HeroIconActionButton,
+  IconClearStored,
+  IconCopy,
+  IconCsv,
+  IconExcel,
+  IconPrint,
+  IconPrintSummary,
+  IconResetAll,
+  IconRestoreQuick,
+  IconSaveQuick,
+  IconSpinner,
+} from "./HeroActionIconButton";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { TableOuter } from "./TableOuter";
@@ -1690,24 +1704,39 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             </div>
             <HeroActionsDrawer>
               <div className="hero-actions__group hero-actions__group--primary">
-                <button type="button" className="btn btn--light" onClick={() => window.print()}>
-                  Tisk
-                </button>
-                <button type="button" className="btn ghost" onClick={saveSnapshotManually}>
-                  Rychle uložit
-                </button>
-                <button type="button" className="btn ghost" onClick={restoreSnapshot}>
-                  Rychle obnovit
-                </button>
+                <HeroIconActionButton
+                  className="btn btn--light"
+                  label="Tisk stránky"
+                  icon={<IconPrint />}
+                  onClick={() => window.print()}
+                />
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Rychle uložit průběh do prohlížeče"
+                  icon={<IconSaveQuick />}
+                  onClick={saveSnapshotManually}
+                />
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Rychle obnovit uložený průběh"
+                  icon={<IconRestoreQuick />}
+                  onClick={restoreSnapshot}
+                />
               </div>
               <hr className="hero-actions__divider" aria-hidden="true" />
               <div className="hero-actions__group hero-actions__group--meta">
-                <button type="button" className="btn ghost" onClick={clearStoredSnapshot}>
-                  Vymazat uložená data
-                </button>
-                <button type="button" className="btn ghost" onClick={resetAll}>
-                  Vymazat všechny údaje
-                </button>
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Vymazat uložená data v prohlížeči"
+                  icon={<IconClearStored />}
+                  onClick={clearStoredSnapshot}
+                />
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Vymazat všechny údaje ve formuláři"
+                  icon={<IconResetAll />}
+                  onClick={resetAll}
+                />
               </div>
               <div className="hero-actions__group hero-actions__group--named">
                 <div className="hero-named-grid" aria-label="Export a pojmenované zálohy">
@@ -1766,24 +1795,33 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               </div>
 
               <div className="hero-actions__group hero-actions__group--exports">
-                <button type="button" className="btn ghost" onClick={handleExportCsv}>
-                  CSV
-                </button>
-                <button
-                  type="button"
+                <HeroIconActionButton
                   className="btn ghost"
+                  label="Exportovat data jako CSV"
+                  icon={<IconCsv />}
+                  onClick={handleExportCsv}
+                />
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label={xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout shrnutí jako Excel (.xlsx)"}
+                  icon={xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
                   disabled={xlsxExportBusy}
                   aria-busy={xlsxExportBusy}
+                  showLabel={xlsxExportBusy}
                   onClick={() => void handleExportXlsx()}
-                >
-                  {xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout Excel"}
-                </button>
-                <button type="button" className="btn ghost" onClick={copySummaryToClipboard}>
-                  Kopírovat shrnutí
-                </button>
-                <button type="button" className="btn ghost" onClick={printSummaryWindow}>
-                  Tisk shrnutí
-                </button>
+                />
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Kopírovat textové shrnutí do schránky"
+                  icon={<IconCopy />}
+                  onClick={copySummaryToClipboard}
+                />
+                <HeroIconActionButton
+                  className="btn ghost"
+                  label="Tisk textového shrnutí"
+                  icon={<IconPrintSummary />}
+                  onClick={printSummaryWindow}
+                />
               </div>
             </HeroActionsDrawer>
           </div>
@@ -2274,7 +2312,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   <p className="muted-text gym-module__lead">
                     Každý řádek je jeden typ nižšího ročníku gymnázia. Zadejte třídy a žáci; průměr, pásmo a PHmax se dopočítají. Tabulka používá celou šířku karty – na velmi úzkém displeji se může zobrazit posuvník.
                   </p>
-                  <div className="gym-table-scroll">
+                  <ScrollGrabRegion className="gym-table-scroll">
                     <p className="table-outer__hint table-outer__hint--inset">{TABLE_SCROLL_HINT}</p>
                     <table className="table table--gym">
                       <thead>
@@ -2315,7 +2353,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                       ))}
                     </tbody>
                     </table>
-                  </div>
+                  </ScrollGrabRegion>
                   <button type="button" className="btn ghost gym-module__add" onClick={addGym}>Přidat třídu / řádek</button>
                 </section>
               )}
