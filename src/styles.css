@@ -876,20 +876,37 @@ button.pill--hero-toggle--active {
 .hero-actions-panel-narrow__toggle {
   width: 100%;
   justify-content: center;
+  gap: 8px;
   font-weight: 800;
   font-size: 0.95rem;
   padding: 12px 16px;
   min-height: 48px;
-  border: 2px solid rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+  border: 2px solid rgba(37, 99, 235, 0.45) !important;
   box-shadow:
-    0 4px 18px rgba(15, 23, 42, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.35);
+    0 6px 20px rgba(15, 23, 42, 0.2),
+    0 0 0 2px rgba(147, 197, 253, 0.35);
+}
+
+.hero-actions-panel-narrow__toggle::before {
+  content: "☰";
+  font-size: 0.95rem;
+  line-height: 1;
+  color: #1d4ed8;
 }
 
 .hero-actions-panel-narrow__toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.62) !important;
   box-shadow:
-    0 6px 22px rgba(15, 23, 42, 0.22),
-    0 0 0 1px rgba(255, 255, 255, 0.5);
+    0 9px 24px rgba(15, 23, 42, 0.24),
+    0 0 0 2px rgba(96, 165, 250, 0.45);
+}
+
+.hero-actions-panel-narrow__toggle:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.6);
+  outline-offset: 2px;
 }
 
 /* Portal = mimo hero (overflow:hidden) a nad plovoucími prvky */
@@ -2703,6 +2720,18 @@ input[type="radio"] {
 
   .scroll-tools {
     display: none !important;
+  }
+
+  /* Mobilní drawer akcí nesmí překrýt tisk celé stránky */
+  .hero-actions-panel-portal-root,
+  .hero-actions-panel-backdrop,
+  .hero-actions-panel-drawer,
+  .hero-actions-panel-narrow {
+    display: none !important;
+  }
+
+  body {
+    overflow: visible !important;
   }
 
   .container {

@@ -50,6 +50,14 @@ export function HeroActionsDrawer({
   }, [narrow]);
 
   useEffect(() => {
+    const handleBeforePrint = () => setOpen(false);
+    window.addEventListener("beforeprint", handleBeforePrint);
+    return () => {
+      window.removeEventListener("beforeprint", handleBeforePrint);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeDrawer();
