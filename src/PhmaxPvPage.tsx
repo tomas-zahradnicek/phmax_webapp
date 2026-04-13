@@ -596,7 +596,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           Součty níže odpovídají pouze řádkům zadaným v této kalkulačce. Údaje z jiných pracovišť nebo výpočtů zapište a
           sečtěte samostatně podle metodiky (jeden dílčí výpočet na kombinaci místa a druhu provozu).
         </p>
-        <div className="table-scroll" style={{ overflowX: "auto" }}>
+        <div className="table-scroll">
           <table className="table">
             <thead>
               <tr>

@@ -5,7 +5,8 @@ type CzechTypographyGuardProps = {
 };
 
 const NBSP = "\u00A0";
-const ONE_LETTER_WORD = /(^|[\s\u00A0])([AaIiUuVvOo])\s+(?=\S)/g;
+/** Jednoznaková spojka/předložka (a, i, k, o, s, u, v, z) – pevná mezera před dalším slovem. */
+const ONE_LETTER_WORD = /(^|[\s\u00A0])([AaIiKkOoSsUuVvZz])\s+(?=\S)/g;
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "TEXTAREA", "INPUT", "SELECT", "OPTION", "CODE", "PRE"]);
 
 function normalizeText(text: string): string {

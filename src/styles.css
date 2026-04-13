@@ -2822,6 +2822,12 @@ input[type="radio"] {
   .table-scroll,
   .sd-phmax-breakdown-scroll {
     overflow: visible !important;
+    scrollbar-gutter: auto !important;
+  }
+
+  .app-table-wrap,
+  .gym-table-scroll {
+    scrollbar-gutter: auto !important;
   }
 
   /* Nadpis v hero na celou šířku stránky (druhý sloupec se stejně netiskne) */
@@ -3703,6 +3709,54 @@ input[type="radio"] {
 }
 
 /* Tabulkové přehledy (PV a sdílené) */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 14px;
+}
+
+/* Výraznější horizontální posuvník u širokých tabulek (úzké okno / touch) */
+.app-table-wrap,
+.table-scroll,
+.gym-table-scroll,
+.sd-phmax-breakdown-scroll {
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: #64748b #e8eef4;
+}
+
+.app-table-wrap::-webkit-scrollbar,
+.table-scroll::-webkit-scrollbar,
+.gym-table-scroll::-webkit-scrollbar,
+.sd-phmax-breakdown-scroll::-webkit-scrollbar {
+  height: 12px;
+  width: 12px;
+}
+
+.app-table-wrap::-webkit-scrollbar-track,
+.table-scroll::-webkit-scrollbar-track,
+.gym-table-scroll::-webkit-scrollbar-track,
+.sd-phmax-breakdown-scroll::-webkit-scrollbar-track {
+  background: #e8eef4;
+  border-radius: 8px;
+}
+
+.app-table-wrap::-webkit-scrollbar-thumb,
+.table-scroll::-webkit-scrollbar-thumb,
+.gym-table-scroll::-webkit-scrollbar-thumb,
+.sd-phmax-breakdown-scroll::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 8px;
+  border: 2px solid #e8eef4;
+}
+
+.app-table-wrap::-webkit-scrollbar-thumb:hover,
+.table-scroll::-webkit-scrollbar-thumb:hover,
+.gym-table-scroll::-webkit-scrollbar-thumb:hover,
+.sd-phmax-breakdown-scroll::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
 .app-table-wrap {
   overflow-x: auto;
   margin-top: 18px;
