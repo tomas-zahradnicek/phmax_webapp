@@ -169,7 +169,7 @@ export function ResultCard({
   const meta = stepMeta(step);
 
   return (
-    <div className={`result-card result-card--${tone} result-card--step-${step}`}>
+    <div className={`result-card result-card--output result-card--${tone} result-card--step-${step}`}>
       <div className="result-card__head">
         <div>
           <div className={meta.className}>{meta.text}</div>
