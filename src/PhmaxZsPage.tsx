@@ -1756,10 +1756,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   </div>
                   <div className="hero-named-field hero-named-field--restore-delete">
                     <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
-                      Obnovit vybranou
+                      Obnovit zálohu
                     </button>
                     <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
-                      Smazat vybranou
+                      Smazat zálohu
                     </button>
                   </div>
                 </div>

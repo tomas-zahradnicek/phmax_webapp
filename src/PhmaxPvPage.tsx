@@ -554,7 +554,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                     Pracoviště {index + 1}
                     {row.label.trim() ? ` — ${row.label.trim()}` : ""}
                   </h3>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end", flex: "1 1 280px" }}>
+                  <div
+                    className="pv-workplace-row-header__controls"
+                    style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end", flex: "1 1 280px" }}
+                  >
                     <label className="field pv-label-field" style={{ flex: "1 1 200px", margin: 0, minWidth: 0 }}>
                       <span>Označení (volitelně)</span>
                       <input
