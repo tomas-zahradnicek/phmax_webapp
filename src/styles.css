@@ -2725,6 +2725,10 @@ input[type="radio"] {
     margin: 0 0 3px !important;
   }
 
+  .input-output-legend {
+    display: none !important;
+  }
+
   .hero,
   .card,
   .subcard,
@@ -3886,6 +3890,76 @@ input[type="radio"] {
   border-color: #ea580c;
 }
 
+/* Legenda vstup vs. výstup (.input-output-legend v phmax-zs-ui) */
+.input-output-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(248, 250, 252, 0.88);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #475569;
+}
+
+.input-output-legend__text {
+  margin: 0;
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.input-output-legend__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.input-output-legend__swatch {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 4px 12px 4px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.input-output-legend__swatch--entry {
+  border-left: 4px solid #ea580c;
+  border-color: rgba(234, 88, 12, 0.32);
+  background: linear-gradient(180deg, #fffefb 0%, #fff 100%);
+}
+
+.input-output-legend__swatch--output {
+  border-left: 4px solid #94a3b8;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.96) 0%, #fff 100%);
+}
+
+.input-output-legend__swatch-label {
+  white-space: nowrap;
+}
+
+.input-output-legend--compact {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  gap: 8px 12px;
+}
+
+.input-output-legend--compact .input-output-legend__swatch {
+  min-height: 1.75rem;
+  padding: 3px 10px 3px 8px;
+  font-size: 0.75rem;
+}
+
 .result-card__type {
   display: inline-flex;
   margin-bottom: 3px;
@@ -4203,7 +4277,12 @@ select:focus {
 
 /* Tabulkové vstupy v modulech ZŠ — stejný „vstupní“ vzhled jako NumberField */
 .section-card--module .table td input[type="number"]:not([readonly]):not([disabled]),
-.section-card--module .table td select:not([disabled]) {
+.section-card--module .table td select:not([disabled]),
+.section-card--pha .table td input[type="number"]:not([readonly]):not([disabled]),
+.section-card--pha .table td select:not([disabled]),
+.section-card--module > select:not([disabled]),
+.section-card--guide .field > select:not([disabled]),
+.section-card--setup .field > select:not([disabled]) {
   border: 2px solid rgba(217, 119, 6, 0.42);
   border-left: 4px solid #ea580c;
   background: linear-gradient(180deg, #fffefb 0%, #fff 100%);
@@ -4211,8 +4290,21 @@ select:focus {
   padding: 8px 10px;
 }
 
+.section-card--module > select:not([disabled]) {
+  display: block;
+  width: 100%;
+  max-width: min(100%, 42rem);
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
 .section-card--module .table td input[type="number"]:not([readonly]):not([disabled]):focus-visible,
-.section-card--module .table td select:not([disabled]):focus-visible {
+.section-card--module .table td select:not([disabled]):focus-visible,
+.section-card--pha .table td input[type="number"]:not([readonly]):not([disabled]):focus-visible,
+.section-card--pha .table td select:not([disabled]):focus-visible,
+.section-card--module > select:not([disabled]):focus-visible,
+.section-card--guide .field > select:not([disabled]):focus-visible,
+.section-card--setup .field > select:not([disabled]):focus-visible {
   outline-color: rgba(234, 88, 12, 0.55);
   border-color: rgba(234, 88, 12, 0.5);
 }

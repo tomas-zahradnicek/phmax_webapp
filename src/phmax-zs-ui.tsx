@@ -1,5 +1,9 @@
 import React from "react";
-import { INPUT_OUTPUT_LEGEND_ARIA, INPUT_OUTPUT_LEGEND_TEXT } from "./calculator-ui-constants";
+
+const INPUT_OUTPUT_LEGEND_TEXT =
+  "Oranžový okraj značí pole k vyplnění; šedý levý pruh u karty značí dopočítanou hodnotu, kterou nelze přímo měnit.";
+
+const INPUT_OUTPUT_LEGEND_ARIA = "Legenda: vstupní pole oproti výstupním hodnotám";
 
 type NumberFieldProps = {
   label: string;
