@@ -37,12 +37,35 @@ type PhmaxSdPageProps = {
 
 const SD_ONBOARDING_KEY = "phmax-sd-onboarding";
 const SD_STORAGE_KEY = "edu-cz-sd-calculator-state";
+const SD_NAMED_SNAPSHOTS_LS_KEY = "edu-cz-sd-named-snapshots-v1";
+const SD_MAX_NAMED_SNAPSHOTS = 10;
 
 type SdPersistedSnapshot = {
   pupils: number;
   manualDepts: boolean;
   departments: number;
 };
+
+type NamedSdSnapshot = { id: string; name: string; savedAt: string; snapshot: SdPersistedSnapshot };
+
+function readNamedSdSnapshotsFromLs(): NamedSdSnapshot[] {
+  try {
+    const raw = localStorage.getItem(SD_NAMED_SNAPSHOTS_LS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { items?: NamedSdSnapshot[] };
+    return Array.isArray(parsed.items) ? parsed.items : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeNamedSdSnapshotsToLs(items: NamedSdSnapshot[]) {
+  try {
+    localStorage.setItem(SD_NAMED_SNAPSHOTS_LS_KEY, JSON.stringify({ items }));
+  } catch {
+    /* ignore */
+  }
+}
 
 function parseSdSnapshot(data: unknown): SdPersistedSnapshot | null {
   if (!data || typeof data !== "object") return null;
@@ -74,6 +97,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState("");
   const [uiNotice, setUiNotice] = useState("");
+  const [namedSnapshots, setNamedSnapshots] = useState<NamedSdSnapshot[]>([]);
+  const [selectedNamedId, setSelectedNamedId] = useState("");
+  const [namedSaveName, setNamedSaveName] = useState("");
   const [guideOpen, setGuideOpen] = useState(() => {
     try {
       return localStorage.getItem(SD_ONBOARDING_KEY) !== "1";
@@ -98,6 +124,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       /* ignore */
     }
     setGuideOpen(true);
+  }, []);
+
+  useEffect(() => {
+    setNamedSnapshots(readNamedSdSnapshotsFromLs());
   }, []);
 
   const suggested = useMemo(() => suggestedDepartmentsFromPupils(pupils), [pupils]);
@@ -214,6 +244,43 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       setUiNotice("Obnovení uložených dat se nepodařilo.");
     }
   }, [applySdSnapshot]);
+
+  const saveNamedSnapshot = useCallback(() => {
+    const name = namedSaveName.trim() || new Date().toLocaleString("cs-CZ");
+    const id = `n-${Date.now()}`;
+    const item: NamedSdSnapshot = { id, name, savedAt: new Date().toISOString(), snapshot: buildSdSnapshot() };
+    setNamedSnapshots((prev) => {
+      const next = [item, ...prev].slice(0, SD_MAX_NAMED_SNAPSHOTS);
+      writeNamedSdSnapshotsToLs(next);
+      return next;
+    });
+    setNamedSaveName("");
+    setUiNotice(`Záloha „${name}“ uložena do seznamu (max. ${SD_MAX_NAMED_SNAPSHOTS}).`);
+  }, [buildSdSnapshot, namedSaveName]);
+
+  const restoreNamedSnapshot = useCallback(() => {
+    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!item) {
+      setUiNotice("Vyberte pojmenovanou zálohu v seznamu.");
+      return;
+    }
+    applySdSnapshot(item.snapshot);
+    setUiNotice(`Obnovena záloha „${item.name}“.`);
+  }, [applySdSnapshot, namedSnapshots, selectedNamedId]);
+
+  const deleteNamedSnapshot = useCallback(() => {
+    if (!selectedNamedId) {
+      setUiNotice("Vyberte zálohu ke smazání.");
+      return;
+    }
+    setNamedSnapshots((prev) => {
+      const next = prev.filter((x) => x.id !== selectedNamedId);
+      writeNamedSdSnapshotsToLs(next);
+      return next;
+    });
+    setSelectedNamedId("");
+    setUiNotice("Pojmenovaná záloha byla smazána.");
+  }, [selectedNamedId]);
 
   const clearSdStoredSnapshot = useCallback(() => {
     try {
@@ -352,10 +419,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               </span>
               <span className="hero-actions__cluster hero-actions__cluster--after" role="group" aria-label="Ukládání">
                 <button type="button" className="btn ghost" onClick={saveSdSnapshotManually}>
-                  Uložit
+                  Rychle uložit
                 </button>
                 <button type="button" className="btn ghost" onClick={restoreSdSnapshot}>
-                  Obnovit
+                  Rychle obnovit
                 </button>
               </span>
             </div>
@@ -384,6 +451,51 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               <button type="button" className="btn ghost" onClick={() => void copySdSummary()}>
                 Kopírovat shrnutí
               </button>
+            </div>
+            <hr className="hero-actions__divider" aria-hidden="true" />
+            <div className="hero-actions__group hero-actions__group--named">
+              <div className="hero-named-grid hero-named-grid--simple" aria-label="Pojmenované zálohy">
+                <label className="hero-named-field hero-named-field--backup-name">
+                  <span className="field__label field__label--hero-named">Název zálohy</span>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="např. varianta A"
+                    value={namedSaveName}
+                    onChange={(e) => setNamedSaveName(e.target.value)}
+                    aria-label="Název pojmenované zálohy"
+                  />
+                </label>
+                <div className="hero-named-field hero-named-field--save">
+                  <span className="hero-named-field__btn-slot" aria-hidden="true" />
+                  <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
+                    Uložit do seznamu
+                  </button>
+                </div>
+                <div className="hero-named-field hero-named-field--select">
+                  <select
+                    className="input"
+                    value={selectedNamedId}
+                    onChange={(e) => setSelectedNamedId(e.target.value)}
+                    aria-label="Vybrat uloženou zálohu"
+                  >
+                    <option value="">Vyberte uloženou zálohu…</option>
+                    {namedSnapshots.map((n) => (
+                      <option key={n.id} value={n.id}>
+                        {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="hero-named-field hero-named-field--restore-delete">
+                  <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
+                    Obnovit zálohu
+                  </button>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
+                    Smazat zálohu
+                  </button>
+                </div>
+              </div>
             </div>
           </HeroActionsDrawer>
         </div>

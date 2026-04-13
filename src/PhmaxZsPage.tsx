@@ -1694,10 +1694,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   Tisk
                 </button>
                 <button type="button" className="btn ghost" onClick={saveSnapshotManually}>
-                  Uložit
+                  Rychle uložit
                 </button>
                 <button type="button" className="btn ghost" onClick={restoreSnapshot}>
-                  Obnovit
+                  Rychle obnovit
                 </button>
               </div>
               <hr className="hero-actions__divider" aria-hidden="true" />

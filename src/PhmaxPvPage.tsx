@@ -69,6 +69,29 @@ type PhmaxPvPageProps = {
 
 const PV_ONBOARDING_KEY = "phmax-pv-onboarding";
 const PV_STORAGE_KEY = "edu-cz-pv-calculator-state";
+const PV_NAMED_SNAPSHOTS_LS_KEY = "edu-cz-pv-named-snapshots-v1";
+const PV_MAX_NAMED_SNAPSHOTS = 10;
+
+type NamedPvSnapshot = { id: string; name: string; savedAt: string; snapshot: { rows: PvWorkplaceRowState[] } };
+
+function readNamedPvSnapshotsFromLs(): NamedPvSnapshot[] {
+  try {
+    const raw = localStorage.getItem(PV_NAMED_SNAPSHOTS_LS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { items?: NamedPvSnapshot[] };
+    return Array.isArray(parsed.items) ? parsed.items : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeNamedPvSnapshotsToLs(items: NamedPvSnapshot[]) {
+  try {
+    localStorage.setItem(PV_NAMED_SNAPSHOTS_LS_KEY, JSON.stringify({ items }));
+  } catch {
+    /* ignore */
+  }
+}
 
 const PROVOZ_OPTIONS: { value: PvProvozKind; label: string }[] = [
   { value: "polodenni", label: "Polodenní provoz (tabulka 1)" },
@@ -152,6 +175,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState("");
   const [uiNotice, setUiNotice] = useState("");
+  const [namedSnapshots, setNamedSnapshots] = useState<NamedPvSnapshot[]>([]);
+  const [selectedNamedId, setSelectedNamedId] = useState("");
+  const [namedSaveName, setNamedSaveName] = useState("");
   const [guideOpen, setGuideOpen] = useState(() => {
     try {
       return localStorage.getItem(PV_ONBOARDING_KEY) !== "1";
@@ -176,6 +202,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       /* ignore */
     }
     setGuideOpen(true);
+  }, []);
+
+  useEffect(() => {
+    setNamedSnapshots(readNamedPvSnapshotsFromLs());
   }, []);
 
   const patchRow = useCallback((id: string, patch: Partial<PvWorkplaceRowState>) => {
@@ -300,6 +330,43 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     }
   }, [applyPvSnapshot]);
 
+  const saveNamedSnapshot = useCallback(() => {
+    const name = namedSaveName.trim() || new Date().toLocaleString("cs-CZ");
+    const id = `n-${Date.now()}`;
+    const item: NamedPvSnapshot = { id, name, savedAt: new Date().toISOString(), snapshot: buildPvSnapshot() };
+    setNamedSnapshots((prev) => {
+      const next = [item, ...prev].slice(0, PV_MAX_NAMED_SNAPSHOTS);
+      writeNamedPvSnapshotsToLs(next);
+      return next;
+    });
+    setNamedSaveName("");
+    setUiNotice(`Záloha „${name}“ uložena do seznamu (max. ${PV_MAX_NAMED_SNAPSHOTS}).`);
+  }, [buildPvSnapshot, namedSaveName]);
+
+  const restoreNamedSnapshot = useCallback(() => {
+    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!item) {
+      setUiNotice("Vyberte pojmenovanou zálohu v seznamu.");
+      return;
+    }
+    applyPvSnapshot(item.snapshot);
+    setUiNotice(`Obnovena záloha „${item.name}“.`);
+  }, [applyPvSnapshot, namedSnapshots, selectedNamedId]);
+
+  const deleteNamedSnapshot = useCallback(() => {
+    if (!selectedNamedId) {
+      setUiNotice("Vyberte zálohu ke smazání.");
+      return;
+    }
+    setNamedSnapshots((prev) => {
+      const next = prev.filter((x) => x.id !== selectedNamedId);
+      writeNamedPvSnapshotsToLs(next);
+      return next;
+    });
+    setSelectedNamedId("");
+    setUiNotice("Pojmenovaná záloha byla smazána.");
+  }, [selectedNamedId]);
+
   const clearPvStoredSnapshot = useCallback(() => {
     try {
       localStorage.removeItem(PV_STORAGE_KEY);
@@ -423,10 +490,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               </span>
               <span className="hero-actions__cluster hero-actions__cluster--after" role="group" aria-label="Ukládání">
                 <button type="button" className="btn ghost" onClick={savePvSnapshotManually}>
-                  Uložit
+                  Rychle uložit
                 </button>
                 <button type="button" className="btn ghost" onClick={restorePvSnapshot}>
-                  Obnovit
+                  Rychle obnovit
                 </button>
               </span>
             </div>
@@ -455,6 +522,51 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               <button type="button" className="btn ghost" onClick={() => void copyPvSummary()}>
                 Kopírovat shrnutí
               </button>
+            </div>
+            <hr className="hero-actions__divider" aria-hidden="true" />
+            <div className="hero-actions__group hero-actions__group--named">
+              <div className="hero-named-grid hero-named-grid--simple" aria-label="Pojmenované zálohy">
+                <label className="hero-named-field hero-named-field--backup-name">
+                  <span className="field__label field__label--hero-named">Název zálohy</span>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="např. varianta A"
+                    value={namedSaveName}
+                    onChange={(e) => setNamedSaveName(e.target.value)}
+                    aria-label="Název pojmenované zálohy"
+                  />
+                </label>
+                <div className="hero-named-field hero-named-field--save">
+                  <span className="hero-named-field__btn-slot" aria-hidden="true" />
+                  <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
+                    Uložit do seznamu
+                  </button>
+                </div>
+                <div className="hero-named-field hero-named-field--select">
+                  <select
+                    className="input"
+                    value={selectedNamedId}
+                    onChange={(e) => setSelectedNamedId(e.target.value)}
+                    aria-label="Vybrat uloženou zálohu"
+                  >
+                    <option value="">Vyberte uloženou zálohu…</option>
+                    {namedSnapshots.map((n) => (
+                      <option key={n.id} value={n.id}>
+                        {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="hero-named-field hero-named-field--restore-delete">
+                  <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
+                    Obnovit zálohu
+                  </button>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
+                    Smazat zálohu
+                  </button>
+                </div>
+              </div>
             </div>
           </HeroActionsDrawer>
         </div>
