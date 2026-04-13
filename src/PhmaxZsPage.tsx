@@ -40,6 +40,7 @@ import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { TableOuter } from "./TableOuter";
 import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
+import { InputOutputLegend } from "./InputOutputLegend";
 import {
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
@@ -1871,6 +1872,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <SectionLead>
             Nejste si jistí, kde začít? Vyberte situaci, která se nejvíc blíží vaší škole. Aplikace vás přesměruje na správnou část kalkulačky a vyplní odpovídající ukázkový příklad.
           </SectionLead>
+          <InputOutputLegend compact />
 
           <div className="grid two">
             <div className="field">
@@ -1901,6 +1903,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <SectionLead>
             Tady vyberete, jaký typ výpočtu chcete zobrazit. Rozcestník výše vám může s výběrem pomoci.
           </SectionLead>
+          <InputOutputLegend />
           <div className="grid two">
             <div className="field">
               <span>Vyberte režim</span>
@@ -1947,6 +1950,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             <SectionLead>
               Výsledky navazují na metodický postup A–D: vstupní údaje, výpočet průměru, určení pásma a výsledná hodnota. Každý modul se stanovuje samostatně.
             </SectionLead>
+            <InputOutputLegend compact />
             <div className="results-panel__meta">
               <span className="status-badge status-badge--neutral">Aktivní modul: {tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"}</span>
               <span className={`status-badge ${incompleteSections > 0 ? "status-badge--warning" : "status-badge--ok"}`}>
@@ -2495,6 +2499,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               U tříd § 16/9 a ZŠ speciální podle metodiky (NV č. 123/2018 Sb., vyhl. č. 48/2005 Sb.) rozlišujte příznak třídy: AD1 (ostatní zdravotní postižení dle § 16 odst. 9) vs. AD2 (těžší varianty – tělesné postižení, PVCH, souběžné postižení, autismus).
               Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v5; průměr žáků ve skupině stejného typu určí pásmo a hodnotu PHAmax na třídu. Přípravný stupeň ZŠ speciální je řádek B45 (samostatná volba).
             </p>
+            <InputOutputLegend compact />
             <TableOuter variant="pha" aria-label="Tabulka PHAmax – asistenti pedagoga">
               <table className="table">
                 <thead>
@@ -2550,6 +2555,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             <p className="muted-text">
               Postup výpočtu (kroky A–D): rozhodné počty, očištění dat, výpočet a interpretace. Najeďte na ikonu „i“ u nadpisů pro stručnou metodickou nápovědu.
             </p>
+            <InputOutputLegend compact />
 
             <div className="tabs tabs--compact">
               <button className={phpWizardStep === "a" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("a")}>
