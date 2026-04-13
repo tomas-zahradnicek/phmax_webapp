@@ -60,9 +60,12 @@ import {
   APP_AUTHOR_EMAIL,
   APP_AUTHOR_EXPORT_ROWS,
   EXPORT_ORIENTACNI_NOTE,
+  HERO_ACTIONS_ICON_LEGEND,
+  HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA,
   PRODUCT_CALCULATOR_TITLES,
   TABLE_SCROLL_HINT,
 } from "./calculator-ui-constants";
+import { APP_VERSION } from "./app-version";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
 import { useZsNamedSnapshots } from "./useZsNamedSnapshots";
 import { MAX_NAMED_SNAPSHOTS } from "./zs-named-snapshots";
@@ -1448,6 +1451,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const buildXlsxContextRows = (): [string, string | number][] => {
     const tabLabel = tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax";
     return [
+      ["Verze aplikace", APP_VERSION],
       ["Název exportu", "Kalkulačka ZŠ – souhrn (XLSX)"],
       ["Datum a čas exportu (ISO)", new Date().toISOString()],
       ["Datum a čas exportu (místní)", new Date().toLocaleString("cs-CZ")],
@@ -1473,6 +1477,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     const tabLabel = tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax";
     const head: [string, string | number][] = [
       ["=== Export kalkulačky ZŠ – rozšířený ===", ""],
+      ["Verze aplikace", APP_VERSION],
       ["Datum a čas exportu (ISO)", new Date().toISOString()],
       ["Datum a čas exportu (místní)", new Date().toLocaleString("cs-CZ")],
       ["Metodický podklad (orientačně)", METHODIKA_VERSION_LABEL],
@@ -1848,6 +1853,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             Pojmenované zálohy (max. {MAX_NAMED_SNAPSHOTS}) drží celý stav včetně záložky a pole „Označení pro export“.
           </p>
           <p>{EXPORT_ORIENTACNI_NOTE}</p>
+          <p className="onboarding-hero-legend">
+            {HERO_ACTIONS_ICON_LEGEND}
+            {HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA}
+          </p>
           <p>
             V první skupině ukázek jsou čísla z modelových postupů PHmax v metodické příloze (včetně smíšených tříd 570 h).
             Model § 16/9 a ZŠ speciální (AD1/AD2, řádky B35–B43) je v metodice v5 jako PHAmax – v rozbalovači ukázka „PHAmax“; po načtení se otevře záložka PHAmax.

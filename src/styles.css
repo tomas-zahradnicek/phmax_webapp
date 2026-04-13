@@ -34,6 +34,10 @@
   --radius-lg: 20px;
   --radius-md: 16px;
   --radius-sm: 12px;
+  /* Jednotný viditelný fokus (kontrast ~ WCAG 2.4.7) */
+  --focus-ring-width: 3px;
+  --focus-ring-color: rgba(29, 78, 216, 0.92);
+  --focus-ring-offset: 2px;
 }
 
 * { box-sizing: border-box; }
@@ -73,13 +77,13 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.55);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 a:focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.55);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
   border-radius: 2px;
 }
 
@@ -2639,6 +2643,27 @@ input[type="radio"] {
   font-weight: 600;
 }
 
+.zs-app-footer__credits {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.zs-app-footer__version {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.onboarding-hero-legend {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--muted-strong);
+}
+
 .error-boundary {
   margin: 16px 0;
   padding: 20px 22px;
@@ -3913,7 +3938,7 @@ input[type="radio"] {
 .table-scroll.scroll-x--overflow:focus-visible,
 .gym-table-scroll.scroll-x--overflow:focus-visible,
 .sd-phmax-breakdown-scroll.scroll-x--overflow:focus-visible {
-  outline: 2px solid rgba(37, 99, 235, 0.65);
+  outline: 2px solid var(--focus-ring-color);
   outline-offset: 3px;
 }
 

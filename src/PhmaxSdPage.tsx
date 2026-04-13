@@ -4,9 +4,11 @@ import {
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   EXPORT_ORIENTACNI_NOTE,
+  HERO_ACTIONS_ICON_LEGEND,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
+import { buildExportMetaRows } from "./export-metadata";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import {
@@ -194,7 +196,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   );
 
   const handleExportCsv = useCallback(() => {
-    downloadTextFile(exportFilenameStamped("phmax-sd", "csv"), exportCsvLocalized(exportRows), "text/csv;charset=utf-8");
+    const rows = [...buildExportMetaRows("sd"), ["", ""], ...exportRows];
+    downloadTextFile(exportFilenameStamped("phmax-sd", "csv"), exportCsvLocalized(rows), "text/csv;charset=utf-8");
   }, [exportRows]);
 
   const handleExportXlsx = useCallback(async () => {
@@ -204,9 +207,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       const { downloadCalculatorXlsx } = await import("./export-xlsx");
       await downloadCalculatorXlsx({
         contextRows: [
-          ["Aplikace", "PHmax školní družina"],
-          ["Čas exportu", new Date().toLocaleString("cs-CZ")],
-          ["Vytvořil:", `${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`],
+          ["Aplikace (produkt)", "PHmax – školní družina"],
+          ...buildExportMetaRows("sd"),
+          ["Vytvořil", `${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`],
         ],
         valueRows: exportRows,
         filename: exportFilenameStamped("phmax-sd", "xlsx"),
@@ -553,6 +556,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           Složité případy (§ 16 školského zákona, méně než čtyři oddělení) musíte ověřit v plném znění předpisů.
         </p>
         <p>{EXPORT_ORIENTACNI_NOTE}</p>
+        <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
         <p>
           Export do CSV a Excelu a kopírování shrnutí najdete v horní liště pod nadpisem stránky.
         </p>

@@ -89,10 +89,23 @@ export function IconCsv() {
 export function IconExcel() {
   return (
     <svg {...iconProps}>
-      {/* Tabulka (sešit) + X jako typický odkaz na formát Excel */}
-      <rect x="3" y="4" width="18" height="16" rx="1.25" />
-      <path d="M3 9h18M3 14h18M9 4v16M15 4v16" />
-      <path d="M8.2 8.2l7.6 7.6M15.8 8.2l-7.6 7.6" strokeWidth="2.25" strokeLinecap="round" />
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
+      <path d="M14 2v6h6" />
+      <text
+        x="12"
+        y="16.2"
+        textAnchor="middle"
+        fill="currentColor"
+        stroke="none"
+        style={{
+          fontSize: "5.5px",
+          fontWeight: 800,
+          fontFamily: 'system-ui, "Segoe UI", Roboto, sans-serif',
+          letterSpacing: "-0.04em",
+        }}
+      >
+        XLSX
+      </text>
     </svg>
   );
 }

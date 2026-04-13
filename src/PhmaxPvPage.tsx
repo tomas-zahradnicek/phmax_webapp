@@ -4,9 +4,11 @@ import {
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   EXPORT_ORIENTACNI_NOTE,
+  HERO_ACTIONS_ICON_LEGEND,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
+import { buildExportMetaRows } from "./export-metadata";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import {
@@ -284,7 +286,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   }, [rowComputations, aggregate]);
 
   const handleExportCsv = useCallback(() => {
-    downloadTextFile(exportFilenameStamped("phmax-pv", "csv"), exportCsvLocalized(exportRows), "text/csv;charset=utf-8");
+    const rows = [...buildExportMetaRows("pv"), ["", ""], ...exportRows];
+    downloadTextFile(
+      exportFilenameStamped("phmax-pv", "csv"),
+      exportCsvLocalized(rows),
+      "text/csv;charset=utf-8",
+    );
   }, [exportRows]);
 
   const handleExportXlsx = useCallback(async () => {
@@ -294,9 +301,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       const { downloadCalculatorXlsx } = await import("./export-xlsx");
       await downloadCalculatorXlsx({
         contextRows: [
-          ["Aplikace", "PHmax / PHAmax předškolní vzdělávání"],
-          ["Čas exportu", new Date().toLocaleString("cs-CZ")],
-          ["Vytvořil:", `${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`],
+          ["Aplikace (produkt)", "PHmax / PHAmax – předškolní vzdělávání"],
+          ...buildExportMetaRows("pv"),
+          ["Vytvořil", `${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`],
         ],
         valueRows: exportRows,
         filename: exportFilenameStamped("phmax-pv", "xlsx"),
@@ -621,6 +628,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           matrice M 1 (dříve S 1-01); u MŠ při zdravotnickém zařízení z výkazu S 4-01.
         </p>
         <p>{EXPORT_ORIENTACNI_NOTE}</p>
+        <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
         <p>
           U každého pracoviště zadáváte <strong>druh provozu</strong>, počet tříd, případně navýšení dle vyhlášky a{" "}
           <strong>průměrnou denní dobu provozu v hodinách</strong> (zařadí se do sloupce tabulky 1–3 přílohy). Máte-li{" "}

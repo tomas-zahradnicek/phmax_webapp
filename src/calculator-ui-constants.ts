@@ -29,6 +29,14 @@ export const TABLE_SCROLL_HINT =
 export const EXPORT_ORIENTACNI_NOTE =
   "Soubory CSV a Excel i text kopírovaného shrnutí obsahují zadané údaje a dopočtené hodnoty z této aplikace; slouží k orientaci a předávání, nejsou náhradou oficiálního výstupu školy nebo zřizovatele.";
 
+/** Legenda k ikonám v horní liště (široké okno = tooltip; úzké = panel s popisky). */
+export const HERO_ACTIONS_ICON_LEGEND =
+  "Ikony v liště akcí znamenají: tisk stránky, tisk textového shrnutí, rychlé uložení a obnovení stavu v prohlížeči, vymazání jen uložených dat, úplné vymazání formuláře, export CSV, stažení Excelu (.xlsx), kopírování shrnutí do schránky. Na širokém zobrazení najedete myší na ikonu pro krátký popisek; na úzkém displeji otevřete „Akce…“ – u každé akce je plný text.";
+
+/** Doplněk legendy jen u ZŠ (pojmenované zálohy). */
+export const HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA =
+  " U této kalkulačky jsou v panelu navíc pole pro pojmenované zálohy (název, výběr ze seznamu, obnovení a smazání).";
+
 /** Autor aplikace – e-mail a texty do exportů / shrnutí. */
 export const APP_AUTHOR_EMAIL = "tomas.zahradnicek.hradec@gmail.com";
 
