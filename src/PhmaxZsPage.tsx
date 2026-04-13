@@ -23,7 +23,7 @@ import {
   PsychRow,
   GymRow,
 } from "./phmax-zs-logic";
-import { NumberField, ResultCard } from "./phmax-zs-ui";
+import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
 import type { CalculatorMode, FormSection } from "./config/calculator-config";
 import { MODE_CONFIG } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
@@ -40,7 +40,6 @@ import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { TableOuter } from "./TableOuter";
 import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { InputOutputLegend } from "./InputOutputLegend";
 import {
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,

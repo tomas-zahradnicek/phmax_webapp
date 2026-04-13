@@ -15,7 +15,7 @@ import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
-import { NumberField, ResultCard } from "./phmax-zs-ui";
+import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
 import { round2 } from "./phmax-zs-logic";
 import { buildPhmaxSdExportRows } from "./phmax-sd-export-rows";
 import {
@@ -413,6 +413,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
       <section className="card section-card section-card--sd">
         <h2 className="section-title">Vstupy</h2>
+        <InputOutputLegend />
 
         <div className="grid two">
           <div className="subcard">

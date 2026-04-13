@@ -1,4 +1,5 @@
 import React from "react";
+import { INPUT_OUTPUT_LEGEND_ARIA, INPUT_OUTPUT_LEGEND_TEXT } from "./calculator-ui-constants";
 
 type NumberFieldProps = {
   label: string;
@@ -183,7 +184,32 @@ export function ResultCard({
   );
 }
 
+type InputOutputLegendProps = {
+  /** Menší odsazení a písmo — např. u přilepeného souhrnu výsledků */
+  compact?: boolean;
+  className?: string;
+};
+
+export function InputOutputLegend({ compact = false, className = "" }: InputOutputLegendProps) {
+  const rootClass = ["input-output-legend", compact ? "input-output-legend--compact" : "", className].filter(Boolean).join(" ");
+
+  return (
+    <div className={rootClass} role="note" aria-label={INPUT_OUTPUT_LEGEND_ARIA}>
+      <p className="input-output-legend__text">{INPUT_OUTPUT_LEGEND_TEXT}</p>
+      <div className="input-output-legend__swatches" aria-hidden="true">
+        <span className="input-output-legend__swatch input-output-legend__swatch--entry">
+          <span className="input-output-legend__swatch-label">Zadání</span>
+        </span>
+        <span className="input-output-legend__swatch input-output-legend__swatch--output">
+          <span className="input-output-legend__swatch-label">Výsledek</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default {
   NumberField,
   ResultCard,
+  InputOutputLegend,
 };

@@ -15,7 +15,7 @@ import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
-import { NumberField } from "./phmax-zs-ui";
+import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
 import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
 import { computePvPhmaxTotal, getPhaMaxPv, getPvMaxClassCount, type PvProvozKind } from "./phmax-pv-logic";
 import { round2 } from "./phmax-zs-logic";
@@ -526,6 +526,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
       <section className="card section-card section-card--sd">
         <h2 className="section-title">Vstupy (pracoviště)</h2>
+        <InputOutputLegend />
         <p className="section-lead muted-text" style={{ marginTop: 0 }}>
           Export a tisk najdete v horní liště u nadpisu stránky.
         </p>
