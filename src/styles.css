@@ -198,6 +198,8 @@ button.pill--hero-toggle {
   color: #fff;
   background: rgba(255, 255, 255, 0.22);
   border: 1px solid rgba(255, 255, 255, 0.42);
+  text-transform: none;
+  letter-spacing: normal;
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
@@ -818,6 +820,11 @@ button.pill--hero-toggle--active {
   border-top: 1px solid rgba(37, 99, 235, 0.15);
 }
 
+.scroll-tools__product-btns .scroll-tools__btn {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
 .scroll-tools__btn--active {
   background: rgba(37, 99, 235, 0.14);
   border-color: rgba(29, 78, 216, 0.55);
@@ -1315,8 +1322,8 @@ textarea:hover { border-color: rgba(59, 130, 246, 0.3); }
 
 .subcard {
   border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 12px;
   background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(248,250,252,0.98) 100%);
   box-shadow: var(--shadow-sm);
 }
@@ -1528,19 +1535,19 @@ input[type="radio"] {
 
 .number-field {
   display: block;
-  padding: 14px;
-  border-radius: 18px;
+  padding: 10px 12px;
+  border-radius: 14px;
   border: 1px solid rgba(148, 163, 184, 0.22);
   background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.98) 100%);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
 }
 
 .number-field__label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  font-size: 13px;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 12px;
   font-weight: 700;
   color: #334155;
   letter-spacing: 0.01em;
@@ -1559,14 +1566,14 @@ input[type="radio"] {
 .number-field__input {
   width: 100%;
   appearance: none;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: rgba(255,255,255,1);
   color: #0f172a;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.2;
   font-weight: 700;
-  padding: 14px 44px 14px 14px;
+  padding: 10px 40px 10px 12px;
   outline: none;
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
 }
@@ -1623,13 +1630,14 @@ input[type="radio"] {
 }
 
 .result-card {
-  padding: 16px;
-  border-radius: 18px;
-  min-height: 104px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+  justify-content: flex-start;
+  gap: 4px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.045);
   border: 1px solid rgba(148,163,184,0.22);
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,1) 100%);
 }
@@ -1661,13 +1669,15 @@ input[type="radio"] {
 .subcard .result-card__label,
 .section-card--summary-phmax .grid .result-card__label,
 .section-card--overview .grid .result-card__label {
-  min-height: 4.2em;
+  min-height: 2.6em;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .result-card__value {
-  margin-top: 12px;
-  font-size: 28px;
-  line-height: 1.1;
+  margin-top: 4px;
+  font-size: 21px;
+  line-height: 1.12;
   font-weight: 800;
   color: #0f172a;
   word-break: break-word;
@@ -3622,10 +3632,10 @@ input[type="radio"] {
 
 .result-card__type {
   display: inline-flex;
-  margin-bottom: 6px;
-  padding: 3px 8px;
+  margin-bottom: 3px;
+  padding: 2px 7px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.01em;
   background: rgba(148,163,184,0.12);
@@ -3839,10 +3849,10 @@ input[type="radio"] {
 
 .result-card__type {
   display: inline-flex;
-  margin-bottom: 6px;
-  padding: 4px 8px;
+  margin-bottom: 3px;
+  padding: 2px 7px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.01em;
 }
@@ -3891,13 +3901,13 @@ input[type="radio"] {
   border-color: rgba(22, 163, 74, 0.45);
   box-shadow:
     0 0 0 1px rgba(22, 163, 74, 0.12),
-    0 14px 36px rgba(22, 163, 74, 0.14),
-    0 8px 22px rgba(15, 23, 42, 0.06);
+    0 8px 22px rgba(22, 163, 74, 0.1),
+    0 4px 14px rgba(15, 23, 42, 0.05);
 }
 
 .result-card--step-d .result-card__type--d {
-  font-size: 12px;
-  padding: 5px 11px;
+  font-size: 10px;
+  padding: 3px 8px;
   letter-spacing: 0.02em;
   border: 1px solid rgba(22, 163, 74, 0.28);
   background: linear-gradient(180deg, rgba(240, 253, 244, 0.95) 0%, rgba(220, 252, 231, 0.75) 100%);
@@ -3905,7 +3915,7 @@ input[type="radio"] {
 }
 
 .result-card--step-d .result-card__value {
-  font-size: clamp(1.75rem, 2.8vw + 1rem, 2.15rem);
+  font-size: clamp(1.35rem, 2vw + 0.85rem, 1.75rem);
   font-weight: 900;
   letter-spacing: -0.03em;
 }
@@ -3914,7 +3924,7 @@ input[type="radio"] {
 .result-card--step-b .result-card__value,
 .result-card--step-c .result-card__value {
   font-weight: 800;
-  font-size: 26px;
+  font-size: 19px;
 }
 
 .result-card--step-warning {
@@ -3960,9 +3970,12 @@ input[type="radio"] {
   align-items: stretch;
 }
 
-.subcard,
-.result-card {
+.subcard {
   height: 100%;
+}
+
+.result-card {
+  height: auto;
 }
 
 /* NumberField v subkartách: výška auto, jinak globální height:100% rozbije více polí pod sebou (např. PV). */
@@ -4006,7 +4019,8 @@ input[type="radio"] {
 .section-card .grid.two,
 .section-card .grid.three,
 .section-card .grid.four {
-  align-items: stretch;
+  align-items: start;
+  gap: 10px;
 }
 
 .subcard .grid.two > *,
@@ -4015,25 +4029,19 @@ input[type="radio"] {
 .section-card .grid.two > *,
 .section-card .grid.three > *,
 .section-card .grid.four > * {
-  min-height: 100%;
+  min-height: 0;
 }
 
 .result-card__value {
   display: flex;
   align-items: flex-end;
-  min-height: 54px;
+  min-height: 34px;
 }
 
 .number-field__control--large {
-  min-height: 72px;
+  min-height: 52px;
 }
 
-@media (min-width: 901px) {
-  .subcard .grid.two > *,
-  .section-card .grid.two > * {
-    min-height: 100%;
-  }
-}
 /* ===== SELECT VÝRAZNĚJŠÍ ===== */
 
 select {
