@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollGrabRegion } from "../ScrollGrabRegion";
 import { confirmDestructive, msgConfirmDeleteNamedBackup } from "../confirm-destructive";
-import { HeroActionsDrawer } from "../HeroActionsDrawer";
 import { HeroIconActionButton, IconJson } from "../HeroActionIconButton";
 import { createSsProductAuditProtocol } from "../phmax-product-audit";
 import { comparePhmaxProductVariants } from "../phmax-product-compare";
@@ -84,6 +83,8 @@ function joinRuleMessages(msgs: readonly { message: string }[]): string {
   return msgs.map((m) => m.message).join(" · ");
 }
 
+export type SsDashboardMetrics = { rowCount: number; phmaxTotal: number };
+
 function SsWhyPhmaxWithExplain({ resolved, unitRow }: { resolved: ServiceResolvedRow; unitRow: PhmaxSsUnitRow }) {
   let explanation: ReturnType<typeof explainSingleRow>["explanation"] | undefined;
   const inp = explainInputFromUnitRow(unitRow);
@@ -97,7 +98,11 @@ function SsWhyPhmaxWithExplain({ resolved, unitRow }: { resolved: ServiceResolve
   return <SsWhyPhmaxPanel row={resolved} explanation={explanation} />;
 }
 
-export function PhmaxSsUnitsForm() {
+export function PhmaxSsUnitsForm({
+  onDashboardMetrics,
+}: {
+  onDashboardMetrics?: (m: SsDashboardMetrics) => void;
+} = {}) {
   const sec = PHMAX_SS_UNITS_SECTION;
   const [rows, setRows] = useState<PhmaxSsUnitRow[]>(() => {
     try {
@@ -148,6 +153,10 @@ export function PhmaxSsUnitsForm() {
   const computedRows = preview.filter((p) => !p.skipped && "resolved" in p);
   const totalPhmax = computedRows.reduce((s, p) => s + (p.resolved?.totalPhmax ?? 0), 0);
   const roundedTotal = Math.round((totalPhmax + Number.EPSILON) * 100) / 100;
+
+  useEffect(() => {
+    onDashboardMetrics?.({ rowCount: rows.length, phmaxTotal: roundedTotal });
+  }, [rows.length, roundedTotal, onDashboardMetrics]);
 
   const auditProtocolInput = useMemo(() => buildSsAuditProtocolInput(rows), [rows]);
 
@@ -279,7 +288,11 @@ export function PhmaxSsUnitsForm() {
     !rows[0].isArt82TalentClass;
 
   return (
-    <section className="card" aria-labelledby="ss-units-heading" style={{ marginTop: 24, marginBottom: 24 }}>
+    <section
+      className="card section-card section-card--ss"
+      aria-labelledby="ss-units-heading"
+      style={{ marginTop: 24, marginBottom: 24 }}
+    >
       <h2 id="ss-units-heading" className="section-title">
         {sec.heading}
       </h2>
@@ -289,78 +302,73 @@ export function PhmaxSsUnitsForm() {
       <p className="muted-text" style={{ marginTop: 8, lineHeight: 1.55 }}>
         {sec.storageNote}
       </p>
-      <p className="muted-text" style={{ marginTop: 8, lineHeight: 1.55 }}>
-        Pojmenované zálohy (max. {PHMAX_SS_MAX_NAMED_SNAPSHOTS}) a auditní protokol (stejný formát jako u PV, ŠD a ZŠ) jsou
-        v panelu níže.
-      </p>
 
-      {uiNotice ? (
-        <p className="muted-text" role="status" style={{ marginTop: 12, lineHeight: 1.5 }}>
-          {uiNotice}
+      <div className="subcard ss-units-actions" aria-label="Auditní protokol a zálohy">
+        <h3 style={{ marginTop: 0, marginBottom: 8, fontSize: "1.05rem", fontWeight: 700 }}>
+          Auditní protokol a pojmenované zálohy
+        </h3>
+        <p className="muted-text" style={{ marginTop: 0, marginBottom: 0, lineHeight: 1.55, fontSize: "0.9rem" }}>
+          Stejný formát JSON jako u PV, ŠD a ZŠ. V tomto prohlížeči lze uložit až {PHMAX_SS_MAX_NAMED_SNAPSHOTS}{" "}
+          pojmenovaných stavů řádků.
         </p>
-      ) : null}
-
-      <div className="hero-actions hero-actions--stacked" style={{ marginTop: 14 }}>
-        <HeroActionsDrawer>
-          <div className="hero-actions--stacked__row">
-            <HeroIconActionButton
-              className="btn ghost"
-              label="Stáhnout auditní protokol (JSON)"
-              icon={<IconJson />}
-              onClick={handleExportSsAuditJson}
+        {uiNotice ? (
+          <p className="muted-text" role="status" style={{ marginTop: 12, marginBottom: 0, lineHeight: 1.5 }}>
+            {uiNotice}
+          </p>
+        ) : null}
+        <div className="toolbar" style={{ marginTop: 14, flexWrap: "wrap" }}>
+          <HeroIconActionButton
+            className="btn ghost"
+            label="Stáhnout auditní protokol (JSON)"
+            icon={<IconJson />}
+            onClick={handleExportSsAuditJson}
+          />
+        </div>
+        <div className="grid two ss-named-backups" style={{ marginTop: 16, gap: "12px 18px", alignItems: "end" }}>
+          <label className="field" style={{ marginTop: 0 }}>
+            <span className="field__label">Název zálohy</span>
+            <input
+              type="text"
+              className="input"
+              placeholder="např. varianta A"
+              value={namedSaveName}
+              onChange={(e) => setNamedSaveName(e.target.value)}
+              aria-label="Název pojmenované zálohy"
             />
+          </label>
+          <div style={{ alignSelf: "end" }}>
+            <button type="button" className="btn ghost" style={{ width: "100%" }} onClick={saveNamedSsSnapshot}>
+              Uložit do seznamu
+            </button>
           </div>
-          <hr className="hero-actions__divider" aria-hidden="true" />
-          <div className="hero-actions__group hero-actions__group--named">
-            <div className="hero-named-grid hero-named-grid--simple" aria-label="Pojmenované zálohy SŠ">
-              <label className="hero-named-field hero-named-field--backup-name">
-                <span className="field__label field__label--hero-named">Název zálohy</span>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="např. varianta A"
-                  value={namedSaveName}
-                  onChange={(e) => setNamedSaveName(e.target.value)}
-                  aria-label="Název pojmenované zálohy"
-                />
-              </label>
-              <div className="hero-named-field hero-named-field--save">
-                <span className="hero-named-field__btn-slot" aria-hidden="true" />
-                <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSsSnapshot}>
-                  Uložit do seznamu
-                </button>
-              </div>
-              <div className="hero-named-field hero-named-field--select">
-                <select
-                  className="input"
-                  value={selectedNamedId}
-                  onChange={(e) => setSelectedNamedId(e.target.value)}
-                  aria-label="Vybrat uloženou zálohu"
-                >
-                  <option value="">Vyberte uloženou zálohu…</option>
-                  {namedSnapshots.map((n) => (
-                    <option key={n.id} value={n.id}>
-                      {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="hero-named-field hero-named-field--restore-delete">
-                <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSsSnapshot}>
-                  Obnovit zálohu
-                </button>
-                <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSsSnapshot}>
-                  Smazat zálohu
-                </button>
-              </div>
-              <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
-                <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareSsWithNamedSnapshot}>
-                  Porovnat aktuální stav se zálohou (JSON)…
-                </button>
-              </div>
-            </div>
-          </div>
-        </HeroActionsDrawer>
+        </div>
+        <label className="field" style={{ marginTop: 14 }}>
+          <span className="field__label">Vybrat uloženou zálohu</span>
+          <select
+            className="input"
+            value={selectedNamedId}
+            onChange={(e) => setSelectedNamedId(e.target.value)}
+            aria-label="Vybrat uloženou zálohu"
+          >
+            <option value="">Vyberte uloženou zálohu…</option>
+            {namedSnapshots.map((n) => (
+              <option key={n.id} value={n.id}>
+                {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="toolbar" style={{ marginTop: 12, flexWrap: "wrap", gap: 10 }}>
+          <button type="button" className="btn ghost" onClick={restoreNamedSsSnapshot}>
+            Obnovit zálohu
+          </button>
+          <button type="button" className="btn ghost" onClick={deleteNamedSsSnapshot}>
+            Smazat zálohu
+          </button>
+        </div>
+        <button type="button" className="btn ghost" style={{ marginTop: 12, width: "100%" }} onClick={handleCompareSsWithNamedSnapshot}>
+          Porovnat aktuální stav se zálohou (JSON)…
+        </button>
       </div>
 
       <div style={{ marginTop: 16 }}>
