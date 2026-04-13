@@ -59,6 +59,7 @@ import {
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   APP_AUTHOR_EXPORT_ROWS,
+  EXPORT_ORIENTACNI_NOTE,
   PRODUCT_CALCULATOR_TITLES,
   TABLE_SCROLL_HINT,
 } from "./calculator-ui-constants";
@@ -1846,6 +1847,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             Průměry u škol při zdravotnickém zařízení a psychiatrii počítá aplikace jako vyšší z minulého roku a aktuálního sběru – doplňte oba sloupce, pokud je znáte.
             Pojmenované zálohy (max. {MAX_NAMED_SNAPSHOTS}) drží celý stav včetně záložky a pole „Označení pro export“.
           </p>
+          <p>{EXPORT_ORIENTACNI_NOTE}</p>
           <p>
             V první skupině ukázek jsou čísla z modelových postupů PHmax v metodické příloze (včetně smíšených tříd 570 h).
             Model § 16/9 a ZŠ speciální (AD1/AD2, řádky B35–B43) je v metodice v5 jako PHAmax – v rozbalovači ukázka „PHAmax“; po načtení se otevře záložka PHAmax.

@@ -872,7 +872,21 @@ button.pill--hero-toggle--active {
 .hero-actions-panel-narrow {
   width: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-actions-panel-narrow__footer {
+  margin: 0;
+  max-width: min(100%, 22rem);
+  padding: 0 6px;
+  font-size: 0.78rem;
+  line-height: 1.38;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  text-wrap: balance;
 }
 
 .hero-actions-panel-narrow__toggle {
@@ -3486,6 +3500,12 @@ input[type="radio"] {
   animation: hero-action-icon-spin 0.85s linear infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .hero-action-icon-btn__spinner {
+    animation: none;
+  }
+}
+
 .hero-actions__group--primary,
 .hero-actions__group--meta,
 .hero-actions__group--exports {
@@ -3889,6 +3909,14 @@ input[type="radio"] {
   cursor: pointer;
 }
 
+.app-table-wrap.scroll-x--overflow:focus-visible,
+.table-scroll.scroll-x--overflow:focus-visible,
+.gym-table-scroll.scroll-x--overflow:focus-visible,
+.sd-phmax-breakdown-scroll.scroll-x--overflow:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.65);
+  outline-offset: 3px;
+}
+
 .app-table-wrap {
   overflow-x: auto;
   margin-top: 18px;
@@ -3931,6 +3959,13 @@ input[type="radio"] {
   letter-spacing: 0.06em;
   color: #475569;
   font-weight: 800;
+}
+
+/* PV souhrn: sloupec „Pásmo doby“ bez zbytečného lámání do výšky řádku */
+.app-data-table__band-col {
+  min-width: 12.5rem;
+  max-width: min(36rem, 55vw);
+  white-space: nowrap;
 }
 
 .app-data-table tbody td,

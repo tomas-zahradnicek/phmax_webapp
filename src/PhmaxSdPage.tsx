@@ -3,6 +3,7 @@ import {
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
+  EXPORT_ORIENTACNI_NOTE,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
@@ -551,6 +552,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           vyhlášce č. 74/2005 Sb.; u průměru pod 20 na oddělení může aplikovat orientační krácení dle § 10 odst. 2.
           Složité případy (§ 16 školského zákona, méně než čtyři oddělení) musíte ověřit v plném znění předpisů.
         </p>
+        <p>{EXPORT_ORIENTACNI_NOTE}</p>
         <p>
           Export do CSV a Excelu a kopírování shrnutí najdete v horní liště pod nadpisem stránky.
         </p>

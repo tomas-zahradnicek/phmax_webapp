@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { HERO_ACTIONS_DRAWER_TITLE, HERO_ACTIONS_TRIGGER_LABEL } from "./calculator-ui-constants";
+import {
+  HERO_ACTIONS_DRAWER_TITLE,
+  HERO_ACTIONS_NARROW_FOOTER,
+  HERO_ACTIONS_TRIGGER_LABEL,
+} from "./calculator-ui-constants";
 import { useMatchMedia } from "./useMatchMedia";
 
 type HeroActionsDrawerProps = {
@@ -113,6 +117,7 @@ export function HeroActionsDrawer({
         >
           {triggerLabel}
         </button>
+        <p className="hero-actions-panel-narrow__footer">{HERO_ACTIONS_NARROW_FOOTER}</p>
       </div>
       {open && typeof document !== "undefined"
         ? createPortal(

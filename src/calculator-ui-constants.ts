@@ -9,6 +9,10 @@ export const PRODUCT_CALCULATOR_TITLES = {
 export const HERO_ACTIONS_TRIGGER_LABEL = "Akce, tisk, uložení a export…";
 export const HERO_ACTIONS_DRAWER_TITLE = "Akce a export";
 
+/** Pod tlačítkem panelu akcí na úzkém displeji (ikony v hero nejsou; nápověda k otevření panelu). */
+export const HERO_ACTIONS_NARROW_FOOTER =
+  "Tisk, uložení, export a kopírování shrnutí otevřete tlačítkem výše – v panelu uvidíte popisky u každé akce.";
+
 /** Upozornění k ukládání v prohlížeči – PV a ŠD (jeden slot). */
 export const BROWSER_STORAGE_HINT_SIMPLE =
   "Údaje se ukládají jen v tomto prohlížeči (jedna rozpracovaná situace). Na sdíleném počítači je po práci smažte nebo použijte anonymní režim.";
@@ -17,9 +21,13 @@ export const BROWSER_STORAGE_HINT_SIMPLE =
 export const BROWSER_STORAGE_HINT_ZS =
   "Údaje se ukládají jen v tomto prohlížeči. Na sdíleném počítači je po práci smažte nebo použijte anonymní režim. U této kalkulačky můžete mít více pojmenovaných záloh v seznamu v panelu akcí.";
 
-/** Krátká poznámka k horizontálnímu posuvu širokých tabulek (ZŠ). */
+/** Krátká poznámka k horizontálnímu posuvu širokých tabulek (ZŠ, sdílené oblasti). */
 export const TABLE_SCROLL_HINT =
-  "Na užším displeji tabulku posuňte do stran nebo použijte vodorovný posuvník.";
+  "Na užším displeji tabulku posuňte do stran (posuvník, tažení myší mimo pole a tlačítka, případně Shift + kolečko myši). Když je oblast tabulky aktivní (Tab), posunou ji také šipky vlevo a vpravo.";
+
+/** Věta do nápovědy k exportům – CSV / Excel / shrnutí. */
+export const EXPORT_ORIENTACNI_NOTE =
+  "Soubory CSV a Excel i text kopírovaného shrnutí obsahují zadané údaje a dopočtené hodnoty z této aplikace; slouží k orientaci a předávání, nejsou náhradou oficiálního výstupu školy nebo zřizovatele.";
 
 /** Autor aplikace – e-mail a texty do exportů / shrnutí. */
 export const APP_AUTHOR_EMAIL = "tomas.zahradnicek.hradec@gmail.com";

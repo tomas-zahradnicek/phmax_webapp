@@ -3,6 +3,7 @@ import {
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
+  EXPORT_ORIENTACNI_NOTE,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
@@ -619,6 +620,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           součet PHmax z pracovišť odpovídá celkovému PHmax (po sečtení dílčích výpočtů dle metodiky). Údaje vycházejí z
           matrice M 1 (dříve S 1-01); u MŠ při zdravotnickém zařízení z výkazu S 4-01.
         </p>
+        <p>{EXPORT_ORIENTACNI_NOTE}</p>
         <p>
           U každého pracoviště zadáváte <strong>druh provozu</strong>, počet tříd, případně navýšení dle vyhlášky a{" "}
           <strong>průměrnou denní dobu provozu v hodinách</strong> (zařadí se do sloupce tabulky 1–3 přílohy). Máte-li{" "}
@@ -977,7 +979,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 <th scope="col" className="app-data-table__num">
                   h/den
                 </th>
-                <th scope="col">Pásmo doby</th>
+                <th scope="col" className="app-data-table__band-col">
+                  Pásmo doby
+                </th>
                 <th scope="col" className="app-data-table__num">
                   Dílčí PHmax
                 </th>
@@ -996,7 +1000,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   <td className="app-data-table__num">
                     {c.row.provoz === "zdravotnicke" ? <span className="muted-text">–</span> : c.row.avgHours}
                   </td>
-                  <td>
+                  <td className="app-data-table__band-col">
                     {c.row.provoz === "zdravotnicke" ? (
                       <span className="muted-text">–</span>
                     ) : c.computed.base ? (
