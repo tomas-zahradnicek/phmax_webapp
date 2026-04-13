@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { PhmaxPvPage } from "./PhmaxPvPage";
 import { PhmaxSdPage } from "./PhmaxSdPage";
+import { PhmaxSsPage } from "./PhmaxSsPage";
 import { PhmaxZsPage } from "./PhmaxZsPage";
 import type { ProductView } from "./ProductViewPills";
 import { readInitialProductView } from "./product-view-url";
@@ -19,25 +20,24 @@ export default function App() {
     }
   }, []);
 
-  if (productView === "pv") {
-    return (
-      <div className="app-shell app-shell--gradient">
-        <div className="container container--app">
-          <PhmaxPvPage productView={productView} setProductView={setProductView} />
-        </div>
-      </div>
-    );
-  }
+  const shell = (child: React.ReactNode) => (
+    <div className="app-shell app-shell--gradient">
+      <div className="container container--app">{child}</div>
+    </div>
+  );
 
-  if (productView === "sd") {
-    return (
-      <div className="app-shell app-shell--gradient">
-        <div className="container container--app">
-          <PhmaxSdPage productView={productView} setProductView={setProductView} />
-        </div>
-      </div>
-    );
+  switch (productView) {
+    case "pv":
+      return shell(<PhmaxPvPage productView={productView} setProductView={setProductView} />);
+    case "sd":
+      return shell(<PhmaxSdPage productView={productView} setProductView={setProductView} />);
+    case "ss":
+      return shell(<PhmaxSsPage productView={productView} setProductView={setProductView} />);
+    case "zs":
+      return <PhmaxZsPage productView={productView} setProductView={setProductView} />;
+    default: {
+      const _missing: never = productView;
+      return _missing;
+    }
   }
-
-  return <PhmaxZsPage productView={productView} setProductView={setProductView} />;
 }
