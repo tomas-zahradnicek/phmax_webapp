@@ -390,24 +390,29 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
       </header>
 
-      <QuickOnboarding title="Jak s touto kalkulačkou pracovat" open={guideOpen} onDismiss={dismissGuide}>
+      <QuickOnboarding
+        title="Jak s touto kalkulačkou pracovat"
+        open={guideOpen}
+        onDismiss={dismissGuide}
+        dismissButtonLabel="Skrýt nápovědu"
+      >
         <p>
           Vyplňte počet účastníků a případně počet oddělení (jinak se dopočítá dělením 27). Výsledek vychází z přílohy k
           vyhlášce č. 74/2005 Sb.; u průměru pod 20 na oddělení může aplikovat orientační krácení dle § 10 odst. 2.
           Složité případy (§ 16 školského zákona, méně než čtyři oddělení) musíte ověřit v plném znění předpisů.
         </p>
-      </QuickOnboarding>
-
-      <section className="card section-card section-card--sd">
-        <h2 className="section-title">Vstupy</h2>
-        <p className="muted-text" style={{ marginTop: 0, marginBottom: 12, fontSize: "0.9rem" }}>
+        <p>
           Export do CSV a Excelu a kopírování shrnutí najdete v horní liště pod nadpisem stránky.
         </p>
-        <p className="section-lead muted-text">
+        <p>
           Počet účastníků = žáci 1. stupně ZŠ přihlášení k pravidelné denní docházce (pro krácení PHmax dle § 10 odst. 2).
           Počet oddělení pro nové oddělení nad první: průměr nad 27 účastníků → dělení počtem 27 a zaokrouhlení nahoru
           (u výjimek viz metodiku).
         </p>
+      </QuickOnboarding>
+
+      <section className="card section-card section-card--sd">
+        <h2 className="section-title">Vstupy</h2>
 
         <div className="grid two">
           <div className="subcard">
