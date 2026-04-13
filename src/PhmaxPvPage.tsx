@@ -8,7 +8,7 @@ import {
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
-import { buildExportMetaRows } from "./export-metadata";
+import { buildExportMetaRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import {
@@ -286,7 +286,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   }, [rowComputations, aggregate]);
 
   const handleExportCsv = useCallback(() => {
-    const rows = [...buildExportMetaRows("pv"), ["", ""], ...exportRows];
+    const rows = [...buildExportMetaRows("pv"), EXPORT_CSV_SEPARATOR_ROW, ...exportRows];
     downloadTextFile(
       exportFilenameStamped("phmax-pv", "csv"),
       exportCsvLocalized(rows),
