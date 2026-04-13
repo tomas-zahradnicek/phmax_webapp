@@ -2832,6 +2832,45 @@ input[type="radio"] {
     padding: 6px 8px !important;
   }
 
+  /* PV tisk: menší vertikální mezery a kompaktnější vstupní pole */
+  .section-card--sd .pv-workplace-row {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  .section-card--sd .pv-workplace-row + .pv-workplace-row {
+    margin-top: 8px !important;
+    padding-top: 8px !important;
+  }
+
+  .section-card--sd .pv-workplace-row-header {
+    margin-bottom: 6px !important;
+  }
+
+  .section-card--sd .pv-row-details {
+    margin-top: 8px !important;
+  }
+
+  .section-card--sd .pv-row-details[open] > summary {
+    margin-bottom: 6px !important;
+  }
+
+  .section-card--sd .app-table-wrap {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  .section-card--sd .number-field {
+    max-width: 100% !important;
+    padding: 5px 6px !important;
+  }
+
+  .section-card--sd .number-field__input {
+    min-height: 30px !important;
+    font-size: 11pt !important;
+    padding: 5px 8px !important;
+  }
+
   .app-data-table th,
   .app-data-table td {
     padding: 5px 8px !important;
@@ -4149,7 +4188,18 @@ input[type="radio"] {
 .section-card--sd .pv-workplace-row .field > select {
   border: 2px solid rgba(217, 119, 6, 0.42);
   border-left: 4px solid #ea580c;
-  background: linear-gradient(180deg, #fffefb 0%, #fff 100%);
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #9a3412 50%),
+    linear-gradient(135deg, #9a3412 50%, transparent 50%),
+    linear-gradient(180deg, #fffefb 0%, #fff 100%);
+  background-position:
+    calc(100% - 17px) calc(50% - 2px),
+    calc(100% - 11px) calc(50% - 2px),
+    0 0;
+  background-size: 6px 6px, 6px 6px, 100% 100%;
+  background-repeat: no-repeat;
+  padding-right: 34px;
 }
 
 .section-card--sd .pv-workplace-row .field > input[type="text"]:focus-visible,
@@ -4166,6 +4216,17 @@ input[type="radio"] {
 .section-card--sd .pv-workplace-row .pv-label-field > input[type="text"] {
   padding: 8px 10px;
   border-radius: 11px;
+}
+
+/* PV: kompaktnější vstupní okna (méně opticky robustní) */
+.section-card--sd .number-field {
+  max-width: 28rem;
+}
+
+.section-card--sd .number-field__input {
+  min-height: 52px;
+  font-size: clamp(1.45rem, 1.8vw, 1.8rem);
+  padding: 10px 14px;
 }
 
 .pv-workplace-rows .pv-workplace-row + .pv-workplace-row {
@@ -4299,9 +4360,19 @@ select:focus {
 .section-card--setup .field > select:not([disabled]) {
   border: 2px solid rgba(217, 119, 6, 0.42);
   border-left: 4px solid #ea580c;
-  background: linear-gradient(180deg, #fffefb 0%, #fff 100%);
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #9a3412 50%),
+    linear-gradient(135deg, #9a3412 50%, transparent 50%),
+    linear-gradient(180deg, #fffefb 0%, #fff 100%);
+  background-position:
+    calc(100% - 17px) calc(50% - 2px),
+    calc(100% - 11px) calc(50% - 2px),
+    0 0;
+  background-size: 6px 6px, 6px 6px, 100% 100%;
+  background-repeat: no-repeat;
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 8px 34px 8px 10px;
 }
 
 .section-card--module > select:not([disabled]) {
