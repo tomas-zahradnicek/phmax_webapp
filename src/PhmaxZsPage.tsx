@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   B11_B13,
   B13_MORE_THAN_2,
@@ -29,6 +29,7 @@ import { MODE_CONFIG } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
 import { DEFAULT_MODE } from "./config/default-form-state";
 import { GlossaryDialog } from "./GlossaryDialog";
+import { GlossaryIconButton } from "./GlossaryIconButton";
 import { exportCsvLocalized, downloadTextFile } from "./export-utils";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, ZsLegisRef } from "./PhmaxProductLegisUi";
@@ -207,25 +208,6 @@ function HelpHint({ text }: { text: string }) {
     </span>
   );
 }
-
-
-
-const GlossaryIconButton = forwardRef<HTMLButtonElement, { onClick: () => void; className?: string }>(
-  function GlossaryIconButton({ onClick, className }, ref) {
-  return (
-    <button
-      ref={ref}
-      type="button"
-      className={["glossary-icon-btn", className].filter(Boolean).join(" ")}
-      onClick={onClick}
-      title="Otevřít slovníček pojmů"
-      aria-label="Otevřít slovníček pojmů"
-    >
-      <span className="glossary-icon-btn__book" aria-hidden="true">📘</span>
-      <span className="glossary-icon-btn__label">Slovníček</span>
-    </button>
-  );
-});
 
 function SectionLead({ children }: { children: React.ReactNode }) {
   return <p className="section-lead muted-text">{children}</p>;

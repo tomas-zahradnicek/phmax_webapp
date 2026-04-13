@@ -1814,18 +1814,6 @@ input[type="radio"] {
 .section-card--ss::after { background: radial-gradient(circle, rgba(99,102,241,0.14), transparent 70%); }
 
 /* SŠ hero: kompaktní statistiky jako PV/ŠD (ne jedna vysoká karta) */
-.hero__stats--compact.hero__stats--ss {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  max-width: min(100%, 520px);
-}
-
-@media (max-width: 520px) {
-  .hero__stats--compact.hero__stats--ss {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* SŠ: akce a zálohy uvnitř bílé karty (ne drawer z modrého hero – špatný kontrast mřížky) */
 .subcard.ss-units-actions {
   background: rgba(255, 255, 255, 0.95);
