@@ -8,7 +8,11 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "extract:ss-metodika": "node scripts/extract-ss-metodika-docx.mjs",
+    "docs:concat-md": "node scripts/concat-zdroje-md.mjs",
+    "docs:concat-ts": "node scripts/concat-zdroje-ts.mjs",
+    "docs:concat-all": "node scripts/concat-zdroje-md.mjs && node scripts/concat-zdroje-ts.mjs"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
@@ -16,6 +20,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "jszip": "^3.10.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
