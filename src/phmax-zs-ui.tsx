@@ -189,7 +189,7 @@ export function ResultCard({
 }
 
 type InputOutputLegendProps = {
-  /** Menší odsazení a písmo — např. u přilepeného souhrnu výsledků */
+  /** Menší odsazení a písmo – např. u přilepeného souhrnu výsledků */
   compact?: boolean;
   className?: string;
 };

@@ -20,12 +20,12 @@ export function buildPhmaxPvExportRows(input: {
   const { provozLabel, provoz, classCount, avgHoursPerDay, sec16Count, languageGroups, computed, phaMax } = input;
 
   const rows: PhmaxPvExportRow[] = [
-    ["=== PHmax / PHAmax předškolní vzdělávání — export ===", ""],
+    ["=== PHmax / PHAmax předškolní vzdělávání – export ===", ""],
     ["Druh provozu", provozLabel],
     ["Počet tříd pracoviště MŠ (v daném druhu provozu)", classCount],
     [
       "Průměrná doba provozu pracoviště v hodinách za den (vstup dle přílohy)",
-      provoz === "zdravotnicke" ? "— (31 h/třídu, tabulky 1–3 se nepoužívají)" : avgHoursPerDay,
+      provoz === "zdravotnicke" ? "– (31 h/třídu, tabulky 1–3 se nepoužívají)" : avgHoursPerDay,
     ],
     ["Počet tříd § 16 odst. 9 školského zákona", sec16Count],
     ["Počet skupin jazykové přípravy", languageGroups],
@@ -68,7 +68,7 @@ export function buildPhmaxPvMultiExportRows(
   totals: { phmaxSum: number; phaSum: number; incomplete: boolean }
 ): PhmaxPvExportRow[] {
   const out: PhmaxPvExportRow[] = [
-    ["=== PHmax / PHAmax předškolní vzdělávání — export (více pracovišť) ===", ""],
+    ["=== PHmax / PHAmax předškolní vzdělávání – export (více pracovišť) ===", ""],
     ["Počet pracovišť ve výpočtu", items.length],
     ["", ""],
   ];
@@ -76,7 +76,7 @@ export function buildPhmaxPvMultiExportRows(
   for (const item of items) {
     const header =
       item.label.trim() !== ""
-        ? `--- Pracoviště ${item.index} — ${item.label.trim()} ---`
+        ? `--- Pracoviště ${item.index} – ${item.label.trim()} ---`
         : `--- Pracoviště ${item.index} ---`;
     out.push([header, ""]);
     const block = buildPhmaxPvExportRows({
@@ -97,7 +97,7 @@ export function buildPhmaxPvMultiExportRows(
   if (totals.incomplete) {
     out.push([
       "Poznámka k součtu PHmax",
-      "Do součtu nejsou započítána pracoviště s chybou vstupu — opravte je nebo je vynechte.",
+      "Do součtu nejsou započítána pracoviště s chybou vstupu – opravte je nebo je vynechte.",
     ]);
   }
   out.push(["PHmax celkem (součet dílčích PHmax, h/týden)", totals.phmaxSum]);

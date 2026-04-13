@@ -76,6 +76,6 @@ describe("pickBand", () => {
     const empty: { label: string; test: (x: number) => boolean; value: number }[] = [];
     const r = pickBand(10, empty);
     expect(r.value).toBe(0);
-    expect(r.label).toBe("—");
+    expect(r.label).toBe("–");
   });
 });

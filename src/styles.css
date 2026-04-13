@@ -464,7 +464,7 @@ button.pill--hero-toggle--active {
   gap: 8px;
   max-width: min(100%, 520px);
   margin-left: auto;
-  /* Bez natažení na výšku levého sloupce — karty jen podle obsahu */
+  /* Bez natažení na výšku levého sloupce – karty jen podle obsahu */
   align-self: start;
   align-items: start;
 }
@@ -743,7 +743,7 @@ button.pill--hero-toggle--active {
   color: #0369a1;
 }
 
-/* ZŠ: celý lepkavý blok (záložky + přehled) na mobilu nelepí — nezasahuje do obsahu pod ním */
+/* ZŠ: celý lepkavý blok (záložky + přehled) na mobilu nelepí – nezasahuje do obsahu pod ním */
 @media (max-width: 900px) {
   .workspace-sticky {
     position: static;
@@ -2975,7 +2975,7 @@ input[type="radio"] {
     line-height: 1.22 !important;
   }
 
-  /* Bez rezervy výšky pro zarovnání mřížky — úsporný tisk */
+  /* Bez rezervy výšky pro zarovnání mřížky – úsporný tisk */
   .section-card--module .result-card__label,
   .subcard .result-card__label,
   .section-card--summary-phmax .grid .result-card__label,
@@ -3000,7 +3000,7 @@ input[type="radio"] {
     font-weight: 800 !important;
   }
 
-  /* Úsporný tisk polí „Krok A“ (NumberField) — bez natahování mřížkou */
+  /* Úsporný tisk polí „Krok A“ (NumberField) – bez natahování mřížkou */
   .number-field {
     padding: 3px 5px !important;
     border-radius: 5px !important;
@@ -4000,7 +4000,7 @@ input[type="radio"] {
 
 /* Detail methodology mapping in cards */
 
-/* Vstupní pole (číselníky) — teplý levý akcent, aby se odlišila od výstupních karet */
+/* Vstupní pole (číselníky) – teplý levý akcent, aby se odlišila od výstupních karet */
 .number-field--entry {
   border: 1px solid rgba(234, 88, 12, 0.26);
   border-left: 4px solid #ea580c;
@@ -4189,7 +4189,7 @@ input[type="radio"] {
   background: linear-gradient(180deg, rgba(254,242,242,0.96) 0%, rgba(255,255,255,1) 100%);
 }
 
-/* Výstupní karty (vypočtené hodnoty) — studený levý „kolík“, bez úpravy uživatelem */
+/* Výstupní karty (vypočtené hodnoty) – studený levý „kolík“, bez úpravy uživatelem */
 .result-card--output {
   cursor: default;
   border-left: 4px solid #94a3b8;
@@ -4285,7 +4285,7 @@ input[type="radio"] {
   margin-top: 16px;
 }
 
-/* PV: textové vstupy a select v pracovištích — stejný vstupní akcent jako NumberField */
+/* PV: textové vstupy a select v pracovištích – stejný vstupní akcent jako NumberField */
 .section-card--sd .pv-workplace-row .field > input[type="text"],
 .section-card--sd .pv-workplace-row .field > select {
   border: 2px solid rgba(217, 119, 6, 0.42);
@@ -4478,7 +4478,7 @@ select:focus {
   min-width: min(100%, 11rem);
 }
 
-/* Tabulkové vstupy v modulech ZŠ — stejný „vstupní“ vzhled jako NumberField */
+/* Tabulkové vstupy v modulech ZŠ – stejný „vstupní“ vzhled jako NumberField */
 .section-card--module .table td input[type="number"]:not([readonly]):not([disabled]),
 .section-card--module .table td select:not([disabled]),
 .section-card--pha .table td input[type="number"]:not([readonly]):not([disabled]),

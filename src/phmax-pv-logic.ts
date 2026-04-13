@@ -57,7 +57,7 @@ export const PV_POLODENNI_BAND_OPTIONS: readonly string[] = [
   "od 6 h včetně do 6,5 h včetně",
 ];
 
-/** Tabulka 2 — sloupce v pořadí jako v příloze. */
+/** Tabulka 2 – sloupce v pořadí jako v příloze. */
 export const PV_CELODENNI_BAND_OPTIONS: readonly string[] = [
   "nad 6,5 h do méně než 7 h",
   "od 7 h včetně do méně než 7,5 h",
@@ -141,7 +141,7 @@ export function internatDurationColumnIndex(avgHoursPerDay: number): number | nu
 
 /**
  * PHmax z tabulek 1–3 podle metodiky: **počet tříd pracoviště** (řádek) a **průměrná denní doba provozu v hodinách**
- * (sloupec — aplikace zařadí do příslušného pásma jako v příloze).
+ * (sloupec – aplikace zařadí do příslušného pásma jako v příloze).
  */
 export function getPhmaxPvBase(params: {
   provoz: PvProvozKind;
@@ -180,7 +180,7 @@ export function getPhmaxPvBase(params: {
     if (classCount > PHMAX_PV_POLODENNI.length) {
       issues.push({
         code: "classes",
-        message: `Tabulka polodenního provozu v aplikaci má ${PHMAX_PV_POLODENNI.length} tříd — nad limit použijte přílohu metodiky.`,
+        message: `Tabulka polodenního provozu v aplikaci má ${PHMAX_PV_POLODENNI.length} tříd – nad limit použijte přílohu metodiky.`,
       });
       return { data: null, issues };
     }
@@ -200,7 +200,7 @@ export function getPhmaxPvBase(params: {
       issues.push({
         code: "duration",
         message:
-          "Celodenní provoz (tabulka 2): průměrná denní doba musí být vyšší než 6,5 h a nejvýše 12 h včetně (poslední sloupec). Do 6,5 h včetně patří tabulka 1 — polodenní provoz.",
+          "Celodenní provoz (tabulka 2): průměrná denní doba musí být vyšší než 6,5 h a nejvýše 12 h včetně (poslední sloupec). Do 6,5 h včetně patří tabulka 1 – polodenní provoz.",
       });
       return { data: null, issues };
     }

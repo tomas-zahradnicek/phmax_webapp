@@ -149,7 +149,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
   const tableWarning =
     effectiveDepts > SD_MAX_DEPARTMENTS_IN_TABLE
-      ? `Tabulka PHmax v této aplikaci končí ${SD_MAX_DEPARTMENTS_IN_TABLE} odděleními — u vyššího počtu použijte přílohu vyhlášky.`
+      ? `Tabulka PHmax v této aplikaci končí ${SD_MAX_DEPARTMENTS_IN_TABLE} odděleními – u vyššího počtu použijte přílohu vyhlášky.`
       : null;
 
   const exportRows = useMemo(
@@ -301,7 +301,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
   const buildSdSummaryText = useCallback(() => {
     const phmaxLine =
-      basePhmax != null ? `PHmax (po krácení): ${formatSdHours(reduction.adjusted)}` : "PHmax: —";
+      basePhmax != null ? `PHmax (po krácení): ${formatSdHours(reduction.adjusted)}` : "PHmax: –";
     const baseLine = basePhmax != null ? `PHmax (základ z tabulky): ${formatSdHours(basePhmax)}` : "";
     const kraceni = reduction.applied
       ? `ano (${(Math.round(reduction.factor * 1000) / 10).toLocaleString("cs-CZ")} %)`
@@ -383,7 +383,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               <strong>vyhlášky č. 74/2005 Sb., o zájmovém vzdělávání</strong> (zejména § 10 a{" "}
               <strong>přílohy s tabulkou</strong> týdenního nejvyššího rozsahu přímé pedagogické činnosti / PHmax podle
               počtu oddělení) a metodických pokynů MŠMT. U „speciálních“ oddělení dle § 16 školského zákona a u méně než
-              čtyř oddělení platí další pravidla — vždy vycházejte z úplného znění vyhlášky a metodiky.
+              čtyř oddělení platí další pravidla – vždy vycházejte z úplného znění vyhlášky a metodiky.
             </p>
           </div>
           <div className="hero__stats hero__stats--compact hero__stats--sd">
@@ -392,7 +392,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <HeroStat
               compact
               label="PHmax"
-              value={basePhmax != null ? formatSdHours(reduction.adjusted) : "—"}
+              value={basePhmax != null ? formatSdHours(reduction.adjusted) : "–"}
             />
             <HeroStat
               compact
@@ -657,7 +657,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
         <p className="muted-text" style={{ marginTop: 20 }}>
           Aplikace nenahrazuje úřední výpočet ani výkazy (např. Z 2-01). U složitých případů (§ 16 školského zákona,
-          méně než čtyři oddělení, výjimky zřizovatele) vycházejte z úplného znění vyhlášky a metodiky — odkazy níže.
+          méně než čtyři oddělení, výjimky zřizovatele) vycházejte z úplného znění vyhlášky a metodiky – odkazy níže.
         </p>
       </section>
 

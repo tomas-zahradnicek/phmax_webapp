@@ -1,4 +1,4 @@
-/** Plné názvy produktů — zápatí a přístupnost u kompaktních záložek v hero. */
+/** Plné názvy produktů – zápatí a přístupnost u kompaktních záložek v hero. */
 export const PRODUCT_CALCULATOR_TITLES = {
   pv: "Kalkulačka pro předškolní vzdělávání",
   sd: "Kalkulačka pro školní družiny",
@@ -21,7 +21,7 @@ export const BROWSER_STORAGE_HINT_ZS =
 export const TABLE_SCROLL_HINT =
   "Na užším displeji tabulku posuňte do stran nebo použijte vodorovný posuvník.";
 
-/** Autor aplikace — e-mail a texty do exportů / shrnutí. */
+/** Autor aplikace – e-mail a texty do exportů / shrnutí. */
 export const APP_AUTHOR_EMAIL = "tomas.zahradnicek.hradec@gmail.com";
 
 export const APP_AUTHOR_DISPLAY_NAME = "Mgr. Tomáš Zahradníček";

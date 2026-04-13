@@ -389,7 +389,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       `Čas: ${new Date().toLocaleString("cs-CZ")}`,
       `Počet pracovišť ve výpočtu: ${rows.length}`,
       `PHmax celkem: ${aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}`,
-      `PHAmax celkem: ${aggregate.phaSum > 0 ? aggregate.phaSum : "—"}`,
+      `PHAmax celkem: ${aggregate.phaSum > 0 ? aggregate.phaSum : "–"}`,
       "",
       aggregate.incomplete ? "* PHmax nezahrnuje pracoviště s neplatným vstupem." : "",
       "",
@@ -462,7 +462,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             </p>
             {aggregate.incomplete ? (
               <p className="hero__note hero__text--sd" style={{ marginTop: 10 }}>
-                * Součet PHmax nezahrnuje pracoviště s neplatným vstupem — opravte je v tabulce níže.
+                * Součet PHmax nezahrnuje pracoviště s neplatným vstupem – opravte je v tabulce níže.
               </p>
             ) : null}
           </div>
@@ -473,7 +473,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               label="PHmax celkem"
               value={aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}
             />
-            <HeroStat compact label="PHAmax celkem" value={aggregate.phaSum > 0 ? aggregate.phaSum : "—"} />
+            <HeroStat compact label="PHAmax celkem" value={aggregate.phaSum > 0 ? aggregate.phaSum : "–"} />
           </div>
         </div>
 
@@ -572,11 +572,11 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         </div>
       </header>
 
-      <QuickOnboarding title="Nápověda — předškolní vzdělávání" open={guideOpen} onDismiss={dismissGuide}>
+      <QuickOnboarding title="Nápověda – předškolní vzdělávání" open={guideOpen} onDismiss={dismissGuide}>
         <p>
           Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a vyhlášky č.
           14/2005 Sb. Každé <strong>číslované pracoviště</strong> ve formuláři (Pracoviště 1, 2…) odpovídá jedné
-          kombinaci <strong>místa (nebo jeho části) a druhu provozu</strong> — stejně jako jeden řádek v tabulkové
+          kombinaci <strong>místa (nebo jeho části) a druhu provozu</strong> – stejně jako jeden řádek v tabulkové
           pomůcce MŠMT. U právnické osoby s více skutečnými pracovišti nebo více druhy provozu přidejte další položku;
           součet PHmax z pracovišť odpovídá celkovému PHmax (po sečtení dílčích výpočtů dle metodiky). Údaje vycházejí z
           matrice M 1 (dříve S 1-01); u MŠ při zdravotnickém zařízení z výkazu S 4-01.
@@ -585,7 +585,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           U každého pracoviště zadáváte <strong>druh provozu</strong>, počet tříd, případně navýšení dle vyhlášky a{" "}
           <strong>průměrnou denní dobu provozu v hodinách</strong> (zařadí se do sloupce tabulky 1–3 přílohy). Máte-li{" "}
           <strong>odloučená pracoviště</strong> nebo na jednom místě např. celodenní i polodenní provoz, přidejte další
-          pracoviště pro každou kombinaci — v souhrnné tabulce uvidíte dílčí PHmax i <strong>součet</strong>. Krácení PHmax
+          pracoviště pro každou kombinaci – v souhrnné tabulce uvidíte dílčí PHmax i <strong>součet</strong>. Krácení PHmax
           dle § 1d odst. 3 vyhl. 14/2005 zde neřešíme.
         </p>
       </QuickOnboarding>
@@ -612,10 +612,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   <td>{i + 1}</td>
                   <td>
                     {c.row.label.trim() || `Pracoviště ${i + 1}`}
-                    <span className="muted-text"> — {c.provozLabel}</span>
+                    <span className="muted-text"> – {c.provozLabel}</span>
                   </td>
-                  <td>{c.computed.totalPhmax != null ? c.computed.totalPhmax : "—"}</td>
-                  <td>{c.phaMax != null ? c.phaMax : "—"}</td>
+                  <td>{c.computed.totalPhmax != null ? c.computed.totalPhmax : "–"}</td>
+                  <td>{c.phaMax != null ? c.phaMax : "–"}</td>
                 </tr>
               ))}
             </tbody>
@@ -628,7 +628,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   <strong>{aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}</strong>
                 </td>
                 <td>
-                  <strong>{aggregate.phaSum > 0 ? aggregate.phaSum : "—"}</strong>
+                  <strong>{aggregate.phaSum > 0 ? aggregate.phaSum : "–"}</strong>
                 </td>
               </tr>
             </tfoot>
@@ -664,7 +664,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 >
                   <h3 className="section-title" style={{ fontSize: "1.05rem", margin: 0, flex: "1 1 200px" }}>
                     Pracoviště {index + 1}
-                    {row.label.trim() ? ` — ${row.label.trim()}` : ""}
+                    {row.label.trim() ? ` – ${row.label.trim()}` : ""}
                   </h3>
                   <div
                     className="pv-workplace-row-header__controls"
@@ -724,7 +724,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                     />
                     {row.provoz === "zdravotnicke" ? (
                       <p className="muted-text" style={{ marginTop: 8, fontSize: "0.88rem" }}>
-                        U MŠ při zdravotnickém zařízení je PHmax <strong>31 hodin/třídu</strong> týdně — tabulky 1–3 se
+                        U MŠ při zdravotnickém zařízení je PHmax <strong>31 hodin/třídu</strong> týdně – tabulky 1–3 se
                         nepoužívají.
                       </p>
                     ) : null}
@@ -773,7 +773,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   <div className="app-table-wrap" role="region" aria-label={`Přehled vstupů pracoviště ${index + 1}`}>
                     <table className="app-data-table">
                       <caption className="app-data-table__caption">
-                        Vstupy — pracoviště {index + 1} ({provozLabel}
+                        Vstupy – pracoviště {index + 1} ({provozLabel}
                         {row.label.trim() ? `, ${row.label.trim()}` : ""})
                       </caption>
                       <thead>
@@ -794,14 +794,14 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                         <tr>
                           <td>Průměrná doba provozu (h/den)</td>
                           <td className="app-data-table__num">
-                            {row.provoz === "zdravotnicke" ? <span className="muted-text">—</span> : row.avgHours}
+                            {row.provoz === "zdravotnicke" ? <span className="muted-text">–</span> : row.avgHours}
                           </td>
                         </tr>
                         <tr>
                           <td>Sloupec tabulky (pásmo doby)</td>
                           <td>
                             {row.provoz === "zdravotnicke" ? (
-                              <span className="muted-text">—</span>
+                              <span className="muted-text">–</span>
                             ) : computed.base ? (
                               computed.base.durationColumnLabel
                             ) : (
@@ -876,7 +876,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   {phaMax != null ? (
                     <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHAmax pracoviště ${index + 1}`}>
                       <table className="app-data-table app-data-table--pha">
-                        <caption className="app-data-table__caption">PHAmax — pracoviště {index + 1} (asistenti pedagoga, § 16)</caption>
+                        <caption className="app-data-table__caption">PHAmax – pracoviště {index + 1} (asistenti pedagoga, § 16)</caption>
                         <thead>
                           <tr>
                             <th scope="col">Položka</th>
@@ -926,7 +926,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         <div className="app-table-wrap app-table-wrap--spaced" role="region" aria-label="Souhrn všech pracovišť výpočtu">
           <table className="app-data-table app-data-table--results">
             <caption className="app-data-table__caption">
-              Souhrn — dílčí PHmax podle pracovišť a součet (hodiny týdně)
+              Souhrn – dílčí PHmax podle pracovišť a součet (hodiny týdně)
             </caption>
             <thead>
               <tr>
@@ -952,26 +952,26 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               {rowComputations.map((c, i) => (
                 <tr key={c.row.id}>
                   <td>{i + 1}</td>
-                  <td>{c.row.label.trim() ? c.row.label.trim() : "—"}</td>
+                  <td>{c.row.label.trim() ? c.row.label.trim() : "–"}</td>
                   <td>{c.provozLabel}</td>
                   <td className="app-data-table__num">{c.row.classCount}</td>
                   <td className="app-data-table__num">
-                    {c.row.provoz === "zdravotnicke" ? <span className="muted-text">—</span> : c.row.avgHours}
+                    {c.row.provoz === "zdravotnicke" ? <span className="muted-text">–</span> : c.row.avgHours}
                   </td>
                   <td>
                     {c.row.provoz === "zdravotnicke" ? (
-                      <span className="muted-text">—</span>
+                      <span className="muted-text">–</span>
                     ) : c.computed.base ? (
                       c.computed.base.durationColumnLabel
                     ) : (
-                      <span className="muted-text">—</span>
+                      <span className="muted-text">–</span>
                     )}
                   </td>
                   <td className="app-data-table__num">
-                    {c.computed.totalPhmax != null ? c.computed.totalPhmax : <span className="muted-text">—</span>}
+                    {c.computed.totalPhmax != null ? c.computed.totalPhmax : <span className="muted-text">–</span>}
                   </td>
                   <td className="app-data-table__num">
-                    {c.phaMax != null ? c.phaMax : <span className="muted-text">—</span>}
+                    {c.phaMax != null ? c.phaMax : <span className="muted-text">–</span>}
                   </td>
                 </tr>
               ))}
@@ -983,7 +983,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 </th>
                 <td className="app-data-table__num app-data-table__num--emph">{aggregate.phmaxSum}</td>
                 <td className="app-data-table__num app-data-table__num--emph">
-                  {aggregate.phaSum > 0 ? aggregate.phaSum : "—"}
+                  {aggregate.phaSum > 0 ? aggregate.phaSum : "–"}
                 </td>
               </tr>
             </tfoot>
@@ -998,7 +998,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         ) : null}
 
         <p className="muted-text" style={{ marginTop: 22 }}>
-          Krácení PHmax při výjimkách z nejnižšího počtu dětí (§ 1d odst. 3) v aplikaci neřešíme — nutno dopočítat dle
+          Krácení PHmax při výjimkách z nejnižšího počtu dětí (§ 1d odst. 3) v aplikaci neřešíme – nutno dopočítat dle
           vyhlášky. Odkazy na předpisy a metodiku jsou v přehledu níže.
         </p>
       </section>

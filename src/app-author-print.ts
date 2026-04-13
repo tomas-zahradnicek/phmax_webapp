@@ -4,7 +4,7 @@ import {
   APP_AUTHOR_EMAIL,
 } from "./calculator-ui-constants";
 
-/** HTML patička „tisk shrnutí“ / okno — jméno je mailto odkaz (e-mail v href). */
+/** HTML patička „tisk shrnutí“ / okno – jméno je mailto odkaz (e-mail v href). */
 export function getAppAuthorPrintFooterHtml(): string {
   return (
     `<p class="print-doc-author" style="margin-top:14px;padding-top:10px;border-top:1px solid #cbd5e1;font-size:10pt;color:#334155">` +

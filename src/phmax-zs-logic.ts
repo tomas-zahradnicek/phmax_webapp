@@ -47,7 +47,7 @@ export const n = (v: unknown) => {
 
 export function pickBand(avg: number, bands: readonly Band[]) {
   const found = bands.find((b) => b.test(avg));
-  return found ?? { label: "—", value: 0, test: () => false };
+  return found ?? { label: "–", value: 0, test: () => false };
 }
 
 export const B13_MORE_THAN_2 = {

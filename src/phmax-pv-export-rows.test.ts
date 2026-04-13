@@ -82,7 +82,7 @@ describe("buildPhmaxPvExportRows (smoke / export)", () => {
       phaMax: null,
     });
 
-    expect(rows.some(([k, v]) => k.includes("Průměrná doba provozu") && String(v).includes("—"))).toBe(true);
+    expect(rows.some(([k, v]) => k.includes("Průměrná doba provozu") && String(v).includes("–"))).toBe(true);
   });
 });
 

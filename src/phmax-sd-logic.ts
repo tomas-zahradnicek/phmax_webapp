@@ -2,7 +2,7 @@ import { round2 } from "./phmax-zs-logic";
 
 /**
  * Týdenní PHmax školní družiny (součet přímé pedagogické činnosti všech vychovatelů)
- * podle celkového počtu oddělení — tabulka v příloze k vyhlášce č. 74/2005 Sb., o zájmovém vzdělávání.
+ * podle celkového počtu oddělení – tabulka v příloze k vyhlášce č. 74/2005 Sb., o zájmovém vzdělávání.
  * Hodnoty ověřte vždy proti aktuálnímu konsolidovanému znění (např. zakonyprolidi.cz).
  */
 export const PHMAX_SD_BY_DEPARTMENTS: readonly number[] = [

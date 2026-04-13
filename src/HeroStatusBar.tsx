@@ -15,7 +15,7 @@ type HeroStatusBarProps = {
 };
 
 /**
- * Stav ukládání a hlášky — v hero (PV/ŠD) nebo v zápatí (ZŠ, PV, ŠD).
+ * Stav ukládání a hlášky – v hero (PV/ŠD) nebo v zápatí (ZŠ, PV, ŠD).
  */
 export function HeroStatusBar({
   lastSavedAt,

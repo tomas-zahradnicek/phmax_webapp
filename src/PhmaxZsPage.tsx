@@ -228,7 +228,7 @@ const GLOSSARY_TERMS = [
       <>
         Žák podle § 38 se nezapočítává do počtu žáků ve třídě rozhodné pro PHmax těchto tříd; celkové PHmax školy se za každého žáka{" "}
         <strong>1. stupně navýší o 0,25 h</strong> a <strong>2. stupně o 0,5 h</strong> týdně (zadání v sekci Samostatné položky PHmax). Aplikace
-        počítá jen toto číselné navýšení — neřeší nerovnoměrné rozvržení přímé pedagogické činnosti v průběhu roku; k úvazku a PČ viz{" "}
+        počítá jen toto číselné navýšení – neřeší nerovnoměrné rozvržení přímé pedagogické činnosti v průběhu roku; k úvazku a PČ viz{" "}
         <a
           href="https://www.msmt.cz/dokumenty/pravni-vyklad-k-23-zakona-opedagogickych-pracovnicich"
           target="_blank"
@@ -435,7 +435,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const basicSecondBand = useMemo(() => {
     if (basicType === "full_more_than_2") return pickBand(basic2Avg, B13_MORE_THAN_2.second);
     if (basicType === "full_max_2") return pickBand(basic2Avg, B34_MAX_2.second);
-    return { label: "—", value: 0, test: () => false };
+    return { label: "–", value: 0, test: () => false };
   }, [basicType, basic2Avg]);
 
   const incl1Band = pickBand(incl1Avg, B9_B10.first);
@@ -1439,12 +1439,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       ["Metodický podklad (orientačně)", METHODIKA_VERSION_LABEL],
       ["Režim výpočtu (typ školy)", MODE_CONFIG[mode].label],
       ["Aktivní záložka při exportu", tabLabel],
-      ["Označení exportu / škola", exportLabel.trim() || "—"],
-      ["Průvodce (volba scénáře)", wizardChoice || "—"],
+      ["Označení exportu / škola", exportLabel.trim() || "–"],
+      ["Průvodce (volba scénáře)", wizardChoice || "–"],
       ["Práce s údaji", dataMode === "example" ? "ukázkový příklad" : "vlastní škola"],
-      ["Identifikátor ukázkového příkladu", selectedExample || "—"],
+      ["Identifikátor ukázkového příkladu", selectedExample || "–"],
       ["", ""],
-      ["Varování", warnings.length ? warnings.join(" | ") : "—"],
+      ["Varování", warnings.length ? warnings.join(" | ") : "–"],
       ["", ""],
       [
         "Poznámka",
@@ -1463,10 +1463,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       ["Metodický podklad (orientačně)", METHODIKA_VERSION_LABEL],
       ["Režim výpočtu (typ školy)", MODE_CONFIG[mode].label],
       ["Aktivní záložka při exportu", tabLabel],
-      ["Označení exportu / škola", exportLabel.trim() || "—"],
-      ["Průvodce (volba scénáře)", wizardChoice || "—"],
+      ["Označení exportu / škola", exportLabel.trim() || "–"],
+      ["Průvodce (volba scénáře)", wizardChoice || "–"],
       ["Práce s údaji", dataMode === "example" ? "ukázkový příklad" : "vlastní škola"],
-      ["Identifikátor ukázkového příkladu", selectedExample || "—"],
+      ["Identifikátor ukázkového příkladu", selectedExample || "–"],
       ["", ""],
       ["=== PHmax – vstupy (agregované) ===", ""],
       ["basicType (kód)", basicType],
@@ -1503,7 +1503,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       ["PHP nezapoč. zahraničí / ZŠ v ČR / individuální", `${phpExcludedAbroad} / ${phpExcludedForeignSchoolCz} / ${phpExcludedIndividual}`],
       ["PHP škola vyloučena z výpočtu", phpExcludedSchool ? "ano" : "ne"],
       ["", ""],
-      ["=== Varování ===", warnings.length ? warnings.join(" | ") : "—"],
+      ["=== Varování ===", warnings.length ? warnings.join(" | ") : "–"],
       ["", ""],
       ["=== Souhrnné výstupy ===", ""],
     ];
@@ -1801,16 +1801,16 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             <strong>PHmax</strong> zadejte podle typu školy v rozbalovacím režimu; u specialit (psychiatrie, zdravotnické zařízení,
             menšina, gymnázia…) přepněte na odpovídající položku. <strong>PHAmax</strong> a <strong>PHPmax</strong> mají vlastní záložky.
             Žáky podle <strong>§ 38</strong> a <strong>§ 41</strong> školského zákona (navýšení PHmax o 0,25 / 0,5 h podle stupně) zadejte v sekci{" "}
-            <strong>Samostatné položky PHmax</strong> — u většiny režimů ZŠ je přímo pod hlavními tabulkami; přípravné třídy a přípravný stupeň ZŠS
+            <strong>Samostatné položky PHmax</strong> – u většiny režimů ZŠ je přímo pod hlavními tabulkami; přípravné třídy a přípravný stupeň ZŠS
             jsou navíc v režimu „PHmax – přípravné třídy, přípravný stupeň, § 38 a § 41“.
           </p>
           <p>
-            Průměry u škol při zdravotnickém zařízení a psychiatrii počítá aplikace jako vyšší z minulého roku a aktuálního sběru — doplňte oba sloupce, pokud je znáte.
+            Průměry u škol při zdravotnickém zařízení a psychiatrii počítá aplikace jako vyšší z minulého roku a aktuálního sběru – doplňte oba sloupce, pokud je znáte.
             Pojmenované zálohy (max. {MAX_NAMED_SNAPSHOTS}) drží celý stav včetně záložky a pole „Označení pro export“.
           </p>
           <p>
             V první skupině ukázek jsou čísla z modelových postupů PHmax v metodické příloze (včetně smíšených tříd 570 h).
-            Model § 16/9 a ZŠ speciální (AD1/AD2, řádky B35–B43) je v metodice v5 jako PHAmax — v rozbalovači ukázka „PHAmax“; po načtení se otevře záložka PHAmax.
+            Model § 16/9 a ZŠ speciální (AD1/AD2, řádky B35–B43) je v metodice v5 jako PHAmax – v rozbalovači ukázka „PHAmax“; po načtení se otevře záložka PHAmax.
             Ostatní ukázky doplňují typické situace; údaje můžete po načtení upravit.
           </p>
           <p>
@@ -2260,7 +2260,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   </div>
                   <div className="grid three section-results-strip">
                     <ResultCard label="PHmax – jazyk menšiny 1. stupeň" value={minority1Phmax} tone="success" />
-                    {minorityType === "minorityFull1" && hasSection("minority_second") ? <ResultCard label="PHmax – jazyk menšiny 2. stupeň" value={minority2Phmax} tone="success" /> : <ResultCard label="PHmax – jazyk menšiny 2. stupeň" value="—" tone="primary" />}
+                    {minorityType === "minorityFull1" && hasSection("minority_second") ? <ResultCard label="PHmax – jazyk menšiny 2. stupeň" value={minority2Phmax} tone="success" /> : <ResultCard label="PHmax – jazyk menšiny 2. stupeň" value="–" tone="primary" />}
                     <ResultCard label="PHmax – jazyk menšiny celkem" value={minorityPhmax} tone="success" />
                   </div>
                 </section>
@@ -2394,7 +2394,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   {hasSection("prep_class") || hasSection("prep_special")
                     ? "Samostatné položky PHmax"
                     : "§ 38 a § 41 školského zákona (navýšení PHmax)"}{" "}
-                  <HelpHint text="Za žáka podle § 38 nebo § 41 se celkové PHmax školy navyšuje o 0,25 h (1. stupeň) nebo 0,5 h (2. stupeň) na žáka; tito žáci se nezapočítávají do průměru třídy pro tabulky B1–B28. Aplikace neřeší rozvržení hodin do týdnů — k přímé pedagogické činnosti a úvazku viz výklad MŠMT: https://www.msmt.cz/dokumenty/pravni-vyklad-k-23-zakona-opedagogickych-pracovnicich" />
+                  <HelpHint text="Za žáka podle § 38 nebo § 41 se celkové PHmax školy navyšuje o 0,25 h (1. stupeň) nebo 0,5 h (2. stupeň) na žáka; tito žáci se nezapočítávají do průměru třídy pro tabulky B1–B28. Aplikace neřeší rozvržení hodin do týdnů – k přímé pedagogické činnosti a úvazku viz výklad MŠMT: https://www.msmt.cz/dokumenty/pravni-vyklad-k-23-zakona-opedagogickych-pracovnicich" />
                 </h2>
                 <div className="grid four">
                   {hasSection("prep_class") && (

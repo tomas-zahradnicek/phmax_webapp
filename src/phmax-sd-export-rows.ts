@@ -31,7 +31,7 @@ export function buildPhmaxSdExportRows(input: {
   } = input;
 
   const rows: PhmaxSdExportRow[] = [
-    ["=== PHmax školní družina — export ===", ""],
+    ["=== PHmax školní družina – export ===", ""],
     ["Počet přihlášených účastníků (žáci 1. st., pravidelná docházka)", pupils],
     ["Počet oddělení (výpočet)", effectiveDepts],
     ["Způsob určení oddělení", manualDepts ? "ruční zadání" : "automaticky ÷ 27 (nahoru)"],
@@ -51,9 +51,9 @@ export function buildPhmaxSdExportRows(input: {
   if (breakdown != null && breakdown.length > 0 && basePhmax != null) {
     rows.push(["--- Rozpad podle oddělení ---", ""]);
     breakdown.forEach((hours, index) => {
-      rows.push([`Oddělení ${index + 1} — PHmax tabulkové (h)`, formatSdHours(hours)]);
+      rows.push([`Oddělení ${index + 1} – PHmax tabulkové (h)`, formatSdHours(hours)]);
       if (reduction.applied) {
-        rows.push([`Oddělení ${index + 1} — po krácení orient. (h)`, formatSdHours(round2(hours * reduction.factor))]);
+        rows.push([`Oddělení ${index + 1} – po krácení orient. (h)`, formatSdHours(round2(hours * reduction.factor))]);
       }
     });
     rows.push(["Celkem tabulkové PHmax (h)", formatSdHours(basePhmax)]);
