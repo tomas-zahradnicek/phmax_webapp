@@ -315,6 +315,16 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     [],
   );
 
+  const methodikaBaseGridRows = useMemo(
+    () =>
+      PHMAX_SD_BY_DEPARTMENTS.map((total, idx) => {
+        const deptCount = idx + 1;
+        const rowHours = getPhmaxSdBreakdown(deptCount) ?? [];
+        return { deptCount, total, rowHours };
+      }),
+    [],
+  );
+
   const exportRows = useMemo(
     () =>
       buildPhmaxSdExportRows({
@@ -1279,6 +1289,41 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             účastnících &lt; 4 se snižuje o 0,6násobek (tj. použije se faktor 0,4). V metodických podkladech je
             evidován tiskový překlep hodnoty 58,1; správná hodnota je 8,1.
           </p>
+        </details>
+
+        <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 14 }}>
+          <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
+            Ověřovací tabulka: Týdenní maximální rozsah provozu školních družin
+          </summary>
+          <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.88rem" }}>
+            Referenční matice přílohy vyhlášky 74/2005 Sb. pro 1 až 21 oddělení. Sloupce 1–21 ukazují hodinové hodnoty
+            pro jednotlivá oddělení, poslední sloupec uvádí celkový PHmax za družinu.
+          </p>
+          <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
+            <table className="sd-phmax-breakdown">
+              <thead>
+                <tr>
+                  <th>Celkový počet oddělení</th>
+                  {Array.from({ length: 21 }, (_, i) => (
+                    <th key={`hd-${i + 1}`}>{i + 1}</th>
+                  ))}
+                  <th>Celkový PHmax za ŠD</th>
+                </tr>
+              </thead>
+              <tbody>
+                {methodikaBaseGridRows.map((row) => (
+                  <tr key={`row-${row.deptCount}`}>
+                    <th scope="row">{row.deptCount}</th>
+                    {Array.from({ length: 21 }, (_, i) => {
+                      const val = i < row.rowHours.length ? row.rowHours[i] : null;
+                      return <td key={`row-${row.deptCount}-c-${i + 1}`}>{val == null ? "" : formatSdHours(val)}</td>;
+                    })}
+                    <td>{formatSdHours(row.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollGrabRegion>
         </details>
 
         <p className="muted-text" style={{ marginTop: 20 }}>
