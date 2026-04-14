@@ -117,19 +117,20 @@ function parseSdSnapshot(data: unknown): SdPersistedSnapshot | null {
   const inputMode = r.inputMode === "detail" ? "detail" : "summary";
   const regularExceptionGranted = typeof r.regularExceptionGranted === "boolean" ? r.regularExceptionGranted : false;
   const specialExceptionGranted = typeof r.specialExceptionGranted === "boolean" ? r.specialExceptionGranted : false;
-  const summarySpecialDepartments = Array.isArray(r.summarySpecialDepartments)
-    ? r.summarySpecialDepartments
-        .map((x) => {
-          if (!x || typeof x !== "object") return null;
-          const o = x as Record<string, unknown>;
-          if (typeof o.participants !== "number" || !Number.isFinite(o.participants) || o.participants < 0) return null;
-          return {
-            participants: o.participants,
-            specialExceptionGranted:
-              typeof o.specialExceptionGranted === "boolean" ? o.specialExceptionGranted : undefined,
-          };
-        })
-        .filter((x): x is { participants: number; specialExceptionGranted?: boolean } => x != null)
+  const summarySpecialDepartments: { participants: number; specialExceptionGranted?: boolean }[] = Array.isArray(
+    r.summarySpecialDepartments,
+  )
+    ? r.summarySpecialDepartments.reduce<{ participants: number; specialExceptionGranted?: boolean }[]>((acc, x) => {
+        if (!x || typeof x !== "object") return acc;
+        const o = x as Record<string, unknown>;
+        if (typeof o.participants !== "number" || !Number.isFinite(o.participants) || o.participants < 0) return acc;
+        acc.push({
+          participants: o.participants,
+          specialExceptionGranted:
+            typeof o.specialExceptionGranted === "boolean" ? o.specialExceptionGranted : undefined,
+        });
+        return acc;
+      }, [])
     : [];
   const detailDepartments = Array.isArray(r.detailDepartments)
     ? r.detailDepartments
