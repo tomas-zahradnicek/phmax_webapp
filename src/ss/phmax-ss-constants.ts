@@ -22,6 +22,10 @@ export const PHMAX_SS_LEGISLATIVE_MD_REL_PATH = "docs/zdroje/phmax_ss_cursor/leg
 export const PHMAX_SS_SOURCE_FOLDER_HINT =
   "Lokální kopii metodiky (.docx / .pdf) můžete držet ve složce projektu docs/zdroje (viz docs/zdroje/README.md).";
 
+/** Legenda pod rozbalovačem „Ukázkový příklad“ v hero (stejná role jako u ZŠ). */
+export const SS_HERO_EXAMPLE_LEGEND =
+  "Ukázkové předvyplněné situace pro SŠ doplníme v další verzi. Exporty, zálohy a auditní JSON jsou v horní liště vedle tisku, obdobně jako u základní školy.";
+
 /**
  * První fáze produktu: co z metodiky plyne pro návrh formuláře (vstupy uživatele × výstupy výpočtu).
  * Znění je shrnutí pravidel z metodiky v3/2026 a souvisejících NV; podrobnosti vždy ověřte v plném znění metodiky.
