@@ -83,6 +83,7 @@ type SdPersistedSnapshot = {
   regularExceptionGranted?: boolean;
   specialExceptionGranted?: boolean;
   detailDepartments?: SdDepartmentInput[];
+  schoolFirstStageClassCount?: 1 | 2 | 3 | null;
 };
 
 type NamedSdSnapshot = { id: string; name: string; savedAt: string; snapshot: SdPersistedSnapshot };
@@ -153,6 +154,10 @@ function parseSdSnapshot(data: unknown): SdPersistedSnapshot | null {
         })
         .filter((x): x is SdDepartmentInput => x != null)
     : [];
+  const schoolFirstStageClassCount =
+    r.schoolFirstStageClassCount === 1 || r.schoolFirstStageClassCount === 2 || r.schoolFirstStageClassCount === 3
+      ? r.schoolFirstStageClassCount
+      : null;
   return {
     pupils,
     manualDepts,
@@ -162,6 +167,7 @@ function parseSdSnapshot(data: unknown): SdPersistedSnapshot | null {
     regularExceptionGranted,
     specialExceptionGranted,
     detailDepartments,
+    schoolFirstStageClassCount,
   };
 }
 
@@ -196,6 +202,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       initial.detailDepartments ?? [
         { kind: "regular", participants: 0 },
       ],
+  );
+  const [schoolFirstStageClassCount, setSchoolFirstStageClassCount] = useState<1 | 2 | 3 | null>(
+    () => initial.schoolFirstStageClassCount ?? null,
   );
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState("");
@@ -258,6 +267,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           regularParticipantsTotal: pupils,
           regularExceptionGranted,
           specialExceptionGranted,
+          schoolFirstStageClassCount,
           specialDepartments: summarySpecialDepartments,
         });
       }
@@ -266,6 +276,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           departments: detailDepartments,
           regularExceptionGranted,
           specialExceptionGranted,
+          schoolFirstStageClassCount,
         }),
       );
     } catch {
@@ -279,6 +290,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     specialExceptionGranted,
     summarySpecialDepartments,
     detailDepartments,
+    schoolFirstStageClassCount,
   ]);
 
   const tableWarning =
@@ -369,6 +381,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       regularExceptionGranted,
       specialExceptionGranted,
       detailDepartments,
+      schoolFirstStageClassCount,
     }),
     [
       pupils,
@@ -379,6 +392,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       regularExceptionGranted,
       specialExceptionGranted,
       detailDepartments,
+      schoolFirstStageClassCount,
     ],
   );
 
@@ -393,6 +407,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       setRegularExceptionGranted(next.regularExceptionGranted ?? false);
       setSpecialExceptionGranted(next.specialExceptionGranted ?? false);
       setDetailDepartments(next.detailDepartments ?? [{ kind: "regular", participants: 0 }]);
+      setSchoolFirstStageClassCount(next.schoolFirstStageClassCount ?? null);
       setUiNotice("Data byla obnovena.");
     } else {
       setUiNotice("Uložená data nejsou ve očekávaném tvaru.");
@@ -503,7 +518,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       `Čas: ${new Date().toLocaleString("cs-CZ")}`,
       `Režim vstupu: ${inputMode === "summary" ? "souhrnný" : "detailní po odděleních"}`,
       `Účastníci (1. st.): ${pupils}`,
-      `Oddělení (výpočet): ${effectiveDepts}${manualDepts ? " (ruční zadání)" : ` (navrženo ${suggested})`}`,
+      `Oddělení (výpočet): ${
+        detailedResult != null ? detailedResult.totalDepartments : effectiveDepts
+      }${manualDepts ? " (ruční zadání)" : ` (navrženo ${suggested})`}`,
       baseLine,
       phmaxLine,
       detailedResult != null
@@ -845,12 +862,32 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                     if (on) setDepartments(Math.max(1, suggested));
                   }}
                 />
-                Zadat počet oddělení ručně (např. dle součtu řádků 0101 ve výkazu Z 2-01)
+                Zadat počet oddělení ručně (v souhrnném režimu = počet běžných oddělení)
               </span>
             </label>
             {manualDepts ? (
-              <NumberField label="Celkový počet oddělení školní družiny" value={departments} onChange={setDepartments} />
+              <NumberField
+                label={inputMode === "summary" ? "Počet běžných oddělení školní družiny" : "Počet oddělení školní družiny"}
+                value={departments}
+                onChange={setDepartments}
+              />
             ) : null}
+            <label className="field" style={{ marginTop: 12 }}>
+              <span className="field__label">Pokud má ŠD 1 běžné oddělení: škola má kolik tříd 1. stupně?</span>
+              <select
+                className="input"
+                value={schoolFirstStageClassCount == null ? "" : String(schoolFirstStageClassCount)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setSchoolFirstStageClassCount(v === "1" ? 1 : v === "2" ? 2 : v === "3" ? 3 : null);
+                }}
+              >
+                <option value="">Nepoužít zvláštní minimum (obecně 20)</option>
+                <option value="1">Škola s 1 třídou 1. stupně (minimum 5)</option>
+                <option value="2">Škola se 2 třídami 1. stupně (minimum 15)</option>
+                <option value="3">Škola se 3 třídami 1. stupně (minimum 18)</option>
+              </select>
+            </label>
           </div>
         </div>
 
@@ -1052,12 +1089,28 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           {detailedResult != null ? (
             <>
               <ResultCard label="Oddělení (celkem)" value={detailedResult.totalDepartments} tone="primary" />
-              <ResultCard label="PHmax (základ z tabulky)" value={detailedResult.basePhmax} tone="success" />
-              <ResultCard label="PHmax – běžná oddělení" value={detailedResult.regularSharePhmax} tone="primary" />
-              <ResultCard label="PHmax – speciální oddělení" value={detailedResult.specialSharePhmax} tone="primary" />
-              <ResultCard label="PHmax celkem" value={detailedResult.finalPhmax} tone="success" />
               <ResultCard
-                label="PHAmax (speciální oddělení, orientačně)"
+                label="PHmax (základ z přílohy vyhl. 74/2005 Sb.)"
+                value={detailedResult.basePhmax}
+                tone="success"
+              />
+              <ResultCard
+                label="PHmax – běžná oddělení (§ 10 odst. 2/3, po případném poměrném krácení)"
+                value={detailedResult.regularSharePhmax}
+                tone="primary"
+              />
+              <ResultCard
+                label="PHmax – speciální oddělení (odst. 7, § 16/9; krácení poměrné části)"
+                value={detailedResult.specialSharePhmax}
+                tone="primary"
+              />
+              <ResultCard
+                label="PHmax celkem (součet běžných + speciálních oddělení)"
+                value={detailedResult.finalPhmax}
+                tone="success"
+              />
+              <ResultCard
+                label="PHAmax – speciální oddělení (odst. 7, § 16/9; po krácení výjimky)"
                 value={detailedResult.finalPhaMax}
                 tone="success"
               />
