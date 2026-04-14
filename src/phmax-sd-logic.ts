@@ -67,3 +67,225 @@ export function reducedPhmaxIfUnderStaffed(params: {
   const factor = pupilsFirstGrade / minPupils;
   return { adjusted: round2(basePhmax * factor), factor, applied: true };
 }
+
+export type SdDepartmentInput = {
+  kind: "regular" | "special";
+  participants: number;
+  participantsFirstStage?: number;
+  specialExceptionGranted?: boolean;
+};
+
+export type SdSummaryInput = {
+  regularDepartments: number;
+  regularParticipantsTotal: number;
+  regularExceptionGranted?: boolean;
+  specialExceptionGranted?: boolean;
+  schoolFirstStageClassCount?: 1 | 2 | 3 | null;
+  specialDepartments?: readonly { participants: number; specialExceptionGranted?: boolean }[];
+};
+
+export type SdDetailedInput = {
+  departments: readonly SdDepartmentInput[];
+  regularExceptionGranted?: boolean;
+  specialExceptionGranted?: boolean;
+  schoolFirstStageClassCount?: 1 | 2 | 3 | null;
+};
+
+export type SdNormalizedModel = {
+  departments: SdDepartmentInput[];
+  regularExceptionGranted: boolean;
+  specialExceptionGranted: boolean;
+  schoolFirstStageClassCount: 1 | 2 | 3 | null;
+  sourceMode: "summary" | "detail";
+};
+
+export type SdBreakdownRow = {
+  index1Based: number;
+  kind: "regular" | "special";
+  participants: number;
+  basePhmax: number;
+  reductionFactor: number;
+  finalPhmax: number;
+  /** PHAmax je zde veden pro speciální oddělení orientačně stejným koeficientem. */
+  finalPhaMax: number;
+};
+
+export type SdDetailedResult = {
+  totalDepartments: number;
+  regularDepartments: number;
+  specialDepartments: number;
+  basePhmax: number;
+  regularSharePhmax: number;
+  specialSharePhmax: number;
+  finalPhmax: number;
+  specialSharePhaMax: number;
+  finalPhaMax: number;
+  regularReductionFactor: number;
+  specialReductionFactor: number;
+  breakdown: SdBreakdownRow[];
+  notes: string[];
+  sourceMode: "summary" | "detail";
+};
+
+function clamp01(value: number): number {
+  if (value < 0) return 0;
+  if (value > 1) return 1;
+  return value;
+}
+
+function getRegularMinimumPerDept(params: {
+  regularDepartments: number;
+  schoolFirstStageClassCount: 1 | 2 | 3 | null;
+}): number {
+  if (params.regularDepartments === 1 && params.schoolFirstStageClassCount != null) {
+    if (params.schoolFirstStageClassCount === 1) return 5;
+    if (params.schoolFirstStageClassCount === 2) return 15;
+    return 18;
+  }
+  return 20;
+}
+
+function getSpecialExceptionFactor(participants: number, exceptionGranted: boolean): number {
+  if (!exceptionGranted) return 1;
+  if (participants >= 5 && participants < 6) return 0.95;
+  if (participants >= 4 && participants < 5) return 0.9;
+  if (participants < 4) return 0.4;
+  return 1;
+}
+
+export function normalizeSchoolDruzinaInput(input: SdSummaryInput | SdDetailedInput): SdNormalizedModel {
+  if ("departments" in input) {
+    if (!Array.isArray(input.departments) || input.departments.length === 0) {
+      throw new Error("Detailní režim vyžaduje alespoň jedno oddělení.");
+    }
+    return {
+      departments: [...input.departments],
+      regularExceptionGranted: Boolean(input.regularExceptionGranted),
+      specialExceptionGranted: Boolean(input.specialExceptionGranted),
+      schoolFirstStageClassCount: input.schoolFirstStageClassCount ?? null,
+      sourceMode: "detail",
+    };
+  }
+
+  const regularDepartments = input.regularDepartments;
+  if (!Number.isInteger(regularDepartments) || regularDepartments < 0) {
+    throw new Error("Počet běžných oddělení musí být nezáporné celé číslo.");
+  }
+  if (input.regularParticipantsTotal < 0) {
+    throw new Error("Celkový počet účastníků v běžných odděleních nemůže být záporný.");
+  }
+
+  const departments: SdDepartmentInput[] = [];
+  const regularPerDept = regularDepartments > 0 ? input.regularParticipantsTotal / regularDepartments : 0;
+  for (let i = 0; i < regularDepartments; i++) {
+    departments.push({ kind: "regular", participants: regularPerDept });
+  }
+  for (const dep of input.specialDepartments ?? []) {
+    if (dep.participants < 0) throw new Error("Počet účastníků speciálního oddělení nemůže být záporný.");
+    departments.push({
+      kind: "special",
+      participants: dep.participants,
+      specialExceptionGranted: dep.specialExceptionGranted,
+    });
+  }
+  if (departments.length === 0) throw new Error("Souhrnný režim vyžaduje alespoň jedno oddělení.");
+
+  return {
+    departments,
+    regularExceptionGranted: Boolean(input.regularExceptionGranted),
+    specialExceptionGranted: Boolean(input.specialExceptionGranted),
+    schoolFirstStageClassCount: input.schoolFirstStageClassCount ?? null,
+    sourceMode: "summary",
+  };
+}
+
+export function calculateSchoolDruzinaPhmaxDetailed(model: SdNormalizedModel): SdDetailedResult {
+  const totalDepartments = model.departments.length;
+  const basePhmax = getPhmaxSdBase(totalDepartments);
+  if (basePhmax == null) {
+    throw new Error(`Počet oddělení musí být v intervalu 1-${SD_MAX_DEPARTMENTS_IN_TABLE}.`);
+  }
+
+  const regularDepartments = model.departments.filter((d) => d.kind === "regular");
+  const regularParticipantsTotal = regularDepartments.reduce((sum, d) => sum + d.participants, 0);
+  const regularMinPerDept = getRegularMinimumPerDept({
+    regularDepartments: regularDepartments.length,
+    schoolFirstStageClassCount: model.schoolFirstStageClassCount,
+  });
+  const regularRequiredTotal = regularDepartments.length * regularMinPerDept;
+  const regularReductionFactor =
+    model.regularExceptionGranted && regularRequiredTotal > 0
+      ? clamp01(regularParticipantsTotal / regularRequiredTotal)
+      : 1;
+
+  const breakdown = model.departments.map((dep, idx): SdBreakdownRow => {
+    const base = getPhmaxSdHourForDepartmentOrder(idx + 1);
+    if (dep.kind === "regular") {
+      const final = round2(base * regularReductionFactor);
+      return {
+        index1Based: idx + 1,
+        kind: dep.kind,
+        participants: dep.participants,
+        basePhmax: base,
+        reductionFactor: regularReductionFactor,
+        finalPhmax: final,
+        finalPhaMax: 0,
+      };
+    }
+    const specialExceptionGranted =
+      typeof dep.specialExceptionGranted === "boolean" ? dep.specialExceptionGranted : model.specialExceptionGranted;
+    const specialFactor = getSpecialExceptionFactor(dep.participants, specialExceptionGranted);
+    const final = round2(base * specialFactor);
+    return {
+      index1Based: idx + 1,
+      kind: dep.kind,
+      participants: dep.participants,
+      basePhmax: base,
+      reductionFactor: specialFactor,
+      finalPhmax: final,
+      finalPhaMax: final,
+    };
+  });
+
+  const regularSharePhmax = round2(breakdown.filter((r) => r.kind === "regular").reduce((s, r) => s + r.finalPhmax, 0));
+  const specialRows = breakdown.filter((r) => r.kind === "special");
+  const specialSharePhmax = round2(specialRows.reduce((s, r) => s + r.finalPhmax, 0));
+  const finalPhmax = round2(regularSharePhmax + specialSharePhmax);
+  const specialSharePhaMax = round2(specialRows.reduce((s, r) => s + r.finalPhaMax, 0));
+  const finalPhaMax = specialSharePhaMax;
+  const specialBase = specialRows.reduce((s, r) => s + r.basePhmax, 0);
+  const specialReductionFactor = specialBase > 0 ? clamp01(specialSharePhmax / specialBase) : 1;
+
+  const notes: string[] = [];
+  if (model.regularExceptionGranted && regularDepartments.length > 0) {
+    notes.push(
+      `Běžná oddělení: poměrné krácení ${regularReductionFactor.toFixed(4)} (${round2(
+        regularParticipantsTotal,
+      )}/${round2(regularRequiredTotal)}).`,
+    );
+  }
+  if (specialRows.length > 0) {
+    notes.push("Speciální oddělení: krácení se aplikuje samostatně po odděleních dle počtu účastníků.");
+  }
+
+  return {
+    totalDepartments,
+    regularDepartments: regularDepartments.length,
+    specialDepartments: specialRows.length,
+    basePhmax,
+    regularSharePhmax,
+    specialSharePhmax,
+    finalPhmax,
+    specialSharePhaMax,
+    finalPhaMax,
+    regularReductionFactor,
+    specialReductionFactor,
+    breakdown,
+    notes,
+    sourceMode: model.sourceMode,
+  };
+}
+
+export function calculateSchoolDruzinaPhmaxFromSummary(input: SdSummaryInput): SdDetailedResult {
+  return calculateSchoolDruzinaPhmaxDetailed(normalizeSchoolDruzinaInput(input));
+}

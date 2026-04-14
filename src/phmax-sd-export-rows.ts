@@ -17,6 +17,21 @@ export function buildPhmaxSdExportRows(input: {
   reduction: { adjusted: number; factor: number; applied: boolean };
   breakdown: readonly number[] | null;
   tableWarning: string | null;
+  detailed?: {
+    finalPhmax: number;
+    finalPhaMax: number;
+    regularSharePhmax: number;
+    specialSharePhmax: number;
+    breakdown: readonly {
+      index1Based: number;
+      kind: "regular" | "special";
+      participants: number;
+      basePhmax: number;
+      reductionFactor: number;
+      finalPhmax: number;
+      finalPhaMax: number;
+    }[];
+  } | null;
 }): PhmaxSdExportRow[] {
   const {
     pupils,
@@ -28,6 +43,7 @@ export function buildPhmaxSdExportRows(input: {
     reduction,
     breakdown,
     tableWarning,
+    detailed,
   } = input;
 
   const rows: PhmaxSdExportRow[] = [
@@ -46,6 +62,23 @@ export function buildPhmaxSdExportRows(input: {
       rows.push(["Koeficient krácení", reduction.factor]);
       rows.push(["PHmax po krácení (h/týden)", reduction.adjusted]);
     }
+  }
+
+  if (detailed) {
+    rows.push(["=== Detailní model (běžná + speciální oddělení) ===", ""]);
+    rows.push(["PHmax běžná oddělení (h/týden)", detailed.regularSharePhmax]);
+    rows.push(["PHmax speciální oddělení (h/týden)", detailed.specialSharePhmax]);
+    rows.push(["PHmax celkem (detailní model)", detailed.finalPhmax]);
+    rows.push(["PHAmax speciální oddělení (orientačně, h/týden)", detailed.finalPhaMax]);
+    detailed.breakdown.forEach((r) => {
+      rows.push([`Oddělení ${r.index1Based} (${r.kind}) účastníci`, formatSdHours(r.participants)]);
+      rows.push([`Oddělení ${r.index1Based} (${r.kind}) PHmax základ`, formatSdHours(r.basePhmax)]);
+      rows.push([`Oddělení ${r.index1Based} (${r.kind}) koeficient`, r.reductionFactor.toFixed(4)]);
+      rows.push([`Oddělení ${r.index1Based} (${r.kind}) PHmax po krácení`, formatSdHours(r.finalPhmax)]);
+      if (r.kind === "special") {
+        rows.push([`Oddělení ${r.index1Based} (${r.kind}) PHAmax`, formatSdHours(r.finalPhaMax)]);
+      }
+    });
   }
 
   if (breakdown != null && breakdown.length > 0 && basePhmax != null) {

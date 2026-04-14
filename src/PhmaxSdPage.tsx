@@ -45,6 +45,11 @@ import { round2 } from "./phmax-zs-logic";
 import { buildPhmaxSdExportRows } from "./phmax-sd-export-rows";
 import {
   SD_MAX_DEPARTMENTS_IN_TABLE,
+  calculateSchoolDruzinaPhmaxDetailed,
+  calculateSchoolDruzinaPhmaxFromSummary,
+  normalizeSchoolDruzinaInput,
+  type SdDepartmentInput,
+  type SdDetailedResult,
   getPhmaxSdBase,
   getPhmaxSdBreakdown,
   reducedPhmaxIfUnderStaffed,
@@ -72,6 +77,11 @@ type SdPersistedSnapshot = {
   pupils: number;
   manualDepts: boolean;
   departments: number;
+  inputMode?: "summary" | "detail";
+  summarySpecialDepartments?: { participants: number; specialExceptionGranted?: boolean }[];
+  regularExceptionGranted?: boolean;
+  specialExceptionGranted?: boolean;
+  detailDepartments?: SdDepartmentInput[];
 };
 
 type NamedSdSnapshot = { id: string; name: string; savedAt: string; snapshot: SdPersistedSnapshot };
@@ -104,7 +114,53 @@ function parseSdSnapshot(data: unknown): SdPersistedSnapshot | null {
   if (typeof pupils !== "number" || !Number.isFinite(pupils) || pupils < 0) return null;
   if (typeof manualDepts !== "boolean") return null;
   if (typeof departments !== "number" || !Number.isFinite(departments) || departments < 1) return null;
-  return { pupils, manualDepts, departments };
+  const inputMode = r.inputMode === "detail" ? "detail" : "summary";
+  const regularExceptionGranted = typeof r.regularExceptionGranted === "boolean" ? r.regularExceptionGranted : false;
+  const specialExceptionGranted = typeof r.specialExceptionGranted === "boolean" ? r.specialExceptionGranted : false;
+  const summarySpecialDepartments = Array.isArray(r.summarySpecialDepartments)
+    ? r.summarySpecialDepartments
+        .map((x) => {
+          if (!x || typeof x !== "object") return null;
+          const o = x as Record<string, unknown>;
+          if (typeof o.participants !== "number" || !Number.isFinite(o.participants) || o.participants < 0) return null;
+          return {
+            participants: o.participants,
+            specialExceptionGranted:
+              typeof o.specialExceptionGranted === "boolean" ? o.specialExceptionGranted : undefined,
+          };
+        })
+        .filter((x): x is { participants: number; specialExceptionGranted?: boolean } => x != null)
+    : [];
+  const detailDepartments = Array.isArray(r.detailDepartments)
+    ? r.detailDepartments
+        .map((x) => {
+          if (!x || typeof x !== "object") return null;
+          const o = x as Record<string, unknown>;
+          if (o.kind !== "regular" && o.kind !== "special") return null;
+          if (typeof o.participants !== "number" || !Number.isFinite(o.participants) || o.participants < 0) return null;
+          return {
+            kind: o.kind,
+            participants: o.participants,
+            participantsFirstStage:
+              typeof o.participantsFirstStage === "number" && Number.isFinite(o.participantsFirstStage)
+                ? o.participantsFirstStage
+                : undefined,
+            specialExceptionGranted:
+              typeof o.specialExceptionGranted === "boolean" ? o.specialExceptionGranted : undefined,
+          } as SdDepartmentInput;
+        })
+        .filter((x): x is SdDepartmentInput => x != null)
+    : [];
+  return {
+    pupils,
+    manualDepts,
+    departments,
+    inputMode,
+    summarySpecialDepartments,
+    regularExceptionGranted,
+    specialExceptionGranted,
+    detailDepartments,
+  };
 }
 
 function loadSdStateFromStorage(): SdPersistedSnapshot {
@@ -119,9 +175,26 @@ function loadSdStateFromStorage(): SdPersistedSnapshot {
 }
 
 export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
-  const [pupils, setPupils] = useState(() => loadSdStateFromStorage().pupils);
-  const [manualDepts, setManualDepts] = useState(() => loadSdStateFromStorage().manualDepts);
-  const [departments, setDepartments] = useState(() => loadSdStateFromStorage().departments);
+  const initial = loadSdStateFromStorage();
+  const [pupils, setPupils] = useState(() => initial.pupils);
+  const [manualDepts, setManualDepts] = useState(() => initial.manualDepts);
+  const [departments, setDepartments] = useState(() => initial.departments);
+  const [inputMode, setInputMode] = useState<"summary" | "detail">(() => initial.inputMode ?? "summary");
+  const [regularExceptionGranted, setRegularExceptionGranted] = useState<boolean>(
+    () => initial.regularExceptionGranted ?? false,
+  );
+  const [specialExceptionGranted, setSpecialExceptionGranted] = useState<boolean>(
+    () => initial.specialExceptionGranted ?? false,
+  );
+  const [summarySpecialDepartments, setSummarySpecialDepartments] = useState<
+    { participants: number; specialExceptionGranted?: boolean }[]
+  >(() => initial.summarySpecialDepartments ?? []);
+  const [detailDepartments, setDetailDepartments] = useState<SdDepartmentInput[]>(
+    () =>
+      initial.detailDepartments ?? [
+        { kind: "regular", participants: 0 },
+      ],
+  );
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState("");
   const [uiNotice, setUiNotice] = useState("");
@@ -175,6 +248,37 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
   const breakdown = useMemo(() => getPhmaxSdBreakdown(effectiveDepts), [effectiveDepts]);
 
+  const detailedResult = useMemo<SdDetailedResult | null>(() => {
+    try {
+      if (inputMode === "summary") {
+        return calculateSchoolDruzinaPhmaxFromSummary({
+          regularDepartments: effectiveDepts,
+          regularParticipantsTotal: pupils,
+          regularExceptionGranted,
+          specialExceptionGranted,
+          specialDepartments: summarySpecialDepartments,
+        });
+      }
+      return calculateSchoolDruzinaPhmaxDetailed(
+        normalizeSchoolDruzinaInput({
+          departments: detailDepartments,
+          regularExceptionGranted,
+          specialExceptionGranted,
+        }),
+      );
+    } catch {
+      return null;
+    }
+  }, [
+    inputMode,
+    effectiveDepts,
+    pupils,
+    regularExceptionGranted,
+    specialExceptionGranted,
+    summarySpecialDepartments,
+    detailDepartments,
+  ]);
+
   const tableWarning =
     effectiveDepts > SD_MAX_DEPARTMENTS_IN_TABLE
       ? `Tabulka PHmax v této aplikaci končí ${SD_MAX_DEPARTMENTS_IN_TABLE} odděleními – u vyššího počtu použijte přílohu vyhlášky.`
@@ -192,6 +296,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         reduction,
         breakdown,
         tableWarning,
+        detailed: detailedResult,
       }),
     [
       pupils,
@@ -203,6 +308,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       reduction,
       breakdown,
       tableWarning,
+      detailedResult,
     ]
   );
 
@@ -235,8 +341,26 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   }, [exportRows, xlsxExportBusy]);
 
   const buildSdSnapshot = useCallback(
-    (): SdPersistedSnapshot => ({ pupils, manualDepts, departments }),
-    [pupils, manualDepts, departments],
+    (): SdPersistedSnapshot => ({
+      pupils,
+      manualDepts,
+      departments,
+      inputMode,
+      summarySpecialDepartments,
+      regularExceptionGranted,
+      specialExceptionGranted,
+      detailDepartments,
+    }),
+    [
+      pupils,
+      manualDepts,
+      departments,
+      inputMode,
+      summarySpecialDepartments,
+      regularExceptionGranted,
+      specialExceptionGranted,
+      detailDepartments,
+    ],
   );
 
   const applySdSnapshot = useCallback((data: unknown) => {
@@ -245,6 +369,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       setPupils(next.pupils);
       setManualDepts(next.manualDepts);
       setDepartments(next.departments);
+      setInputMode(next.inputMode ?? "summary");
+      setSummarySpecialDepartments(next.summarySpecialDepartments ?? []);
+      setRegularExceptionGranted(next.regularExceptionGranted ?? false);
+      setSpecialExceptionGranted(next.specialExceptionGranted ?? false);
+      setDetailDepartments(next.detailDepartments ?? [{ kind: "regular", participants: 0 }]);
       setUiNotice("Data byla obnovena.");
     } else {
       setUiNotice("Uložená data nejsou ve očekávaném tvaru.");
@@ -335,8 +464,17 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
   const buildSdSummaryText = useCallback(() => {
     const phmaxLine =
-      basePhmax != null ? `PHmax (po krácení): ${formatSdHours(reduction.adjusted)}` : "PHmax: –";
-    const baseLine = basePhmax != null ? `PHmax (základ z tabulky): ${formatSdHours(basePhmax)}` : "";
+      detailedResult != null
+        ? `PHmax (detailní model): ${formatSdHours(detailedResult.finalPhmax)}`
+        : basePhmax != null
+          ? `PHmax (po krácení): ${formatSdHours(reduction.adjusted)}`
+          : "PHmax: –";
+    const baseLine =
+      detailedResult != null
+        ? `PHmax (základ z tabulky): ${formatSdHours(detailedResult.basePhmax)}`
+        : basePhmax != null
+          ? `PHmax (základ z tabulky): ${formatSdHours(basePhmax)}`
+          : "";
     const kraceni = reduction.applied
       ? `ano (${(Math.round(reduction.factor * 1000) / 10).toLocaleString("cs-CZ")} %)`
       : "ne";
@@ -344,17 +482,21 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       "Shrnutí – PHmax, školní družina",
       "",
       `Čas: ${new Date().toLocaleString("cs-CZ")}`,
+      `Režim vstupu: ${inputMode === "summary" ? "souhrnný" : "detailní po odděleních"}`,
       `Účastníci (1. st.): ${pupils}`,
       `Oddělení (výpočet): ${effectiveDepts}${manualDepts ? " (ruční zadání)" : ` (navrženo ${suggested})`}`,
       baseLine,
       phmaxLine,
+      detailedResult != null
+        ? `PHAmax speciální oddělení (orientačně): ${formatSdHours(detailedResult.finalPhaMax)}`
+        : "",
       `Krácení § 10 odst. 2: ${kraceni}`,
       "",
       APP_AUTHOR_CREDIT_LINE,
     ]
       .filter(Boolean)
       .join("\n");
-  }, [pupils, effectiveDepts, manualDepts, suggested, basePhmax, reduction]);
+  }, [pupils, effectiveDepts, manualDepts, suggested, basePhmax, reduction, detailedResult, inputMode]);
 
   const copySdSummary = useCallback(async () => {
     try {
@@ -454,11 +596,17 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </div>
           <div className="hero__stats hero__stats--compact hero__stats--sd">
             <HeroStat compact label="Účastníci (1. st.)" value={pupils} />
-            <HeroStat compact label="Oddělení" value={effectiveDepts} />
+            <HeroStat compact label="Oddělení" value={inputMode === "detail" ? detailDepartments.length : effectiveDepts} />
             <HeroStat
               compact
               label="PHmax"
-              value={basePhmax != null ? formatSdHours(reduction.adjusted) : "–"}
+              value={
+                detailedResult != null
+                  ? formatSdHours(detailedResult.finalPhmax)
+                  : basePhmax != null
+                    ? formatSdHours(reduction.adjusted)
+                    : "–"
+              }
             />
             <HeroStat
               compact
@@ -630,6 +778,27 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         <h2 className="section-title">Vstupy</h2>
         <InputOutputLegend />
 
+        <div className="checks" style={{ marginTop: 12 }}>
+          <label>
+            <input
+              type="radio"
+              name="sd-input-mode"
+              checked={inputMode === "summary"}
+              onChange={() => setInputMode("summary")}
+            />
+            Souhrnný režim
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="sd-input-mode"
+              checked={inputMode === "detail"}
+              onChange={() => setInputMode("detail")}
+            />
+            Detailní režim po odděleních
+          </label>
+        </div>
+
         <div className="grid two">
           <div className="subcard">
             <h3>Účastníci</h3>
@@ -666,8 +835,215 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </div>
         </div>
 
+        {inputMode === "summary" ? (
+          <div className="subcard" style={{ marginTop: 16 }}>
+            <h3>Speciální oddělení (§ 16 odst. 9)</h3>
+            <div className="checks">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={regularExceptionGranted}
+                  onChange={(e) => setRegularExceptionGranted(e.target.checked)}
+                />
+                Povolená výjimka u běžných oddělení (PHmax)
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={specialExceptionGranted}
+                  onChange={(e) => setSpecialExceptionGranted(e.target.checked)}
+                />
+                Povolená výjimka u speciálních oddělení (§ 16/9, PHmax i PHAmax)
+              </label>
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <button
+                type="button"
+                className="btn ghost"
+                onClick={() =>
+                  setSummarySpecialDepartments((prev) => [...prev, { participants: 0, specialExceptionGranted: undefined }])
+                }
+              >
+                Přidat speciální oddělení
+              </button>
+            </div>
+            {summarySpecialDepartments.length > 0 ? (
+              <div className="stack" style={{ marginTop: 12 }}>
+                {summarySpecialDepartments.map((row, i) => (
+                  <div key={i} className="grid two" style={{ gap: 10, alignItems: "end" }}>
+                    <NumberField
+                      label={`Speciální oddělení ${i + 1} – počet účastníků`}
+                      value={row.participants}
+                      onChange={(v) =>
+                        setSummarySpecialDepartments((prev) =>
+                          prev.map((x, idx) => (idx === i ? { ...x, participants: v } : x)),
+                        )
+                      }
+                    />
+                    <div className="checks">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={Boolean(row.specialExceptionGranted)}
+                          onChange={(e) =>
+                            setSummarySpecialDepartments((prev) =>
+                              prev.map((x, idx) =>
+                                idx === i ? { ...x, specialExceptionGranted: e.target.checked } : x,
+                              ),
+                            )
+                          }
+                        />
+                        Lokální výjimka pro toto oddělení
+                      </label>
+                      <button
+                        type="button"
+                        className="btn ghost"
+                        onClick={() => setSummarySpecialDepartments((prev) => prev.filter((_, idx) => idx !== i))}
+                      >
+                        Odstranit
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="muted-text" style={{ marginTop: 10 }}>
+                Zatím bez speciálních oddělení.
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="subcard" style={{ marginTop: 16 }}>
+            <h3>Detailní evidence oddělení</h3>
+            <div className="checks">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={regularExceptionGranted}
+                  onChange={(e) => setRegularExceptionGranted(e.target.checked)}
+                />
+                Povolená výjimka u běžných oddělení (PHmax)
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={specialExceptionGranted}
+                  onChange={(e) => setSpecialExceptionGranted(e.target.checked)}
+                />
+                Povolená výjimka u speciálních oddělení (§ 16/9, PHmax i PHAmax)
+              </label>
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <button
+                type="button"
+                className="btn ghost"
+                onClick={() => setDetailDepartments((prev) => [...prev, { kind: "regular", participants: 0 }])}
+              >
+                Přidat oddělení
+              </button>
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <ScrollGrabRegion className="app-table-wrap app-table-wrap--spaced">
+              <table className="app-data-table">
+                <thead>
+                  <tr>
+                    <th>Oddělení</th>
+                    <th>Typ</th>
+                    <th>Účastníci</th>
+                    <th>Výjimka (spec.)</th>
+                    <th>Akce</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {detailDepartments.map((row, i) => (
+                    <tr key={i}>
+                      <td>{i + 1}</td>
+                      <td>
+                        <select
+                          className="input"
+                          value={row.kind}
+                          onChange={(e) =>
+                            setDetailDepartments((prev) =>
+                              prev.map((x, idx) =>
+                                idx === i ? { ...x, kind: e.target.value as "regular" | "special" } : x,
+                              ),
+                            )
+                          }
+                        >
+                          <option value="regular">Běžné</option>
+                          <option value="special">Speciální (§ 16/9)</option>
+                        </select>
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          className="input"
+                          min={0}
+                          step="0.1"
+                          value={row.participants}
+                          onChange={(e) =>
+                            setDetailDepartments((prev) =>
+                              prev.map((x, idx) =>
+                                idx === i ? { ...x, participants: Math.max(0, Number(e.target.value) || 0) } : x,
+                              ),
+                            )
+                          }
+                        />
+                      </td>
+                      <td>
+                        {row.kind === "special" ? (
+                          <input
+                            type="checkbox"
+                            checked={Boolean(row.specialExceptionGranted)}
+                            onChange={(e) =>
+                              setDetailDepartments((prev) =>
+                                prev.map((x, idx) =>
+                                  idx === i ? { ...x, specialExceptionGranted: e.target.checked } : x,
+                                ),
+                              )
+                            }
+                          />
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="btn ghost"
+                          onClick={() =>
+                            setDetailDepartments((prev) =>
+                              prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev,
+                            )
+                          }
+                        >
+                          Odstranit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              </ScrollGrabRegion>
+            </div>
+          </div>
+        )}
+
         <div className="grid two section-results" style={{ marginTop: 18 }}>
-          {basePhmax != null ? (
+          {detailedResult != null ? (
+            <>
+              <ResultCard label="Oddělení (celkem)" value={detailedResult.totalDepartments} tone="primary" />
+              <ResultCard label="PHmax (základ z tabulky)" value={detailedResult.basePhmax} tone="success" />
+              <ResultCard label="PHmax – běžná oddělení" value={detailedResult.regularSharePhmax} tone="primary" />
+              <ResultCard label="PHmax – speciální oddělení" value={detailedResult.specialSharePhmax} tone="primary" />
+              <ResultCard label="PHmax celkem" value={detailedResult.finalPhmax} tone="success" />
+              <ResultCard
+                label="PHAmax (speciální oddělení, orientačně)"
+                value={detailedResult.finalPhaMax}
+                tone="success"
+              />
+            </>
+          ) : basePhmax != null ? (
             <>
               <ResultCard
                 label="Počet oddělení pro výpočet"
@@ -699,7 +1075,41 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           )}
         </div>
 
-        {breakdown != null && breakdown.length > 0 && basePhmax != null ? (
+        {detailedResult != null ? (
+          <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
+            <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
+              Rozpad PHmax/PHAmax po odděleních
+            </h3>
+            <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
+              <table className="sd-phmax-breakdown">
+                <thead>
+                  <tr>
+                    <th>Oddělení</th>
+                    <th>Typ</th>
+                    <th>Účastníci</th>
+                    <th>PHmax základ</th>
+                    <th>Koef. krácení</th>
+                    <th>PHmax po krácení</th>
+                    <th>PHAmax (spec.)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {detailedResult.breakdown.map((row) => (
+                    <tr key={row.index1Based}>
+                      <td>{row.index1Based}</td>
+                      <td>{row.kind === "regular" ? "Běžné" : "Speciální"}</td>
+                      <td>{formatSdHours(row.participants)}</td>
+                      <td>{formatSdHours(row.basePhmax)}</td>
+                      <td>{row.reductionFactor.toFixed(4)}</td>
+                      <td>{formatSdHours(row.finalPhmax)}</td>
+                      <td>{row.kind === "special" ? formatSdHours(row.finalPhaMax) : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </ScrollGrabRegion>
+          </div>
+        ) : breakdown != null && breakdown.length > 0 && basePhmax != null ? (
           <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
             <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
               Rozpad PHmax podle oddělení
