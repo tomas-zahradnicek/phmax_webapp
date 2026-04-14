@@ -197,6 +197,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const [summarySpecialDepartments, setSummarySpecialDepartments] = useState<
     { participants: number; specialExceptionGranted?: boolean }[]
   >(() => initial.summarySpecialDepartments ?? []);
+  const [summaryHasSpecial, setSummaryHasSpecial] = useState<boolean>(
+    () => (initial.summarySpecialDepartments?.length ?? 0) > 0,
+  );
   const [detailDepartments, setDetailDepartments] = useState<SdDepartmentInput[]>(
     () =>
       initial.detailDepartments ?? [
@@ -206,6 +209,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const [schoolFirstStageClassCount, setSchoolFirstStageClassCount] = useState<1 | 2 | 3 | null>(
     () => initial.schoolFirstStageClassCount ?? null,
   );
+  const detailHasSpecial = useMemo(() => detailDepartments.some((d) => d.kind === "special"), [detailDepartments]);
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState("");
   const [uiNotice, setUiNotice] = useState("");
@@ -601,6 +605,13 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   }, [namedSnapshots, selectedNamedId, buildSdAuditProtocol]);
 
   useEffect(() => {
+    if (!summaryHasSpecial && summarySpecialDepartments.length > 0) {
+      setSummarySpecialDepartments([]);
+      setSpecialExceptionGranted(false);
+    }
+  }, [summaryHasSpecial, summarySpecialDepartments.length]);
+
+  useEffect(() => {
     try {
       localStorage.setItem(SD_STORAGE_KEY, JSON.stringify(buildSdSnapshot()));
       setLastSavedAt(new Date().toLocaleString("cs-CZ"));
@@ -823,6 +834,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       <section className="card section-card section-card--sd">
         <h2 className="section-title">Vstupy</h2>
         <InputOutputLegend />
+        <p className="muted-text" style={{ marginTop: 10 }}>
+          Postupujte po krocích: 1) zvolte režim, 2) zadejte běžná oddělení/účastníky, 3) případně zapněte speciální
+          oddělení a výjimky, 4) zkontrolujte výsledky.
+        </p>
 
         <div className="checks" style={{ marginTop: 12 }}>
           <label>
@@ -861,27 +876,35 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
           <div className="subcard">
             <h3>Oddělení</h3>
-            <label className="checks" style={{ marginTop: 0 }}>
-              <span>
-                <input
-                  type="checkbox"
-                  checked={manualDepts}
-                  onChange={(e) => {
-                    const on = e.target.checked;
-                    setManualDepts(on);
-                    if (on) setDepartments(Math.max(1, suggested));
-                  }}
-                />
-                Zadat počet oddělení ručně (v souhrnném režimu = počet běžných oddělení)
-              </span>
-            </label>
-            {manualDepts ? (
-              <NumberField
-                label={inputMode === "summary" ? "Počet běžných oddělení školní družiny" : "Počet oddělení školní družiny"}
-                value={departments}
-                onChange={setDepartments}
-              />
-            ) : null}
+            {inputMode === "summary" ? (
+              <>
+                <label className="checks" style={{ marginTop: 0 }}>
+                  <span>
+                    <input
+                      type="checkbox"
+                      checked={manualDepts}
+                      onChange={(e) => {
+                        const on = e.target.checked;
+                        setManualDepts(on);
+                        if (on) setDepartments(Math.max(1, suggested));
+                      }}
+                    />
+                    Zadat počet oddělení ručně (v souhrnném režimu = počet běžných oddělení)
+                  </span>
+                </label>
+                {manualDepts ? (
+                  <NumberField
+                    label="Počet běžných oddělení školní družiny"
+                    value={departments}
+                    onChange={setDepartments}
+                  />
+                ) : null}
+              </>
+            ) : (
+              <p className="muted-text" style={{ marginTop: 0 }}>
+                V detailním režimu se celkový počet oddělení určí automaticky podle počtu řádků v tabulce oddělení.
+              </p>
+            )}
             <label className="field" style={{ marginTop: 12 }}>
               <span className="field__label">Pokud má ŠD 1 běžné oddělení: škola má kolik tříd 1. stupně?</span>
               <select
@@ -908,73 +931,93 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               <label>
                 <input
                   type="checkbox"
+                  checked={summaryHasSpecial}
+                  onChange={(e) => setSummaryHasSpecial(e.target.checked)}
+                />
+                Družina obsahuje speciální oddělení (§ 16/9)
+              </label>
+            </div>
+            <div className="checks" style={{ marginTop: 8 }}>
+              <label>
+                <input
+                  type="checkbox"
                   checked={regularExceptionGranted}
                   onChange={(e) => setRegularExceptionGranted(e.target.checked)}
                 />
                 Povolená výjimka u běžných oddělení (PHmax)
               </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={specialExceptionGranted}
-                  onChange={(e) => setSpecialExceptionGranted(e.target.checked)}
-                />
-                Povolená výjimka u speciálních oddělení (§ 16/9, PHmax i PHAmax)
-              </label>
             </div>
-            <div style={{ marginTop: 10 }}>
-              <button
-                type="button"
-                className="btn ghost"
-                onClick={() =>
-                  setSummarySpecialDepartments((prev) => [...prev, { participants: 0, specialExceptionGranted: undefined }])
-                }
-              >
-                Přidat speciální oddělení
-              </button>
-            </div>
-            {summarySpecialDepartments.length > 0 ? (
-              <div className="stack" style={{ marginTop: 12 }}>
-                {summarySpecialDepartments.map((row, i) => (
-                  <div key={i} className="grid two" style={{ gap: 10, alignItems: "end" }}>
-                    <NumberField
-                      label={`Speciální oddělení ${i + 1} – počet účastníků`}
-                      value={row.participants}
-                      onChange={(v) =>
-                        setSummarySpecialDepartments((prev) =>
-                          prev.map((x, idx) => (idx === i ? { ...x, participants: v } : x)),
-                        )
-                      }
+            {summaryHasSpecial ? (
+              <>
+                <div className="checks" style={{ marginTop: 8 }}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={specialExceptionGranted}
+                      onChange={(e) => setSpecialExceptionGranted(e.target.checked)}
                     />
-                    <div className="checks">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={Boolean(row.specialExceptionGranted)}
-                          onChange={(e) =>
+                    Povolená výjimka u speciálních oddělení (§ 16/9, PHmax i PHAmax)
+                  </label>
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    onClick={() =>
+                      setSummarySpecialDepartments((prev) => [...prev, { participants: 0, specialExceptionGranted: undefined }])
+                    }
+                  >
+                    Přidat speciální oddělení
+                  </button>
+                </div>
+                {summarySpecialDepartments.length > 0 ? (
+                  <div className="stack" style={{ marginTop: 12 }}>
+                    {summarySpecialDepartments.map((row, i) => (
+                      <div key={i} className="grid two" style={{ gap: 10, alignItems: "end" }}>
+                        <NumberField
+                          label={`Speciální oddělení ${i + 1} – počet účastníků`}
+                          value={row.participants}
+                          onChange={(v) =>
                             setSummarySpecialDepartments((prev) =>
-                              prev.map((x, idx) =>
-                                idx === i ? { ...x, specialExceptionGranted: e.target.checked } : x,
-                              ),
+                              prev.map((x, idx) => (idx === i ? { ...x, participants: v } : x)),
                             )
                           }
                         />
-                        Lokální výjimka pro toto oddělení
-                      </label>
-                      <button
-                        type="button"
-                        className="btn ghost"
-                        onClick={() => setSummarySpecialDepartments((prev) => prev.filter((_, idx) => idx !== i))}
-                      >
-                        Odstranit
-                      </button>
-                    </div>
+                        <div className="checks">
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={Boolean(row.specialExceptionGranted)}
+                              onChange={(e) =>
+                                setSummarySpecialDepartments((prev) =>
+                                  prev.map((x, idx) =>
+                                    idx === i ? { ...x, specialExceptionGranted: e.target.checked } : x,
+                                  ),
+                                )
+                              }
+                            />
+                            Lokální výjimka pro toto oddělení
+                          </label>
+                          <button
+                            type="button"
+                            className="btn ghost"
+                            onClick={() => setSummarySpecialDepartments((prev) => prev.filter((_, idx) => idx !== i))}
+                          >
+                            Odstranit
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                ) : (
+                  <p className="muted-text" style={{ marginTop: 10 }}>
+                    Zatím bez zadaného speciálního oddělení.
+                  </p>
+                )}
+              </>
             ) : (
               <p className="muted-text" style={{ marginTop: 10 }}>
-                Zatím bez speciálních oddělení.
+                Speciální oddělení nejsou aktivní. Pokud je nepoužíváte, další varianty se skryjí.
               </p>
             )}
           </div>
@@ -990,14 +1033,16 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 />
                 Povolená výjimka u běžných oddělení (PHmax)
               </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={specialExceptionGranted}
-                  onChange={(e) => setSpecialExceptionGranted(e.target.checked)}
-                />
-                Povolená výjimka u speciálních oddělení (§ 16/9, PHmax i PHAmax)
-              </label>
+              {detailHasSpecial ? (
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={specialExceptionGranted}
+                    onChange={(e) => setSpecialExceptionGranted(e.target.checked)}
+                  />
+                  Povolená výjimka u speciálních oddělení (§ 16/9, PHmax i PHAmax)
+                </label>
+              ) : null}
             </div>
             <div style={{ marginTop: 10 }}>
               <button
@@ -1092,6 +1137,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               </table>
               </ScrollGrabRegion>
             </div>
+            {!detailHasSpecial ? (
+              <p className="muted-text" style={{ marginTop: 10 }}>
+                Tip: přepněte některý řádek na „Speciální (§ 16/9)“, pokud chcete počítat i speciální režim.
+              </p>
+            ) : null}
           </div>
         )}
 
@@ -1109,21 +1159,25 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 value={detailedResult.regularSharePhmax}
                 tone="primary"
               />
-              <ResultCard
-                label="PHmax – speciální oddělení (odst. 7, § 16/9; krácení poměrné části)"
-                value={detailedResult.specialSharePhmax}
-                tone="primary"
-              />
+              {detailedResult.specialDepartments > 0 ? (
+                <ResultCard
+                  label="PHmax – speciální oddělení (odst. 7, § 16/9; krácení poměrné části)"
+                  value={detailedResult.specialSharePhmax}
+                  tone="primary"
+                />
+              ) : null}
               <ResultCard
                 label="PHmax celkem (součet běžných + speciálních oddělení)"
                 value={detailedResult.finalPhmax}
                 tone="success"
               />
-              <ResultCard
-                label="PHAmax – speciální oddělení (odst. 7, § 16/9; po krácení výjimky)"
-                value={detailedResult.finalPhaMax}
-                tone="success"
-              />
+              {detailedResult.specialDepartments > 0 ? (
+                <ResultCard
+                  label="PHAmax – speciální oddělení (odst. 7, § 16/9; po krácení výjimky)"
+                  value={detailedResult.finalPhaMax}
+                  tone="success"
+                />
+              ) : null}
             </>
           ) : basePhmax != null ? (
             <>
