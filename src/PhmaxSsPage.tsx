@@ -40,7 +40,7 @@ import {
   SS_HERO_EXAMPLE_LEGEND,
 } from "./ss/phmax-ss-constants";
 import { PhmaxSsUnitsForm, type SsDashboardMetrics } from "./ss/PhmaxSsUnitsForm";
-import { usePhmaxSsUnits } from "./ss/use-phmax-ss-units";
+import { usePhmaxSsUnits, type SsNamedSnapshot } from "./ss/use-phmax-ss-units";
 
 const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
   {
@@ -229,7 +229,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                     aria-label="Vybrat uloženou zálohu"
                   >
                     <option value="">Vyberte uloženou zálohu…</option>
-                    {ss.namedSnapshots.map((n) => (
+                    {ss.namedSnapshots.map((n: SsNamedSnapshot) => (
                       <option key={n.id} value={n.id}>
                         {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
                       </option>
