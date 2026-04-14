@@ -44,6 +44,7 @@ import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
 import { round2 } from "./phmax-zs-logic";
 import { buildPhmaxSdExportRows } from "./phmax-sd-export-rows";
 import {
+  PHMAX_SD_BY_DEPARTMENTS,
   SD_MAX_DEPARTMENTS_IN_TABLE,
   calculateSchoolDruzinaPhmaxDetailed,
   calculateSchoolDruzinaPhmaxFromSummary,
@@ -284,6 +285,23 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     effectiveDepts > SD_MAX_DEPARTMENTS_IN_TABLE
       ? `Tabulka PHmax v této aplikaci končí ${SD_MAX_DEPARTMENTS_IN_TABLE} odděleními – u vyššího počtu použijte přílohu vyhlášky.`
       : null;
+
+  const methodikaVariantRows = useMemo(
+    () =>
+      PHMAX_SD_BY_DEPARTMENTS.map((base, idx) => {
+        const deptCount = idx + 1;
+        const avg = base / deptCount;
+        return {
+          deptCount,
+          base,
+          avg,
+          v5: round2(base - avg * 0.05),
+          v4: round2(base - avg * 0.1),
+          vUnder4: round2(base - avg * 0.6),
+        };
+      }),
+    [],
+  );
 
   const exportRows = useMemo(
     () =>
@@ -1168,6 +1186,42 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         ) : null}
 
         {tableWarning ? <p className="card card--warning" style={{ marginTop: 16, padding: 14 }}>{tableWarning}</p> : null}
+
+        <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
+          <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
+            Ověřovací tabulka metodiky (1 speciální oddělení s výjimkou)
+          </h3>
+          <p className="muted-text" style={{ marginBottom: 12, fontSize: "0.88rem" }}>
+            Kontrolní scénář 1:1 s metodikou: při jednom výjimkovém oddělení § 16/9 se odečítá 0,05 / 0,10 / 0,60
+            průměrného PHmax na oddělení. Sloupce odpovídají variantě 5 dětí, 4 děti, méně než 4 děti.
+          </p>
+          <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
+            <table className="sd-phmax-breakdown">
+              <thead>
+                <tr>
+                  <th>Počet oddělení ŠD</th>
+                  <th>PHmax</th>
+                  <th>Průměr PHmax na 1 odd.</th>
+                  <th>Varianta 5 dětí (0,95)</th>
+                  <th>Varianta 4 děti (0,90)</th>
+                  <th>Varianta &lt; 4 děti (0,40)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {methodikaVariantRows.map((r) => (
+                  <tr key={r.deptCount}>
+                    <td>{r.deptCount}</td>
+                    <td>{formatSdHours(r.base)}</td>
+                    <td>{formatSdHours(r.avg)}</td>
+                    <td>{formatSdHours(r.v5)}</td>
+                    <td>{formatSdHours(r.v4)}</td>
+                    <td>{formatSdHours(r.vUnder4)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollGrabRegion>
+        </div>
 
         <p className="muted-text" style={{ marginTop: 20 }}>
           Aplikace nenahrazuje úřední výpočet ani výkazy (např. Z 2-01). U složitých případů (

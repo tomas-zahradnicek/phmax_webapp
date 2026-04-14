@@ -127,6 +127,9 @@ export type SdDetailedResult = {
   sourceMode: "summary" | "detail";
 };
 
+/** Orientační základ PHAmax pro 1 speciální oddělení (viz metodický příklad č. 7). */
+const SD_PHAMAX_BASE_PER_SPECIAL_DEPARTMENT = 15;
+
 function clamp01(value: number): number {
   if (value < 0) return 0;
   if (value > 1) return 1;
@@ -218,32 +221,40 @@ export function calculateSchoolDruzinaPhmaxDetailed(model: SdNormalizedModel): S
       ? clamp01(regularParticipantsTotal / regularRequiredTotal)
       : 1;
 
+  const specialCount = model.departments.filter((d) => d.kind === "special").length;
+  const regularCount = model.departments.filter((d) => d.kind === "regular").length;
+  const basePerDepartment = totalDepartments > 0 ? basePhmax / totalDepartments : 0;
+  const specialBasePerDepartment = specialCount > 0 ? (basePhmax * (specialCount / totalDepartments)) / specialCount : 0;
+  const regularBasePerDepartment = regularCount > 0 ? (basePhmax - specialBasePerDepartment * specialCount) / regularCount : 0;
+
+  // U speciálních oddělení se krátí poměrná část PHmax připadající na tato oddělení.
   const breakdown = model.departments.map((dep, idx): SdBreakdownRow => {
-    const base = getPhmaxSdHourForDepartmentOrder(idx + 1);
     if (dep.kind === "regular") {
-      const final = round2(base * regularReductionFactor);
+      const final = round2(regularBasePerDepartment * regularReductionFactor);
       return {
         index1Based: idx + 1,
         kind: dep.kind,
         participants: dep.participants,
-        basePhmax: base,
+        basePhmax: round2(regularBasePerDepartment),
         reductionFactor: regularReductionFactor,
         finalPhmax: final,
         finalPhaMax: 0,
       };
     }
+
     const specialExceptionGranted =
       typeof dep.specialExceptionGranted === "boolean" ? dep.specialExceptionGranted : model.specialExceptionGranted;
     const specialFactor = getSpecialExceptionFactor(dep.participants, specialExceptionGranted);
-    const final = round2(base * specialFactor);
+    const finalPhmax = round2(specialBasePerDepartment * specialFactor);
+    const finalPhaMax = round2(SD_PHAMAX_BASE_PER_SPECIAL_DEPARTMENT * specialFactor);
     return {
       index1Based: idx + 1,
       kind: dep.kind,
       participants: dep.participants,
-      basePhmax: base,
+      basePhmax: round2(specialBasePerDepartment),
       reductionFactor: specialFactor,
-      finalPhmax: final,
-      finalPhaMax: final,
+      finalPhmax,
+      finalPhaMax,
     };
   });
 
@@ -266,6 +277,10 @@ export function calculateSchoolDruzinaPhmaxDetailed(model: SdNormalizedModel): S
   }
   if (specialRows.length > 0) {
     notes.push("Speciální oddělení: krácení se aplikuje samostatně po odděleních dle počtu účastníků.");
+    notes.push(
+      `PHAmax speciální oddělení: základ ${SD_PHAMAX_BASE_PER_SPECIAL_DEPARTMENT} h/odd. krátí stejný koeficient výjimky (např. 0,95 / 0,90 / 0,40).`,
+    );
+    notes.push(`Průměrný PHmax základ na oddělení: ${round2(basePerDepartment)} h.`);
   }
 
   return {
