@@ -1,28 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React from "react";
 import { ScrollGrabRegion } from "../ScrollGrabRegion";
-import { confirmDestructive, msgConfirmDeleteNamedBackup } from "../confirm-destructive";
 import { HeroIconActionButton, IconJson } from "../HeroActionIconButton";
-import { createSsProductAuditProtocol } from "../phmax-product-audit";
-import { comparePhmaxProductVariants } from "../phmax-product-compare";
-import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "../phmax-product-audit-download";
 import {
   PHMAX_SS_MAX_NAMED_SNAPSHOTS,
   PHMAX_SS_MODE_OPTIONS,
-  PHMAX_SS_NAMED_SNAPSHOTS_LS_KEY,
   PHMAX_SS_UNITS_SECTION,
-  PHMAX_SS_UNITS_STORAGE_KEY,
 } from "./phmax-ss-constants";
 import { phmaxSsDataset } from "./phmax-ss-dataset";
 import { PHMAX_SS_STUDY_FORM_OPTIONS, type ModeKey, type StudyForm } from "./phmax-ss-helpers";
-import { explainFullPhmaxDecision, explainSingleRow } from "./phmax-ss-explainability";
+import { explainSingleRow } from "./phmax-ss-explainability";
 import type { ServiceResolvedRow } from "./phmax-ss-service";
-import {
-  buildSsAuditProtocolInput,
-  deriveSsUnitsBrulesPreview,
-  deriveSsUnitsPreview,
-  explainInputFromUnitRow,
-} from "./phmax-ss-units-derive";
-import { createEmptyPhmaxSsUnitRow, revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./phmax-ss-types";
+import { explainInputFromUnitRow } from "./phmax-ss-units-derive";
+import type { PhmaxSsUnitRow } from "./phmax-ss-types";
 import {
   SsSchoolExplainabilitySummary,
   SsWhyBrulesEvalErrorPanel,
@@ -30,60 +19,13 @@ import {
   SsWhyPhmaxErrorPanel,
   SsWhyPhmaxPanel,
 } from "./SsWhyPanels";
+import { usePhmaxSsUnits, type PhmaxSsUnitsModel } from "./use-phmax-ss-units";
 
-function parseStoredRows(raw: string | null): PhmaxSsUnitRow[] {
-  if (!raw) return [createEmptyPhmaxSsUnitRow(1)];
-  try {
-    const data = JSON.parse(raw) as unknown;
-    if (!Array.isArray(data) || data.length === 0) return [createEmptyPhmaxSsUnitRow(1)];
-    return data.map((item, i) => revivePhmaxSsUnitRow((item ?? {}) as Record<string, unknown>, i + 1));
-  } catch {
-    return [createEmptyPhmaxSsUnitRow(1)];
-  }
-}
-
-function nextRowId(rows: PhmaxSsUnitRow[]): number {
-  return rows.reduce((m, r) => Math.max(m, r.id), 0) + 1;
-}
-
-type NamedSsSnapshot = {
-  id: string;
-  name: string;
-  savedAt: string;
-  snapshot: { rows: PhmaxSsUnitRow[] };
-};
-
-function readNamedSsSnapshotsFromLs(): NamedSsSnapshot[] {
-  try {
-    const raw = localStorage.getItem(PHMAX_SS_NAMED_SNAPSHOTS_LS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as { items?: NamedSsSnapshot[] };
-    return Array.isArray(parsed.items) ? parsed.items : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeNamedSsSnapshotsToLs(items: NamedSsSnapshot[]) {
-  try {
-    localStorage.setItem(PHMAX_SS_NAMED_SNAPSHOTS_LS_KEY, JSON.stringify({ items }));
-  } catch {
-    /* ignore */
-  }
-}
-
-function parseSsNamedRowsPayload(data: unknown): PhmaxSsUnitRow[] | null {
-  if (!data || typeof data !== "object") return null;
-  const rowsRaw = (data as { rows?: unknown }).rows;
-  if (!Array.isArray(rowsRaw) || rowsRaw.length === 0) return null;
-  return rowsRaw.map((item, i) => revivePhmaxSsUnitRow((item ?? {}) as Record<string, unknown>, i + 1));
-}
+export type { SsDashboardMetrics } from "./use-phmax-ss-units";
 
 function joinRuleMessages(msgs: readonly { message: string }[]): string {
   return msgs.map((m) => m.message).join(" · ");
 }
-
-export type SsDashboardMetrics = { rowCount: number; phmaxTotal: number };
 
 function SsWhyPhmaxWithExplain({ resolved, unitRow }: { resolved: ServiceResolvedRow; unitRow: PhmaxSsUnitRow }) {
   let explanation: ReturnType<typeof explainSingleRow>["explanation"] | undefined;
@@ -98,178 +40,40 @@ function SsWhyPhmaxWithExplain({ resolved, unitRow }: { resolved: ServiceResolve
   return <SsWhyPhmaxPanel row={resolved} explanation={explanation} />;
 }
 
-export function PhmaxSsUnitsForm({
-  onDashboardMetrics,
+function PhmaxSsUnitsFormView({
+  model,
+  hideBackupSubcard = false,
 }: {
-  onDashboardMetrics?: (m: SsDashboardMetrics) => void;
-} = {}) {
+  model: PhmaxSsUnitsModel;
+  hideBackupSubcard?: boolean;
+}) {
   const sec = PHMAX_SS_UNITS_SECTION;
-  const [rows, setRows] = useState<PhmaxSsUnitRow[]>(() => {
-    try {
-      return parseStoredRows(localStorage.getItem(PHMAX_SS_UNITS_STORAGE_KEY));
-    } catch {
-      return [createEmptyPhmaxSsUnitRow(1)];
-    }
-  });
-
-  const [whyPhmaxRowId, setWhyPhmaxRowId] = useState<number | null>(null);
-  const [whyBrulesRowId, setWhyBrulesRowId] = useState<number | null>(null);
-  const [namedSnapshots, setNamedSnapshots] = useState<NamedSsSnapshot[]>([]);
-  const [selectedNamedId, setSelectedNamedId] = useState("");
-  const [namedSaveName, setNamedSaveName] = useState("");
-  const [uiNotice, setUiNotice] = useState("");
-
-  useEffect(() => {
-    setNamedSnapshots(readNamedSsSnapshotsFromLs());
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(PHMAX_SS_UNITS_STORAGE_KEY, JSON.stringify(rows));
-    } catch {
-      /* ignore */
-    }
-  }, [rows]);
-
-  const updateRow = useCallback((id: number, patch: Partial<PhmaxSsUnitRow>) => {
-    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-  }, []);
-
-  const addRow = useCallback(() => {
-    setRows((prev) => [...prev, createEmptyPhmaxSsUnitRow(nextRowId(prev))]);
-  }, []);
-
-  const removeRow = useCallback((id: number) => {
-    setRows((prev) => {
-      const next = prev.filter((r) => r.id !== id);
-      return next.length === 0 ? [createEmptyPhmaxSsUnitRow(1)] : next;
-    });
-  }, []);
-
-  const preview = useMemo(() => deriveSsUnitsPreview(rows), [rows]);
-
-  const brulesPreview = useMemo(() => deriveSsUnitsBrulesPreview(rows), [rows]);
-
-  const computedRows = preview.filter((p) => !p.skipped && "resolved" in p);
-  const totalPhmax = computedRows.reduce((s, p) => s + (p.resolved?.totalPhmax ?? 0), 0);
-  const roundedTotal = Math.round((totalPhmax + Number.EPSILON) * 100) / 100;
-
-  useEffect(() => {
-    onDashboardMetrics?.({ rowCount: rows.length, phmaxTotal: roundedTotal });
-  }, [rows.length, roundedTotal, onDashboardMetrics]);
-
-  const auditProtocolInput = useMemo(() => buildSsAuditProtocolInput(rows), [rows]);
-
-  const schoolPhmaxExplain = useMemo(() => {
-    const input = auditProtocolInput;
-    if (!input) return null;
-    try {
-      return explainFullPhmaxDecision(phmaxSsDataset, {
-        rows: input.rows,
-        ...(input.businessRules ? { businessRules: input.businessRules } : {}),
-      });
-    } catch {
-      return null;
-    }
-  }, [auditProtocolInput]);
-
-  const buildSsRowsSnapshot = useCallback((): { rows: PhmaxSsUnitRow[] } => ({ rows }), [rows]);
-
-  const applySsRowsSnapshot = useCallback((data: unknown) => {
-    const next = parseSsNamedRowsPayload(data);
-    if (next) {
-      setRows(next);
-      setUiNotice("Data byla obnovena.");
-    } else {
-      setUiNotice("Uložená data nejsou ve očekávaném tvaru.");
-    }
-  }, []);
-
-  const saveNamedSsSnapshot = useCallback(() => {
-    const name = namedSaveName.trim() || new Date().toLocaleString("cs-CZ");
-    const id = `n-${Date.now()}`;
-    const item: NamedSsSnapshot = {
-      id,
-      name,
-      savedAt: new Date().toISOString(),
-      snapshot: buildSsRowsSnapshot(),
-    };
-    setNamedSnapshots((prev) => {
-      const next = [item, ...prev].slice(0, PHMAX_SS_MAX_NAMED_SNAPSHOTS);
-      writeNamedSsSnapshotsToLs(next);
-      return next;
-    });
-    setNamedSaveName("");
-    setUiNotice(`Záloha „${name}“ uložena do seznamu (max. ${PHMAX_SS_MAX_NAMED_SNAPSHOTS}).`);
-  }, [buildSsRowsSnapshot, namedSaveName]);
-
-  const restoreNamedSsSnapshot = useCallback(() => {
-    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
-    if (!item) {
-      setUiNotice("Vyberte pojmenovanou zálohu v seznamu.");
-      return;
-    }
-    applySsRowsSnapshot(item.snapshot);
-    setUiNotice(`Obnovena záloha „${item.name}“.`);
-  }, [applySsRowsSnapshot, namedSnapshots, selectedNamedId]);
-
-  const deleteNamedSsSnapshot = useCallback(() => {
-    if (!selectedNamedId) {
-      setUiNotice("Vyberte zálohu ke smazání.");
-      return;
-    }
-    const toDelete = namedSnapshots.find((x) => x.id === selectedNamedId);
-    if (!toDelete) return;
-    if (!confirmDestructive(msgConfirmDeleteNamedBackup(toDelete.name))) return;
-    setNamedSnapshots((prev) => {
-      const next = prev.filter((x) => x.id !== selectedNamedId);
-      writeNamedSsSnapshotsToLs(next);
-      return next;
-    });
-    setSelectedNamedId("");
-    setUiNotice("Pojmenovaná záloha byla smazána.");
-  }, [namedSnapshots, selectedNamedId]);
-
-  const handleExportSsAuditJson = useCallback(() => {
-    if (!auditProtocolInput) {
-      setUiNotice("Nejdřív vyplňte alespoň jeden platný řádek PHmax pro export auditu.");
-      return;
-    }
-    downloadPhmaxProductAuditJson(createSsProductAuditProtocol(phmaxSsDataset, auditProtocolInput), "ss");
-    setUiNotice("Stažen auditní protokol (JSON).");
-  }, [auditProtocolInput]);
-
-  const handleCompareSsWithNamedSnapshot = useCallback(() => {
-    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
-    if (!item) {
-      setUiNotice("Vyberte v seznamu zálohu, kterou chcete porovnat s aktuálním stavem.");
-      return;
-    }
-    const inputCurrent = auditProtocolInput;
-    const inputNamed = buildSsAuditProtocolInput(item.snapshot.rows);
-    if (!inputCurrent) {
-      setUiNotice("Aktuální stav nemá žádný platný řádek PHmax pro srovnání.");
-      return;
-    }
-    if (!inputNamed) {
-      setUiNotice("Vybraná záloha neobsahuje platné řádky PHmax pro srovnání.");
-      return;
-    }
-    const cmp = comparePhmaxProductVariants([
-      {
-        id: "current",
-        label: "Aktuální stav",
-        protocol: createSsProductAuditProtocol(phmaxSsDataset, inputCurrent),
-      },
-      {
-        id: "named",
-        label: item.name,
-        protocol: createSsProductAuditProtocol(phmaxSsDataset, inputNamed),
-      },
-    ]);
-    downloadPhmaxProductCompareJson(cmp, "ss");
-    setUiNotice(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
-  }, [auditProtocolInput, namedSnapshots, selectedNamedId]);
+  const {
+    rows,
+    updateRow,
+    addRow,
+    removeRow,
+    whyPhmaxRowId,
+    setWhyPhmaxRowId,
+    whyBrulesRowId,
+    setWhyBrulesRowId,
+    preview,
+    brulesPreview,
+    computedRows,
+    roundedTotal,
+    schoolPhmaxExplain,
+    namedSnapshots,
+    selectedNamedId,
+    setSelectedNamedId,
+    namedSaveName,
+    setNamedSaveName,
+    uiNotice,
+    saveNamedSsSnapshot,
+    restoreNamedSsSnapshot,
+    deleteNamedSsSnapshot,
+    handleExportSsAuditJson,
+    handleCompareSsWithNamedSnapshot,
+  } = model;
 
   const tableDescId = "phmax-ss-units-form-desc";
 
@@ -303,6 +107,13 @@ export function PhmaxSsUnitsForm({
         {sec.storageNote}
       </p>
 
+      {hideBackupSubcard && uiNotice ? (
+        <p className="muted-text" role="status" style={{ marginTop: 12, lineHeight: 1.5 }}>
+          {uiNotice}
+        </p>
+      ) : null}
+
+      {!hideBackupSubcard ? (
       <div className="subcard ss-units-actions" aria-label="Auditní protokol a zálohy">
         <h3 style={{ marginTop: 0, marginBottom: 8, fontSize: "1.05rem", fontWeight: 700 }}>
           Auditní protokol a pojmenované zálohy
@@ -370,6 +181,7 @@ export function PhmaxSsUnitsForm({
           Porovnat aktuální stav se zálohou (JSON)…
         </button>
       </div>
+      ) : null}
 
       <div style={{ marginTop: 16 }}>
         <button type="button" className="btn btn--light" onClick={addRow}>
@@ -799,5 +611,31 @@ export function PhmaxSsUnitsForm({
         </ScrollGrabRegion>
       </div>
     </section>
+  );
+}
+
+function PhmaxSsUnitsFormWithOwnState({
+  onDashboardMetrics,
+  hideBackupSubcard,
+}: {
+  onDashboardMetrics?: (m: SsDashboardMetrics) => void;
+  hideBackupSubcard?: boolean;
+}) {
+  const model = usePhmaxSsUnits(onDashboardMetrics);
+  return <PhmaxSsUnitsFormView model={model} hideBackupSubcard={hideBackupSubcard} />;
+}
+
+export type PhmaxSsUnitsFormProps = {
+  model?: PhmaxSsUnitsModel;
+  hideBackupSubcard?: boolean;
+  onDashboardMetrics?: (m: SsDashboardMetrics) => void;
+};
+
+export function PhmaxSsUnitsForm({ model, hideBackupSubcard, onDashboardMetrics }: PhmaxSsUnitsFormProps) {
+  if (model) {
+    return <PhmaxSsUnitsFormView model={model} hideBackupSubcard={hideBackupSubcard} />;
+  }
+  return (
+    <PhmaxSsUnitsFormWithOwnState onDashboardMetrics={onDashboardMetrics} hideBackupSubcard={hideBackupSubcard} />
   );
 }
