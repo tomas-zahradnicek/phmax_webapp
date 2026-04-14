@@ -1240,11 +1240,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
         {tableWarning ? <p className="card card--warning" style={{ marginTop: 16, padding: 14 }}>{tableWarning}</p> : null}
 
-        <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
-          <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
+        <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
+          <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
             Ověřovací tabulka metodiky (1 speciální oddělení s výjimkou)
-          </h3>
-          <p className="muted-text" style={{ marginBottom: 12, fontSize: "0.88rem" }}>
+          </summary>
+          <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.88rem" }}>
             Kontrolní scénář 1:1 s metodikou: při jednom výjimkovém oddělení § 16/9 se odečítá 0,05 / 0,10 / 0,60
             průměrného PHmax na oddělení. Sloupce odpovídají variantě 5 dětí, 4 děti, méně než 4 děti.
           </p>
@@ -1274,7 +1274,12 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               </tbody>
             </table>
           </ScrollGrabRegion>
-        </div>
+          <p className="muted-text" style={{ marginTop: 10, fontSize: "0.82rem", lineHeight: 1.45 }}>
+            Výpočet v aplikaci je veden podle textu metodiky (nikoli striktně podle tabulkového přepisu): při
+            účastnících &lt; 4 se snižuje o 0,6násobek (tj. použije se faktor 0,4). V metodických podkladech je
+            evidován tiskový překlep hodnoty 58,1; správná hodnota je 8,1.
+          </p>
+        </details>
 
         <p className="muted-text" style={{ marginTop: 20 }}>
           Aplikace nenahrazuje úřední výpočet ani výkazy (např. Z 2-01). U složitých případů (
