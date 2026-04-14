@@ -19,9 +19,13 @@ import {
   SsWhyPhmaxErrorPanel,
   SsWhyPhmaxPanel,
 } from "./SsWhyPanels";
-import { usePhmaxSsUnits, type PhmaxSsUnitsModel } from "./use-phmax-ss-units";
+import { usePhmaxSsUnits } from "./use-phmax-ss-units";
+import type { PhmaxSsUnitsModel } from "./use-phmax-ss-units";
 
 export type { SsDashboardMetrics } from "./use-phmax-ss-units";
+
+/** Stejný tvar jako `SsDashboardMetrics` z hooku – explicitně zde kvůli stabilnímu `tsc` v CI. */
+type OnSsDashboardMetrics = (m: { rowCount: number; phmaxTotal: number }) => void;
 
 function joinRuleMessages(msgs: readonly { message: string }[]): string {
   return msgs.map((m) => m.message).join(" · ");
@@ -618,7 +622,7 @@ function PhmaxSsUnitsFormWithOwnState({
   onDashboardMetrics,
   hideBackupSubcard,
 }: {
-  onDashboardMetrics?: (m: SsDashboardMetrics) => void;
+  onDashboardMetrics?: OnSsDashboardMetrics;
   hideBackupSubcard?: boolean;
 }) {
   const model = usePhmaxSsUnits(onDashboardMetrics);
@@ -628,7 +632,7 @@ function PhmaxSsUnitsFormWithOwnState({
 export type PhmaxSsUnitsFormProps = {
   model?: PhmaxSsUnitsModel;
   hideBackupSubcard?: boolean;
-  onDashboardMetrics?: (m: SsDashboardMetrics) => void;
+  onDashboardMetrics?: OnSsDashboardMetrics;
 };
 
 export function PhmaxSsUnitsForm({ model, hideBackupSubcard, onDashboardMetrics }: PhmaxSsUnitsFormProps) {
