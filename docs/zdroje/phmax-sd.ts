@@ -1,48 +1,65 @@
-export type SchoolShdDepartment = {
+/**
+ * Jedno oddělení zadané uživatelem.
+ * - `participantsFirstStage` je volitelný údaj pro situace, kdy se sleduje zvlášť 1. stupeň.
+ */
+export type SchoolDruzinaDepartmentInput = {
   kind: "regular" | "special";
   participants: number;
-  /**
-   * U speciálních oddělení lze výjimku evidovat po odděleních (pokud se liší).
-   * Když není zadáno, použije se globální `specialExceptionGranted` z detailního vstupu.
-   */
+  participantsFirstStage?: number;
+  /** Lokální výjimka u speciálního oddělení; když není, použije se globální nastavení. */
   specialExceptionGranted?: boolean;
 };
 
-export type SchoolShdSummaryInput = {
+/** Souhrnný režim – uživatel zadává agregované hodnoty za celou družinu. */
+export type SchoolDruzinaSummaryInput = {
   mode: "summary";
   regularDepartments: number;
   regularParticipantsTotal: number;
-  /**
-   * Speciální oddělení po jednom (umožňuje různý počet účastníků).
-   * Počet speciálních oddělení = délka pole.
-   */
-  specialDepartments?: readonly { participants: number; exceptionGranted?: boolean }[];
+  regularParticipantsFirstStageTotal?: number;
+  specialDepartments?: readonly {
+    participants: number;
+    participantsFirstStage?: number;
+    exceptionGranted?: boolean;
+  }[];
   regularExceptionGranted?: boolean;
   specialExceptionGranted?: boolean;
   schoolFirstStageClassCount?: 1 | 2 | 3 | null;
 };
 
-export type SchoolShdDetailInput = {
+/** Detailní režim – každé oddělení je zadáno samostatně. */
+export type SchoolDruzinaDetailInput = {
   mode: "detail";
-  departments: readonly SchoolShdDepartment[];
+  departments: readonly SchoolDruzinaDepartmentInput[];
   regularExceptionGranted?: boolean;
   specialExceptionGranted?: boolean;
   schoolFirstStageClassCount?: 1 | 2 | 3 | null;
 };
 
-export type SchoolShdInput = SchoolShdSummaryInput | SchoolShdDetailInput;
+export type SchoolDruzinaInput = SchoolDruzinaSummaryInput | SchoolDruzinaDetailInput;
 
-export type SchoolShdDepartmentResult = {
+/** Normalizovaný interní model, nad kterým vždy běží výpočet. */
+export type SchoolDruzinaNormalizedModel = {
+  sourceMode: "summary" | "detail";
+  departments: SchoolDruzinaDepartmentInput[];
+  regularExceptionGranted: boolean;
+  specialExceptionGranted: boolean;
+  schoolFirstStageClassCount: 1 | 2 | 3 | null;
+};
+
+/** Řádek mezivýpočtu (breakdown) pro jedno oddělení. */
+export type SchoolDruzinaBreakdownRow = {
   index1Based: number;
   kind: "regular" | "special";
   participants: number;
+  participantsFirstStage?: number;
   basePhmax: number;
   reductionFactor: number;
   finalPhmax: number;
   note?: string;
 };
 
-export type SchoolShdResult = {
+/** Výstup výpočtu s mezivýsledky. */
+export type SchoolDruzinaCalculationResult = {
   mode: "summary" | "detail";
   totalDepartments: number;
   regularDepartments: number;
@@ -54,7 +71,7 @@ export type SchoolShdResult = {
   /** Vážený koeficient speciálních oddělení (součet po krácení / součet bez krácení). */
   specialReductionFactor: number;
   finalPhmax: number;
-  departments: SchoolShdDepartmentResult[];
+  breakdown: SchoolDruzinaBreakdownRow[];
   notes: string[];
 };
 
@@ -133,19 +150,13 @@ function getSpecialReductionFactor(participants: number, exceptionGranted: boole
   return 1;
 }
 
-function toInternalDetail(input: SchoolShdInput): {
-  mode: "summary" | "detail";
-  departments: SchoolShdDepartment[];
-  regularExceptionGranted: boolean;
-  specialExceptionGranted: boolean;
-  schoolFirstStageClassCount?: 1 | 2 | 3 | null;
-} {
+export function normalizeSchoolDruzinaInput(input: SchoolDruzinaInput): SchoolDruzinaNormalizedModel {
   if (input.mode === "detail") {
     if (!Array.isArray(input.departments) || input.departments.length === 0) {
       throw new Error("Detailní režim vyžaduje alespoň jedno oddělení.");
     }
     return {
-      mode: "detail",
+      sourceMode: "detail",
       departments: [...input.departments],
       regularExceptionGranted: Boolean(input.regularExceptionGranted),
       specialExceptionGranted: Boolean(input.specialExceptionGranted),
@@ -161,12 +172,20 @@ function toInternalDetail(input: SchoolShdInput): {
   }
 
   const special = input.specialDepartments ?? [];
-  const departments: SchoolShdDepartment[] = [];
+  const departments: SchoolDruzinaDepartmentInput[] = [];
 
   // Souhrnný vstup -> detail: běžná oddělení rozpočítáme rovnoměrně (včetně desetinných podílů).
   const regularPerDept = input.regularDepartments > 0 ? input.regularParticipantsTotal / input.regularDepartments : 0;
+  const regularFirstStagePerDept =
+    input.regularParticipantsFirstStageTotal != null && input.regularDepartments > 0
+      ? input.regularParticipantsFirstStageTotal / input.regularDepartments
+      : undefined;
   for (let i = 0; i < input.regularDepartments; i++) {
-    departments.push({ kind: "regular", participants: regularPerDept });
+    departments.push({
+      kind: "regular",
+      participants: regularPerDept,
+      ...(regularFirstStagePerDept != null ? { participantsFirstStage: regularFirstStagePerDept } : {}),
+    });
   }
   for (const dep of special) {
     if (dep.participants < 0) {
@@ -175,6 +194,7 @@ function toInternalDetail(input: SchoolShdInput): {
     departments.push({
       kind: "special",
       participants: dep.participants,
+      ...(dep.participantsFirstStage != null ? { participantsFirstStage: dep.participantsFirstStage } : {}),
       specialExceptionGranted: dep.exceptionGranted,
     });
   }
@@ -184,7 +204,7 @@ function toInternalDetail(input: SchoolShdInput): {
   }
 
   return {
-    mode: "summary",
+    sourceMode: "summary",
     departments,
     regularExceptionGranted: Boolean(input.regularExceptionGranted),
     specialExceptionGranted: Boolean(input.specialExceptionGranted),
@@ -193,10 +213,10 @@ function toInternalDetail(input: SchoolShdInput): {
 }
 
 /**
- * Helper požadovaný zadáním: převod souhrnného vstupu na detailní interní model.
+ * Helper: převod souhrnného vstupu na detailní model (pro debug/inspekci).
  */
-export function summaryToDetailModel(input: SchoolShdSummaryInput): SchoolShdDetailInput {
-  const internal = toInternalDetail(input);
+export function summaryToDetailModel(input: SchoolDruzinaSummaryInput): SchoolDruzinaDetailInput {
+  const internal = normalizeSchoolDruzinaInput(input);
   return {
     mode: "detail",
     departments: internal.departments,
@@ -206,10 +226,11 @@ export function summaryToDetailModel(input: SchoolShdSummaryInput): SchoolShdDet
   };
 }
 
-export function calculateSchoolDruzinaPhmax(input: SchoolShdInput): SchoolShdResult {
-  const internal = toInternalDetail(input);
+export function calculateSchoolDruzinaPhmaxDetailed(
+  normalized: SchoolDruzinaNormalizedModel,
+): SchoolDruzinaCalculationResult {
   const notes: string[] = [];
-  const departments = internal.departments;
+  const departments = normalized.departments;
 
   const regularDepartments = departments.filter((d) => d.kind === "regular");
   const specialDepartments = departments.filter((d) => d.kind === "special");
@@ -219,22 +240,22 @@ export function calculateSchoolDruzinaPhmax(input: SchoolShdInput): SchoolShdRes
   const regularParticipantsTotal = regularDepartments.reduce((sum, d) => sum + d.participants, 0);
   const regularMinPerDept = getRegularMinimumParticipantsPerDepartment({
     regularDepartments: regularDepartments.length,
-    schoolFirstStageClassCount: internal.schoolFirstStageClassCount ?? null,
+    schoolFirstStageClassCount: normalized.schoolFirstStageClassCount ?? null,
   });
   const regularRequiredTotal = regularDepartments.length * regularMinPerDept;
   const regularReductionFactor =
-    internal.regularExceptionGranted && regularDepartments.length > 0 && regularRequiredTotal > 0
+    normalized.regularExceptionGranted && regularDepartments.length > 0 && regularRequiredTotal > 0
       ? clamp01(regularParticipantsTotal / regularRequiredTotal)
       : 1;
 
-  if (internal.regularExceptionGranted && regularDepartments.length > 0) {
+  if (normalized.regularExceptionGranted && regularDepartments.length > 0) {
     notes.push(
       `Běžná oddělení: koeficient ${regularReductionFactor.toFixed(4)} ` +
         `(${round1(regularParticipantsTotal)} / ${round1(regularRequiredTotal)}).`,
     );
   }
 
-  const departmentResults: SchoolShdDepartmentResult[] = departments.map((dep, idx) => {
+  const departmentResults: SchoolDruzinaBreakdownRow[] = departments.map((dep, idx) => {
     const order = idx + 1;
     const base = getDepartmentBasePhmax(order);
 
@@ -244,23 +265,29 @@ export function calculateSchoolDruzinaPhmax(input: SchoolShdInput): SchoolShdRes
         index1Based: order,
         kind: dep.kind,
         participants: round1(dep.participants),
+        ...(dep.participantsFirstStage != null
+          ? { participantsFirstStage: round1(dep.participantsFirstStage) }
+          : {}),
         basePhmax: round1(base),
         reductionFactor: regularReductionFactor,
         finalPhmax: round1(reduced),
-        note: internal.regularExceptionGranted ? "Poměrné krácení běžného oddělení." : undefined,
+        note: normalized.regularExceptionGranted ? "Poměrné krácení běžného oddělení." : undefined,
       };
     }
 
     const specialExceptionGranted =
       typeof dep.specialExceptionGranted === "boolean"
         ? dep.specialExceptionGranted
-        : internal.specialExceptionGranted;
+        : normalized.specialExceptionGranted;
     const specialFactor = getSpecialReductionFactor(dep.participants, specialExceptionGranted);
     const reduced = base * specialFactor;
     return {
       index1Based: order,
       kind: dep.kind,
       participants: round1(dep.participants),
+      ...(dep.participantsFirstStage != null
+        ? { participantsFirstStage: round1(dep.participantsFirstStage) }
+        : {}),
       basePhmax: round1(base),
       reductionFactor: specialFactor,
       finalPhmax: round1(reduced),
@@ -290,7 +317,7 @@ export function calculateSchoolDruzinaPhmax(input: SchoolShdInput): SchoolShdRes
   const finalPhmax = round1(regularSharePhmax + specialSharePhmax);
 
   return {
-    mode: input.mode,
+    mode: normalized.sourceMode,
     totalDepartments,
     regularDepartments: regularDepartments.length,
     specialDepartments: specialDepartments.length,
@@ -300,7 +327,50 @@ export function calculateSchoolDruzinaPhmax(input: SchoolShdInput): SchoolShdRes
     regularReductionFactor,
     specialReductionFactor,
     finalPhmax,
-    departments: departmentResults,
+    breakdown: departmentResults,
     notes,
   };
 }
+
+export function calculateSchoolDruzinaPhmaxFromSummary(
+  summaryInput: SchoolDruzinaSummaryInput,
+): SchoolDruzinaCalculationResult {
+  const normalized = normalizeSchoolDruzinaInput(summaryInput);
+  return calculateSchoolDruzinaPhmaxDetailed(normalized);
+}
+
+/**
+ * Kompatibilní wrapper pro existující volání:
+ * přijme summary i detail a vrátí výsledek.
+ */
+export function calculateSchoolDruzinaPhmax(input: SchoolDruzinaInput): SchoolDruzinaCalculationResult {
+  return calculateSchoolDruzinaPhmaxDetailed(normalizeSchoolDruzinaInput(input));
+}
+
+// ---------------------------------------------------------------------------
+// Usage examples
+// ---------------------------------------------------------------------------
+//
+// Souhrnný režim:
+// const r1 = calculateSchoolDruzinaPhmaxFromSummary({
+//   mode: "summary",
+//   regularDepartments: 3,
+//   regularParticipantsTotal: 48,
+//   regularExceptionGranted: true,
+//   specialExceptionGranted: true,
+//   specialDepartments: [
+//     { participants: 5.4, exceptionGranted: true },
+//     { participants: 4.3, exceptionGranted: true },
+//   ],
+// });
+//
+// Detailní režim:
+// const normalized = normalizeSchoolDruzinaInput({
+//   mode: "detail",
+//   regularExceptionGranted: true,
+//   departments: [
+//     { kind: "regular", participants: 17 },
+//     { kind: "special", participants: 4.8, specialExceptionGranted: true },
+//   ],
+// });
+// const r2 = calculateSchoolDruzinaPhmaxDetailed(normalized);
