@@ -8,7 +8,20 @@ import {
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { GlossaryIconButton } from "./GlossaryIconButton";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
-import { HeroIconActionButton, IconPrint } from "./HeroActionIconButton";
+import {
+  HeroIconActionButton,
+  IconClearStored,
+  IconCopy,
+  IconCsv,
+  IconExcel,
+  IconJson,
+  IconPrint,
+  IconPrintSummary,
+  IconResetAll,
+  IconRestoreQuick,
+  IconSaveQuick,
+  IconSpinner,
+} from "./HeroActionIconButton";
 import { HeroStat } from "./HeroStat";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { MethodologyStrip } from "./MethodologyStrip";
@@ -19,12 +32,15 @@ import {
   PHMAX_SS_FRAMEWORK_FIRST_PHASE,
   PHMAX_SS_LEGISLATIVE_MD_REL_PATH,
   PHMAX_SS_LOCAL_DOC_EXAMPLE_NAMES,
+  PHMAX_SS_MAX_NAMED_SNAPSHOTS,
   PHMAX_SS_METHODOLOGY_LABEL,
   PHMAX_SS_MSMT_PAGE_URL,
   PHMAX_SS_RIZENI_SKOLY_URL,
   PHMAX_SS_SOURCE_FOLDER_HINT,
+  SS_HERO_EXAMPLE_LEGEND,
 } from "./ss/phmax-ss-constants";
 import { PhmaxSsUnitsForm, type SsDashboardMetrics } from "./ss/PhmaxSsUnitsForm";
+import { usePhmaxSsUnits } from "./ss/use-phmax-ss-units";
 
 const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
   {
@@ -52,16 +68,13 @@ type PhmaxSsPageProps = {
 export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   const fw = PHMAX_SS_FRAMEWORK_FIRST_PHASE;
   const [ssMetrics, setSsMetrics] = useState<SsDashboardMetrics>({ rowCount: 1, phmaxTotal: 0 });
+  const ss = usePhmaxSsUnits(setSsMetrics);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [ssGuideOpen, setSsGuideOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
 
   const toggleSsGuideFromHero = useCallback(() => {
     setSsGuideOpen((o) => !o);
-  }, []);
-
-  const scrollToEvidence = useCallback(() => {
-    document.getElementById("ss-units-heading")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   const phmaxHeroValue = ssMetrics.phmaxTotal.toLocaleString("cs-CZ", {
@@ -122,28 +135,156 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
 
         <div className="hero-actions">
           <div className="field field--hero-select hero-actions__example">
-            <span className="field__label field__label--hero" id="ss-hero-workflow-label">
-              Pracovní postup
+            <span className="field__label field__label--hero" id="ss-hero-example-label">
+              Ukázkový příklad
             </span>
+            <select
+              id="ss-hero-example-select"
+              aria-labelledby="ss-hero-example-label"
+              aria-describedby="ss-hero-example-legend"
+              disabled
+              value=""
+            >
+              <option value="">Vyberte ukázkový příklad…</option>
+            </select>
             <p
-              id="ss-hero-workflow-legend"
+              id="ss-hero-example-legend"
               className="muted-text"
               style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "44rem", lineHeight: 1.5 }}
             >
-              Nejprve projděte rámec vstupů a výstupů. Poté vyplňte tabulku dílčích jednotek – orientační PHmax a kontrolu
-              pravidel uvidíte přímo pod řádky. Pojmenované zálohy a auditní JSON jsou v kartě evidence.
+              {SS_HERO_EXAMPLE_LEGEND}
             </p>
           </div>
           <HeroActionsDrawer>
             <div className="hero-actions__group hero-actions__group--primary">
-              <button type="button" className="btn btn--light" onClick={scrollToEvidence}>
-                Přejít k evidenci
-              </button>
               <HeroIconActionButton
                 className="btn btn--light"
                 label="Tisk stránky"
                 icon={<IconPrint />}
                 onClick={() => window.print()}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Rychle uložit průběh do prohlížeče"
+                icon={<IconSaveQuick />}
+                onClick={ss.saveSnapshotManually}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Rychle obnovit uložený průběh"
+                icon={<IconRestoreQuick />}
+                onClick={ss.restoreSnapshot}
+              />
+            </div>
+            <hr className="hero-actions__divider" aria-hidden="true" />
+            <div className="hero-actions__group hero-actions__group--meta">
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Vymazat uložená data v prohlížeči"
+                icon={<IconClearStored />}
+                onClick={ss.clearStoredSnapshot}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Vymazat všechny údaje ve formuláři"
+                icon={<IconResetAll />}
+                onClick={ss.resetAll}
+              />
+            </div>
+            <div className="hero-actions__group hero-actions__group--named">
+              <div className="hero-named-grid" aria-label="Export a pojmenované zálohy">
+                <label className="hero-named-field hero-named-field--export">
+                  <span className="field__label field__label--hero-named">Označení pro export</span>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="např. název školy, školní rok…"
+                    value={ss.exportLabel}
+                    onChange={(e) => ss.setExportLabel(e.target.value)}
+                    aria-label="Označení pro export a shrnutí"
+                  />
+                </label>
+                <label className="hero-named-field hero-named-field--backup-name">
+                  <span className="field__label field__label--hero-named">Název zálohy</span>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="např. stav 2026/27"
+                    value={ss.namedSaveName}
+                    onChange={(e) => ss.setNamedSaveName(e.target.value)}
+                    aria-label="Název pojmenované zálohy"
+                  />
+                </label>
+                <div className="hero-named-field hero-named-field--save">
+                  <span className="hero-named-field__btn-slot" aria-hidden="true" />
+                  <button type="button" className="btn ghost btn--hero-named" onClick={ss.saveNamedSsSnapshot}>
+                    Uložit do seznamu
+                  </button>
+                </div>
+                <div className="hero-named-field hero-named-field--select">
+                  <select
+                    className="input"
+                    value={ss.selectedNamedId}
+                    onChange={(e) => ss.setSelectedNamedId(e.target.value)}
+                    aria-label="Vybrat uloženou zálohu"
+                  >
+                    <option value="">Vyberte uloženou zálohu…</option>
+                    {ss.namedSnapshots.map((n) => (
+                      <option key={n.id} value={n.id}>
+                        {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="hero-named-field hero-named-field--restore-delete">
+                  <button type="button" className="btn ghost btn--hero-named" onClick={ss.restoreNamedSsSnapshot}>
+                    Obnovit zálohu
+                  </button>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={ss.deleteNamedSsSnapshot}>
+                    Smazat zálohu
+                  </button>
+                </div>
+                <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={ss.handleCompareSsWithNamedSnapshot}>
+                    Porovnat aktuální stav se zálohou (JSON)…
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="hero-actions__group hero-actions__group--exports">
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Exportovat data jako CSV"
+                icon={<IconCsv />}
+                onClick={ss.handleExportCsv}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label={ss.xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout shrnutí jako Excel (.xlsx)"}
+                icon={ss.xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
+                disabled={ss.xlsxExportBusy}
+                aria-busy={ss.xlsxExportBusy}
+                showLabel={ss.xlsxExportBusy}
+                onClick={() => void ss.handleExportXlsx()}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Kopírovat textové shrnutí do schránky"
+                icon={<IconCopy />}
+                onClick={() => void ss.copySummaryToClipboard()}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Tisk textového shrnutí"
+                icon={<IconPrintSummary />}
+                onClick={ss.printSummaryWindow}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
+                label="Stáhnout auditní protokol (JSON)"
+                icon={<IconJson />}
+                onClick={ss.handleExportSsAuditJson}
               />
             </div>
           </HeroActionsDrawer>
@@ -176,8 +317,9 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         <p>{EXPORT_ORIENTACNI_NOTE}</p>
         <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
         <p>
-          V horní liště pod nadpisem je tisk a skok k evidenci; zálohy a export auditního JSON najdete přímo v kartě
-          formuláře.
+          Horní lišta je rozložená jako u ZŠ: tisk, rychlé uložení a obnovení z prohlížeče, vymazání úložiště a formuláře,
+          pole „Označení pro export“, pojmenované zálohy (max. {PHMAX_SS_MAX_NAMED_SNAPSHOTS}), srovnání se zálohou (JSON)
+          a export CSV, Excel, kopírování shrnutí, tisk shrnutí a auditní JSON.
         </p>
       </QuickOnboarding>
 
@@ -237,7 +379,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         </p>
       </section>
 
-      <PhmaxSsUnitsForm onDashboardMetrics={setSsMetrics} />
+      <PhmaxSsUnitsForm model={ss} hideBackupSubcard />
 
       <MethodologyStrip />
 

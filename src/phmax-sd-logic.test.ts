@@ -66,6 +66,13 @@ describe("getPhmaxSdBreakdown", () => {
     expect(getPhmaxSdBreakdown(2)).toEqual([32.5, 25]);
   });
 
+  it("oddělení 17–21: vždy 22,5 h dle tabulky metodiky (ne pokračování cyklu)", () => {
+    for (let d = 17; d <= 21; d++) {
+      expect(getPhmaxSdHourForDepartmentOrder(d)).toBe(22.5);
+    }
+    expect(getPhmaxSdBreakdown(21)?.slice(16)).toEqual([22.5, 22.5, 22.5, 22.5, 22.5]);
+  });
+
   it("součet řádků se rovná PHmax z tabulky pro 1–21 oddělení", () => {
     for (let n = 1; n <= 21; n++) {
       const parts = getPhmaxSdBreakdown(n);

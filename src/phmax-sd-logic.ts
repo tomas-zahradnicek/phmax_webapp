@@ -14,11 +14,15 @@ export const SD_MAX_DEPARTMENTS_IN_TABLE = PHMAX_SD_BY_DEPARTMENTS.length;
 
 /**
  * Hodiny PHmax připadající na i-té oddělení podle pořadí v příloze vyhl. č. 74/2005 Sb.
- * (cyklus 32,5 → 25 → 22,5 → 17,5 h opakovaný pro oddělení 1, 2, 3, 4, 5…).
+ * Pro oddělení 1–16 se opakuje cyklus 32,5 → 25 → 22,5 → 17,5 h. Pro 17. až 21. oddělení dává tabulka
+ * v metodice u každého dalšího oddělení konstantně 22,5 h (cyklus se už neopakuje).
  */
 export const SD_DEPARTMENT_HOUR_CYCLE: readonly number[] = [32.5, 25, 22.5, 17.5];
 
 export function getPhmaxSdHourForDepartmentOrder(order1Based: number): number {
+  if (order1Based >= 17 && order1Based <= 21) {
+    return 22.5;
+  }
   const i = (order1Based - 1) % SD_DEPARTMENT_HOUR_CYCLE.length;
   return SD_DEPARTMENT_HOUR_CYCLE[i];
 }
