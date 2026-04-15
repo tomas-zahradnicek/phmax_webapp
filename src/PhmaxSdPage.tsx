@@ -328,6 +328,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       }),
     [],
   );
+  const activeDeptCount = detailedResult?.totalDepartments ?? effectiveDepts;
+  const activeMethodikaRow = useMemo(
+    () => methodikaBaseGridRows.find((r) => r.deptCount === activeDeptCount) ?? null,
+    [methodikaBaseGridRows, activeDeptCount],
+  );
 
   const exportRows = useMemo(
     () =>
@@ -1303,6 +1308,44 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         ) : null}
 
         {tableWarning ? <p className="card card--warning" style={{ marginTop: 16, padding: 14 }}>{tableWarning}</p> : null}
+
+        {activeMethodikaRow != null ? (
+          <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 14 }}>
+            <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
+              Aktivní řádek metodiky pro {activeMethodikaRow.deptCount} oddělení
+            </h3>
+            <p className="muted-text" style={{ marginBottom: 10, fontSize: "0.86rem" }}>
+              Zobrazen je pouze aktuální řádek „Týdenní maximální rozsah provozu školních družin“.
+            </p>
+            <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
+              <table className="sd-phmax-breakdown">
+                <thead>
+                  <tr>
+                    <th>Počet oddělení</th>
+                    {Array.from({ length: 21 }, (_, i) => (
+                      <th key={`active-h-${i + 1}`}>{i + 1}</th>
+                    ))}
+                    <th>Celkový PHmax</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">{activeMethodikaRow.deptCount}</th>
+                    {Array.from({ length: 21 }, (_, i) => {
+                      const val = i < activeMethodikaRow.rowHours.length ? activeMethodikaRow.rowHours[i] : null;
+                      return (
+                        <td key={`active-r-${i + 1}`}>
+                          {val == null ? "" : formatSdHours(val)}
+                        </td>
+                      );
+                    })}
+                    <td>{formatSdHours(activeMethodikaRow.total)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ScrollGrabRegion>
+          </div>
+        ) : null}
 
         <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
           <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
