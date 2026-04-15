@@ -1357,11 +1357,17 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <table className="sd-phmax-breakdown">
               <thead>
                 <tr>
-                  <th>Celkový počet oddělení</th>
+                  <th rowSpan={3}>Celkový počet oddělení</th>
+                  <th colSpan={21}>TÝDENNÍ MAXIMÁLNÍ ROZSAH PROVOZU ŠKOLNÍCH DRUŽIN</th>
+                  <th rowSpan={3}>Celkový PHmax za školní družinu</th>
+                </tr>
+                <tr>
+                  <th colSpan={21}>pro jednotlivá oddělení</th>
+                </tr>
+                <tr>
                   {Array.from({ length: 21 }, (_, i) => (
                     <th key={`hd-${i + 1}`}>{i + 1}</th>
                   ))}
-                  <th>Celkový PHmax za ŠD</th>
                 </tr>
               </thead>
               <tbody>
