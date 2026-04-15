@@ -333,6 +333,37 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     () => methodikaBaseGridRows.find((r) => r.deptCount === activeDeptCount) ?? null,
     [methodikaBaseGridRows, activeDeptCount],
   );
+  const activeVariantColumn = useMemo<"v5" | "v4" | "vUnder4" | null>(() => {
+    const pickFromParticipants = (p: number): "v5" | "v4" | "vUnder4" | null => {
+      if (p >= 5 && p < 6) return "v5";
+      if (p >= 4 && p < 5) return "v4";
+      if (p < 4) return "vUnder4";
+      return null;
+    };
+
+    if (inputMode === "summary") {
+      const oneSpecial = summarySpecialDepartments.length === 1 ? summarySpecialDepartments[0] : null;
+      if (!oneSpecial) return null;
+      const hasExc =
+        typeof oneSpecial.specialExceptionGranted === "boolean"
+          ? oneSpecial.specialExceptionGranted
+          : specialExceptionGranted;
+      if (!hasExc) return null;
+      return pickFromParticipants(oneSpecial.participants);
+    }
+
+    const specialRows = detailDepartments.filter((d) => d.kind === "special");
+    if (specialRows.length !== 1) return null;
+    const r = specialRows[0];
+    const hasExc = typeof r.specialExceptionGranted === "boolean" ? r.specialExceptionGranted : specialExceptionGranted;
+    if (!hasExc) return null;
+    return pickFromParticipants(r.participants);
+  }, [
+    inputMode,
+    summarySpecialDepartments,
+    specialExceptionGranted,
+    detailDepartments,
+  ]);
 
   const exportRows = useMemo(
     () =>
@@ -1438,13 +1469,56 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               </thead>
               <tbody>
                 {methodikaVariantRows.map((r) => (
-                  <tr key={r.deptCount}>
-                    <td>{r.deptCount}</td>
+                  <tr
+                    key={r.deptCount}
+                    style={
+                      r.deptCount === activeDeptCount
+                        ? { background: "rgba(37, 99, 235, 0.06)" }
+                        : undefined
+                    }
+                  >
+                    <td style={r.deptCount === activeDeptCount ? { fontWeight: 800 } : undefined}>{r.deptCount}</td>
                     <td>{formatSdHours(r.base)}</td>
                     <td>{formatSdHours(r.avg)}</td>
-                    <td>{formatSdHours(r.v5)}</td>
-                    <td>{formatSdHours(r.v4)}</td>
-                    <td>{formatSdHours(r.vUnder4)}</td>
+                    <td
+                      style={
+                        r.deptCount === activeDeptCount && activeVariantColumn === "v5"
+                          ? {
+                              background: "rgba(34, 197, 94, 0.14)",
+                              borderColor: "rgba(22, 163, 74, 0.45)",
+                              fontWeight: 800,
+                            }
+                          : undefined
+                      }
+                    >
+                      {formatSdHours(r.v5)}
+                    </td>
+                    <td
+                      style={
+                        r.deptCount === activeDeptCount && activeVariantColumn === "v4"
+                          ? {
+                              background: "rgba(34, 197, 94, 0.14)",
+                              borderColor: "rgba(22, 163, 74, 0.45)",
+                              fontWeight: 800,
+                            }
+                          : undefined
+                      }
+                    >
+                      {formatSdHours(r.v4)}
+                    </td>
+                    <td
+                      style={
+                        r.deptCount === activeDeptCount && activeVariantColumn === "vUnder4"
+                          ? {
+                              background: "rgba(34, 197, 94, 0.14)",
+                              borderColor: "rgba(22, 163, 74, 0.45)",
+                              fontWeight: 800,
+                            }
+                          : undefined
+                      }
+                    >
+                      {formatSdHours(r.vUnder4)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -1484,13 +1558,34 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               </thead>
               <tbody>
                 {methodikaBaseGridRows.map((row) => (
-                  <tr key={`row-${row.deptCount}`}>
-                    <th scope="row">{row.deptCount}</th>
+                  <tr
+                    key={`row-${row.deptCount}`}
+                    style={
+                      row.deptCount === activeDeptCount
+                        ? { background: "rgba(37, 99, 235, 0.06)" }
+                        : undefined
+                    }
+                  >
+                    <th scope="row" style={row.deptCount === activeDeptCount ? { fontWeight: 800 } : undefined}>
+                      {row.deptCount}
+                    </th>
                     {Array.from({ length: 21 }, (_, i) => {
                       const val = i < row.rowHours.length ? row.rowHours[i] : null;
                       return <td key={`row-${row.deptCount}-c-${i + 1}`}>{val == null ? "" : formatSdHours(val)}</td>;
                     })}
-                    <td>{formatSdHours(row.total)}</td>
+                    <td
+                      style={
+                        row.deptCount === activeDeptCount
+                          ? {
+                              background: "rgba(34, 197, 94, 0.14)",
+                              borderColor: "rgba(22, 163, 74, 0.45)",
+                              fontWeight: 800,
+                            }
+                          : undefined
+                      }
+                    >
+                      {formatSdHours(row.total)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
