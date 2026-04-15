@@ -1322,24 +1322,44 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 <thead>
                   <tr>
                     <th>Počet oddělení</th>
-                    {Array.from({ length: 21 }, (_, i) => (
-                      <th key={`active-h-${i + 1}`}>{i + 1}</th>
+                    {Array.from({ length: 11 }, (_, i) => (
+                      <th key={`active-h-a-${i + 1}`}>{i + 1}</th>
                     ))}
                     <th>Celkový PHmax</th>
+                  </tr>
+                  <tr>
+                    <th>Pokračování</th>
+                    {Array.from({ length: 10 }, (_, i) => (
+                      <th key={`active-h-b-${i + 12}`}>{i + 12}</th>
+                    ))}
+                    <th />
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <th scope="row">{activeMethodikaRow.deptCount}</th>
-                    {Array.from({ length: 21 }, (_, i) => {
+                    <th scope="row">{activeMethodikaRow.deptCount} (1–11)</th>
+                    {Array.from({ length: 11 }, (_, i) => {
                       const val = i < activeMethodikaRow.rowHours.length ? activeMethodikaRow.rowHours[i] : null;
                       return (
-                        <td key={`active-r-${i + 1}`}>
+                        <td key={`active-r-a-${i + 1}`}>
                           {val == null ? "" : formatSdHours(val)}
                         </td>
                       );
                     })}
                     <td>{formatSdHours(activeMethodikaRow.total)}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">{activeMethodikaRow.deptCount} (12–21)</th>
+                    {Array.from({ length: 10 }, (_, i) => {
+                      const idx = i + 11;
+                      const val = idx < activeMethodikaRow.rowHours.length ? activeMethodikaRow.rowHours[idx] : null;
+                      return (
+                        <td key={`active-r-b-${idx + 1}`}>
+                          {val == null ? "" : formatSdHours(val)}
+                        </td>
+                      );
+                    })}
+                    <td />
                   </tr>
                 </tbody>
               </table>
