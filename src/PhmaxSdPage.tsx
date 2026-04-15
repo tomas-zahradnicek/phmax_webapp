@@ -1217,10 +1217,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         </div>
 
         {detailedResult != null ? (
-          <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
-            <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
-              Rozpad PHmax/PHAmax po odděleních
-            </h3>
+          <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
+            <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
+              Podrobný rozpad PHmax/PHAmax po odděleních (pro kontrolu)
+            </summary>
+            <p className="muted-text" style={{ marginTop: 10, marginBottom: 10, fontSize: "0.84rem" }}>
+              Tato tabulka je detailní technický rozpad. Pro běžné použití většinou stačí aktivní řádek metodiky a
+              souhrnné výsledky nahoře.
+            </p>
             <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
               <table className="sd-phmax-breakdown">
                 <thead>
@@ -1249,7 +1253,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 </tbody>
               </table>
             </ScrollGrabRegion>
-          </div>
+          </details>
         ) : breakdown != null && breakdown.length > 0 && basePhmax != null ? (
           <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
             <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
@@ -1346,7 +1350,15 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                         </td>
                       );
                     })}
-                    <td>{formatSdHours(activeMethodikaRow.total)}</td>
+                    <td
+                      style={{
+                        background: "rgba(34, 197, 94, 0.14)",
+                        borderColor: "rgba(22, 163, 74, 0.45)",
+                        fontWeight: 800,
+                      }}
+                    >
+                      {formatSdHours(activeMethodikaRow.total)}
+                    </td>
                   </tr>
                   <tr>
                     <th scope="row">{activeMethodikaRow.deptCount} (12–21)</th>
@@ -1364,6 +1376,43 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 </tbody>
               </table>
             </ScrollGrabRegion>
+            {detailedResult != null ? (
+              <p className="muted-text" style={{ marginTop: 10, fontSize: "0.84rem" }}>
+                Výsledek kalkulačky (aktuální vstup):{" "}
+                <span
+                  style={{
+                    display: "inline-block",
+                    padding: "1px 8px",
+                    borderRadius: 999,
+                    background: "rgba(34, 197, 94, 0.14)",
+                    border: "1px solid rgba(22, 163, 74, 0.45)",
+                    color: "#166534",
+                    fontWeight: 800,
+                  }}
+                >
+                  PHmax {formatSdHours(detailedResult.finalPhmax)}
+                </span>
+                {detailedResult.specialDepartments > 0 ? (
+                  <>
+                    {" "}
+                    ·{" "}
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "1px 8px",
+                        borderRadius: 999,
+                        background: "rgba(59, 130, 246, 0.12)",
+                        border: "1px solid rgba(59, 130, 246, 0.35)",
+                        color: "#1d4ed8",
+                        fontWeight: 700,
+                      }}
+                    >
+                      PHAmax {formatSdHours(detailedResult.finalPhaMax)}
+                    </span>
+                  </>
+                ) : null}
+              </p>
+            ) : null}
           </div>
         ) : null}
 
