@@ -1015,7 +1015,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
         {inputMode === "summary" ? (
           <div className="subcard" style={{ marginTop: 16 }}>
-            <h3>Speciální oddělení (§ 16 odst. 9)</h3>
+            <h3>Speciální oddělení</h3>
+            <p className="muted-text" style={{ marginTop: 4, fontSize: "0.82rem" }}>
+              Režim pro oddělení tvořená pouze účastníky se speciálními vzdělávacími potřebami.
+            </p>
             <div className="checks">
               <label>
                 <input
@@ -1023,7 +1026,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                   checked={summaryHasSpecial}
                   onChange={(e) => setSummaryHasSpecial(e.target.checked)}
                 />
-                Družina obsahuje speciální oddělení (§ 16/9)
+                <span title="Dle § 16 odst. 9 školského zákona">Družina obsahuje speciální oddělení</span>
               </label>
             </div>
             <div className="checks" style={{ marginTop: 8 }}>
@@ -1033,7 +1036,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                   checked={regularExceptionGranted}
                   onChange={(e) => setRegularExceptionGranted(e.target.checked)}
                 />
-                Povolená výjimka u běžných oddělení (PHmax)
+                <span title="Pravidla krácení PHmax dle § 10 odst. 2 a 3 vyhlášky č. 74/2005 Sb.">
+                  Výjimka u běžných oddělení (krácení PHmax)
+                </span>
               </label>
             </div>
             {summaryHasSpecial ? (
@@ -1045,7 +1050,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                       checked={specialExceptionGranted}
                       onChange={(e) => setSpecialExceptionGranted(e.target.checked)}
                     />
-                    Povolená výjimka u speciálních oddělení (§ 16/9, PHmax i PHAmax)
+                    <span title="Pravidla pro oddělení dle § 10 odst. 7 vyhlášky č. 74/2005 Sb. a § 16 odst. 9 školského zákona">
+                      Výjimka u speciálních oddělení (krácení PHmax i PHAmax)
+                    </span>
                   </label>
                 </div>
                 <div style={{ marginTop: 10 }}>
@@ -1165,7 +1172,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                   checked={regularExceptionGranted}
                   onChange={(e) => setRegularExceptionGranted(e.target.checked)}
                 />
-                Povolená výjimka u běžných oddělení (PHmax)
+                <span title="Pravidla krácení PHmax dle § 10 odst. 2 a 3 vyhlášky č. 74/2005 Sb.">
+                  Výjimka u běžných oddělení (krácení PHmax)
+                </span>
               </label>
             </div>
             <div style={{ marginTop: 10 }}>
@@ -1329,20 +1338,23 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <>
               <ResultCard label="Oddělení (celkem)" value={detailedResult.totalDepartments} tone="primary" />
               <ResultCard
-                label="PHmax (základ z přílohy vyhl. 74/2005 Sb.)"
+                label="PHmax (základní tabulková hodnota)"
+                hint="Dle přílohy vyhlášky č. 74/2005 Sb. podle celkového počtu oddělení."
                 value={detailedResult.basePhmax}
                 tone="success"
               />
               {detailedResult.regularDepartments > 0 ? (
                 <ResultCard
-                  label="PHmax – běžná oddělení (§ 10 odst. 2/3, po případném poměrném krácení)"
+                  label="PHmax – běžná oddělení (po krácení kvůli výjimce)"
+                  hint="Právní opora: § 10 odst. 2 a 3 vyhlášky č. 74/2005 Sb."
                   value={detailedResult.regularSharePhmax}
                   tone="primary"
                 />
               ) : null}
               {detailedResult.specialDepartments > 0 ? (
                 <ResultCard
-                  label="PHmax – speciální oddělení (odst. 7, § 16/9; krácení poměrné části)"
+                  label="PHmax – speciální oddělení (po krácení kvůli výjimce)"
+                  hint="Právní opora: § 10 odst. 7 vyhlášky č. 74/2005 Sb. ve vazbě na § 16 odst. 9 školského zákona."
                   value={detailedResult.specialSharePhmax}
                   tone="primary"
                 />
@@ -1363,7 +1375,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               />
               {detailedResult.specialDepartments > 0 ? (
                 <ResultCard
-                  label="PHAmax celkem – speciální oddělení (odst. 7, § 16/9; po krácení výjimky)"
+                  label="PHAmax celkem – speciální oddělení (po krácení kvůli výjimce)"
+                  hint="Právní opora: § 10 odst. 11 vyhlášky č. 74/2005 Sb. a § 16 odst. 9 školského zákona."
                   methodStepLabel="Výsledek PHAmax"
                   value={detailedResult.finalPhaMax}
                   tone="success"
