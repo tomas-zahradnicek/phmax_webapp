@@ -1072,6 +1072,49 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         ) : (
           <div className="subcard" style={{ marginTop: 16 }}>
             <h3>Detailní evidence oddělení</h3>
+            <div style={{ marginTop: 8 }}>
+              <div className="checks" style={{ gap: 8, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  onClick={() => {
+                    setInputMode("detail");
+                    setDetailDepartments([{ kind: "regular", participants: 0 }]);
+                  }}
+                  title="Předvyplní 1 běžné oddělení"
+                >
+                  Šablona: Jen běžná
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  onClick={() => {
+                    setInputMode("detail");
+                    setDetailDepartments([{ kind: "special", participants: 0, specialExceptionGranted: false }]);
+                  }}
+                  title="Předvyplní 1 speciální oddělení (§ 16/9)"
+                >
+                  Šablona: Jen speciální (§ 16/9)
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  onClick={() => {
+                    setInputMode("detail");
+                    setDetailDepartments([
+                      { kind: "regular", participants: 0 },
+                      { kind: "special", participants: 0, specialExceptionGranted: false },
+                    ]);
+                  }}
+                  title="Předvyplní kombinaci běžného a speciálního oddělení"
+                >
+                  Šablona: Kombinace
+                </button>
+              </div>
+              <p className="muted-text" style={{ marginTop: 8, fontSize: "0.84rem" }}>
+                Šablony předvyplní strukturu oddělení; počty účastníků a výjimky pak upravte podle skutečnosti.
+              </p>
+            </div>
             <div className="checks">
               <label>
                 <input
