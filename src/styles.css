@@ -323,6 +323,70 @@ button.pill--hero-toggle--active {
   margin-bottom: 0;
 }
 
+/* ŠD: rychlé šablony oddělení — jeden řádek, výrazné tlačítka */
+.sd-dept-templates {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+  align-items: stretch;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  scrollbar-gutter: stable;
+}
+
+.sd-dept-templates__btn {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  padding: 9px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+  color: #1e3a8a;
+  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  border: 2px solid #2563eb;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.22);
+}
+
+.sd-dept-templates__btn:hover {
+  border-color: #1d4ed8;
+  background: linear-gradient(180deg, #fff 0%, #eff6ff 100%);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+}
+
+/* ŠD: kompaktní tabulky — méně horizontálního posuvu v užším okně */
+.sd-phmax-breakdown-scroll--compact {
+  max-width: 100%;
+}
+
+.sd-phmax-breakdown-scroll--compact .sd-phmax-breakdown {
+  font-size: 0.74rem;
+}
+
+.sd-phmax-breakdown-scroll--compact .sd-phmax-breakdown th,
+.sd-phmax-breakdown-scroll--compact .sd-phmax-breakdown td {
+  padding: 5px 6px;
+}
+
+@media (max-width: 720px) {
+  .sd-phmax-breakdown-scroll--compact .sd-phmax-breakdown {
+    font-size: 0.66rem;
+  }
+
+  .sd-phmax-breakdown-scroll--compact .sd-phmax-breakdown th,
+  .sd-phmax-breakdown-scroll--compact .sd-phmax-breakdown td {
+    padding: 3px 4px;
+  }
+
+  .sd-dept-templates__btn {
+    font-size: 0.72rem;
+    padding: 8px 6px;
+  }
+}
+
 .sd-phmax-breakdown-scroll {
   overflow-x: auto;
   border-radius: 12px;

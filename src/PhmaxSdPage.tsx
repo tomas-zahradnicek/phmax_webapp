@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
@@ -40,6 +40,8 @@ import { ProductLegisContextPanel, SdLegisRef } from "./PhmaxProductLegisUi";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
+import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
+import { GlossaryIconButton } from "./GlossaryIconButton";
 import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
 import { round2 } from "./phmax-zs-logic";
 import { buildPhmaxSdExportRows } from "./phmax-sd-export-rows";
@@ -67,6 +69,76 @@ function formatSdHours(value: number) {
 function formatSdFactor(value: number) {
   return value.toLocaleString("cs-CZ", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 }
+
+const SD_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
+  {
+    term: "PHmax (školní družina)",
+    description: (
+      <>
+        Nejvyšší týdenní rozsah přímé pedagogické činnosti (hodiny) pro družinu podle celkového počtu oddělení.
+        Tabulkové hodnoty jsou v příloze k{" "}
+        <strong>vyhlášce č. 74/2005 Sb., o zájmovém vzdělávání</strong>.
+      </>
+    ),
+  },
+  {
+    term: "PHAmax (speciální oddělení)",
+    description: (
+      <>
+        Orientační strop týdenních hodin přímé pedagogické činnosti <strong>asistenta pedagoga</strong> ve
+        speciálních odděleních (§ 16 odst. 9 školského zákona). Počítá se zvlášť od PHmax a nelze ho na PHmax
+        „přepočítat“.
+      </>
+    ),
+  },
+  {
+    term: "Běžné oddělení",
+    description: (
+      <>
+        Oddělení, které <strong>není</strong> tvořeno pouze účastníky uvedenými v § 16 odst. 9 školského zákona
+        (zákona č. 561/2004 Sb.).
+      </>
+    ),
+  },
+  {
+    term: "Speciální oddělení (§ 16/9)",
+    description: (
+      <>
+        Oddělení tvořené pouze účastníky podle § 16 odst. 9 školského zákona. Na ně se uplatňují zvláštní pravidla
+        krácení v rámci výpočtu (vyhláška č. 74/2005 Sb., zejména § 10 odst. 7 a pravidla k PHAmax).
+      </>
+    ),
+  },
+  {
+    term: "Výjimka z nejnižšího počtu",
+    description: (
+      <>
+        Rozhodnutí zřizovatele / souhlasné stanovisko, které umožní nižší počet účastníků, než stanoví obecná pravidla.
+        V kalkulačce ji modelujete zaškrtnutím výjimky; u speciálních oddělení se podle počtu účastníků uplatní koeficient
+        krácení (např. 0,95 / 0,90 / 0,40 dle metodiky).
+      </>
+    ),
+  },
+  {
+    term: "Souhrnný vs. detailní režim",
+    description: (
+      <>
+        <strong>Souhrnný režim</strong> zadáváte běžná oddělení souhrnně a speciální případně jako další položky.{" "}
+        <strong>Detailní režim</strong> zapisuje každé oddělení zvlášť (typ, počet účastníků, výjimka u řádku) — interně
+        se vždy převádí na model po odděleních.
+      </>
+    ),
+  },
+  {
+    term: "Krácení PHmax (průměr pod 20)",
+    description: (
+      <>
+        Orientační krácení celkového PHmax, pokud není splněn průměr účastníků 1. stupně na oddělení (typicky pod 20)
+        — viz § 10 odst. 2 vyhlášky č. 74/2005 Sb. V aplikaci se zobrazí koeficient a upravený součet.
+      </>
+    ),
+  },
+];
 
 type PhmaxSdPageProps = {
   productView: ProductView;
@@ -227,6 +299,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       return true;
     }
   });
+  const [glossaryOpen, setGlossaryOpen] = useState(false);
+  const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
 
   const dismissGuide = useCallback(() => {
     try {
@@ -713,6 +787,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         <div className="hero__pills-row">
           <ProductViewPills productView={productView} setProductView={setProductView} />
           <div className="hero__pills-row-trailing">
+            <GlossaryIconButton
+              ref={glossaryTriggerRef}
+              className="glossary-icon-btn--hero"
+              onClick={() => setGlossaryOpen(true)}
+            />
             <button
               type="button"
               className="btn btn--hero-help"
@@ -1123,32 +1202,32 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           <div className="subcard" style={{ marginTop: 16 }}>
             <h3>Detailní evidence oddělení</h3>
             <div style={{ marginTop: 8 }}>
-              <div className="checks" style={{ gap: 8, flexWrap: "wrap" }}>
+              <div className="sd-dept-templates" role="group" aria-label="Rychlé šablony oddělení">
                 <button
                   type="button"
-                  className="btn ghost"
+                  className="btn sd-dept-templates__btn"
                   onClick={() => {
                     setInputMode("detail");
                     setDetailDepartments([{ kind: "regular", participants: 0 }]);
                   }}
                   title="Předvyplní 1 běžné oddělení"
                 >
-                  Šablona: Jen běžná
+                  Jen běžná
                 </button>
                 <button
                   type="button"
-                  className="btn ghost"
+                  className="btn sd-dept-templates__btn"
                   onClick={() => {
                     setInputMode("detail");
                     setDetailDepartments([{ kind: "special", participants: 0, specialExceptionGranted: false }]);
                   }}
-                  title="Předvyplní 1 speciální oddělení (§ 16/9)"
+                  title="Předvyplní 1 speciální oddělení (§ 16 odst. 9 školského zákona)"
                 >
-                  Šablona: Jen speciální (§ 16/9)
+                  Jen speciální
                 </button>
                 <button
                   type="button"
-                  className="btn ghost"
+                  className="btn sd-dept-templates__btn"
                   onClick={() => {
                     setInputMode("detail");
                     setDetailDepartments([
@@ -1158,7 +1237,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                   }}
                   title="Předvyplní kombinaci běžného a speciálního oddělení"
                 >
-                  Šablona: Kombinace
+                  Kombinace
                 </button>
               </div>
               <p className="muted-text" style={{ marginTop: 8, fontSize: "0.84rem" }}>
@@ -1430,7 +1509,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <p className="muted-text" style={{ marginTop: 10, marginBottom: 10, fontSize: "0.84rem" }}>
               Technický přehled po řádcích. Pro běžné použití stačí souhrn nahoře a tabulka „Tabulková hodnota PHmax“.
             </p>
-            <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
+            <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
               <table className="sd-phmax-breakdown">
                 <thead>
                   <tr>
@@ -1474,7 +1553,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               Hodiny podle tabulky pro váš počet oddělení (pořadí 1. až n-té oddělení). Právní opora: příloha vyhlášky
               č. 74/2005 Sb.
             </p>
-            <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
+            <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
               <table className="sd-phmax-breakdown">
                 <thead>
                   <tr>
@@ -1536,7 +1615,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <p className="muted-text" style={{ marginBottom: 10, fontSize: "0.86rem" }}>
               Řádek z přehledu týdenního maxima provozu školní družiny. Právní opora: příloha vyhlášky č. 74/2005 Sb.
             </p>
-            <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
+            <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
               <table className="sd-phmax-breakdown">
                 <thead>
                   <tr>
@@ -1650,16 +1729,18 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             Pozn.: metodika zaokrouhluje mezikroky. Aplikace ponechává plnou přesnost mezivýpočtu a zaokrouhluje
             výsledné hodnoty, proto mohou vznikat malé rozdíly v desetinných místech.
           </p>
-          <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
+          <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
             <table className="sd-phmax-breakdown">
               <thead>
                 <tr>
-                  <th>Počet oddělení ŠD</th>
-                  <th>PHmax</th>
-                  <th>Průměr PHmax na 1 odd.</th>
-                  <th>Varianta 5 dětí (0,95)</th>
-                  <th>Varianta 4 děti (0,90)</th>
-                  <th>Varianta &lt; 4 děti (0,40)</th>
+                  <th title="Počet oddělení školní družiny">Odd.</th>
+                  <th title="Celkový PHmax z přílohy pro daný počet oddělení">PHmax</th>
+                  <th title="Průměrný PHmax na 1 oddělení (základ pro výjimku u 1 speciálním oddělení)">Prům.</th>
+                  <th title="Varianta: 1 speciální oddělení s výjimkou, 5 účastníků (koeficient 0,95)">5 (0,95)</th>
+                  <th title="Varianta: 1 speciální oddělení s výjimkou, 4 účastníci (koeficient 0,90)">4 (0,90)</th>
+                  <th title="Varianta: 1 speciální oddělení s výjimkou, méně než 4 účastníci (koeficient 0,40 dle textu metodiky)">
+                    &lt;4 (0,40)
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -1734,20 +1815,28 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             Referenční matice přílohy vyhlášky 74/2005 Sb. pro 1 až 21 oddělení. Sloupce 1–21 ukazují hodinové hodnoty
             pro jednotlivá oddělení, poslední sloupec uvádí celkový PHmax za družinu.
           </p>
-          <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
+          <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
             <table className="sd-phmax-breakdown">
               <thead>
                 <tr>
-                  <th rowSpan={3}>Celkový počet oddělení</th>
-                  <th colSpan={21}>TÝDENNÍ MAXIMÁLNÍ ROZSAH PROVOZU ŠKOLNÍCH DRUŽIN</th>
-                  <th rowSpan={3}>Celkový PHmax za školní družinu</th>
-                </tr>
-                <tr>
-                  <th colSpan={21}>pro jednotlivá oddělení</th>
+                  <th rowSpan={2} title="Celkový počet oddělení školní družiny">
+                    Odd.
+                  </th>
+                  <th
+                    colSpan={21}
+                    title="Týdenní maximální rozsah provozu školních družin — hodiny PHmax pro 1. až 21. oddělení dle přílohy vyhlášky č. 74/2005 Sb."
+                  >
+                    PHmax na oddělení 1–21 (h)
+                  </th>
+                  <th rowSpan={2} title="Součet tabulkového PHmax za družinu pro daný počet oddělení">
+                    Σ PHmax
+                  </th>
                 </tr>
                 <tr>
                   {Array.from({ length: 21 }, (_, i) => (
-                    <th key={`hd-${i + 1}`}>{i + 1}</th>
+                    <th key={`hd-${i + 1}`} title={`${i + 1}. oddělení`}>
+                      {i + 1}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -1809,6 +1898,12 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         <AuthorCreditFooter />
       </footer>
       <ProductFloatingNav active={productView} setProductView={setProductView} />
+      <GlossaryDialog
+        open={glossaryOpen}
+        onClose={() => setGlossaryOpen(false)}
+        terms={SD_GLOSSARY_TERMS}
+        triggerRef={glossaryTriggerRef}
+      />
     </>
   );
 }
