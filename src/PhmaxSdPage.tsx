@@ -1185,6 +1185,36 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </div>
         )}
 
+        {detailedResult != null ? (
+          <div
+            className="subcard"
+            style={{ marginTop: 14, borderLeft: "5px solid #22c55e", background: "rgba(34, 197, 94, 0.06)" }}
+          >
+            {detailedResult.regularDepartments > 0 && detailedResult.specialDepartments === 0 ? (
+              <p style={{ margin: 0 }}>
+                <strong>Hlavní výsledek (jen běžná oddělení):</strong> PHmax{" "}
+                <strong>{formatSdHours(detailedResult.finalPhmax)} h</strong>
+              </p>
+            ) : null}
+            {detailedResult.regularDepartments === 0 && detailedResult.specialDepartments > 0 ? (
+              <p style={{ margin: 0 }}>
+                <strong>Hlavní výsledek (jen speciální oddělení):</strong> PHAmax{" "}
+                <strong>{formatSdHours(detailedResult.finalPhaMax)} h</strong>{" "}
+                <span className="muted-text">
+                  (PHmax pro provoz: {formatSdHours(detailedResult.finalPhmax)} h)
+                </span>
+              </p>
+            ) : null}
+            {detailedResult.regularDepartments > 0 && detailedResult.specialDepartments > 0 ? (
+              <p style={{ margin: 0 }}>
+                <strong>Hlavní výsledek (kombinace):</strong> PHmax{" "}
+                <strong>{formatSdHours(detailedResult.finalPhmax)} h</strong> a PHAmax{" "}
+                <strong>{formatSdHours(detailedResult.finalPhaMax)} h</strong>
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         <div className="grid two section-results" style={{ marginTop: 18 }}>
           {detailedResult != null ? (
             <>
