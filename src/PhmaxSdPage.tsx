@@ -1209,13 +1209,18 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 />
               ) : null}
               <ResultCard
-                label="PHmax celkem (součet běžných + speciálních oddělení)"
+                label={
+                  detailedResult.specialDepartments > 0
+                    ? "PHmax celkem (součet běžných + speciálních oddělení)"
+                    : "PHmax celkem (běžná oddělení)"
+                }
                 value={detailedResult.finalPhmax}
-                tone="success"
+                tone={detailedResult.specialDepartments > 0 && detailedResult.regularDepartments === 0 ? "primary" : "success"}
               />
               {detailedResult.specialDepartments > 0 ? (
                 <ResultCard
-                  label="PHAmax – speciální oddělení (odst. 7, § 16/9; po krácení výjimky)"
+                  label="PHAmax celkem – speciální oddělení (odst. 7, § 16/9; po krácení výjimky)"
+                  methodStepLabel="Výsledná hodnota PHAmax"
                   value={detailedResult.finalPhaMax}
                   tone="success"
                 />
@@ -1261,7 +1266,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         {detailedResult != null ? (
           <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
             <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
-              Podrobný rozpad PHmax/PHAmax po odděleních (pro kontrolu)
+              {detailedResult.specialDepartments > 0
+                ? "Podrobný rozpad PHmax/PHAmax po odděleních (pro kontrolu)"
+                : "Podrobný rozpad PHmax po odděleních (pro kontrolu)"}
             </summary>
             <p className="muted-text" style={{ marginTop: 10, marginBottom: 10, fontSize: "0.84rem" }}>
               Tato tabulka je detailní technický rozpad. Pro běžné použití většinou stačí aktivní řádek metodiky a
@@ -1277,7 +1284,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                     <th>PHmax základ</th>
                     <th>Koef. krácení</th>
                     <th>PHmax po krácení</th>
-                    <th>PHAmax (spec.)</th>
+                    {detailedResult.specialDepartments > 0 ? <th>PHAmax (spec.)</th> : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -1289,7 +1296,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                       <td>{formatSdHours(row.basePhmax)}</td>
                       <td>{formatSdFactor(row.reductionFactor)}</td>
                       <td>{formatSdHours(row.finalPhmax)}</td>
-                      <td>{row.kind === "special" ? formatSdHours(row.finalPhaMax) : "—"}</td>
+                      {detailedResult.specialDepartments > 0 ? (
+                        <td>{row.kind === "special" ? formatSdHours(row.finalPhaMax) : "—"}</td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>
