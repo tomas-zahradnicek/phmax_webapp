@@ -37,6 +37,10 @@ export type CompareVariantsResult = {
   recommendation: string;
 };
 
+function formatHours(value: number): string {
+  return value.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function metricsFromProtocol(v: CompareVariant, protocol: AuditProtocol): CompareVariantMetrics {
   let totalPhmax: number | null = null;
   let totalClasses: number | null = null;
@@ -82,7 +86,9 @@ function buildDifferences(metrics: CompareVariantMetrics[]): string[] {
 
     if (base.totalPhmax !== null && cur.totalPhmax !== null && base.totalPhmax !== cur.totalPhmax) {
       const d = cur.totalPhmax - base.totalPhmax;
-      lines.push(`PHmax: „${labelB}“ oproti „${labelA}“ ${d >= 0 ? "+" : ""}${d.toFixed(2)} h (celkem ${cur.totalPhmax} vs ${base.totalPhmax}).`);
+      lines.push(
+        `PHmax: „${labelB}“ oproti „${labelA}“ ${d >= 0 ? "+" : ""}${formatHours(d)} h (celkem ${formatHours(cur.totalPhmax)} vs ${formatHours(base.totalPhmax)}).`,
+      );
     }
     if (base.totalClasses !== null && cur.totalClasses !== null && base.totalClasses !== cur.totalClasses) {
       lines.push(
