@@ -279,7 +279,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         normalizeSchoolDruzinaInput({
           departments: detailDepartments,
           regularExceptionGranted,
-          specialExceptionGranted,
+          // V detailním režimu řídíme výjimku pouze po řádcích (sloupec "Výjimka (spec.)").
+          specialExceptionGranted: false,
           schoolFirstStageClassCount,
         }),
       );
@@ -902,7 +903,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <NumberField
               label="Počet přihlášených účastníků (žáci 1. st. ZŠ, pravidelná docházka)"
               value={pupils}
-              onChange={setPupils}
+              onChange={(v) => setPupils(Math.max(0, Math.round(v)))}
             />
             <p className="muted-text" style={{ marginTop: 12, fontSize: "0.88rem" }}>
               Navržený počet oddělení (÷ 27, nahoru): <strong>{suggested}</strong>
@@ -932,7 +933,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                   <NumberField
                     label="Počet běžných oddělení školní družiny"
                     value={departments}
-                    onChange={setDepartments}
+                    onChange={(v) => setDepartments(Math.max(1, Math.round(v)))}
                   />
                 ) : null}
               </>
@@ -1015,7 +1016,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                           value={row.participants}
                           onChange={(v) =>
                             setSummarySpecialDepartments((prev) =>
-                              prev.map((x, idx) => (idx === i ? { ...x, participants: v } : x)),
+                              prev.map((x, idx) =>
+                                idx === i ? { ...x, participants: Math.max(0, Math.round(v)) } : x,
+                              ),
                             )
                           }
                         />
@@ -1069,16 +1072,6 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 />
                 Povolená výjimka u běžných oddělení (PHmax)
               </label>
-              {detailHasSpecial ? (
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={specialExceptionGranted}
-                    onChange={(e) => setSpecialExceptionGranted(e.target.checked)}
-                  />
-                  Povolená výjimka u speciálních oddělení (§ 16/9, PHmax i PHAmax)
-                </label>
-              ) : null}
             </div>
             <div style={{ marginTop: 10 }}>
               <button
@@ -1097,7 +1090,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                     <th>Oddělení</th>
                     <th>Typ</th>
                     <th>Účastníci</th>
-                    <th>Výjimka (spec.)</th>
+                    <th>Výjimka (spec., pro řádek)</th>
                     <th>Akce</th>
                   </tr>
                 </thead>
@@ -1126,12 +1119,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                           type="number"
                           className="input"
                           min={0}
-                          step="0.1"
+                          step="1"
                           value={row.participants}
                           onChange={(e) =>
                             setDetailDepartments((prev) =>
                               prev.map((x, idx) =>
-                                idx === i ? { ...x, participants: Math.max(0, Number(e.target.value) || 0) } : x,
+                                idx === i
+                                  ? { ...x, participants: Math.max(0, Math.round(Number(e.target.value) || 0)) }
+                                  : x,
                               ),
                             )
                           }
