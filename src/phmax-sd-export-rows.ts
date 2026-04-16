@@ -7,6 +7,10 @@ function formatSdHours(value: number) {
   return value.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function formatSdFactor(value: number) {
+  return value.toLocaleString("cs-CZ", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+}
+
 export function buildPhmaxSdExportRows(input: {
   pupils: number;
   effectiveDepts: number;
@@ -73,7 +77,7 @@ export function buildPhmaxSdExportRows(input: {
     detailed.breakdown.forEach((r) => {
       rows.push([`Oddělení ${r.index1Based} (${r.kind}) účastníci`, formatSdHours(r.participants)]);
       rows.push([`Oddělení ${r.index1Based} (${r.kind}) PHmax základ`, formatSdHours(r.basePhmax)]);
-      rows.push([`Oddělení ${r.index1Based} (${r.kind}) koeficient`, r.reductionFactor.toFixed(4)]);
+      rows.push([`Oddělení ${r.index1Based} (${r.kind}) koeficient`, formatSdFactor(r.reductionFactor)]);
       rows.push([`Oddělení ${r.index1Based} (${r.kind}) PHmax po krácení`, formatSdHours(r.finalPhmax)]);
       if (r.kind === "special") {
         rows.push([`Oddělení ${r.index1Based} (${r.kind}) PHAmax`, formatSdHours(r.finalPhaMax)]);

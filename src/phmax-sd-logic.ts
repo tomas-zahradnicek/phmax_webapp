@@ -130,6 +130,10 @@ export type SdDetailedResult = {
 /** Orientační základ PHAmax pro 1 speciální oddělení (viz metodický příklad č. 7). */
 const SD_PHAMAX_BASE_PER_SPECIAL_DEPARTMENT = 15;
 
+function formatFactor(value: number): string {
+  return value.toLocaleString("cs-CZ", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+}
+
 function clamp01(value: number): number {
   if (value < 0) return 0;
   if (value > 1) return 1;
@@ -270,7 +274,7 @@ export function calculateSchoolDruzinaPhmaxDetailed(model: SdNormalizedModel): S
   const notes: string[] = [];
   if (model.regularExceptionGranted && regularDepartments.length > 0) {
     notes.push(
-      `Běžná oddělení: poměrné krácení ${regularReductionFactor.toFixed(4)} (${round2(
+      `Běžná oddělení: poměrné krácení ${formatFactor(regularReductionFactor)} (${round2(
         regularParticipantsTotal,
       )}/${round2(regularRequiredTotal)}).`,
     );

@@ -27,6 +27,13 @@ type ResultCardProps = {
 
 type MethodStep = "a" | "b" | "c" | "d" | "warning";
 
+function formatResultValue(value: React.ReactNode): React.ReactNode {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value.toLocaleString("cs-CZ", { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+  }
+  return value;
+}
+
 function HintBadge({ text }: { text: string }) {
   return (
     <span className="help-hint help-hint--ui" title={text} aria-label={text}>
@@ -176,6 +183,7 @@ export function ResultCard({
   const stepSource = methodStepLabel ?? (typeof label === "string" ? label : "");
   const step = inferMethodStep(stepSource, tone);
   const meta = stepMeta(step);
+  const displayedValue = formatResultValue(value);
 
   return (
     <div className={`result-card result-card--output result-card--${tone} result-card--step-${step}`}>
@@ -187,7 +195,7 @@ export function ResultCard({
         {hint ? <HintBadge text={hint} /> : null}
       </div>
 
-      <div className="result-card__value">{value}</div>
+      <div className="result-card__value">{displayedValue}</div>
     </div>
   );
 }

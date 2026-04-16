@@ -64,6 +64,10 @@ function formatSdHours(value: number) {
   return value.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function formatSdFactor(value: number) {
+  return value.toLocaleString("cs-CZ", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+}
+
 type PhmaxSdPageProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
@@ -907,7 +911,12 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             />
             <p className="muted-text" style={{ marginTop: 12, fontSize: "0.88rem" }}>
               Navržený počet oddělení (÷ 27, nahoru): <strong>{suggested}</strong>
-              {pupils > 0 ? ` → průměr při ${suggested} odd.: ${(pupils / suggested).toFixed(2)} účastníků` : null}
+              {pupils > 0
+                ? ` → průměr při ${suggested} odd.: ${(pupils / suggested).toLocaleString("cs-CZ", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })} účastníků`
+                : null}
             </p>
           </div>
 
@@ -1225,7 +1234,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               <ResultCard label="PHmax (základ z tabulky)" value={basePhmax} tone="success" />
               {reduction.applied ? (
                 <ResultCard
-                  label={`PHmax po krácení (koef. ${reduction.factor.toFixed(4)})`}
+                  label={`PHmax po krácení (koef. ${formatSdFactor(reduction.factor)})`}
                   value={reduction.adjusted}
                   tone="success"
                 />
@@ -1271,7 +1280,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                       <td>{row.kind === "regular" ? "Běžné" : "Speciální"}</td>
                       <td>{formatSdHours(row.participants)}</td>
                       <td>{formatSdHours(row.basePhmax)}</td>
-                      <td>{row.reductionFactor.toFixed(4)}</td>
+                      <td>{formatSdFactor(row.reductionFactor)}</td>
                       <td>{formatSdHours(row.finalPhmax)}</td>
                       <td>{row.kind === "special" ? formatSdHours(row.finalPhaMax) : "—"}</td>
                     </tr>
@@ -1330,7 +1339,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             </ScrollGrabRegion>
             {reduction.applied ? (
               <p className="muted-text" style={{ marginTop: 10, fontSize: "0.82rem" }}>
-                Koeficient krácení: {reduction.factor.toFixed(4)}. Jako celkový strop po krácení platí součet v řádku
+                Koeficient krácení: {formatSdFactor(reduction.factor)}. Jako celkový strop po krácení platí součet v řádku
                 Celkem ({formatSdHours(reduction.adjusted)} h); rozpad sloupců je poměrný podklad.
               </p>
             ) : null}
