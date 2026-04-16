@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
@@ -34,6 +34,8 @@ import {
 import { HeroStatusBar } from "./HeroStatusBar";
 import { HeroStat } from "./HeroStat";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
+import { GlossaryIconButton } from "./GlossaryIconButton";
+import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, PvLegisRef } from "./PhmaxProductLegisUi";
 import { ProductFloatingNav } from "./ProductFloatingNav";
@@ -102,6 +104,66 @@ type PhmaxPvPageProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
 };
+
+const PV_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
+  {
+    term: "PHmax (předškolní vzdělávání)",
+    description: (
+      <>
+        Nejvyšší týdenní rozsah přímé pedagogické činnosti (hodiny) pro mateřskou školu / pracoviště podle tabulek v
+        příloze k <strong>vyhlášce č. 14/2005 Sb.</strong> a metodiky PHmax/PHAmax pro PV (tabulky 1–3 podle druhu
+        provozu a průměrné denní doby).
+      </>
+    ),
+  },
+  {
+    term: "PHAmax (asistent pedagoga)",
+    description: (
+      <>
+        Orientační strop týdenních hodin přímé pedagogické činnosti <strong>asistenta pedagoga</strong> u tříd zřízených
+        podle § 16 odst. 9 školského zákona. Počítá se zvlášť od PHmax; přebytky jednoho nelze použít na druhé.
+      </>
+    ),
+  },
+  {
+    term: "Pracoviště (řádek ve formuláři)",
+    description: (
+      <>
+        Jedna kombinace <strong>místa (nebo jeho části) a druhu provozu</strong> — odpovídá jednomu dílčímu výpočtu v
+        metodice. Při více provozech na stejném místě (např. celodenní i polodenní) přidejte další řádek; součet PHmax z
+        řádků odpovídá celkovému PHmax.
+      </>
+    ),
+  },
+  {
+    term: "Třída podle § 16 odst. 9 školského zákona",
+    description: (
+      <>
+        Třída zřízená pro děti, na které se uplatní zvláštní pravidla; v kalkulačce zvyšuje PHmax o{" "}
+        <strong>5 hodin týdně za každou takto označenou třídu</strong> (navíc k tabulkové hodnotě) a vstupuje do výpočtu
+        PHAmax.
+      </>
+    ),
+  },
+  {
+    term: "Skupina jazykové přípravy",
+    description: (
+      <>
+        Dle metodiky v4: ke PHmax se přičítá <strong>+1 hodina týdně za každou skupinu</strong> jazykové přípravy dle §
+        1d odst. 11 vyhlášky č. 14/2005 Sb., kterou zadáte u pracoviště.
+      </>
+    ),
+  },
+  {
+    term: "MŠ při zdravotnickém zařízení",
+    description: (
+      <>
+        Samostatný režim výpočtu podle výkazu S 4-01 (v aplikaci volba „Mateřská škola při zdravotnickém zařízení“) —
+        základ PHmax se nečte z tabulek 1–3 podle hodin, ale podle pravidel metodiky pro tento typ zařízení.
+      </>
+    ),
+  },
+];
 
 const PV_ONBOARDING_KEY = "phmax-pv-onboarding";
 const PV_STORAGE_KEY = "edu-cz-pv-calculator-state";
@@ -206,6 +268,27 @@ function loadPvRowsFromStorage(): PvWorkplaceRowState[] {
   }
 }
 
+/** Mimo komponentu kvůli stabilnímu odkazu v JSX (částečné mergy nemohou „ztratit“ handler uvnitř hooků). */
+function applyPvHeroExampleSelection(
+  key: PvHeroExampleKey,
+  setters: {
+    setSelected: (k: PvHeroExampleKey) => void;
+    setRows: (rows: PvWorkplaceRowState[]) => void;
+    setNotice: (msg: string) => void;
+  },
+) {
+  setters.setSelected(key);
+  if (!key) return;
+  const snap = pvHeroExampleSnapshot(key);
+  const next = parsePvSnapshot({ rows: snap.rows });
+  if (next) {
+    setters.setRows(next);
+    setters.setNotice("Načten ukázkový příklad z metodiky nebo z přílohy.");
+  } else {
+    setters.setNotice("Ukázkový příklad se nepodařilo načíst.");
+  }
+}
+
 export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [rows, setRows] = useState<PvWorkplaceRowState[]>(() => loadPvRowsFromStorage());
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
@@ -215,6 +298,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
   const [selectedPvHeroExample, setSelectedPvHeroExample] = useState<PvHeroExampleKey>("");
+  const [glossaryOpen, setGlossaryOpen] = useState(false);
+  const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
   const [guideOpen, setGuideOpen] = useState(() => {
     try {
       return localStorage.getItem(PV_ONBOARDING_KEY) !== "1";
@@ -342,6 +427,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const applyPvSnapshot = useCallback((data: unknown) => {
     const next = parsePvSnapshot(data);
     if (next) {
+      setSelectedPvHeroExample("");
       setRows(next);
       setUiNotice("Data byla obnovena.");
     } else {
@@ -531,6 +617,11 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         <div className="hero__pills-row">
           <ProductViewPills productView={productView} setProductView={setProductView} />
           <div className="hero__pills-row-trailing">
+            <GlossaryIconButton
+              ref={glossaryTriggerRef}
+              className="glossary-icon-btn--hero"
+              onClick={() => setGlossaryOpen(true)}
+            />
             <button
               type="button"
               className="btn btn--hero-help"
@@ -581,7 +672,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             aria-describedby="pv-hero-example-legend"
             title="Ukázkové příklady z metodiky a z přílohy k PHmax / PHAmax u předškolního vzdělávání. Najeďte na řádek pro detaily."
             value={selectedPvHeroExample}
-            onChange={(e) => loadPvHeroExample(e.target.value as PvHeroExampleKey)}
+            onChange={(e) =>
+              applyPvHeroExampleSelection(e.target.value as PvHeroExampleKey, {
+                setSelected: setSelectedPvHeroExample,
+                setRows,
+                setNotice: setUiNotice,
+              })
+            }
           >
             <option value="">Vyberte ukázkový příklad…</option>
             <optgroup label="Metodika — výkladové příklady">
@@ -1192,6 +1289,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         <AuthorCreditFooter />
       </footer>
       <ProductFloatingNav active={productView} setProductView={setProductView} />
+      <GlossaryDialog
+        open={glossaryOpen}
+        onClose={() => setGlossaryOpen(false)}
+        terms={PV_GLOSSARY_TERMS}
+        triggerRef={glossaryTriggerRef}
+      />
     </>
   );
 }
