@@ -370,6 +370,49 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     detailDepartments,
   ]);
 
+  const stickySummary = useMemo(() => {
+    if (detailedResult != null) {
+      const departmentsCount = detailedResult.totalDepartments;
+      const phmax = detailedResult.finalPhmax;
+      const phamax = detailedResult.specialDepartments > 0 ? detailedResult.finalPhaMax : null;
+      let coefficientLabel = "Koef. krácení";
+      let coefficientValue = "1,0000";
+
+      if (detailedResult.regularDepartments > 0 && detailedResult.specialDepartments === 0) {
+        coefficientLabel = "Koef. krácení (běžná)";
+        coefficientValue = formatSdFactor(detailedResult.regularReductionFactor);
+      } else if (detailedResult.regularDepartments === 0 && detailedResult.specialDepartments > 0) {
+        coefficientLabel = "Koef. krácení (spec.)";
+        coefficientValue = formatSdFactor(detailedResult.specialReductionFactor);
+      } else if (detailedResult.regularDepartments > 0 && detailedResult.specialDepartments > 0) {
+        coefficientLabel = "Koef. krácení (běž./spec.)";
+        coefficientValue = `${formatSdFactor(detailedResult.regularReductionFactor)} / ${formatSdFactor(
+          detailedResult.specialReductionFactor,
+        )}`;
+      }
+
+      return {
+        departmentsCount,
+        phmax,
+        phamax,
+        coefficientLabel,
+        coefficientValue,
+      };
+    }
+
+    if (basePhmax != null) {
+      return {
+        departmentsCount: effectiveDepts,
+        phmax: reduction.adjusted,
+        phamax: null,
+        coefficientLabel: "Koef. krácení",
+        coefficientValue: formatSdFactor(reduction.factor),
+      };
+    }
+
+    return null;
+  }, [detailedResult, basePhmax, effectiveDepts, reduction.adjusted, reduction.factor]);
+
   const exportRows = useMemo(
     () =>
       buildPhmaxSdExportRows({
@@ -1227,6 +1270,29 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             ) : null}
           </div>
         )}
+
+        {stickySummary != null ? (
+          <div className="sd-sticky-summary" role="status" aria-live="polite">
+            <div className="sd-sticky-summary__item">
+              <span className="sd-sticky-summary__label">Oddělení</span>
+              <strong className="sd-sticky-summary__value">{stickySummary.departmentsCount}</strong>
+            </div>
+            <div className="sd-sticky-summary__item">
+              <span className="sd-sticky-summary__label">PHmax</span>
+              <strong className="sd-sticky-summary__value">{formatSdHours(stickySummary.phmax)} h</strong>
+            </div>
+            {stickySummary.phamax != null ? (
+              <div className="sd-sticky-summary__item">
+                <span className="sd-sticky-summary__label">PHAmax</span>
+                <strong className="sd-sticky-summary__value">{formatSdHours(stickySummary.phamax)} h</strong>
+              </div>
+            ) : null}
+            <div className="sd-sticky-summary__item">
+              <span className="sd-sticky-summary__label">{stickySummary.coefficientLabel}</span>
+              <strong className="sd-sticky-summary__value">{stickySummary.coefficientValue}</strong>
+            </div>
+          </div>
+        ) : null}
 
         {detailedResult != null ? (
           <div
