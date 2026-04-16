@@ -336,7 +336,8 @@ button.pill--hero-toggle--active {
   scrollbar-gutter: stable;
 }
 
-.sd-dept-templates__btn {
+/* Musí přebít pozdější `.btn { color: white }` — proto spojený selektor. */
+.btn.sd-dept-templates__btn {
   flex: 1 1 0;
   min-width: 0;
   font-size: 0.8rem;
@@ -351,10 +352,17 @@ button.pill--hero-toggle--active {
   box-shadow: 0 2px 10px rgba(37, 99, 235, 0.22);
 }
 
-.sd-dept-templates__btn:hover {
+.btn.sd-dept-templates__btn:hover,
+.btn.sd-dept-templates__btn:focus-visible {
+  color: #172554;
   border-color: #1d4ed8;
-  background: linear-gradient(180deg, #fff 0%, #eff6ff 100%);
+  background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+}
+
+.btn.sd-dept-templates__btn:active {
+  color: #172554;
+  background: linear-gradient(180deg, #bfdbfe 0%, #93c5fd 100%);
 }
 
 /* ŠD: kompaktní tabulky — méně horizontálního posuvu v užším okně */
@@ -381,7 +389,7 @@ button.pill--hero-toggle--active {
     padding: 3px 4px;
   }
 
-  .sd-dept-templates__btn {
+  .btn.sd-dept-templates__btn {
     font-size: 0.72rem;
     padding: 8px 6px;
   }
