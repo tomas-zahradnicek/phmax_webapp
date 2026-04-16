@@ -45,6 +45,14 @@ import { createPvProductAuditProtocol } from "./phmax-product-audit";
 import { comparePhmaxProductVariants } from "./phmax-product-compare";
 import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "./phmax-product-audit-download";
 import { computePvPhmaxTotal, getPhaMaxPv, getPvMaxClassCount, type PvProvozKind } from "./phmax-pv-logic";
+import {
+  type PvHeroExampleKey,
+  PV_HERO_EXAMPLE_ILL_KEYS,
+  PV_HERO_EXAMPLE_METH_KEYS,
+  PV_HERO_EXAMPLE_META,
+  PV_HERO_EXAMPLE_SELECT_LEGEND,
+  pvHeroExampleSnapshot,
+} from "./phmax-pv-hero-examples";
 import { round2 } from "./phmax-zs-logic";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
 
@@ -206,6 +214,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [namedSnapshots, setNamedSnapshots] = useState<NamedPvSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
+  const [selectedPvHeroExample, setSelectedPvHeroExample] = useState<PvHeroExampleKey>("");
   const [guideOpen, setGuideOpen] = useState(() => {
     try {
       return localStorage.getItem(PV_ONBOARDING_KEY) !== "1";
@@ -416,6 +425,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
   const resetPvAll = useCallback(() => {
     if (!confirmDestructive(MSG_CONFIRM_RESET_FORM_ALL)) return;
+    setSelectedPvHeroExample("");
     setRows([createInitialPvRow()]);
     setUiNotice("Všechna vstupní data kalkulačky byla vymazána.");
   }, []);
@@ -555,6 +565,53 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             />
             <HeroStat compact label="PHAmax celkem" value={aggregate.phaSum > 0 ? aggregate.phaSum : "–"} />
           </div>
+        </div>
+
+        <div
+          className="field field--hero-select hero-actions__example hero-pv-example-select"
+          style={{ marginTop: 14 }}
+        >
+          <span className="field__label field__label--hero" id="pv-hero-example-label">
+            Ukázkový příklad
+          </span>
+          <select
+            id="pv-hero-example-select"
+            className="input"
+            aria-labelledby="pv-hero-example-label"
+            aria-describedby="pv-hero-example-legend"
+            title="Ukázkové příklady z metodiky a z přílohy k PHmax / PHAmax u předškolního vzdělávání. Najeďte na řádek pro detaily."
+            value={selectedPvHeroExample}
+            onChange={(e) => loadPvHeroExample(e.target.value as PvHeroExampleKey)}
+          >
+            <option value="">Vyberte ukázkový příklad…</option>
+            <optgroup label="Metodika — výkladové příklady">
+              {PV_HERO_EXAMPLE_METH_KEYS.map((k) => {
+                const m = PV_HERO_EXAMPLE_META[k];
+                return (
+                  <option key={k} value={k} title={m.title}>
+                    {m.label}
+                  </option>
+                );
+              })}
+            </optgroup>
+            <optgroup label="Příloha — ilustrace MŠ (bez § 16/9)">
+              {PV_HERO_EXAMPLE_ILL_KEYS.map((k) => {
+                const m = PV_HERO_EXAMPLE_META[k];
+                return (
+                  <option key={k} value={k} title={m.title}>
+                    {m.label}
+                  </option>
+                );
+              })}
+            </optgroup>
+          </select>
+          <p
+            id="pv-hero-example-legend"
+            className="muted-text"
+            style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}
+          >
+            {PV_HERO_EXAMPLE_SELECT_LEGEND}
+          </p>
         </div>
 
         <div className="hero-actions hero-actions--stacked">
