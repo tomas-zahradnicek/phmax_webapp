@@ -61,6 +61,12 @@ import {
 import { createSdProductAuditProtocol } from "./phmax-product-audit";
 import { comparePhmaxProductVariants } from "./phmax-product-compare";
 import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "./phmax-product-audit-download";
+import {
+  SD_HERO_EXAMPLE_META,
+  SD_HERO_EXAMPLE_ORDER,
+  sdHeroExampleSnapshot,
+  type SdHeroExampleKey,
+} from "./phmax-sd-hero-examples";
 
 function formatSdHours(value: number) {
   return value.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -144,6 +150,9 @@ type PhmaxSdPageProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
 };
+
+const SD_HERO_EXAMPLE_SELECT_LEGEND =
+  "Najeďte myší na řádek v seznamu pro stručný popis situace a orientační očekávaný výsledek. Čísla odpovídají výpočtu v této aplikaci (včetně přesných mezikroků; metodika někdy zaokrouhluje jinak).";
 
 const SD_ONBOARDING_KEY = "phmax-sd-onboarding";
 const SD_STORAGE_KEY = "edu-cz-sd-calculator-state";
@@ -299,6 +308,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       return true;
     }
   });
+  const [selectedSdHeroExample, setSelectedSdHeroExample] = useState<SdHeroExampleKey>("");
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -568,23 +578,42 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     ],
   );
 
-  const applySdSnapshot = useCallback((data: unknown) => {
-    const next = parseSdSnapshot(data);
-    if (next) {
-      setPupils(next.pupils);
-      setManualDepts(next.manualDepts);
-      setDepartments(next.departments);
-      setInputMode(next.inputMode ?? "summary");
-      setSummarySpecialDepartments(next.summarySpecialDepartments ?? []);
-      setRegularExceptionGranted(next.regularExceptionGranted ?? false);
-      setSpecialExceptionGranted(next.specialExceptionGranted ?? false);
-      setDetailDepartments(next.detailDepartments ?? [{ kind: "regular", participants: 0 }]);
-      setSchoolFirstStageClassCount(next.schoolFirstStageClassCount ?? null);
-      setUiNotice("Data byla obnovena.");
-    } else {
-      setUiNotice("Uložená data nejsou ve očekávaném tvaru.");
-    }
+  const applySdPersisted = useCallback((next: SdPersistedSnapshot) => {
+    setPupils(next.pupils);
+    setManualDepts(next.manualDepts);
+    setDepartments(next.departments);
+    setInputMode(next.inputMode ?? "summary");
+    setSummarySpecialDepartments(next.summarySpecialDepartments ?? []);
+    setRegularExceptionGranted(next.regularExceptionGranted ?? false);
+    setSpecialExceptionGranted(next.specialExceptionGranted ?? false);
+    setDetailDepartments(next.detailDepartments ?? [{ kind: "regular", participants: 0 }]);
+    setSchoolFirstStageClassCount(next.schoolFirstStageClassCount ?? null);
+    setSummaryHasSpecial((next.summarySpecialDepartments?.length ?? 0) > 0);
   }, []);
+
+  const applySdSnapshot = useCallback(
+    (data: unknown) => {
+      const next = parseSdSnapshot(data);
+      if (next) {
+        setSelectedSdHeroExample("");
+        applySdPersisted(next);
+        setUiNotice("Data byla obnovena.");
+      } else {
+        setUiNotice("Uložená data nejsou ve očekávaném tvaru.");
+      }
+    },
+    [applySdPersisted],
+  );
+
+  const loadSdHeroExample = useCallback(
+    (key: SdHeroExampleKey) => {
+      setSelectedSdHeroExample(key);
+      if (!key) return;
+      applySdPersisted(sdHeroExampleSnapshot(key) as SdPersistedSnapshot);
+      setUiNotice("Načten ukázkový příklad z metodiky.");
+    },
+    [applySdPersisted],
+  );
 
   const saveSdSnapshotManually = useCallback(() => {
     try {
@@ -665,6 +694,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     setPupils(0);
     setManualDepts(false);
     setDepartments(1);
+    setInputMode("summary");
+    setSummarySpecialDepartments([]);
+    setRegularExceptionGranted(false);
+    setSpecialExceptionGranted(false);
+    setDetailDepartments([{ kind: "regular", participants: 0 }]);
+    setSchoolFirstStageClassCount(null);
+    setSummaryHasSpecial(false);
+    setSelectedSdHeroExample("");
     setUiNotice("Všechna vstupní data kalkulačky byla vymazána.");
   }, []);
 
@@ -838,6 +875,36 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               }
             />
           </div>
+        </div>
+
+        <div className="field field--hero-select hero-actions__example hero-sd-example-select" style={{ marginTop: 14 }}>
+          <span className="field__label field__label--hero" id="sd-hero-example-label">
+            Ukázkový příklad
+          </span>
+          <select
+            id="sd-hero-example-select"
+            className="input"
+            aria-labelledby="sd-hero-example-label"
+            aria-describedby="sd-hero-example-legend"
+            title="Ukázkové příklady z metodiky k školní družině (PHmax / PHAmax). Najeďte na řádek pro detaily a očekávané hodnoty."
+            value={selectedSdHeroExample}
+            onChange={(e) => loadSdHeroExample(e.target.value as SdHeroExampleKey)}
+          >
+            <option value="">Vyberte ukázkový příklad…</option>
+            <optgroup label="Metodika — školní družina (orientačně)">
+              {SD_HERO_EXAMPLE_ORDER.map((k) => {
+                const m = SD_HERO_EXAMPLE_META[k];
+                return (
+                  <option key={k} value={k} title={m.title}>
+                    {m.label}
+                  </option>
+                );
+              })}
+            </optgroup>
+          </select>
+          <p id="sd-hero-example-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
+            {SD_HERO_EXAMPLE_SELECT_LEGEND}
+          </p>
         </div>
 
         <div className="hero-actions hero-actions--stacked">

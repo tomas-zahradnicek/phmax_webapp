@@ -323,6 +323,25 @@ button.pill--hero-toggle--active {
   margin-bottom: 0;
 }
 
+/* ŠD: výběr ukázkového příkladu v záhlaví (stejný vizuální režim jako u ZŠ) */
+.hero-sd-example-select {
+  max-width: min(48rem, 100%);
+  padding: 14px 16px 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+}
+
+.hero-sd-example-select .input {
+  width: 100%;
+  max-width: 100%;
+}
+
+.hero-sd-example-select .muted-text {
+  color: rgba(255, 255, 255, 0.86) !important;
+}
+
 /* ŠD: rychlé šablony oddělení — jeden řádek, výrazné tlačítka */
 .sd-dept-templates {
   display: flex;
