@@ -64,6 +64,7 @@ import {
 } from "./phmax-pv-hero-examples";
 import { round2 } from "./phmax-zs-logic";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
+import { PhmaxPvMethodologyTables123 } from "./phmax-pv-methodology-tables";
 
 function pvDurationBandTableNo(provoz: PvProvozKind): string {
   if (provoz === "polodenni") return "1";
@@ -1367,6 +1368,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             );
           })}
         </details>
+
+        <PhmaxPvMethodologyTables123 />
 
         {aggregate.incomplete ? (
           <p className="muted-text" style={{ marginTop: 10, fontSize: "0.9rem" }}>

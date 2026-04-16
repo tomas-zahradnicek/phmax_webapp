@@ -39,6 +39,7 @@ import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
+import { PhmaxZsMethodologyReferenceTables } from "./phmax-zs-methodology-tables";
 import {
   HeroIconActionButton,
   IconClearStored,
@@ -2976,6 +2977,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                 </table>
               </ScrollGrabRegion>
             </details>
+
+            <PhmaxZsMethodologyReferenceTables />
           </div>
         )}
 
