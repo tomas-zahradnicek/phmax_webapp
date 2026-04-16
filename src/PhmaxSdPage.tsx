@@ -1194,11 +1194,13 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 value={detailedResult.basePhmax}
                 tone="success"
               />
-              <ResultCard
-                label="PHmax – běžná oddělení (§ 10 odst. 2/3, po případném poměrném krácení)"
-                value={detailedResult.regularSharePhmax}
-                tone="primary"
-              />
+              {detailedResult.regularDepartments > 0 ? (
+                <ResultCard
+                  label="PHmax – běžná oddělení (§ 10 odst. 2/3, po případném poměrném krácení)"
+                  value={detailedResult.regularSharePhmax}
+                  tone="primary"
+                />
+              ) : null}
               {detailedResult.specialDepartments > 0 ? (
                 <ResultCard
                   label="PHmax – speciální oddělení (odst. 7, § 16/9; krácení poměrné části)"
