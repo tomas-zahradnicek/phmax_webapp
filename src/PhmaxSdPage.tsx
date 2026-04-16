@@ -1250,6 +1250,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <p className="muted-text">Zadejte platný počet oddělení (1–{SD_MAX_DEPARTMENTS_IN_TABLE}).</p>
           )}
         </div>
+        <p className="muted-text" style={{ marginTop: 8, fontSize: "0.84rem", lineHeight: 1.45 }}>
+          Pozn.: metodika v příkladech často zaokrouhluje mezikroky (např. průměr na oddělení), proto se může lišit
+          mezivýsledek v tabulce oproti kalkulačce. V aplikaci počítáme přesnou hodnotu a zaokrouhlujeme až výsledné
+          částky.
+        </p>
 
         {detailedResult != null ? (
           <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
@@ -1458,6 +1463,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.88rem" }}>
             Kontrolní scénář 1:1 s metodikou: při jednom výjimkovém oddělení § 16/9 se odečítá 0,05 / 0,10 / 0,60
             průměrného PHmax na oddělení. Sloupce odpovídají variantě 5 dětí, 4 děti, méně než 4 děti.
+          </p>
+          <p className="muted-text" style={{ marginTop: -4, marginBottom: 12, fontSize: "0.84rem", lineHeight: 1.45 }}>
+            Pozn.: metodika zaokrouhluje mezikroky. Aplikace ponechává plnou přesnost mezivýpočtu a zaokrouhluje
+            výsledné hodnoty, proto mohou vznikat malé rozdíly v desetinných místech.
           </p>
           <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
             <table className="sd-phmax-breakdown">
