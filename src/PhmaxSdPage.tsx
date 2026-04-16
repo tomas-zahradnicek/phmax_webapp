@@ -1214,13 +1214,18 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                     ? "PHmax celkem (součet běžných + speciálních oddělení)"
                     : "PHmax celkem (běžná oddělení)"
                 }
+                methodStepLabel={
+                  detailedResult.specialDepartments > 0 && detailedResult.regularDepartments === 0
+                    ? "Dílčí PHmax"
+                    : undefined
+                }
                 value={detailedResult.finalPhmax}
                 tone={detailedResult.specialDepartments > 0 && detailedResult.regularDepartments === 0 ? "primary" : "success"}
               />
               {detailedResult.specialDepartments > 0 ? (
                 <ResultCard
                   label="PHAmax celkem – speciální oddělení (odst. 7, § 16/9; po krácení výjimky)"
-                  methodStepLabel="Výsledná hodnota PHAmax"
+                  methodStepLabel="Výsledek PHAmax"
                   value={detailedResult.finalPhaMax}
                   tone="success"
                 />
