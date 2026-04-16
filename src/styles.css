@@ -178,6 +178,16 @@ a:focus-visible {
   margin-left: auto;
 }
 
+@keyframes hero-pill-soft-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
 .hero__pills-row .hero__product-pills {
   margin-bottom: 0;
   flex: 1 1 280px;
@@ -238,12 +248,19 @@ button.pill--hero-toggle--active {
   color: #0f172a;
   border: 2px solid rgba(255, 255, 255, 0.98);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 .btn.btn--hero-help:hover {
   background: #fff;
   border-color: #fff;
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
+  animation: none;
+  transform: translateY(-2px);
 }
 
 .btn.btn--hero-help:focus-visible {
@@ -261,13 +278,19 @@ button.pill--hero-toggle--active {
   color: #0f172a;
   border: 2px solid rgba(255, 255, 255, 0.98);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 .hero__pills-row .glossary-icon-btn--hero:hover {
   background: #fff;
   border-color: #fff;
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
-  transform: none;
+  animation: none;
+  transform: translateY(-2px);
 }
 
 .hero__pills-row .glossary-icon-btn--hero:focus-visible {
@@ -290,12 +313,35 @@ button.pill--hero-toggle--active {
   border: 2px solid rgba(255, 255, 255, 0.98);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
   white-space: nowrap;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 .hero__pills-row .btn--hero-guide:hover {
   background: #fff;
   border-color: #fff;
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
+  animation: none;
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero__pills-row-trailing .btn.btn--hero-help,
+  .hero__pills-row-trailing .btn.btn--hero-guide,
+  .hero__pills-row-trailing .glossary-icon-btn.glossary-icon-btn--hero {
+    animation: hero-pill-soft-drift 3.4s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__pills-row-trailing .btn.btn--hero-help,
+  .hero__pills-row-trailing .btn.btn--hero-guide,
+  .hero__pills-row-trailing .glossary-icon-btn.glossary-icon-btn--hero {
+    animation: none !important;
+  }
 }
 
 .btn.btn--pv-add-workplace {
