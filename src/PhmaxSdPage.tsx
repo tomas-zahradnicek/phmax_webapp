@@ -1424,12 +1424,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
             <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
               {detailedResult.specialDepartments > 0
-                ? "Podrobný rozpad PHmax/PHAmax po odděleních (pro kontrolu)"
-                : "Podrobný rozpad PHmax po odděleních (pro kontrolu)"}
+                ? "Rozpad po odděleních: PHmax a PHAmax (pro kontrolu)"
+                : "Rozpad po odděleních: PHmax (pro kontrolu)"}
             </summary>
             <p className="muted-text" style={{ marginTop: 10, marginBottom: 10, fontSize: "0.84rem" }}>
-              Tato tabulka je detailní technický rozpad. Pro běžné použití většinou stačí aktivní řádek metodiky a
-              souhrnné výsledky nahoře.
+              Technický přehled po řádcích. Pro běžné použití stačí souhrn nahoře a tabulka „Tabulková hodnota PHmax“.
             </p>
             <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
               <table className="sd-phmax-breakdown">
@@ -1438,10 +1437,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                     <th>Oddělení</th>
                     <th>Typ</th>
                     <th>Účastníci</th>
-                    <th>PHmax základ</th>
-                    <th>Koef. krácení</th>
-                    <th>PHmax po krácení</th>
-                    {detailedResult.specialDepartments > 0 ? <th>PHAmax (spec.)</th> : null}
+                    <th title="Základní (tabulková) část PHmax pro oddělení před krácením kvůli výjimce.">
+                      Základ PHmax
+                    </th>
+                    <th title="Koeficient krácení podle výjimky (běžná nebo speciální oddělení).">Krácení</th>
+                    <th title="PHmax po uplatnění krácení u daného oddělení.">PHmax po krácení</th>
+                    {detailedResult.specialDepartments > 0 ? (
+                      <th title="PHAmax u speciálního oddělení po krácení kvůli výjimce.">PHAmax</th>
+                    ) : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -1465,22 +1468,26 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         ) : breakdown != null && breakdown.length > 0 && basePhmax != null ? (
           <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
             <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
-              Rozpad PHmax podle oddělení
+              Rozpad PHmax po odděleních
             </h3>
             <p className="muted-text" style={{ marginBottom: 12, fontSize: "0.88rem" }}>
-              Hodiny podle přílohy k vyhlášce č. 74/2005 Sb. (stejně jako ve sloupcích tabulky pro váš počet oddělení).
-              Pořadí odpovídá 1. až n-tému oddělení v této tabulce.
+              Hodiny podle tabulky pro váš počet oddělení (pořadí 1. až n-té oddělení). Právní opora: příloha vyhlášky
+              č. 74/2005 Sb.
             </p>
             <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
               <table className="sd-phmax-breakdown">
                 <thead>
                   <tr>
                     <th scope="col" className="sd-phmax-breakdown__corner" />
-                    <th scope="col" className="sd-phmax-breakdown__head-num">
-                      PHmax
+                    <th scope="col" className="sd-phmax-breakdown__head-num" title="Tabulkové PHmax pro dané oddělení.">
+                      Základ PHmax
                     </th>
                     {reduction.applied ? (
-                      <th scope="col" className="sd-phmax-breakdown__head-num">
+                      <th
+                        scope="col"
+                        className="sd-phmax-breakdown__head-num"
+                        title="Orientační rozklad po krácení kvůli výjimce dle § 10 odst. 2 vyhlášky č. 74/2005 Sb."
+                      >
                         Po krácení (orient.)
                       </th>
                     ) : null}
@@ -1512,8 +1519,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             </ScrollGrabRegion>
             {reduction.applied ? (
               <p className="muted-text" style={{ marginTop: 10, fontSize: "0.82rem" }}>
-                Koeficient krácení: {formatSdFactor(reduction.factor)}. Jako celkový strop po krácení platí součet v řádku
-                Celkem ({formatSdHours(reduction.adjusted)} h); rozpad sloupců je poměrný podklad.
+                Koeficient krácení: {formatSdFactor(reduction.factor)}. Jako celkový strop po krácení platí součet v
+                řádku Celkem ({formatSdHours(reduction.adjusted)} h); rozpad sloupců je jen orientační podklad.
               </p>
             ) : null}
           </div>
@@ -1524,25 +1531,32 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         {activeMethodikaRow != null ? (
           <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 14 }}>
             <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
-              Aktivní řádek metodiky pro {activeMethodikaRow.deptCount} oddělení
+              Tabulková hodnota PHmax pro {activeMethodikaRow.deptCount} oddělení
             </h3>
             <p className="muted-text" style={{ marginBottom: 10, fontSize: "0.86rem" }}>
-              Zobrazen je pouze aktuální řádek „Týdenní maximální rozsah provozu školních družin“.
+              Řádek z přehledu týdenního maxima provozu školní družiny. Právní opora: příloha vyhlášky č. 74/2005 Sb.
             </p>
             <ScrollGrabRegion className="sd-phmax-breakdown-scroll">
               <table className="sd-phmax-breakdown">
                 <thead>
                   <tr>
-                    <th>Počet oddělení</th>
+                    <th title="Počet oddělení, ke kterému se řádek vztahuje.">Počet oddělení</th>
                     {Array.from({ length: 11 }, (_, i) => (
-                      <th key={`active-h-a-${i + 1}`}>{i + 1}</th>
+                      <th key={`active-h-a-${i + 1}`} title={`PHmax pro ${i + 1}. oddělení (tabulkový rozpad).`}>
+                        {i + 1}
+                      </th>
                     ))}
-                    <th>Celkový PHmax</th>
+                    <th title="Součet tabulkových hodin PHmax pro zvolený počet oddělení.">Celkový PHmax</th>
                   </tr>
                   <tr>
-                    <th>Pokračování</th>
+                    <th title="Pokračování rozpadu pro vyšší pořadí oddělení.">Pokračování</th>
                     {Array.from({ length: 10 }, (_, i) => (
-                      <th key={`active-h-b-${i + 12}`}>{i + 12}</th>
+                      <th
+                        key={`active-h-b-${i + 12}`}
+                        title={`PHmax pro ${i + 12}. oddělení (tabulkový rozpad).`}
+                      >
+                        {i + 12}
+                      </th>
                     ))}
                     <th />
                   </tr>
@@ -1586,7 +1600,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             </ScrollGrabRegion>
             {detailedResult != null ? (
               <p className="muted-text" style={{ marginTop: 10, fontSize: "0.84rem" }}>
-                Výsledek kalkulačky (aktuální vstup):{" "}
+                Vaše výsledky z aktuálního zadání:{" "}
                 <span
                   style={{
                     display: "inline-block",
