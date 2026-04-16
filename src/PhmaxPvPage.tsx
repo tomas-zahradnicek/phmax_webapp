@@ -46,7 +46,14 @@ import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
 import { createPvProductAuditProtocol } from "./phmax-product-audit";
 import { comparePhmaxProductVariants } from "./phmax-product-compare";
 import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "./phmax-product-audit-download";
-import { computePvPhmaxTotal, getPhaMaxPv, getPvMaxClassCount, type PvProvozKind } from "./phmax-pv-logic";
+import {
+  computePvPhmaxTotal,
+  getPhaMaxPv,
+  getPvAppendixBandLabels,
+  getPvAppendixMatrixRow,
+  getPvMaxClassCount,
+  type PvProvozKind,
+} from "./phmax-pv-logic";
 import {
   type PvHeroExampleKey,
   PV_HERO_EXAMPLE_ILL_KEYS,
@@ -1262,6 +1269,104 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             </tfoot>
           </table>
         </ScrollGrabRegion>
+
+        <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
+          <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
+            Rozpad / ověření vůči tabulkám přílohy (PV)
+          </summary>
+          <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.86rem", lineHeight: 1.5 }}>
+            U každého pracoviště s platným základem z tabulky 1–3 je zobrazen celý řádek matice pro váš počet tříd.
+            Sloupec odpovídající zadané průměrné době provozu je zvýrazněn — hodnota musí souhlasit se základním PHmax
+            před navýšeními § 16/9 a jazykovou přípravou. U MŠ při zdravotnickém zařízení se tabulky 1–3 nepoužívají.
+          </p>
+          {rowComputations.map((c, i) => {
+            const { row, computed, provozLabel } = c;
+            if (row.provoz === "zdravotnicke") {
+              return (
+                <div key={row.id} style={{ marginBottom: 18 }}>
+                  <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
+                    Pracoviště {i + 1}
+                    {row.label.trim() ? ` – ${row.label.trim()}` : ""} ({provozLabel})
+                  </h4>
+                  <p className="muted-text" style={{ fontSize: "0.84rem", margin: 0 }}>
+                    PHmax se nečte z tabulky podle sloupců doby — používá se 31 h/třídu dle metodiky (S 4-01).
+                  </p>
+                </div>
+              );
+            }
+            if (!computed.base) {
+              return (
+                <div key={row.id} style={{ marginBottom: 18 }}>
+                  <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
+                    Pracoviště {i + 1}
+                    {row.label.trim() ? ` – ${row.label.trim()}` : ""}
+                  </h4>
+                  <p className="muted-text" style={{ fontSize: "0.84rem", margin: 0 }}>
+                    Bez platného základu z tabulky (upravte vstupy výše).
+                  </p>
+                </div>
+              );
+            }
+            const matrix = getPvAppendixMatrixRow(row.provoz, row.classCount);
+            const bandLabels = getPvAppendixBandLabels(row.provoz);
+            const col = computed.base.durationColumnIndex;
+            if (!matrix || !bandLabels) return null;
+            return (
+              <div key={row.id} style={{ marginBottom: 22 }}>
+                <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
+                  Pracoviště {i + 1}
+                  {row.label.trim() ? ` – ${row.label.trim()}` : ""} — {provozLabel}, {row.classCount}{" "}
+                  {row.classCount === 1 ? "třída" : row.classCount < 5 ? "třídy" : "tříd"}
+                </h4>
+                <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
+                  <table className="sd-phmax-breakdown">
+                    <thead>
+                      <tr>
+                        <th scope="col" className="sd-phmax-breakdown__corner">
+                          Sloupec (pásmo)
+                        </th>
+                        {bandLabels.map((lab, j) => (
+                          <th
+                            key={`${row.id}-h-${j}`}
+                            scope="col"
+                            className="sd-phmax-breakdown__head-num"
+                            title={lab}
+                          >
+                            {j + 1}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th scope="row" className="sd-phmax-breakdown__label">
+                          PHmax základ (h/týd.)
+                        </th>
+                        {matrix.map((cell, j) => (
+                          <td
+                            key={`${row.id}-c-${j}`}
+                            className={
+                              "sd-phmax-breakdown__num" +
+                              (j === col ? " sd-phmax-breakdown__cell--pv-active" : "")
+                            }
+                            title={bandLabels[j]}
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </ScrollGrabRegion>
+                <p className="muted-text" style={{ marginTop: 8, fontSize: "0.8rem", lineHeight: 1.45 }}>
+                  Sloupec {col + 1}: {computed.base.durationColumnLabel}. Kontrola: základ tabulky{" "}
+                  <strong>{computed.base.basePhmax}</strong> + § 16/9 ({computed.sec16Bonus}) + jazyková příprava (
+                  {computed.languageBonus}) = <strong>{computed.totalPhmax ?? "–"}</strong>.
+                </p>
+              </div>
+            );
+          })}
+        </details>
 
         {aggregate.incomplete ? (
           <p className="muted-text" style={{ marginTop: 10, fontSize: "0.9rem" }}>

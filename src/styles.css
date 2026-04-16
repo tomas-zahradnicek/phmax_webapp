@@ -525,6 +525,13 @@ button.pill--hero-toggle--active {
   color: #0f172a;
 }
 
+/* PV / sdílené: zvýraznění aktivního sloupce tabulky přílohy při ověření */
+.sd-phmax-breakdown__cell--pv-active {
+  background: rgba(34, 197, 94, 0.18);
+  font-weight: 800;
+  box-shadow: inset 0 0 0 2px rgba(22, 163, 74, 0.42);
+}
+
 .sd-phmax-breakdown__total th,
 .sd-phmax-breakdown__total td {
   background: #f1f5f9;

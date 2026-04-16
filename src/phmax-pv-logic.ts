@@ -247,6 +247,32 @@ export function getPhmaxPvBase(params: {
   };
 }
 
+/** Celý řádek matice přílohy (tab. 1–3) pro zadaný počet tříd — pro ověření proti tištěné příloze. */
+export function getPvAppendixMatrixRow(provoz: PvProvozKind, classCount: number): readonly number[] | null {
+  if (provoz === "zdravotnicke" || classCount < 1) return null;
+  if (provoz === "polodenni") {
+    if (classCount > PHMAX_PV_POLODENNI.length) return null;
+    return PHMAX_PV_POLODENNI[classCount - 1];
+  }
+  if (provoz === "celodenni") {
+    if (classCount > PHMAX_PV_CELODENNI.length) return null;
+    return PHMAX_PV_CELODENNI[classCount - 1];
+  }
+  if (provoz === "internat") {
+    if (classCount > PHMAX_PV_INTERNAT.length) return null;
+    return PHMAX_PV_INTERNAT[classCount - 1];
+  }
+  return null;
+}
+
+/** Popisy sloupců doby provozu pro stejnou tabulku jako `getPvAppendixMatrixRow`. */
+export function getPvAppendixBandLabels(provoz: PvProvozKind): readonly string[] | null {
+  if (provoz === "polodenni") return PV_POLODENNI_BAND_OPTIONS;
+  if (provoz === "celodenni") return PV_CELODENNI_BAND_OPTIONS;
+  if (provoz === "internat") return PV_INTERNAT_BAND_OPTIONS;
+  return null;
+}
+
 /** +5 h/týden za každou třídu (školu) dle § 16 odst. 9 (metodika PV v4). */
 export function phmaxPvSec16Bonus(sec16ClassCount: number): number {
   return Math.max(0, sec16ClassCount) * 5;
