@@ -374,7 +374,6 @@ function ZsSpecialCombinationTable({ combo }: { combo?: { i1: boolean; i2: boole
           <tbody>
             {rows.map((r, i) => {
               const rowMatch =
-                target != null &&
                 combo != null &&
                 r.i1 === (combo.i1 ? "ano" : "ne") &&
                 r.i2 === (combo.i2 ? "ano" : "ne") &&
