@@ -350,6 +350,55 @@ export const PHA_TABLE = {
   ],
 } as const;
 
+/** Přípravná třída základní školy — řádek B29 (PHmax). */
+export const B29_PREP_CLASS = [
+  { label: "méně než 10", test: (x: number) => x < 10, value: 14 },
+  { label: "10 a více", test: (x: number) => x >= 10, value: 22 },
+] as const;
+
+/** Třídy přípravného stupně základní školy speciální — řádek B30 (PHmax). */
+export const B30_PREP_SPECIAL = [
+  { label: "méně než 4", test: (x: number) => x < 4, value: 10 },
+  { label: "4 a více", test: (x: number) => x >= 4, value: 40 },
+] as const;
+
+/** Odpovídá tabulce kombinací ZŠSp (NV 123/2018) — který řádek B26–B28 určuje PHmax. */
+export function resolveZssSpecialComboTargetRow(
+  hasPart1First: boolean,
+  hasPart1Second: boolean,
+  hasPart2: boolean,
+): "B26" | "B27" | "B28" | null {
+  if (!hasPart1First && !hasPart1Second && !hasPart2) return null;
+  if (hasPart1Second) return "B27";
+  if (hasPart2 && !hasPart1First && !hasPart1Second) return "B28";
+  if (hasPart2 && hasPart1First && !hasPart1Second) return "B26";
+  if (hasPart1First && !hasPart1Second && !hasPart2) return "B26";
+  return "B26";
+}
+
+/** Řádek přílohy PHAmax ↔ interní klíč `PHA_TABLE`. */
+export const PHA_TABLE_ROW_IDS: { [K in keyof typeof PHA_TABLE]: string } = {
+  zs1: "B35",
+  zs1Heavy: "B36",
+  zs2: "B37",
+  zs2Heavy: "B38",
+  zss1: "B39",
+  zss1Heavy: "B40",
+  zss2: "B41",
+  zss2Heavy: "B42",
+  zssII: "B43",
+  zssIIHeavy: "B44",
+  zssPrep: "B45",
+};
+
+/** Řádek přílohy PHmax (gymnázia) ↔ interní klíč `B22_B25`. */
+export const GYM_KIND_TO_ROW: { [K in keyof typeof B22_B25]: string } = {
+  gym6: "B22",
+  gym8: "B23",
+  sport8: "B24",
+  sport6: "B25",
+};
+
 export const PHP_TABLE = [
   { label: "méně než 180", test: (x: number) => x < 180, value: 0 },
   { label: "180 – méně než 300", test: (x: number) => x >= 180 && x < 300, value: 12 },

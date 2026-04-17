@@ -64,7 +64,7 @@ import {
 } from "./phmax-pv-hero-examples";
 import { round2 } from "./phmax-zs-logic";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
-import { PhmaxPvMethodologyTables123 } from "./phmax-pv-methodology-tables";
+import { PhmaxPvMethodologyTables123, type PvMethodologyActiveCell } from "./phmax-pv-methodology-tables";
 
 function pvDurationBandTableNo(provoz: PvProvozKind): string {
   if (provoz === "polodenni") return "1";
@@ -365,6 +365,19 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       return { row, computed, phaMax, provozLabel };
     });
   }, [rows]);
+
+  const pvMethodologyActiveCells: PvMethodologyActiveCell[] = useMemo(() => {
+    const out: PvMethodologyActiveCell[] = [];
+    for (const c of rowComputations) {
+      const base = c.computed.base;
+      if (!base || base.durationColumnIndex < 0) continue;
+      const provoz = c.row.provoz;
+      if (provoz === "zdravotnicke") continue;
+      const table = provoz === "polodenni" ? 1 : provoz === "celodenni" ? 2 : 3;
+      out.push({ table, rowIndex: c.row.classCount - 1, colIndex: base.durationColumnIndex });
+    }
+    return out;
+  }, [rowComputations]);
 
   const aggregate = useMemo(() => {
     let phmaxSum = 0;
@@ -1369,7 +1382,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           })}
         </details>
 
-        <PhmaxPvMethodologyTables123 />
+        <PhmaxPvMethodologyTables123 activeCells={pvMethodologyActiveCells} />
 
         {aggregate.incomplete ? (
           <p className="muted-text" style={{ marginTop: 10, fontSize: "0.9rem" }}>

@@ -13,10 +13,21 @@ function fmtPv(n: number): string {
   return n.toLocaleString("cs-CZ", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
+export type PvMethodologyActiveCell = { table: 1 | 2 | 3; rowIndex: number; colIndex: number };
+
+const ACTIVE = "sd-phmax-breakdown__cell--pv-active";
+
+function pvCellClass(active: readonly PvMethodologyActiveCell[] | undefined, table: 1 | 2 | 3, ri: number, ci: number) {
+  const on = active?.some((a) => a.table === table && a.rowIndex === ri && a.colIndex === ci);
+  return "sd-phmax-breakdown__num" + (on ? ` ${ACTIVE}` : "");
+}
+
 /**
  * Kompletní tabulky 1–3 přílohy k metodice PHmax PV (vyhl. 14/2005 Sb.) — pro ruční ověření.
+ * Volitelně zvýrazní buňky odpovídající zadaným pracovištím (stejně jako kontrolní přehled výše).
  */
-export function PhmaxPvMethodologyTables123() {
+export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: readonly PvMethodologyActiveCell[] }) {
+  const ac = activeCells;
   return (
     <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 16 }}>
       <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
@@ -24,7 +35,7 @@ export function PhmaxPvMethodologyTables123() {
       </summary>
       <p className="muted-text" style={{ marginTop: 10, marginBottom: 14, fontSize: "0.86rem", lineHeight: 1.5 }}>
         Hodnoty odpovídají maticím v aplikaci (<code className="methodology-strip__code">phmax-pv-logic.ts</code>). Čísla
-        jsou v hodinách týdně (PHmax).
+        jsou v hodinách týdně (PHmax). Po vyplnění pracoviště se zvýrazní odpovídající buňka v příslušné tabulce.
       </p>
 
       <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "14px 0 8px" }}>
@@ -51,7 +62,7 @@ export function PhmaxPvMethodologyTables123() {
                   {ri + 1}
                 </th>
                 {row.map((cell, ci) => (
-                  <td key={ci} className="sd-phmax-breakdown__num">
+                  <td key={ci} className={pvCellClass(ac, 1, ri, ci)} title={PV_POLODENNI_BAND_OPTIONS[ci]}>
                     {fmtPv(cell)}
                   </td>
                 ))}
@@ -89,7 +100,7 @@ export function PhmaxPvMethodologyTables123() {
                   {ri + 1}
                 </th>
                 {row.map((cell, ci) => (
-                  <td key={ci} className="sd-phmax-breakdown__num">
+                  <td key={ci} className={pvCellClass(ac, 2, ri, ci)} title={PV_CELODENNI_BAND_OPTIONS[ci]}>
                     {fmtPv(cell)}
                   </td>
                 ))}
@@ -123,7 +134,7 @@ export function PhmaxPvMethodologyTables123() {
                   {ri + 1}
                 </th>
                 {row.map((cell, ci) => (
-                  <td key={ci} className="sd-phmax-breakdown__num">
+                  <td key={ci} className={pvCellClass(ac, 3, ri, ci)} title={PV_INTERNAT_BAND_OPTIONS[ci]}>
                     {fmtPv(cell)}
                   </td>
                 ))}

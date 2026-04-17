@@ -12,8 +12,12 @@ import {
   B17_B21,
   B22_B25,
   B26_B28,
+  B29_PREP_CLASS,
+  B30_PREP_SPECIAL,
   PHA_TABLE,
+  PHA_TABLE_ROW_IDS,
   PHP_TABLE,
+  GYM_KIND_TO_ROW,
   pickBand,
   round2,
   BasicType,
@@ -39,7 +43,7 @@ import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
-import { PhmaxZsMethodologyReferenceTables } from "./phmax-zs-methodology-tables";
+import { PhmaxZsMethodologyReferenceTables, type PhmaxZsMethodologyHighlights } from "./phmax-zs-methodology-tables";
 import {
   HeroIconActionButton,
   IconClearStored,
@@ -650,6 +654,126 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const phpAdjustedValue = round2(Math.max(0, phpBaseValue - phpExcludedTotal));
   const phpBand = phpExcludedSchool ? { label: "bez nároku", value: 0 } : pickBand(phpAdjustedValue, PHP_TABLE);
   const totalPhp = round2(phpBand.value);
+
+  const zsMethodologyHighlights: PhmaxZsMethodologyHighlights = useMemo(() => {
+    const activeColumnByRowId: Partial<Record<string, string>> = {};
+
+    if (basicType === "full_more_than_2") {
+      if (basic1Classes > 0) activeColumnByRowId.B1 = basicFirstBand.label;
+      if (basic2Classes > 0) activeColumnByRowId.B2 = basicSecondBand.label;
+    } else if (basicType === "full_max_2") {
+      if (basic1Classes > 0) activeColumnByRowId.B3 = basicFirstBand.label;
+      if (basic2Classes > 0) activeColumnByRowId.B4 = basicSecondBand.label;
+    } else if (basicType === "first_only_1" && basic1Classes > 0) {
+      activeColumnByRowId.B5 = basicFirstBand.label;
+    } else if (basicType === "first_only_2" && basic1Classes > 0) {
+      activeColumnByRowId.B6 = basicFirstBand.label;
+    } else if (basicType === "first_only_3" && basic1Classes > 0) {
+      activeColumnByRowId.B7 = basicFirstBand.label;
+    } else if (basicType === "first_only_4" && basic1Classes > 0) {
+      activeColumnByRowId.B8 = basicFirstBand.label;
+    }
+
+    if (incl1Classes > 0) activeColumnByRowId.B9 = incl1Band.label;
+    if (incl2Classes > 0) activeColumnByRowId.B10 = incl2Band.label;
+
+    for (const r of psychComputedRows) {
+      if (r.currentClasses > 0 || r.prevClasses > 0) {
+        const bid = r.kind === "psych1" ? "B14" : r.kind === "psych2" ? "B15" : "B16";
+        activeColumnByRowId[bid] = r.bandLabel;
+      }
+    }
+    for (const r of healthComputedRows) {
+      if (r.currentClasses > 0 || r.prevClasses > 0) {
+        const bid = r.kind === "health1" ? "B11" : r.kind === "health2" ? "B12" : "B13";
+        activeColumnByRowId[bid] = r.bandLabel;
+      }
+    }
+
+    if (minority1Classes > 0) {
+      const rowMap: Partial<Record<keyof typeof B17_B21, "B17" | "B18" | "B19" | "B20">> = {
+        minority1: "B17",
+        minority2: "B18",
+        minority3: "B19",
+        minorityFull1: "B20",
+      };
+      const bid = rowMap[minorityType];
+      if (bid) activeColumnByRowId[bid] = minority1Band.label;
+    }
+    if (minorityType === "minorityFull1" && minority2Classes > 0) {
+      activeColumnByRowId.B21 = minority2Band.label;
+    }
+
+    for (const r of gymComputedRows) {
+      if (r.classes > 0) {
+        activeColumnByRowId[GYM_KIND_TO_ROW[r.kind]] = r.bandLabel;
+      }
+    }
+
+    if (special1Classes > 0) activeColumnByRowId.B26 = special1Band.label;
+    if (special2Classes > 0) activeColumnByRowId.B27 = special2Band.label;
+    if (specialIIClasses > 0) activeColumnByRowId.B28 = specialIIBand.label;
+
+    for (const r of phaComputedRows) {
+      if (r.classes > 0) {
+        activeColumnByRowId[PHA_TABLE_ROW_IDS[r.kind]] = r.bandLabel;
+      }
+    }
+
+    if (!phpExcludedSchool) {
+      activeColumnByRowId.B46 = phpBand.label;
+    }
+
+    const zsspCombo =
+      special1Classes > 0 || special2Classes > 0 || specialIIClasses > 0
+        ? { i1: special1Classes > 0, i2: special2Classes > 0, ii: specialIIClasses > 0 }
+        : null;
+
+    return {
+      activeColumnByRowId,
+      zsspCombo,
+      prepClassLabel: prepClasses > 0 ? pickBand(prepAvg, B29_PREP_CLASS).label : undefined,
+      prepSpecialLabel: prepSpecialClasses > 0 ? pickBand(prepSpecialAvg, B30_PREP_SPECIAL).label : undefined,
+      par38: { first: p38First > 0, second: p38Second > 0 },
+      par41: { first: p41First > 0, second: p41Second > 0 },
+      phpBandLabel: phpExcludedSchool ? null : phpBand.label,
+    };
+  }, [
+    basicType,
+    basic1Classes,
+    basic2Classes,
+    basicFirstBand.label,
+    basicSecondBand.label,
+    incl1Classes,
+    incl2Classes,
+    incl1Band.label,
+    incl2Band.label,
+    psychComputedRows,
+    healthComputedRows,
+    minority1Classes,
+    minority2Classes,
+    minorityType,
+    minority1Band.label,
+    minority2Band.label,
+    gymComputedRows,
+    special1Classes,
+    special2Classes,
+    specialIIClasses,
+    special1Band.label,
+    special2Band.label,
+    specialIIBand.label,
+    phaComputedRows,
+    phpExcludedSchool,
+    phpBand.label,
+    prepClasses,
+    prepAvg,
+    prepSpecialClasses,
+    prepSpecialAvg,
+    p38First,
+    p38Second,
+    p41First,
+    p41Second,
+  ]);
 
   const nv75Reference = getNv75Reference(nv75Role, nv75School);
   const nv75TeacherRangeValid = nv75TeacherMin <= nv75TeacherMax;
@@ -2978,7 +3102,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               </ScrollGrabRegion>
             </details>
 
-            <PhmaxZsMethodologyReferenceTables />
+            <PhmaxZsMethodologyReferenceTables highlights={zsMethodologyHighlights} />
           </div>
         )}
 

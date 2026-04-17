@@ -532,6 +532,29 @@ button.pill--hero-toggle--active {
   box-shadow: inset 0 0 0 2px rgba(22, 163, 74, 0.42);
 }
 
+/* ZŠ metodika: červené označení řádků B*, žlutá „ano“ v kombinační tabulce ZŠSp */
+.zs-methodology-ref__bid {
+  color: #991b1b;
+  font-weight: 800;
+}
+
+.zs-methodology-ref__head-accent {
+  background: #fef3c7;
+  font-weight: 700;
+  text-align: left;
+}
+
+.zs-ref-cell--combo-ano {
+  background: #fff9c4;
+  font-weight: 600;
+}
+
+.zs-methodology-ref__row--combo-match td,
+.zs-methodology-ref__row--combo-match th {
+  background: rgba(34, 197, 94, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.28);
+}
+
 .sd-phmax-breakdown__total th,
 .sd-phmax-breakdown__total td {
   background: #f1f5f9;
