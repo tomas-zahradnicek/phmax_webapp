@@ -1,7 +1,6 @@
 import type { FormSection } from "./config/calculator-config";
 import type { PhmaxZsMethodologyHighlights, ZsMethodologyConnectedBlock } from "./phmax-zs-methodology-tables";
-
-type MinorityType = "minority1" | "minority2" | "minority3" | "minorityFull1";
+import type { ZsMinorityBandKind } from "./phmax-zs-logic";
 
 export type BuildZsConnectedBlocksInput = {
   hasSection: (section: FormSection) => boolean;
@@ -12,7 +11,7 @@ export type BuildZsConnectedBlocksInput = {
   incl2Classes: number;
   hasHealthRows: boolean;
   hasPsychRows: boolean;
-  minorityType: MinorityType;
+  minorityType: ZsMinorityBandKind;
   minority1Classes: number;
   hasGymRows: boolean;
   special1Classes: number;

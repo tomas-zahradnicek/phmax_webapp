@@ -237,6 +237,9 @@ export const B17_B21 = {
   ],
 } as const;
 
+/** Varianta tabulky menšinových škol (B17_B21) — shodně se stavem ve formuláři ZŠ. */
+export type ZsMinorityBandKind = keyof typeof B17_B21;
+
 export const B22_B25 = {
   gym6: [
     { label: "8 a méně", test: (x: number) => x <= 8, value: 14 },
