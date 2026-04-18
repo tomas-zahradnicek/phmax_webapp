@@ -50,6 +50,7 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
       </label>
 
       {show(1) ? (
+      <>
       <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "14px 0 8px" }}>
         Tabulka 1 — polodenní provoz
       </h4>
@@ -83,9 +84,11 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
           </tbody>
         </table>
       </ScrollGrabRegion>
+      </>
       ) : null}
 
       {show(2) ? (
+      <>
       <p className="muted-text" style={{ margin: "12px 0 8px", fontSize: "0.8rem" }}>
         U tabulky 2 mají sloupce v záhlaví pořadí 1–12; úplné znění pásma průměrné doby zobrazí nápověda při najetí na
         hlavičku (title), shodně s přílohou metodiky.
@@ -123,9 +126,11 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
           </tbody>
         </table>
       </ScrollGrabRegion>
+      </>
       ) : null}
 
       {show(3) ? (
+      <>
       <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "18px 0 8px" }}>
         Tabulka 3 — internátní provoz
       </h4>
@@ -159,6 +164,7 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
           </tbody>
         </table>
       </ScrollGrabRegion>
+      </>
       ) : null}
     </details>
   );
