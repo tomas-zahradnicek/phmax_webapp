@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import type { Band } from "./phmax-zs-logic";
 import {
   B11_B13,
   B13_MORE_THAN_2,
+  B14_B16,
+  B17_B21,
   B22_B25,
+  B26_B28,
   B29_PREP_CLASS,
   B30_PREP_SPECIAL,
   B34_MAX_2,
@@ -13,124 +16,50 @@ import {
   B7,
   B8,
   B9_B10,
-  B14_B16,
-  B17_B21,
-  B26_B28,
   PHA_TABLE,
   PHP_TABLE,
 } from "./phmax-zs-logic";
 
 type RefRow = { id: string; code: string; desc: string; bands: readonly Band[] };
 
-/** Bloky referenční přílohy — podle nich lze zobrazit jen „zapojené“ tabulky. */
 export type ZsMethodologyConnectedBlock =
-  | "basic_b1b2"
-  | "basic_b3b4"
-  | "basic_b5"
-  | "basic_b6"
-  | "basic_b7"
-  | "basic_b8"
-  | "sec16"
-  | "health"
-  | "psych"
-  | "minority_b17"
-  | "minority_b18"
-  | "minority_b19"
-  | "minority_b20b21"
-  | "gym"
-  | "special_b26_28"
-  | "special_combo"
-  | "prep_b29"
-  | "prep_b30"
-  | "par38"
-  | "par41"
-  | "pha_b35_38"
-  | "pha_b39_45"
-  | "php_b46"
-  /** Smíšené třídy — bez jednoho řádku Bx; vysvětlení a odkaz na součet v aplikaci */
-  | "mixed_explain";
+  | "basic_b1b2" | "basic_b3b4" | "basic_b5" | "basic_b6" | "basic_b7" | "basic_b8"
+  | "sec16" | "health" | "psych"
+  | "minority_b17" | "minority_b18" | "minority_b19" | "minority_b20b21"
+  | "gym" | "special_b26_28" | "special_combo" | "mixed_explain"
+  | "prep_b29" | "prep_b30" | "par38" | "par41" | "pha_b35_38" | "pha_b39_45" | "php_b46";
 
 export type PhmaxZsMethodologyHighlights = {
-  /**
-   * Které bloky přílohy zobrazit. Když je pole prázdné, nevykreslí se žádná datová tabulka (jen úvodní text).
-   * Když je `undefined`, zobrazí se kompletní přehled (zpětná kompatibilita).
-   */
   connectedBlocks?: readonly ZsMethodologyConnectedBlock[];
-  /** Řádek Bx → aktivní popisek sloupce (stejný text jako u `pickBand` v aplikaci). */
   activeColumnByRowId?: Partial<Record<string, string>>;
-  /** Skupiny ZŠSp ve výpočtu (alespoň jedna třída) — zvýrazní řádek kombinační tabulky. */
   zsspCombo?: { i1: boolean; i2: boolean; ii: boolean } | null;
   prepClassLabel?: string;
   prepSpecialLabel?: string;
   par38?: { first?: boolean; second?: boolean };
   par41?: { first?: boolean; second?: boolean };
-  /** Sloupec B46; `null` = nezvýrazňovat (např. vyloučená škola). */
   phpBandLabel?: string | null;
-  /** Řádky B22–B25, u kterých máte v kalkulačce zapojené třídy — ostatní řádky se v režimu filtru nevykreslí. */
   visibleGymRowIds?: readonly string[];
-  /** Smíšené třídy — součet a zda jde o metodickou tabulku dominantní většiny. */
   mixedReferenceNote?: { total: number; usesMethodTable: boolean };
 };
 
 const ACTIVE = "sd-phmax-breakdown__cell--pv-active";
+const cn = (on: boolean) => "sd-phmax-breakdown__num" + (on ? ` ${ACTIVE}` : "");
 
-function cellClass(active: boolean, base = "sd-phmax-breakdown__num") {
-  return base + (active ? ` ${ACTIVE}` : "");
-}
-
-function ZsRefBandTable({
-  title,
-  intro,
-  rows,
-  activeColumnByRowId,
-}: {
-  title: string;
-  intro?: string;
-  rows: RefRow[];
-  activeColumnByRowId?: Partial<Record<string, string>>;
-}) {
+function RefBandTable({ title, rows, active }: { title: string; rows: RefRow[]; active?: Partial<Record<string, string>> }) {
   if (rows.length === 0) return null;
-  const colLabels = rows[0].bands.map((b) => b.label);
   return (
-    <div style={{ marginBottom: 22 }}>
-      <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 6px", lineHeight: 1.35 }}>
-        {title}
-      </h4>
-      {intro ? (
-        <p className="muted-text" style={{ margin: "0 0 10px", fontSize: "0.82rem", lineHeight: 1.45 }}>
-          {intro}
-        </p>
-      ) : null}
+    <div style={{ marginBottom: 20 }}>
+      <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 6px" }}>{title}</h4>
       <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
         <table className="sd-phmax-breakdown zs-methodology-ref">
-          <thead>
-            <tr>
-              <th scope="col">Řádek</th>
-              <th scope="col">Kód</th>
-              <th scope="col">Popis</th>
-              {colLabels.map((lab) => (
-                <th key={lab} scope="col" className="sd-phmax-breakdown__head-num" title={lab}>
-                  {lab}
-                </th>
-              ))}
-            </tr>
-          </thead>
+          <thead><tr><th>Řádek</th><th>Kód</th><th>Popis</th>{rows[0].bands.map((b) => <th key={b.label}>{b.label}</th>)}</tr></thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.id}>
-                <th scope="row">
-                  <span className="zs-methodology-ref__bid">{r.id}</span>
-                </th>
-                <td style={{ whiteSpace: "nowrap" }}>{r.code}</td>
+                <th scope="row"><span className="zs-methodology-ref__bid">{r.id}</span></th>
+                <td>{r.code}</td>
                 <td>{r.desc}</td>
-                {r.bands.map((b) => {
-                  const on = activeColumnByRowId?.[r.id] === b.label;
-                  return (
-                    <td key={`${r.id}-${b.label}`} className={cellClass(on)} title={b.label}>
-                      {b.value}
-                    </td>
-                  );
-                })}
+                {r.bands.map((b) => <td key={b.label} className={cn(active?.[r.id] === b.label)}>{b.value}</td>)}
               </tr>
             ))}
           </tbody>
@@ -140,364 +69,50 @@ function ZsRefBandTable({
   );
 }
 
-function ZsTwoColPhTable({
-  title,
-  rowId,
-  label,
-  headerLeft,
-  bands,
-  activeLabel,
-}: {
-  title: string;
-  rowId: string;
-  label: string;
-  headerLeft: string;
-  bands: readonly Band[];
-  activeLabel?: string;
-}) {
-  const cols = bands.map((b) => b.label);
-  return (
-    <div style={{ marginBottom: 22 }}>
-      <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 8px", lineHeight: 1.35 }}>
-        {title}
-      </h4>
-      <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
-        <table className="sd-phmax-breakdown zs-methodology-ref">
-          <thead>
-            <tr>
-              <th scope="col" className="zs-methodology-ref__head-accent">
-                {headerLeft}
-              </th>
-              {cols.map((c) => (
-                <th key={c} scope="col" className="sd-phmax-breakdown__head-num">
-                  {c}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">
-                <span className="zs-methodology-ref__bid">{rowId}</span> {label}
-              </th>
-              {bands.map((b) => (
-                <td key={b.label} className={cellClass(activeLabel === b.label)}>
-                  {b.value}
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
-      </ScrollGrabRegion>
-    </div>
-  );
-}
-
-function ZsParLawMiniTable({
-  title,
-  categoryHeader,
-  rows,
-  activeFirst,
-  activeSecond,
-}: {
-  title: string;
-  categoryHeader: string;
-  rows: { id: string; desc: string; value: string }[];
-  activeFirst?: boolean;
-  activeSecond?: boolean;
-}) {
-  const act = [activeFirst, activeSecond];
-  return (
-    <div style={{ marginBottom: 22 }}>
-      <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 8px", lineHeight: 1.35 }}>
-        {title}
-      </h4>
-      <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
-        <table className="sd-phmax-breakdown zs-methodology-ref">
-          <thead>
-            <tr>
-              <th scope="col" className="zs-methodology-ref__head-accent">
-                {categoryHeader}
-              </th>
-              <th scope="col" className="sd-phmax-breakdown__head-num">
-                PHmax
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr key={r.id}>
-                <th scope="row">
-                  <span className="zs-methodology-ref__bid">{r.id}</span> {r.desc}
-                </th>
-                <td className={cellClass(!!act[i])}>{r.value}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </ScrollGrabRegion>
-    </div>
-  );
-}
-
-function ZsMixedMethodologyNote({ note }: { note: { total: number; usesMethodTable: boolean } }) {
-  return (
-    <div
-      className="subcard"
-      style={{
-        marginBottom: 22,
-        padding: "12px 14px",
-        borderLeft: "4px solid #0d9488",
-        background: "rgba(13, 148, 136, 0.06)",
-      }}
-    >
-      <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 8px", lineHeight: 1.35 }}>
-        Smíšené třídy (§ 16 odst. 9) a ZŠ speciální — doplnění k referenční příloze
-      </h4>
-      <p className="muted-text" style={{ margin: "0 0 8px", fontSize: "0.84rem", lineHeight: 1.5 }}>
-        U smíšených tříd se PHmax neváže na jeden řádek Bx v příloze: u každé třídy se podle převažujícího oboru použije
-        buď tabulka <strong>B9–B10</strong> (převažuje běžná ZŠ, kód 79-01-C/01), nebo <strong>B26–B28</strong> (převažuje ZŠ
-        speciální / shodné počty dle metodiky). V referenci výše se tedy dívejte na tyto bloky podle toho, co máte ve
-        smíšených řádcích zvoleno.
-      </p>
-      <p className="muted-text" style={{ margin: "0 0 6px", fontSize: "0.84rem", lineHeight: 1.5 }}>
-        <strong>PHmax ze smíšených tříd v součtu (modul):</strong>{" "}
-        {note.total.toLocaleString("cs-CZ", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-      </p>
-      <p className="muted-text" style={{ margin: 0, fontSize: "0.82rem", lineHeight: 1.45 }}>
-        {note.usesMethodTable
-          ? "Používáte metodickou tabulku podle dominantní většiny (odděleně 1. a 2. stupeň) — odpovídá výkladu u sekce Smíšené třídy v aplikaci."
-          : "Používáte zjednodušený seznam smíšených řádků; u každého řádku se zvlášť volí B9–B10 nebo B26–B28 podle převažujícího oboru."}
-      </p>
-    </div>
-  );
-}
-
-function ZsPhpB46Table({ activeLabel }: { activeLabel?: string | null }) {
-  return (
-    <div style={{ marginBottom: 22 }}>
-      <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 8px", lineHeight: 1.35 }}>
-        26) Maximální počet hodin přímé pedagogické činnosti psychologa, speciálního pedagoga nebo sociálního pedagoga
-        (PHPmax) — řádek B46
-      </h4>
-      <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
-        <table className="sd-phmax-breakdown zs-methodology-ref">
-          <thead>
-            <tr>
-              <th scope="col">Průměrný počet žáků ve škole</th>
-              {PHP_TABLE.map((b) => (
-                <th key={b.label} scope="col" className="sd-phmax-breakdown__head-num" title={b.label}>
-                  {b.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">
-                <span className="zs-methodology-ref__bid">B46</span> PHPmax
-              </th>
-              {PHP_TABLE.map((b) => (
-                <td key={b.label} className={cellClass(activeLabel != null && activeLabel === b.label)}>
-                  {b.value}
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
-      </ScrollGrabRegion>
-    </div>
-  );
-}
-
-const PHA_ORDER: { key: keyof typeof PHA_TABLE; id: string; code: string; desc: string }[] = [
-  {
-    key: "zs1",
-    id: "B35",
-    code: "79-01-C/01",
-    desc: "Základní škola (1. stupeň)",
-  },
-  {
-    key: "zs1Heavy",
-    id: "B36",
-    code: "79-01-C/01",
-    desc: "Základní škola (1. stupeň) zřízená pro žáky s tělesným postižením, závažnými vývojovými poruchami chování, souběžným postižením více vadami nebo autismem",
-  },
-  {
-    key: "zs2",
-    id: "B37",
-    code: "79-01-C/01",
-    desc: "Základní škola (2. stupeň)",
-  },
-  {
-    key: "zs2Heavy",
-    id: "B38",
-    code: "79-01-C/01",
-    desc: "Základní škola (2. stupeň) zřízená pro žáky s tělesným postižením, závažnými vývojovými poruchami chování, souběžným postižením více vadami nebo autismem",
-  },
-  {
-    key: "zss1",
-    id: "B39",
-    code: "79-01-B/01",
-    desc: "Základní škola speciální (I. díl, 1. stupeň)",
-  },
-  {
-    key: "zss1Heavy",
-    id: "B40",
-    code: "79-01-B/01",
-    desc: "Základní škola speciální (I. díl, 1. stupeň) v případě vzdělávání žáků se závažnými vývojovými poruchami chování, tělesným postižením, souběžným postižením více vadami nebo autismem",
-  },
-  {
-    key: "zss2",
-    id: "B41",
-    code: "79-01-B/01",
-    desc: "Základní škola speciální (I. díl, 2. stupeň)",
-  },
-  {
-    key: "zss2Heavy",
-    id: "B42",
-    code: "79-01-B/01",
-    desc: "Základní škola speciální (I. díl, 2. stupeň) v případě vzdělávání žáků se závažnými vývojovými poruchami chování, tělesným postižením, souběžným postižením více vadami nebo autismem",
-  },
-  {
-    key: "zssII",
-    id: "B43",
-    code: "79-01-B/01",
-    desc: "Základní škola speciální (II. díl)",
-  },
-  {
-    key: "zssIIHeavy",
-    id: "B44",
-    code: "79-01-B/01",
-    desc: "Základní škola speciální (II. díl) v případě vzdělávání žáků se závažnými vývojovými poruchami chování, tělesným postižením, souběžným postižením více vadami nebo autismem",
-  },
-  {
-    key: "zssPrep",
-    id: "B45",
-    code: "—",
-    desc: "Třídy přípravného stupně základní školy speciální",
-  },
-];
-
-function ZsPhaAnnexBlock({
-  activeColumnByRowId,
-  showSec16 = true,
-  showZss = true,
-}: {
-  activeColumnByRowId?: Partial<Record<string, string>>;
-  showSec16?: boolean;
-  showZss?: boolean;
-}) {
-  const b35_b38: RefRow[] = PHA_ORDER.slice(0, 4).map((m) => ({
-    id: m.id,
-    code: m.code,
-    desc: m.desc,
-    bands: PHA_TABLE[m.key],
-  }));
-  const b39_b45: RefRow[] = PHA_ORDER.slice(4).map((m) => ({
-    id: m.id,
-    code: m.code,
-    desc: m.desc,
-    bands: PHA_TABLE[m.key],
-  }));
-  return (
-    <>
-      {showSec16 ? (
-        <ZsRefBandTable
-          title="24) Základní škola zřízená podle § 16 odst. 9 školského zákona — PHAmax (B35–B38)"
-          rows={b35_b38}
-          activeColumnByRowId={activeColumnByRowId}
-        />
-      ) : null}
-      {showZss ? (
-        <ZsRefBandTable
-          title="25) Základní škola speciální — PHAmax (B39–B44) a přípravný stupeň ZŠ speciální (B45)"
-          intro="Poznámky 1–2 k většině žáků s těžšími diagnózami platí dle metodiky u řádků B40 a B44."
-          rows={b39_b45}
-          activeColumnByRowId={activeColumnByRowId}
-        />
-      ) : null}
-    </>
-  );
-}
-
-/** Přehled kombinací ZŠSp — řádky B26–B28 (metodika). */
-function ZsSpecialCombinationTable({ combo }: { combo?: { i1: boolean; i2: boolean; ii: boolean } | null }) {
+function ComboTable({ combo }: { combo?: { i1: boolean; i2: boolean; ii: boolean } | null }) {
   const rows = [
-    { i1: "ano", i2: "ne", ii: "ne", use: "ZŠSp I. díl, 1. st.", row: "B26" as const },
-    { i1: "ne", i2: "ano", ii: "ne", use: "ZŠSp I. díl, 2. st.", row: "B27" as const },
-    { i1: "ne", i2: "ne", ii: "ano", use: "ZŠSp II. díl", row: "B28" as const },
-    { i1: "ano", i2: "ano", ii: "ne", use: "ZŠSp I. díl, 2. st.", row: "B27" as const },
-    { i1: "ano", i2: "ne", ii: "ano", use: "ZŠSp I. díl, 1. st.", row: "B26" as const },
-    { i1: "ne", i2: "ano", ii: "ano", use: "ZŠSp I. díl, 2. st.", row: "B27" as const },
-    { i1: "ano", i2: "ano", ii: "ano", use: "ZŠSp I. díl, 2. st.", row: "B27" as const },
-  ];
-
+    { i1: "ano", i2: "ne", ii: "ne", use: "ZŠSp I. díl, 1. st.", row: "B26" },
+    { i1: "ne", i2: "ano", ii: "ne", use: "ZŠSp I. díl, 2. st.", row: "B27" },
+    { i1: "ne", i2: "ne", ii: "ano", use: "ZŠSp II. díl", row: "B28" },
+    { i1: "ano", i2: "ano", ii: "ne", use: "ZŠSp I. díl, 2. st.", row: "B27" },
+    { i1: "ano", i2: "ne", ii: "ano", use: "ZŠSp I. díl, 1. st.", row: "B26" },
+    { i1: "ne", i2: "ano", ii: "ano", use: "ZŠSp I. díl, 2. st.", row: "B27" },
+    { i1: "ano", i2: "ano", ii: "ano", use: "ZŠSp I. díl, 2. st.", row: "B27" },
+  ] as const;
   return (
-    <div style={{ marginBottom: 22 }}>
-      <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 8px", lineHeight: 1.35 }}>
-        20) Přehled možných kombinací společné výuky žáků ZŠ speciální ve třídě (určení PHmax z řádku B26–B28)
-      </h4>
-      <p className="muted-text" style={{ margin: "0 0 10px", fontSize: "0.8rem", lineHeight: 1.45 }}>
-        Sloupce I. díl / II. díl odpovídají skupinám, u kterých máte v kalkulačce zadané třídy (počet &gt; 0). Žlutě jsou
-        vyznačena „ano“; zeleně buňka odpovídající vašemu stavu a cílovému řádku B26–B28.
-      </p>
-      <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
-        <table className="sd-phmax-breakdown zs-methodology-ref">
-          <thead>
-            <tr>
-              <th scope="col">I. díl, 1. st.</th>
-              <th scope="col">I. díl, 2. st.</th>
-              <th scope="col">II. díl</th>
-              <th scope="col">Použije se PHmax pro</th>
-              <th scope="col">PHmax z řádku</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => {
-              const rowMatch =
-                combo != null &&
-                r.i1 === (combo.i1 ? "ano" : "ne") &&
-                r.i2 === (combo.i2 ? "ano" : "ne") &&
-                r.ii === (combo.ii ? "ano" : "ne");
-              const rowCls = rowMatch ? "zs-methodology-ref__row--combo-match" : "";
-              return (
-                <tr key={i} className={rowCls}>
-                  <td className={r.i1 === "ano" ? "zs-ref-cell--combo-ano" : undefined}>{r.i1}</td>
-                  <td className={r.i2 === "ano" ? "zs-ref-cell--combo-ano" : undefined}>{r.i2}</td>
-                  <td className={r.ii === "ano" ? "zs-ref-cell--combo-ano" : undefined}>{r.ii}</td>
-                  <td>{r.use}</td>
-                  <th scope="row" className={cellClass(!!rowMatch, "sd-phmax-breakdown__num")}>
-                    <span className="zs-methodology-ref__bid">{r.row}</span>
-                  </th>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </ScrollGrabRegion>
+    <div style={{ marginBottom: 20 }}>
+      <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 6px" }}>20) Kombinace společné výuky ZŠ speciální</h4>
+      <table className="sd-phmax-breakdown zs-methodology-ref">
+        <thead><tr><th>I. díl, 1. st.</th><th>I. díl, 2. st.</th><th>II. díl</th><th>Použije se PHmax pro</th><th>PHmax z řádku</th></tr></thead>
+        <tbody>{rows.map((r, i) => { const m = combo != null && r.i1 === (combo.i1 ? "ano" : "ne") && r.i2 === (combo.i2 ? "ano" : "ne") && r.ii === (combo.ii ? "ano" : "ne"); return <tr key={i} className={m ? "zs-methodology-ref__row--combo-match" : undefined}><td className={r.i1 === "ano" ? "zs-ref-cell--combo-ano" : undefined}>{r.i1}</td><td className={r.i2 === "ano" ? "zs-ref-cell--combo-ano" : undefined}>{r.i2}</td><td className={r.ii === "ano" ? "zs-ref-cell--combo-ano" : undefined}>{r.ii}</td><td>{r.use}</td><td className={cn(m)}><span className="zs-methodology-ref__bid">{r.row}</span></td></tr>; })}</tbody>
+      </table>
     </div>
   );
 }
 
-/**
- * Referenční tabulky řádků B1–B46 podle metodiky ZV — při vyplnění kalkulačky se zvýrazní odpovídající buňky (jako u ŠD).
- */
+function MixedNote({ note }: { note: { total: number; usesMethodTable: boolean } }) {
+  return (
+    <div className="subcard" style={{ marginBottom: 20, borderLeft: "4px solid #0d9488", background: "rgba(13,148,136,.06)" }}>
+      <p className="muted-text" style={{ margin: 0, fontSize: "0.84rem", lineHeight: 1.5 }}>
+        U smíšených tříd se PHmax neváže na jeden řádek Bx; používá se B9–B10 nebo B26–B28 podle převažujícího oboru. Pokud máte současně samostatné řádky § 16/9 nebo ZŠ speciální, tyto PHmax se sčítají zvlášť jako další položky součtu.
+      </p>
+      <p className="muted-text" style={{ margin: "6px 0 0", fontSize: "0.84rem" }}>
+        Smíšené třídy celkem: <strong>{note.total.toLocaleString("cs-CZ", { maximumFractionDigits: 2 })}</strong> ({note.usesMethodTable ? "metodická tabulka" : "legacy řádky"})
+      </p>
+    </div>
+  );
+}
+
+function LawRows({ title, ids, active }: { title: string; ids: [string, string]; active?: { first?: boolean; second?: boolean } }) {
+  return <div style={{ marginBottom: 20 }}><h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 6px" }}>{title}</h4><table className="sd-phmax-breakdown zs-methodology-ref"><tbody><tr><th scope="row"><span className="zs-methodology-ref__bid">{ids[0]}</span> 1 žák na 1. stupni</th><td className={cn(!!active?.first)}>0,25</td></tr><tr><th scope="row"><span className="zs-methodology-ref__bid">{ids[1]}</span> 1 žák na 2. stupni</th><td className={cn(!!active?.second)}>0,5</td></tr></tbody></table></div>;
+}
+
 export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?: PhmaxZsMethodologyHighlights }) {
   const h = highlights ?? {};
+  const [showAll, setShowAll] = useState(false);
+  const filtered = h.connectedBlocks != null && !showAll;
+  const show = (id: ZsMethodologyConnectedBlock) => showAll || !h.connectedBlocks || h.connectedBlocks.includes(id);
   const ac = h.activeColumnByRowId;
-  const show = (id: ZsMethodologyConnectedBlock) => !h.connectedBlocks || h.connectedBlocks.includes(id);
-  const filtering = h.connectedBlocks != null;
-  const emptyFilter = filtering && h.connectedBlocks!.length === 0;
-
-  const b1b2: RefRow[] = [
-    { id: "B1", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B13_MORE_THAN_2.first },
-    { id: "B2", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B13_MORE_THAN_2.second },
-  ];
-  const b3b4: RefRow[] = [
-    { id: "B3", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B34_MAX_2.first },
-    { id: "B4", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B34_MAX_2.second },
-  ];
 
   const gymRows: RefRow[] = [
     { id: "B22", code: "79-41-K/61", desc: "Gymnázium šestileté", bands: B22_B25.gym6 },
@@ -505,219 +120,42 @@ export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?:
     { id: "B24", code: "79-42-K/81", desc: "Gymnázium se sportovní přípravou (osmileté)", bands: B22_B25.sport8 },
     { id: "B25", code: "79-42-K/61", desc: "Gymnázium se sportovní přípravou (šestileté)", bands: B22_B25.sport6 },
   ];
-  const gymRowsFiltered =
-    h.visibleGymRowIds && h.visibleGymRowIds.length > 0
-      ? gymRows.filter((r) => h.visibleGymRowIds!.includes(r.id))
-      : gymRows;
+  const gymVisible = filtered && h.visibleGymRowIds?.length ? gymRows.filter((r) => h.visibleGymRowIds!.includes(r.id)) : gymRows;
 
   return (
     <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 18 }}>
-      <summary className="section-title" style={{ fontSize: "1.02rem", cursor: "pointer" }}>
-        Referenční tabulky metodiky PHmax / PHAmax / PHPmax (řádky B1–B46)
-      </summary>
-      <p className="muted-text" style={{ marginTop: 10, marginBottom: 14, fontSize: "0.86rem", lineHeight: 1.5 }}>
-        Tabulky odpovídají kódům v <code className="methodology-strip__code">phmax-zs-logic.ts</code>. Po zadání údajů v
-        kalkulačce se zvýrazní sloupce a řádky odpovídající vypočteným pásmům (stejná logika jako u přehledu ŠD).
-        {filtering ? (
-          <>
-            {" "}
-            <strong>Zobrazeny jsou jen bloky,</strong> které odpovídají aktivním sekcím režimu a mají nenulový vstup ve
-            výpočtu PHmax.
-          </>
-        ) : null}
-      </p>
+      <summary className="section-title" style={{ fontSize: "1.02rem", cursor: "pointer" }}>Referenční tabulky metodiky PHmax / PHAmax / PHPmax</summary>
+      <p className="muted-text" style={{ marginTop: 10, marginBottom: 8, fontSize: "0.86rem" }}>Legenda: zelená aktivní buňka, žlutá „ano“ v kombinaci ZŠSp, tyrkysová vysvětlivka smíšených tříd.</p>
+      <label style={{ display: "inline-flex", gap: 8, alignItems: "center", marginBottom: 10 }} onClick={(e) => e.stopPropagation()}>
+        <input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
+        Zobrazit všechny referenční tabulky
+      </label>
+      {filtered && (h.connectedBlocks?.length ?? 0) === 0 ? <p className="muted-text" style={{ marginBottom: 10, fontSize: "0.84rem" }}>Zatím není vyplněný žádný navázaný vstup. Pro náhled struktury zapněte „Zobrazit všechny referenční tabulky“.</p> : null}
 
-      {emptyFilter ? (
-        <p className="muted-text" style={{ marginBottom: 14, fontSize: "0.86rem", lineHeight: 1.5 }}>
-          Zatím není vyplněn žádný úsek, který by odkazoval na řádky přílohy — po zadání tříd, žáků nebo doplňkových
-          modulů se zde objeví příslušné tabulky.
-        </p>
-      ) : null}
-
-      {show("basic_b1b2") ? (
-        <ZsRefBandTable title="4) ZŠ s 1. a 2. stupněm — více než 2 třídy v některém ročníku (B1, B2)" rows={b1b2} activeColumnByRowId={ac} />
-      ) : null}
-      {show("basic_b3b4") ? (
-        <ZsRefBandTable title="5) ZŠ s 1. a 2. stupněm — nejvýše 2 třídy v každém ročníku (B3, B4)" rows={b3b4} activeColumnByRowId={ac} />
-      ) : null}
-      {show("basic_b5") ? (
-        <ZsRefBandTable
-          title="6) ZŠ tvořená 1 třídou 1. stupně (B5)"
-          rows={[{ id: "B5", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B5 }]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-      {show("basic_b6") ? (
-        <ZsRefBandTable
-          title="7) ZŠ tvořená 2 třídami 1. stupně (B6)"
-          rows={[{ id: "B6", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B6 }]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-      {show("basic_b7") ? (
-        <ZsRefBandTable
-          title="8) ZŠ tvořená 3 třídami 1. stupně (B7)"
-          rows={[{ id: "B7", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B7 }]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-      {show("basic_b8") ? (
-        <ZsRefBandTable
-          title="9) ZŠ tvořená 4 a více třídami 1. stupně (B8)"
-          rows={[{ id: "B8", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B8 }]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-      {show("sec16") ? (
-        <ZsRefBandTable
-          title="10) ZŠ zřízená podle § 16 odst. 9 školského zákona (B9, B10)"
-          rows={[
-            { id: "B9", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B9_B10.first },
-            { id: "B10", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B9_B10.second },
-          ]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-      {show("health") ? (
-        <ZsRefBandTable
-          title="11) ZŠ při zdravotnickém zařízení mimo psychiatrickou nemocnici (B11–B13)"
-          rows={[
-            { id: "B11", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B11_B13.health1 },
-            { id: "B12", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B11_B13.health2 },
-            { id: "B13", code: "79-01-C/01", desc: "Základní škola (1. a 2. stupeň)", bands: B11_B13.healthMix },
-          ]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-      {show("psych") ? (
-        <ZsRefBandTable
-          title="12) ZŠ při psychiatrické nemocnici (B14–B16)"
-          rows={[
-            { id: "B14", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B14_B16.psych1 },
-            { id: "B15", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B14_B16.psych2 },
-            { id: "B16", code: "79-01-C/01", desc: "Základní škola (1. a 2. stupeň)", bands: B14_B16.psychMix },
-          ]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-      {show("minority_b17") ? (
-        <ZsRefBandTable
-          title="13) ZŠ s jazykem národnostní menšiny — 1 třída 1. stupně (B17)"
-          rows={[{ id: "B17", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B17_B21.minority1 }]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-      {show("minority_b18") ? (
-        <ZsRefBandTable
-          title="14) ZŠ s jazykem národnostní menšiny — 2 třídy 1. stupně (B18)"
-          rows={[{ id: "B18", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B17_B21.minority2 }]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-      {show("minority_b19") ? (
-        <ZsRefBandTable
-          title="15) ZŠ s jazykem národnostní menšiny — 3 a více tříd 1. stupně (B19)"
-          rows={[{ id: "B19", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B17_B21.minority3 }]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-      {show("minority_b20b21") ? (
-        <ZsRefBandTable
-          title="16) ZŠ s jazykem národnostní menšiny — 1. a 2. stupeň (B20, B21)"
-          rows={[
-            { id: "B20", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B17_B21.minorityFull1 },
-            { id: "B21", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B17_B21.minorityFull2 },
-          ]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-
-      {show("gym") && gymRowsFiltered.length > 0 ? (
-        <ZsRefBandTable
-          title="17) Gymnázia — nižší stupeň / sportovní příprava (B22–B25)"
-          rows={gymRowsFiltered}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-
-      {show("special_b26_28") ? (
-        <ZsRefBandTable
-          title="18) Základní škola speciální — PHmax podle průměru ve třídě (B26–B28)"
-          rows={[
-            { id: "B26", code: "79-01-B/01", desc: "Základní škola speciální (I. díl, první stupeň)", bands: B26_B28.special1 },
-            { id: "B27", code: "79-01-B/01", desc: "Základní škola speciální (I. díl, druhý stupeň)", bands: B26_B28.special2 },
-            { id: "B28", code: "79-01-B/01", desc: "Základní škola speciální (II. díl)", bands: B26_B28.specialII },
-          ]}
-          activeColumnByRowId={ac}
-        />
-      ) : null}
-
-      {show("special_combo") ? <ZsSpecialCombinationTable combo={h.zsspCombo} /> : null}
-
-      {show("mixed_explain") && h.mixedReferenceNote ? (
-        <ZsMixedMethodologyNote note={h.mixedReferenceNote} />
-      ) : null}
-
-      {show("prep_b29") ? (
-        <ZsTwoColPhTable
-          title="21) Přípravná třída základní školy (B29)"
-          rowId="B29"
-          label="PHmax"
-          headerLeft="Přípravná třída základní školy"
-          bands={B29_PREP_CLASS}
-          activeLabel={h.prepClassLabel}
-        />
-      ) : null}
-      {show("prep_b30") ? (
-        <ZsTwoColPhTable
-          title="21) Třídy přípravného stupně základní školy speciální (B30)"
-          rowId="B30"
-          label="PHmax"
-          headerLeft="Třídy přípravného stupně základní školy speciální"
-          bands={B30_PREP_SPECIAL}
-          activeLabel={h.prepSpecialLabel}
-        />
-      ) : null}
-
-      {show("par38") ? (
-        <ZsParLawMiniTable
-          title="22) Žák vzdělávaný podle § 38 školského zákona"
-          categoryHeader="Žák vzdělávaný podle § 38 školského zákona"
-          rows={[
-            { id: "B31", desc: "1 žák na 1. stupni základní školy", value: "0,25" },
-            { id: "B32", desc: "1 žák na 2. stupni základní školy", value: "0,5" },
-          ]}
-          activeFirst={h.par38?.first}
-          activeSecond={h.par38?.second}
-        />
-      ) : null}
-      {show("par41") ? (
-        <ZsParLawMiniTable
-          title="23) Žák vzdělávaný podle § 41 školského zákona"
-          categoryHeader="Žák vzdělávaný podle § 41 školského zákona"
-          rows={[
-            { id: "B33", desc: "1 žák na 1. stupni základní školy", value: "0,25" },
-            { id: "B34", desc: "1 žák na 2. stupni základní školy", value: "0,5" },
-          ]}
-          activeFirst={h.par41?.first}
-          activeSecond={h.par41?.second}
-        />
-      ) : null}
-
-      {show("pha_b35_38") || show("pha_b39_45") ? (
-        <ZsPhaAnnexBlock
-          activeColumnByRowId={ac}
-          showSec16={show("pha_b35_38")}
-          showZss={show("pha_b39_45")}
-        />
-      ) : null}
-
-      {show("php_b46") ? <ZsPhpB46Table activeLabel={h.phpBandLabel} /> : null}
-
-      <p className="muted-text" style={{ marginTop: 12, fontSize: "0.82rem", lineHeight: 1.5 }}>
-        Pravidla výpočtu (smíšené třídy, § 16/9, ZŠ speciální aj.) jsou v metodice u přílohy NV č. 123/2018 Sb. — text v
-        aplikaci u jednotlivých sekcí odpovídá těmto ustanovením.
-      </p>
+      {show("basic_b1b2") ? <RefBandTable title="4) ZŠ více než 2 třídy (B1, B2)" rows={[{ id: "B1", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B13_MORE_THAN_2.first }, { id: "B2", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B13_MORE_THAN_2.second }]} active={ac} /> : null}
+      {show("basic_b3b4") ? <RefBandTable title="5) ZŠ max 2 třídy (B3, B4)" rows={[{ id: "B3", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B34_MAX_2.first }, { id: "B4", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B34_MAX_2.second }]} active={ac} /> : null}
+      {show("basic_b5") ? <RefBandTable title="6) B5" rows={[{ id: "B5", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B5 }]} active={ac} /> : null}
+      {show("basic_b6") ? <RefBandTable title="7) B6" rows={[{ id: "B6", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B6 }]} active={ac} /> : null}
+      {show("basic_b7") ? <RefBandTable title="8) B7" rows={[{ id: "B7", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B7 }]} active={ac} /> : null}
+      {show("basic_b8") ? <RefBandTable title="9) B8" rows={[{ id: "B8", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B8 }]} active={ac} /> : null}
+      {show("sec16") ? <RefBandTable title="10) §16/9 (B9, B10)" rows={[{ id: "B9", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B9_B10.first }, { id: "B10", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B9_B10.second }]} active={ac} /> : null}
+      {show("health") ? <RefBandTable title="11) Zdravotnické zařízení (B11–B13)" rows={[{ id: "B11", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B11_B13.health1 }, { id: "B12", code: "79-01-C/01", desc: "ZŠ (2. stupeň)", bands: B11_B13.health2 }, { id: "B13", code: "79-01-C/01", desc: "ZŠ (1. a 2. stupeň)", bands: B11_B13.healthMix }]} active={ac} /> : null}
+      {show("psych") ? <RefBandTable title="12) Psychiatrie (B14–B16)" rows={[{ id: "B14", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B14_B16.psych1 }, { id: "B15", code: "79-01-C/01", desc: "ZŠ (2. stupeň)", bands: B14_B16.psych2 }, { id: "B16", code: "79-01-C/01", desc: "ZŠ (1. a 2. stupeň)", bands: B14_B16.psychMix }]} active={ac} /> : null}
+      {show("minority_b17") ? <RefBandTable title="13) Menšina B17" rows={[{ id: "B17", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minority1 }]} active={ac} /> : null}
+      {show("minority_b18") ? <RefBandTable title="14) Menšina B18" rows={[{ id: "B18", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minority2 }]} active={ac} /> : null}
+      {show("minority_b19") ? <RefBandTable title="15) Menšina B19" rows={[{ id: "B19", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minority3 }]} active={ac} /> : null}
+      {show("minority_b20b21") ? <RefBandTable title="16) Menšina B20, B21" rows={[{ id: "B20", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minorityFull1 }, { id: "B21", code: "79-01-C/01", desc: "ZŠ (2. stupeň)", bands: B17_B21.minorityFull2 }]} active={ac} /> : null}
+      {show("gym") && gymVisible.length > 0 ? <RefBandTable title="17) Gymnázia (B22–B25)" rows={gymVisible} active={ac} /> : null}
+      {show("special_b26_28") ? <RefBandTable title="18) ZŠ speciální (B26–B28)" rows={[{ id: "B26", code: "79-01-B/01", desc: "I. díl, 1. stupeň", bands: B26_B28.special1 }, { id: "B27", code: "79-01-B/01", desc: "I. díl, 2. stupeň", bands: B26_B28.special2 }, { id: "B28", code: "79-01-B/01", desc: "II. díl", bands: B26_B28.specialII }]} active={ac} /> : null}
+      {show("special_combo") ? <ComboTable combo={h.zsspCombo} /> : null}
+      {show("mixed_explain") && h.mixedReferenceNote ? <MixedNote note={h.mixedReferenceNote} /> : null}
+      {show("prep_b29") ? <RefBandTable title="21) B29" rows={[{ id: "B29", code: "—", desc: "Přípravná třída ZŠ", bands: B29_PREP_CLASS }]} active={{ B29: h.prepClassLabel ?? "" }} /> : null}
+      {show("prep_b30") ? <RefBandTable title="21) B30" rows={[{ id: "B30", code: "—", desc: "Přípravný stupeň ZŠS", bands: B30_PREP_SPECIAL }]} active={{ B30: h.prepSpecialLabel ?? "" }} /> : null}
+      {show("par38") ? <LawRows title="22) § 38" ids={["B31", "B32"]} active={h.par38} /> : null}
+      {show("par41") ? <LawRows title="23) § 41" ids={["B33", "B34"]} active={h.par41} /> : null}
+      {show("pha_b35_38") ? <RefBandTable title="24) PHA B35–B38" rows={[{ id: "B35", code: "79-01-C/01", desc: "ZŠ 1. stupeň", bands: PHA_TABLE.zs1 }, { id: "B36", code: "79-01-C/01", desc: "ZŠ 1. stupeň těžší postižení", bands: PHA_TABLE.zs1Heavy }, { id: "B37", code: "79-01-C/01", desc: "ZŠ 2. stupeň", bands: PHA_TABLE.zs2 }, { id: "B38", code: "79-01-C/01", desc: "ZŠ 2. stupeň těžší postižení", bands: PHA_TABLE.zs2Heavy }]} active={ac} /> : null}
+      {show("pha_b39_45") ? <RefBandTable title="25) PHA B39–B45" rows={[{ id: "B39", code: "79-01-B/01", desc: "ZŠS I/1", bands: PHA_TABLE.zss1 }, { id: "B40", code: "79-01-B/01", desc: "ZŠS I/1 těžší", bands: PHA_TABLE.zss1Heavy }, { id: "B41", code: "79-01-B/01", desc: "ZŠS I/2", bands: PHA_TABLE.zss2 }, { id: "B42", code: "79-01-B/01", desc: "ZŠS I/2 těžší", bands: PHA_TABLE.zss2Heavy }, { id: "B43", code: "79-01-B/01", desc: "ZŠS II", bands: PHA_TABLE.zssII }, { id: "B44", code: "79-01-B/01", desc: "ZŠS II těžší", bands: PHA_TABLE.zssIIHeavy }, { id: "B45", code: "—", desc: "Přípravný stupeň", bands: PHA_TABLE.zssPrep }]} active={ac} /> : null}
+      {show("php_b46") ? <RefBandTable title="26) PHP B46" rows={[{ id: "B46", code: "79-01-C/01", desc: "PHPmax", bands: PHP_TABLE }]} active={{ B46: h.phpBandLabel ?? "" }} /> : null}
     </details>
   );
 }

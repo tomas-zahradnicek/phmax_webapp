@@ -28,6 +28,10 @@ function pvCellClass(active: readonly PvMethodologyActiveCell[] | undefined, tab
  */
 export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: readonly PvMethodologyActiveCell[] }) {
   const ac = activeCells;
+  const [showAll, setShowAll] = React.useState(false);
+  const connected = new Set((ac ?? []).map((x) => x.table));
+  const filter = !showAll && connected.size > 0;
+  const show = (t: 1 | 2 | 3) => !filter || connected.has(t);
   return (
     <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 16 }}>
       <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
@@ -37,7 +41,15 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
         Hodnoty odpovídají maticím v aplikaci (<code className="methodology-strip__code">phmax-pv-logic.ts</code>). Čísla
         jsou v hodinách týdně (PHmax). Po vyplnění pracoviště se zvýrazní odpovídající buňka v příslušné tabulce.
       </p>
+      <p className="muted-text" style={{ marginTop: -4, marginBottom: 8, fontSize: "0.84rem" }}>
+        Legenda: zelená = aktivní buňka podle výpočtu.
+      </p>
+      <label style={{ display: "inline-flex", gap: 8, alignItems: "center", marginBottom: 10 }} onClick={(e) => e.stopPropagation()}>
+        <input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
+        Zobrazit všechny tabulky 1–3
+      </label>
 
+      {show(1) ? (
       <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "14px 0 8px" }}>
         Tabulka 1 — polodenní provoz
       </h4>
@@ -71,7 +83,9 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
           </tbody>
         </table>
       </ScrollGrabRegion>
+      ) : null}
 
+      {show(2) ? (
       <p className="muted-text" style={{ margin: "12px 0 8px", fontSize: "0.8rem" }}>
         U tabulky 2 mají sloupce v záhlaví pořadí 1–12; úplné znění pásma průměrné doby zobrazí nápověda při najetí na
         hlavičku (title), shodně s přílohou metodiky.
@@ -109,7 +123,9 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
           </tbody>
         </table>
       </ScrollGrabRegion>
+      ) : null}
 
+      {show(3) ? (
       <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "18px 0 8px" }}>
         Tabulka 3 — internátní provoz
       </h4>
@@ -143,6 +159,7 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
           </tbody>
         </table>
       </ScrollGrabRegion>
+      ) : null}
     </details>
   );
 }

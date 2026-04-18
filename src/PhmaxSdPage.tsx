@@ -1796,6 +1796,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             Pozn.: metodika zaokrouhluje mezikroky. Aplikace ponechává plnou přesnost mezivýpočtu a zaokrouhluje
             výsledné hodnoty, proto mohou vznikat malé rozdíly v desetinných místech.
           </p>
+          <p className="muted-text" style={{ marginTop: -4, marginBottom: 12, fontSize: "0.82rem", lineHeight: 1.45 }}>
+            Legenda: zeleně je zvýrazněná aktivní buňka podle aktuálního výpočtu.
+          </p>
           <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
             <table className="sd-phmax-breakdown">
               <thead>
@@ -1881,6 +1884,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.88rem" }}>
             Referenční matice přílohy vyhlášky 74/2005 Sb. pro 1 až 21 oddělení. Sloupce 1–21 ukazují hodinové hodnoty
             pro jednotlivá oddělení, poslední sloupec uvádí celkový PHmax za družinu.
+          </p>
+          <p className="muted-text" style={{ marginTop: -4, marginBottom: 12, fontSize: "0.82rem", lineHeight: 1.45 }}>
+            Legenda: zeleně je zvýrazněná aktivní hodnota pro aktuální počet oddělení.
           </p>
           <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
             <table className="sd-phmax-breakdown">
