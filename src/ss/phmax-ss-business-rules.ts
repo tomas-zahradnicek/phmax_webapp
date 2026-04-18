@@ -316,11 +316,12 @@ export function evaluateBusinessRules(
       codes,
     );
   } else {
-    if (has82) {
-      pushWarning(
+    const someTalentExam = obory.some((o) => o.hasTalentExam);
+    if (someTalentExam) {
+      pushInfo(
         result,
-        'MIXED_82',
-        'Je přítomen obor skupiny 82, ale ne všechny obory jsou talentové; platí jen běžná výjimka podle § 2c odst. 2 písm. a).',
+        'MIXED_TALENT_REGIME',
+        'Ne všechny obory mají v RVP součást přijímacího řízení v podobě talentové zkoušky; kombinace s/bez talentové zkoušky se řídí vyhláškou č. 13/2005 Sb. Aplikace talent odhaduje ze skupiny kódu a názvu programu — ověřte u konkrétních oborů.',
         codes,
       );
     }
@@ -334,11 +335,11 @@ export function evaluateBusinessRules(
       );
     }
 
-    if (['L', 'M', 'K'].includes(category) && oborCount > 2) {
+    if (['L', 'M'].includes(category) && oborCount > 2) {
       pushError(
         result,
-        'KM_TOO_MANY',
-        'V běžné víceoborové třídě lze mít nejvýše 2 obory kategorie L/M/K.',
+        'LM_TOO_MANY',
+        'V běžné víceoborové třídě lze mít nejvýše 2 obory kategorie L nebo M.',
         codes,
       );
     }

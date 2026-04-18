@@ -10,11 +10,11 @@ export const SS_LEGIS_PARAGRAPH_TOOLTIPS: Record<string, string> = {
   "nv123-priloha1":
     "Počet hodin se určuje podle pásma odpovídajícího průměrnému počtu žáků ve třídě (NV č. 123/2018 Sb., příloha č. 1).",
   "nv123-2":
-    "U dalších forem vzdělávání se základ z přílohy násobí koeficientem (večerní 0,3; kombinovaná 0,26; dálková 0,2; distanční 0,05) — NV č. 123/2018 Sb., § 2.",
+    "U dalších forem vzdělávání se základ z přílohy násobí koeficientem (večerní 0,3; kombinovaná 0,26; kombinovaná u konzervatoří 0,48; dálková 0,2; distanční 0,05) — NV č. 123/2018 Sb., § 2.",
   "vyhl13-2a1":
     "Víceoborovou třídu lze zřídit jen při stejné kategorii dosaženého vzdělání, stejné formě, stejné délce vzdělávání a stejném ročníku (vyhl. č. 13/2005 Sb., § 2a odst. 1).",
   "vyhl13-2a2":
-    "Kategorie E a H: nejvýše 3 obory; kategorie L, M, K: nejvýše 2 obory (vyhl. č. 13/2005 Sb., § 2a odst. 2, ve znění vyhl. č. 145/2018 Sb.).",
+    "Kategorie E a H: nejvýše 3 obory; kategorie L a M: nejvýše 2 obory. Kategorie K: víceoborovou třídu nelze obecně zřizovat, výjimka je jen kombinace gymnázium + gymnázium se sportovní přípravou (vyhl. č. 13/2005 Sb., § 2a odst. 2 a 3, ve znění vyhl. č. 145/2018 Sb.).",
   "vyhl13-2a3":
     "Víceoborovou třídu obvykle nelze v kategorii K; výjimka: gymnázium + gymnázium se sportovní přípravou (§ 2a odst. 3).",
   "vyhl13-2c1":
@@ -70,9 +70,12 @@ export const SS_BRULE_CODE_LEGIS: Record<string, BruleLegisEntry> = {
   PARTIAL_OVER_17: { citeIds: ["vyhl13-2c1"], note: "Kombinace oborů s 17+ žáky — zvláštní režim dle metodiky, pokud nelze třídu složit jen z oborů pod 17." },
   K_NOT_ALLOWED: { citeIds: ["vyhl13-2a3"], note: "Kategorie K — víceoborová třída jen ve výjimce gymnázium + gymnázium se sportovní přípravou." },
   ALL_TALENT: { citeIds: ["vyhl13-2c2"], note: "Talentové obory — omezení počtu oborů dle § 2a odst. 2 neplatí." },
-  MIXED_82: { citeIds: ["vyhl13-2c2"], note: "Skupina 82 bez plného talentového režimu — platí zužující výjimka dle metodiky / § 2c." },
+  MIXED_TALENT_REGIME: {
+    citeIds: ["vyhl13-2c2", "vyhl13-2a1"],
+    note: "Kombinace oborů s/bez talentové zkoušky — plná pravidla organizace třídy dle vyhl. č. 13/2005 Sb.; u čistě talentových oborů § 2c odst. 2.",
+  },
   EH_TOO_MANY: { citeIds: ["vyhl13-2a2"], note: "Kategorie E/H — nejvýše 3 obory v běžné víceoborové třídě." },
-  KM_TOO_MANY: { citeIds: ["vyhl13-2a2"], note: "Kategorie L/M/K — nejvýše 2 obory v běžné víceoborové třídě." },
+  LM_TOO_MANY: { citeIds: ["vyhl13-2a2"], note: "Kategorie L/M — nejvýše 2 obory v běžné víceoborové třídě (kategorii K řeší zvlášť § 2a odst. 3)." },
 };
 
 export function getBruleLegis(code: string): BruleLegisEntry | undefined {
