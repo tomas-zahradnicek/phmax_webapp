@@ -7,9 +7,11 @@ type GlossaryDialogProps = {
   onClose: () => void;
   terms: readonly GlossaryTerm[];
   triggerRef: React.RefObject<HTMLButtonElement | null>;
+  /** Volitelně doplní kontext produktu (např. „SŠ“) pod úvodní řádek dialogu. */
+  scopeHint?: string;
 };
 
-export function GlossaryDialog({ open, onClose, terms, triggerRef }: GlossaryDialogProps) {
+export function GlossaryDialog({ open, onClose, terms, triggerRef, scopeHint }: GlossaryDialogProps) {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);
@@ -87,6 +89,11 @@ export function GlossaryDialog({ open, onClose, terms, triggerRef }: GlossaryDia
             <p className="muted-text">
               Pojmy jsou popsány podle metodiky a navazujících právních předpisů, ze kterých kalkulačka vychází.
             </p>
+            {scopeHint ? (
+              <p className="muted-text" style={{ marginTop: 6 }}>
+                {scopeHint}
+              </p>
+            ) : null}
           </div>
           <button
             ref={closeBtnRef}
