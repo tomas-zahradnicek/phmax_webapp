@@ -1803,7 +1803,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       ["Menšina – 1. st. třídy / žáci", `${minority1Classes} / ${minority1Pupils}`],
       ["Menšina – 2. st. třídy / žáci", `${minority2Classes} / ${minority2Pupils}`],
       ["Gymnázia – počet řádků", gymRows.length],
-      ["Smíšené (legacy řádky) – počet", mixedRows.length],
+      ["Smíšené (zjednodušený seznam řádků) – počet", mixedRows.length],
       ["Smíšené tab. – 1. st. C/01 žáci / třídy", `${mixedMethodFirstZsPupils} / ${mixedMethodFirstZsClasses}`],
       ["Smíšené tab. – 1. st. B/01 žáci / třídy", `${mixedMethodFirstSpecialPupils} / ${mixedMethodFirstSpecialClasses}`],
       ["Smíšené tab. – 2. st. C/01 žáci / třídy", `${mixedMethodSecondZsPupils} / ${mixedMethodSecondZsClasses}`],
@@ -1875,7 +1875,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     }
     if (mixedRows.length > 0) {
       out.push(["", ""]);
-      out.push(["=== Smíšené třídy (legacy řádky) ===", ""]);
+      out.push(["=== Smíšené třídy (zjednodušený seznam řádků) ===", ""]);
       mixedRows.forEach((row, i) => {
         const avg = row.classes > 0 ? row.pupils / row.classes : 0;
         const band =

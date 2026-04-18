@@ -10,9 +10,15 @@ import {
  * Společné metodiky a předpisy pro všechny kalkulačky – text pod rozbalitelným shrnutím.
  */
 export function MethodologyStrip() {
+  const [open, setOpen] = React.useState(false);
   return (
-    <details className="methodology-strip methodology-strip--collapsible card muted">
-      <summary className="methodology-strip__summary">Verze metodik a předpisy</summary>
+    <details
+      className="methodology-strip methodology-strip--collapsible card muted"
+      onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
+    >
+      <summary className="methodology-strip__summary" aria-expanded={open}>
+        Verze metodik a předpisy
+      </summary>
       <div className="methodology-strip__panel">
         <ul className="methodology-strip__list">
           <li>

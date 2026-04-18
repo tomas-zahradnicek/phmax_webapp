@@ -17,6 +17,20 @@ export type PvMethodologyActiveCell = { table: 1 | 2 | 3; rowIndex: number; colI
 
 const ACTIVE = "sd-phmax-breakdown__cell--pv-active";
 
+/** Čistá logika filtru tabulek 1–3 (pro UI i unit testy). */
+export function getPvMethodologyAppendixVisibility(showAll: boolean, activeCells?: readonly PvMethodologyActiveCell[] | null) {
+  const list = activeCells ?? [];
+  const connected = new Set(list.map((x) => x.table));
+  const hasActive = list.length > 0;
+  const filter = !showAll && hasActive;
+  return {
+    show1: !filter || connected.has(1),
+    show2: !filter || connected.has(2),
+    show3: !filter || connected.has(3),
+    showEmptyHint: !hasActive && !showAll,
+  };
+}
+
 function pvCellClass(active: readonly PvMethodologyActiveCell[] | undefined, table: 1 | 2 | 3, ri: number, ci: number) {
   const on = active?.some((a) => a.table === table && a.rowIndex === ri && a.colIndex === ci);
   return "sd-phmax-breakdown__num" + (on ? ` ${ACTIVE}` : "");
@@ -29,12 +43,20 @@ function pvCellClass(active: readonly PvMethodologyActiveCell[] | undefined, tab
 export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: readonly PvMethodologyActiveCell[] }) {
   const ac = activeCells;
   const [showAll, setShowAll] = React.useState(false);
-  const connected = new Set((ac ?? []).map((x) => x.table));
-  const filter = !showAll && connected.size > 0;
-  const show = (t: 1 | 2 | 3) => !filter || connected.has(t);
+  const [detailsOpen, setDetailsOpen] = React.useState(false);
+  const vis = getPvMethodologyAppendixVisibility(showAll, ac);
+  const show = (t: 1 | 2 | 3) => (t === 1 ? vis.show1 : t === 2 ? vis.show2 : vis.show3);
   return (
-    <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 16 }}>
-      <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
+    <details
+      className="subcard sd-phmax-breakdown-wrap"
+      style={{ marginTop: 16 }}
+      onToggle={(e) => setDetailsOpen((e.target as HTMLDetailsElement).open)}
+    >
+      <summary
+        className="section-title"
+        style={{ fontSize: "1.05rem", cursor: "pointer" }}
+        aria-expanded={detailsOpen}
+      >
         Kompletní tabulky 1–3 přílohy (polodenní, celodenní, internátní provoz)
       </summary>
       <p className="muted-text" style={{ marginTop: 10, marginBottom: 14, fontSize: "0.86rem", lineHeight: 1.5 }}>
@@ -45,9 +67,20 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
         Legenda: zelená = aktivní buňka podle výpočtu.
       </p>
       <label style={{ display: "inline-flex", gap: 8, alignItems: "center", marginBottom: 10 }} onClick={(e) => e.stopPropagation()}>
-        <input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={showAll}
+          onChange={(e) => setShowAll(e.target.checked)}
+          aria-label="Zobrazit všechny tabulky 1–3 přílohy metodiky PV"
+        />
         Zobrazit všechny tabulky 1–3
       </label>
+      {vis.showEmptyHint ? (
+        <p className="muted-text" style={{ marginBottom: 10, fontSize: "0.84rem" }}>
+          Zatím není vyplněné žádné pracoviště s tabulkou 1–3. Pro náhled všech matic zapněte „Zobrazit všechny tabulky
+          1–3“, nebo vyplňte pracoviště — pak se zobrazí jen příslušná tabulka.
+        </p>
+      ) : null}
 
       {show(1) ? (
       <>
