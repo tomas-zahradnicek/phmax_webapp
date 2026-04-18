@@ -46,7 +46,9 @@ export type ZsMethodologyConnectedBlock =
   | "par41"
   | "pha_b35_38"
   | "pha_b39_45"
-  | "php_b46";
+  | "php_b46"
+  /** Smíšené třídy — bez jednoho řádku Bx; vysvětlení a odkaz na součet v aplikaci */
+  | "mixed_explain";
 
 export type PhmaxZsMethodologyHighlights = {
   /**
@@ -66,6 +68,8 @@ export type PhmaxZsMethodologyHighlights = {
   phpBandLabel?: string | null;
   /** Řádky B22–B25, u kterých máte v kalkulačce zapojené třídy — ostatní řádky se v režimu filtru nevykreslí. */
   visibleGymRowIds?: readonly string[];
+  /** Smíšené třídy — součet a zda jde o metodickou tabulku dominantní většiny. */
+  mixedReferenceNote?: { total: number; usesMethodTable: boolean };
 };
 
 const ACTIVE = "sd-phmax-breakdown__cell--pv-active";
@@ -232,6 +236,39 @@ function ZsParLawMiniTable({
           </tbody>
         </table>
       </ScrollGrabRegion>
+    </div>
+  );
+}
+
+function ZsMixedMethodologyNote({ note }: { note: { total: number; usesMethodTable: boolean } }) {
+  return (
+    <div
+      className="subcard"
+      style={{
+        marginBottom: 22,
+        padding: "12px 14px",
+        borderLeft: "4px solid #0d9488",
+        background: "rgba(13, 148, 136, 0.06)",
+      }}
+    >
+      <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 8px", lineHeight: 1.35 }}>
+        Smíšené třídy (§ 16 odst. 9) a ZŠ speciální — doplnění k referenční příloze
+      </h4>
+      <p className="muted-text" style={{ margin: "0 0 8px", fontSize: "0.84rem", lineHeight: 1.5 }}>
+        U smíšených tříd se PHmax neváže na jeden řádek Bx v příloze: u každé třídy se podle převažujícího oboru použije
+        buď tabulka <strong>B9–B10</strong> (převažuje běžná ZŠ, kód 79-01-C/01), nebo <strong>B26–B28</strong> (převažuje ZŠ
+        speciální / shodné počty dle metodiky). V referenci výše se tedy dívejte na tyto bloky podle toho, co máte ve
+        smíšených řádcích zvoleno.
+      </p>
+      <p className="muted-text" style={{ margin: "0 0 6px", fontSize: "0.84rem", lineHeight: 1.5 }}>
+        <strong>PHmax ze smíšených tříd v součtu (modul):</strong>{" "}
+        {note.total.toLocaleString("cs-CZ", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+      </p>
+      <p className="muted-text" style={{ margin: 0, fontSize: "0.82rem", lineHeight: 1.45 }}>
+        {note.usesMethodTable
+          ? "Používáte metodickou tabulku podle dominantní většiny (odděleně 1. a 2. stupeň) — odpovídá výkladu u sekce Smíšené třídy v aplikaci."
+          : "Používáte zjednodušený seznam smíšených řádků; u každého řádku se zvlášť volí B9–B10 nebo B26–B28 podle převažujícího oboru."}
+      </p>
     </div>
   );
 }
@@ -616,6 +653,10 @@ export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?:
       ) : null}
 
       {show("special_combo") ? <ZsSpecialCombinationTable combo={h.zsspCombo} /> : null}
+
+      {show("mixed_explain") && h.mixedReferenceNote ? (
+        <ZsMixedMethodologyNote note={h.mixedReferenceNote} />
+      ) : null}
 
       {show("prep_b29") ? (
         <ZsTwoColPhTable

@@ -713,6 +713,18 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       connectedBlocks.push("special_combo");
     }
 
+    const hasMixedSection =
+      hasSection("dominant_c_first") ||
+      hasSection("dominant_c_second") ||
+      hasSection("dominant_b_first") ||
+      hasSection("dominant_b_second");
+    const hasMixedLegacyInput = mixedRows.some((r) => r.classes > 0 || r.pupils > 0);
+    let mixedReferenceNote: PhmaxZsMethodologyHighlights["mixedReferenceNote"] = undefined;
+    if (hasMixedSection && (hasMixedLegacyInput || hasMixedMethodTableData || mixedForTotal > 0)) {
+      connectedBlocks.push("mixed_explain");
+      mixedReferenceNote = { total: mixedForTotal, usesMethodTable: hasMixedMethodTableData };
+    }
+
     if (hasSection("prep_class") && prepClasses > 0) connectedBlocks.push("prep_b29");
     if (hasSection("prep_special") && prepSpecialClasses > 0) connectedBlocks.push("prep_b30");
 
@@ -823,6 +835,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     return {
       connectedBlocks,
       visibleGymRowIds,
+      mixedReferenceNote,
       activeColumnByRowId,
       zsspCombo,
       prepClassLabel: prepClasses > 0 ? pickBand(prepAvg, B29_PREP_CLASS).label : undefined,
@@ -854,6 +867,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     minority2Band.label,
     gymComputedRows,
     gymRows,
+    mixedRows,
+    mixedForTotal,
+    hasMixedMethodTableData,
     special1Classes,
     special2Classes,
     specialIIClasses,
