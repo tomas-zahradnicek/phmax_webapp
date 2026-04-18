@@ -46,8 +46,8 @@ import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import {
   PhmaxZsMethodologyReferenceTables,
   type PhmaxZsMethodologyHighlights,
-  type ZsMethodologyConnectedBlock,
 } from "./phmax-zs-methodology-tables";
+import { buildZsConnectedBlocks } from "./phmax-zs-connected-blocks";
 import {
   HeroIconActionButton,
   IconClearStored,
@@ -661,101 +661,54 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const zsMethodologyHighlights: PhmaxZsMethodologyHighlights = useMemo(() => {
     const activeColumnByRowId: Partial<Record<string, string>> = {};
-    const connectedBlocks: ZsMethodologyConnectedBlock[] = [];
-
-    const isFullBasic = basicType === "full_more_than_2" || basicType === "full_max_2";
-    const hasBasicUi =
-      hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only");
-    const hasBasicData = basic1Classes > 0 || (isFullBasic && basic2Classes > 0);
-    if (hasBasicUi && hasBasicData) {
-      if (basicType === "full_more_than_2") connectedBlocks.push("basic_b1b2");
-      else if (basicType === "full_max_2") connectedBlocks.push("basic_b3b4");
-      else if (basicType === "first_only_1") connectedBlocks.push("basic_b5");
-      else if (basicType === "first_only_2") connectedBlocks.push("basic_b6");
-      else if (basicType === "first_only_3") connectedBlocks.push("basic_b7");
-      else if (basicType === "first_only_4") connectedBlocks.push("basic_b8");
-    }
-
-    if (
-      (hasSection("sec16_first") || hasSection("sec16_second")) &&
-      (incl1Classes > 0 || incl2Classes > 0)
-    ) {
-      connectedBlocks.push("sec16");
-    }
-
-    if (
-      hasSection("health_groups") &&
-      healthRows.some((r) => r.currentClasses > 0 || r.prevClasses > 0)
-    ) {
-      connectedBlocks.push("health");
-    }
-
-    if (hasSection("psych_groups") && psychRows.some((r) => r.currentClasses > 0 || r.prevClasses > 0)) {
-      connectedBlocks.push("psych");
-    }
-
-    if (hasSection("minority_first") && minority1Classes > 0) {
-      if (minorityType === "minority1") connectedBlocks.push("minority_b17");
-      else if (minorityType === "minority2") connectedBlocks.push("minority_b18");
-      else if (minorityType === "minority3") connectedBlocks.push("minority_b19");
-      else if (minorityType === "minorityFull1") connectedBlocks.push("minority_b20b21");
-    }
-
-    if (hasSection("gym_groups") && gymRows.some((r) => r.classes > 0)) {
-      connectedBlocks.push("gym");
-    }
-
-    if (
-      (hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) &&
-      (special1Classes > 0 || special2Classes > 0 || specialIIClasses > 0)
-    ) {
-      connectedBlocks.push("special_b26_28");
-      connectedBlocks.push("special_combo");
-    }
-
-    const hasMixedSection =
-      hasSection("dominant_c_first") ||
-      hasSection("dominant_c_second") ||
-      hasSection("dominant_b_first") ||
-      hasSection("dominant_b_second");
     const hasMixedLegacyInput = mixedRows.some((r) => r.classes > 0 || r.pupils > 0);
-    let mixedReferenceNote: PhmaxZsMethodologyHighlights["mixedReferenceNote"] = undefined;
-    if (hasMixedSection && (hasMixedLegacyInput || hasMixedMethodTableData || mixedForTotal > 0)) {
-      connectedBlocks.push("mixed_explain");
-      mixedReferenceNote = { total: mixedForTotal, usesMethodTable: hasMixedMethodTableData };
-    }
-
-    if (hasSection("prep_class") && prepClasses > 0) connectedBlocks.push("prep_b29");
-    if (hasSection("prep_special") && prepSpecialClasses > 0) connectedBlocks.push("prep_b30");
-
-    if (hasSection("par38") && (p38First > 0 || p38Second > 0)) connectedBlocks.push("par38");
-    if (hasSection("par41") && (p41First > 0 || p41Second > 0)) connectedBlocks.push("par41");
-
     const hasPhaUi = visibleSections.some((s) => s.startsWith("pha_rvp") || s === "pha_disability_flags");
-    if (hasPhaUi) {
-      const hasPhaSec16Row = phaComputedRows.some(
-        (r) =>
-          r.classes > 0 &&
-          (r.kind === "zs1" || r.kind === "zs1Heavy" || r.kind === "zs2" || r.kind === "zs2Heavy"),
-      );
-      const hasPhaZssRow = phaComputedRows.some(
-        (r) =>
-          r.classes > 0 &&
-          (r.kind === "zss1" ||
-            r.kind === "zss1Heavy" ||
-            r.kind === "zss2" ||
-            r.kind === "zss2Heavy" ||
-            r.kind === "zssII" ||
-            r.kind === "zssIIHeavy" ||
-            r.kind === "zssPrep"),
-      );
-      if (hasPhaSec16Row) connectedBlocks.push("pha_b35_38");
-      if (hasPhaZssRow) connectedBlocks.push("pha_b39_45");
-    }
-
-    if ((hasSection("php_years") || hasSection("php_options")) && !phpExcludedSchool) {
-      connectedBlocks.push("php_b46");
-    }
+    const hasPhaSec16Row = phaComputedRows.some(
+      (r) =>
+        r.classes > 0 &&
+        (r.kind === "zs1" || r.kind === "zs1Heavy" || r.kind === "zs2" || r.kind === "zs2Heavy"),
+    );
+    const hasPhaZssRow = phaComputedRows.some(
+      (r) =>
+        r.classes > 0 &&
+        (r.kind === "zss1" ||
+          r.kind === "zss1Heavy" ||
+          r.kind === "zss2" ||
+          r.kind === "zss2Heavy" ||
+          r.kind === "zssII" ||
+          r.kind === "zssIIHeavy" ||
+          r.kind === "zssPrep"),
+    );
+    const { connectedBlocks, mixedReferenceNote } = buildZsConnectedBlocks({
+      hasSection,
+      basicType,
+      basic1Classes,
+      basic2Classes,
+      incl1Classes,
+      incl2Classes,
+      hasHealthRows: healthRows.some((r) => r.currentClasses > 0 || r.prevClasses > 0),
+      hasPsychRows: psychRows.some((r) => r.currentClasses > 0 || r.prevClasses > 0),
+      minorityType,
+      minority1Classes,
+      hasGymRows: gymRows.some((r) => r.classes > 0),
+      special1Classes,
+      special2Classes,
+      specialIIClasses,
+      hasMixedLegacyInput,
+      hasMixedMethodTableData,
+      mixedForTotal,
+      prepClasses,
+      prepSpecialClasses,
+      p38First,
+      p38Second,
+      p41First,
+      p41Second,
+      hasPhaUi,
+      hasPhaSec16Row,
+      hasPhaZssRow,
+      hasPhpUi: hasSection("php_years") || hasSection("php_options"),
+      phpExcludedSchool,
+    });
 
     const visibleGymRowIds = gymComputedRows
       .filter((r) => r.classes > 0)
