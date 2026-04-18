@@ -484,6 +484,93 @@ function PhmaxSsUnitsFormView({
             ) : null}
           </table>
         </ScrollGrabRegion>
+
+        <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 16 }}>
+          <summary className="section-title" style={{ fontSize: "1.02rem", cursor: "pointer" }}>
+            Rozpad / ověřovací tabulka PHmax (řádky)
+          </summary>
+          <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.86rem", lineHeight: 1.5 }}>
+            Stejná data jako v přehledu výše, ve formě vhodné pro rychlé porovnání se součtem. Sloupec „PHmax řádku“
+            odpovídá sloupci „PHmax celkem“ v hlavní tabulce; v řádku Celkem je součet platných výpočtů.
+          </p>
+          <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
+            <table className="sd-phmax-breakdown">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Označení</th>
+                  <th scope="col">Kód oboru</th>
+                  <th scope="col">Režim</th>
+                  <th scope="col">Pásmo</th>
+                  <th scope="col" className="sd-phmax-breakdown__head-num">
+                    PHmax / třídu
+                  </th>
+                  <th scope="col" className="sd-phmax-breakdown__head-num">
+                    PHmax řádku
+                  </th>
+                  <th scope="col">Stav</th>
+                </tr>
+              </thead>
+              <tbody>
+                {preview.map((p, idx) => {
+                  const src = rows.find((r) => r.id === p.rowId);
+                  const code = src?.educationField.trim() ?? "";
+                  if (p.skipped) {
+                    return (
+                      <tr key={p.rowId}>
+                        <td>{idx + 1}</td>
+                        <td>{p.label || "—"}</td>
+                        <td colSpan={5} className="muted-text">
+                          (nezadáno pro výpočet)
+                        </td>
+                        <td className="muted-text">—</td>
+                      </tr>
+                    );
+                  }
+                  if ("error" in p) {
+                    return (
+                      <tr key={p.rowId}>
+                        <td>{idx + 1}</td>
+                        <td>{p.label || "—"}</td>
+                        <td>{code}</td>
+                        <td className="muted-text">—</td>
+                        <td className="muted-text">—</td>
+                        <td className="sd-phmax-breakdown__num">—</td>
+                        <td className="sd-phmax-breakdown__num">—</td>
+                        <td style={{ color: "var(--danger, #b91c1c)", fontSize: "0.88rem" }}>{p.error}</td>
+                      </tr>
+                    );
+                  }
+                  const r = p.resolved;
+                  return (
+                    <tr key={p.rowId}>
+                      <td>{idx + 1}</td>
+                      <td>{p.label || "—"}</td>
+                      <td>{r.code}</td>
+                      <td className="muted-text">{r.modeKey}</td>
+                      <td>{r.intervalLabel}</td>
+                      <td className="sd-phmax-breakdown__num">{r.adjustedPhmaxPerClass}</td>
+                      <td className="sd-phmax-breakdown__num">{r.totalPhmax}</td>
+                      <td className="muted-text">OK</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              {computedRows.length > 0 ? (
+                <tfoot>
+                  <tr className="sd-phmax-breakdown__total">
+                    <th scope="row" colSpan={6}>
+                      Součet PHmax (platné řádky)
+                    </th>
+                    <td className="sd-phmax-breakdown__num">{roundedTotal}</td>
+                    <td />
+                  </tr>
+                </tfoot>
+              ) : null}
+            </table>
+          </ScrollGrabRegion>
+        </details>
+
         {schoolPhmaxExplain ? (
           <details
             className="card muted ss-explain-school-wrap"
