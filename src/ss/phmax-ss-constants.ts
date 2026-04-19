@@ -89,3 +89,13 @@ export const PHMAX_SS_UNITS_STORAGE_KEY = "phmax-ss-units-draft";
 
 export const PHMAX_SS_NAMED_SNAPSHOTS_LS_KEY = "phmax-ss-named-snapshots-v1";
 export const PHMAX_SS_MAX_NAMED_SNAPSHOTS = 10;
+
+/** Metodické texty a tabulky § 4 / § 16 / PrŠ — sdílený modul kvůli přehledným diffům a stabilnímu buildu. */
+export {
+  PHMAX_SS_CALCULATION_BRANCH_GUIDE,
+  PHMAX_SS_NV123_FORM_COEFFICIENTS,
+  PHMAX_SS_PAR16_AVERAGE_PUPILS_GUIDE,
+  PHMAX_SS_PRACTICAL_SCHOOL_PHAMAX_TABLE,
+  PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE,
+  PHMAX_SS_SECTION4_PHMAX_GUIDE,
+} from "./phmax-ss-methodology-guides";

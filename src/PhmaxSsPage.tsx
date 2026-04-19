@@ -37,13 +37,20 @@ import {
   PHMAX_SS_MSMT_PAGE_URL,
   PHMAX_SS_RIZENI_SKOLY_URL,
   PHMAX_SS_SOURCE_FOLDER_HINT,
-  PHMAX_SS_CALCULATION_BRANCH_GUIDE,
-  PHMAX_SS_PAR16_AVERAGE_PUPILS_GUIDE,
-  PHMAX_SS_SECTION4_PHMAX_GUIDE,
-  PHMAX_SS_NV123_FORM_COEFFICIENTS,
-  PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE,
-  PHMAX_SS_PRACTICAL_SCHOOL_PHAMAX_TABLE,
 } from "./ss/phmax-ss-constants";
+import {
+  PHMAX_SS_CALCULATION_BRANCH_GUIDE,
+  PHMAX_SS_NV123_FORM_COEFFICIENTS,
+  PHMAX_SS_PAR16_AVERAGE_PUPILS_GUIDE,
+  PHMAX_SS_PRACTICAL_SCHOOL_PHAMAX_TABLE,
+  PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE,
+  PHMAX_SS_SECTION4_PHMAX_GUIDE,
+  type PhmaxSsCalcBranch,
+  type PhmaxSsNv123FormCoefficient,
+  type PhmaxSsPar16ExampleRow,
+  type PhmaxSsPracticalSchoolPhamaxRow,
+  type PhmaxSsPracticalSchoolPhmaxRow,
+} from "./ss/phmax-ss-methodology-guides";
 import {
   ssHeroExampleSnapshot,
   SS_HERO_EXAMPLE_GROUP_AGGREGAT_JEDNO,
@@ -626,7 +633,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           <p className="muted-text" style={{ margin: "0 0 12px", lineHeight: 1.55 }}>
             {PHMAX_SS_CALCULATION_BRANCH_GUIDE.lead}
           </p>
-          {PHMAX_SS_CALCULATION_BRANCH_GUIDE.branches.map((b, i) => (
+          {PHMAX_SS_CALCULATION_BRANCH_GUIDE.branches.map((b: PhmaxSsCalcBranch, i: number) => (
             <div key={i} style={{ marginBottom: 14 }}>
               <p className="muted-text" style={{ margin: "0 0 6px", lineHeight: 1.5 }}>
                 <strong>{b.question}</strong>
@@ -661,7 +668,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             {PHMAX_SS_PAR16_AVERAGE_PUPILS_GUIDE.intro}
           </p>
           <ol className="muted-text" style={{ margin: "0 0 14px", paddingLeft: "1.25rem", lineHeight: 1.55 }}>
-            {PHMAX_SS_PAR16_AVERAGE_PUPILS_GUIDE.steps.map((s, idx) => (
+            {PHMAX_SS_PAR16_AVERAGE_PUPILS_GUIDE.steps.map((s: string, idx: number) => (
               <li key={idx} style={{ marginBottom: 6 }}>
                 <strong>{idx + 1})</strong> {s}
               </li>
@@ -683,7 +690,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               </tr>
             </thead>
             <tbody>
-              {PHMAX_SS_PAR16_AVERAGE_PUPILS_GUIDE.exampleRows.map((r) => (
+              {PHMAX_SS_PAR16_AVERAGE_PUPILS_GUIDE.exampleRows.map((r: PhmaxSsPar16ExampleRow) => (
                 <tr key={r.className}>
                   <th scope="row">{r.className}</th>
                   <td className="sd-phmax-breakdown__num">{r.pupils}</td>
@@ -715,13 +722,13 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           <h3 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
             {s4.jednooborDaily.title}
           </h3>
-          {s4.jednooborDaily.paragraphs.map((p) => (
+          {s4.jednooborDaily.paragraphs.map((p: string) => (
             <p key={p} style={{ margin: "0 0 8px" }}>
               {p}
             </p>
           ))}
           <ol style={{ margin: "0 0 16px", paddingLeft: "1.25rem" }}>
-            {s4.jednooborDaily.flowSummary.map((s, i) => (
+            {s4.jednooborDaily.flowSummary.map((s: string, i: number) => (
               <li key={i} style={{ marginBottom: 4 }}>
                 {s}
               </li>
@@ -731,14 +738,14 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           <h3 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
             {s4.jednooborOtherForms.title}
           </h3>
-          {s4.jednooborOtherForms.paragraphs.map((p) => (
+          {s4.jednooborOtherForms.paragraphs.map((p: string) => (
             <p key={p} style={{ margin: "0 0 8px" }}>
               {p}
             </p>
           ))}
           <p style={{ margin: "0 0 6px", fontWeight: 600 }}>Koeficienty (NV č. 123/2018 Sb., § 2)</p>
           <ul style={{ margin: "0 0 16px", paddingLeft: "1.25rem" }}>
-            {PHMAX_SS_NV123_FORM_COEFFICIENTS.map((c) => (
+            {PHMAX_SS_NV123_FORM_COEFFICIENTS.map((c: PhmaxSsNv123FormCoefficient) => (
               <li key={c.label} style={{ marginBottom: 4 }}>
                 {c.label}: <strong>{c.value}</strong> násobek hodnoty PHmax
               </li>
@@ -748,13 +755,13 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           <h3 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
             {s4.multiDaily.title}
           </h3>
-          {s4.multiDaily.paragraphs.map((p) => (
+          {s4.multiDaily.paragraphs.map((p: string) => (
             <p key={p} style={{ margin: "0 0 8px" }}>
               {p}
             </p>
           ))}
           <ol style={{ margin: "0 0 16px", paddingLeft: "1.25rem" }}>
-            {s4.multiDaily.flowSummary.map((s, i) => (
+            {s4.multiDaily.flowSummary.map((s: string, i: number) => (
               <li key={i} style={{ marginBottom: 4 }}>
                 {s}
               </li>
@@ -764,7 +771,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           <h3 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
             {s4.multiOtherForms.title}
           </h3>
-          {s4.multiOtherForms.paragraphs.map((p) => (
+          {s4.multiOtherForms.paragraphs.map((p: string) => (
             <p key={p} style={{ margin: "0 0 8px" }}>
               {p}
             </p>
@@ -776,13 +783,13 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           <h3 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
             {s4.transitional.title}
           </h3>
-          {s4.transitional.paragraphs.map((p) => (
+          {s4.transitional.paragraphs.map((p: string) => (
             <p key={p} style={{ margin: "0 0 8px" }}>
               {p}
             </p>
           ))}
           <ol style={{ margin: "0 0 16px", paddingLeft: "1.25rem" }}>
-            {s4.transitional.flowSummary.map((s, i) => (
+            {s4.transitional.flowSummary.map((s: string, i: number) => (
               <li key={i} style={{ marginBottom: 4 }}>
                 {s}
               </li>
@@ -792,14 +799,14 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           <h3 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
             {s4.par16AndPractical.title}
           </h3>
-          {s4.par16AndPractical.paragraphs.map((p) => (
+          {s4.par16AndPractical.paragraphs.map((p: string) => (
             <p key={p} style={{ margin: "0 0 8px" }}>
               {p}
             </p>
           ))}
           <p style={{ margin: "0 0 6px", fontWeight: 600 }}>Schéma § 16 odst. 9 (shrnutí kroků)</p>
           <ol style={{ margin: "0 0 12px", paddingLeft: "1.25rem" }}>
-            {s4.par16AndPractical.par16FlowSummary.map((s, i) => (
+            {s4.par16AndPractical.par16FlowSummary.map((s: string, i: number) => (
               <li key={i} style={{ marginBottom: 4 }}>
                 {s}
               </li>
@@ -807,7 +814,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           </ol>
           <p style={{ margin: "0 0 6px", fontWeight: 600 }}>PHmax Praktická škola — postup a–e</p>
           <ol style={{ margin: "0 0 12px", paddingLeft: "1.25rem" }}>
-            {s4.par16AndPractical.practicalPhmaxSteps.map((s, i) => (
+            {s4.par16AndPractical.practicalPhmaxSteps.map((s: string, i: number) => (
               <li key={i} style={{ marginBottom: 4 }}>
                 {s}
               </li>
@@ -821,7 +828,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                 <tr>
                   <th scope="col">Kód</th>
                   <th scope="col">Obor</th>
-                  {PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE.colBands.map((h) => (
+                  {PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE.colBands.map((h: string) => (
                     <th key={h} scope="col" className="sd-phmax-breakdown__head-num" title={h}>
                       {h}
                     </th>
@@ -829,13 +836,13 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                 </tr>
               </thead>
               <tbody>
-                {PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE.rows.map((r) => (
+                {PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE.rows.map((r: PhmaxSsPracticalSchoolPhmaxRow) => (
                   <tr key={r.code}>
                     <td>
                       <code className="methodology-strip__code">{r.code}</code>
                     </td>
                     <td>{r.name}</td>
-                    {r.values.map((v, j) => (
+                    {r.values.map((v: number, j: number) => (
                       <td key={j} className="sd-phmax-breakdown__num">
                         {v}
                       </td>
@@ -849,7 +856,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
 
           <p style={{ margin: "0 0 6px", fontWeight: 600 }}>PHAmax Praktická škola — postup a–e</p>
           <ol style={{ margin: "0 0 12px", paddingLeft: "1.25rem" }}>
-            {s4.par16AndPractical.practicalPhamaxSteps.map((s, i) => (
+            {s4.par16AndPractical.practicalPhamaxSteps.map((s: string, i: number) => (
               <li key={i} style={{ marginBottom: 4 }}>
                 {s}
               </li>
@@ -862,7 +869,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                 <tr>
                   <th scope="col">Kód</th>
                   <th scope="col">Obor</th>
-                  {PHMAX_SS_PRACTICAL_SCHOOL_PHAMAX_TABLE.colBands.map((h) => (
+                  {PHMAX_SS_PRACTICAL_SCHOOL_PHAMAX_TABLE.colBands.map((h: string) => (
                     <th key={h} scope="col" className="sd-phmax-breakdown__head-num" title={h}>
                       {h}
                     </th>
@@ -870,13 +877,13 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                 </tr>
               </thead>
               <tbody>
-                {PHMAX_SS_PRACTICAL_SCHOOL_PHAMAX_TABLE.rows.map((r) => (
+                {PHMAX_SS_PRACTICAL_SCHOOL_PHAMAX_TABLE.rows.map((r: PhmaxSsPracticalSchoolPhamaxRow) => (
                   <tr key={r.code}>
                     <td>
                       <code className="methodology-strip__code">{r.code}</code>
                     </td>
                     <td>{r.name}</td>
-                    {r.values.map((v, j) => (
+                    {r.values.map((v: number, j: number) => (
                       <td key={j} className="sd-phmax-breakdown__num">
                         {v}
                       </td>
