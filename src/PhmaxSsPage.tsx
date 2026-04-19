@@ -43,8 +43,16 @@ import {
   PHMAX_SS_NV123_FORM_COEFFICIENTS,
   PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE,
   PHMAX_SS_PRACTICAL_SCHOOL_PHAMAX_TABLE,
-  SS_HERO_EXAMPLE_LEGEND,
 } from "./ss/phmax-ss-constants";
+import {
+  ssHeroExampleSnapshot,
+  SS_HERO_EXAMPLE_GROUP_AGGREGAT_JEDNO,
+  SS_HERO_EXAMPLE_GROUP_MATURITNI,
+  SS_HERO_EXAMPLE_GROUP_VICEOBOR,
+  SS_HERO_EXAMPLE_META,
+  SS_HERO_EXAMPLE_SELECT_LEGEND,
+  type SsHeroExampleKey,
+} from "./ss/phmax-ss-hero-examples";
 import { PhmaxSsUnitsForm, type SsDashboardMetrics } from "./ss/PhmaxSsUnitsForm";
 import { usePhmaxSsUnits, type SsNamedSnapshot } from "./ss/use-phmax-ss-units";
 
@@ -233,11 +241,31 @@ type PhmaxSsPageProps = {
   setProductView: (v: ProductView) => void;
 };
 
+function applySsHeroExampleSelection(
+  key: SsHeroExampleKey,
+  handlers: {
+    setSelected: (value: SsHeroExampleKey) => void;
+    applySnapshot: (snapshot: unknown) => void;
+    setNotice: (message: string) => void;
+  },
+) {
+  handlers.setSelected(key);
+  if (!key) return;
+  try {
+    const snapshot = ssHeroExampleSnapshot(key);
+    handlers.applySnapshot({ rows: snapshot.rows });
+    handlers.setNotice("Načten ukázkový příklad SŠ (orientační model).");
+  } catch {
+    handlers.setNotice("Ukázkový příklad SŠ se nepodařilo načíst.");
+  }
+}
+
 export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   const fw = PHMAX_SS_FRAMEWORK_FIRST_PHASE;
   const s4 = PHMAX_SS_SECTION4_PHMAX_GUIDE;
   const [ssMetrics, setSsMetrics] = useState<SsDashboardMetrics>({ rowCount: 1, phmaxTotal: 0 });
   const ss = usePhmaxSsUnits(setSsMetrics);
+  const [selectedSsHeroExample, setSelectedSsHeroExample] = useState<SsHeroExampleKey>("");
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [ssGuideOpen, setSsGuideOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
@@ -309,19 +337,57 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             </span>
             <select
               id="ss-hero-example-select"
+              className="input"
               aria-labelledby="ss-hero-example-label"
               aria-describedby="ss-hero-example-legend"
-              disabled
-              value=""
+              title="Ukázkový orientační příklad pro SŠ. Po načtení upravte vstupy podle reálné evidence tříd školy."
+              value={selectedSsHeroExample}
+              onChange={(e) =>
+                applySsHeroExampleSelection(e.target.value as SsHeroExampleKey, {
+                  setSelected: setSelectedSsHeroExample,
+                  applySnapshot: ss.applySsRowsSnapshot,
+                  setNotice: ss.setUiNotice,
+                })
+              }
             >
               <option value="">Vyberte ukázkový příklad…</option>
+              <optgroup label="Jednoobor a agregát">
+                {SS_HERO_EXAMPLE_GROUP_AGGREGAT_JEDNO.map((k) => {
+                  const m = SS_HERO_EXAMPLE_META[k];
+                  return (
+                    <option key={k} value={k} title={m.title}>
+                      {m.label}
+                    </option>
+                  );
+                })}
+              </optgroup>
+              <optgroup label="Maturitní obory (denní)">
+                {SS_HERO_EXAMPLE_GROUP_MATURITNI.map((k) => {
+                  const m = SS_HERO_EXAMPLE_META[k];
+                  return (
+                    <option key={k} value={k} title={m.title}>
+                      {m.label}
+                    </option>
+                  );
+                })}
+              </optgroup>
+              <optgroup label="Víceoborová třída">
+                {SS_HERO_EXAMPLE_GROUP_VICEOBOR.map((k) => {
+                  const m = SS_HERO_EXAMPLE_META[k];
+                  return (
+                    <option key={k} value={k} title={m.title}>
+                      {m.label}
+                    </option>
+                  );
+                })}
+              </optgroup>
             </select>
             <p
               id="ss-hero-example-legend"
               className="muted-text"
               style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "44rem", lineHeight: 1.5 }}
             >
-              {SS_HERO_EXAMPLE_LEGEND}
+              {SS_HERO_EXAMPLE_SELECT_LEGEND}
             </p>
           </div>
           <HeroActionsDrawer>

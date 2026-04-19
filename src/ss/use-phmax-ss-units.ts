@@ -416,6 +416,7 @@ export function usePhmaxSsUnits(
     roundedTotal,
     auditProtocolInput,
     schoolPhmaxExplain,
+    applySsRowsSnapshot,
     saveNamedSsSnapshot,
     restoreNamedSsSnapshot,
     deleteNamedSsSnapshot,
