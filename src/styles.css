@@ -2056,52 +2056,61 @@ input[type="radio"] {
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
 }
 
-/* SŠ: evidence tříd — větší čitelnost tabulky na menších monitorech */
-.app-table-wrap--ss-units {
-  overflow-x: auto;
-}
-
+/* SŠ: evidence tříd — tabulka do šířky karty (bez horizontálního posuvníku) */
 .ss-units-table {
-  min-width: 1560px;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 0;
 }
 
-@media (max-width: 1600px) {
-  .ss-units-table {
-    min-width: 1380px;
-  }
+.ss-units-table thead th {
+  white-space: normal;
+  word-break: break-word;
+  hyphens: auto;
+  line-height: 1.2;
+  font-size: 0.64rem;
+  padding: 8px 5px;
+  vertical-align: bottom;
 }
 
-@media (min-width: 1920px) {
-  .ss-units-table {
-    min-width: 1680px;
-  }
+.ss-units-table tbody td {
+  padding: 7px 5px;
 }
 
 .ss-units-table input.input,
 .ss-units-table select.input {
-  min-height: 40px;
-  font-size: 0.92rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  font-size: 0.82rem;
+  box-sizing: border-box;
 }
 
-.ss-units-table td:nth-child(1) .input {
-  min-width: 110px;
+.ss-units-table th:nth-child(4),
+.ss-units-table td:nth-child(4),
+.ss-units-table th:nth-child(7),
+.ss-units-table td:nth-child(7) {
+  width: 4.25rem;
 }
 
-.ss-units-table td:nth-child(2) .input {
-  min-width: 108px;
+.ss-units-table th:nth-child(8),
+.ss-units-table td:nth-child(8) {
+  width: 2.6rem;
+  text-align: center;
 }
 
-.ss-units-table td:nth-child(3) .input,
-.ss-units-table td:nth-child(4) .input,
-.ss-units-table td:nth-child(7) .input {
-  min-width: 72px;
+.ss-units-table th:last-child,
+.ss-units-table td:last-child {
+  width: 4.75rem;
 }
 
-.ss-units-table td:nth-child(9) .input,
-.ss-units-table td:nth-child(10) .input,
-.ss-units-table td:nth-child(11) .input,
-.ss-units-table td:nth-child(12) .input {
-  min-width: 120px;
+.ss-units-table td:last-child .btn {
+  width: 100%;
+  white-space: normal;
+  padding: 6px 4px;
+  font-size: 0.72rem;
+  line-height: 1.2;
 }
 
 @media (max-width: 720px) {
@@ -4303,6 +4312,11 @@ input[type="radio"] {
 
 .app-table-wrap--spaced {
   margin-top: 22px;
+}
+
+/* SŠ evidence: nepřetahovat obal — fixed tabulka drží šířku karty (nadřazené .app-table-wrap má overflow-x: auto) */
+.app-table-wrap.app-table-wrap--ss-units {
+  overflow-x: hidden;
 }
 
 .app-data-table {
