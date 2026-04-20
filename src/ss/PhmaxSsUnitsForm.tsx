@@ -193,8 +193,12 @@ function PhmaxSsUnitsFormView({
         </button>
       </div>
 
-      <ScrollGrabRegion className="app-table-wrap app-table-wrap--spaced" role="region" aria-labelledby="ss-units-heading">
-        <table className="app-data-table" aria-describedby={tableDescId}>
+      <ScrollGrabRegion
+        className="app-table-wrap app-table-wrap--spaced app-table-wrap--ss-units"
+        role="region"
+        aria-labelledby="ss-units-heading"
+      >
+        <table className="app-data-table ss-units-table" aria-describedby={tableDescId}>
           <caption className="app-data-table__caption">{sec.tableCaption}</caption>
           <thead>
             <tr>
