@@ -406,6 +406,10 @@ button.pill--hero-toggle--active {
   color: rgba(255, 255, 255, 0.86) !important;
 }
 
+.hero-zs-example-select .muted-text {
+  color: #fff !important;
+}
+
 /* ŠD: rychlé šablony oddělení — jeden řádek, výrazné tlačítka */
 .sd-dept-templates {
   display: flex;
@@ -870,6 +874,35 @@ button.pill--hero-toggle--active {
   z-index: 1;
 }
 
+/* ZŠ: přepínač PHmax/PHAmax/PHPmax ve stylu ŠD šablon */
+.tabs--sticky-sdlike .tab {
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  padding: 9px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+  color: #1e3a8a;
+  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  border: 2px solid #2563eb;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.22);
+}
+
+.tabs--sticky-sdlike .tab:hover,
+.tabs--sticky-sdlike .tab:focus-visible {
+  color: #172554;
+  border-color: #1d4ed8;
+  background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+}
+
+.tabs--sticky-sdlike .tab.active {
+  color: #fff;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  border-color: #1d4ed8;
+  box-shadow: 0 8px 18px rgba(29, 78, 216, 0.3);
+}
+
 .workspace-sticky__summary {
   margin: 0 !important;
   box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
@@ -953,6 +986,21 @@ button.pill--hero-toggle--active {
 
   .stack {
     scroll-margin-top: 8px;
+  }
+}
+
+/* ZŠ: sticky „Aktuální přehled“ vypnout na notebooku / nízkém okně (1366×768, 1600×900…),
+   na širokém Full HD (1920×1080) nechat zapnuté — šířka > 1760px nebo výška > 920px */
+@media (max-height: 760px), (max-width: 1760px) and (max-height: 920px) {
+  .workspace-sticky {
+    position: static;
+    top: auto;
+    z-index: auto;
+  }
+
+  .workspace-sticky .tabs--sticky {
+    position: static;
+    top: auto;
   }
 }
 
@@ -2006,6 +2054,54 @@ input[type="radio"] {
   border-radius: 16px;
   padding: 16px 18px;
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+}
+
+/* SŠ: evidence tříd — větší čitelnost tabulky na menších monitorech */
+.app-table-wrap--ss-units {
+  overflow-x: auto;
+}
+
+.ss-units-table {
+  min-width: 1560px;
+}
+
+@media (max-width: 1600px) {
+  .ss-units-table {
+    min-width: 1380px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .ss-units-table {
+    min-width: 1680px;
+  }
+}
+
+.ss-units-table input.input,
+.ss-units-table select.input {
+  min-height: 40px;
+  font-size: 0.92rem;
+}
+
+.ss-units-table td:nth-child(1) .input {
+  min-width: 110px;
+}
+
+.ss-units-table td:nth-child(2) .input {
+  min-width: 108px;
+}
+
+.ss-units-table td:nth-child(3) .input,
+.ss-units-table td:nth-child(4) .input,
+.ss-units-table td:nth-child(7) .input {
+  min-width: 72px;
+}
+
+.ss-units-table td:nth-child(9) .input,
+.ss-units-table td:nth-child(10) .input,
+.ss-units-table td:nth-child(11) .input,
+.ss-units-table td:nth-child(12) .input {
+  min-width: 120px;
 }
 
 @media (max-width: 720px) {
