@@ -56,6 +56,7 @@ import {
   SS_HERO_EXAMPLE_GROUP_AGGREGAT_JEDNO,
   SS_HERO_EXAMPLE_GROUP_GYMNAZIUM,
   SS_HERO_EXAMPLE_GROUP_MATURITNI,
+  SS_HERO_EXAMPLE_GROUP_PRIJIMACI,
   SS_HERO_EXAMPLE_GROUP_VICEOBOR,
   SS_HERO_EXAMPLE_META,
   SS_HERO_EXAMPLE_SELECT_LEGEND,
@@ -339,7 +340,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         </div>
 
         <div className="hero-actions">
-          <div className="field field--hero-select hero-actions__example">
+          <div className="field field--hero-select hero-actions__example hero-ss-example-select">
             <span className="field__label field__label--hero" id="ss-hero-example-label">
               Ukázkový příklad
             </span>
@@ -371,6 +372,16 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               </optgroup>
               <optgroup label="Maturitní obory (denní)">
                 {SS_HERO_EXAMPLE_GROUP_MATURITNI.map((k) => {
+                  const m = SS_HERO_EXAMPLE_META[k];
+                  return (
+                    <option key={k} value={k} title={m.title}>
+                      {m.label}
+                    </option>
+                  );
+                })}
+              </optgroup>
+              <optgroup label="Obory z praxe (přijímací řízení / výkaz)">
+                {SS_HERO_EXAMPLE_GROUP_PRIJIMACI.map((k) => {
                   const m = SS_HERO_EXAMPLE_META[k];
                   return (
                     <option key={k} value={k} title={m.title}>

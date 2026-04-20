@@ -104,12 +104,14 @@ function PhmaxSsUnitsFormView({
       <h2 id="ss-units-heading" className="section-title">
         {sec.heading}
       </h2>
-      <p id={tableDescId} className="muted-text" style={{ marginTop: 10, lineHeight: 1.55 }}>
-        {sec.lead}
-      </p>
-      <p className="muted-text" style={{ marginTop: 8, lineHeight: 1.55 }}>
-        {sec.storageNote}
-      </p>
+      <div className="ss-units-intro">
+        <p id={tableDescId} className="muted-text ss-units-intro__text">
+          {sec.lead}
+        </p>
+        <p className="muted-text ss-units-intro__text ss-units-intro__text--note">
+          {sec.storageNote}
+        </p>
+      </div>
 
       {hideBackupSubcard && uiNotice ? (
         <p className="muted-text" role="status" style={{ marginTop: 12, lineHeight: 1.5 }}>

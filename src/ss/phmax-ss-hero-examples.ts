@@ -8,7 +8,9 @@ export type SsHeroExampleKey =
   | "ill_ss_maturita_provoz_dopravy"
   | "ill_ss_gymnazium_ctyrleta"
   | "ill_ss_dvouobor_stavba"
-  | "ill_ss_tri_obor_auto";
+  | "ill_ss_tri_obor_auto"
+  | "ill_ss_prijimaci_obory_mix"
+  | "ill_ss_kuchar_cisnik_rvp";
 
 type SsHeroExampleSnapshot = {
   rows: Partial<PhmaxSsUnitRow>[];
@@ -23,6 +25,8 @@ export const SS_HERO_EXAMPLE_ORDER: readonly Exclude<SsHeroExampleKey, "">[] = [
   "ill_ss_gymnazium_ctyrleta",
   "ill_ss_dvouobor_stavba",
   "ill_ss_tri_obor_auto",
+  "ill_ss_prijimaci_obory_mix",
+  "ill_ss_kuchar_cisnik_rvp",
 ];
 
 export const SS_HERO_EXAMPLE_GROUP_AGGREGAT_JEDNO: readonly Exclude<SsHeroExampleKey, "">[] = [
@@ -43,6 +47,12 @@ export const SS_HERO_EXAMPLE_GROUP_GYMNAZIUM: readonly Exclude<SsHeroExampleKey,
 export const SS_HERO_EXAMPLE_GROUP_VICEOBOR: readonly Exclude<SsHeroExampleKey, "">[] = [
   "ill_ss_dvouobor_stavba",
   "ill_ss_tri_obor_auto",
+];
+
+/** Obory často uváděné u přijímacího řízení / ve výkazu (denní studium) — ilustrace, ne závazná evidence konkrétní školy. */
+export const SS_HERO_EXAMPLE_GROUP_PRIJIMACI: readonly Exclude<SsHeroExampleKey, "">[] = [
+  "ill_ss_prijimaci_obory_mix",
+  "ill_ss_kuchar_cisnik_rvp",
 ];
 
 export const SS_HERO_EXAMPLE_META: Record<Exclude<SsHeroExampleKey, "">, { label: string; title: string }> = {
@@ -80,6 +90,16 @@ export const SS_HERO_EXAMPLE_META: Record<Exclude<SsHeroExampleKey, "">, { label
     label: "Tříoborová třída — autoservis (tři obory H)",
     title:
       "Jedna třída se třemi obory vzdělání dle vyhl. č. 13/2005 Sb.; orientační rozložení žáků. Kontrola pravidel pro tří obory (E/H) je v sekci brules.",
+  },
+  ill_ss_prijimaci_obory_mix: {
+    label: "Soubor oborů — IT, gastronomie, podnikání, kuchař-číšník, cukrář, prodavač",
+    title:
+      "Šest samostatných řádků (jednooborově) pro kódy typické u přijímacího řízení denního studia: 18-20-M/01, 65-41-L/01, 64-41-L/51, 65-51-H/01, 29-54-H/01, 66-51-H/01. Průměry a počty tříd jsou orientační (řádově podle běžného výkazu SŠ); upravte podle skutečné evidence.",
+  },
+  ill_ss_kuchar_cisnik_rvp: {
+    label: "65-51-H/01 — tři zápisy zaměření (kuchař / číšník / obecně)",
+    title:
+      "Jeden kód RVP 65-51-H/01 pro obor Kuchař-číšník; zaměření kuchař nebo číšník se v rejstříku školy rozlišuje názvem oboru, ne jiným kódem. Tři řádky ilustrují zápis z přijímacího řízení (kuchař / číšník / obecný název) — PHmax se počítá z kódu a vstupů na řádku.",
   },
 };
 
@@ -260,6 +280,121 @@ export function ssHeroExampleSnapshot(key: Exclude<SsHeroExampleKey, "">): SsHer
             classCount: "1",
             classType: "tříoborová třída (obory skupiny H)",
             note: "Tři obory v jedné třídě; orientační rovnoměrné rozložení žáků. Slouží k náhledu PHmax a kontrole brules.",
+          },
+        ],
+      };
+
+    case "ill_ss_prijimaci_obory_mix":
+      return {
+        rows: [
+          {
+            id: 1,
+            label: "18-20-M/01 — Informační technologie",
+            educationField: "18-20-M/01",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "32,75",
+            classCount: "4",
+            classType: "jednooborová třída, denní, maturitní obor (M)",
+            note: "Čtyřletý obor; počty řádově odpovídají typickému členění po ročnících.",
+          },
+          {
+            id: 2,
+            label: "65-41-L/01 — Gastronomie",
+            educationField: "65-41-L/01",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "17,75",
+            classCount: "4",
+            classType: "jednooborová třída, denní, maturitní obor (L)",
+            note: "V rejstříku může být název rozšířený (např. gastronomie a hotelnictví) — kód RVP zůstává 65-41-L/01.",
+          },
+          {
+            id: 3,
+            label: "64-41-L/51 — Podnikání (nástavbové studium)",
+            educationField: "64-41-L/51",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "23",
+            classCount: "2",
+            classType: "jednooborová třída, denní, nástavba",
+          },
+          {
+            id: 4,
+            label: "65-51-H/01 — Kuchař-číšník",
+            educationField: "65-51-H/01",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "29,4",
+            classCount: "5",
+            classType: "jednooborová třída, denní (H)",
+            note: "Zaměření kuchař / číšník se v dokumentaci školy liší názvem; pro výpočet PHmax v aplikaci stačí kód 65-51-H/01.",
+          },
+          {
+            id: 5,
+            label: "29-54-H/01 — Cukrář",
+            educationField: "29-54-H/01",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "30,33",
+            classCount: "3",
+            classType: "jednooborová třída, denní (H)",
+          },
+          {
+            id: 6,
+            label: "66-51-H/01 — Prodavač",
+            educationField: "66-51-H/01",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "12,5",
+            classCount: "2",
+            classType: "jednooborová třída, denní (H)",
+          },
+        ],
+      };
+
+    case "ill_ss_kuchar_cisnik_rvp":
+      return {
+        rows: [
+          {
+            id: 1,
+            label: "Přijímací řízení — 65-51-H/01, kuchař",
+            educationField: "65-51-H/01",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "26",
+            classCount: "1",
+            classType: "jednooborová třída, zaměření kuchař",
+            note: "Stejný kód 65-51-H/01 jako u číšníka — ilustrace zápisu z přehledu oborů.",
+          },
+          {
+            id: 2,
+            label: "Přijímací řízení — 65-51-H/01, číšník",
+            educationField: "65-51-H/01",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "24",
+            classCount: "1",
+            classType: "jednooborová třída, zaměření číšník",
+          },
+          {
+            id: 3,
+            label: "Přijímací řízení — 65-51-H/01 (Kuchař – číšník)",
+            educationField: "65-51-H/01",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "25",
+            classCount: "1",
+            classType: "jednooborová třída, obecný název oboru",
           },
         ],
       };
