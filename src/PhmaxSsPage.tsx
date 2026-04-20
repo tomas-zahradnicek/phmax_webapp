@@ -275,7 +275,11 @@ function applySsHeroExampleSelection(
 export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   const fw = PHMAX_SS_FRAMEWORK_FIRST_PHASE;
   const s4 = PHMAX_SS_SECTION4_PHMAX_GUIDE;
-  const [ssMetrics, setSsMetrics] = useState<SsDashboardMetrics>({ rowCount: 1, phmaxTotal: 0 });
+  const [ssMetrics, setSsMetrics] = useState<SsDashboardMetrics>({
+    rowCount: 1,
+    phmaxTotal: 0,
+    phamaxTotal: null,
+  });
   const ss = usePhmaxSsUnits(setSsMetrics);
   const [selectedSsHeroExample, setSelectedSsHeroExample] = useState<SsHeroExampleKey>("");
   const [glossaryOpen, setGlossaryOpen] = useState(false);
@@ -290,6 +294,14 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
+
+  const phamaxHeroValue =
+    ssMetrics.phamaxTotal == null
+      ? "–"
+      : ssMetrics.phamaxTotal.toLocaleString("cs-CZ", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        });
 
   return (
     <>
@@ -337,7 +349,15 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             <HeroStat label="Aktivní modul" value="PHmax SŠ" />
             <HeroStat label="Zvolený režim" value="Evidence dílčích jednotek" />
             <HeroStat label="Výsledek PHmax" value={phmaxHeroValue} />
-            <HeroStat label="Výsledek PHAmax" value="–" />
+            <HeroStat
+              label="Výsledek PHAmax"
+              value={phamaxHeroValue}
+              title={
+                ssMetrics.phamaxTotal == null
+                  ? "PHAmax v aplikaci počítáme jen pro Praktickou školu (78-62-C/01, 78-62-C/02) v denní formě podle tabulky metodiky. Jiné obory: použijte metodiku / výkaz."
+                  : "Součet PHAmax pro řádky PrŠ (78-62-C/01, 78-62-C/02), denní forma, podle přílohy metodiky. Ostatní typy tříd nejsou v tomto součtu."
+              }
+            />
             <HeroStat label="Řádků ve formuláři" value={ssMetrics.rowCount} />
           </div>
         </div>

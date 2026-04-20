@@ -23,6 +23,7 @@ import {
 } from "./phmax-ss-constants";
 import { phmaxSsDataset } from "./phmax-ss-dataset";
 import { explainFullPhmaxDecision } from "./phmax-ss-explainability";
+import { sumPracticalSchoolPhaMaxFromRows } from "./phmax-ss-practical-phamax";
 import {
   buildSsAuditProtocolInput,
   deriveSsUnitsBrulesPreview,
@@ -82,6 +83,7 @@ function buildSsExportValueRows(
   rows: PhmaxSsUnitRow[],
   roundedTotal: number,
   exportLabel: string,
+  phamaxPracticalTotal: number | null,
 ): [string, string | number][] {
   const sec = PHMAX_SS_UNITS_SECTION;
   const out: [string, string | number][] = [];
@@ -89,6 +91,12 @@ function buildSsExportValueRows(
     out.push(["Označení pro export", exportLabel.trim()]);
   }
   out.push(["Součet PHmax (orientačně, platné řádky)", roundedTotal]);
+  if (phamaxPracticalTotal != null) {
+    out.push([
+      "Součet PHAmax (PrŠ 78-62-C/01, 78-62-C/02, denní forma — tabulka metodiky)",
+      phamaxPracticalTotal,
+    ]);
+  }
   out.push(["Počet řádků ve formuláři", rows.length]);
   rows.forEach((r, i) => {
     const prefix = `Řádek ${i + 1} (id ${r.id})`;
@@ -112,17 +120,26 @@ function buildSsPlainSummary(params: {
   exportLabel: string;
   roundedTotal: number;
   rowCount: number;
+  phamaxPracticalTotal: number | null;
 }): string {
   const lines = [
     "PHmax SŠ – textové shrnutí (orientační)",
     params.exportLabel.trim() ? `Označení pro export: ${params.exportLabel.trim()}` : null,
     `Počet řádků: ${params.rowCount}`,
     `Součet PHmax (platné řádky): ${params.roundedTotal}`,
+    params.phamaxPracticalTotal != null
+      ? `Součet PHAmax (PrŠ, denní, tabulka metodiky): ${params.phamaxPracticalTotal}`
+      : null,
   ].filter(Boolean) as string[];
   return lines.join("\n");
 }
 
-export type SsDashboardMetrics = { rowCount: number; phmaxTotal: number };
+export type SsDashboardMetrics = {
+  rowCount: number;
+  phmaxTotal: number;
+  /** Součet PHAmax jen pro Praktickou školu (kódy 78-62-C/01, 78-62-C/02, denní forma); jinak `null`. */
+  phamaxTotal: number | null;
+};
 
 export function usePhmaxSsUnits(
   onDashboardMetrics?: (m: SsDashboardMetrics) => void,
@@ -178,9 +195,15 @@ export function usePhmaxSsUnits(
   const totalPhmax = computedRows.reduce((s, p) => s + (p.resolved?.totalPhmax ?? 0), 0);
   const roundedTotal = Math.round((totalPhmax + Number.EPSILON) * 100) / 100;
 
+  const phamaxPracticalTotal = useMemo(() => sumPracticalSchoolPhaMaxFromRows(rows), [rows]);
+
   useEffect(() => {
-    onDashboardMetrics?.({ rowCount: rows.length, phmaxTotal: roundedTotal });
-  }, [rows.length, roundedTotal, onDashboardMetrics]);
+    onDashboardMetrics?.({
+      rowCount: rows.length,
+      phmaxTotal: roundedTotal,
+      phamaxTotal: phamaxPracticalTotal,
+    });
+  }, [rows.length, roundedTotal, phamaxPracticalTotal, onDashboardMetrics]);
 
   const auditProtocolInput = useMemo(() => buildSsAuditProtocolInput(rows), [rows]);
 
@@ -326,8 +349,8 @@ export function usePhmaxSsUnits(
   }, []);
 
   const exportValueRows = useMemo(
-    () => buildSsExportValueRows(rows, roundedTotal, exportLabel),
-    [rows, roundedTotal, exportLabel],
+    () => buildSsExportValueRows(rows, roundedTotal, exportLabel, phamaxPracticalTotal),
+    [rows, roundedTotal, exportLabel, phamaxPracticalTotal],
   );
 
   const handleExportCsv = useCallback(() => {
@@ -364,17 +387,27 @@ export function usePhmaxSsUnits(
   }, [exportValueRows, xlsxExportBusy]);
 
   const copySummaryToClipboard = useCallback(async () => {
-    const text = buildSsPlainSummary({ exportLabel, roundedTotal, rowCount: rows.length });
+    const text = buildSsPlainSummary({
+      exportLabel,
+      roundedTotal,
+      rowCount: rows.length,
+      phamaxPracticalTotal,
+    });
     try {
       await navigator.clipboard.writeText(text);
       setUiNotice("Shrnutí bylo zkopírováno do schránky.");
     } catch {
       setUiNotice("Kopírování do schránky se nepodařilo.");
     }
-  }, [exportLabel, roundedTotal, rows.length]);
+  }, [exportLabel, roundedTotal, rows.length, phamaxPracticalTotal]);
 
   const printSummaryWindow = useCallback(() => {
-    const plain = buildSsPlainSummary({ exportLabel, roundedTotal, rowCount: rows.length });
+    const plain = buildSsPlainSummary({
+      exportLabel,
+      roundedTotal,
+      rowCount: rows.length,
+      phamaxPracticalTotal,
+    });
     const text = plain.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
     const win = window.open("", "_blank", "width=900,height=700");
     if (!win) return;
@@ -390,7 +423,7 @@ export function usePhmaxSsUnits(
     win.document.close();
     win.focus();
     win.print();
-  }, [exportLabel, roundedTotal, rows.length]);
+  }, [exportLabel, roundedTotal, rows.length, phamaxPracticalTotal]);
 
   return {
     rows,

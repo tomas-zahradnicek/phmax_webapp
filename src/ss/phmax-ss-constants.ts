@@ -31,7 +31,7 @@ export const PHMAX_SS_FRAMEWORK_FIRST_PHASE = {
   lead:
     "U středního vzdělávání se podle metodiky pracuje s dílčími jednotkami (typicky třída nebo skupina) zvlášť podle kombinace oboru, formy a typu. PHmax a PHAmax jsou dva oddělené rámce – přebytky z jednoho nelze přelévat do druhého.",
   implementationNote:
-    "Evidence dílčích jednotek a orientační PHmax (jednooborový režim z datasetu) jsou v sekci 2; dále doplníme PHAmax, víceoborové režimy a validace podle plné metodiky.",
+    "Sekce 2 eviduje dílčí jednotky (řádky), počítá orientační PHmax z datasetu NV podle zvoleného režimu a formy, kontrolu pravidel pro víceoborové třídy (sloupce Další obory / žáci) a součet PHAmax pro Praktickou školu (kódy 78-62-C/01 a 78-62-C/02, denní forma) podle tabulky z metodiky. Další dílčí výpočty PHAmax dle metodiky mimo PrŠ zatím v aplikaci nejsou.",
   inputs: [
     "Evidence dílčích jednotek výpočtu: vždy zvlášť podle oboru vzdělání, formy a typu třídy (jak metodika vyžaduje rozlišovat).",
     "Údaje pro stanovení povinného minima přímé pedagogické činnosti dle nařízení vlády a metodiky.",
@@ -45,11 +45,11 @@ export const PHMAX_SS_FRAMEWORK_FIRST_PHASE = {
   ],
 } as const;
 
-/** Druhá sekce – evidence řádků + orientační PHmax z datasetu (jednooborový režim). */
+/** Druhá sekce – evidence řádků + orientační PHmax z datasetu; PHAmax pro PrŠ z tabulky metodiky. */
 export const PHMAX_SS_UNITS_SECTION = {
   heading: "2. fáze: evidence tříd a skupin",
   lead:
-    "Každý řádek je jedna dílčí jednotka. „Kód oboru“ = přesný kód z RVP (např. 82-51-L/51). Sloupec „Režim PHmax“ může zůstat Automaticky (výběr podle „Oborů ve třídě“ a příznaku „Talent 82“) nebo režim ručně vynutit. PHAmax a pravidla pro skutečné víceoborové třídy (více kódů v jedné třídě) doplníme.",
+    "Každý řádek je jedna dílčí jednotka. „Kód oboru“ = přesný kód z RVP (např. 82-51-L/51). Sloupec „Režim PHmax“ může zůstat Automaticky (výběr podle „Oborů ve třídě“ a příznaku „Talent 82“) nebo režim ručně vynutit. U více oborů v jedné třídě vyplňte „Další obory“ a volitelně „Žáci / obor“ — níže proběhne kontrola pravidel. PHAmax v horním přehledu se pro tuto verzi aplikace počítá jen u Praktické školy (78-62-C/01, 78-62-C/02) v denní formě podle tabulky metodiky; u ostatních oborů použijte plný postup MŠMT.",
   tableCaption: "Dílčí jednotky výpočtu (třída / skupina)",
   colLabel: "Třída / skupina",
   colEducationField: "Kód oboru",

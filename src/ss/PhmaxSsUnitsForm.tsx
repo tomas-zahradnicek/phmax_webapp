@@ -25,7 +25,11 @@ import type { PhmaxSsUnitsModel } from "./use-phmax-ss-units";
 export type { SsDashboardMetrics } from "./use-phmax-ss-units";
 
 /** Stejný tvar jako `SsDashboardMetrics` z hooku – explicitně zde kvůli stabilnímu `tsc` v CI. */
-type OnSsDashboardMetrics = (m: { rowCount: number; phmaxTotal: number }) => void;
+type OnSsDashboardMetrics = (m: {
+  rowCount: number;
+  phmaxTotal: number;
+  phamaxTotal: number | null;
+}) => void;
 
 function joinRuleMessages(msgs: readonly { message: string }[]): string {
   return msgs.map((m) => m.message).join(" · ");
