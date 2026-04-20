@@ -406,7 +406,8 @@ button.pill--hero-toggle--active {
   color: rgba(255, 255, 255, 0.86) !important;
 }
 
-.hero-zs-example-select .muted-text {
+.hero-zs-example-select .muted-text,
+.hero-ss-example-select .muted-text {
   color: #fff !important;
 }
 
@@ -2045,6 +2046,31 @@ input[type="radio"] {
 }
 .section-card--ss::before { background: linear-gradient(90deg, #4338ca, #6366f1); }
 .section-card--ss::after { background: radial-gradient(circle, rgba(99,102,241,0.14), transparent 70%); }
+
+/* SŠ „2. fáze: evidence…“ — čitelnější úvod než samotná .muted-text na bílé ploše */
+.section-card--ss .ss-units-intro {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(67, 56, 202, 0.1) 0%, rgba(248, 250, 252, 0.98) 55%, #f8fafc 100%);
+  border: 1px solid rgba(67, 56, 202, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.section-card--ss .ss-units-intro__text {
+  margin: 0;
+  color: #0f172a !important;
+  font-size: 0.93rem;
+  line-height: 1.58;
+  font-weight: 500;
+}
+
+.section-card--ss .ss-units-intro__text--note {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  color: #334155 !important;
+  font-weight: 400;
+}
 
 /* SŠ hero: kompaktní statistiky jako PV/ŠD (ne jedna vysoká karta) */
 /* SŠ: akce a zálohy uvnitř bílé karty (ne drawer z modrého hero – špatný kontrast mřížky) */
