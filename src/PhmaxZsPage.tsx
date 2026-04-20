@@ -1987,7 +1987,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </div>
 
           <div className="hero-actions">
-            <div className="field field--hero-select hero-actions__example">
+            <div className="field field--hero-select hero-actions__example hero-zs-example-select">
               <span className="field__label field__label--hero" id="zs-hero-example-label">
                 Ukázkový příklad
               </span>
@@ -2385,7 +2385,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         )}
 
         <div className="workspace-sticky" id="workspace-results-dock" ref={workspaceStickyRef}>
-          <div className="tabs tabs--sticky">
+          <div className="tabs tabs--sticky tabs--sticky-sdlike">
             <button type="button" className={tab === "phmax" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("phmax")}>PHmax</button>
             <button type="button" className={tab === "pha" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("pha")}>PHAmax</button>
             <button type="button" className={tab === "php" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("php")}>PHPmax</button>
