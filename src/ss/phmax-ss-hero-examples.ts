@@ -10,7 +10,13 @@ export type SsHeroExampleKey =
   | "ill_ss_dvouobor_stavba"
   | "ill_ss_tri_obor_auto"
   | "ill_ss_prijimaci_obory_mix"
-  | "ill_ss_kuchar_cisnik_rvp";
+  | "ill_ss_kuchar_cisnik_rvp"
+  | "ill_ss_srovnani_denni_vecerni"
+  | "ill_ss_dalkova_jednoobor"
+  | "ill_ss_auto_dvoubor_eh"
+  | "ill_ss_82_talent_dvouobor"
+  | "ill_ss_prakticka_skola"
+  | "ill_ss_sec16_trida";
 
 type SsHeroExampleSnapshot = {
   rows: Partial<PhmaxSsUnitRow>[];
@@ -27,6 +33,12 @@ export const SS_HERO_EXAMPLE_ORDER: readonly Exclude<SsHeroExampleKey, "">[] = [
   "ill_ss_tri_obor_auto",
   "ill_ss_prijimaci_obory_mix",
   "ill_ss_kuchar_cisnik_rvp",
+  "ill_ss_srovnani_denni_vecerni",
+  "ill_ss_dalkova_jednoobor",
+  "ill_ss_auto_dvoubor_eh",
+  "ill_ss_82_talent_dvouobor",
+  "ill_ss_prakticka_skola",
+  "ill_ss_sec16_trida",
 ];
 
 export const SS_HERO_EXAMPLE_GROUP_AGGREGAT_JEDNO: readonly Exclude<SsHeroExampleKey, "">[] = [
@@ -53,6 +65,24 @@ export const SS_HERO_EXAMPLE_GROUP_VICEOBOR: readonly Exclude<SsHeroExampleKey, 
 export const SS_HERO_EXAMPLE_GROUP_PRIJIMACI: readonly Exclude<SsHeroExampleKey, "">[] = [
   "ill_ss_prijimaci_obory_mix",
   "ill_ss_kuchar_cisnik_rvp",
+];
+
+/** Forma studia, koeficienty a automatický výběr režimu PHmax (bez překryvu s přijímacím mixem). */
+export const SS_HERO_EXAMPLE_GROUP_FORMA_REGIME: readonly Exclude<SsHeroExampleKey, "">[] = [
+  "ill_ss_srovnani_denni_vecerni",
+  "ill_ss_dalkova_jednoobor",
+  "ill_ss_auto_dvoubor_eh",
+];
+
+/** Skupina oborů 82 + příznak talentové třídy. */
+export const SS_HERO_EXAMPLE_GROUP_82_TALENT: readonly Exclude<SsHeroExampleKey, "">[] = [
+  "ill_ss_82_talent_dvouobor",
+];
+
+/** Praktická škola a třída zřízená podle § 16 odst. 9 (metodický kontext ve vstupech). */
+export const SS_HERO_EXAMPLE_GROUP_SPECIAL_TYP: readonly Exclude<SsHeroExampleKey, "">[] = [
+  "ill_ss_prakticka_skola",
+  "ill_ss_sec16_trida",
 ];
 
 export const SS_HERO_EXAMPLE_META: Record<Exclude<SsHeroExampleKey, "">, { label: string; title: string }> = {
@@ -101,10 +131,40 @@ export const SS_HERO_EXAMPLE_META: Record<Exclude<SsHeroExampleKey, "">, { label
     title:
       "Jeden kód RVP 65-51-H/01 pro obor Kuchař-číšník; zaměření kuchař nebo číšník se v rejstříku školy rozlišuje názvem oboru, ne jiným kódem. Tři řádky ilustrují zápis z přijímacího řízení (kuchař / číšník / obecný název) — PHmax se počítá z kódu a vstupů na řádku.",
   },
+  ill_ss_srovnani_denni_vecerni: {
+    label: "Srovnání — denní vs večerní (stejný kód oboru)",
+    title:
+      "Dva řádky se stejným kódem 39-41-L/01 (Autotronik); liší se jen forma studia. Ukázka dopadu koeficientu formy na upravený PHmax. Čísla jsou orientační.",
+  },
+  ill_ss_dalkova_jednoobor: {
+    label: "Dálková forma — jednoobor (IT)",
+    title:
+      "Jeden řádek, jednooborově, dálková forma studia. Slouží k ověření koeficientu oproti dennímu studiu u stejného RVP kódu.",
+  },
+  ill_ss_auto_dvoubor_eh: {
+    label: "Automaticky — dvouobor E + H (jedna třída)",
+    title:
+      "Režim PHmax necháte prázdný (Automaticky); počet oborů ve třídě = 2, hlavní kód E (23-51-E/01), druhý obor H (36-67-H/01). Aplikace zvolí režim „dva obory (E/H)“. Sloupce Další obory / žáci doplňte podle evidence.",
+  },
+  ill_ss_82_talent_dvouobor: {
+    label: "Skupina 82 — talentová třída, dva obory (umělecký kmen)",
+    title:
+      "Obory skupiny 82 (82-41-M/01 + 82-41-M/02), zapnutý příznak Talent 82, Automaticky — očekává se režim „dva obory (82)“. Ilustrace kombinace skupiny 82 a talentové třídy.",
+  },
+  ill_ss_prakticka_skola: {
+    label: "Praktická škola — jednoletý obor (78-62-C/01)",
+    title:
+      "Jednooborová třída s kódem praktické školy z RVP; denní forma. Slouží jako oddělená šablona od běžného maturitního kmene.",
+  },
+  ill_ss_sec16_trida: {
+    label: "Třída podle § 16 odst. 9 — metodická poznámka u řádku",
+    title:
+      "Stejný vstup jako běžná třída (79-41-K/41), ale v poznámce a typu třídy je uvedeno zřízení podle § 16 odst. 9. V aplikaci jde o orientační PHmax z řádku; oddělené účtování dle metodiky MŠMT řeší škola v plném výkazu.",
+  },
 };
 
 export const SS_HERO_EXAMPLE_SELECT_LEGEND =
-  "Příklady jsou anonymní a slouží jako výchozí šablony (jednoobor, gymnázium, odborné maturitní obory, víceoborová třída). Údaje upravte podle evidence školy; výsledky ověřte vůči metodice MŠMT a oficiálním výstupům.";
+  "Příklady jsou anonymní šablony (jednoobor, gymnázium, maturitní obory, víceoborová třída, přijímací řízení, forma studia a režim, skupina 82 / talent, PrŠ, § 16/9). Údaje upravte podle evidence školy; výsledky ověřte vůči metodice MŠMT a oficiálním výstupům.";
 
 export function ssHeroExampleSnapshot(key: Exclude<SsHeroExampleKey, "">): SsHeroExampleSnapshot {
   switch (key) {
@@ -395,6 +455,130 @@ export function ssHeroExampleSnapshot(key: Exclude<SsHeroExampleKey, "">): SsHer
             averageStudents: "25",
             classCount: "1",
             classType: "jednooborová třída, obecný název oboru",
+          },
+        ],
+      };
+
+    case "ill_ss_srovnani_denni_vecerni":
+      return {
+        rows: [
+          {
+            id: 1,
+            label: "Autotronik — denní forma",
+            educationField: "39-41-L/01",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "22",
+            classCount: "1",
+            classType: "jednooborová třída",
+            note: "Stejný kód jako řádek níže — pro srovnání koeficientu formy studia.",
+          },
+          {
+            id: 2,
+            label: "Autotronik — večerní forma",
+            educationField: "39-41-L/01",
+            studyForm: "vecerni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "22",
+            classCount: "1",
+            classType: "jednooborová třída",
+          },
+        ],
+      };
+
+    case "ill_ss_dalkova_jednoobor":
+      return {
+        rows: [
+          {
+            id: 1,
+            label: "IT — dálkové studium",
+            educationField: "18-20-M/01",
+            studyForm: "dalkova",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "28",
+            classCount: "2",
+            classType: "jednooborová třída, dálková forma",
+            note: "Ukázka koeficientu u dálkové formy; upravte počty podle evidence.",
+          },
+        ],
+      };
+
+    case "ill_ss_auto_dvoubor_eh":
+      return {
+        rows: [
+          {
+            id: 1,
+            label: "Společná třída — strojírenské práce (E) + zedník (H)",
+            educationField: "23-51-E/01",
+            studyForm: "denni",
+            phmaxMode: "",
+            oborCountInClass: "2",
+            additionalOborCodes: "36-67-H/01",
+            oborStudentCountsRaw: "23-51-E/01:12\n36-67-H/01:12",
+            averageStudents: "24",
+            classCount: "1",
+            classType: "dvouoborová třída (E + H)",
+            note: "Režim PHmax = Automaticky — aplikace zvolí režim pro dva obory (E/H).",
+          },
+        ],
+      };
+
+    case "ill_ss_82_talent_dvouobor":
+      return {
+        rows: [
+          {
+            id: 1,
+            label: "1. ročník — talentová třída, dva obory skupiny 82",
+            educationField: "82-41-M/01",
+            studyForm: "denni",
+            phmaxMode: "",
+            oborCountInClass: "2",
+            additionalOborCodes: "82-41-M/02",
+            oborStudentCountsRaw: "82-41-M/01:10\n82-41-M/02:10",
+            averageStudents: "20",
+            classCount: "1",
+            classType: "dvouoborová třída, skupina 82",
+            isArt82TalentClass: true,
+            note: "Zaškrtnutý Talent 82 + dva obory v kmeni 82 — Automaticky → typicky režim „dva obory (82)“.",
+          },
+        ],
+      };
+
+    case "ill_ss_prakticka_skola":
+      return {
+        rows: [
+          {
+            id: 1,
+            label: "Praktická škola — jednoletá",
+            educationField: "78-62-C/01",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "8",
+            classCount: "1",
+            classType: "jednooborová třída, praktická škola",
+            note: "Kód 78-62-C/01 — zvláštní tabulka v metodice; vstup v aplikaci jako u ostatních oborů.",
+          },
+        ],
+      };
+
+    case "ill_ss_sec16_trida":
+      return {
+        rows: [
+          {
+            id: 1,
+            label: "Třída § 16/9 — ilustrace (gymnázium)",
+            educationField: "79-41-K/41",
+            studyForm: "denni",
+            phmaxMode: "oneObor",
+            oborCountInClass: "1",
+            averageStudents: "18",
+            classCount: "1",
+            classType: "třída zřízená podle § 16 odst. 9 školského zákona",
+            note: "Metodika stanovuje PHmax/PHAmax pro § 16/9 zvlášť — tento řádek slouží k orientačnímu náhledu; doplňte podle pokynů MŠMT.",
           },
         ],
       };

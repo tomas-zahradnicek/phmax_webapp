@@ -53,10 +53,13 @@ import {
 } from "./ss/phmax-ss-methodology-guides";
 import {
   ssHeroExampleSnapshot,
+  SS_HERO_EXAMPLE_GROUP_82_TALENT,
   SS_HERO_EXAMPLE_GROUP_AGGREGAT_JEDNO,
+  SS_HERO_EXAMPLE_GROUP_FORMA_REGIME,
   SS_HERO_EXAMPLE_GROUP_GYMNAZIUM,
   SS_HERO_EXAMPLE_GROUP_MATURITNI,
   SS_HERO_EXAMPLE_GROUP_PRIJIMACI,
+  SS_HERO_EXAMPLE_GROUP_SPECIAL_TYP,
   SS_HERO_EXAMPLE_GROUP_VICEOBOR,
   SS_HERO_EXAMPLE_META,
   SS_HERO_EXAMPLE_SELECT_LEGEND,
@@ -402,6 +405,36 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               </optgroup>
               <optgroup label="Víceoborová třída">
                 {SS_HERO_EXAMPLE_GROUP_VICEOBOR.map((k) => {
+                  const m = SS_HERO_EXAMPLE_META[k];
+                  return (
+                    <option key={k} value={k} title={m.title}>
+                      {m.label}
+                    </option>
+                  );
+                })}
+              </optgroup>
+              <optgroup label="Forma studia a režim">
+                {SS_HERO_EXAMPLE_GROUP_FORMA_REGIME.map((k) => {
+                  const m = SS_HERO_EXAMPLE_META[k];
+                  return (
+                    <option key={k} value={k} title={m.title}>
+                      {m.label}
+                    </option>
+                  );
+                })}
+              </optgroup>
+              <optgroup label="Skupina 82 / talent">
+                {SS_HERO_EXAMPLE_GROUP_82_TALENT.map((k) => {
+                  const m = SS_HERO_EXAMPLE_META[k];
+                  return (
+                    <option key={k} value={k} title={m.title}>
+                      {m.label}
+                    </option>
+                  );
+                })}
+              </optgroup>
+              <optgroup label="Zvláštní typ školy (PrŠ, § 16/9)">
+                {SS_HERO_EXAMPLE_GROUP_SPECIAL_TYP.map((k) => {
                   const m = SS_HERO_EXAMPLE_META[k];
                   return (
                     <option key={k} value={k} title={m.title}>
