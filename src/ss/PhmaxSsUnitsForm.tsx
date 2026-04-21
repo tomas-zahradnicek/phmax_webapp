@@ -214,152 +214,160 @@ function PhmaxSsUnitsFormView({
               <th scope="col">{sec.colClassCount}</th>
               <th scope="col">{sec.colStudyForm}</th>
               <th scope="col">{sec.colPhmaxMode}</th>
+              <th scope="col" rowSpan={2}>
+                Akce
+              </th>
+            </tr>
+            <tr>
               <th scope="col">{sec.colOborCountInClass}</th>
               <th scope="col">{sec.colArt82Talent}</th>
               <th scope="col">{sec.colAdditionalObors}</th>
               <th scope="col">{sec.colOborStudentCounts}</th>
               <th scope="col">{sec.colClassType}</th>
               <th scope="col">{sec.colNote}</th>
-              <th scope="col">Akce</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.id}>
-                <td>
-                  <input
-                    type="text"
-                    className="input"
-                    value={row.label}
-                    onChange={(e) => updateRow(row.id, { label: e.target.value })}
-                    aria-label={`${sec.colLabel}, řádek ${row.id}`}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="input"
-                    value={row.educationField}
-                    onChange={(e) => updateRow(row.id, { educationField: e.target.value })}
-                    aria-label={`${sec.colEducationField}, řádek ${row.id}`}
-                    spellCheck={false}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="input"
-                    inputMode="decimal"
-                    value={row.averageStudents}
-                    onChange={(e) => updateRow(row.id, { averageStudents: e.target.value })}
-                    aria-label={`${sec.colAvgStudents}, řádek ${row.id}`}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="input"
-                    inputMode="numeric"
-                    value={row.classCount}
-                    onChange={(e) => updateRow(row.id, { classCount: e.target.value })}
-                    aria-label={`${sec.colClassCount}, řádek ${row.id}`}
-                  />
-                </td>
-                <td>
-                  <select
-                    className="input"
-                    value={row.studyForm}
-                    onChange={(e) => updateRow(row.id, { studyForm: e.target.value as StudyForm })}
-                    aria-label={`${sec.colStudyForm}, řádek ${row.id}`}
-                  >
-                    {PHMAX_SS_STUDY_FORM_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  <select
-                    className="input"
-                    value={row.phmaxMode}
-                    onChange={(e) =>
-                      updateRow(row.id, { phmaxMode: e.target.value as "" | ModeKey })
-                    }
-                    aria-label={`${sec.colPhmaxMode}, řádek ${row.id}`}
-                  >
-                    {PHMAX_SS_MODE_OPTIONS.map((o) => (
-                      <option key={o.value || "auto"} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="input"
-                    inputMode="numeric"
-                    value={row.oborCountInClass}
-                    onChange={(e) => updateRow(row.id, { oborCountInClass: e.target.value })}
-                    aria-label={`${sec.colOborCountInClass}, řádek ${row.id}`}
-                    title="Pro režim „Automaticky“; při ručním režimu se pole typicky nechá 1."
-                  />
-                </td>
-                <td style={{ textAlign: "center", verticalAlign: "middle" }}>
-                  <input
-                    type="checkbox"
-                    checked={row.isArt82TalentClass}
-                    onChange={(e) => updateRow(row.id, { isArt82TalentClass: e.target.checked })}
-                    aria-label={`${sec.colArt82Talent}, řádek ${row.id}`}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="input"
-                    value={row.additionalOborCodes}
-                    onChange={(e) => updateRow(row.id, { additionalOborCodes: e.target.value })}
-                    aria-label={`${sec.colAdditionalObors}, řádek ${row.id}`}
-                    placeholder="kód, kód…"
-                    spellCheck={false}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="input"
-                    value={row.oborStudentCountsRaw}
-                    onChange={(e) => updateRow(row.id, { oborStudentCountsRaw: e.target.value })}
-                    aria-label={`${sec.colOborStudentCounts}, řádek ${row.id}`}
-                    placeholder="KÓD:15 …"
-                    spellCheck={false}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="input"
-                    value={row.classType}
-                    onChange={(e) => updateRow(row.id, { classType: e.target.value })}
-                    aria-label={`${sec.colClassType}, řádek ${row.id}`}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="input"
-                    value={row.note}
-                    onChange={(e) => updateRow(row.id, { note: e.target.value })}
-                    aria-label={`${sec.colNote}, řádek ${row.id}`}
-                  />
-                </td>
-                <td>
-                  <button type="button" className="btn ghost" onClick={() => removeRow(row.id)}>
-                    {sec.removeRow}
-                  </button>
-                </td>
-              </tr>
+              <React.Fragment key={row.id}>
+                <tr className="ss-units-row ss-units-row--top">
+                  <td>
+                    <input
+                      type="text"
+                      className="input"
+                      value={row.label}
+                      onChange={(e) => updateRow(row.id, { label: e.target.value })}
+                      aria-label={`${sec.colLabel}, řádek ${row.id}`}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      className="input"
+                      value={row.educationField}
+                      onChange={(e) => updateRow(row.id, { educationField: e.target.value })}
+                      aria-label={`${sec.colEducationField}, řádek ${row.id}`}
+                      spellCheck={false}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      className="input"
+                      inputMode="decimal"
+                      value={row.averageStudents}
+                      onChange={(e) => updateRow(row.id, { averageStudents: e.target.value })}
+                      aria-label={`${sec.colAvgStudents}, řádek ${row.id}`}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      className="input"
+                      inputMode="numeric"
+                      value={row.classCount}
+                      onChange={(e) => updateRow(row.id, { classCount: e.target.value })}
+                      aria-label={`${sec.colClassCount}, řádek ${row.id}`}
+                    />
+                  </td>
+                  <td>
+                    <select
+                      className="input"
+                      value={row.studyForm}
+                      onChange={(e) => updateRow(row.id, { studyForm: e.target.value as StudyForm })}
+                      aria-label={`${sec.colStudyForm}, řádek ${row.id}`}
+                    >
+                      {PHMAX_SS_STUDY_FORM_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    <select
+                      className="input"
+                      value={row.phmaxMode}
+                      onChange={(e) =>
+                        updateRow(row.id, { phmaxMode: e.target.value as "" | ModeKey })
+                      }
+                      aria-label={`${sec.colPhmaxMode}, řádek ${row.id}`}
+                    >
+                      {PHMAX_SS_MODE_OPTIONS.map((o) => (
+                        <option key={o.value || "auto"} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td rowSpan={2} className="ss-units-row__action">
+                    <button type="button" className="btn ghost" onClick={() => removeRow(row.id)}>
+                      {sec.removeRow}
+                    </button>
+                  </td>
+                </tr>
+                <tr className="ss-units-row ss-units-row--bottom">
+                  <td>
+                    <input
+                      type="text"
+                      className="input"
+                      inputMode="numeric"
+                      value={row.oborCountInClass}
+                      onChange={(e) => updateRow(row.id, { oborCountInClass: e.target.value })}
+                      aria-label={`${sec.colOborCountInClass}, řádek ${row.id}`}
+                      title="Pro režim „Automaticky“; při ručním režimu se pole typicky nechá 1."
+                    />
+                  </td>
+                  <td style={{ textAlign: "center", verticalAlign: "middle" }}>
+                    <input
+                      type="checkbox"
+                      checked={row.isArt82TalentClass}
+                      onChange={(e) => updateRow(row.id, { isArt82TalentClass: e.target.checked })}
+                      aria-label={`${sec.colArt82Talent}, řádek ${row.id}`}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      className="input"
+                      value={row.additionalOborCodes}
+                      onChange={(e) => updateRow(row.id, { additionalOborCodes: e.target.value })}
+                      aria-label={`${sec.colAdditionalObors}, řádek ${row.id}`}
+                      placeholder="kód, kód…"
+                      spellCheck={false}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      className="input"
+                      value={row.oborStudentCountsRaw}
+                      onChange={(e) => updateRow(row.id, { oborStudentCountsRaw: e.target.value })}
+                      aria-label={`${sec.colOborStudentCounts}, řádek ${row.id}`}
+                      placeholder="KÓD:15 …"
+                      spellCheck={false}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      className="input"
+                      value={row.classType}
+                      onChange={(e) => updateRow(row.id, { classType: e.target.value })}
+                      aria-label={`${sec.colClassType}, řádek ${row.id}`}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      className="input"
+                      value={row.note}
+                      onChange={(e) => updateRow(row.id, { note: e.target.value })}
+                      aria-label={`${sec.colNote}, řádek ${row.id}`}
+                    />
+                  </td>
+                </tr>
+              </React.Fragment>
             ))}
           </tbody>
         </table>
