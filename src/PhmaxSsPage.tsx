@@ -35,6 +35,7 @@ import {
   PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY,
   PHMAX_SS_LEGISLATIVE_MD_REL_PATH,
   PHMAX_SS_UNITS_SECTION,
+  PHMAX_SS_UNITS_STORAGE_KEY,
   PHMAX_SS_LOCAL_DOC_EXAMPLE_NAMES,
   PHMAX_SS_MAX_NAMED_SNAPSHOTS,
   PHMAX_SS_METHODOLOGY_LABEL,
@@ -344,8 +345,13 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               className="glossary-icon-btn--hero"
               onClick={() => setGlossaryOpen(true)}
             />
-            <button type="button" className="btn btn--hero-guide" onClick={toggleSsGuideFromHero}>
-              {ssGuideOpen ? "Skrýt nápovědu" : "Stručné pokyny"}
+            <button
+              type="button"
+              className="btn btn--hero-help"
+              onClick={toggleSsGuideFromHero}
+              aria-expanded={ssGuideOpen}
+            >
+              {ssGuideOpen ? "Skrýt nápovědu" : "Nápověda"}
             </button>
           </div>
         </div>
@@ -658,34 +664,54 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       />
 
       <QuickOnboarding
-        title="Jak postupovat u střední školy"
+        title="Nápověda – střední školy (PHmax / PHAmax)"
         open={ssGuideOpen}
         onDismiss={() => setSsGuideOpen(false)}
         dismissButtonLabel="Skrýt nápovědu"
         anchorId="ss-quick-onboarding"
       >
         <p>
-          <strong>1) Rozdělte evidenci podle metodiky.</strong> Nejprve oddělte obory podle formy vzdělávání a typu třídy
-          (jednooborová, víceoborová, § 16 odst. 9). Jeden řádek formuláře = jedna dílčí jednotka.
+          Kalkulačka je orientační; výsledky ověřte vůči aktuální{" "}
+          <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
+            metodice MŠMT pro SŠ
+          </a>{" "}
+          a výkazům školy. Vedle tlačítka <strong>Nápověda</strong> je <strong>Slovníček</strong> s definicemi pojmů (PHmax,
+          typ třídy, víceobor…).
         </p>
         <p>
-          <strong>2) Vyplňte klíčové vstupy pro každý řádek.</strong> Kód oboru (RVP), průměr žáků, počet tříd, forma
-          studia a režim PHmax. U víceoborové třídy doplňte i „Další obory“ a případně „Žáci / obor“.
+          <strong>1. fáze – rámec vstupů a výstupů.</strong> Shrnuje, co metodika očekává jako vstupy školy a co dopočítá
+          aplikace. Můžete si vést <strong>volitelné poznámky</strong> (ukládají se jen v tomto prohlížeči, odděleně od
+          evidence řádků).
         </p>
         <p>
-          <strong>3) Zkontrolujte výstupy.</strong> Sekce „Orientační výpočet PHmax“ ukáže výsledek po řádcích; „Kontrola
-          pravidel“ upozorní na kombinace, které nemusí odpovídat vyhlášce č. 13/2005 Sb. a metodice.
+          <strong>2. fáze – evidence tříd a skupin.</strong> Každý <strong>řádek</strong> = jedna dílčí jednotka: přesný{" "}
+          <strong>kód oboru z RVP</strong>, průměr žáků, počet tříd, forma studia, typ třídy. Sloupec <strong>Režim PHmax</strong>{" "}
+          nechte na <em>Automaticky</em> (podle počtu oborů ve třídě a příznaku talentové 82) nebo režim ručně vynuťte. U
+          více oborů ve stejné třídě vyplňte <strong>Další obory</strong> a volitelně <strong>Žáci / obor</strong> – níže
+          proběhne kontrola pravidel. U každého řádku můžete řádek také <strong>Odstranit</strong> (konkrétní řádek).
         </p>
         <p>
-          <strong>4) PHAmax čtěte odděleně od PHmax.</strong> V této verzi aplikace se PHAmax dopočítává pro PrŠ
-          (78-62-C/01, 78-62-C/02, denní forma) podle tabulky metodiky. Ostatní scénáře PHAmax ověřte v plném postupu
-          MŠMT.
+          <strong>PHAmax v aplikaci.</strong> V horním přehledu se PHAmax dopočítává jen pro{" "}
+          <strong>Praktickou školu</strong> (kódy <code className="methodology-strip__code">78-62-C/01</code>,{" "}
+          <code className="methodology-strip__code">78-62-C/02</code>) v <strong>denní</strong> formě podle tabulky z
+          metodiky. U ostatních oborů použijte plný postup MŠMT – PHAmax neinterpretujte z této verze jako úplný.
+        </p>
+        <p>
+          <strong>Horní nástrojová lišta (pod ukázkovým příkladem).</strong> Zleva doprava typicky: <strong>tisk</strong>{" "}
+          stránky, <strong>Přidat řádek</strong> a <strong>Odstranit poslední řádek</strong> (evidence v tabulce níže;
+          vždy zůstane alespoň jeden řádek), rychlé <strong>uložení / obnovení</strong> průběhu v prohlížeči,{" "}
+          <strong>vymazání uložených dat</strong> nebo <strong>vyčištění formuláře</strong>, pojmenované zálohy (max.{" "}
+          {PHMAX_SS_MAX_NAMED_SNAPSHOTS}), export <strong>CSV</strong> a <strong>Excel</strong>, kopie a tisk textového
+          shrnutí, <strong>auditní JSON</strong>. Řádky evidence se automaticky ukládají do{" "}
+          <code className="methodology-strip__code">localStorage</code> (klíč{" "}
+          <code className="methodology-strip__code">{PHMAX_SS_UNITS_STORAGE_KEY}</code>).
         </p>
         <p>{EXPORT_ORIENTACNI_NOTE}</p>
         <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
         <p>
-          Horní lišta obsahuje pracovní nástroje: tisk, rychlé uložení/obnovení, smazání uložených dat, pojmenované zálohy
-          (max. {PHMAX_SS_MAX_NAMED_SNAPSHOTS}), export CSV/XLSX, kopírování a tisk shrnutí a auditní JSON.
+          Po vyplnění sledujte sekci <strong>Orientační výpočet PHmax</strong> (řádek po řádku) a blok{" "}
+          <strong>Kontrola pravidel</strong> u víceoborových tříd. U řádku lze rozbalit vysvětlení výpočtu („proč takto
+          PHmax“) a vyhodnocení pravidel.
         </p>
       </QuickOnboarding>
 
