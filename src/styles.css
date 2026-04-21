@@ -5441,3 +5441,34 @@ select:focus {
 .ss-explain-school-wrap summary::-webkit-details-marker {
   display: none;
 }
+
+/* SŠ: zvýrazněné klíčové rozbalovače (Rozpad + Celkový výklad) */
+.sd-phmax-breakdown-wrap > summary,
+.ss-explain-school-wrap > summary {
+  list-style: none;
+  border: 1px solid rgba(79, 70, 229, 0.34);
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(67, 56, 202, 0.12), rgba(99, 102, 241, 0.06));
+  padding: 10px 12px;
+  color: #1e1b4b;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(67, 56, 202, 0.08);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.sd-phmax-breakdown-wrap > summary:hover,
+.ss-explain-school-wrap > summary:hover {
+  border-color: rgba(79, 70, 229, 0.56);
+  box-shadow: 0 6px 16px rgba(67, 56, 202, 0.16);
+  background: linear-gradient(90deg, rgba(67, 56, 202, 0.16), rgba(99, 102, 241, 0.1));
+}
+
+.sd-phmax-breakdown-wrap[open] > summary,
+.ss-explain-school-wrap[open] > summary {
+  border-color: rgba(59, 130, 246, 0.68);
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.16), rgba(96, 165, 250, 0.1));
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
+}
