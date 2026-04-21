@@ -2101,6 +2101,33 @@ input[type="radio"] {
   min-height: 36px;
   font-size: 0.82rem;
   box-sizing: border-box;
+  border: 1.5px solid rgba(79, 70, 229, 0.42);
+  background: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.ss-units-table input.input::placeholder {
+  color: #64748b;
+  opacity: 1;
+  font-weight: 500;
+}
+
+.ss-units-table input.input:hover,
+.ss-units-table select.input:hover {
+  border-color: rgba(79, 70, 229, 0.62);
+  background: linear-gradient(180deg, #ffffff 0%, #e8edff 100%);
+}
+
+.ss-units-table input.input:focus,
+.ss-units-table select.input:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.34);
+  outline-offset: 0;
+  border-color: rgba(37, 99, 235, 0.92);
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
 }
 
 .ss-units-table .ss-units-block-cell {
