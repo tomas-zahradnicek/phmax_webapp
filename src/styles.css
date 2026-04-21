@@ -5494,3 +5494,38 @@ select:focus {
 .ss-explain-school-wrap[open] > summary::after {
   transform: translateY(-40%) rotate(-135deg);
 }
+
+/* SŠ: zvýraznění vnořeného rozpisu po řádcích */
+.ss-explain-school-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ss-explain-school-details__summary {
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 700;
+  list-style: none;
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.1), rgba(129, 140, 248, 0.04));
+  padding: 8px 30px 8px 10px;
+  position: relative;
+  color: #3730a3 !important;
+}
+
+.ss-explain-school-details__summary::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-60%) rotate(45deg);
+  transition: transform 140ms ease;
+}
+
+.ss-explain-school-details[open] > .ss-explain-school-details__summary::after {
+  transform: translateY(-40%) rotate(-135deg);
+}

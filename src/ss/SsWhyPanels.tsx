@@ -80,7 +80,7 @@ export function SsSchoolExplainabilitySummary({ result }: { result: Explainabili
         </div>
       ))}
       <details className="ss-explain-school-details" style={{ marginTop: 8 }}>
-        <summary className="muted-text" style={{ cursor: "pointer", fontSize: "0.88rem", fontWeight: 600 }}>
+        <summary className="muted-text ss-explain-school-details__summary">
           Rozpis po řádcích ({result.rows.length})
         </summary>
         <ul className="muted-text" style={{ margin: "8px 0 0", paddingLeft: "1.1rem", fontSize: "0.86rem", lineHeight: 1.5 }}>
