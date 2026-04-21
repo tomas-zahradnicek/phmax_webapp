@@ -5529,3 +5529,48 @@ select:focus {
 .ss-explain-school-details[open] > .ss-explain-school-details__summary::after {
   transform: translateY(-40%) rotate(-135deg);
 }
+
+/* SŠ: kompaktní rozbalení sekce „1. fáze: rámec vstupů a výstupů“ */
+.ss-framework-compact-note {
+  margin-top: 10px;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.ss-framework-details {
+  margin-top: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(248, 250, 255, 0.9), rgba(255, 255, 255, 0.96));
+  padding: 10px 12px;
+}
+
+.ss-framework-details__summary {
+  list-style: none;
+  cursor: pointer;
+  font-weight: 800;
+  color: #1e1b4b;
+  position: relative;
+  padding-right: 28px;
+}
+
+.ss-framework-details__summary::-webkit-details-marker {
+  display: none;
+}
+
+.ss-framework-details__summary::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-60%) rotate(45deg);
+  transition: transform 140ms ease;
+}
+
+.ss-framework-details[open] > .ss-framework-details__summary::after {
+  transform: translateY(-40%) rotate(-135deg);
+}

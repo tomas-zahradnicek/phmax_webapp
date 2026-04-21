@@ -663,47 +663,57 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         <h2 id="ss-framework-heading" className="section-title">
           {fw.heading}
         </h2>
-        <p className="muted-text" style={{ marginTop: 10, lineHeight: 1.55 }}>
-          {fw.lead}
-        </p>
-        <p className="muted-text" style={{ marginTop: 10, lineHeight: 1.55 }}>
-          <strong>V aplikaci:</strong> {fw.implementationNote}
+        <p className="muted-text ss-framework-compact-note">
+          Rychlý souhrn: evidujte řádky po oboru/formě/typu třídy; PHmax a PHAmax jsou oddělené rámce.
         </p>
 
-        <div className="grid two" style={{ marginTop: 18, gap: "18px 24px", alignItems: "start" }}>
-          <div>
-            <h3 style={{ marginTop: 0, marginBottom: 8, fontSize: "1.05rem", fontWeight: 700 }}>
-              Vstupy (uživatel / škola)
-            </h3>
-            <ul className="muted-text" style={{ margin: 0, paddingLeft: "1.25rem", lineHeight: 1.55 }}>
-              {fw.inputs.map((line) => (
-                <li key={line} style={{ marginBottom: 6 }}>
-                  {line}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3 style={{ marginTop: 0, marginBottom: 8, fontSize: "1.05rem", fontWeight: 700 }}>
-              Výstupy (dopočítá aplikace)
-            </h3>
-            <ul className="muted-text" style={{ margin: 0, paddingLeft: "1.25rem", lineHeight: 1.55 }}>
-              {fw.outputs.map((line) => (
-                <li key={line} style={{ marginBottom: 6 }}>
-                  {line}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        <details className="ss-framework-details" open>
+          <summary className="ss-framework-details__summary">Rozbalit metodický kontext a omezení v aplikaci</summary>
+          <p className="muted-text" style={{ marginTop: 10, lineHeight: 1.55 }}>
+            {fw.lead}
+          </p>
+          <p className="muted-text" style={{ marginTop: 10, lineHeight: 1.55 }}>
+            <strong>V aplikaci:</strong> {fw.implementationNote}
+          </p>
+        </details>
 
-        <p className="muted-text" style={{ marginTop: 18, lineHeight: 1.55 }}>
-          Přímý odkaz na tuto kalkulačku: <code className="methodology-strip__code">?view=ss</code>. Právní rámec v
-          přehledu níže (rozbalení „Verze metodik a předpisy“) – u SŠ společně s{" "}
+        <details className="ss-framework-details">
+          <summary className="ss-framework-details__summary">Rozbalit vstupy / výstupy podle metodiky</summary>
+          <div className="grid two" style={{ marginTop: 14, gap: "18px 24px", alignItems: "start" }}>
+            <div>
+              <h3 style={{ marginTop: 0, marginBottom: 8, fontSize: "1.05rem", fontWeight: 700 }}>
+                Vstupy (uživatel / škola)
+              </h3>
+              <ul className="muted-text" style={{ margin: 0, paddingLeft: "1.25rem", lineHeight: 1.55 }}>
+                {fw.inputs.map((line) => (
+                  <li key={line} style={{ marginBottom: 6 }}>
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 style={{ marginTop: 0, marginBottom: 8, fontSize: "1.05rem", fontWeight: 700 }}>
+                Výstupy (dopočítá aplikace)
+              </h3>
+              <ul className="muted-text" style={{ margin: 0, paddingLeft: "1.25rem", lineHeight: 1.55 }}>
+                {fw.outputs.map((line) => (
+                  <li key={line} style={{ marginBottom: 6 }}>
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </details>
+
+        <p className="muted-text ss-framework-compact-note">
+          Přímý odkaz: <code className="methodology-strip__code">?view=ss</code> • právní rámec viz níže („Verze metodik a
+          předpisy“):{" "}
           <a href="https://www.zakonyprolidi.cz/cs/2018-123" target="_blank" rel="noopener noreferrer" className="status-link">
             NV č. 123/2018 Sb.
           </a>{" "}
-          a{" "}
+          +{" "}
           <a href="https://www.zakonyprolidi.cz/cs/2005-75" target="_blank" rel="noopener noreferrer" className="status-link">
             NV č. 75/2005 Sb.
           </a>
