@@ -2047,8 +2047,8 @@ input[type="radio"] {
 .section-card--ss::before { background: linear-gradient(90deg, #4338ca, #6366f1); }
 .section-card--ss::after { background: radial-gradient(circle, rgba(99,102,241,0.14), transparent 70%); }
 
-/* SŠ „2. fáze: evidence…“ — čitelnější úvod než samotná .muted-text na bílé ploše */
-.section-card--ss .ss-units-intro {
+/* SŠ „2. fáze: evidence…“ — kompaktní souhrn + rozbalovač (jako 1. fáze) */
+.section-card--ss .ss-units-phase2-head {
   margin-top: 12px;
   padding: 14px 16px;
   border-radius: 14px;
@@ -2057,15 +2057,19 @@ input[type="radio"] {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
-.section-card--ss .ss-units-intro__text {
-  margin: 0;
+.section-card--ss .ss-units-phase2-head .ss-framework-details {
+  margin-top: 10px;
+}
+
+.section-card--ss .ss-units-phase2-lead {
+  margin: 10px 0 0;
   color: #0f172a !important;
   font-size: 0.93rem;
   line-height: 1.58;
   font-weight: 500;
 }
 
-.section-card--ss .ss-units-intro__text--note {
+.section-card--ss .ss-units-phase2-storage {
   margin-top: 10px;
   font-size: 0.88rem;
   color: #334155 !important;
@@ -2285,13 +2289,72 @@ input[type="radio"] {
   padding-top: 4px;
 }
 
-.ss-units-table .ss-units-block-actions .btn {
+.ss-units-table .ss-units-block-actions .ss-units-row-action {
   width: 100%;
-  max-width: 180px;
+  max-width: 200px;
   white-space: normal;
-  padding: 8px 10px;
-  font-size: 0.78rem;
-  line-height: 1.2;
+}
+
+/* SŠ evidence řádků — zvýrazněná řadová tlačítka */
+.section-card--ss .ss-units-add-row-wrap {
+  margin-top: 16px;
+}
+
+.section-card--ss .ss-units-row-action {
+  appearance: none;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.88rem;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  line-height: 1.25;
+  transition:
+    transform 140ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.section-card--ss .ss-units-row-action:hover {
+  transform: translateY(-1px);
+}
+
+.section-card--ss .ss-units-row-action:active {
+  transform: translateY(0);
+}
+
+.section-card--ss .ss-units-row-action:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.55);
+  outline-offset: 2px;
+}
+
+.section-card--ss .ss-units-row-action--add {
+  background: linear-gradient(135deg, #4338ca 0%, #6366f1 52%, #4f46e5 100%);
+  color: #fff !important;
+  border-color: rgba(165, 180, 252, 0.65);
+  box-shadow:
+    0 6px 18px rgba(67, 56, 202, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.section-card--ss .ss-units-row-action--add:hover {
+  box-shadow:
+    0 10px 26px rgba(67, 56, 202, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.section-card--ss .ss-units-row-action--remove {
+  background: linear-gradient(180deg, #fff5f7 0%, #ffffff 55%);
+  color: #9f1239 !important;
+  border-color: rgba(244, 63, 94, 0.55);
+  box-shadow: 0 2px 12px rgba(244, 63, 94, 0.14);
+}
+
+.section-card--ss .ss-units-row-action--remove:hover {
+  border-color: rgba(225, 29, 72, 0.88);
+  background: linear-gradient(180deg, #ffe4e9 0%, #fffafc 50%);
+  box-shadow: 0 5px 18px rgba(244, 63, 94, 0.22);
 }
 
 @media (max-width: 1200px) {

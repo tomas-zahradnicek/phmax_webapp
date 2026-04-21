@@ -209,8 +209,8 @@ function PhmaxSsUnitsFormView({
       </div>
       ) : null}
 
-      <div style={{ marginTop: 16 }}>
-        <button type="button" className="btn btn--light" onClick={addRow}>
+      <div className="ss-units-add-row-wrap">
+        <button type="button" className="btn ss-units-row-action ss-units-row-action--add" onClick={addRow}>
           {sec.addRow}
         </button>
       </div>
@@ -371,7 +371,11 @@ function PhmaxSsUnitsFormView({
                     </div>
 
                     <div className="ss-units-block-actions">
-                      <button type="button" className="btn ghost" onClick={() => removeRow(row.id)}>
+                      <button
+                        type="button"
+                        className="btn ss-units-row-action ss-units-row-action--remove"
+                        onClick={() => removeRow(row.id)}
+                      >
                         {sec.removeRow}
                       </button>
                     </div>
