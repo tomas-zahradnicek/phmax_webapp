@@ -286,8 +286,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   const [ssGuideOpen, setSsGuideOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
 
-  const toggleSsGuideFromHero = useCallback(() => {
-    setSsGuideOpen((o) => !o);
+  const openSsGuideFromHero = useCallback(() => {
+    setSsGuideOpen(true);
   }, []);
 
   const phmaxHeroValue = ssMetrics.phmaxTotal.toLocaleString("cs-CZ", {
@@ -317,8 +317,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               className="glossary-icon-btn--hero"
               onClick={() => setGlossaryOpen(true)}
             />
-            <button type="button" className="btn btn--hero-guide" onClick={toggleSsGuideFromHero}>
-              {ssGuideOpen ? "Skrýt nápovědu" : "Stručné pokyny"}
+            <button type="button" className="btn btn--hero-guide" onClick={openSsGuideFromHero}>
+              Stručné pokyny
             </button>
           </div>
         </div>
