@@ -232,7 +232,7 @@ function PhmaxSsUnitsFormView({
                       <span className="ss-units-block-head__hint">Dílčí jednotka výpočtu</span>
                     </div>
 
-                    <div className="ss-units-mini">
+                    <div className="ss-units-mini ss-units-mini--top">
                       <div className="ss-units-mini__labels">
                         <span>{sec.colLabel}</span>
                         <span>{sec.colEducationField}</span>
@@ -302,7 +302,7 @@ function PhmaxSsUnitsFormView({
                       </div>
                     </div>
 
-                    <div className="ss-units-mini">
+                    <div className="ss-units-mini ss-units-mini--bottom">
                       <div className="ss-units-mini__labels">
                         <span>{sec.colOborCountInClass}</span>
                         <span>{sec.colArt82Talent}</span>

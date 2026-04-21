@@ -2108,6 +2108,21 @@ input[type="radio"] {
   font-weight: 600;
 }
 
+.ss-units-table select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 2rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #334155 50%),
+    linear-gradient(135deg, #334155 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) calc(50% - 2px),
+    calc(100% - 9px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
 .ss-units-table input.input::placeholder {
   color: #64748b;
   opacity: 1;
@@ -2207,6 +2222,28 @@ input[type="radio"] {
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
   align-items: center;
+}
+
+.ss-units-table .ss-units-mini--top .ss-units-mini__labels,
+.ss-units-table .ss-units-mini--top .ss-units-mini__inputs {
+  grid-template-columns:
+    minmax(110px, 1.2fr)
+    minmax(110px, 1.1fr)
+    minmax(52px, 0.5fr)
+    minmax(52px, 0.5fr)
+    minmax(96px, 0.95fr)
+    minmax(110px, 1.1fr);
+}
+
+.ss-units-table .ss-units-mini--bottom .ss-units-mini__labels,
+.ss-units-table .ss-units-mini--bottom .ss-units-mini__inputs {
+  grid-template-columns:
+    minmax(52px, 0.5fr)
+    minmax(52px, 0.45fr)
+    minmax(120px, 1.1fr)
+    minmax(125px, 1.1fr)
+    minmax(120px, 1fr)
+    minmax(120px, 1fr);
 }
 
 .ss-units-table .ss-units-mini__labels {
