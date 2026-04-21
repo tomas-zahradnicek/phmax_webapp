@@ -211,6 +211,11 @@ function PhmaxSsUnitsFormView({
               <tr key={row.id}>
                 <td className="ss-units-block-cell">
                   <div className="ss-units-block-card">
+                    <div className="ss-units-block-head">
+                      <span className="ss-units-block-badge">Řádek {row.id}</span>
+                      <span className="ss-units-block-head__hint">Dílčí jednotka výpočtu</span>
+                    </div>
+
                     <div className="ss-units-mini">
                       <div className="ss-units-mini__labels">
                         <span>{sec.colLabel}</span>

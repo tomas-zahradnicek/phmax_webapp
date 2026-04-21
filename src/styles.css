@@ -2116,6 +2116,32 @@ input[type="radio"] {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  position: relative;
+}
+
+.ss-units-table .ss-units-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ss-units-table .ss-units-block-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4338ca, #6366f1);
+  color: #fff;
+  font-size: 0.73rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.ss-units-table .ss-units-block-head__hint {
+  font-size: 0.74rem;
+  color: #475569;
+  font-weight: 700;
 }
 
 .ss-units-table .ss-units-mini {
@@ -2135,7 +2161,7 @@ input[type="radio"] {
 
 .ss-units-table .ss-units-mini__labels {
   padding: 8px;
-  background: rgba(241, 245, 249, 0.95);
+  background: linear-gradient(90deg, #3730a3, #4f46e5);
   border-bottom: 1px solid rgba(148, 163, 184, 0.24);
 }
 
@@ -2143,7 +2169,7 @@ input[type="radio"] {
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #475569;
+  color: #eef2ff;
   font-weight: 800;
   line-height: 1.2;
 }
@@ -2165,6 +2191,11 @@ input[type="radio"] {
 .ss-units-table .ss-units-block-actions {
   display: flex;
   justify-content: flex-end;
+  position: sticky;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(248, 251, 255, 0), rgba(248, 251, 255, 0.96) 30%);
+  padding-top: 4px;
 }
 
 .ss-units-table .ss-units-block-actions .btn {
