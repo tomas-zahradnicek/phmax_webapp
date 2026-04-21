@@ -35,6 +35,16 @@ function joinRuleMessages(msgs: readonly { message: string }[]): string {
   return msgs.map((m) => m.message).join(" · ");
 }
 
+function isPositiveNumberInput(raw: string): boolean {
+  const n = Number(String(raw).trim().replace(",", "."));
+  return Number.isFinite(n) && n > 0;
+}
+
+function isPositiveIntegerInput(raw: string): boolean {
+  const n = parseInt(String(raw).trim(), 10);
+  return Number.isInteger(n) && n > 0;
+}
+
 function SsWhyPhmaxWithExplain({ resolved, unitRow }: { resolved: ServiceResolvedRow; unitRow: PhmaxSsUnitRow }) {
   let explanation: ReturnType<typeof explainSingleRow>["explanation"] | undefined;
   const inp = explainInputFromUnitRow(unitRow);
@@ -210,7 +220,13 @@ function PhmaxSsUnitsFormView({
             {rows.map((row) => (
               <tr key={row.id}>
                 <td className="ss-units-block-cell">
-                  <div className="ss-units-block-card">
+                  <div
+                    className={`ss-units-block-card ${
+                      row.educationField.trim() && isPositiveNumberInput(row.averageStudents) && isPositiveIntegerInput(row.classCount)
+                        ? "ss-units-block-card--valid"
+                        : "ss-units-block-card--invalid"
+                    }`}
+                  >
                     <div className="ss-units-block-head">
                       <span className="ss-units-block-badge">Řádek {row.id}</span>
                       <span className="ss-units-block-head__hint">Dílčí jednotka výpočtu</span>

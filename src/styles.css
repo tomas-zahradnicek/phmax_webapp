@@ -2117,6 +2117,29 @@ input[type="radio"] {
   flex-direction: column;
   gap: 10px;
   position: relative;
+  transition:
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    border-color 180ms ease;
+}
+
+.ss-units-table .ss-units-block-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+}
+
+.ss-units-table .ss-units-block-card--valid {
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.05),
+    inset 0 0 0 1px rgba(16, 185, 129, 0.16);
+}
+
+.ss-units-table .ss-units-block-card--invalid {
+  border-color: rgba(244, 63, 94, 0.4);
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.05),
+    inset 0 0 0 1px rgba(244, 63, 94, 0.13);
 }
 
 .ss-units-table .ss-units-block-head {
