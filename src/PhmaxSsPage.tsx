@@ -74,25 +74,21 @@ const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
     description: (
       <>
         <p style={{ margin: "0 0 8px" }}>
-          PHmax je v právní úpravě stanoven v{" "}
-          <strong>nařízení vlády č. 123/2018 Sb.</strong> jako maximální rozsah vzdělávání, resp. maximální rozsah přímé
-          pedagogické činnosti hrazený ze státního rozpočtu. Vyjadřuje hodnotu maximálního počtu hodin na{" "}
-          <strong>jednu třídu</strong> a u oborů vzdělání konzervatoře na <strong>jeden ročník</strong>, které budou
-          financovány ze státního rozpočtu, v souladu s RVP pro střední vzdělávání. Zahrnuje mimo jiné:
+          <strong>PHmax</strong> je podle <strong>NV č. 123/2018 Sb.</strong> maximální týdenní rozsah přímé pedagogické
+          činnosti hrazený ze státního rozpočtu. Stanovuje se vždy pro konkrétní <strong>obor</strong>,{" "}
+          <strong>formu vzdělávání</strong> a <strong>typ třídy</strong>.
+        </p>
+        <p style={{ margin: "0 0 6px" }}>
+          <strong>V metodice se vychází zejména z:</strong>
         </p>
         <ul style={{ margin: "0 0 8px", paddingLeft: "1.25rem" }}>
-          <li>minimální týdenní počet hodin teoretické a praktické přípravy;</li>
-          <li>
-            dělení na skupiny při realizaci odborného výcviku v souladu s{" "}
-            <strong>nařízením vlády č. 211/2010 Sb.</strong>, o soustavě oborů vzdělání, které stanoví počet žáků na
-            jednoho učitele odborného výcviku;
-          </li>
-          <li>potřebný počet hodin na nezbytné dělení teoretické výuky (např. cizí jazyky, ICT, tělesná výchova).</li>
+          <li>tabulek PHmax v příloze NV č. 123/2018 Sb. (pásma podle průměrného počtu žáků),</li>
+          <li>pravidel pro dělení odborné výuky a skupiny dle navazujících předpisů,</li>
+          <li>rozlišení jednoobor / víceobor / § 16 odst. 9 / přechodné režimy dle metodiky MŠMT.</li>
         </ul>
         <p style={{ margin: 0 }}>
-          Hodnoty PHmax se berou z tabulek v příloze k nařízení vlády č. 123/2018 Sb.; při stanovení je nutné vycházet z
-          hodnot určených pro <strong>daný typ a formu vzdělávání</strong>. V této aplikaci jde o orientační výpočet
-          podle metodiky MŠMT a vstupů uživatele.
+          V aplikaci je výpočet <strong>orientační</strong>; při oficiálním vykazování je nutné ověřit výsledek vůči
+          aktuální metodice MŠMT a výkazům školy.
         </p>
       </>
     ),
@@ -198,28 +194,39 @@ const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
     description: (
       <>
         <p style={{ margin: "0 0 8px" }}>
-          PHAmax vyjadřuje maximální <strong>týdenní</strong> počet hodin přímé pedagogické činnosti{" "}
-          <strong>asistenta pedagoga</strong> financovaný ze státního rozpočtu v oborech{" "}
-          <strong>Praktická škola jednoletá (78-62-C/01)</strong> a <strong>Praktická škola dvouletá (78-62-C/02)</strong>
-          . Hodnoty PHmax a PHAmax se stanovují <strong>odděleně</strong>; přebytky PHmax nelze použít na asistenty
-          pedagoga a naopak.
+          PHAmax je maximální <strong>týdenní</strong> počet hodin přímé pedagogické činnosti{" "}
+          <strong>asistenta pedagoga</strong>. V metodice SŠ se řeší samostatně od PHmax.
         </p>
         <p style={{ margin: "0 0 8px" }}>
-          Výše PHAmax se odvíjí od <strong>průměrného počtu žáků ve třídách</strong>. Od{" "}
-          <strong>1. 1. 2020</strong> nelze v těchto oborech poskytovat podpůrná opatření spočívající ve využití asistenta
-          pedagoga.
+          V této verzi aplikace je PHAmax dopočítán pro obory <strong>Praktická škola jednoletá (78-62-C/01)</strong> a{" "}
+          <strong>Praktická škola dvouletá (78-62-C/02)</strong> v denní formě podle tabulky metodiky (pásma podle
+          průměrného počtu žáků ve třídě).
         </p>
         <p style={{ margin: 0 }}>
-          Týdenní rozsah přímé pedagogické činnosti asistenta pedagoga při úvazku 1,0 je v souladu s{" "}
-          <strong>nařízením vlády č. 75/2005 Sb.</strong> ve výši <strong>36 hodin</strong>.
+          <strong>Důležité:</strong> PHmax a PHAmax jsou oddělené rámce; přebytky mezi nimi nelze převádět. Pro další
+          scénáře mimo PrŠ použijte plný metodický postup MŠMT.
         </p>
       </>
     ),
   },
   {
     term: "Dílčí jednotka výpočtu",
-    description:
-      "Řádek evidence třídy nebo skupiny s kódem oboru, průměrem žáků, počtem tříd a zvoleným režimem PHmax. Z něj aplikace dopočítá orientační PHmax a kontrolu pravidel (v souladu s metodickým členěním vstupů).",
+    description: (
+      <>
+        <p style={{ margin: "0 0 8px" }}>
+          Dílčí jednotka je jeden řádek evidence (třída/skupina) pro konkrétní kombinaci:
+        </p>
+        <ul style={{ margin: "0 0 8px", paddingLeft: "1.25rem" }}>
+          <li>kód oboru,</li>
+          <li>forma vzdělávání,</li>
+          <li>typ třídy (jednoobor / víceobor / § 16 odst. 9),</li>
+          <li>průměrný počet žáků a počet tříd.</li>
+        </ul>
+        <p style={{ margin: 0 }}>
+          Z těchto vstupů aplikace počítá orientační PHmax a provádí kontrolu pravidel pro víceoborové třídy.
+        </p>
+      </>
+    ),
   },
   {
     term: "§ 4 — Stanovení PHmax (a tabulky PrŠ)",
@@ -624,20 +631,27 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         anchorId="ss-quick-onboarding"
       >
         <p>
-          Začněte u sekce <strong>{fw.heading}</strong>: ověřte, co zadáváte vy a co dopočítá aplikace. Poté v sekci{" "}
-          <strong>evidence tříd a skupin</strong> doplňte řádky podle skutečné struktury – kód oboru, průměr žáků, forma
-          studia a režim PHmax.
+          <strong>1) Rozdělte evidenci podle metodiky.</strong> Nejprve oddělte obory podle formy vzdělávání a typu třídy
+          (jednooborová, víceoborová, § 16 odst. 9). Jeden řádek formuláře = jedna dílčí jednotka.
         </p>
         <p>
-          Tabulka <strong>Orientační výpočet PHmax</strong> a <strong>Kontrola pravidel</strong> reagují na vyplnění; prázdné
-          řádky bez kódu oboru se do výpočtu neberou.
+          <strong>2) Vyplňte klíčové vstupy pro každý řádek.</strong> Kód oboru (RVP), průměr žáků, počet tříd, forma
+          studia a režim PHmax. U víceoborové třídy doplňte i „Další obory“ a případně „Žáci / obor“.
+        </p>
+        <p>
+          <strong>3) Zkontrolujte výstupy.</strong> Sekce „Orientační výpočet PHmax“ ukáže výsledek po řádcích; „Kontrola
+          pravidel“ upozorní na kombinace, které nemusí odpovídat vyhlášce č. 13/2005 Sb. a metodice.
+        </p>
+        <p>
+          <strong>4) PHAmax čtěte odděleně od PHmax.</strong> V této verzi aplikace se PHAmax dopočítává pro PrŠ
+          (78-62-C/01, 78-62-C/02, denní forma) podle tabulky metodiky. Ostatní scénáře PHAmax ověřte v plném postupu
+          MŠMT.
         </p>
         <p>{EXPORT_ORIENTACNI_NOTE}</p>
         <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
         <p>
-          Horní lišta je rozložená jako u ZŠ: tisk, rychlé uložení a obnovení z prohlížeče, vymazání úložiště a formuláře,
-          pole „Označení pro export“, pojmenované zálohy (max. {PHMAX_SS_MAX_NAMED_SNAPSHOTS}), srovnání se zálohou (JSON)
-          a export CSV, Excel, kopírování shrnutí, tisk shrnutí a auditní JSON.
+          Horní lišta obsahuje pracovní nástroje: tisk, rychlé uložení/obnovení, smazání uložených dat, pojmenované zálohy
+          (max. {PHMAX_SS_MAX_NAMED_SNAPSHOTS}), export CSV/XLSX, kopírování a tisk shrnutí a auditní JSON.
         </p>
       </QuickOnboarding>
 
