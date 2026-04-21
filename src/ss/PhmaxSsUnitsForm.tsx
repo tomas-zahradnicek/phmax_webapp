@@ -118,13 +118,19 @@ function PhmaxSsUnitsFormView({
       <h2 id="ss-units-heading" className="section-title">
         {sec.heading}
       </h2>
-      <div className="ss-units-intro">
-        <p id={tableDescId} className="muted-text ss-units-intro__text">
-          {sec.lead}
+      <div className="ss-units-phase2-head">
+        <p className="muted-text ss-framework-compact-note" style={{ marginTop: 0 }}>
+          {sec.compactLead}
         </p>
-        <p className="muted-text ss-units-intro__text ss-units-intro__text--note">
-          {sec.storageNote}
-        </p>
+        <details className="ss-framework-details">
+          <summary className="ss-framework-details__summary">{sec.methodologyDetailsSummary}</summary>
+          <p id={tableDescId} className="muted-text ss-units-phase2-lead">
+            {sec.lead}
+          </p>
+          <p className="muted-text ss-units-phase2-storage" style={{ marginTop: 12, marginBottom: 0 }}>
+            {sec.storageNote}
+          </p>
+        </details>
       </div>
 
       {hideBackupSubcard && uiNotice ? (

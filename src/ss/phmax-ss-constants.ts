@@ -22,12 +22,17 @@ export const PHMAX_SS_LEGISLATIVE_MD_REL_PATH = "docs/zdroje/phmax_ss_cursor/leg
 export const PHMAX_SS_SOURCE_FOLDER_HINT =
   "Lokální kopii metodiky (.docx / .pdf) můžete držet ve složce projektu docs/zdroje (viz docs/zdroje/README.md).";
 
+/** localStorage: volitelné poznámky uživatele u sekce „1. fáze“ SŠ (neovlivňují výpočet). */
+export const PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY = "phmax-ss-framework-phase1-notes";
+
 /**
  * První fáze produktu: co z metodiky plyne pro návrh formuláře (vstupy uživatele × výstupy výpočtu).
  * Znění je shrnutí pravidel z metodiky v3/2026 a souvisejících NV; podrobnosti vždy ověřte v plném znění metodiky.
  */
 export const PHMAX_SS_FRAMEWORK_FIRST_PHASE = {
   heading: "1. fáze: rámec vstupů a výstupů",
+  phase1NotesFieldLabel: "Poznámky k rámci (volitelně)",
+  phase1NotesFieldHint: `Vlastní záznamy; nezasahují do výpočtu. Ukládají se jen v tomto prohlížeči (localStorage, klíč ${PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY}).`,
   lead:
     "U středního vzdělávání se podle metodiky pracuje s dílčími jednotkami (typicky třída nebo skupina) zvlášť podle kombinace oboru, formy a typu. PHmax a PHAmax jsou dva oddělené rámce – přebytky z jednoho nelze přelévat do druhého.",
   implementationNote:
@@ -48,6 +53,10 @@ export const PHMAX_SS_FRAMEWORK_FIRST_PHASE = {
 /** Druhá sekce – evidence řádků + orientační PHmax z datasetu; PHAmax pro PrŠ z tabulky metodiky. */
 export const PHMAX_SS_UNITS_SECTION = {
   heading: "2. fáze: evidence tříd a skupin",
+  /** Krátký souhrn nad rozbalovačem – stejná role jako u 1. fáze. */
+  compactLead:
+    "Jeden řádek = dílčí jednotka (kód RVP, průměr, třídy, forma). Režim PHmax lze nechat na Automaticky nebo vynutit ručně; u více oborů ve třídě doplňte další obory a volitelně žáky/obor. PHAmax v horním přehledu jen pro PrŠ 78-62-C/01 a 78-62-C/02 v denní formě — jinak plný postup MŠMT.",
+  methodologyDetailsSummary: "Rozbalit podrobný popis evidence řádků a úložiště v prohlížeči",
   lead:
     "Každý řádek je jedna dílčí jednotka. „Kód oboru“ = přesný kód z RVP (např. 82-51-L/51). Sloupec „Režim PHmax“ může zůstat Automaticky (výběr podle „Oborů ve třídě“ a příznaku „Talent 82“) nebo režim ručně vynutit. U více oborů v jedné třídě vyplňte „Další obory“ a volitelně „Žáci / obor“ — níže proběhne kontrola pravidel. PHAmax v horním přehledu se pro tuto verzi aplikace počítá jen u Praktické školy (78-62-C/01, 78-62-C/02) v denní formě podle tabulky metodiky; u ostatních oborů použijte plný postup MŠMT.",
   tableCaption: "Dílčí jednotky výpočtu (třída / skupina)",

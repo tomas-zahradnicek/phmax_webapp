@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import {
   EXPORT_ORIENTACNI_NOTE,
@@ -30,6 +30,7 @@ import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { QuickOnboarding } from "./QuickOnboarding";
 import {
   PHMAX_SS_FRAMEWORK_FIRST_PHASE,
+  PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY,
   PHMAX_SS_LEGISLATIVE_MD_REL_PATH,
   PHMAX_SS_LOCAL_DOC_EXAMPLE_NAMES,
   PHMAX_SS_MAX_NAMED_SNAPSHOTS,
@@ -292,6 +293,21 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [ssGuideOpen, setSsGuideOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const [phase1Notes, setPhase1Notes] = useState(() => {
+    try {
+      return localStorage.getItem(PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY, phase1Notes);
+    } catch {
+      /* ignore */
+    }
+  }, [phase1Notes]);
 
   const toggleSsGuideFromHero = useCallback(() => {
     setSsGuideOpen((o) => !o);
@@ -706,6 +722,20 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             </div>
           </div>
         </details>
+
+        <label className="field" style={{ marginTop: 16, marginBottom: 0 }}>
+          <span className="field__label">{fw.phase1NotesFieldLabel}</span>
+          <textarea
+            rows={4}
+            value={phase1Notes}
+            onChange={(e) => setPhase1Notes(e.target.value)}
+            placeholder="Krátké poznámky k škole, oborům nebo postupu…"
+            aria-describedby="ss-framework-phase1-notes-hint"
+          />
+          <span id="ss-framework-phase1-notes-hint" className="muted-text" style={{ fontSize: "0.85rem", marginTop: 6 }}>
+            {fw.phase1NotesFieldHint}
+          </span>
+        </label>
 
         <p className="muted-text ss-framework-compact-note">
           Přímý odkaz: <code className="methodology-strip__code">?view=ss</code> • právní rámec viz níže („Verze metodik a
