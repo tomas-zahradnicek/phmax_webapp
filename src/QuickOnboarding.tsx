@@ -88,7 +88,7 @@ export function QuickOnboarding({
             {dismissButtonLabel}
           </button>
         </div>
-        <div className="onboarding-quick__body muted-text">{children}</div>
+        <div className="onboarding-quick__body">{children}</div>
       </div>
     </div>
   );
