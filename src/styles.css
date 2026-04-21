@@ -4023,6 +4023,29 @@ input[type="radio"] {
   font-weight: 700;
 }
 
+/* Kompaktní varianta lišty (SŠ): menší mezery a kompaktnější ikonová tlačítka */
+.hero-actions.hero-actions--compact {
+  gap: 8px 14px;
+  padding: 10px 12px 12px;
+  border-radius: 18px;
+}
+
+.hero-actions.hero-actions--compact .hero-actions__group {
+  gap: 7px;
+}
+
+.hero-actions.hero-actions--compact .hero-action-icon-btn {
+  min-width: 38px;
+  min-height: 38px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.hero-actions.hero-actions--compact .hero-action-icon-btn svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
 @keyframes hero-action-icon-spin {
   to {
     transform: rotate(360deg);

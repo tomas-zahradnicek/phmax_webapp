@@ -362,7 +362,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           </div>
         </div>
 
-        <div className="hero-actions">
+        <div className="hero-actions hero-actions--compact">
           <div className="field field--hero-select hero-actions__example hero-ss-example-select">
             <span className="field__label field__label--hero" id="ss-hero-example-label">
               Ukázkový příklad
