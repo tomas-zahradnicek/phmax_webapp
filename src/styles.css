@@ -2227,11 +2227,11 @@ input[type="radio"] {
 .ss-units-table .ss-units-mini--top .ss-units-mini__labels,
 .ss-units-table .ss-units-mini--top .ss-units-mini__inputs {
   grid-template-columns:
-    minmax(110px, 1.2fr)
+    minmax(88px, 0.95fr)
     minmax(110px, 1.1fr)
     minmax(52px, 0.5fr)
     minmax(52px, 0.5fr)
-    minmax(96px, 0.95fr)
+    minmax(124px, 1.25fr)
     minmax(110px, 1.1fr);
 }
 
