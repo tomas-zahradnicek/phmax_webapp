@@ -10,6 +10,7 @@ import { GlossaryIconButton } from "./GlossaryIconButton";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import {
   HeroIconActionButton,
+  IconAddTableRow,
   IconClearStored,
   IconCopy,
   IconCsv,
@@ -17,6 +18,7 @@ import {
   IconJson,
   IconPrint,
   IconPrintSummary,
+  IconRemoveTableRow,
   IconResetAll,
   IconRestoreQuick,
   IconSaveQuick,
@@ -32,6 +34,7 @@ import {
   PHMAX_SS_FRAMEWORK_FIRST_PHASE,
   PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY,
   PHMAX_SS_LEGISLATIVE_MD_REL_PATH,
+  PHMAX_SS_UNITS_SECTION,
   PHMAX_SS_LOCAL_DOC_EXAMPLE_NAMES,
   PHMAX_SS_MAX_NAMED_SNAPSHOTS,
   PHMAX_SS_METHODOLOGY_LABEL,
@@ -282,6 +285,7 @@ function applySsHeroExampleSelection(
 
 export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   const fw = PHMAX_SS_FRAMEWORK_FIRST_PHASE;
+  const ssUnitsUi = PHMAX_SS_UNITS_SECTION;
   const s4 = PHMAX_SS_SECTION4_PHMAX_GUIDE;
   const [ssMetrics, setSsMetrics] = useState<SsDashboardMetrics>({
     rowCount: 1,
@@ -505,6 +509,13 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               />
               <HeroIconActionButton
                 className="btn ghost"
+                label={ssUnitsUi.addRow}
+                title="Přidá nový řádek na konec tabulky evidence dílčích jednotek níže."
+                icon={<IconAddTableRow />}
+                onClick={ss.addRow}
+              />
+              <HeroIconActionButton
+                className="btn ghost"
                 label="Rychle uložit průběh do prohlížeče"
                 icon={<IconSaveQuick />}
                 onClick={ss.saveSnapshotManually}
@@ -518,6 +529,13 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions__group hero-actions__group--meta">
+              <HeroIconActionButton
+                className="btn ghost"
+                label={ssUnitsUi.removeLastRowHeroLabel}
+                title={ssUnitsUi.removeLastRowHeroTitle}
+                icon={<IconRemoveTableRow />}
+                onClick={ss.removeLastRow}
+              />
               <HeroIconActionButton
                 className="btn ghost"
                 label="Vymazat uložená data v prohlížeči"

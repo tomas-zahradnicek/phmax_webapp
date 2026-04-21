@@ -188,6 +188,14 @@ export function usePhmaxSsUnits(
     });
   }, []);
 
+  /** Stejné pravidlo jako u jediného řádku po „Odstranit“ — vždy zůstane alespoň jeden řádek. */
+  const removeLastRow = useCallback(() => {
+    setRows((prev) => {
+      if (prev.length <= 1) return [createEmptyPhmaxSsUnitRow(1)];
+      return prev.slice(0, -1);
+    });
+  }, []);
+
   const preview = useMemo(() => deriveSsUnitsPreview(rows), [rows]);
   const brulesPreview = useMemo(() => deriveSsUnitsBrulesPreview(rows), [rows]);
 
@@ -430,6 +438,7 @@ export function usePhmaxSsUnits(
     updateRow,
     addRow,
     removeRow,
+    removeLastRow,
     whyPhmaxRowId,
     setWhyPhmaxRowId,
     whyBrulesRowId,

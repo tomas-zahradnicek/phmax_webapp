@@ -20,6 +20,29 @@ export function IconPrint() {
   );
 }
 
+/** Dokument + plus — přidání řádku v tabulkové evidenci (SŠ apod.). */
+export function IconAddTableRow() {
+  return (
+    <svg {...iconProps}>
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
+      <path d="M14 2v6h6" />
+      <path d="M12 17.5V14M10.25 15.25h3.5" />
+    </svg>
+  );
+}
+
+/** Koš — odstranění posledního řádku v evidenci (SŠ apod.). */
+export function IconRemoveTableRow() {
+  return (
+    <svg {...iconProps}>
+      <path d="M3 6h18" />
+      <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+      <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" />
+      <path d="M10 11v6M14 11v6" />
+    </svg>
+  );
+}
+
 export function IconPrintSummary() {
   return (
     <svg {...iconProps}>

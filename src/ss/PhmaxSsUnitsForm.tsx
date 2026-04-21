@@ -69,7 +69,6 @@ function PhmaxSsUnitsFormView({
   const {
     rows,
     updateRow,
-    addRow,
     removeRow,
     whyPhmaxRowId,
     setWhyPhmaxRowId,
@@ -208,12 +207,6 @@ function PhmaxSsUnitsFormView({
         </button>
       </div>
       ) : null}
-
-      <div className="ss-units-add-row-wrap">
-        <button type="button" className="btn ss-units-row-action ss-units-row-action--add" onClick={addRow}>
-          {sec.addRow}
-        </button>
-      </div>
 
       <ScrollGrabRegion
         className="app-table-wrap app-table-wrap--spaced app-table-wrap--ss-units"

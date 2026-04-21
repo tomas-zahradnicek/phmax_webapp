@@ -73,6 +73,10 @@ export const PHMAX_SS_UNITS_SECTION = {
   colClassType: "Typ třídy",
   colNote: "Poznámka",
   addRow: "Přidat řádek",
+  /** Lišta nad formulářem — odstraní poslední řádek (stejná logika jako u jediného řádku). */
+  removeLastRowHeroLabel: "Odstranit poslední řádek",
+  removeLastRowHeroTitle:
+    "Odstraní poslední řádek v tabulce evidence. Vždy zůstane alespoň jeden řádek; byl-li to poslední vyplněný řádek, vloží se prázdný řádek.",
   removeRow: "Odstranit",
   emptyHint: "Vyplňte kód oboru, průměr žáků a počet tříd – níže se zobrazí orientační PHmax.",
   storageNote: "Řádky se ukládají jen v tomto prohlížeči (localStorage, klíč phmax-ss-units-draft).",

@@ -2295,11 +2295,7 @@ input[type="radio"] {
   white-space: normal;
 }
 
-/* SŠ evidence řádků — zvýrazněná řadová tlačítka */
-.section-card--ss .ss-units-add-row-wrap {
-  margin-top: 16px;
-}
-
+/* SŠ evidence řádků — zvýrazněné tlačítko Odstranit u řádku */
 .section-card--ss .ss-units-row-action {
   appearance: none;
   cursor: pointer;
@@ -2327,21 +2323,6 @@ input[type="radio"] {
 .section-card--ss .ss-units-row-action:focus-visible {
   outline: 2px solid rgba(59, 130, 246, 0.55);
   outline-offset: 2px;
-}
-
-.section-card--ss .ss-units-row-action--add {
-  background: linear-gradient(135deg, #4338ca 0%, #6366f1 52%, #4f46e5 100%);
-  color: #fff !important;
-  border-color: rgba(165, 180, 252, 0.65);
-  box-shadow:
-    0 6px 18px rgba(67, 56, 202, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-}
-
-.section-card--ss .ss-units-row-action--add:hover {
-  box-shadow:
-    0 10px 26px rgba(67, 56, 202, 0.48),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .section-card--ss .ss-units-row-action--remove {
