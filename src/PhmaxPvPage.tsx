@@ -6,7 +6,13 @@ import {
   APP_AUTHOR_EMAIL,
   BROWSER_ERROR_NEXT_STEP_HINT,
   CALCULATOR_LIMITS_NOTE,
+  MSG_DATA_UNEXPECTED_SHAPE,
+  MSG_NAMED_BACKUP_PICK_FIRST,
+  MSG_NAMED_BACKUP_PICK_TO_COMPARE,
+  MSG_NAMED_BACKUP_PICK_TO_DELETE,
+  LAY_USER_QUICK_START_PV,
   EXPORT_ORIENTACNI_NOTE,
+  formatPvLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
   NAMED_BACKUPS_DELETE_LABEL,
@@ -466,7 +472,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       setRows(next);
       setUiNotice("Data byla obnovena.");
     } else {
-      setUiNotice("Uložená data nejsou ve očekávaném tvaru.");
+      setUiNotice(MSG_DATA_UNEXPECTED_SHAPE);
     }
   }, []);
 
@@ -509,7 +515,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const restoreNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice("Vyberte pojmenovanou zálohu v seznamu.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_FIRST);
       return;
     }
     applyPvSnapshot(item.snapshot);
@@ -518,7 +524,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
   const deleteNamedSnapshot = useCallback(() => {
     if (!selectedNamedId) {
-      setUiNotice("Vyberte zálohu ke smazání.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_DELETE);
       return;
     }
     const toDelete = namedSnapshots.find((x) => x.id === selectedNamedId);
@@ -613,7 +619,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const handleCompareWithNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice("Vyberte v seznamu zálohu, kterou chcete porovnat s aktuálním stavem.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
       return;
     }
     const protocolNamed = createPvProductAuditProtocol(
@@ -692,6 +698,14 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             <HeroStat compact label="PHAmax celkem" value={aggregate.phaSum > 0 ? aggregate.phaSum : "–"} />
           </div>
         </div>
+
+        <p
+          className="muted-text"
+          style={{ marginTop: 6, fontSize: "0.86rem", lineHeight: 1.5, maxWidth: "48rem" }}
+          aria-live="polite"
+        >
+          <strong>Průběh:</strong> {formatPvLayContextLine(rows.length, aggregate.incomplete)}
+        </p>
 
         <div
           className="field field--hero-select hero-actions__example hero-pv-example-select"
@@ -895,6 +909,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         <p>
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
         </p>
+        <p>{LAY_USER_QUICK_START_PV}</p>
         <p>
           Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a vyhlášky č.
           14/2005 Sb. Každé <strong>číslované pracoviště</strong> ve formuláři (Pracoviště 1, 2…) odpovídá jedné

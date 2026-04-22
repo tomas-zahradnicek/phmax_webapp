@@ -6,7 +6,13 @@ import {
   APP_AUTHOR_EMAIL,
   BROWSER_ERROR_NEXT_STEP_HINT,
   CALCULATOR_LIMITS_NOTE,
+  MSG_DATA_UNEXPECTED_SHAPE,
+  MSG_NAMED_BACKUP_PICK_FIRST,
+  MSG_NAMED_BACKUP_PICK_TO_COMPARE,
+  MSG_NAMED_BACKUP_PICK_TO_DELETE,
+  LAY_USER_QUICK_START_SD,
   EXPORT_ORIENTACNI_NOTE,
+  formatSdLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
   NAMED_BACKUPS_DELETE_LABEL,
@@ -613,7 +619,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         applySdPersisted(next);
         setUiNotice("Data byla obnovena.");
       } else {
-        setUiNotice("Uložená data nejsou ve očekávaném tvaru.");
+        setUiNotice(MSG_DATA_UNEXPECTED_SHAPE);
       }
     },
     [applySdPersisted],
@@ -668,7 +674,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const restoreNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice("Vyberte pojmenovanou zálohu v seznamu.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_FIRST);
       return;
     }
     applySdSnapshot(item.snapshot);
@@ -677,7 +683,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
   const deleteNamedSnapshot = useCallback(() => {
     if (!selectedNamedId) {
-      setUiNotice("Vyberte zálohu ke smazání.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_DELETE);
       return;
     }
     const toDelete = namedSnapshots.find((x) => x.id === selectedNamedId);
@@ -797,7 +803,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const handleCompareWithNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice("Vyberte v seznamu zálohu, kterou chcete porovnat s aktuálním stavem.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
       return;
     }
     const protocolNamed = createSdProductAuditProtocol({
@@ -890,6 +896,18 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             />
           </div>
         </div>
+
+        <p
+          className="muted-text"
+          style={{ marginTop: 6, fontSize: "0.86rem", lineHeight: 1.5, maxWidth: "48rem" }}
+          aria-live="polite"
+        >
+          <strong>Průběh:</strong>{" "}
+          {formatSdLayContextLine(
+            inputMode,
+            inputMode === "detail" ? detailDepartments.length : effectiveDepts,
+          )}
+        </p>
 
         <div className="field field--hero-select hero-actions__example hero-sd-example-select" style={{ marginTop: 14 }}>
           <span className="field__label field__label--hero" id="sd-hero-example-label">
@@ -1076,6 +1094,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         <p>
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
         </p>
+        <p>{LAY_USER_QUICK_START_SD}</p>
         <p>
           Vyplňte počet účastníků a případně počet oddělení (jinak se dopočítá dělením 27). Výsledek vychází z přílohy k
           vyhlášce č. 74/2005 Sb.; u průměru pod 20 na oddělení může aplikovat orientační krácení dle § 10 odst. 2.

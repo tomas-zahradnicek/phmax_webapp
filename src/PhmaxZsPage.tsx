@@ -74,7 +74,10 @@ import {
   APP_AUTHOR_EXPORT_ROWS,
   BROWSER_ERROR_NEXT_STEP_HINT,
   CALCULATOR_LIMITS_NOTE,
+  LAY_USER_QUICK_START_ZS,
+  MSG_NAMED_BACKUP_PICK_TO_COMPARE,
   EXPORT_ORIENTACNI_NOTE,
+  formatZsLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
   HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
@@ -1913,7 +1916,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const handleCompareZsWithNamedSnapshot = () => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice("Vyberte zálohu pro porovnání s aktuálním stavem.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
       return;
     }
     const stored = parseZsSnapshotAuditTotals(item.snapshot);
@@ -2229,6 +2232,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <p>
             <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
           </p>
+          <p>{LAY_USER_QUICK_START_ZS}</p>
           <p>
             <strong>PHmax</strong> zadejte podle typu školy v rozbalovacím režimu; u specialit (psychiatrie, zdravotnické zařízení,
             menšina, gymnázia…) přepněte na odpovídající položku. <strong>PHAmax</strong> a <strong>PHPmax</strong> mají vlastní záložky.
@@ -2421,7 +2425,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               Výsledky navazují na metodický postup A–D: vstupní údaje, výpočet průměru, určení pásma a výsledná hodnota. Každý modul se stanovuje samostatně.
             </SectionLead>
             <p className="muted-text" style={{ marginTop: 10, marginBottom: 0, fontSize: "0.86rem" }}>
-              Zvoleno: {MODE_CONFIG[mode].label} · {tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"}
+              <strong>Aktuální kontext:</strong> {formatZsLayContextLine(MODE_CONFIG[mode].label, tab, incompleteSections)}
             </p>
             <InputOutputLegend compact />
             <div className="results-panel__meta">

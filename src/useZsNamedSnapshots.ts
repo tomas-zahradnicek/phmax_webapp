@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { confirmDestructive, msgConfirmDeleteNamedBackup } from "./confirm-destructive";
-import { namedBackupSavedNotice } from "./calculator-ui-constants";
+import {
+  MSG_NAMED_BACKUP_PICK_FIRST,
+  MSG_NAMED_BACKUP_PICK_TO_DELETE,
+  namedBackupSavedNotice,
+} from "./calculator-ui-constants";
 import {
   MAX_NAMED_SNAPSHOTS,
   type NamedZsSnapshot,
@@ -44,7 +48,7 @@ export function useZsNamedSnapshots({
   const restoreNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice("Vyberte pojmenovanou zálohu v seznamu.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_FIRST);
       return;
     }
     applySnapshotPayload(item.snapshot, `Obnovena záloha „${item.name}“.`);
@@ -52,7 +56,7 @@ export function useZsNamedSnapshots({
 
   const deleteNamedSnapshot = useCallback(() => {
     if (!selectedNamedId) {
-      setUiNotice("Vyberte zálohu ke smazání.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_DELETE);
       return;
     }
     const toDelete = namedSnapshots.find((x) => x.id === selectedNamedId);

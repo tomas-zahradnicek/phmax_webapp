@@ -14,6 +14,13 @@ import {
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   BROWSER_ERROR_NEXT_STEP_HINT,
+  MSG_DATA_UNEXPECTED_SHAPE,
+  MSG_SS_AUDIT_NEEDS_VALID_ROW,
+  MSG_SS_COMPARE_CURRENT_INVALID,
+  MSG_SS_COMPARE_NAMED_INVALID,
+  MSG_NAMED_BACKUP_PICK_FIRST,
+  MSG_NAMED_BACKUP_PICK_TO_COMPARE,
+  MSG_NAMED_BACKUP_PICK_TO_DELETE,
   namedBackupSavedNotice,
 } from "../calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml } from "../app-author-print";
@@ -238,7 +245,7 @@ export function usePhmaxSsUnits(
       setRows(next);
       setUiNotice("Data byla obnovena.");
     } else {
-      setUiNotice("Uložená data nejsou ve očekávaném tvaru.");
+      setUiNotice(MSG_DATA_UNEXPECTED_SHAPE);
     }
   }, []);
 
@@ -263,7 +270,7 @@ export function usePhmaxSsUnits(
   const restoreNamedSsSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice("Vyberte pojmenovanou zálohu v seznamu.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_FIRST);
       return;
     }
     applySsRowsSnapshot(item.snapshot);
@@ -272,7 +279,7 @@ export function usePhmaxSsUnits(
 
   const deleteNamedSsSnapshot = useCallback(() => {
     if (!selectedNamedId) {
-      setUiNotice("Vyberte zálohu ke smazání.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_DELETE);
       return;
     }
     const toDelete = namedSnapshots.find((x) => x.id === selectedNamedId);
@@ -289,7 +296,7 @@ export function usePhmaxSsUnits(
 
   const handleExportSsAuditJson = useCallback(() => {
     if (!auditProtocolInput) {
-      setUiNotice("Nejdřív vyplňte alespoň jeden platný řádek PHmax pro export auditu.");
+      setUiNotice(MSG_SS_AUDIT_NEEDS_VALID_ROW);
       return;
     }
     downloadPhmaxProductAuditJson(createSsProductAuditProtocol(phmaxSsDataset, auditProtocolInput), "ss");
@@ -299,17 +306,17 @@ export function usePhmaxSsUnits(
   const handleCompareSsWithNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice("Vyberte v seznamu zálohu, kterou chcete porovnat s aktuálním stavem.");
+      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
       return;
     }
     const inputCurrent = auditProtocolInput;
     const inputNamed = buildSsAuditProtocolInput(item.snapshot.rows);
     if (!inputCurrent) {
-      setUiNotice("Aktuální stav nemá žádný platný řádek PHmax pro srovnání.");
+      setUiNotice(MSG_SS_COMPARE_CURRENT_INVALID);
       return;
     }
     if (!inputNamed) {
-      setUiNotice("Vybraná záloha neobsahuje platné řádky PHmax pro srovnání.");
+      setUiNotice(MSG_SS_COMPARE_NAMED_INVALID);
       return;
     }
     const cmp = comparePhmaxProductVariants([

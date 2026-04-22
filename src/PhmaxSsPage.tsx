@@ -3,7 +3,9 @@ import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import {
   ADVANCED_AUDIT_GROUP_LABEL,
   CALCULATOR_LIMITS_NOTE,
+  LAY_USER_QUICK_START_SS,
   EXPORT_ORIENTACNI_NOTE,
+  formatSsLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
   NAMED_BACKUPS_DELETE_LABEL,
@@ -406,6 +408,15 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             <HeroStat label="Řádků ve formuláři" value={ssMetrics.rowCount} />
           </div>
         </div>
+
+        <p
+          className="muted-text"
+          style={{ marginTop: 6, fontSize: "0.86rem", lineHeight: 1.5, maxWidth: "48rem" }}
+          aria-live="polite"
+        >
+          <strong>Průběh:</strong> {formatSsLayContextLine(ssMetrics.rowCount, ss.computedRows.length)}
+        </p>
+
         <p className="hero__note" style={{ marginTop: 10 }}>
           PHAmax mimo PrŠ (78-62-C/01, 78-62-C/02) dopočítejte plným postupem metodiky MŠMT – navazující kroky a tabulky jsou na{" "}
           <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
@@ -707,6 +718,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         <p>
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
         </p>
+        <p>{LAY_USER_QUICK_START_SS}</p>
         <p>
           Kalkulačka je orientační; výsledky ověřte vůči aktuální{" "}
           <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
