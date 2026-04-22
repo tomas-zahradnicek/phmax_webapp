@@ -4,6 +4,11 @@ import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
 import { computePvPhmaxTotal } from "./phmax-pv-logic";
 import { buildPhmaxSdExportRows } from "./phmax-sd-export-rows";
 import { calculateSchoolDruzinaPhmaxDetailed, normalizeSchoolDruzinaInput } from "./phmax-sd-logic";
+import { createSsProductAuditProtocol, createZsProductAuditProtocol, parseZsSnapshotAuditTotals } from "./phmax-product-audit";
+import { phmaxSsDataset } from "./ss/phmax-ss-dataset";
+import { buildSsAuditProtocolInput } from "./ss/phmax-ss-units-derive";
+import { ssHeroExampleSnapshot } from "./ss/phmax-ss-hero-examples";
+import { revivePhmaxSsUnitRow } from "./ss/phmax-ss-types";
 
 describe("Export contract", () => {
   it("PV multi export drží klíčové contract hlavičky a součet", () => {
@@ -67,5 +72,47 @@ describe("Export contract", () => {
     const csv = exportCsvLocalized(rows);
     expect(csv).toContain("Položka;Hodnota");
     expect(csv).toContain('"Oddělení 2 (special) PHAmax";"14,25"');
+  });
+
+  it("ZŠ audit export drží contract pole meta/validation/calculation", () => {
+    const snapshot = {
+      mode: "full",
+      tab: "phmax",
+      _phmaxAuditTotals: { totalPhmax: 628, totalPha: 0, totalPhp: 12, tab: "phmax" },
+    } as Record<string, unknown>;
+    const totals = parseZsSnapshotAuditTotals(snapshot);
+    expect(totals).not.toBeNull();
+
+    const protocol = createZsProductAuditProtocol({
+      formSnapshot: snapshot,
+      totals: {
+        totalPhmax: totals!.totalPhmax,
+        breakdown: { totalPha: totals!.totalPha, totalPhp: totals!.totalPhp },
+      },
+      narrative: "Contract test ZS",
+    });
+
+    expect(protocol.meta.product).toBe("zs");
+    expect(protocol.validation.source).toBe("zs:ui_snapshot+totals");
+    expect(protocol.calculation.ok).toBe(true);
+    if (protocol.calculation.ok) {
+      expect(protocol.calculation.totalPrimary).toBe(628);
+    }
+  });
+
+  it("SŠ audit export drží contract pole a orientační výsledek", () => {
+    const rows = ssHeroExampleSnapshot("ill_ss_prakticka_skola").rows.map((row, i) =>
+      revivePhmaxSsUnitRow((row ?? {}) as Record<string, unknown>, i + 1),
+    );
+    const input = buildSsAuditProtocolInput(rows);
+    expect(input).not.toBeNull();
+
+    const protocol = createSsProductAuditProtocol(phmaxSsDataset, input!);
+    expect(protocol.meta.product).toBe("ss");
+    expect(protocol.validation.source.startsWith("ss:")).toBe(true);
+    expect(protocol.calculation.ok).toBe(true);
+    if (protocol.calculation.ok) {
+      expect((protocol.calculation.totalPrimary ?? 0) > 0).toBe(true);
+    }
   });
 });

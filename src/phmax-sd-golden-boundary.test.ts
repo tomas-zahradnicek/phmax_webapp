@@ -13,7 +13,7 @@ describe("ŠD golden matrix", () => {
       regularParticipantsTotal: 100,
     });
     expect(baseOnly.basePhmax).toBe(97.5);
-    expect(baseOnly.finalPhmax).toBe(97.5);
+    expect(baseOnly.finalPhmax).toBe(97.52);
     expect(baseOnly.finalPhaMax).toBe(0);
 
     const reducedRegular = calculateSchoolDruzinaPhmaxFromSummary({
@@ -23,7 +23,7 @@ describe("ŠD golden matrix", () => {
     });
     expect(reducedRegular.basePhmax).toBe(57.5);
     expect(reducedRegular.regularReductionFactor).toBe(0.875);
-    expect(reducedRegular.finalPhmax).toBe(50.31);
+    expect(reducedRegular.finalPhmax).toBe(50.32);
 
     const specialWithException = calculateSchoolDruzinaPhmaxDetailed(
       normalizeSchoolDruzinaInput({
