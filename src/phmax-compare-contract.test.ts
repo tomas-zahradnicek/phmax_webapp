@@ -176,4 +176,46 @@ describe("Compare contract", () => {
     const secondaryLine = out.differences.find((line) => line.startsWith("Sekundární metrika"));
     expect(secondaryLine).toContain("„Pravá“ 3 vs „Levá“ 2");
   });
+
+  it("comparison zachová pořadí variant podle vstupu", () => {
+    const first = createPvProductAuditProtocol([
+      { label: "A", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const second = createPvProductAuditProtocol([
+      { label: "B", provoz: "celodenni", classCount: 2, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([
+      { id: "v2", label: "Druhá", protocol: second },
+      { id: "v1", label: "První", protocol: first },
+    ]);
+
+    expect(out.comparison.totalPrimary.map((x) => x.variantId)).toEqual(["v2", "v1"]);
+    expect(out.comparison.totalSecondary.map((x) => x.variantId)).toEqual(["v2", "v1"]);
+  });
+
+  it("comparison přenese variantId i variantLabel beze změny", () => {
+    const p = createPvProductAuditProtocol([
+      { label: "A", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([{ id: "custom-id", label: "Moje varianta", protocol: p }]);
+
+    expect(out.comparison.totalPrimary[0]).toMatchObject({
+      variantId: "custom-id",
+      variantLabel: "Moje varianta",
+    });
+    expect(out.comparison.totalSecondary[0]).toMatchObject({
+      variantId: "custom-id",
+      variantLabel: "Moje varianta",
+    });
+  });
+
+  it("comparison vrací null totalPrimary/totalSecondary pro neúspěšný výpočet", () => {
+    const invalid = createPvProductAuditProtocol([
+      { label: "Bad", provoz: "celodenni", classCount: 0, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([{ id: "bad", label: "Neplatná", protocol: invalid }]);
+
+    expect(out.comparison.totalPrimary[0].value).toBeNull();
+    expect(out.comparison.totalSecondary[0].value).toBeNull();
+  });
 });
