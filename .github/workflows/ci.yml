@@ -26,7 +26,7 @@ jobs:
       - name: Run golden tests
         id: golden_tests
         continue-on-error: true
-        run: npm run test:golden 2>&1 | tee ci-golden-tests.log
+        run: npm run check:golden-manifest && npm run test:golden 2>&1 | tee ci-golden-tests.log
 
       - name: Build test failure report
         if: always()
