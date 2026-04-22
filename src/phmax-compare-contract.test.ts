@@ -276,4 +276,42 @@ describe("Compare contract", () => {
     expect(phLine).toContain("-57,50 h");
     expect(phLine).toContain("62,50 vs 120,00");
   });
+
+  it("differences použije variantId jako fallback, když je label prázdný", () => {
+    const base = createPvProductAuditProtocol([
+      { label: "A", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const changed = createPvProductAuditProtocol([
+      { label: "B", provoz: "celodenni", classCount: 2, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([
+      { id: "base-id", label: "", protocol: base },
+      { id: "changed-id", label: "", protocol: changed },
+    ]);
+    const phLine = out.differences.find((line) => line.startsWith("PHmax (primární metrika):"));
+    expect(phLine).toContain("„changed-id“");
+    expect(phLine).toContain("„base-id“");
+  });
+
+  it("recommendation při remíze validačně OK poolu vrací text o stejné metrice", () => {
+    const okA = createPvProductAuditProtocol([
+      { label: "A", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const okB = createPvProductAuditProtocol([
+      { label: "B", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const invalidHigherBase = createPvProductAuditProtocol([
+      { label: "C", provoz: "celodenni", classCount: 2, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const invalidHigher = {
+      ...invalidHigherBase,
+      validation: { ...invalidHigherBase.validation, ok: false },
+    };
+    const out = comparePhmaxProductVariants([
+      { id: "a", label: "OK A", protocol: okA },
+      { id: "b", label: "OK B", protocol: okB },
+      { id: "c", label: "Invalid high", protocol: invalidHigher },
+    ]);
+    expect(out.recommendation).toContain("stejnou nejvyšší primární metriku");
+  });
 });
