@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:golden": "vitest run src/phmax-zs-golden-boundary.test.ts src/ss/phmax-ss-golden-boundary.test.ts",
+    "test:golden": "vitest run src/phmax-pv-golden-boundary.test.ts src/phmax-sd-golden-boundary.test.ts src/phmax-zs-golden-boundary.test.ts src/ss/phmax-ss-golden-boundary.test.ts src/phmax-pv-ui-flow.test.ts src/phmax-sd-ui-flow.test.ts src/phmax-export-contract.test.ts",
     "test:watch": "vitest",
     "extract:ss-metodika": "node scripts/extract-ss-metodika-docx.mjs",
     "docs:concat-md": "node scripts/concat-zdroje-md.mjs",
