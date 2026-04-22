@@ -76,4 +76,51 @@ describe("Compare contract", () => {
 
     expect(out.differences.some((line) => line.includes("Produkt se liší"))).toBe(true);
   });
+
+  it("recommendation pro jednu variantu obsahuje název varianty", () => {
+    const a = createPvProductAuditProtocol([
+      { label: "A", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([{ id: "a", label: "Varianta A", protocol: a }]);
+    expect(out.recommendation).toContain("Jediná varianta");
+    expect(out.recommendation).toContain("Varianta A");
+  });
+
+  it("recommendation při shodném PHmax vrací text o stejné nejvyšší metrice", () => {
+    const a = createPvProductAuditProtocol([
+      { label: "A", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const b = createPvProductAuditProtocol([
+      { label: "B", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([
+      { id: "a", label: "Varianta A", protocol: a },
+      { id: "b", label: "Varianta B", protocol: b },
+    ]);
+    expect(out.recommendation).toContain("stejnou nejvyšší primární metriku");
+  });
+
+  it("recommendation preferuje validačně OK variantu před nevalidní", () => {
+    const betterButInvalidBase = createPvProductAuditProtocol([
+      { label: "A", provoz: "celodenni", classCount: 2, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const betterButInvalid = {
+      ...betterButInvalidBase,
+      validation: { ...betterButInvalidBase.validation, ok: false },
+    };
+    const validLower = createPvProductAuditProtocol([
+      { label: "B", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const validLowest = createPvProductAuditProtocol([
+      { label: "C", provoz: "polodenni", classCount: 1, avgHoursPerDay: 4, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+
+    const out = comparePhmaxProductVariants([
+      { id: "a", label: "Nevalidní vyšší", protocol: betterButInvalid },
+      { id: "b", label: "Validní nižší", protocol: validLower },
+      { id: "c", label: "Validní nejnižší", protocol: validLowest },
+    ]);
+    expect(out.recommendation).toContain("Validní nižší");
+    expect(out.recommendation).not.toContain("Nevalidní vyšší");
+  });
 });
