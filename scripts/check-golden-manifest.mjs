@@ -16,6 +16,10 @@ const requiredEntries = [
   "src/export-time-freeze.test.ts",
   "src/snapshot-restore-contract.test.ts",
   "src/phmax-audit-schema-contract.test.ts",
+  "src/phmax-pv-ui-flow.test.ts",
+  "src/phmax-sd-ui-flow.test.ts",
+  "src/phmax-zs-ui-flow.test.ts",
+  "src/ss/phmax-ss-ui-flow.test.ts",
 ];
 
 const missing = requiredEntries.filter((entry) => !goldenScript.includes(entry));
