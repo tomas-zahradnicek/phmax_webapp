@@ -16,6 +16,7 @@ const requiredEntries = [
   "src/phmax-zs-golden-boundary.test.ts",
   "src/ss/phmax-ss-golden-boundary.test.ts",
   "src/phmax-compare-contract.test.ts",
+  "src/phmax-export-contract.test.ts",
   "src/export-metadata-contract.test.ts",
   "src/export-time-freeze.test.ts",
   "src/snapshot-restore-contract.test.ts",
