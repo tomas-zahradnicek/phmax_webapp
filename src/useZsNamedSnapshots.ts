@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { confirmDestructive, msgConfirmDeleteNamedBackup } from "./confirm-destructive";
+import { namedBackupSavedNotice } from "./calculator-ui-constants";
 import {
   MAX_NAMED_SNAPSHOTS,
   type NamedZsSnapshot,
@@ -37,7 +38,7 @@ export function useZsNamedSnapshots({
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(`Pojmenovaná záloha „${name}“ uložena (max. ${MAX_NAMED_SNAPSHOTS}).`);
+    setUiNotice(namedBackupSavedNotice(name, MAX_NAMED_SNAPSHOTS));
   }, [buildSnapshot, namedSaveName, setUiNotice]);
 
   const restoreNamedSnapshot = useCallback(() => {

@@ -67,6 +67,11 @@ export function namedBackupsMicrocopy(maxCount: number, savedScopeLabel: string)
   return `V tomto prohlížeči můžete uložit až ${maxCount} pojmenovaných záloh; ukládá se ${savedScopeLabel}.`;
 }
 
+/** Sjednocená notifikace po uložení pojmenované zálohy napříč produkty. */
+export function namedBackupSavedNotice(name: string, maxCount: number): string {
+  return `Pojmenovaná záloha „${name}“ uložena (max. ${maxCount}).`;
+}
+
 /** Autor aplikace – e-mail a texty do exportů / shrnutí. */
 export const APP_AUTHOR_EMAIL = "tomas.zahradnicek.hradec@gmail.com";
 

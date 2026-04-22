@@ -14,6 +14,7 @@ import {
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   BROWSER_ERROR_NEXT_STEP_HINT,
+  namedBackupSavedNotice,
 } from "../calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml } from "../app-author-print";
 import {
@@ -256,7 +257,7 @@ export function usePhmaxSsUnits(
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(`Pojmenovaná záloha „${name}“ uložena (max. ${PHMAX_SS_MAX_NAMED_SNAPSHOTS}).`);
+    setUiNotice(namedBackupSavedNotice(name, PHMAX_SS_MAX_NAMED_SNAPSHOTS));
   }, [buildSsRowsSnapshot, namedSaveName]);
 
   const restoreNamedSsSnapshot = useCallback(() => {

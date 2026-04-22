@@ -15,6 +15,7 @@ import {
   NAMED_BACKUPS_SAVE_LABEL,
   NAMED_BACKUPS_SELECT_PLACEHOLDER,
   namedBackupsMicrocopy,
+  namedBackupSavedNotice,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
@@ -502,7 +503,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(`Pojmenovaná záloha „${name}“ uložena (max. ${PV_MAX_NAMED_SNAPSHOTS}).`);
+    setUiNotice(namedBackupSavedNotice(name, PV_MAX_NAMED_SNAPSHOTS));
   }, [buildPvSnapshot, namedSaveName]);
 
   const restoreNamedSnapshot = useCallback(() => {
