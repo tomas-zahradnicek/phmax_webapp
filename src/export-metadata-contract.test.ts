@@ -63,4 +63,23 @@ describe("Export metadata contract", () => {
       expect(String(rows[2][1]).includes("orientační výpočet")).toBe(true);
     }
   });
+
+  it("export filename policy drží prefix phmax-* pro produktové exporty", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-22T10:00:00.000Z"));
+
+    expect(exportFilenameStamped("phmax-pv", "csv")).toMatch(/^phmax-pv-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(exportFilenameStamped("phmax-sd", "csv")).toMatch(/^phmax-sd-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(exportFilenameStamped("phmax-zs", "xlsx")).toMatch(/^phmax-zs-\d{4}-\d{2}-\d{2}\.xlsx$/);
+    expect(exportFilenameStamped("phmax-ss", "xlsx")).toMatch(/^phmax-ss-\d{4}-\d{2}-\d{2}\.xlsx$/);
+  });
+
+  it("export filename policy drží příponu podle typu exportu", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-22T10:00:00.000Z"));
+
+    expect(exportFilenameStamped("phmax-zs", "csv").endsWith(".csv")).toBe(true);
+    expect(exportFilenameStamped("phmax-zs", "xlsx").endsWith(".xlsx")).toBe(true);
+    expect(exportFilenameStamped("phmax-audit", "json").endsWith(".json")).toBe(true);
+  });
 });
