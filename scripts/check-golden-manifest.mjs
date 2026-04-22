@@ -1,4 +1,6 @@
 import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const packageJson = JSON.parse(
   fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
@@ -16,6 +18,16 @@ const duplicateEntries = scriptEntries.filter((entry, index) => scriptEntries.in
 if (duplicateEntries.length > 0) {
   console.error("test:golden contains duplicate test entries:");
   for (const entry of [...new Set(duplicateEntries)]) {
+    console.error(`- ${entry}`);
+  }
+  process.exit(1);
+}
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const missingFiles = scriptEntries.filter((entry) => !fs.existsSync(path.resolve(repoRoot, entry)));
+if (missingFiles.length > 0) {
+  console.error("test:golden references missing test files:");
+  for (const entry of missingFiles) {
     console.error(`- ${entry}`);
   }
   process.exit(1);
