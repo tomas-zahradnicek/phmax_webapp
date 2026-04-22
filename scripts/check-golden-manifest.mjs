@@ -11,6 +11,10 @@ if (typeof goldenScript !== "string") {
 }
 
 const requiredEntries = [
+  "src/phmax-pv-golden-boundary.test.ts",
+  "src/phmax-sd-golden-boundary.test.ts",
+  "src/phmax-zs-golden-boundary.test.ts",
+  "src/ss/phmax-ss-golden-boundary.test.ts",
   "src/phmax-compare-contract.test.ts",
   "src/export-metadata-contract.test.ts",
   "src/export-time-freeze.test.ts",
@@ -20,6 +24,9 @@ const requiredEntries = [
   "src/phmax-sd-ui-flow.test.ts",
   "src/phmax-zs-ui-flow.test.ts",
   "src/ss/phmax-ss-ui-flow.test.ts",
+  "src/phmax-zs-property-boundaries.test.ts",
+  "src/phmax-pv-sd-property-boundaries.test.ts",
+  "src/ss/phmax-ss-property-boundaries.test.ts",
 ];
 
 const missing = requiredEntries.filter((entry) => !goldenScript.includes(entry));
