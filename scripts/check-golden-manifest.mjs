@@ -10,24 +10,40 @@ if (typeof goldenScript !== "string") {
   process.exit(1);
 }
 
-const requiredEntries = [
+const requiredGoldenBoundaryEntries = [
   "src/phmax-pv-golden-boundary.test.ts",
   "src/phmax-sd-golden-boundary.test.ts",
   "src/phmax-zs-golden-boundary.test.ts",
   "src/ss/phmax-ss-golden-boundary.test.ts",
+];
+
+const requiredContractEntries = [
   "src/phmax-compare-contract.test.ts",
   "src/phmax-export-contract.test.ts",
   "src/export-metadata-contract.test.ts",
   "src/export-time-freeze.test.ts",
-  "src/snapshot-restore-contract.test.ts",
   "src/phmax-audit-schema-contract.test.ts",
+  "src/snapshot-restore-contract.test.ts",
+];
+
+const requiredUiFlowEntries = [
   "src/phmax-pv-ui-flow.test.ts",
   "src/phmax-sd-ui-flow.test.ts",
   "src/phmax-zs-ui-flow.test.ts",
   "src/ss/phmax-ss-ui-flow.test.ts",
+];
+
+const requiredPropertyEntries = [
   "src/phmax-zs-property-boundaries.test.ts",
   "src/phmax-pv-sd-property-boundaries.test.ts",
   "src/ss/phmax-ss-property-boundaries.test.ts",
+];
+
+const requiredEntries = [
+  ...requiredGoldenBoundaryEntries,
+  ...requiredContractEntries,
+  ...requiredUiFlowEntries,
+  ...requiredPropertyEntries,
 ];
 
 const missing = requiredEntries.filter((entry) => !goldenScript.includes(entry));
