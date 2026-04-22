@@ -10,6 +10,17 @@ if (typeof goldenScript !== "string") {
   process.exit(1);
 }
 
+const tokens = goldenScript.trim().split(/\s+/);
+const scriptEntries = tokens.filter((token) => token.endsWith(".test.ts"));
+const duplicateEntries = scriptEntries.filter((entry, index) => scriptEntries.indexOf(entry) !== index);
+if (duplicateEntries.length > 0) {
+  console.error("test:golden contains duplicate test entries:");
+  for (const entry of [...new Set(duplicateEntries)]) {
+    console.error(`- ${entry}`);
+  }
+  process.exit(1);
+}
+
 const requiredGoldenBoundaryEntries = [
   "src/phmax-pv-golden-boundary.test.ts",
   "src/phmax-sd-golden-boundary.test.ts",
