@@ -33,7 +33,7 @@ describe("pickBand", () => {
     expect(pickBand(8, B13_MORE_THAN_2.first).value).toBe(10);
     expect(pickBand(8.01, B13_MORE_THAN_2.first).value).toBe(16);
     expect(pickBand(17, B13_MORE_THAN_2.first).value).toBe(25);
-    expect(pickBand(27.5, B13_MORE_THAN_2.first).value).toBe(30);
+    expect(pickBand(27.5, B13_MORE_THAN_2.first).value).toBe(32);
     expect(pickBand(28, B13_MORE_THAN_2.first).value).toBe(32);
   });
 

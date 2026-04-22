@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      - name: Run unit tests
+        id: unit_tests
+        continue-on-error: true
+        run: npm test 2>&1 | tee ci-unit-tests.log
+
+      - name: Run golden tests
+        id: golden_tests
+        continue-on-error: true
+        run: npm run test:golden 2>&1 | tee ci-golden-tests.log
+
+      - name: Build test failure report
+        if: always()
+        run: |
+          {
+            echo "# CI test failure report"
+            echo ""
+            echo "- Unit tests outcome: ${{ steps.unit_tests.outcome }}"
+            echo "- Golden tests outcome: ${{ steps.golden_tests.outcome }}"
+            echo ""
+            echo "## Unit tests (last 120 lines)"
+            echo ""
+            echo '```'
+            tail -n 120 ci-unit-tests.log || true
+            echo '```'
+            echo ""
+            echo "## Golden tests (last 120 lines)"
+            echo ""
+            echo '```'
+            tail -n 120 ci-golden-tests.log || true
+            echo '```'
+          } > ci-test-report.md
+
+      - name: Upload test failure report artifact
+        if: ${{ steps.unit_tests.outcome != 'success' || steps.golden_tests.outcome != 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-test-failure-report
+          path: |
+            ci-test-report.md
+            ci-unit-tests.log
+            ci-golden-tests.log
+
+      - name: Write short test summary
+        if: always()
+        run: |
+          {
+            echo "## Test summary"
+            echo ""
+            echo "- Unit tests: ${{ steps.unit_tests.outcome }}"
+            echo "- Golden tests: ${{ steps.golden_tests.outcome }}"
+            echo ""
+            if [ "${{ steps.unit_tests.outcome }}" != "success" ] || [ "${{ steps.golden_tests.outcome }}" != "success" ]; then
+              echo "One or more test suites failed. See logs and artifact \`ci-test-failure-report\`."
+            else
+              echo "All test suites passed."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail job when tests failed
+        if: always()
+        run: |
+          if [ "${{ steps.unit_tests.outcome }}" != "success" ] || [ "${{ steps.golden_tests.outcome }}" != "success" ]; then
+            exit 1
+          fi

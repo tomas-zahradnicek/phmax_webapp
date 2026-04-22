@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { getPvMethodologyAppendixVisibility } from "./phmax-pv-methodology-tables";
 
 describe("getPvMethodologyAppendixVisibility", () => {
-  it("bez aktivních buněk a bez „vše“ zobrazí nápovědu a skryje tabulky", () => {
+  it("bez aktivních buněk a bez „vše“ zobrazí nápovědu a nechá tabulky dostupné", () => {
     const v = getPvMethodologyAppendixVisibility(false, []);
     expect(v.showEmptyHint).toBe(true);
-    expect(v.show1).toBe(false);
-    expect(v.show2).toBe(false);
-    expect(v.show3).toBe(false);
+    expect(v.show1).toBe(true);
+    expect(v.show2).toBe(true);
+    expect(v.show3).toBe(true);
   });
 
   it("bez aktivních buněk se zapnutým „vše“ zobrazí všechny tabulky", () => {
@@ -27,6 +27,6 @@ describe("getPvMethodologyAppendixVisibility", () => {
   it("undefined activeCells se chová jako prázdné pole", () => {
     const v = getPvMethodologyAppendixVisibility(false, undefined);
     expect(v.showEmptyHint).toBe(true);
-    expect(v.show1).toBe(false);
+    expect(v.show1).toBe(true);
   });
 });
