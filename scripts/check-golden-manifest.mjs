@@ -55,4 +55,20 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
+const requiredOrder = [
+  "src/phmax-export-contract.test.ts",
+  "src/export-metadata-contract.test.ts",
+  "src/export-time-freeze.test.ts",
+];
+const positions = requiredOrder.map((entry) => goldenScript.indexOf(entry));
+const orderValid =
+  positions.every((position) => position >= 0) &&
+  positions.every((position, index) => index === 0 || positions[index - 1] < position);
+if (!orderValid) {
+  console.error(
+    "test:golden export contract entries must stay ordered: phmax-export-contract -> export-metadata-contract -> export-time-freeze.",
+  );
+  process.exit(1);
+}
+
 console.log("Golden manifest check passed.");
