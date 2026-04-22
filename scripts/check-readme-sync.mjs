@@ -5,6 +5,10 @@ const readme = fs.readFileSync(new URL("../README.md", import.meta.url), "utf8")
 const requiredSnippets = [
   "npm run test:golden",
   "Test summary",
+  "npm run check:readme-sync",
+  "npm run check:ci-summary-manifest",
+  "npm run check:golden-manifest",
+  "npm run check:ci-guards-manifest",
 ];
 
 const missing = requiredSnippets.filter((snippet) => !readme.includes(snippet));

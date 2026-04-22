@@ -19,6 +19,11 @@ npm run test:golden
 
 - `npm run test:golden` spouští golden/boundary/UI-flow/contract sadu pro kontrolu stability výpočtů a exportů.
 - V GitHub Actions je po běhu dostupný krátký `Test summary` blok v job summary (unit + golden výsledky), bez nutnosti stahovat artifact.
+- Guard skripty pro CI kontrakty:
+  - `npm run check:readme-sync`
+  - `npm run check:ci-summary-manifest`
+  - `npm run check:golden-manifest`
+  - `npm run check:ci-guards-manifest`
 
 ## Struktura
 - `src/phmax-zs-logic.ts` – tabulky, typy, helpery, export CSV
