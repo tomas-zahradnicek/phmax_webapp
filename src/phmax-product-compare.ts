@@ -29,6 +29,10 @@ export type CompareProductVariantsResult = {
   recommendation: string;
 };
 
+function formatHours(value: number): string {
+  return value.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function metricsFromProtocol(v: CompareProductVariant): CompareProductVariantMetrics {
   let totalPrimary: number | null = null;
   let totalSecondary: number | null = null;
@@ -64,7 +68,7 @@ function buildDifferences(metrics: CompareProductVariantMetrics[]): string[] {
     ) {
       const d = cur.totalPrimary - base.totalPrimary;
       lines.push(
-        `PHmax (primární metrika): „${labelB}“ oproti „${labelA}“ ${d >= 0 ? "+" : ""}${d.toFixed(2)} h (celkem ${cur.totalPrimary} vs ${base.totalPrimary}).`,
+        `PHmax (primární metrika): „${labelB}“ oproti „${labelA}“ ${d >= 0 ? "+" : ""}${formatHours(d)} h (celkem ${formatHours(cur.totalPrimary)} vs ${formatHours(base.totalPrimary)}).`,
       );
     }
     if (

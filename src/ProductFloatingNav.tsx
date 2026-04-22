@@ -48,6 +48,14 @@ export function ProductFloatingNav({ active, setProductView }: ProductFloatingNa
         >
           ZŠ
         </button>
+        <button
+          type="button"
+          className={`scroll-tools__btn${active === "ss" ? " scroll-tools__btn--active" : ""}`}
+          title="Kalkulačka pro střední školy"
+          onClick={() => setProductView("ss")}
+        >
+          SŠ
+        </button>
       </div>
     </div>
   );

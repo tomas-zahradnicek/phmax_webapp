@@ -42,6 +42,31 @@ export const HERO_ACTIONS_ICON_LEGEND =
 export const HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA =
   " U této kalkulačky jsou v panelu navíc pole pro pojmenované zálohy (název, výběr ze seznamu, obnovení a smazání).";
 
+/** Sjednocená věta do nápověd: co kalkulačka záměrně nedělá. */
+export const CALCULATOR_LIMITS_NOTE =
+  "Kalkulačka nenahrazuje oficiální vykazování školy ani závazný výstup pro zřizovatele; neřeší plné napojení na výkazové systémy ani všechny individuální výjimky metodiky.";
+
+/** Datum poslední redakční kontroly textů v UI (nikoli datum legislativní účinnosti). */
+export const UI_TEXTS_LAST_REVIEW_DATE = "22. 4. 2026";
+
+/** Doplňková nápověda pro chybové hlášky úložiště/exportu. */
+export const BROWSER_ERROR_NEXT_STEP_HINT =
+  "Zkuste jiný prohlížeč nebo ověřte, že pro tento web není blokované localStorage/stahování souborů.";
+
+/** Sjednocené popisky pro pojmenované zálohy napříč produkty. */
+export const NAMED_BACKUPS_NAME_LABEL = "Název zálohy";
+export const NAMED_BACKUPS_SAVE_LABEL = "Uložit zálohu";
+export const NAMED_BACKUPS_SELECT_PLACEHOLDER = "Vyberte pojmenovanou zálohu…";
+export const NAMED_BACKUPS_RESTORE_LABEL = "Obnovit vybranou";
+export const NAMED_BACKUPS_DELETE_LABEL = "Smazat vybranou";
+export const NAMED_BACKUPS_COMPARE_JSON_LABEL = "Porovnat aktuální stav se zálohou (JSON)…";
+export const ADVANCED_AUDIT_GROUP_LABEL = "Pokročilé: audit a srovnání";
+
+/** Jednotný mikrotext pod pojmenovanými zálohami (max + co se ukládá). */
+export function namedBackupsMicrocopy(maxCount: number, savedScopeLabel: string): string {
+  return `V tomto prohlížeči můžete uložit až ${maxCount} pojmenovaných záloh; ukládá se ${savedScopeLabel}.`;
+}
+
 /** Autor aplikace – e-mail a texty do exportů / shrnutí. */
 export const APP_AUTHOR_EMAIL = "tomas.zahradnicek.hradec@gmail.com";
 

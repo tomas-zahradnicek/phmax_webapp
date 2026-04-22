@@ -1,4 +1,5 @@
 import React from "react";
+import { UI_TEXTS_LAST_REVIEW_DATE } from "./calculator-ui-constants";
 import {
   PHMAX_SS_LEGISLATIVE_MD_REL_PATH,
   PHMAX_SS_MSMT_PAGE_URL,
@@ -88,6 +89,9 @@ export function MethodologyStrip() {
           konkrétní kalkulačku: přidejte k adrese parametr <code className="methodology-strip__code">?view=zs</code>,{" "}
           <code className="methodology-strip__code">?view=sd</code>, <code className="methodology-strip__code">?view=pv</code>{" "}
           nebo <code className="methodology-strip__code">?view=ss</code>.
+        </p>
+        <p className="methodology-strip__note muted-text">
+          UI texty v aplikaci byly naposledy redakčně kontrolovány: <strong>{UI_TEXTS_LAST_REVIEW_DATE}</strong>.
         </p>
       </div>
     </details>

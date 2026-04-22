@@ -1,8 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import {
+  ADVANCED_AUDIT_GROUP_LABEL,
+  CALCULATOR_LIMITS_NOTE,
   EXPORT_ORIENTACNI_NOTE,
   HERO_ACTIONS_ICON_LEGEND,
+  NAMED_BACKUPS_COMPARE_JSON_LABEL,
+  NAMED_BACKUPS_DELETE_LABEL,
+  NAMED_BACKUPS_NAME_LABEL,
+  NAMED_BACKUPS_RESTORE_LABEL,
+  NAMED_BACKUPS_SAVE_LABEL,
+  NAMED_BACKUPS_SELECT_PLACEHOLDER,
+  namedBackupsMicrocopy,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
@@ -15,7 +24,6 @@ import {
   IconCopy,
   IconCsv,
   IconExcel,
-  IconJson,
   IconPrint,
   IconPrintSummary,
   IconRemoveTableRow,
@@ -295,6 +303,10 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   });
   const ss = usePhmaxSsUnits(setSsMetrics);
   const [selectedSsHeroExample, setSelectedSsHeroExample] = useState<SsHeroExampleKey>("");
+  const selectedSsHeroExampleMeta =
+    selectedSsHeroExample && selectedSsHeroExample in SS_HERO_EXAMPLE_META
+      ? SS_HERO_EXAMPLE_META[selectedSsHeroExample as Exclude<SsHeroExampleKey, "">]
+      : null;
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [ssGuideOpen, setSsGuideOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
@@ -394,6 +406,13 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             <HeroStat label="Řádků ve formuláři" value={ssMetrics.rowCount} />
           </div>
         </div>
+        <p className="hero__note" style={{ marginTop: 10 }}>
+          PHAmax mimo PrŠ (78-62-C/01, 78-62-C/02) dopočítejte plným postupem metodiky MŠMT – navazující kroky a tabulky jsou na{" "}
+          <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
+            stránce metodiky pro SŠ
+          </a>
+          .
+        </p>
 
         <div className="hero-actions hero-actions--compact">
           <div className="field field--hero-select hero-actions__example hero-ss-example-select">
@@ -504,6 +523,11 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             >
               {SS_HERO_EXAMPLE_SELECT_LEGEND}
             </p>
+            {selectedSsHeroExampleMeta ? (
+              <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "44rem", lineHeight: 1.5 }}>
+                <strong>Tento příklad ilustruje:</strong> {selectedSsHeroExampleMeta.title}
+              </p>
+            ) : null}
           </div>
           <HeroActionsDrawer>
             <div className="hero-actions__group hero-actions__group--primary">
@@ -557,6 +581,9 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             </div>
             <div className="hero-actions__group hero-actions__group--named">
               <div className="hero-named-grid" aria-label="Export a pojmenované zálohy">
+                <p className="muted-text" style={{ gridColumn: "1 / -1", margin: "0 0 6px", fontSize: "0.85rem", lineHeight: 1.45 }}>
+                  {namedBackupsMicrocopy(PHMAX_SS_MAX_NAMED_SNAPSHOTS, "kompletní stav řádkové evidence SŠ a označení pro export")}
+                </p>
                 <label className="hero-named-field hero-named-field--export">
                   <span className="field__label field__label--hero-named">Označení pro export</span>
                   <input
@@ -569,7 +596,16 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                   />
                 </label>
                 <label className="hero-named-field hero-named-field--backup-name">
-                  <span className="field__label field__label--hero-named">Název zálohy</span>
+                  <span className="field__label field__label--hero-named">
+                    {NAMED_BACKUPS_NAME_LABEL}
+                    <span
+                      title={namedBackupsMicrocopy(PHMAX_SS_MAX_NAMED_SNAPSHOTS, "kompletní stav řádkové evidence SŠ a označení pro export")}
+                      aria-label={namedBackupsMicrocopy(PHMAX_SS_MAX_NAMED_SNAPSHOTS, "kompletní stav řádkové evidence SŠ a označení pro export")}
+                      className="help-hint"
+                    >
+                      i
+                    </span>
+                  </span>
                   <input
                     type="text"
                     className="input"
@@ -582,7 +618,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                 <div className="hero-named-field hero-named-field--save">
                   <span className="hero-named-field__btn-slot" aria-hidden="true" />
                   <button type="button" className="btn ghost btn--hero-named" onClick={ss.saveNamedSsSnapshot}>
-                    Uložit do seznamu
+                    {NAMED_BACKUPS_SAVE_LABEL}
                   </button>
                 </div>
                 <div className="hero-named-field hero-named-field--select">
@@ -592,7 +628,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                     onChange={(e) => ss.setSelectedNamedId(e.target.value)}
                     aria-label="Vybrat uloženou zálohu"
                   >
-                    <option value="">Vyberte uloženou zálohu…</option>
+                    <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
                     {ss.namedSnapshots.map((n: SsNamedSnapshot) => (
                       <option key={n.id} value={n.id}>
                         {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
@@ -602,15 +638,19 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                 </div>
                 <div className="hero-named-field hero-named-field--restore-delete">
                   <button type="button" className="btn ghost btn--hero-named" onClick={ss.restoreNamedSsSnapshot}>
-                    Obnovit zálohu
+                    {NAMED_BACKUPS_RESTORE_LABEL}
                   </button>
                   <button type="button" className="btn ghost btn--hero-named" onClick={ss.deleteNamedSsSnapshot}>
-                    Smazat zálohu
+                    {NAMED_BACKUPS_DELETE_LABEL}
                   </button>
                 </div>
                 <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                  <p className="hero-actions__group-title">{ADVANCED_AUDIT_GROUP_LABEL}</p>
                   <button type="button" className="btn ghost btn--hero-named" onClick={ss.handleCompareSsWithNamedSnapshot}>
-                    Porovnat aktuální stav se zálohou (JSON)…
+                    {NAMED_BACKUPS_COMPARE_JSON_LABEL}
+                  </button>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={ss.handleExportSsAuditJson}>
+                    Stáhnout auditní protokol (JSON)
                   </button>
                 </div>
               </div>
@@ -644,12 +684,6 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                 icon={<IconPrintSummary />}
                 onClick={ss.printSummaryWindow}
               />
-              <HeroIconActionButton
-                className="btn ghost"
-                label="Stáhnout auditní protokol (JSON)"
-                icon={<IconJson />}
-                onClick={ss.handleExportSsAuditJson}
-              />
             </div>
           </HeroActionsDrawer>
         </div>
@@ -670,6 +704,9 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         dismissButtonLabel="Skrýt nápovědu"
         anchorId="ss-quick-onboarding"
       >
+        <p>
+          <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
+        </p>
         <p>
           Kalkulačka je orientační; výsledky ověřte vůči aktuální{" "}
           <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">

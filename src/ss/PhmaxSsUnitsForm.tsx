@@ -1,6 +1,16 @@
 import React from "react";
+import {
+  ADVANCED_AUDIT_GROUP_LABEL,
+  NAMED_BACKUPS_COMPARE_JSON_LABEL,
+  NAMED_BACKUPS_DELETE_LABEL,
+  NAMED_BACKUPS_NAME_LABEL,
+  NAMED_BACKUPS_RESTORE_LABEL,
+  NAMED_BACKUPS_SAVE_LABEL,
+  NAMED_BACKUPS_SELECT_PLACEHOLDER,
+  namedBackupsMicrocopy,
+} from "../calculator-ui-constants";
 import { ScrollGrabRegion } from "../ScrollGrabRegion";
-import { HeroIconActionButton, IconJson } from "../HeroActionIconButton";
+import { IconJson } from "../HeroActionIconButton";
 import {
   PHMAX_SS_MAX_NAMED_SNAPSHOTS,
   PHMAX_SS_MODE_OPTIONS,
@@ -144,25 +154,28 @@ function PhmaxSsUnitsFormView({
           Auditní protokol a pojmenované zálohy
         </h3>
         <p className="muted-text" style={{ marginTop: 0, marginBottom: 0, lineHeight: 1.55, fontSize: "0.9rem" }}>
-          Stejný formát JSON jako u PV, ŠD a ZŠ. V tomto prohlížeči lze uložit až {PHMAX_SS_MAX_NAMED_SNAPSHOTS}{" "}
-          pojmenovaných stavů řádků.
+          Stejný formát JSON jako u PV, ŠD a ZŠ.
+        </p>
+        <p className="muted-text" style={{ marginTop: 8, marginBottom: 0, lineHeight: 1.55, fontSize: "0.86rem" }}>
+          {namedBackupsMicrocopy(PHMAX_SS_MAX_NAMED_SNAPSHOTS, "řádky evidence SŠ v této sekci")}
         </p>
         {uiNotice ? (
           <p className="muted-text" role="status" style={{ marginTop: 12, marginBottom: 0, lineHeight: 1.5 }}>
             {uiNotice}
           </p>
         ) : null}
-        <div className="toolbar" style={{ marginTop: 14, flexWrap: "wrap" }}>
-          <HeroIconActionButton
-            className="btn ghost"
-            label="Stáhnout auditní protokol (JSON)"
-            icon={<IconJson />}
-            onClick={handleExportSsAuditJson}
-          />
-        </div>
         <div className="grid two ss-named-backups" style={{ marginTop: 16, gap: "12px 18px", alignItems: "end" }}>
           <label className="field" style={{ marginTop: 0 }}>
-            <span className="field__label">Název zálohy</span>
+            <span className="field__label">
+              {NAMED_BACKUPS_NAME_LABEL}
+              <span
+                title={namedBackupsMicrocopy(PHMAX_SS_MAX_NAMED_SNAPSHOTS, "řádky evidence SŠ v této sekci")}
+                aria-label={namedBackupsMicrocopy(PHMAX_SS_MAX_NAMED_SNAPSHOTS, "řádky evidence SŠ v této sekci")}
+                className="help-hint"
+              >
+                i
+              </span>
+            </span>
             <input
               type="text"
               className="input"
@@ -174,7 +187,7 @@ function PhmaxSsUnitsFormView({
           </label>
           <div style={{ alignSelf: "end" }}>
             <button type="button" className="btn ghost" style={{ width: "100%" }} onClick={saveNamedSsSnapshot}>
-              Uložit do seznamu
+              {NAMED_BACKUPS_SAVE_LABEL}
             </button>
           </div>
         </div>
@@ -186,7 +199,7 @@ function PhmaxSsUnitsFormView({
             onChange={(e) => setSelectedNamedId(e.target.value)}
             aria-label="Vybrat uloženou zálohu"
           >
-            <option value="">Vyberte uloženou zálohu…</option>
+            <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
             {namedSnapshots.map((n) => (
               <option key={n.id} value={n.id}>
                 {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
@@ -196,14 +209,21 @@ function PhmaxSsUnitsFormView({
         </label>
         <div className="toolbar" style={{ marginTop: 12, flexWrap: "wrap", gap: 10 }}>
           <button type="button" className="btn ghost" onClick={restoreNamedSsSnapshot}>
-            Obnovit zálohu
+            {NAMED_BACKUPS_RESTORE_LABEL}
           </button>
           <button type="button" className="btn ghost" onClick={deleteNamedSsSnapshot}>
-            Smazat zálohu
+            {NAMED_BACKUPS_DELETE_LABEL}
           </button>
         </div>
+        <p className="hero-actions__group-title" style={{ marginTop: 14 }}>{ADVANCED_AUDIT_GROUP_LABEL}</p>
         <button type="button" className="btn ghost" style={{ marginTop: 12, width: "100%" }} onClick={handleCompareSsWithNamedSnapshot}>
-          Porovnat aktuální stav se zálohou (JSON)…
+          {NAMED_BACKUPS_COMPARE_JSON_LABEL}
+        </button>
+        <button type="button" className="btn ghost" style={{ marginTop: 10, width: "100%" }} onClick={handleExportSsAuditJson}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <IconJson />
+            Stáhnout auditní protokol (JSON)
+          </span>
         </button>
       </div>
       ) : null}
@@ -619,6 +639,10 @@ function PhmaxSsUnitsFormView({
         <h3 style={{ marginTop: 0, marginBottom: 10, fontSize: "1.05rem", fontWeight: 700 }}>{sec.brulesHeading}</h3>
         <p className="muted-text" style={{ marginBottom: 12, lineHeight: 1.5 }}>
           {sec.brulesHint}
+        </p>
+        <p className="muted-text" style={{ marginTop: -4, marginBottom: 12, lineHeight: 1.5 }}>
+          Ručně vždy ověřte, že kombinace oborů odpovídá skutečné organizaci výuky školy a pravidlům dělení odborné/všeobecné
+          složky dle metodiky; výpis níže je technická kontrola vstupů, nikoli právní výklad.
         </p>
         <ScrollGrabRegion className="app-table-wrap" role="region" aria-label={sec.brulesHeading}>
           <table className="app-data-table">

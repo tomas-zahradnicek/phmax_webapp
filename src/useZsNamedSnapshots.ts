@@ -37,7 +37,7 @@ export function useZsNamedSnapshots({
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(`Záloha „${name}“ uložena do seznamu (max. ${MAX_NAMED_SNAPSHOTS}).`);
+    setUiNotice(`Pojmenovaná záloha „${name}“ uložena (max. ${MAX_NAMED_SNAPSHOTS}).`);
   }, [buildSnapshot, namedSaveName, setUiNotice]);
 
   const restoreNamedSnapshot = useCallback(() => {

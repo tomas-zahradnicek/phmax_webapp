@@ -1,10 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ADVANCED_AUDIT_GROUP_LABEL,
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
+  BROWSER_ERROR_NEXT_STEP_HINT,
+  CALCULATOR_LIMITS_NOTE,
   EXPORT_ORIENTACNI_NOTE,
   HERO_ACTIONS_ICON_LEGEND,
+  NAMED_BACKUPS_COMPARE_JSON_LABEL,
+  NAMED_BACKUPS_DELETE_LABEL,
+  NAMED_BACKUPS_NAME_LABEL,
+  NAMED_BACKUPS_RESTORE_LABEL,
+  NAMED_BACKUPS_SAVE_LABEL,
+  NAMED_BACKUPS_SELECT_PLACEHOLDER,
+  namedBackupsMicrocopy,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
@@ -23,7 +33,6 @@ import {
   IconCopy,
   IconCsv,
   IconExcel,
-  IconJson,
   IconPrint,
   IconPrintSummary,
   IconResetAll,
@@ -315,6 +324,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       return true;
     }
   });
+  const selectedPvHeroExampleMeta =
+    selectedPvHeroExample && selectedPvHeroExample in PV_HERO_EXAMPLE_META
+      ? PV_HERO_EXAMPLE_META[selectedPvHeroExample as Exclude<PvHeroExampleKey, "">]
+      : null;
 
   const dismissGuide = useCallback(() => {
     try {
@@ -437,7 +450,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       setUiNotice("Byl stažen soubor Excel (XLSX).");
     } catch (e) {
       console.error(e);
-      setUiNotice("Export do Excelu se nepodařil.");
+      setUiNotice(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     } finally {
       setXlsxExportBusy(false);
     }
@@ -462,7 +475,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       setLastSavedAt(new Date().toLocaleString("cs-CZ"));
       setUiNotice("Rozpracované údaje byly uloženy.");
     } catch {
-      setUiNotice("Uložení se nepodařilo.");
+      setUiNotice(`Uložení se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [buildPvSnapshot]);
 
@@ -475,7 +488,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       }
       applyPvSnapshot(JSON.parse(raw));
     } catch {
-      setUiNotice("Obnovení uložených dat se nepodařilo.");
+      setUiNotice(`Obnovení uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [applyPvSnapshot]);
 
@@ -489,7 +502,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(`Záloha „${name}“ uložena do seznamu (max. ${PV_MAX_NAMED_SNAPSHOTS}).`);
+    setUiNotice(`Pojmenovaná záloha „${name}“ uložena (max. ${PV_MAX_NAMED_SNAPSHOTS}).`);
   }, [buildPvSnapshot, namedSaveName]);
 
   const restoreNamedSnapshot = useCallback(() => {
@@ -526,7 +539,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       setLastSavedAt("");
       setUiNotice("Uložená data v prohlížeči byla vymazána.");
     } catch {
-      setUiNotice("Vymazání uložených dat se nepodařilo.");
+      setUiNotice(`Vymazání uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, []);
 
@@ -559,7 +572,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       await navigator.clipboard.writeText(buildPvSummaryText());
       setUiNotice("Shrnutí bylo zkopírováno do schránky.");
     } catch {
-      setUiNotice("Kopírování do schránky se nepodařilo.");
+      setUiNotice(`Kopírování do schránky se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [buildPvSummaryText]);
 
@@ -730,6 +743,11 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           >
             {PV_HERO_EXAMPLE_SELECT_LEGEND}
           </p>
+          {selectedPvHeroExampleMeta ? (
+            <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
+              <strong>Očekávaný výsledek vybrané ukázky:</strong> {selectedPvHeroExampleMeta.title}
+            </p>
+          ) : null}
         </div>
 
         <div className="hero-actions hero-actions--stacked">
@@ -801,18 +819,24 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 icon={<IconCopy />}
                 onClick={() => void copyPvSummary()}
               />
-              <HeroIconActionButton
-                className="btn ghost"
-                label="Stáhnout auditní protokol (JSON)"
-                icon={<IconJson />}
-                onClick={handleExportAuditJson}
-              />
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions__group hero-actions__group--named">
               <div className="hero-named-grid hero-named-grid--simple" aria-label="Pojmenované zálohy">
+                <p className="muted-text" style={{ gridColumn: "1 / -1", margin: "0 0 6px", fontSize: "0.85rem", lineHeight: 1.45 }}>
+                  {namedBackupsMicrocopy(PV_MAX_NAMED_SNAPSHOTS, "kompletní stav pracovišť předškolního výpočtu")}
+                </p>
                 <label className="hero-named-field hero-named-field--backup-name">
-                  <span className="field__label field__label--hero-named">Název zálohy</span>
+                  <span className="field__label field__label--hero-named">
+                    {NAMED_BACKUPS_NAME_LABEL}
+                    <span
+                      title={namedBackupsMicrocopy(PV_MAX_NAMED_SNAPSHOTS, "kompletní stav pracovišť předškolního výpočtu")}
+                      aria-label={namedBackupsMicrocopy(PV_MAX_NAMED_SNAPSHOTS, "kompletní stav pracovišť předškolního výpočtu")}
+                      className="help-hint"
+                    >
+                      i
+                    </span>
+                  </span>
                   <input
                     type="text"
                     className="input"
@@ -825,7 +849,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 <div className="hero-named-field hero-named-field--save">
                   <span className="hero-named-field__btn-slot" aria-hidden="true" />
                   <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
-                    Uložit do seznamu
+                    {NAMED_BACKUPS_SAVE_LABEL}
                   </button>
                 </div>
                 <div className="hero-named-field hero-named-field--select">
@@ -835,7 +859,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                     onChange={(e) => setSelectedNamedId(e.target.value)}
                     aria-label="Vybrat uloženou zálohu"
                   >
-                    <option value="">Vyberte uloženou zálohu…</option>
+                    <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
                     {namedSnapshots.map((n) => (
                       <option key={n.id} value={n.id}>
                         {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
@@ -845,15 +869,19 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 </div>
                 <div className="hero-named-field hero-named-field--restore-delete">
                   <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
-                    Obnovit zálohu
+                    {NAMED_BACKUPS_RESTORE_LABEL}
                   </button>
                   <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
-                    Smazat zálohu
+                    {NAMED_BACKUPS_DELETE_LABEL}
                   </button>
                 </div>
                 <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                  <p className="hero-actions__group-title">{ADVANCED_AUDIT_GROUP_LABEL}</p>
                   <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareWithNamedSnapshot}>
-                    Porovnat aktuální stav se zálohou (JSON)…
+                    {NAMED_BACKUPS_COMPARE_JSON_LABEL}
+                  </button>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={handleExportAuditJson}>
+                    Stáhnout auditní protokol (JSON)
                   </button>
                 </div>
               </div>
@@ -863,6 +891,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       </header>
 
       <QuickOnboarding title="Nápověda – předškolní vzdělávání" open={guideOpen} onDismiss={dismissGuide}>
+        <p>
+          <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
+        </p>
         <p>
           Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a vyhlášky č.
           14/2005 Sb. Každé <strong>číslované pracoviště</strong> ve formuláři (Pracoviště 1, 2…) odpovídá jedné
@@ -879,6 +910,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           <strong>odloučená pracoviště</strong> nebo na jednom místě např. celodenní i polodenní provoz, přidejte další
           pracoviště pro každou kombinaci – v souhrnné tabulce uvidíte dílčí PHmax i <strong>součet</strong>. Krácení PHmax
           dle § 1d odst. 3 vyhl. 14/2005 zde neřešíme.
+        </p>
+        <p>
+          <strong>Checklist – kdy přidat další pracoviště:</strong> odloučené místo školy; jiný druh provozu na stejném
+          místě (celodenní/polodenní/internátní); nebo oddělená situace, kterou potřebujete vykázat samostatně.
         </p>
       </QuickOnboarding>
 

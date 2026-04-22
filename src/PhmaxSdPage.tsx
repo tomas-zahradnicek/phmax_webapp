@@ -1,10 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ADVANCED_AUDIT_GROUP_LABEL,
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
+  BROWSER_ERROR_NEXT_STEP_HINT,
+  CALCULATOR_LIMITS_NOTE,
   EXPORT_ORIENTACNI_NOTE,
   HERO_ACTIONS_ICON_LEGEND,
+  NAMED_BACKUPS_COMPARE_JSON_LABEL,
+  NAMED_BACKUPS_DELETE_LABEL,
+  NAMED_BACKUPS_NAME_LABEL,
+  NAMED_BACKUPS_RESTORE_LABEL,
+  NAMED_BACKUPS_SAVE_LABEL,
+  NAMED_BACKUPS_SELECT_PLACEHOLDER,
+  namedBackupsMicrocopy,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
@@ -23,7 +33,6 @@ import {
   IconCopy,
   IconCsv,
   IconExcel,
-  IconJson,
   IconPrint,
   IconPrintSummary,
   IconResetAll,
@@ -309,6 +318,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     }
   });
   const [selectedSdHeroExample, setSelectedSdHeroExample] = useState<SdHeroExampleKey>("");
+  const selectedSdHeroExampleMeta =
+    selectedSdHeroExample && selectedSdHeroExample in SD_HERO_EXAMPLE_META
+      ? SD_HERO_EXAMPLE_META[selectedSdHeroExample as Exclude<SdHeroExampleKey, "">]
+      : null;
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -547,7 +560,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       setUiNotice("Byl stažen soubor Excel (XLSX).");
     } catch (e) {
       console.error(e);
-      setUiNotice("Export do Excelu se nepodařil.");
+      setUiNotice(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     } finally {
       setXlsxExportBusy(false);
     }
@@ -621,7 +634,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       setLastSavedAt(new Date().toLocaleString("cs-CZ"));
       setUiNotice("Rozpracované údaje byly uloženy.");
     } catch {
-      setUiNotice("Uložení se nepodařilo.");
+      setUiNotice(`Uložení se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [buildSdSnapshot]);
 
@@ -634,7 +647,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       }
       applySdSnapshot(JSON.parse(raw));
     } catch {
-      setUiNotice("Obnovení uložených dat se nepodařilo.");
+      setUiNotice(`Obnovení uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [applySdSnapshot]);
 
@@ -648,7 +661,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(`Záloha „${name}“ uložena do seznamu (max. ${SD_MAX_NAMED_SNAPSHOTS}).`);
+    setUiNotice(`Pojmenovaná záloha „${name}“ uložena (max. ${SD_MAX_NAMED_SNAPSHOTS}).`);
   }, [buildSdSnapshot, namedSaveName]);
 
   const restoreNamedSnapshot = useCallback(() => {
@@ -685,7 +698,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       setLastSavedAt("");
       setUiNotice("Uložená data v prohlížeči byla vymazána.");
     } catch {
-      setUiNotice("Vymazání uložených dat se nepodařilo.");
+      setUiNotice(`Vymazání uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, []);
 
@@ -748,7 +761,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       await navigator.clipboard.writeText(buildSdSummaryText());
       setUiNotice("Shrnutí bylo zkopírováno do schránky.");
     } catch {
-      setUiNotice("Kopírování do schránky se nepodařilo.");
+      setUiNotice(`Kopírování do schránky se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [buildSdSummaryText]);
 
@@ -905,6 +918,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           <p id="sd-hero-example-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
             {SD_HERO_EXAMPLE_SELECT_LEGEND}
           </p>
+          {selectedSdHeroExampleMeta ? (
+            <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
+              <strong>Očekávaný výsledek vybrané ukázky:</strong> {selectedSdHeroExampleMeta.title}
+            </p>
+          ) : null}
         </div>
 
         <div className="hero-actions hero-actions--stacked">
@@ -976,18 +994,24 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 icon={<IconCopy />}
                 onClick={() => void copySdSummary()}
               />
-              <HeroIconActionButton
-                className="btn ghost"
-                label="Stáhnout auditní protokol (JSON)"
-                icon={<IconJson />}
-                onClick={handleExportAuditJson}
-              />
             </div>
             <hr className="hero-actions__divider" aria-hidden="true" />
             <div className="hero-actions__group hero-actions__group--named">
               <div className="hero-named-grid hero-named-grid--simple" aria-label="Pojmenované zálohy">
+                <p className="muted-text" style={{ gridColumn: "1 / -1", margin: "0 0 6px", fontSize: "0.85rem", lineHeight: 1.45 }}>
+                  {namedBackupsMicrocopy(SD_MAX_NAMED_SNAPSHOTS, "kompletní stav vstupů školní družiny")}
+                </p>
                 <label className="hero-named-field hero-named-field--backup-name">
-                  <span className="field__label field__label--hero-named">Název zálohy</span>
+                  <span className="field__label field__label--hero-named">
+                    {NAMED_BACKUPS_NAME_LABEL}
+                    <span
+                      title={namedBackupsMicrocopy(SD_MAX_NAMED_SNAPSHOTS, "kompletní stav vstupů školní družiny")}
+                      aria-label={namedBackupsMicrocopy(SD_MAX_NAMED_SNAPSHOTS, "kompletní stav vstupů školní družiny")}
+                      className="help-hint"
+                    >
+                      i
+                    </span>
+                  </span>
                   <input
                     type="text"
                     className="input"
@@ -1000,7 +1024,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 <div className="hero-named-field hero-named-field--save">
                   <span className="hero-named-field__btn-slot" aria-hidden="true" />
                   <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
-                    Uložit do seznamu
+                    {NAMED_BACKUPS_SAVE_LABEL}
                   </button>
                 </div>
                 <div className="hero-named-field hero-named-field--select">
@@ -1010,7 +1034,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                     onChange={(e) => setSelectedNamedId(e.target.value)}
                     aria-label="Vybrat uloženou zálohu"
                   >
-                    <option value="">Vyberte uloženou zálohu…</option>
+                    <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
                     {namedSnapshots.map((n) => (
                       <option key={n.id} value={n.id}>
                         {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
@@ -1020,15 +1044,19 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 </div>
                 <div className="hero-named-field hero-named-field--restore-delete">
                   <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
-                    Obnovit zálohu
+                    {NAMED_BACKUPS_RESTORE_LABEL}
                   </button>
                   <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
-                    Smazat zálohu
+                    {NAMED_BACKUPS_DELETE_LABEL}
                   </button>
                 </div>
                 <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                  <p className="hero-actions__group-title">{ADVANCED_AUDIT_GROUP_LABEL}</p>
                   <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareWithNamedSnapshot}>
-                    Porovnat aktuální stav se zálohou (JSON)…
+                    {NAMED_BACKUPS_COMPARE_JSON_LABEL}
+                  </button>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={handleExportAuditJson}>
+                    Stáhnout auditní protokol (JSON)
                   </button>
                 </div>
               </div>
@@ -1045,6 +1073,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         dismissButtonLabel="Skrýt nápovědu"
       >
         <p>
+          <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
+        </p>
+        <p>
           Vyplňte počet účastníků a případně počet oddělení (jinak se dopočítá dělením 27). Výsledek vychází z přílohy k
           vyhlášce č. 74/2005 Sb.; u průměru pod 20 na oddělení může aplikovat orientační krácení dle § 10 odst. 2.
           Složité případy (§ 16 školského zákona, méně než čtyři oddělení) musíte ověřit v plném znění předpisů.
@@ -1059,14 +1090,18 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           Počet oddělení pro nové oddělení nad první: průměr nad 27 účastníků → dělení počtem 27 a zaokrouhlení nahoru
           (u výjimek viz metodiku).
         </p>
+        <p>
+          Krácení dle § 10 odst. 2 se nepoužívá mechanicky ve všech případech (např. specifická organizace oddělení nebo
+          výjimky dle vyhlášky). Pokud je situace hraniční, proveďte ruční kontrolu podle plného znění vyhlášky a metodiky.
+        </p>
       </QuickOnboarding>
 
       <section className="card section-card section-card--sd">
         <h2 className="section-title">Vstupy</h2>
         <InputOutputLegend />
         <p className="muted-text" style={{ marginTop: 10 }}>
-          Postupujte po krocích: 1) zvolte režim, 2) zadejte běžná oddělení/účastníky, 3) případně zapněte speciální
-          oddělení a výjimky, 4) zkontrolujte výsledky.
+          Postup 1–2–3: <strong>1)</strong> zvolte režim (souhrnný/detailní), <strong>2)</strong> vyplňte vstupy
+          (účastníci, oddělení, výjimky), <strong>3)</strong> zkontrolujte výsledek a případné krácení.
         </p>
 
         <div className="checks" style={{ marginTop: 12 }}>

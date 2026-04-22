@@ -54,7 +54,6 @@ import {
   IconCopy,
   IconCsv,
   IconExcel,
-  IconJson,
   IconPrint,
   IconPrintSummary,
   IconResetAll,
@@ -68,15 +67,25 @@ import { TableOuter } from "./TableOuter";
 import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
 import {
+  ADVANCED_AUDIT_GROUP_LABEL,
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   APP_AUTHOR_EXPORT_ROWS,
+  BROWSER_ERROR_NEXT_STEP_HINT,
+  CALCULATOR_LIMITS_NOTE,
   EXPORT_ORIENTACNI_NOTE,
   HERO_ACTIONS_ICON_LEGEND,
   HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA,
+  NAMED_BACKUPS_COMPARE_JSON_LABEL,
+  NAMED_BACKUPS_DELETE_LABEL,
+  NAMED_BACKUPS_NAME_LABEL,
+  NAMED_BACKUPS_RESTORE_LABEL,
+  NAMED_BACKUPS_SAVE_LABEL,
+  NAMED_BACKUPS_SELECT_PLACEHOLDER,
   PRODUCT_CALCULATOR_TITLES,
   TABLE_SCROLL_HINT,
+  namedBackupsMicrocopy,
 } from "./calculator-ui-constants";
 import { APP_VERSION } from "./app-version";
 import {
@@ -1393,7 +1402,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       applySnapshotPayload(s, "Uložená data byla obnovena.");
     } catch (error) {
       console.error("Nepodařilo se obnovit uložená data.", error);
-      setUiNotice("Obnovení uložených dat se nepodařilo.");
+      setUiNotice(`Obnovení uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   };
 
@@ -1870,7 +1879,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       setUiNotice("Byl stažen soubor Excel (XLSX): list „Kontext“ a list „Hodnoty“.");
     } catch (error) {
       console.error(error);
-      setUiNotice("Export do Excelu se nepodařil – zkuste znovu nebo použijte CSV.");
+      setUiNotice(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     } finally {
       setXlsxExportBusy(false);
     }
@@ -1937,7 +1946,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       { id: "named", label: item.name, protocol: namedProtocol },
     ]);
     downloadPhmaxProductCompareJson(cmp, "zs");
-    setUiNotice(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
+    setUiNotice(
+      `Staženo srovnání: aktuální stav vs „${item.name}“ (JSON). Krátké doporučení: ${cmp.recommendation}`,
+    );
   };
 
   const scrollToWorkspaceDock = () => {
@@ -2099,6 +2110,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               </div>
               <div className="hero-actions__group hero-actions__group--named">
                 <div className="hero-named-grid" aria-label="Export a pojmenované zálohy">
+                  <p className="muted-text" style={{ gridColumn: "1 / -1", margin: "0 0 6px", fontSize: "0.85rem", lineHeight: 1.45 }}>
+                    {namedBackupsMicrocopy(MAX_NAMED_SNAPSHOTS, "kompletní stav ZŠ včetně aktivní záložky a označení pro export")}
+                  </p>
                   <label className="hero-named-field hero-named-field--export">
                     <span className="field__label field__label--hero-named">Označení pro export</span>
                     <input
@@ -2111,7 +2125,16 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                     />
                   </label>
                   <label className="hero-named-field hero-named-field--backup-name">
-                    <span className="field__label field__label--hero-named">Název zálohy</span>
+                    <span className="field__label field__label--hero-named">
+                      {NAMED_BACKUPS_NAME_LABEL}
+                      <span
+                        title={namedBackupsMicrocopy(MAX_NAMED_SNAPSHOTS, "kompletní stav ZŠ včetně aktivní záložky a označení pro export")}
+                        aria-label={namedBackupsMicrocopy(MAX_NAMED_SNAPSHOTS, "kompletní stav ZŠ včetně aktivní záložky a označení pro export")}
+                        className="help-hint"
+                      >
+                        i
+                      </span>
+                    </span>
                     <input
                       type="text"
                       className="input"
@@ -2124,7 +2147,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   <div className="hero-named-field hero-named-field--save">
                     <span className="hero-named-field__btn-slot" aria-hidden="true" />
                     <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
-                      Uložit do seznamu
+                      {NAMED_BACKUPS_SAVE_LABEL}
                     </button>
                   </div>
                   <div className="hero-named-field hero-named-field--select">
@@ -2134,7 +2157,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                       onChange={(e) => setSelectedNamedId(e.target.value)}
                       aria-label="Vybrat uloženou zálohu"
                     >
-                      <option value="">Vyberte uloženou zálohu…</option>
+                      <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
                       {namedSnapshots.map((n) => (
                         <option key={n.id} value={n.id}>
                           {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
@@ -2144,15 +2167,19 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   </div>
                   <div className="hero-named-field hero-named-field--restore-delete">
                     <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
-                      Obnovit zálohu
+                      {NAMED_BACKUPS_RESTORE_LABEL}
                     </button>
                     <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
-                      Smazat zálohu
+                      {NAMED_BACKUPS_DELETE_LABEL}
                     </button>
                   </div>
                   <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                    <p className="hero-actions__group-title">{ADVANCED_AUDIT_GROUP_LABEL}</p>
                     <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareZsWithNamedSnapshot}>
-                      Porovnat aktuální stav se zálohou (JSON)…
+                      {NAMED_BACKUPS_COMPARE_JSON_LABEL}
+                    </button>
+                    <button type="button" className="btn ghost btn--hero-named" onClick={handleExportZsAuditJson}>
+                      Stáhnout auditní protokol (JSON)
                     </button>
                   </div>
                 </div>
@@ -2186,12 +2213,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   icon={<IconPrintSummary />}
                   onClick={printSummaryWindow}
                 />
-                <HeroIconActionButton
-                  className="btn ghost"
-                  label="Stáhnout auditní protokol (JSON)"
-                  icon={<IconJson />}
-                  onClick={handleExportZsAuditJson}
-                />
               </div>
             </HeroActionsDrawer>
           </div>
@@ -2205,6 +2226,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           anchorId="zs-quick-guide"
           dismissButtonLabel="Skrýt nápovědu"
         >
+          <p>
+            <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
+          </p>
           <p>
             <strong>PHmax</strong> zadejte podle typu školy v rozbalovacím režimu; u specialit (psychiatrie, zdravotnické zařízení,
             menšina, gymnázia…) přepněte na odpovídající položku. <strong>PHAmax</strong> a <strong>PHPmax</strong> mají vlastní záložky.
@@ -2396,6 +2420,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             <SectionLead>
               Výsledky navazují na metodický postup A–D: vstupní údaje, výpočet průměru, určení pásma a výsledná hodnota. Každý modul se stanovuje samostatně.
             </SectionLead>
+            <p className="muted-text" style={{ marginTop: 10, marginBottom: 0, fontSize: "0.86rem" }}>
+              Zvoleno: {MODE_CONFIG[mode].label} · {tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"}
+            </p>
             <InputOutputLegend compact />
             <div className="results-panel__meta">
               <span className="status-badge status-badge--neutral">Aktivní modul: {tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"}</span>

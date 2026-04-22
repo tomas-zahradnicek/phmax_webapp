@@ -13,6 +13,7 @@ import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "
 import {
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
+  BROWSER_ERROR_NEXT_STEP_HINT,
 } from "../calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml } from "../app-author-print";
 import {
@@ -255,7 +256,7 @@ export function usePhmaxSsUnits(
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(`Záloha „${name}“ uložena do seznamu (max. ${PHMAX_SS_MAX_NAMED_SNAPSHOTS}).`);
+    setUiNotice(`Pojmenovaná záloha „${name}“ uložena (max. ${PHMAX_SS_MAX_NAMED_SNAPSHOTS}).`);
   }, [buildSsRowsSnapshot, namedSaveName]);
 
   const restoreNamedSsSnapshot = useCallback(() => {
@@ -331,7 +332,7 @@ export function usePhmaxSsUnits(
       localStorage.setItem(PHMAX_SS_UNITS_STORAGE_KEY, JSON.stringify(rows));
       setUiNotice("Rozpracované údaje byly uloženy do prohlížeče.");
     } catch {
-      setUiNotice("Uložení se nepodařilo (úložiště prohlížeče).");
+      setUiNotice(`Uložení se nepodařilo (úložiště prohlížeče). ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [rows]);
 
@@ -388,7 +389,7 @@ export function usePhmaxSsUnits(
       setUiNotice("Byl stažen soubor Excel (XLSX).");
     } catch (e) {
       console.error(e);
-      setUiNotice("Export do Excelu se nepodařil.");
+      setUiNotice(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     } finally {
       setXlsxExportBusy(false);
     }
@@ -405,7 +406,7 @@ export function usePhmaxSsUnits(
       await navigator.clipboard.writeText(text);
       setUiNotice("Shrnutí bylo zkopírováno do schránky.");
     } catch {
-      setUiNotice("Kopírování do schránky se nepodařilo.");
+      setUiNotice(`Kopírování do schránky se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [exportLabel, roundedTotal, rows.length, phamaxPracticalTotal]);
 

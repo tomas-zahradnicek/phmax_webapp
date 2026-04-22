@@ -3322,6 +3322,8 @@ input[type="radio"] {
   }
 
   .hero__orb,
+  .hero__pills-row,
+  .hero__pills-row-trailing,
   .toolbar,
   .tabs,
   .checks,
@@ -3333,6 +3335,7 @@ input[type="radio"] {
   .hero-status,
   .hero-actions,
   .hero__stats,
+  .hero__status,
   .results-panel__meta,
   .section-jump-nav,
   .section-card--live-results,
@@ -4069,6 +4072,11 @@ input[type="radio"] {
   gap: 0;
   box-sizing: border-box;
 }
+.hero-action-icon-btn:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.68);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.82);
+}
 
 .hero-action-icon-btn svg {
   width: 1.35rem;
@@ -4297,6 +4305,15 @@ input[type="radio"] {
   font-weight: 700;
   font-size: 0.88rem;
   letter-spacing: 0.01em;
+}
+
+.hero-actions__group-title {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .hero-named-field__btn-slot {
