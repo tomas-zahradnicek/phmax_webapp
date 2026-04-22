@@ -17,6 +17,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run check:readme-sync
+      - run: npm run check:ci-summary-manifest
 
       - name: Run unit tests
         id: unit_tests
