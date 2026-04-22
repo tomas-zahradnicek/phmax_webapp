@@ -244,4 +244,36 @@ describe("Compare contract", () => {
       "U žádné varianty není k dispozici primární metrika (PHmax) — zkontrolujte vstupy.",
     );
   });
+
+  it("u jedné nevalidní varianty vrátí recommendation bez primární metriky", () => {
+    const invalid = createPvProductAuditProtocol([
+      { label: "Bad", provoz: "celodenni", classCount: 0, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([{ id: "single-bad", label: "Single bad", protocol: invalid }]);
+    expect(out.recommendation).toBe("Jediná varianta „Single bad“: primární metrika není k dispozici.");
+  });
+
+  it("u jedné varianty zůstává differences prázdné i při nevalidním stavu", () => {
+    const invalid = createPvProductAuditProtocol([
+      { label: "Bad", provoz: "celodenni", classCount: 0, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([{ id: "bad", label: "Neplatná", protocol: invalid }]);
+    expect(out.differences).toEqual([]);
+  });
+
+  it("PHmax difference umí zápornou deltu ve stabilním formátu", () => {
+    const higher = createPvProductAuditProtocol([
+      { label: "High", provoz: "celodenni", classCount: 2, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const lower = createPvProductAuditProtocol([
+      { label: "Low", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([
+      { id: "h", label: "Vyšší", protocol: higher },
+      { id: "l", label: "Nižší", protocol: lower },
+    ]);
+    const phLine = out.differences.find((line) => line.startsWith("PHmax (primární metrika):"));
+    expect(phLine).toContain("-57,50 h");
+    expect(phLine).toContain("62,50 vs 120,00");
+  });
 });
