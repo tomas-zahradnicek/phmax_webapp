@@ -43,4 +43,24 @@ describe("Export metadata contract", () => {
     expect(exportFilenameStamped("phmax-ss", "xlsx")).toBe("phmax-ss-2026-04-22.xlsx");
     expect(exportFilenameStamped("phmax-audit", "json")).toBe("phmax-audit-2026-04-22.json");
   });
+
+  it("exportFilenameStamped drží nulové doplnění měsíce a dne", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-02T08:00:00.000Z"));
+
+    expect(exportFilenameStamped("contract", "csv")).toBe("contract-2026-01-02.csv");
+  });
+
+  it("CSV export správně escapuje uvozovky a zachová český oddělovač", () => {
+    const csv = exportCsvLocalized([["Poznámka", 'Řádek "A"']]);
+    expect(csv).toContain('"Poznámka";"Řádek ""A"""');
+    expect(csv).toContain("Položka;Hodnota");
+  });
+
+  it("metodický rámec pro všechny produkty obsahuje orientační disclaimer", () => {
+    for (const kind of ["pv", "sd", "zs", "ss"] as const) {
+      const rows = buildExportMetaRows(kind);
+      expect(String(rows[2][1]).includes("orientační výpočet")).toBe(true);
+    }
+  });
 });
