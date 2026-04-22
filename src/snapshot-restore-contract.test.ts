@@ -84,6 +84,22 @@ describe("Snapshot/restore contract", () => {
     expect(totals?.totalPhmax).toBe(628);
   });
 
+  it("ZŠ restore toleruje cizí pole ve snapshotu i v audit totals", () => {
+    const totals = parseZsSnapshotAuditTotals({
+      _phmaxAuditTotals: {
+        totalPhmax: 700,
+        totalPha: 10,
+        totalPhp: 12,
+        tab: "phmax",
+        unexpected: { foo: "bar" },
+      },
+      foreignRootField: true,
+    } as Record<string, unknown>);
+    expect(totals).not.toBeNull();
+    expect(totals?.totalPhmax).toBe(700);
+    expect(totals?.tab).toBe("phmax");
+  });
+
   it("SŠ revive + audit input builder drží restore kompatibilitu", () => {
     const restoredRow = revivePhmaxSsUnitRow(
       {
@@ -104,5 +120,26 @@ describe("Snapshot/restore contract", () => {
     const auditInput = buildSsAuditProtocolInput([restoredRow]);
     expect(auditInput).not.toBeNull();
     expect((auditInput?.rows.length ?? 0) > 0).toBe(true);
+  });
+
+  it("SŠ revive ignoruje cizí pole a zachová známé hodnoty", () => {
+    const restoredRow = revivePhmaxSsUnitRow(
+      {
+        id: 9,
+        label: "Řádek s extra poli",
+        educationField: "39-41-L/01",
+        studyForm: "vecerni",
+        phmaxMode: "twoObory",
+        oborCountInClass: "2",
+        averageStudents: "17",
+        classCount: "1",
+        injected: { anything: true },
+      } as Record<string, unknown>,
+      1,
+    );
+    expect(restoredRow.id).toBe(9);
+    expect(restoredRow.studyForm).toBe("vecerni");
+    expect(restoredRow.phmaxMode).toBe("twoObory");
+    expect((restoredRow as Record<string, unknown>).injected).toBeUndefined();
   });
 });
