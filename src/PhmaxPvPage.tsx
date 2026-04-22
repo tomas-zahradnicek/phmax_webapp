@@ -10,6 +10,7 @@ import {
   MSG_NAMED_BACKUP_PICK_FIRST,
   MSG_NAMED_BACKUP_PICK_TO_COMPARE,
   MSG_NAMED_BACKUP_PICK_TO_DELETE,
+  MSG_NO_LOCAL_AUTOSAVE_DATA,
   LAY_USER_QUICK_START_PV,
   EXPORT_ORIENTACNI_NOTE,
   formatPvLayContextLine,
@@ -490,7 +491,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     try {
       const raw = localStorage.getItem(PV_STORAGE_KEY);
       if (!raw) {
-        setUiNotice("Nebyla nalezena žádná uložená data.");
+        setUiNotice(MSG_NO_LOCAL_AUTOSAVE_DATA);
         return;
       }
       applyPvSnapshot(JSON.parse(raw));

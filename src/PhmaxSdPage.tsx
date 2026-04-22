@@ -10,6 +10,7 @@ import {
   MSG_NAMED_BACKUP_PICK_FIRST,
   MSG_NAMED_BACKUP_PICK_TO_COMPARE,
   MSG_NAMED_BACKUP_PICK_TO_DELETE,
+  MSG_NO_LOCAL_AUTOSAVE_DATA,
   LAY_USER_QUICK_START_SD,
   EXPORT_ORIENTACNI_NOTE,
   formatSdLayContextLine,
@@ -649,7 +650,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     try {
       const raw = localStorage.getItem(SD_STORAGE_KEY);
       if (!raw) {
-        setUiNotice("Nebyla nalezena žádná uložená data.");
+        setUiNotice(MSG_NO_LOCAL_AUTOSAVE_DATA);
         return;
       }
       applySdSnapshot(JSON.parse(raw));

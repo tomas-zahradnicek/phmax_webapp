@@ -120,6 +120,14 @@ export const MSG_NAMED_BACKUP_PICK_TO_DELETE =
 export const MSG_NAMED_BACKUP_PICK_TO_COMPARE =
   "Nejprve v seznamu vyberte zálohu, kterou chcete porovnat s aktuálním výpočtem.";
 
+/** Obnova rozpracovaného stavu — v úložišti prohlížeče nic není (PV, ŠD, ZŠ). */
+export const MSG_NO_LOCAL_AUTOSAVE_DATA =
+  "V prohlížeči nejsou žádná uložená rozpracovaná data k obnovení — buď ještě nebyla uložena, nebo je někdo smazal (např. akcí „vymazat uložená data“).";
+
+/** ZŠ — pojmenovaná záloha bez uložených součtů pro JSON srovnání. */
+export const MSG_ZS_NAMED_BACKUP_NO_AUDIT_TOTALS =
+  "Vybraná záloha neobsahuje uložené součty PHmax / PHAmax / PHPmax pro srovnání. Načtěte ji ve formuláři, přepněte potřebné záložky, nechte spočíst souhrn a uložte znovu jako pojmenovanou zálohu.";
+
 /** Datum poslední redakční kontroly textů v UI (nikoli datum legislativní účinnosti). */
 export const UI_TEXTS_LAST_REVIEW_DATE = "22. 4. 2026";
 

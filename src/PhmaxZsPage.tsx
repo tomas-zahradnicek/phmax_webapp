@@ -76,6 +76,8 @@ import {
   CALCULATOR_LIMITS_NOTE,
   LAY_USER_QUICK_START_ZS,
   MSG_NAMED_BACKUP_PICK_TO_COMPARE,
+  MSG_NO_LOCAL_AUTOSAVE_DATA,
+  MSG_ZS_NAMED_BACKUP_NO_AUDIT_TOTALS,
   EXPORT_ORIENTACNI_NOTE,
   formatZsLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
@@ -1398,7 +1400,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     try {
       const raw = localStorage.getItem("edu-cz-zs-calculator-state");
       if (!raw) {
-        setUiNotice("Nebyla nalezena žádná uložená data.");
+        setUiNotice(MSG_NO_LOCAL_AUTOSAVE_DATA);
         return;
       }
       const s = JSON.parse(raw) as Record<string, unknown>;
@@ -1921,9 +1923,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     }
     const stored = parseZsSnapshotAuditTotals(item.snapshot);
     if (!stored) {
-      setUiNotice(
-        "Vybraná záloha neobsahuje auditní součty. Obnovte ji ze seznamu a uložte znovu jako pojmenovanou zálohu.",
-      );
+      setUiNotice(MSG_ZS_NAMED_BACKUP_NO_AUDIT_TOTALS);
       return;
     }
     const currentProtocol = createZsProductAuditProtocol({
