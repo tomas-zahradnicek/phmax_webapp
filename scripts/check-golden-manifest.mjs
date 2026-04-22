@@ -12,11 +12,15 @@ if (typeof goldenScript !== "string") {
 
 const requiredEntries = [
   "src/phmax-compare-contract.test.ts",
+  "src/export-metadata-contract.test.ts",
+  "src/export-time-freeze.test.ts",
+  "src/snapshot-restore-contract.test.ts",
+  "src/phmax-audit-schema-contract.test.ts",
 ];
 
 const missing = requiredEntries.filter((entry) => !goldenScript.includes(entry));
 if (missing.length > 0) {
-  console.error("test:golden is missing required compare contract entries:");
+  console.error("test:golden is missing required contract entries:");
   for (const entry of missing) {
     console.error(`- ${entry}`);
   }
