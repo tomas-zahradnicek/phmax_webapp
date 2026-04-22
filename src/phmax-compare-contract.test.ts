@@ -3,6 +3,16 @@ import { comparePhmaxProductVariants } from "./phmax-product-compare";
 import { createPvProductAuditProtocol, createSdProductAuditProtocol } from "./phmax-product-audit";
 
 describe("Compare contract", () => {
+  it("pro prázdný vstup vrátí stabilní fallback recommendation", () => {
+    const out = comparePhmaxProductVariants([]);
+    expect(out.variants).toEqual([]);
+    expect(out.metrics).toEqual([]);
+    expect(out.comparison.totalPrimary).toEqual([]);
+    expect(out.comparison.totalSecondary).toEqual([]);
+    expect(out.differences).toEqual([]);
+    expect(out.recommendation).toBe("Nebyla předána žádná varianta.");
+  });
+
   it("vrací stabilní strukturu výsledku", () => {
     const a = createPvProductAuditProtocol([
       { label: "A", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
@@ -217,5 +227,21 @@ describe("Compare contract", () => {
 
     expect(out.comparison.totalPrimary[0].value).toBeNull();
     expect(out.comparison.totalSecondary[0].value).toBeNull();
+  });
+
+  it("když žádná varianta nemá totalPrimary, recommendation vrátí fallback text", () => {
+    const invalidA = createPvProductAuditProtocol([
+      { label: "Bad A", provoz: "celodenni", classCount: 0, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const invalidB = createPvProductAuditProtocol([
+      { label: "Bad B", provoz: "celodenni", classCount: 0, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([
+      { id: "a", label: "Neplatná A", protocol: invalidA },
+      { id: "b", label: "Neplatná B", protocol: invalidB },
+    ]);
+    expect(out.recommendation).toBe(
+      "U žádné varianty není k dispozici primární metrika (PHmax) — zkontrolujte vstupy.",
+    );
   });
 });
