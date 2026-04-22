@@ -123,4 +123,57 @@ describe("Compare contract", () => {
     expect(out.recommendation).toContain("Validní nižší");
     expect(out.recommendation).not.toContain("Nevalidní vyšší");
   });
+
+  it("differences pro PHmax drží formát +/− a dvě desetinná místa (cs-CZ)", () => {
+    const lower = createPvProductAuditProtocol([
+      { label: "A", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const higher = createPvProductAuditProtocol([
+      { label: "B", provoz: "celodenni", classCount: 2, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const out = comparePhmaxProductVariants([
+      { id: "a", label: "Nižší", protocol: lower },
+      { id: "b", label: "Vyšší", protocol: higher },
+    ]);
+    const phLine = out.differences.find((line) => line.startsWith("PHmax (primární metrika):"));
+    expect(phLine).toBeDefined();
+    expect(phLine).toContain("+57,50 h");
+    expect(phLine).toContain("120,00");
+    expect(phLine).toContain("62,50");
+  });
+
+  it("differences pro validaci drží text OK/chyby", () => {
+    const ok = createPvProductAuditProtocol([
+      { label: "A", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const errBase = createPvProductAuditProtocol([
+      { label: "B", provoz: "celodenni", classCount: 1, avgHoursPerDay: 10, sec16ClassCount: 0, languageGroupCount: 0 },
+    ]);
+    const err = { ...errBase, validation: { ...errBase.validation, ok: false } };
+    const out = comparePhmaxProductVariants([
+      { id: "a", label: "A", protocol: ok },
+      { id: "b", label: "B", protocol: err },
+    ]);
+    const validationLine = out.differences.find((line) => line.startsWith("Validace:"));
+    expect(validationLine).toBe('Validace: „A“ OK, „B“ chyby.');
+  });
+
+  it("differences pro secondary metriku hlásí hodnoty variant", () => {
+    const left = createSdProductAuditProtocol({
+      pupilsFirstGrade: 40,
+      manualDepts: true,
+      departments: 2,
+    });
+    const right = createSdProductAuditProtocol({
+      pupilsFirstGrade: 60,
+      manualDepts: true,
+      departments: 3,
+    });
+    const out = comparePhmaxProductVariants([
+      { id: "left", label: "Levá", protocol: left },
+      { id: "right", label: "Pravá", protocol: right },
+    ]);
+    const secondaryLine = out.differences.find((line) => line.startsWith("Sekundární metrika"));
+    expect(secondaryLine).toContain("„Pravá“ 3 vs „Levá“ 2");
+  });
 });
