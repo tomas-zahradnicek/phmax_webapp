@@ -1,5 +1,12 @@
 import fs from "node:fs";
 
+const checksDir = new URL("./", import.meta.url);
+const checkFiles = fs
+  .readdirSync(checksDir, { withFileTypes: true })
+  .filter((entry) => entry.isFile() && /^check-.*\.mjs$/.test(entry.name))
+  .map((entry) => entry.name)
+  .sort();
+
 const packageJson = JSON.parse(
   fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
 );
@@ -8,11 +15,9 @@ const workflow = fs.readFileSync(
   "utf8",
 );
 
-const requiredScripts = [
-  "check:readme-sync",
-  "check:ci-summary-manifest",
-  "check:golden-manifest",
-];
+const requiredScripts = checkFiles.map((fileName) =>
+  `check:${fileName.replace(/^check-/, "").replace(/\.mjs$/, "")}`,
+);
 
 const missingScripts = requiredScripts.filter(
   (scriptName) => typeof packageJson?.scripts?.[scriptName] !== "string",
@@ -25,11 +30,7 @@ if (missingScripts.length > 0) {
   process.exit(1);
 }
 
-const requiredWorkflowSnippets = [
-  "npm run check:readme-sync",
-  "npm run check:ci-summary-manifest",
-  "npm run check:golden-manifest",
-];
+const requiredWorkflowSnippets = requiredScripts.map((scriptName) => `npm run ${scriptName}`);
 
 const missingWorkflowSnippets = requiredWorkflowSnippets.filter(
   (snippet) => !workflow.includes(snippet),
