@@ -95,8 +95,11 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
     );
   }
 
-  const left = result.metrics[0];
-  const right = result.metrics[1];
+  const [swapped, setSwapped] = React.useState(false);
+  const baseLeft = result.metrics[0];
+  const baseRight = result.metrics[1];
+  const left = swapped ? baseRight : baseLeft;
+  const right = swapped ? baseLeft : baseRight;
   const [copyNotice, setCopyNotice] = React.useState("");
   const generatedAt = React.useMemo(() => new Date().toLocaleString("cs-CZ"), [result]);
   const verdict = compareVerdict(result);
@@ -209,6 +212,14 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
         </ul>
       ) : null}
       <div className="compare-panel__actions" role="group" aria-label="Export porovnání">
+        <button
+          type="button"
+          className="btn ghost btn--hero-named"
+          aria-pressed={swapped}
+          onClick={() => setSwapped((v) => !v)}
+        >
+          Prohodit A/B
+        </button>
         <button type="button" className="btn ghost btn--hero-named" onClick={() => void copyCompareSummary()}>
           Kopírovat porovnání
         </button>
