@@ -21,6 +21,9 @@ describe("UX contract: compare panel side-by-side pattern", () => {
     expect(src).toContain("Export porovnání (JSON)");
     expect(src).toContain("Rozdíl PHmax (B - A):");
     expect(src).toContain("Rozdíl sekundární metriky (B - A):");
+    expect(src).toContain("<strong>A:</strong>");
+    expect(src).toContain("<strong>B:</strong>");
+    expect(src).toContain("compare-panel__delta-item--");
   });
 
   it("all products render compare preview panel in named snapshots section", () => {

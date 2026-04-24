@@ -21,6 +21,13 @@ function deltaText(left: number | null, right: number | null, suffix = ""): stri
   return `${sign}${delta.toLocaleString("cs-CZ", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}${suffix}`;
 }
 
+function deltaTone(left: number | null, right: number | null): "positive" | "negative" | "neutral" {
+  if (left == null || right == null) return "neutral";
+  if (right > left) return "positive";
+  if (right < left) return "negative";
+  return "neutral";
+}
+
 function normalize(value: number | null): number | null {
   return typeof value === "number" ? value : null;
 }
@@ -88,6 +95,10 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
   const verdict = compareVerdict(result);
   const phmaxDelta = deltaText(left.totalPrimary, right.totalPrimary, " h");
   const secondaryDelta = deltaText(left.totalSecondary, right.totalSecondary);
+  const phmaxDeltaTone = deltaTone(left.totalPrimary, right.totalPrimary);
+  const secondaryDeltaTone = deltaTone(left.totalSecondary, right.totalSecondary);
+  const leftLabel = left.variantLabel || left.variantId;
+  const rightLabel = right.variantLabel || right.variantId;
   const exportCompareJson = () => {
     downloadTextFile(
       exportFilenameStamped(`phmax-${exportSlug}-compare-preview`, "json"),
@@ -120,9 +131,12 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
     <section className="compare-panel" aria-label={title}>
       <p className="compare-panel__title">{title}</p>
       <p className={`compare-panel__verdict compare-panel__verdict--${verdict.tone}`}>{verdict.text}</p>
+      <p className="compare-panel__basis">
+        <strong>A:</strong> {leftLabel} · <strong>B:</strong> {rightLabel}
+      </p>
       <div className="compare-panel__grid">
         <article className="compare-panel__card">
-          <h4 className="compare-panel__variant">{left.variantLabel || left.variantId}</h4>
+          <h4 className="compare-panel__variant">{leftLabel}</h4>
           <p className="compare-panel__metric">
             PHmax: <strong>{metricText(left.totalPrimary, " h")}</strong>
           </p>
@@ -130,7 +144,7 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
           <p className="compare-panel__metric">Validace: {left.validationOk === false ? "chyby" : "OK"}</p>
         </article>
         <article className="compare-panel__card">
-          <h4 className="compare-panel__variant">{right.variantLabel || right.variantId}</h4>
+          <h4 className="compare-panel__variant">{rightLabel}</h4>
           <p className="compare-panel__metric">
             PHmax: <strong>{metricText(right.totalPrimary, " h")}</strong>
           </p>
@@ -139,10 +153,10 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
         </article>
       </div>
       <div className="compare-panel__delta" aria-label="Rozdíl mezi variantami">
-        <p className="compare-panel__delta-item">
+        <p className={`compare-panel__delta-item compare-panel__delta-item--${phmaxDeltaTone}`}>
           <strong>Rozdíl PHmax (B - A):</strong> {phmaxDelta}
         </p>
-        <p className="compare-panel__delta-item">
+        <p className={`compare-panel__delta-item compare-panel__delta-item--${secondaryDeltaTone}`}>
           <strong>Rozdíl sekundární metriky (B - A):</strong> {secondaryDelta}
         </p>
       </div>

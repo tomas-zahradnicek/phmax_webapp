@@ -5820,6 +5820,12 @@ select:focus {
   color: #334155;
 }
 
+.compare-panel__basis {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
 .compare-panel__empty {
   margin: 0;
   font-size: 0.82rem;
@@ -5865,6 +5871,18 @@ select:focus {
 .compare-panel__delta-item {
   margin: 0;
   font-size: 0.8rem;
+  color: #1e3a8a;
+}
+
+.compare-panel__delta-item--positive {
+  color: #166534;
+}
+
+.compare-panel__delta-item--negative {
+  color: #991b1b;
+}
+
+.compare-panel__delta-item--neutral {
   color: #1e3a8a;
 }
 
