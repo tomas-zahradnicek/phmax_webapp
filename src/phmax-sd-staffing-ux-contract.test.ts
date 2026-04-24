@@ -18,15 +18,17 @@ describe("UX contract: SD staffing model (NV 75/2005, PPV) guards", () => {
     expect(src).toContain("75/2005");
   });
 
-  it("PhmaxSdPage drží vychovatelPpcHours v snapshotu a propojuje export s modelem", () => {
+  it("PhmaxSdPage drží vychovatelPpcHours a separateVedoucihoDleT72 v snapshotu; export navazuje na model", () => {
     const page = readSource("src/PhmaxSdPage.tsx");
     const exportRows = readSource("src/phmax-sd-export-rows.ts");
 
     expect(page).toContain("vychovatelPpcHours");
+    expect(page).toContain("separateVedoucihoDleT72");
     expect(page).toMatch(/buildPhmaxSdExportRows\([\s\S]*?staffingNv75/s);
     expect(exportRows).toContain("staffingNv75");
     expect(exportRows).toContain("7.1");
     expect(exportRows).toContain("7.2");
+    expect(exportRows).toContain("separateVedoucihoDleT72");
   });
 
   it("phmax-sd-legislativa a legislativní panel ŠD zmiňují NV 75/2005 a tooltips tabulek 7.1/7.2", () => {

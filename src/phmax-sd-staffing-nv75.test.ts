@@ -33,5 +33,21 @@ describe("computeSdStaffingSplitNv75", () => {
     expect(s.forOthersPhmax).toBe(206.5);
     expect(s.fullTimeSlots).toBe(7);
     expect(s.partialHours).toBe(10.5);
+    expect(s.separateVedoucihoDleT72).toBe(true);
+  });
+
+  it("při separateVedoucihoDleT72: false není odečtena tab. 7.2 — zbytek dělí jen dle 7.1 (100/30=3+10 h)", () => {
+    const s = computeSdStaffingSplitNv75({
+      totalPhmax: 100,
+      departmentCount: 4,
+      vychovatelFullPpc: 30,
+      separateVedoucihoDleT72: false,
+    });
+    expect(s.inconsistent).toBe(false);
+    expect(s.separateVedoucihoDleT72).toBe(false);
+    expect(s.headVedouciHours).toBe(0);
+    expect(s.forOthersPhmax).toBe(100);
+    expect(s.fullTimeSlots).toBe(3);
+    expect(s.partialHours).toBe(10);
   });
 });

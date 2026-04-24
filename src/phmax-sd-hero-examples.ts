@@ -13,6 +13,8 @@ export type SdHeroExampleSnapshot = {
   schoolFirstStageClassCount: 1 | 2 | 3 | null;
   /** Volitelné; při absenci 28 h (PHmax / NV 75 model). */
   vychovatelPpcHours?: 28 | 29 | 30;
+  /** Výchozí true; při `false` se v modelu neaplikuje tab. 7.2 před dělením dle 7.1. */
+  separateVedoucihoDleT72?: boolean;
 };
 
 /** Klíče ukázek z metodiky MŠMT / vyhl. 74/2005 Sb. (školská družina). */

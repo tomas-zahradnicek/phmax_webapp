@@ -108,9 +108,13 @@ export function buildPhmaxSdExportRows(input: {
     const m = staffingNv75.model;
     const slot = staffingNv75.vychovatelPpc;
     rows.push(["=== Model úvazků (nařízení vlády č. 75/2005 Sb., orientačně) ===", ""]);
+    rows.push([
+      "Vedoucí vychovatel: samostatný slot dle tab. 7.2 (před dělením PPV ostatních, tab. 7.1)",
+      m.separateVedoucihoDleT72 ? "ano" : "ne",
+    ]);
     rows.push(["Zvolený plný týdenní rozsah PPV vychovatele (příl. 1, tab. 7.1, h/týd.)", slot]);
     if (m.headNote) {
-      rows.push(["Poznámka (vedoucí, tab. 7.2)", m.headNote]);
+      rows.push(["Poznámka k modelu (tab. 7.1 / 7.2)", m.headNote]);
     }
     rows.push(["Vedoucí vychovatel (příl. 1, tab. 7.2, h/týd.)", m.headVedouciHours]);
     rows.push(["PHmax pro ostatní vychovatele (h/týd., zbývá z PHmax)", formatSdHours(m.forOthersPhmax)]);

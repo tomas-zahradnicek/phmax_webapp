@@ -79,7 +79,9 @@ describe("buildPhmaxSdExportRows (smoke / export)", () => {
       totalPhmax: adjusted,
       departmentCount: effectiveDepts,
       vychovatelFullPpc: 30,
+      separateVedoucihoDleT72: true,
     });
+    expect(staffing.separateVedoucihoDleT72).toBe(true);
 
     const rows = buildPhmaxSdExportRows({
       pupils,
@@ -99,6 +101,8 @@ describe("buildPhmaxSdExportRows (smoke / export)", () => {
     expect(modelIndex).toBeGreaterThan(-1);
     expect(upozornIndex).toBeGreaterThan(-1);
     expect(modelIndex).toBeLessThan(upozornIndex);
+    const anoRow = rows.find(([k, v]) => k.includes("tab. 7.2") && k.includes("7.1") && v === "ano");
+    expect(anoRow).toBeDefined();
     expect(rows.some(([k]) => k.includes("tab. 7.1") && k.includes("PPV"))).toBe(true);
     expect(rows.some(([k]) => k.includes("7.2"))).toBe(true);
   });

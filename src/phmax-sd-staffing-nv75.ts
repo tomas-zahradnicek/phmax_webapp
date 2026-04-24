@@ -1,5 +1,8 @@
 import { round2 } from "./phmax-zs-logic";
 
+const MSG_NO_VEDOUCI_HEAD =
+  "Vedoucí vychovatel není v tomto modelu uplatněn samostatným slotem dle tab. 7.2; veškeré PHmax se dělí dle PPV ostatních vychovatelů (tab. 7.1).";
+
 /** Týdenní rozsah přímé pedagogické činnosti vychovatele (příl. č. 1, tab. 7.1, NV č. 75/2005 Sb.) – volitelná volba plného „slotu“. */
 export type SdVychovatelPpcFullHours = 28 | 29 | 30;
 
@@ -41,19 +44,28 @@ export type SdStaffingSplitNv75 = {
   /** PHmax menší než rozsah vedoucího dle tabulky – model je v rozporu, ověřte vstupy. */
   inconsistent: boolean;
   inconsistencyMessage?: string;
+  /**
+   * Zda v modelu nejdřív odebíráme týdenní rozsah pro vedoucího dle tab. 7.2, pak dělí zbytek.
+   * Při `false` není tento slot uplatňován (celé PHmax jde na PPV ostatních, tab. 7.1).
+   */
+  separateVedoucihoDleT72: boolean;
 };
 
 /**
  * Rozdělí součtový PHmax: nejdřív odpovídající rozsah vedoucího (tab. 7.2), zbytek na plné a případně zkrácený úvazek
  * vychovatele s přímou pedagogickou činností ve zvolené délce 28/29/30 h (tab. 7.1, rozsah zákona).
+ * @param separateVedoucihoDleT72 Výchozí `true`. Při `false` se rozsah vedoucího dle tab. 7.2 v modelu neodečítá
+ *   a celé PHmax se dělí dle PPV ostatních (tab. 7.1).
  */
 export function computeSdStaffingSplitNv75(params: {
   totalPhmax: number;
   departmentCount: number;
   vychovatelFullPpc: SdVychovatelPpcFullHours;
+  separateVedoucihoDleT72?: boolean;
 }): SdStaffingSplitNv75 {
-  const { totalPhmax, departmentCount, vychovatelFullPpc: slot } = params;
-  const head = getNv2005VedouciVychovatelHours(departmentCount);
+  const { totalPhmax, departmentCount, vychovatelFullPpc: slot, separateVedoucihoDleT72: sepIn = true } = params;
+  const separateVedoucihoDleT72 = sepIn !== false;
+  const head = separateVedoucihoDleT72 ? getNv2005VedouciVychovatelHours(departmentCount) : { hours: 0, note: undefined };
 
   if (totalPhmax <= 0) {
     return {
@@ -68,10 +80,11 @@ export function computeSdStaffingSplitNv75(params: {
       partialPercentOfFull: 0,
       inconsistent: true,
       inconsistencyMessage: "PHmax není kladné – model úvazků nelze sestavit.",
+      separateVedoucihoDleT72,
     };
   }
 
-  if (head.hours > totalPhmax + 1e-6) {
+  if (separateVedoucihoDleT72 && head.hours > totalPhmax + 1e-6) {
     return {
       totalPhmax,
       departmentCount,
@@ -85,6 +98,7 @@ export function computeSdStaffingSplitNv75(params: {
       inconsistent: true,
       inconsistencyMessage:
         "Rozsah vedoucího vychovatele dle tab. 7.2 je vyšší než vypočtený PHmax. Zkontrolujte oddělení, krácení a vstupy – model je jen orientační.",
+      separateVedoucihoDleT72: true,
     };
   }
 
@@ -102,6 +116,7 @@ export function computeSdStaffingSplitNv75(params: {
       partialPercentOfFull: 0,
       inconsistent: true,
       inconsistencyMessage: "Záporný zbytek po vedoucím – zkontrolujte výpočet PHmax.",
+      separateVedoucihoDleT72: true,
     };
   }
 
@@ -115,11 +130,12 @@ export function computeSdStaffingSplitNv75(params: {
     departmentCount,
     vychovatelFullPpc: slot,
     headVedouciHours: head.hours,
-    headNote: head.note,
+    headNote: !separateVedoucihoDleT72 ? MSG_NO_VEDOUCI_HEAD : head.note,
     forOthersPhmax: forOthers,
     fullTimeSlots,
     partialHours,
     partialPercentOfFull,
     inconsistent: false,
+    separateVedoucihoDleT72,
   };
 }

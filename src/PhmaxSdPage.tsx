@@ -195,6 +195,11 @@ type SdPersistedSnapshot = {
   schoolFirstStageClassCount?: 1 | 2 | 3 | null;
   /** Zvolený týdenní rozsah PPV pro „plný slot“ vychovatele (NV č. 75/2005 Sb., tab. 7.1, pásma 28 až 30 h). */
   vychovatelPpcHours?: SdVychovatelPpcFullHours;
+  /**
+   * Zda v modelu nejdřív odečíst týdenní rozsah pro vedoucího dle tab. 7.2, pak dělit zbytek dle 7.1.
+   * Při `false` není 7.2 uplatněna; výchozí a starší uložení: `true` (nebo pole chybí).
+   */
+  separateVedoucihoDleT72?: boolean;
 };
 
 type NamedSdSnapshot = { id: string; name: string; savedAt: string; snapshot: SdPersistedSnapshot };
@@ -272,6 +277,7 @@ function parseSdSnapshot(data: unknown): SdPersistedSnapshot | null {
   const vph = r.vychovatelPpcHours;
   const vychovatelPpcHours: SdVychovatelPpcFullHours | undefined =
     vph === 28 || vph === 29 || vph === 30 ? vph : undefined;
+  const separateVedoucihoDleT72 = r.separateVedoucihoDleT72 === false ? false : true;
   return {
     pupils,
     manualDepts,
@@ -283,6 +289,7 @@ function parseSdSnapshot(data: unknown): SdPersistedSnapshot | null {
     detailDepartments,
     schoolFirstStageClassCount,
     vychovatelPpcHours,
+    separateVedoucihoDleT72,
   };
 }
 
@@ -351,6 +358,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     const v = initial.vychovatelPpcHours;
     return v === 28 || v === 29 || v === 30 ? v : 28;
   });
+  const [separateVedoucihoDleT72, setSeparateVedoucihoDleT72] = useState(() => initial.separateVedoucihoDleT72 !== false);
   const selectedSdHeroExampleMeta =
     selectedSdHeroExample && selectedSdHeroExample in SD_HERO_EXAMPLE_META
       ? SD_HERO_EXAMPLE_META[selectedSdHeroExample as Exclude<SdHeroExampleKey, "">]
@@ -536,8 +544,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       totalPhmax: phmaxHours,
       departmentCount: depts,
       vychovatelFullPpc: vychovatelPpcHours,
+      separateVedoucihoDleT72,
     });
-  }, [pupils, detailedResult, basePhmax, reduction.adjusted, effectiveDepts, vychovatelPpcHours]);
+  }, [pupils, detailedResult, basePhmax, reduction.adjusted, effectiveDepts, vychovatelPpcHours, separateVedoucihoDleT72]);
 
   const stickySummary = useMemo(() => {
     if (detailedResult != null) {
@@ -711,6 +720,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       detailDepartments,
       schoolFirstStageClassCount,
       vychovatelPpcHours,
+      separateVedoucihoDleT72,
     }),
     [
       pupils,
@@ -723,6 +733,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       detailDepartments,
       schoolFirstStageClassCount,
       vychovatelPpcHours,
+      separateVedoucihoDleT72,
     ],
   );
 
@@ -741,6 +752,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         ? next.vychovatelPpcHours
         : 28,
     );
+    setSeparateVedoucihoDleT72(next.separateVedoucihoDleT72 !== false);
     setSummaryHasSpecial((next.summarySpecialDepartments?.length ?? 0) > 0);
   }, []);
 
@@ -856,6 +868,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     setSummaryHasSpecial(false);
     setSelectedSdHeroExample("");
     setVychovatelPpcHours(28);
+    setSeparateVedoucihoDleT72(true);
     setUiNotice("Všechna vstupní data kalkulačky byla vymazána.");
   }, []);
 
@@ -882,13 +895,22 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             return [
               "",
               "Model úvazků dle nařízení vlády č. 75/2005 (příl. č. 1, orientačně):",
+              `Vedoucí vychovatel dle tab. 7.2 v modelu: ${
+                m.separateVedoucihoDleT72 ? "ano (před dělením ostatním podle 7.1)" : "ne (dělí se jen dle 7.1, bez kroku 7.2)"
+              }`,
               `Zvolený plný týdenní rozsah PPV (tab. 7.1): ${vychovatelPpcHours} h/týd.`,
               m.headNote ? m.headNote : null,
               m.inconsistent && m.inconsistencyMessage ? m.inconsistencyMessage : null,
               `Vedoucí vychovatel (tab. 7.2): ${formatSdHours(m.headVedouciHours)} h/týd.`,
-              `PHmax pro ostatní vychovatele: ${formatSdHours(m.forOthersPhmax)} h/týd.`,
-              `Ostatní: plné úvazky: ${m.fullTimeSlots}×${vychovatelPpcHours} h`,
-              `Ostatní: zkrácený úvazek: ${formatSdHours(m.partialHours)} h (${m.partialPercentOfFull.toLocaleString("cs-CZ", {
+              m.separateVedoucihoDleT72
+                ? `PHmax pro ostatní vychovatele: ${formatSdHours(m.forOthersPhmax)} h/týd.`
+                : `Celé PHmax pro vychovatele (PPV, tab. 7.1): ${formatSdHours(m.forOthersPhmax)} h/týd.`,
+              m.separateVedoucihoDleT72
+                ? `Ostatní: plné úvazky: ${m.fullTimeSlots}×${vychovatelPpcHours} h`
+                : `Vychovatelé: plné úvazky: ${m.fullTimeSlots}×${vychovatelPpcHours} h`,
+              `${m.separateVedoucihoDleT72 ? "Ostatní" : "Vychovatelé"}: zkrácený úvazek: ${formatSdHours(
+                m.partialHours,
+              )} h (${m.partialPercentOfFull.toLocaleString("cs-CZ", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })} % vůči ${vychovatelPpcHours} h)`,
@@ -1871,12 +1893,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <summary className="section-title" style={{ fontSize: "0.95rem", cursor: "pointer" }}>
               Model úvazků dle nařízení vlády č. 75/2005 Sb. (příl. č. 1) — orientačně
             </summary>
-            <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.84rem", lineHeight: 1.5 }}>
-              Rozsah přímé pedagogické činnosti (PPV) vychovatele a vedoucího vychovatele u školní družiny je v zákonném
-              rámci uveden v <strong>příloze č. 1, tab. 7.1 a 7.2</strong> k NV č. 75/2005 Sb. Aplikace následovně odečte
-              úvazek <strong>vedoucího vychovatele</strong> dle <strong>počtu oddělení (jednotek)</strong> a zbylé PHmax
-              rozdělí na ostatní vychovatele s vámi zvolenou délkou plného PPV 28, 29 nebo 30 h. Údaje ověřte u
-              konsolidovaného znění předpisu.{" "}
+            <p className="muted-text" style={{ marginTop: 10, marginBottom: 10, fontSize: "0.84rem", lineHeight: 1.5 }}>
+              Rozsah přímé pedagogické činnosti (PPV) u školní družiny je v rámci NV uveden v <strong>tab. 7.1 a 7.2</strong>{" "}
+              v příloze č. 1. Tento blok umí buď <strong>nejdřív vyčlenit</strong> modelový týdenní rozsah dle 7.2 a zbytek
+              dělit mezi ostatní vychovatele, nebo <strong>celé PHmax</strong> dělit jen dle 7.1, pokud ve vaší praxi
+              tento krok nechcete v modelu. Údaje ověřte u konsolidovaného znění.{" "}
               <a
                 href={SD_LEGIS_ZAKONY_URL.nv75_2005}
                 rel="noreferrer"
@@ -1886,6 +1907,33 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 Znění na zakonyprolidi.cz (NV 75/2005, orientačně)
               </a>
             </p>
+            <div className="field" style={{ marginBottom: 12, maxWidth: 520 }} role="group" aria-label="Rozdělení dle tabulky 7.2">
+              <span className="field__label" id="sd-staff-vedouci-legend">
+                V modelu dříve odečíst rozsah pro vedoucího dle tab. 7.2 (a teprve pak dělit zbylé PHmax dle 7.1)?
+              </span>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px 20px", marginTop: 8, alignItems: "center" }}>
+                <label className="muted-text" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: "0.9rem" }}>
+                  <input
+                    type="radio"
+                    name="sd-staff-vedouci"
+                    checked={separateVedoucihoDleT72}
+                    onChange={() => setSeparateVedoucihoDleT72(true)}
+                    aria-describedby="sd-staff-vedouci-legend"
+                  />
+                  Ano (7.2 před 7.1, výchozí)
+                </label>
+                <label className="muted-text" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: "0.9rem" }}>
+                  <input
+                    type="radio"
+                    name="sd-staff-vedouci"
+                    checked={!separateVedoucihoDleT72}
+                    onChange={() => setSeparateVedoucihoDleT72(false)}
+                    aria-describedby="sd-staff-vedouci-legend"
+                  />
+                  Ne (dělí se jen 7.1, bez 7.2 v modelu)
+                </label>
+              </div>
+            </div>
             <label className="field" style={{ marginBottom: 12, maxWidth: 420 }}>
               <span className="field__label">Plný týdenní rozsah PPV vychovatele dle modelu (tab. 7.1: 28 až 30 h týdně)</span>
               <select
@@ -1920,15 +1968,25 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                   <td className="app-data-table__num">{formatSdHours(sdStaffingModel.headVedouciHours)} h</td>
                 </tr>
                 <tr>
-                  <th scope="row">Na ostatní vychovatele (zbývá z PHmax)</th>
+                  <th scope="row">
+                    {sdStaffingModel.separateVedoucihoDleT72
+                      ? "Na ostatní vychovatele (zbývá z PHmax)"
+                      : "Celé PHmax pro vychovatele (dělení dle tab. 7.1)"}
+                  </th>
                   <td className="app-data-table__num">{formatSdHours(sdStaffingModel.forOthersPhmax)} h</td>
                 </tr>
                 <tr>
-                  <th scope="row">Ostatní vychovatelé: plné úvazky (×{vychovatelPpcHours} h)</th>
+                  <th scope="row">
+                    {sdStaffingModel.separateVedoucihoDleT72
+                      ? `Ostatní vychovatelé: plné úvazky (×${vychovatelPpcHours} h)`
+                      : `Vychovatelé: plné úvazky (×${vychovatelPpcHours} h)`}
+                  </th>
                   <td className="app-data-table__num">{sdStaffingModel.fullTimeSlots}</td>
                 </tr>
                 <tr>
-                  <th scope="row">Zkrácený úvazek (dopočet)</th>
+                  <th scope="row">
+                    {sdStaffingModel.separateVedoucihoDleT72 ? "Zkrácený úvazek ostatních (dopočet)" : "Zkrácený úvazek (dopočet)"}
+                  </th>
                   <td className="app-data-table__num">{formatSdHours(sdStaffingModel.partialHours)} h</td>
                 </tr>
                 <tr>
