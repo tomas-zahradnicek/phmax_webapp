@@ -28,6 +28,11 @@ function deltaTone(left: number | null, right: number | null): "positive" | "neg
   return "neutral";
 }
 
+function missingDeltaReason(left: number | null, right: number | null): string | null {
+  if (left != null && right != null) return null;
+  return "Rozdíl nelze určit, protože alespoň u jedné varianty chybí dopočtená metrika.";
+}
+
 function normalize(value: number | null): number | null {
   return typeof value === "number" ? value : null;
 }
@@ -97,6 +102,8 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
   const secondaryDelta = deltaText(left.totalSecondary, right.totalSecondary);
   const phmaxDeltaTone = deltaTone(left.totalPrimary, right.totalPrimary);
   const secondaryDeltaTone = deltaTone(left.totalSecondary, right.totalSecondary);
+  const phmaxMissingReason = missingDeltaReason(left.totalPrimary, right.totalPrimary);
+  const secondaryMissingReason = missingDeltaReason(left.totalSecondary, right.totalSecondary);
   const leftLabel = left.variantLabel || left.variantId;
   const rightLabel = right.variantLabel || right.variantId;
   const exportCompareJson = () => {
@@ -156,9 +163,11 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
         <p className={`compare-panel__delta-item compare-panel__delta-item--${phmaxDeltaTone}`}>
           <strong>Rozdíl PHmax (B - A):</strong> {phmaxDelta}
         </p>
+        {phmaxMissingReason ? <p className="compare-panel__delta-note">{phmaxMissingReason}</p> : null}
         <p className={`compare-panel__delta-item compare-panel__delta-item--${secondaryDeltaTone}`}>
           <strong>Rozdíl sekundární metriky (B - A):</strong> {secondaryDelta}
         </p>
+        {secondaryMissingReason ? <p className="compare-panel__delta-note">{secondaryMissingReason}</p> : null}
       </div>
       <p className="compare-panel__recommendation">
         <strong>Doporučení:</strong> {result.recommendation}

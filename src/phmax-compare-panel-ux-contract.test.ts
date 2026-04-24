@@ -24,6 +24,7 @@ describe("UX contract: compare panel side-by-side pattern", () => {
     expect(src).toContain("<strong>A:</strong>");
     expect(src).toContain("<strong>B:</strong>");
     expect(src).toContain("compare-panel__delta-item--");
+    expect(src).toContain("Rozdíl nelze určit, protože alespoň u jedné varianty chybí dopočtená metrika.");
   });
 
   it("all products render compare preview panel in named snapshots section", () => {
