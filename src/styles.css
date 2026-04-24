@@ -5717,3 +5717,29 @@ select:focus {
   border-color: rgba(220, 38, 38, 0.4);
   background: rgba(254, 242, 242, 0.92);
 }
+
+.hero-zone-label {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #334155;
+}
+
+.hero-zone-kpi {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #334155;
+}
+
+.hero-zone-actions {
+  margin-top: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 10px;
+}

@@ -694,6 +694,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
         <div className="grid two hero__grid">
           <div>
+            <p className="hero-zone-label">A. Kontext výpočtu</p>
             <h1 className="hero__title hero__title--sd">PHmax a PHAmax – předškolní vzdělávání</h1>
             <p className="hero__text hero__text--sd">
               Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a{" "}
@@ -707,6 +708,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             ) : null}
           </div>
           <div className="hero__stats hero__stats--compact hero__stats--pv">
+            <p className="hero-zone-kpi">B. Hlavní KPI</p>
             <HeroStat compact label="Počet pracovišť ve výpočtu" value={rows.length} />
             <HeroStat
               compact
@@ -735,10 +737,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           ]}
         />
 
-        <div
-          className="field field--hero-select hero-actions__example hero-pv-example-select"
-          style={{ marginTop: 14 }}
-        >
+        <section className="hero-zone-actions" aria-label="Akce výpočtu">
+          <p className="hero-zone-label">C. Akce</p>
+          <div
+            className="field field--hero-select hero-actions__example hero-pv-example-select"
+            style={{ marginTop: 14 }}
+          >
           <span className="field__label field__label--hero" id="pv-hero-example-label">
             Ukázkový příklad
           </span>
@@ -786,15 +790,15 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           >
             {PV_HERO_EXAMPLE_SELECT_LEGEND}
           </p>
-          {selectedPvHeroExampleMeta ? (
-            <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
-              <strong>Očekávaný výsledek vybrané ukázky:</strong> {selectedPvHeroExampleMeta.title}
-            </p>
-          ) : null}
-        </div>
+            {selectedPvHeroExampleMeta ? (
+              <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
+                <strong>Očekávaný výsledek vybrané ukázky:</strong> {selectedPvHeroExampleMeta.title}
+              </p>
+            ) : null}
+          </div>
 
-        <div className="hero-actions hero-actions--stacked">
-          <HeroActionsDrawer>
+          <div className="hero-actions hero-actions--stacked">
+            <HeroActionsDrawer>
             <div className="hero-actions--stacked__row">
               <span className="hero-actions__cluster" role="group" aria-label="Tisk">
                 <HeroIconActionButton
@@ -929,8 +933,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 </div>
               </div>
             </div>
-          </HeroActionsDrawer>
-        </div>
+            </HeroActionsDrawer>
+          </div>
+        </section>
       </header>
 
       <QuickOnboarding title="Nápověda – předškolní vzdělávání" open={guideOpen} onDismiss={dismissGuide}>

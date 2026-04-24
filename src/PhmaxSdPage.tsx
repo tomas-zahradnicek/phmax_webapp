@@ -887,6 +887,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
         <div className="grid two hero__grid">
           <div>
+            <p className="hero-zone-label">A. Kontext výpočtu</p>
             <h1 className="hero__title hero__title--sd">PHmax ve školní družině</h1>
             <p className="hero__text hero__text--sd">
               Orientační výpočet podle{" "}
@@ -897,6 +898,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             </p>
           </div>
           <div className="hero__stats hero__stats--compact hero__stats--sd">
+            <p className="hero-zone-kpi">B. Hlavní KPI</p>
             <HeroStat compact label="Účastníci (1. st.)" value={pupils} />
             <HeroStat compact label="Oddělení" value={inputMode === "detail" ? detailDepartments.length : effectiveDepts} />
             <HeroStat
@@ -944,43 +946,45 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           ]}
         />
 
-        <div className="field field--hero-select hero-actions__example hero-sd-example-select" style={{ marginTop: 14 }}>
-          <span className="field__label field__label--hero" id="sd-hero-example-label">
-            Ukázkový příklad
-          </span>
-          <select
-            id="sd-hero-example-select"
-            className="input"
-            aria-labelledby="sd-hero-example-label"
-            aria-describedby="sd-hero-example-legend"
-            title="Ukázkové příklady z metodiky k školní družině (PHmax / PHAmax). Najeďte na řádek pro detaily a očekávané hodnoty."
-            value={selectedSdHeroExample}
-            onChange={(e) => loadSdHeroExample(e.target.value as SdHeroExampleKey)}
-          >
-            <option value="">Vyberte ukázkový příklad…</option>
-            <optgroup label="Metodika — školní družina (orientačně)">
-              {SD_HERO_EXAMPLE_ORDER.map((k) => {
-                const m = SD_HERO_EXAMPLE_META[k];
-                return (
-                  <option key={k} value={k} title={m.title}>
-                    {m.label}
-                  </option>
-                );
-              })}
-            </optgroup>
-          </select>
-          <p id="sd-hero-example-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
-            {SD_HERO_EXAMPLE_SELECT_LEGEND}
-          </p>
-          {selectedSdHeroExampleMeta ? (
-            <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
-              <strong>Očekávaný výsledek vybrané ukázky:</strong> {selectedSdHeroExampleMeta.title}
+        <section className="hero-zone-actions" aria-label="Akce výpočtu">
+          <p className="hero-zone-label">C. Akce</p>
+          <div className="field field--hero-select hero-actions__example hero-sd-example-select" style={{ marginTop: 14 }}>
+            <span className="field__label field__label--hero" id="sd-hero-example-label">
+              Ukázkový příklad
+            </span>
+            <select
+              id="sd-hero-example-select"
+              className="input"
+              aria-labelledby="sd-hero-example-label"
+              aria-describedby="sd-hero-example-legend"
+              title="Ukázkové příklady z metodiky k školní družině (PHmax / PHAmax). Najeďte na řádek pro detaily a očekávané hodnoty."
+              value={selectedSdHeroExample}
+              onChange={(e) => loadSdHeroExample(e.target.value as SdHeroExampleKey)}
+            >
+              <option value="">Vyberte ukázkový příklad…</option>
+              <optgroup label="Metodika — školní družina (orientačně)">
+                {SD_HERO_EXAMPLE_ORDER.map((k) => {
+                  const m = SD_HERO_EXAMPLE_META[k];
+                  return (
+                    <option key={k} value={k} title={m.title}>
+                      {m.label}
+                    </option>
+                  );
+                })}
+              </optgroup>
+            </select>
+            <p id="sd-hero-example-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
+              {SD_HERO_EXAMPLE_SELECT_LEGEND}
             </p>
-          ) : null}
-        </div>
+            {selectedSdHeroExampleMeta ? (
+              <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
+                <strong>Očekávaný výsledek vybrané ukázky:</strong> {selectedSdHeroExampleMeta.title}
+              </p>
+            ) : null}
+          </div>
 
-        <div className="hero-actions hero-actions--stacked">
-          <HeroActionsDrawer>
+          <div className="hero-actions hero-actions--stacked">
+            <HeroActionsDrawer>
             <div className="hero-actions--stacked__row">
               <span className="hero-actions__cluster" role="group" aria-label="Tisk">
                 <HeroIconActionButton
@@ -1115,8 +1119,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 </div>
               </div>
             </div>
-          </HeroActionsDrawer>
-        </div>
+            </HeroActionsDrawer>
+          </div>
+        </section>
 
       </header>
 

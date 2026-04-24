@@ -2006,6 +2006,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
           <div className="grid two hero__grid">
             <div>
+              <p className="hero-zone-label">A. Kontext výpočtu</p>
               <h1 className="hero__title">
                 Přehledný průvodce výpočtem PHmax, PHAmax a PHPmax
               </h1>
@@ -2017,6 +2018,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             </div>
 
             <div className="hero__stats">
+              <p className="hero-zone-kpi">B. Hlavní KPI</p>
               <HeroStat label="Aktivní modul" value={tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"} />
               <HeroStat label="Zvolený režim" value={MODE_CONFIG[mode].label} />
               <HeroStat label="Výsledek PHmax" value={totalPhmax} />
@@ -2025,7 +2027,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             </div>
           </div>
 
-          <div className="hero-actions">
+          <section className="hero-zone-actions" aria-label="Akce výpočtu">
+            <p className="hero-zone-label">C. Akce</p>
+            <div className="hero-actions">
             <div className="field field--hero-select hero-actions__example hero-zs-example-select">
               <span className="field__label field__label--hero" id="zs-hero-example-label">
                 Ukázkový příklad
@@ -2243,7 +2247,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                 />
               </div>
             </HeroActionsDrawer>
-          </div>
+            </div>
+          </section>
         </header>
 
         <ErrorBoundary title="Obsah kalkulačky pro základní školy se nepodařilo zobrazit">

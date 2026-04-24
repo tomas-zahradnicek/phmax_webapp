@@ -396,6 +396,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
 
         <div className="grid two hero__grid">
           <div>
+            <p className="hero-zone-label">A. Kontext výpočtu</p>
             <h1 className="hero__title">PHmax a PHAmax – střední školy</h1>
             <p className="hero__text">
               Přehledná kalkulačka pro <strong>střední vzdělávání</strong> podle{" "}
@@ -417,6 +418,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             </p>
           </div>
           <div className="hero__stats">
+            <p className="hero-zone-kpi">B. Hlavní KPI</p>
             <HeroStat label="Aktivní modul" value="PHmax SŠ" />
             <HeroStat label="Zvolený režim" value="Evidence dílčích jednotek" />
             <HeroStat label="Výsledek PHmax" value={phmaxHeroValue} />
@@ -459,7 +461,9 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           .
         </p>
 
-        <div className="hero-actions hero-actions--compact">
+        <section className="hero-zone-actions" aria-label="Akce výpočtu">
+          <p className="hero-zone-label">C. Akce</p>
+          <div className="hero-actions hero-actions--compact">
           <div className="field field--hero-select hero-actions__example hero-ss-example-select">
             <span className="field__label field__label--hero" id="ss-hero-example-label">
               Ukázkový příklad
@@ -731,7 +735,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               />
             </div>
           </HeroActionsDrawer>
-        </div>
+          </div>
+        </section>
       </header>
 
       <GlossaryDialog
