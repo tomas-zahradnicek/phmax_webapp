@@ -102,12 +102,20 @@ export function ProductLegisContextPanel({ variant }: { variant: ProductLegisVar
             při nízké naplněnosti: <SdLegisRef citeId="sd-10-2" label="§ 10 odst. 2 vyhl. 74" />.
           </li>
           <li>
+            Týdenní rozsah PPV a orientační dělič dle <SdLegisRef citeId="sd-nv75-nv" label="NV č. 75/2005 Sb." />, v aplikaci
+            s odkazem na <SdLegisRef citeId="sd-nv75-7-1" label="tab. 7.1" /> (vychovatel) a{" "}
+            <SdLegisRef citeId="sd-nv75-7-2" label="tab. 7.2" /> (vedoucí vychovatel) v příloze č. 1 — mechanický model, nikoli
+            personální výkaz.
+          </li>
+          <li>
             Složité případy (např. <SdLegisRef citeId="sd-skolsky-16" label="§ 16 školského zákona" />, méně než čtyři oddělení)
             vyžadují úplné znění vyhlášky a metodiku — aplikace je neřeší v plné šíři.
           </li>
         </ul>
         <p className="muted-text methodology-strip__note" style={{ marginTop: 10, fontSize: "0.88rem" }}>
           <LawLink href={SD_LEGIS_ZAKONY_URL.vyhl74}>Vyhl. 74/2005</LawLink>
+          {" · "}
+          <LawLink href={SD_LEGIS_ZAKONY_URL.nv75_2005}>NV 75/2005 (PPV)</LawLink>
           {" · "}
           <LawLink href={SD_LEGIS_ZAKONY_URL.skolsky561}>Školský zákon</LawLink>.
         </p>

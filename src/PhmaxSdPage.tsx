@@ -650,6 +650,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         breakdown,
         tableWarning,
         detailed: detailedResult,
+        staffingNv75:
+          sdStaffingModel != null
+            ? { vychovatelPpc: vychovatelPpcHours, model: sdStaffingModel }
+            : null,
       }),
     [
       pupils,
@@ -662,6 +666,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       breakdown,
       tableWarning,
       detailedResult,
+      sdStaffingModel,
+      vychovatelPpcHours,
     ]
   );
 
@@ -869,6 +875,27 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     const kraceni = reduction.applied
       ? `ano (${(Math.round(reduction.factor * 1000) / 10).toLocaleString("cs-CZ")} %)`
       : "ne";
+    const staffingBlock =
+      sdStaffingModel != null
+        ? (() => {
+            const m = sdStaffingModel;
+            return [
+              "",
+              "Model úvazků dle nařízení vlády č. 75/2005 (příl. č. 1, orientačně):",
+              `Zvolený plný týdenní rozsah PPV (tab. 7.1): ${vychovatelPpcHours} h/týd.`,
+              m.headNote ? m.headNote : null,
+              m.inconsistent && m.inconsistencyMessage ? m.inconsistencyMessage : null,
+              `Vedoucí vychovatel (tab. 7.2): ${formatSdHours(m.headVedouciHours)} h/týd.`,
+              `PHmax pro ostatní vychovatele: ${formatSdHours(m.forOthersPhmax)} h/týd.`,
+              `Ostatní: plné úvazky: ${m.fullTimeSlots}×${vychovatelPpcHours} h`,
+              `Ostatní: zkrácený úvazek: ${formatSdHours(m.partialHours)} h (${m.partialPercentOfFull.toLocaleString("cs-CZ", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })} % vůči ${vychovatelPpcHours} h)`,
+            ] as (string | null)[];
+          })()
+        : [];
+
     return [
       "Shrnutí – PHmax, školní družina",
       "",
@@ -884,12 +911,24 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         ? `PHAmax speciální oddělení (orientačně): ${formatSdHours(detailedResult.finalPhaMax)}`
         : "",
       `Krácení § 10 odst. 2: ${kraceni}`,
+      ...staffingBlock,
       "",
       APP_AUTHOR_CREDIT_LINE,
     ]
       .filter(Boolean)
       .join("\n");
-  }, [pupils, effectiveDepts, manualDepts, suggested, basePhmax, reduction, detailedResult, inputMode]);
+  }, [
+    pupils,
+    effectiveDepts,
+    manualDepts,
+    suggested,
+    basePhmax,
+    reduction,
+    detailedResult,
+    inputMode,
+    sdStaffingModel,
+    vychovatelPpcHours,
+  ]);
 
   const copySdSummary = useCallback(async () => {
     try {

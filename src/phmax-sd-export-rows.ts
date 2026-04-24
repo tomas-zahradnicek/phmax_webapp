@@ -1,4 +1,5 @@
 import { APP_AUTHOR_EXPORT_ROWS } from "./calculator-ui-constants";
+import type { SdVychovatelPpcFullHours, SdStaffingSplitNv75 } from "./phmax-sd-staffing-nv75";
 import { round2 } from "./phmax-zs-logic";
 
 export type PhmaxSdExportRow = readonly [string, string | number];
@@ -36,6 +37,11 @@ export function buildPhmaxSdExportRows(input: {
       finalPhaMax: number;
     }[];
   } | null;
+  /** Orientační model PPV dle NV 75/2005 (tab. 7.1 / 7.2), stejné uplatnění jako v UI. */
+  staffingNv75?: {
+    vychovatelPpc: SdVychovatelPpcFullHours;
+    model: SdStaffingSplitNv75;
+  } | null;
 }): PhmaxSdExportRow[] {
   const {
     pupils,
@@ -48,6 +54,7 @@ export function buildPhmaxSdExportRows(input: {
     breakdown,
     tableWarning,
     detailed,
+    staffingNv75,
   } = input;
 
   const rows: PhmaxSdExportRow[] = [
@@ -95,6 +102,24 @@ export function buildPhmaxSdExportRows(input: {
     });
     rows.push(["Celkem tabulkové PHmax (h)", formatSdHours(basePhmax)]);
     if (reduction.applied) rows.push(["Celkem po krácení (h)", formatSdHours(reduction.adjusted)]);
+  }
+
+  if (staffingNv75) {
+    const m = staffingNv75.model;
+    const slot = staffingNv75.vychovatelPpc;
+    rows.push(["=== Model úvazků (nařízení vlády č. 75/2005 Sb., orientačně) ===", ""]);
+    rows.push(["Zvolený plný týdenní rozsah PPV vychovatele (příl. 1, tab. 7.1, h/týd.)", slot]);
+    if (m.headNote) {
+      rows.push(["Poznámka (vedoucí, tab. 7.2)", m.headNote]);
+    }
+    rows.push(["Vedoucí vychovatel (příl. 1, tab. 7.2, h/týd.)", m.headVedouciHours]);
+    rows.push(["PHmax pro ostatní vychovatele (h/týd., zbývá z PHmax)", formatSdHours(m.forOthersPhmax)]);
+    rows.push([`Ostatní: plné úvazky (počet ×${slot} h, tab. 7.1)`, m.fullTimeSlots]);
+    rows.push(["Ostatní: zkrácený úvazek, dopočet (h/týd.)", formatSdHours(m.partialHours)]);
+    rows.push([`Ostatní: zkrácený úvazek v % vůči plnému ${slot} h`, m.partialPercentOfFull]);
+    if (m.inconsistent) {
+      rows.push(["Konzistence modelu", m.inconsistencyMessage ?? "nesoulad (viz upozornění v aplikaci)"]);
+    }
   }
 
   if (tableWarning) rows.push(["Upozornění", tableWarning]);
