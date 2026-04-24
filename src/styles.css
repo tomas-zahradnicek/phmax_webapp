@@ -5802,6 +5802,12 @@ select:focus {
   color: #0f172a;
 }
 
+.compare-panel__stamp {
+  margin: 0 0 6px;
+  font-size: 0.76rem;
+  color: #475569;
+}
+
 .compare-panel__verdict {
   margin: 0 0 8px;
   font-size: 0.82rem;

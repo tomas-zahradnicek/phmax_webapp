@@ -97,6 +97,7 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
 
   const left = result.metrics[0];
   const right = result.metrics[1];
+  const generatedAt = React.useMemo(() => new Date().toLocaleString("cs-CZ"), [result]);
   const verdict = compareVerdict(result);
   const phmaxDelta = deltaText(left.totalPrimary, right.totalPrimary, " h");
   const secondaryDelta = deltaText(left.totalSecondary, right.totalSecondary);
@@ -109,7 +110,7 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
   const exportCompareJson = () => {
     downloadTextFile(
       exportFilenameStamped(`phmax-${exportSlug}-compare-preview`, "json"),
-      JSON.stringify(result, null, 2),
+      JSON.stringify({ generatedAt, ...result }, null, 2),
       "application/json;charset=utf-8",
     );
   };
@@ -123,6 +124,7 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
     rows.push(["Sekundární metrika B", right.totalSecondary == null ? "–" : right.totalSecondary]);
     rows.push(["Validace A", left.validationOk === false ? "chyby" : "OK"]);
     rows.push(["Validace B", right.validationOk === false ? "chyby" : "OK"]);
+    rows.push(["Aktualizováno", generatedAt]);
     rows.push(["Doporučení", result.recommendation]);
     if (result.differences.length > 0) {
       result.differences.slice(0, 6).forEach((line, i) => rows.push([`Rozdíl ${i + 1}`, line]));
@@ -137,6 +139,9 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
   return (
     <section className="compare-panel" aria-label={title}>
       <p className="compare-panel__title">{title}</p>
+      <p className="compare-panel__stamp">
+        <strong>Aktualizováno:</strong> {generatedAt}
+      </p>
       <p className={`compare-panel__verdict compare-panel__verdict--${verdict.tone}`}>{verdict.text}</p>
       <p className="compare-panel__basis">
         <strong>A:</strong> {leftLabel} · <strong>B:</strong> {rightLabel}
