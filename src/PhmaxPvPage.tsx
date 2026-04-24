@@ -1541,6 +1541,16 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             const bandLabels = getPvAppendixBandLabels(row.provoz);
             const col = computed.base.durationColumnIndex;
             if (!matrix || !bandLabels) return null;
+            const segmentSize = 6;
+            const columnSegments: number[][] = [];
+            for (let start = 0; start < bandLabels.length; start += segmentSize) {
+              columnSegments.push(
+                Array.from(
+                  { length: Math.min(segmentSize, bandLabels.length - start) },
+                  (_, i) => start + i,
+                ),
+              );
+            }
             return (
               <div key={row.id} style={{ marginBottom: 22 }}>
                 <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
@@ -1551,40 +1561,44 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
                   <table className="sd-phmax-breakdown">
                     <thead>
-                      <tr>
-                        <th scope="col" className="sd-phmax-breakdown__corner">
-                          Sloupec (pásmo)
-                        </th>
-                        {bandLabels.map((lab, j) => (
-                          <th
-                            key={`${row.id}-h-${j}`}
-                            scope="col"
-                            className="sd-phmax-breakdown__head-num"
-                            title={lab}
-                          >
-                            {renderBandLabelWithBreak(lab)}
+                      {columnSegments.map((segment, segmentIndex) => (
+                        <tr key={`${row.id}-h-seg-${segmentIndex}`}>
+                          <th scope="col" className="sd-phmax-breakdown__corner">
+                            {segmentIndex === 0 ? "Sloupec (pásmo)" : "Pokračování"}
                           </th>
-                        ))}
-                      </tr>
+                          {segment.map((j) => (
+                            <th
+                              key={`${row.id}-h-${j}`}
+                              scope="col"
+                              className="sd-phmax-breakdown__head-num"
+                              title={bandLabels[j]}
+                            >
+                              {renderBandLabelWithBreak(bandLabels[j])}
+                            </th>
+                          ))}
+                        </tr>
+                      ))}
                     </thead>
                     <tbody>
-                      <tr>
-                        <th scope="row" className="sd-phmax-breakdown__label">
-                          PHmax základ (h/týd.)
-                        </th>
-                        {matrix.map((cell, j) => (
-                          <td
-                            key={`${row.id}-c-${j}`}
-                            className={
-                              "sd-phmax-breakdown__num" +
-                              (j === col ? " sd-phmax-breakdown__cell--pv-active" : "")
-                            }
-                            title={bandLabels[j]}
-                          >
-                            {cell}
-                          </td>
-                        ))}
-                      </tr>
+                      {columnSegments.map((segment, segmentIndex) => (
+                        <tr key={`${row.id}-c-seg-${segmentIndex}`}>
+                          <th scope="row" className="sd-phmax-breakdown__label">
+                            {segmentIndex === 0 ? "PHmax základ (h/týd.)" : "Pokračování"}
+                          </th>
+                          {segment.map((j) => (
+                            <td
+                              key={`${row.id}-c-${j}`}
+                              className={
+                                "sd-phmax-breakdown__num" +
+                                (j === col ? " sd-phmax-breakdown__cell--pv-active" : "")
+                              }
+                              title={bandLabels[j]}
+                            >
+                              {matrix[j]}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </ScrollGrabRegion>
