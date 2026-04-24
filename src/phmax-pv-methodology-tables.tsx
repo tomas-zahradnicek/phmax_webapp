@@ -145,10 +145,14 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
         Tabulka 2 — celodenní provoz
       </h4>
       <p className="muted-text" style={{ marginTop: 2, marginBottom: 8, fontSize: "0.82rem", lineHeight: 1.45 }}>
-        Tabulka je rozdělena do navazujících bloků pro lepší čitelnost — druhý blok navazuje v pořadí pásem.
+        Pro přehlednost je matice uvedena ve <strong>dvou tabulkách</strong> — společně pokrývají všechna pásma provozu; druhá
+        tabulka navazuje v pořadí sloupců po první.
       </p>
+      <h5 className="section-title" style={{ fontSize: "0.9rem", margin: "0 0 6px", fontWeight: 700 }}>
+        Tabulka 2a — pásma do méně než 9,5 h
+      </h5>
       <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
-        <table className="sd-phmax-breakdown pv-methodology-table">
+        <table className="sd-phmax-breakdown pv-methodology-table pv-methodology-table--celodenni-split">
           <thead>
             <tr>
               <th scope="col" className="sd-phmax-breakdown__corner pv-methodology-table__classes-col">
@@ -160,20 +164,10 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
                 </th>
               ))}
             </tr>
-            <tr>
-              <th scope="col" className="sd-phmax-breakdown__corner pv-methodology-table__classes-col">
-                Pokračování
-              </th>
-              {PV_CELODENNI_BAND_OPTIONS.slice(6).map((lab, i) => (
-                <th key={`cont-${i}`} scope="col" className="sd-phmax-breakdown__head-num" title={lab}>
-                  {renderBandLabelWithBreak(lab)}
-                </th>
-              ))}
-            </tr>
           </thead>
-          {PHMAX_PV_CELODENNI.map((row, ri) => (
-            <tbody key={ri} className="pv-methodology-tbody--celodenni-pair">
-              <tr>
+          <tbody>
+            {PHMAX_PV_CELODENNI.map((row, ri) => (
+              <tr key={ri}>
                 <th scope="row" className="sd-phmax-breakdown__label pv-methodology-table__classes-col">
                   {ri + 1}
                 </th>
@@ -183,7 +177,30 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
                   </td>
                 ))}
               </tr>
-              <tr>
+            ))}
+          </tbody>
+        </table>
+      </ScrollGrabRegion>
+      <h5 className="section-title" style={{ fontSize: "0.9rem", margin: "16px 0 6px", fontWeight: 700 }}>
+        Tabulka 2b — od 9,5 h včetně
+      </h5>
+      <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
+        <table className="sd-phmax-breakdown pv-methodology-table pv-methodology-table--celodenni-split">
+          <thead>
+            <tr>
+              <th scope="col" className="sd-phmax-breakdown__corner pv-methodology-table__classes-col">
+                Pokračování
+              </th>
+              {PV_CELODENNI_BAND_OPTIONS.slice(6).map((lab, i) => (
+                <th key={i} scope="col" className="sd-phmax-breakdown__head-num" title={lab}>
+                  {renderBandLabelWithBreak(lab)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {PHMAX_PV_CELODENNI.map((row, ri) => (
+              <tr key={ri}>
                 <th scope="row" className="sd-phmax-breakdown__label pv-methodology-table__classes-col">
                   {ri + 1}
                 </th>
@@ -191,7 +208,7 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
                   const sourceCol = ci + 6;
                   return (
                     <td
-                      key={`cont-${ci}`}
+                      key={ci}
                       className={pvCellClass(ac, 2, ri, sourceCol)}
                       title={PV_CELODENNI_BAND_OPTIONS[sourceCol]}
                     >
@@ -200,8 +217,8 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
                   );
                 })}
               </tr>
-            </tbody>
-          ))}
+            ))}
+          </tbody>
         </table>
       </ScrollGrabRegion>
       </>

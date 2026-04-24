@@ -21,7 +21,7 @@ describe("UX contract: PV tables readability guards", () => {
     expect(src).toContain("počtu tříd");
   });
 
-  it("Tabulka 2 keeps 6+continuation segmentation instead of one wide row", () => {
+  it("Tabulka 2 keeps 6+continuation as two separate tables (2a / 2b)", () => {
     const src = readSource("src/phmax-pv-methodology-tables.tsx");
 
     expect(src).toContain("PV_CELODENNI_BAND_OPTIONS.slice(0, 6)");
@@ -29,8 +29,10 @@ describe("UX contract: PV tables readability guards", () => {
     expect(src).toContain("Pokračování");
     expect(src).toContain("row.slice(0, 6)");
     expect(src).toContain("row.slice(6)");
-    expect(src).toContain("Tabulka je rozdělena do navazujících bloků pro lepší čitelnost");
-    expect(src).toContain('className="pv-methodology-tbody--celodenni-pair"');
+    expect(src).toContain("dvou tabulkách");
+    expect(src).toContain("Tabulka 2a");
+    expect(src).toContain("Tabulka 2b");
+    expect(src).toContain('className="sd-phmax-breakdown pv-methodology-table pv-methodology-table--celodenni-split"');
   });
 
   it("PV workplace verification matrix keeps segmented 6-column rendering", () => {
@@ -52,7 +54,7 @@ describe("UX contract: PV tables readability guards", () => {
     const css = readSource("src/styles.css");
 
     expect(css).toContain("/* PV (27C):");
-    expect(css).toContain(".pv-methodology-tbody--celodenni-pair");
+    expect(css).toContain(".pv-methodology-table--celodenni-split");
     expect(css).toContain(".pv-appendix-verify-matrix thead");
     expect(css).toContain("display: table-header-group !important");
   });

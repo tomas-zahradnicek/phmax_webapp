@@ -3476,7 +3476,7 @@ input[type="radio"] {
     display: table-header-group !important;
   }
 
-  .pv-methodology-tbody--celodenni-pair {
+  .pv-methodology-table--celodenni-split {
     break-inside: avoid-page;
     page-break-inside: avoid;
   }
