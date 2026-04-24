@@ -57,6 +57,7 @@ import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, SdLegisRef } from "./PhmaxProductLegisUi";
+import { SD_LEGIS_ZAKONY_URL } from "./phmax-sd-legislativa";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -78,6 +79,8 @@ import {
   reducedPhmaxIfUnderStaffed,
   suggestedDepartmentsFromPupils,
 } from "./phmax-sd-logic";
+import { buildSdPlainNarrativeText } from "./phmax-sd-narrative";
+import { computeSdStaffingSplitNv75, type SdVychovatelPpcFullHours } from "./phmax-sd-staffing-nv75";
 import { createSdProductAuditProtocol } from "./phmax-product-audit";
 import { comparePhmaxProductVariants } from "./phmax-product-compare";
 import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "./phmax-product-audit-download";
@@ -190,6 +193,8 @@ type SdPersistedSnapshot = {
   specialExceptionGranted?: boolean;
   detailDepartments?: SdDepartmentInput[];
   schoolFirstStageClassCount?: 1 | 2 | 3 | null;
+  /** Zvolený týdenní rozsah PPV pro „plný slot“ vychovatele (NV č. 75/2005 Sb., tab. 7.1, pásma 28 až 30 h). */
+  vychovatelPpcHours?: SdVychovatelPpcFullHours;
 };
 
 type NamedSdSnapshot = { id: string; name: string; savedAt: string; snapshot: SdPersistedSnapshot };
@@ -264,6 +269,9 @@ function parseSdSnapshot(data: unknown): SdPersistedSnapshot | null {
     r.schoolFirstStageClassCount === 1 || r.schoolFirstStageClassCount === 2 || r.schoolFirstStageClassCount === 3
       ? r.schoolFirstStageClassCount
       : null;
+  const vph = r.vychovatelPpcHours;
+  const vychovatelPpcHours: SdVychovatelPpcFullHours | undefined =
+    vph === 28 || vph === 29 || vph === 30 ? vph : undefined;
   return {
     pupils,
     manualDepts,
@@ -274,6 +282,7 @@ function parseSdSnapshot(data: unknown): SdPersistedSnapshot | null {
     specialExceptionGranted,
     detailDepartments,
     schoolFirstStageClassCount,
+    vychovatelPpcHours,
   };
 }
 
@@ -337,6 +346,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     } catch {
       return "basic";
     }
+  });
+  const [vychovatelPpcHours, setVychovatelPpcHours] = useState<SdVychovatelPpcFullHours>(() => {
+    const v = initial.vychovatelPpcHours;
+    return v === 28 || v === 29 || v === 30 ? v : 28;
   });
   const selectedSdHeroExampleMeta =
     selectedSdHeroExample && selectedSdHeroExample in SD_HERO_EXAMPLE_META
@@ -494,6 +507,37 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     specialExceptionGranted,
     detailDepartments,
   ]);
+
+  const sdPlainNarrative = useMemo(() => {
+    if (pupils <= 0) return null;
+    const phmaxHours =
+      detailedResult != null ? detailedResult.finalPhmax : basePhmax != null ? reduction.adjusted : null;
+    if (phmaxHours == null) return null;
+    const totalDepartments = detailedResult != null ? detailedResult.totalDepartments : effectiveDepts;
+    if (totalDepartments < 1) return null;
+    const hasSpecialDepartments =
+      detailedResult != null ? detailedResult.specialDepartments > 0 : Boolean(summaryHasSpecial);
+    return buildSdPlainNarrativeText({
+      pupils,
+      hasSpecialDepartments,
+      totalDepartments,
+      phmaxHours,
+    });
+  }, [pupils, detailedResult, basePhmax, reduction.adjusted, effectiveDepts, summaryHasSpecial]);
+
+  const sdStaffingModel = useMemo(() => {
+    if (pupils <= 0) return null;
+    const phmaxHours =
+      detailedResult != null ? detailedResult.finalPhmax : basePhmax != null ? reduction.adjusted : null;
+    if (phmaxHours == null) return null;
+    const depts = detailedResult != null ? detailedResult.totalDepartments : effectiveDepts;
+    if (depts < 1) return null;
+    return computeSdStaffingSplitNv75({
+      totalPhmax: phmaxHours,
+      departmentCount: depts,
+      vychovatelFullPpc: vychovatelPpcHours,
+    });
+  }, [pupils, detailedResult, basePhmax, reduction.adjusted, effectiveDepts, vychovatelPpcHours]);
 
   const stickySummary = useMemo(() => {
     if (detailedResult != null) {
@@ -660,6 +704,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       specialExceptionGranted,
       detailDepartments,
       schoolFirstStageClassCount,
+      vychovatelPpcHours,
     }),
     [
       pupils,
@@ -671,6 +716,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       specialExceptionGranted,
       detailDepartments,
       schoolFirstStageClassCount,
+      vychovatelPpcHours,
     ],
   );
 
@@ -684,6 +730,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     setSpecialExceptionGranted(next.specialExceptionGranted ?? false);
     setDetailDepartments(next.detailDepartments ?? [{ kind: "regular", participants: 0 }]);
     setSchoolFirstStageClassCount(next.schoolFirstStageClassCount ?? null);
+    setVychovatelPpcHours(
+      next.vychovatelPpcHours === 28 || next.vychovatelPpcHours === 29 || next.vychovatelPpcHours === 30
+        ? next.vychovatelPpcHours
+        : 28,
+    );
     setSummaryHasSpecial((next.summarySpecialDepartments?.length ?? 0) > 0);
   }, []);
 
@@ -798,6 +849,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     setSchoolFirstStageClassCount(null);
     setSummaryHasSpecial(false);
     setSelectedSdHeroExample("");
+    setVychovatelPpcHours(28);
     setUiNotice("Všechna vstupní data kalkulačky byla vymazána.");
   }, []);
 
@@ -1760,6 +1812,106 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <p className="muted-text">Zadejte platný počet oddělení (1–{SD_MAX_DEPARTMENTS_IN_TABLE}).</p>
           )}
         </div>
+
+        {sdPlainNarrative != null ? (
+          <div className="sd-lay-narrative" role="region" aria-label="Slovní souhrn výsledku (orientačně)">
+            <p className="sd-lay-narrative__label">Slovní souhrn (orientačně)</p>
+            <p>{sdPlainNarrative.p1}</p>
+            <p>{sdPlainNarrative.p2}</p>
+            <p className="muted-text" style={{ marginTop: 8, fontSize: "0.8rem", lineHeight: 1.45 }}>
+              {sdPlainNarrative.disclaimer}
+            </p>
+          </div>
+        ) : null}
+
+        {sdStaffingModel != null ? (
+          <details
+            className="subcard sd-lay-staffing-nv75"
+            style={{ marginTop: 12 }}
+          >
+            <summary className="section-title" style={{ fontSize: "0.95rem", cursor: "pointer" }}>
+              Model úvazků dle nařízení vlády č. 75/2005 Sb. (příl. č. 1) — orientačně
+            </summary>
+            <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.84rem", lineHeight: 1.5 }}>
+              Rozsah přímé pedagogické činnosti (PPV) vychovatele a vedoucího vychovatele u školní družiny je v zákonném
+              rámci uveden v <strong>příloze č. 1, tab. 7.1 a 7.2</strong> k NV č. 75/2005 Sb. Aplikace následovně odečte
+              úvazek <strong>vedoucího vychovatele</strong> dle <strong>počtu oddělení (jednotek)</strong> a zbylé PHmax
+              rozdělí na ostatní vychovatele s vámi zvolenou délkou plného PPV 28, 29 nebo 30 h. Údaje ověřte u
+              konsolidovaného znění předpisu.{" "}
+              <a
+                href={SD_LEGIS_ZAKONY_URL.nv75_2005}
+                rel="noreferrer"
+                target="_blank"
+                style={{ color: "#1d4ed8", fontWeight: 600 }}
+              >
+                Znění na zakonyprolidi.cz (NV 75/2005, orientačně)
+              </a>
+            </p>
+            <label className="field" style={{ marginBottom: 12, maxWidth: 420 }}>
+              <span className="field__label">Plný týdenní rozsah PPV vychovatele dle modelu (tab. 7.1: 28 až 30 h týdně)</span>
+              <select
+                className="input"
+                value={vychovatelPpcHours}
+                onChange={(e) => setVychovatelPpcHours(Number(e.target.value) as SdVychovatelPpcFullHours)}
+                aria-label="Délka PPV u plného úvazku vychovatele pro dělení zbylého PHmax (28, 29 nebo 30 h týdně dle NV)"
+              >
+                <option value={28}>28,00 h / týden</option>
+                <option value={29}>29,00 h / týden</option>
+                <option value={30}>30,00 h / týden</option>
+              </select>
+            </label>
+            {sdStaffingModel.headNote ? (
+              <p className="muted-text" style={{ marginBottom: 10, fontSize: "0.84rem" }}>
+                {sdStaffingModel.headNote}
+              </p>
+            ) : null}
+            {sdStaffingModel.inconsistent && sdStaffingModel.inconsistencyMessage ? (
+              <p className="muted-text" style={{ color: "#b91c1c", marginBottom: 10, fontSize: "0.88rem" }}>
+                {sdStaffingModel.inconsistencyMessage}
+              </p>
+            ) : null}
+            <table className="app-data-table" style={{ maxWidth: 480 }}>
+              <tbody>
+                <tr>
+                  <th scope="row">PHmax celkem (váš výpočet)</th>
+                  <td className="app-data-table__num">{formatSdHours(sdStaffingModel.totalPhmax)} h</td>
+                </tr>
+                <tr>
+                  <th scope="row">Vedoucí vychovatel (příl. 1, tab. 7.2)</th>
+                  <td className="app-data-table__num">{formatSdHours(sdStaffingModel.headVedouciHours)} h</td>
+                </tr>
+                <tr>
+                  <th scope="row">Na ostatní vychovatele (zbývá z PHmax)</th>
+                  <td className="app-data-table__num">{formatSdHours(sdStaffingModel.forOthersPhmax)} h</td>
+                </tr>
+                <tr>
+                  <th scope="row">Ostatní vychovatelé: plné úvazky (×{vychovatelPpcHours} h)</th>
+                  <td className="app-data-table__num">{sdStaffingModel.fullTimeSlots}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Zkrácený úvazek (dopočet)</th>
+                  <td className="app-data-table__num">{formatSdHours(sdStaffingModel.partialHours)} h</td>
+                </tr>
+                <tr>
+                  <th scope="row">Zkrácený úvazek v % vůči plnému {vychovatelPpcHours} h</th>
+                  <td className="app-data-table__num">
+                    {sdStaffingModel.partialPercentOfFull.toLocaleString("cs-CZ", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                    %
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p className="muted-text" style={{ marginTop: 10, fontSize: "0.8rem", lineHeight: 1.45 }}>
+              Týdenní i dlouhodobé rozvržení PPV, odpočinky a sjednání s pracovníkem stanovuje ředitel/ka ve vazbě na ZP, NV
+              a vnitřní předpisy. Nejedná se o mzdový a personální výkaz, jen o orientační mechanický dělič součtového PHmax
+              a tabulek 7.1 / 7.2.
+            </p>
+          </details>
+        ) : null}
+
         <p className="muted-text" style={{ marginTop: 8, fontSize: "0.84rem", lineHeight: 1.45 }}>
           Pozn.: metodika v příkladech často zaokrouhluje mezikroky (např. průměr na oddělení), proto se může lišit
           mezivýsledek v tabulce oproti kalkulačce. V aplikaci počítáme přesnou hodnotu a zaokrouhlujeme až výsledné

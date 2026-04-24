@@ -11,4 +11,6 @@ export const SD_LEGIS_PARAGRAPH_TOOLTIPS: Record<string, string> = {
 export const SD_LEGIS_ZAKONY_URL = {
   vyhl74: "https://www.zakonyprolidi.cz/cs/2005-74",
   skolsky561: "https://www.zakonyprolidi.cz/cs/2004-561",
+  /** Nařízení vlády č. 75/2005 Sb. – rozsah přímé pedagogické činnosti (příl. č. 1: vychovatel / vedoucí vychovatel ŠD). Konsolidované znění ověřte u úředního zdroje. */
+  nv75_2005: "https://www.zakonyprolidi.cz/cs/2005-75",
 } as const;
