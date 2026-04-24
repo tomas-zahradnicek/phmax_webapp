@@ -1558,6 +1558,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   {row.label.trim() ? ` – ${row.label.trim()}` : ""} — {provozLabel}, {row.classCount}{" "}
                   {row.classCount === 1 ? "třída" : row.classCount < 5 ? "třídy" : "tříd"}
                 </h4>
+                {columnSegments.length > 1 ? (
+                  <p className="muted-text" style={{ marginTop: 0, marginBottom: 8, fontSize: "0.82rem", lineHeight: 1.45 }}>
+                    Tabulka je rozdělena do navazujících bloků pro lepší čitelnost — druhý a další blok navazuje v pořadí
+                    sloupců (pásem).
+                  </p>
+                ) : null}
                 <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
                   <table className="sd-phmax-breakdown">
                     <thead>

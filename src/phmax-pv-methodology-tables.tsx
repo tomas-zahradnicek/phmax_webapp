@@ -140,6 +140,9 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
       <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "18px 0 8px" }}>
         Tabulka 2 — celodenní provoz
       </h4>
+      <p className="muted-text" style={{ marginTop: 2, marginBottom: 8, fontSize: "0.82rem", lineHeight: 1.45 }}>
+        Tabulka je rozdělena do navazujících bloků pro lepší čitelnost — druhý blok navazuje v pořadí pásem.
+      </p>
       <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
         <table className="sd-phmax-breakdown pv-methodology-table">
           <thead>

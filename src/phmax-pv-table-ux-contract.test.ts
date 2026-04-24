@@ -27,6 +27,7 @@ describe("UX contract: PV tables readability guards", () => {
     expect(src).toContain("Pokračování");
     expect(src).toContain("row.slice(0, 6)");
     expect(src).toContain("row.slice(6)");
+    expect(src).toContain("Tabulka je rozdělena do navazujících bloků pro lepší čitelnost");
   });
 
   it("PV workplace verification matrix keeps segmented 6-column rendering", () => {
@@ -34,6 +35,8 @@ describe("UX contract: PV tables readability guards", () => {
 
     expect(src).toContain("const segmentSize = 6;");
     expect(src).toContain("const columnSegments: number[][] = [];");
+    expect(src).toContain("{columnSegments.length > 1 ? (");
+    expect(src).toContain("Tabulka je rozdělena do navazujících bloků pro lepší čitelnost");
     expect(src).toContain('segmentIndex === 0 ? "Sloupec (pásmo)" : "Pokračování"');
     expect(src).toContain('segmentIndex === 0 ? "PHmax základ (h/týd.)" : "Pokračování"');
     expect(src).toContain("{renderBandLabelWithBreak(bandLabels[j])}");
