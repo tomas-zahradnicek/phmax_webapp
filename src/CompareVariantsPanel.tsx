@@ -14,6 +14,13 @@ function metricText(value: number | null, suffix = ""): string {
   return `${value.toLocaleString("cs-CZ", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}${suffix}`;
 }
 
+function deltaText(left: number | null, right: number | null, suffix = ""): string {
+  if (left == null || right == null) return "–";
+  const delta = right - left;
+  const sign = delta > 0 ? "+" : "";
+  return `${sign}${delta.toLocaleString("cs-CZ", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}${suffix}`;
+}
+
 function normalize(value: number | null): number | null {
   return typeof value === "number" ? value : null;
 }
@@ -79,6 +86,8 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
   const left = result.metrics[0];
   const right = result.metrics[1];
   const verdict = compareVerdict(result);
+  const phmaxDelta = deltaText(left.totalPrimary, right.totalPrimary, " h");
+  const secondaryDelta = deltaText(left.totalSecondary, right.totalSecondary);
   const exportCompareJson = () => {
     downloadTextFile(
       exportFilenameStamped(`phmax-${exportSlug}-compare-preview`, "json"),
@@ -128,6 +137,14 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
           <p className="compare-panel__metric">Sekundární metrika: {metricText(right.totalSecondary)}</p>
           <p className="compare-panel__metric">Validace: {right.validationOk === false ? "chyby" : "OK"}</p>
         </article>
+      </div>
+      <div className="compare-panel__delta" aria-label="Rozdíl mezi variantami">
+        <p className="compare-panel__delta-item">
+          <strong>Rozdíl PHmax (B - A):</strong> {phmaxDelta}
+        </p>
+        <p className="compare-panel__delta-item">
+          <strong>Rozdíl sekundární metriky (B - A):</strong> {secondaryDelta}
+        </p>
       </div>
       <p className="compare-panel__recommendation">
         <strong>Doporučení:</strong> {result.recommendation}
