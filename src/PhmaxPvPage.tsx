@@ -258,6 +258,21 @@ function createInitialPvRow(): PvWorkplaceRowState {
   };
 }
 
+function renderBandLabelWithBreak(label: string) {
+  const splitToken = " do ";
+  const idx = label.indexOf(splitToken);
+  if (idx < 0) return label;
+  const first = label.slice(0, idx).trimEnd();
+  const second = `do ${label.slice(idx + splitToken.length).trimStart()}`;
+  return (
+    <>
+      {first}
+      <br />
+      {second}
+    </>
+  );
+}
+
 function normalizePvRow(item: unknown): PvWorkplaceRowState | null {
   if (!item || typeof item !== "object") return null;
   const r = item as Record<string, unknown>;
@@ -1547,7 +1562,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                             className="sd-phmax-breakdown__head-num"
                             title={lab}
                           >
-                            {lab}
+                            {renderBandLabelWithBreak(lab)}
                           </th>
                         ))}
                       </tr>

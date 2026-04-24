@@ -523,7 +523,8 @@ button.pill--hero-toggle--active {
 }
 
 .pv-methodology-table .sd-phmax-breakdown__head-num {
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.25;
 }
 
 .pv-methodology-table__classes-col {

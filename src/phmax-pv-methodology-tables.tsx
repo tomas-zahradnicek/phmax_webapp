@@ -13,6 +13,21 @@ function fmtPv(n: number): string {
   return n.toLocaleString("cs-CZ", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
+function renderBandLabelWithBreak(label: string) {
+  const splitToken = " do ";
+  const idx = label.indexOf(splitToken);
+  if (idx < 0) return label;
+  const first = label.slice(0, idx).trimEnd();
+  const second = `do ${label.slice(idx + splitToken.length).trimStart()}`;
+  return (
+    <>
+      {first}
+      <br />
+      {second}
+    </>
+  );
+}
+
 export type PvMethodologyActiveCell = { table: 1 | 2 | 3; rowIndex: number; colIndex: number };
 
 const ACTIVE = "sd-phmax-breakdown__cell--pv-active";
@@ -96,7 +111,7 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
               </th>
               {PV_POLODENNI_BAND_OPTIONS.map((lab, i) => (
                 <th key={i} scope="col" className="sd-phmax-breakdown__head-num" title={lab}>
-                  {lab}
+                  {renderBandLabelWithBreak(lab)}
                 </th>
               ))}
             </tr>
@@ -132,25 +147,54 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
               <th scope="col" className="sd-phmax-breakdown__corner pv-methodology-table__classes-col">
                 Počet tříd
               </th>
-              {PV_CELODENNI_BAND_OPTIONS.map((lab, i) => (
+              {PV_CELODENNI_BAND_OPTIONS.slice(0, 6).map((lab, i) => (
                 <th key={i} scope="col" className="sd-phmax-breakdown__head-num" title={lab}>
-                  {lab}
+                  {renderBandLabelWithBreak(lab)}
+                </th>
+              ))}
+            </tr>
+            <tr>
+              <th scope="col" className="sd-phmax-breakdown__corner pv-methodology-table__classes-col">
+                Pokračování
+              </th>
+              {PV_CELODENNI_BAND_OPTIONS.slice(6).map((lab, i) => (
+                <th key={`cont-${i}`} scope="col" className="sd-phmax-breakdown__head-num" title={lab}>
+                  {renderBandLabelWithBreak(lab)}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {PHMAX_PV_CELODENNI.map((row, ri) => (
-              <tr key={ri}>
-                <th scope="row" className="sd-phmax-breakdown__label pv-methodology-table__classes-col">
-                  {ri + 1}
-                </th>
-                {row.map((cell, ci) => (
-                  <td key={ci} className={pvCellClass(ac, 2, ri, ci)} title={PV_CELODENNI_BAND_OPTIONS[ci]}>
-                    {fmtPv(cell)}
-                  </td>
-                ))}
-              </tr>
+              <React.Fragment key={ri}>
+                <tr>
+                  <th scope="row" className="sd-phmax-breakdown__label pv-methodology-table__classes-col">
+                    {ri + 1}
+                  </th>
+                  {row.slice(0, 6).map((cell, ci) => (
+                    <td key={ci} className={pvCellClass(ac, 2, ri, ci)} title={PV_CELODENNI_BAND_OPTIONS[ci]}>
+                      {fmtPv(cell)}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <th scope="row" className="sd-phmax-breakdown__label pv-methodology-table__classes-col">
+                    {ri + 1}
+                  </th>
+                  {row.slice(6).map((cell, ci) => {
+                    const sourceCol = ci + 6;
+                    return (
+                      <td
+                        key={`cont-${ci}`}
+                        className={pvCellClass(ac, 2, ri, sourceCol)}
+                        title={PV_CELODENNI_BAND_OPTIONS[sourceCol]}
+                      >
+                        {fmtPv(cell)}
+                      </td>
+                    );
+                  })}
+                </tr>
+              </React.Fragment>
             ))}
           </tbody>
         </table>
@@ -172,7 +216,7 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
               </th>
               {PV_INTERNAT_BAND_OPTIONS.map((lab, i) => (
                 <th key={i} scope="col" className="sd-phmax-breakdown__head-num" title={lab}>
-                  {lab}
+                  {renderBandLabelWithBreak(lab)}
                 </th>
               ))}
             </tr>
