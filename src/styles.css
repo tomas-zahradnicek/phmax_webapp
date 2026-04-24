@@ -5849,6 +5849,12 @@ select:focus {
   color: #334155;
 }
 
+.compare-panel__swap-note {
+  margin: -4px 0 8px;
+  font-size: 0.76rem;
+  color: #1e40af;
+}
+
 .compare-panel__empty {
   margin: 0;
   font-size: 0.82rem;

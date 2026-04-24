@@ -129,6 +129,12 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
     const timer = window.setTimeout(() => setCopyNotice(""), 2600);
     return () => window.clearTimeout(timer);
   }, [copyNotice]);
+
+  React.useEffect(() => {
+    setSwapped(false);
+    setShowMoreDiffs(false);
+    setCopyNotice("");
+  }, [result]);
   const exportCompareJson = () => {
     downloadTextFile(
       exportFilenameStamped(`phmax-${exportSlug}-compare-preview`, "json"),
@@ -192,6 +198,11 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
       <p className="compare-panel__basis">
         <strong>A:</strong> {leftLabel} · <strong>B:</strong> {rightLabel}
       </p>
+      {swapped ? (
+        <p className="compare-panel__swap-note" aria-live="polite">
+          Pořadí A/B je aktuálně prohozené.
+        </p>
+      ) : null}
       <div className="compare-panel__grid">
         <article className="compare-panel__card">
           <h4 className="compare-panel__variant">{leftLabel}</h4>
