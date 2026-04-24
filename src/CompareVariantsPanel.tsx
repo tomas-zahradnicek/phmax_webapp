@@ -104,6 +104,7 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
   }
 
   const [swapped, setSwapped] = React.useState(false);
+  const [showMoreDiffs, setShowMoreDiffs] = React.useState(false);
   const baseLeft = result.metrics[0];
   const baseRight = result.metrics[1];
   const left = swapped ? baseRight : baseLeft;
@@ -121,6 +122,7 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
   const rightLabel = right.variantLabel || right.variantId;
   const winner = winnerLabel(left, right);
   const validationBadge = `Validace: A ${left.validationOk === false ? "chyby" : "OK"} / B ${right.validationOk === false ? "chyby" : "OK"}`;
+  const visibleDiffCount = showMoreDiffs ? 6 : 3;
 
   React.useEffect(() => {
     if (!copyNotice) return;
@@ -226,10 +228,20 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
       </p>
       {result.differences.length > 0 ? (
         <ul className="compare-panel__diffs">
-          {result.differences.slice(0, 3).map((line) => (
+          {result.differences.slice(0, visibleDiffCount).map((line) => (
             <li key={line}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {result.differences.length > 3 ? (
+        <button
+          type="button"
+          className="btn ghost btn--hero-named compare-panel__more-btn"
+          aria-expanded={showMoreDiffs}
+          onClick={() => setShowMoreDiffs((v) => !v)}
+        >
+          {showMoreDiffs ? "Zobrazit méně rozdílů" : "Zobrazit více rozdílů"}
+        </button>
       ) : null}
       <div className="compare-panel__actions" role="group" aria-label="Export porovnání">
         <button

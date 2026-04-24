@@ -5938,6 +5938,10 @@ select:focus {
   color: #334155;
 }
 
+.compare-panel__more-btn {
+  margin-top: 6px;
+}
+
 .compare-panel__actions {
   margin-top: 8px;
   display: flex;

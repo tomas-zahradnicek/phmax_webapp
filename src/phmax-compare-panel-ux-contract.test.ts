@@ -35,6 +35,9 @@ describe("UX contract: compare panel side-by-side pattern", () => {
     expect(src).toContain("Rychlé vyhodnocení porovnání");
     expect(src).toContain("compare-panel__badge");
     expect(src).toContain("setTimeout(() => setCopyNotice(\"\")");
+    expect(src).toContain("Zobrazit více rozdílů");
+    expect(src).toContain("Zobrazit méně rozdílů");
+    expect(src).toContain("aria-expanded={showMoreDiffs}");
   });
 
   it("all products render compare preview panel in named snapshots section", () => {
