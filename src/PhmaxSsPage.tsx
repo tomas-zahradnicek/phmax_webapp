@@ -271,6 +271,8 @@ const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
   },
 ];
 
+const SS_VIEW_MODE_LS_KEY = "phmax-ss-view-mode";
+
 type PhmaxSsPageProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
@@ -312,6 +314,14 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       : null;
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [ssGuideOpen, setSsGuideOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
+    try {
+      const stored = localStorage.getItem(SS_VIEW_MODE_LS_KEY);
+      return stored === "expert" ? "expert" : "basic";
+    } catch {
+      return "basic";
+    }
+  });
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
 
   const [phase1Notes, setPhase1Notes] = useState(() => {
@@ -328,6 +338,14 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       /* ignore */
     }
   }, [phase1Notes]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SS_VIEW_MODE_LS_KEY, viewMode);
+    } catch {
+      /* ignore */
+    }
+  }, [viewMode]);
 
   const toggleSsGuideFromHero = useCallback(() => {
     setSsGuideOpen((o) => !o);
@@ -378,6 +396,26 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         <div className="hero__pills-row">
           <ProductViewPills productView={productView} setProductView={setProductView} />
           <div className="hero__pills-row-trailing">
+            <div className="checks" role="group" aria-label="Režim zobrazení SŠ">
+              <label>
+                <input
+                  type="radio"
+                  name="ss-view-mode"
+                  checked={viewMode === "basic"}
+                  onChange={() => setViewMode("basic")}
+                />
+                Základní
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="ss-view-mode"
+                  checked={viewMode === "expert"}
+                  onChange={() => setViewMode("expert")}
+                />
+                Expertní
+              </label>
+            </div>
             <GlossaryIconButton
               ref={glossaryTriggerRef}
               className="glossary-icon-btn--hero"
@@ -803,11 +841,12 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         </p>
       </QuickOnboarding>
 
-      <section
-        className="card section-card section-card--ss"
-        aria-labelledby="ss-framework-heading"
-        style={{ marginTop: 24, marginBottom: 24 }}
-      >
+      {viewMode === "expert" ? (
+        <section
+          className="card section-card section-card--ss"
+          aria-labelledby="ss-framework-heading"
+          style={{ marginTop: 24, marginBottom: 24 }}
+        >
         <h2 id="ss-framework-heading" className="section-title">
           {fw.heading}
         </h2>
@@ -881,9 +920,11 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           </a>
           .
         </p>
-      </section>
+        </section>
+      ) : null}
 
-      <details className="subcard section-card" style={{ marginBottom: 24 }}>
+      {viewMode === "expert" ? (
+        <details className="subcard section-card" style={{ marginBottom: 24 }}>
         <summary className="section-title" style={{ cursor: "pointer", fontSize: "1.02rem" }}>
           Metodika: rozcestník a průměr žáků (§ 16 odst. 9)
         </summary>
@@ -971,9 +1012,11 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             <code className="methodology-strip__code">public/</code> a odkázat z tohoto bloku.
           </p>
         </div>
-      </details>
+        </details>
+      ) : null}
 
-      <details className="subcard section-card" style={{ marginBottom: 24 }}>
+      {viewMode === "expert" ? (
+        <details className="subcard section-card" style={{ marginBottom: 24 }}>
         <summary className="section-title" style={{ cursor: "pointer", fontSize: "1.02rem" }}>
           Metodika § 4: Stanovení PHmax (1, 1a, 2, 2a, 3, 4) a tabulky PrŠ / PHAmax
         </summary>
@@ -1159,11 +1202,12 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
 
           <p style={{ margin: 0, fontSize: "0.86rem" }}>{s4.closing}</p>
         </div>
-      </details>
+        </details>
+      ) : null}
 
       <PhmaxSsUnitsForm model={ss} hideBackupSubcard />
 
-      <MethodologyStrip />
+      {viewMode === "expert" ? <MethodologyStrip /> : null}
 
       <footer className="zs-app-footer">
         <HeroStatusBar

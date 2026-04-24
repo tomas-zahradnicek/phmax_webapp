@@ -112,6 +112,7 @@ import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
+const ZS_VIEW_MODE_LS_KEY = "phmax-zs-view-mode";
 
 const ZS_ONBOARDING_KEY = "phmax-zs-onboarding";
 
@@ -379,6 +380,14 @@ export type PhmaxZsPageProps = {
 export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [tab, setTab] = useState<TabKey>("phmax");
   const [mode, setMode] = useState<CalculatorMode>(getInitialPreferredMode());
+  const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
+    try {
+      const stored = localStorage.getItem(ZS_VIEW_MODE_LS_KEY);
+      return stored === "expert" ? "expert" : "basic";
+    } catch {
+      return "basic";
+    }
+  });
 
   const modeOptions = useMemo(() => {
     return Object.values(MODE_CONFIG).filter((item) => {
@@ -393,6 +402,14 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       setMode(modeOptions[0]?.id ?? DEFAULT_MODE);
     }
   }, [mode, modeOptions]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ZS_VIEW_MODE_LS_KEY, viewMode);
+    } catch {
+      /* ignore */
+    }
+  }, [viewMode]);
 
   const visibleSections = useMemo(() => getVisibleSections(mode), [mode]);
   const hasSection = (section: FormSection) => visibleSections.includes(section);
@@ -1994,6 +2011,26 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <div className="hero__pills-row">
             <ProductViewPills productView={productView} setProductView={setProductView} />
             <div className="hero__pills-row-trailing">
+              <div className="checks" role="group" aria-label="Režim zobrazení ZŠ">
+                <label>
+                  <input
+                    type="radio"
+                    name="zs-view-mode"
+                    checked={viewMode === "basic"}
+                    onChange={() => setViewMode("basic")}
+                  />
+                  Základní
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="zs-view-mode"
+                    checked={viewMode === "expert"}
+                    onChange={() => setViewMode("expert")}
+                  />
+                  Expertní
+                </label>
+              </div>
               <GlossaryIconButton
                 ref={glossaryTriggerRef}
                 className="glossary-icon-btn--hero"
@@ -2293,6 +2330,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </p>
         </QuickOnboarding>
 
+        {viewMode === "expert" ? (
         <section className="card card--onboarding section-card section-card--onboarding">
           <div className="onboarding">
             <div className="onboarding__intro">
@@ -2338,8 +2376,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             </div>
           </div>
         </section>
+        ) : null}
 
 
+        {viewMode === "expert" ? (
         <section className="card card--accent section-card section-card--guide" data-section="guide">
           <h2 className="section-title">Rychlý rozcestník</h2>
           <SectionLead>
@@ -2394,6 +2434,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             </div>
           </div>
         </section>
+        ) : null}
 
         <section className="card card--elevated section-card section-card--setup" data-section="setup">
           <h2 className="section-title">Typ školy a režim výpočtu</h2>
@@ -3257,7 +3298,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               </ScrollGrabRegion>
             </details>
 
-            <PhmaxZsMethodologyReferenceTables highlights={zsMethodologyHighlights} />
+            {viewMode === "expert" ? <PhmaxZsMethodologyReferenceTables highlights={zsMethodologyHighlights} /> : null}
           </div>
         )}
 
@@ -3504,8 +3545,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </div>
         ) : null}
 
-        <ProductLegisContextPanel variant="zs" />
-        <MethodologyStrip />
+        {viewMode === "expert" ? <ProductLegisContextPanel variant="zs" /> : null}
+        {viewMode === "expert" ? <MethodologyStrip /> : null}
 
         <footer className="zs-app-footer">
           <HeroStatusBar
