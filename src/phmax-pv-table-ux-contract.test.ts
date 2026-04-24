@@ -28,6 +28,7 @@ describe("UX contract: PV tables readability guards", () => {
     expect(src).toContain("row.slice(0, 6)");
     expect(src).toContain("row.slice(6)");
     expect(src).toContain("Tabulka je rozdělena do navazujících bloků pro lepší čitelnost");
+    expect(src).toContain('className="pv-methodology-tbody--celodenni-pair"');
   });
 
   it("PV workplace verification matrix keeps segmented 6-column rendering", () => {
@@ -40,5 +41,15 @@ describe("UX contract: PV tables readability guards", () => {
     expect(src).toContain('segmentIndex === 0 ? "Sloupec (pásmo)" : "Pokračování"');
     expect(src).toContain('segmentIndex === 0 ? "PHmax základ (h/týd.)" : "Pokračování"');
     expect(src).toContain("{renderBandLabelWithBreak(bandLabels[j])}");
+    expect(src).toContain('className="sd-phmax-breakdown pv-appendix-verify-matrix"');
+  });
+
+  it("print stylesheet keeps PV matrix page-break hints (27C)", () => {
+    const css = readSource("src/styles.css");
+
+    expect(css).toContain("/* PV (27C):");
+    expect(css).toContain(".pv-methodology-tbody--celodenni-pair");
+    expect(css).toContain(".pv-appendix-verify-matrix thead");
+    expect(css).toContain("display: table-header-group !important");
   });
 });

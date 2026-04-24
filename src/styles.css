@@ -3470,6 +3470,34 @@ input[type="radio"] {
     scrollbar-gutter: auto !important;
   }
 
+  /* PV (27C): přílohové matice — držet logické řádky pohromadě, opakovat hlavičku na další stránce */
+  .pv-methodology-table thead,
+  .pv-appendix-verify-matrix thead {
+    display: table-header-group !important;
+  }
+
+  .pv-methodology-tbody--celodenni-pair {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .pv-methodology-table tbody tr,
+  .pv-appendix-verify-matrix tbody tr,
+  .pv-methodology-table thead tr,
+  .pv-appendix-verify-matrix thead tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .pv-methodology-table th,
+  .pv-methodology-table td,
+  .pv-appendix-verify-matrix th,
+  .pv-appendix-verify-matrix td {
+    padding: 3px 5px !important;
+    font-size: 7pt !important;
+    line-height: 1.2 !important;
+  }
+
   .app-table-wrap,
   .gym-table-scroll {
     scrollbar-gutter: auto !important;

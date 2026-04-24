@@ -167,39 +167,37 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
               ))}
             </tr>
           </thead>
-          <tbody>
-            {PHMAX_PV_CELODENNI.map((row, ri) => (
-              <React.Fragment key={ri}>
-                <tr>
-                  <th scope="row" className="sd-phmax-breakdown__label pv-methodology-table__classes-col">
-                    {ri + 1}
-                  </th>
-                  {row.slice(0, 6).map((cell, ci) => (
-                    <td key={ci} className={pvCellClass(ac, 2, ri, ci)} title={PV_CELODENNI_BAND_OPTIONS[ci]}>
+          {PHMAX_PV_CELODENNI.map((row, ri) => (
+            <tbody key={ri} className="pv-methodology-tbody--celodenni-pair">
+              <tr>
+                <th scope="row" className="sd-phmax-breakdown__label pv-methodology-table__classes-col">
+                  {ri + 1}
+                </th>
+                {row.slice(0, 6).map((cell, ci) => (
+                  <td key={ci} className={pvCellClass(ac, 2, ri, ci)} title={PV_CELODENNI_BAND_OPTIONS[ci]}>
+                    {fmtPv(cell)}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <th scope="row" className="sd-phmax-breakdown__label pv-methodology-table__classes-col">
+                  {ri + 1}
+                </th>
+                {row.slice(6).map((cell, ci) => {
+                  const sourceCol = ci + 6;
+                  return (
+                    <td
+                      key={`cont-${ci}`}
+                      className={pvCellClass(ac, 2, ri, sourceCol)}
+                      title={PV_CELODENNI_BAND_OPTIONS[sourceCol]}
+                    >
                       {fmtPv(cell)}
                     </td>
-                  ))}
-                </tr>
-                <tr>
-                  <th scope="row" className="sd-phmax-breakdown__label pv-methodology-table__classes-col">
-                    {ri + 1}
-                  </th>
-                  {row.slice(6).map((cell, ci) => {
-                    const sourceCol = ci + 6;
-                    return (
-                      <td
-                        key={`cont-${ci}`}
-                        className={pvCellClass(ac, 2, ri, sourceCol)}
-                        title={PV_CELODENNI_BAND_OPTIONS[sourceCol]}
-                      >
-                        {fmtPv(cell)}
-                      </td>
-                    );
-                  })}
-                </tr>
-              </React.Fragment>
-            ))}
-          </tbody>
+                  );
+                })}
+              </tr>
+            </tbody>
+          ))}
         </table>
       </ScrollGrabRegion>
       </>

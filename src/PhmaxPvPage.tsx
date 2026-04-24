@@ -1565,7 +1565,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   </p>
                 ) : null}
                 <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
-                  <table className="sd-phmax-breakdown">
+                  <table className="sd-phmax-breakdown pv-appendix-verify-matrix">
                     <thead>
                       {columnSegments.map((segment, segmentIndex) => (
                         <tr key={`${row.id}-h-seg-${segmentIndex}`}>
