@@ -8,6 +8,7 @@ import {
   reducedPhmaxIfUnderStaffed,
   suggestedDepartmentsFromPupils,
 } from "./phmax-sd-logic";
+import { computeSdStaffingSplitNv75 } from "./phmax-sd-staffing-nv75";
 
 describe("buildPhmaxSdExportRows (smoke / export)", () => {
   it("obsahuje vstupy, základní PHmax a CSV hlavičku", () => {
@@ -61,5 +62,44 @@ describe("buildPhmaxSdExportRows (smoke / export)", () => {
     });
 
     expect(rows.some(([k, v]) => k === "Upozornění" && v === warning)).toBe(true);
+  });
+
+  it("při staffingNv75 přidá sekci NV 75/2005 (tab. 7.1 / 7.2) před Upozorněním", () => {
+    const pupils = 100;
+    const effectiveDepts = 4;
+    const suggested = suggestedDepartmentsFromPupils(pupils);
+    const basePhmax = getPhmaxSdBase(effectiveDepts)!;
+    const reduction = reducedPhmaxIfUnderStaffed({
+      pupilsFirstGrade: pupils,
+      departmentCount: effectiveDepts,
+      basePhmax,
+    });
+    const adjusted = reduction.adjusted;
+    const staffing = computeSdStaffingSplitNv75({
+      totalPhmax: adjusted,
+      departmentCount: effectiveDepts,
+      vychovatelFullPpc: 30,
+    });
+
+    const rows = buildPhmaxSdExportRows({
+      pupils,
+      effectiveDepts,
+      manualDepts: false,
+      suggested,
+      avgPerDept: 25,
+      basePhmax,
+      reduction,
+      breakdown: getPhmaxSdBreakdown(effectiveDepts),
+      tableWarning: "Poznámka testu",
+      staffingNv75: { vychovatelPpc: 30, model: staffing },
+    });
+
+    const upozornIndex = rows.findIndex(([k]) => k === "Upozornění");
+    const modelIndex = rows.findIndex(([k]) => k === "=== Model úvazků (nařízení vlády č. 75/2005 Sb., orientačně) ===");
+    expect(modelIndex).toBeGreaterThan(-1);
+    expect(upozornIndex).toBeGreaterThan(-1);
+    expect(modelIndex).toBeLessThan(upozornIndex);
+    expect(rows.some(([k]) => k.includes("tab. 7.1") && k.includes("PPV"))).toBe(true);
+    expect(rows.some(([k]) => k.includes("7.2"))).toBe(true);
   });
 });
