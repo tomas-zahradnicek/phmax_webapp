@@ -194,6 +194,7 @@ const PV_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
 ];
 
 const PV_ONBOARDING_KEY = "phmax-pv-onboarding";
+const PV_VIEW_MODE_LS_KEY = "phmax-pv-view-mode";
 const PV_STORAGE_KEY = "edu-cz-pv-calculator-state";
 const PV_NAMED_SNAPSHOTS_LS_KEY = "edu-cz-pv-named-snapshots-v1";
 const PV_MAX_NAMED_SNAPSHOTS = 10;
@@ -326,6 +327,14 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
   const [selectedPvHeroExample, setSelectedPvHeroExample] = useState<PvHeroExampleKey>("");
+  const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
+    try {
+      const stored = localStorage.getItem(PV_VIEW_MODE_LS_KEY);
+      return stored === "expert" ? "expert" : "basic";
+    } catch {
+      return "basic";
+    }
+  });
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
   const [guideOpen, setGuideOpen] = useState(() => {
@@ -357,6 +366,14 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     }
     setGuideOpen(true);
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PV_VIEW_MODE_LS_KEY, viewMode);
+    } catch {
+      /* ignore */
+    }
+  }, [viewMode]);
 
   useEffect(() => {
     setNamedSnapshots(readNamedPvSnapshotsFromLs());
@@ -434,6 +451,38 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       detail: "Součet PHmax je spočtený pro všechna zadaná pracoviště. Pokračujte uložením scénáře nebo exportem.",
     };
   }, [rowComputations]);
+
+  const pvWorkflow = useMemo(() => {
+    const invalidRows = rowComputations.filter((c) => c.computed.totalPhmax == null).length;
+    if (rows.length === 0) {
+      return {
+        recommendedStep: "Vyplňte alespoň jedno pracoviště.",
+        steps: [
+          { label: "Vyplnit vstupní řádky pracovišť", state: "active" as const },
+          { label: "Zkontrolovat součet PHmax/PHAmax", state: "todo" as const },
+          { label: "Uložit nebo exportovat výsledek", state: "todo" as const },
+        ],
+      };
+    }
+    if (invalidRows > 0) {
+      return {
+        recommendedStep: "Opravte neplatné řádky, které nejsou započítané do součtu.",
+        steps: [
+          { label: "Vyplnit vstupní řádky pracovišť", state: "done" as const },
+          { label: "Opravit neplatné řádky", state: "active" as const },
+          { label: "Uložit nebo exportovat výsledek", state: "todo" as const },
+        ],
+      };
+    }
+    return {
+      recommendedStep: "Výpočet je připraven k uložení nebo exportu.",
+      steps: [
+        { label: "Vyplnit vstupní řádky pracovišť", state: "done" as const },
+        { label: "Zkontrolovat součet PHmax/PHAmax", state: "done" as const },
+        { label: "Uložit nebo exportovat výsledek", state: "active" as const },
+      ],
+    };
+  }, [rowComputations, rows.length]);
 
   const exportRows = useMemo(() => {
     const items = rowComputations.map((c, i) => ({
@@ -678,6 +727,26 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         <div className="hero__pills-row">
           <ProductViewPills productView={productView} setProductView={setProductView} />
           <div className="hero__pills-row-trailing">
+            <div className="checks" role="group" aria-label="Režim zobrazení PV">
+              <label>
+                <input
+                  type="radio"
+                  name="pv-view-mode"
+                  checked={viewMode === "basic"}
+                  onChange={() => setViewMode("basic")}
+                />
+                Základní
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="pv-view-mode"
+                  checked={viewMode === "expert"}
+                  onChange={() => setViewMode("expert")}
+                />
+                Expertní
+              </label>
+            </div>
             <GlossaryIconButton
               ref={glossaryTriggerRef}
               className="glossary-icon-btn--hero"
@@ -732,6 +801,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           tone={pvVerdict.tone}
           verdictLabel={pvVerdict.label}
           verdictDetail={pvVerdict.detail}
+          recommendedStep={pvWorkflow.recommendedStep}
+          workflowSteps={pvWorkflow.steps}
           actions={[
             { label: "Uložit scénář", onClick: savePvSnapshotManually },
             { label: "Export CSV", onClick: handleExportCsv },
@@ -1385,6 +1456,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           </table>
         </ScrollGrabRegion>
 
+        {viewMode === "expert" ? (
         <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
           <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
             Rozpad / ověření vůči tabulkám přílohy (PV)
@@ -1482,8 +1554,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             );
           })}
         </details>
+        ) : null}
 
-        <PhmaxPvMethodologyTables123 activeCells={pvMethodologyActiveCells} />
+        {viewMode === "expert" ? <PhmaxPvMethodologyTables123 activeCells={pvMethodologyActiveCells} /> : null}
 
         {aggregate.incomplete ? (
           <p className="muted-text" style={{ marginTop: 10, fontSize: "0.9rem" }}>
@@ -1498,8 +1571,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         </p>
       </section>
 
-      <ProductLegisContextPanel variant="pv" />
-      <MethodologyStrip />
+      {viewMode === "expert" ? <ProductLegisContextPanel variant="pv" /> : null}
+      {viewMode === "expert" ? <MethodologyStrip /> : null}
       <footer className="zs-app-footer">
         <HeroStatusBar
           productLabel={PRODUCT_CALCULATOR_TITLES.pv}

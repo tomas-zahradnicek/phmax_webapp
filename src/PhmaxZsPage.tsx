@@ -1581,6 +1581,39 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       detail: "Souhrn PHmax/PHAmax/PHPmax je připravený pro export, uložení varianty nebo porovnání scénářů.",
     };
   })();
+  const zsWorkflow = (() => {
+    if (incompleteSections > 0) {
+      return {
+        recommendedStep:
+          incompleteSections === 1
+            ? "Doplňte poslední nevyplněnou část."
+            : `Doplňte ${incompleteSections} nevyplněné části.`,
+        steps: [
+          { label: "Vyplnit povinné vstupy v aktivních modulech", state: "active" as const },
+          { label: "Zkontrolovat upozornění a hraniční pravidla", state: "todo" as const },
+          { label: "Uložit, exportovat nebo porovnat variantu", state: "todo" as const },
+        ],
+      };
+    }
+    if (warnings.length > 0) {
+      return {
+        recommendedStep: "Projděte upozornění a potvrďte, že odpovídají metodice školy.",
+        steps: [
+          { label: "Vyplnit povinné vstupy v aktivních modulech", state: "done" as const },
+          { label: "Zkontrolovat upozornění a hraniční pravidla", state: "active" as const },
+          { label: "Uložit, exportovat nebo porovnat variantu", state: "todo" as const },
+        ],
+      };
+    }
+    return {
+      recommendedStep: "Souhrn je připravený k uložení, exportu nebo porovnání variant.",
+      steps: [
+        { label: "Vyplnit povinné vstupy v aktivních modulech", state: "done" as const },
+        { label: "Zkontrolovat upozornění a hraniční pravidla", state: "done" as const },
+        { label: "Uložit, exportovat nebo porovnat variantu", state: "active" as const },
+      ],
+    };
+  })();
   const firstIssueSection = validationIssues[0]?.section ?? "";
   const hasIssue = (sectionId: string) => validationIssues.some((item) => item.section === sectionId);
 
@@ -2503,6 +2536,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               tone={zsVerdict.tone}
               verdictLabel={zsVerdict.label}
               verdictDetail={zsVerdict.detail}
+              recommendedStep={zsWorkflow.recommendedStep}
+              workflowSteps={zsWorkflow.steps}
               actions={[
                 { label: "Uložit scénář", onClick: saveSnapshotManually },
                 { label: "Export CSV", onClick: handleExportCsv },

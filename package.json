@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:golden": "vitest run src/phmax-pv-golden-boundary.test.ts src/phmax-sd-golden-boundary.test.ts src/phmax-zs-golden-boundary.test.ts src/ss/phmax-ss-golden-boundary.test.ts src/phmax-pv-ui-flow.test.ts src/phmax-sd-ui-flow.test.ts src/phmax-zs-ui-flow.test.ts src/ss/phmax-ss-ui-flow.test.ts src/phmax-export-contract.test.ts src/export-metadata-contract.test.ts src/export-time-freeze.test.ts src/phmax-audit-schema-contract.test.ts src/snapshot-restore-contract.test.ts src/phmax-compare-contract.test.ts src/phmax-zs-property-boundaries.test.ts src/phmax-pv-sd-property-boundaries.test.ts src/ss/phmax-ss-property-boundaries.test.ts",
+    "test:golden": "vitest run src/phmax-pv-golden-boundary.test.ts src/phmax-sd-golden-boundary.test.ts src/phmax-zs-golden-boundary.test.ts src/ss/phmax-ss-golden-boundary.test.ts src/phmax-pv-ui-flow.test.ts src/phmax-sd-ui-flow.test.ts src/phmax-zs-ui-flow.test.ts src/ss/phmax-ss-ui-flow.test.ts src/phmax-view-mode-ux-contract.test.ts src/phmax-workflow-ux-contract.test.ts src/phmax-export-contract.test.ts src/export-metadata-contract.test.ts src/export-time-freeze.test.ts src/phmax-audit-schema-contract.test.ts src/snapshot-restore-contract.test.ts src/phmax-compare-contract.test.ts src/phmax-zs-property-boundaries.test.ts src/phmax-pv-sd-property-boundaries.test.ts src/ss/phmax-ss-property-boundaries.test.ts",
     "check:ci-guards-manifest": "node scripts/check-ci-guards-manifest.mjs",
     "check:ci-summary-manifest": "node scripts/check-ci-summary-manifest.mjs",
     "check:golden-manifest": "node scripts/check-golden-manifest.mjs",

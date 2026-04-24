@@ -5696,8 +5696,47 @@ select:focus {
   line-height: 1.45;
 }
 
+.verdict-panel__recommended {
+  margin: 8px 0 0;
+  font-size: 0.86rem;
+  color: #0f172a;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.verdict-panel__workflow {
+  margin: 8px 0 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 6px;
+}
+
+.verdict-panel__workflow-item {
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.verdict-panel__workflow-item--done {
+  color: #166534;
+}
+
+.verdict-panel__workflow-item--active {
+  color: #0f172a;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+.verdict-panel__workflow-item--todo {
+  color: #475569;
+}
+
 .verdict-panel__actions {
-  margin-top: 8px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.45);
   display: flex;
   gap: 8px;
   flex-wrap: wrap;

@@ -174,6 +174,7 @@ const SD_HERO_EXAMPLE_SELECT_LEGEND =
   "Najeďte myší na řádek v seznamu pro stručný popis situace a orientační očekávaný výsledek. Čísla odpovídají výpočtu v této aplikaci (včetně přesných mezikroků; metodika někdy zaokrouhluje jinak).";
 
 const SD_ONBOARDING_KEY = "phmax-sd-onboarding";
+const SD_VIEW_MODE_LS_KEY = "phmax-sd-view-mode";
 const SD_STORAGE_KEY = "edu-cz-sd-calculator-state";
 const SD_NAMED_SNAPSHOTS_LS_KEY = "edu-cz-sd-named-snapshots-v1";
 const SD_MAX_NAMED_SNAPSHOTS = 10;
@@ -328,6 +329,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     }
   });
   const [selectedSdHeroExample, setSelectedSdHeroExample] = useState<SdHeroExampleKey>("");
+  const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
+    try {
+      const stored = localStorage.getItem(SD_VIEW_MODE_LS_KEY);
+      return stored === "expert" ? "expert" : "basic";
+    } catch {
+      return "basic";
+    }
+  });
   const selectedSdHeroExampleMeta =
     selectedSdHeroExample && selectedSdHeroExample in SD_HERO_EXAMPLE_META
       ? SD_HERO_EXAMPLE_META[selectedSdHeroExample as Exclude<SdHeroExampleKey, "">]
@@ -356,6 +365,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   useEffect(() => {
     setNamedSnapshots(readNamedSdSnapshotsFromLs());
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SD_VIEW_MODE_LS_KEY, viewMode);
+    } catch {
+      /* ignore */
+    }
+  }, [viewMode]);
 
   const suggested = useMemo(() => suggestedDepartmentsFromPupils(pupils), [pupils]);
   const effectiveDepts = manualDepts ? departments : suggested;
@@ -540,6 +557,38 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       tone: "ok" as const,
       label: "Výpočet je připravený",
       detail: "PHmax je spočtený pro aktuální režim. Další krok: uložte variantu nebo exportujte podklady.",
+    };
+  }, [detailDepartments.length, effectiveDepts, inputMode, pupils, tableWarning]);
+
+  const sdWorkflow = useMemo(() => {
+    const activeDeptCount = inputMode === "detail" ? detailDepartments.length : effectiveDepts;
+    if (pupils <= 0 || activeDeptCount <= 0) {
+      return {
+        recommendedStep: "Doplňte počet účastníků a oddělení.",
+        steps: [
+          { label: "Vyplnit základní vstupy", state: "active" as const },
+          { label: "Zkontrolovat výsledek PHmax", state: "todo" as const },
+          { label: "Uložit nebo exportovat výsledek", state: "todo" as const },
+        ],
+      };
+    }
+    if (tableWarning) {
+      return {
+        recommendedStep: "Upravte vstupy tak, aby odpovídaly metodické tabulce.",
+        steps: [
+          { label: "Vyplnit základní vstupy", state: "done" as const },
+          { label: "Opravit vstupy mimo tabulku", state: "active" as const },
+          { label: "Uložit nebo exportovat výsledek", state: "todo" as const },
+        ],
+      };
+    }
+    return {
+      recommendedStep: "Výpočet je připraven k uložení nebo exportu.",
+      steps: [
+        { label: "Vyplnit základní vstupy", state: "done" as const },
+        { label: "Zkontrolovat výsledek PHmax", state: "done" as const },
+        { label: "Uložit nebo exportovat výsledek", state: "active" as const },
+      ],
     };
   }, [detailDepartments.length, effectiveDepts, inputMode, pupils, tableWarning]);
 
@@ -870,6 +919,26 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         <div className="hero__pills-row">
           <ProductViewPills productView={productView} setProductView={setProductView} />
           <div className="hero__pills-row-trailing">
+            <div className="checks" role="group" aria-label="Režim zobrazení ŠD">
+              <label>
+                <input
+                  type="radio"
+                  name="sd-view-mode"
+                  checked={viewMode === "basic"}
+                  onChange={() => setViewMode("basic")}
+                />
+                Základní
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="sd-view-mode"
+                  checked={viewMode === "expert"}
+                  onChange={() => setViewMode("expert")}
+                />
+                Expertní
+              </label>
+            </div>
             <GlossaryIconButton
               ref={glossaryTriggerRef}
               className="glossary-icon-btn--hero"
@@ -940,6 +1009,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           tone={sdVerdict.tone}
           verdictLabel={sdVerdict.label}
           verdictDetail={sdVerdict.detail}
+          recommendedStep={sdWorkflow.recommendedStep}
+          workflowSteps={sdWorkflow.steps}
           actions={[
             { label: "Uložit scénář", onClick: saveSdSnapshotManually },
             { label: "Export CSV", onClick: handleExportCsv },
@@ -1555,7 +1626,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </div>
         ) : null}
 
-        {detailedResult != null ? (
+        {viewMode === "expert" && detailedResult != null ? (
           <div
             className="subcard"
             style={{ marginTop: 14, borderLeft: "5px solid #22c55e", background: "rgba(34, 197, 94, 0.06)" }}
@@ -1717,7 +1788,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               </table>
             </ScrollGrabRegion>
           </details>
-        ) : breakdown != null && breakdown.length > 0 && basePhmax != null ? (
+        ) : viewMode === "expert" && breakdown != null && breakdown.length > 0 && basePhmax != null ? (
           <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
             <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
               Rozpad PHmax po odděleních
@@ -1780,7 +1851,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
         {tableWarning ? <p className="card card--warning" style={{ marginTop: 16, padding: 14 }}>{tableWarning}</p> : null}
 
-        {activeMethodikaRow != null ? (
+        {viewMode === "expert" && activeMethodikaRow != null ? (
           <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 14 }}>
             <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
               Tabulková hodnota PHmax pro {activeMethodikaRow.deptCount} oddělení
@@ -1890,7 +1961,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </div>
         ) : null}
 
-        <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
+        {viewMode === "expert" ? (
+          <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 20 }}>
           <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
             Ověřovací tabulka metodiky (1 speciální oddělení s výjimkou)
           </summary>
@@ -1981,9 +2053,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             účastnících &lt; 4 se snižuje o 0,6násobek (tj. použije se faktor 0,4). V metodických podkladech je
             evidován tiskový překlep hodnoty 58,1; správná hodnota je 8,1.
           </p>
-        </details>
+          </details>
+        ) : null}
 
-        <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 14 }}>
+        {viewMode === "expert" ? (
+          <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 14 }}>
           <summary className="section-title" style={{ fontSize: "1.05rem", cursor: "pointer" }}>
             Ověřovací tabulka: Týdenní maximální rozsah provozu školních družin
           </summary>
@@ -2054,7 +2128,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               </tbody>
             </table>
           </ScrollGrabRegion>
-        </details>
+          </details>
+        ) : null}
 
         <p className="muted-text" style={{ marginTop: 20 }}>
           Aplikace nenahrazuje úřední výpočet ani výkazy (např. Z 2-01). U složitých případů (
@@ -2064,8 +2139,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         </p>
       </section>
 
-      <ProductLegisContextPanel variant="sd" />
-      <MethodologyStrip />
+      {viewMode === "expert" ? <ProductLegisContextPanel variant="sd" /> : null}
+      {viewMode === "expert" ? <MethodologyStrip /> : null}
       <footer className="zs-app-footer">
         <HeroStatusBar
           productLabel={PRODUCT_CALCULATOR_TITLES.sd}

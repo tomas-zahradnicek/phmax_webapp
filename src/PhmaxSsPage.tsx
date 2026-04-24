@@ -386,6 +386,38 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       detail: "Řádky mají platný výpočet PHmax. Pokračujte uložením varianty, exportem nebo porovnáním scénářů.",
     };
   })();
+  const ssWorkflow = (() => {
+    const errorRows = ss.preview.filter((p) => !p.skipped && "error" in p).length;
+    const skippedRows = ss.preview.filter((p) => p.skipped).length;
+    if (errorRows > 0) {
+      return {
+        recommendedStep: "Opravte neplatné řádky označené chybou v evidenci jednotek.",
+        steps: [
+          { label: "Vyplnit povinné údaje u všech řádků", state: "done" as const },
+          { label: "Opravit chybné kombinace nebo hodnoty", state: "active" as const },
+          { label: "Uložit, exportovat nebo porovnat variantu", state: "todo" as const },
+        ],
+      };
+    }
+    if (skippedRows > 0) {
+      return {
+        recommendedStep: "Doplňte chybějící podklady u přeskočených řádků.",
+        steps: [
+          { label: "Vyplnit povinné údaje u všech řádků", state: "active" as const },
+          { label: "Zkontrolovat validitu řádků bez chyb", state: "todo" as const },
+          { label: "Uložit, exportovat nebo porovnat variantu", state: "todo" as const },
+        ],
+      };
+    }
+    return {
+      recommendedStep: "Výpočet je připraven k uložení, exportu nebo porovnání variant.",
+      steps: [
+        { label: "Vyplnit povinné údaje u všech řádků", state: "done" as const },
+        { label: "Zkontrolovat validitu řádků bez chyb", state: "done" as const },
+        { label: "Uložit, exportovat nebo porovnat variantu", state: "active" as const },
+      ],
+    };
+  })();
 
   return (
     <>
@@ -484,6 +516,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           tone={ssVerdict.tone}
           verdictLabel={ssVerdict.label}
           verdictDetail={ssVerdict.detail}
+          recommendedStep={ssWorkflow.recommendedStep}
+          workflowSteps={ssWorkflow.steps}
           actions={[
             { label: "Uložit scénář", onClick: ss.saveSnapshotManually },
             { label: "Export CSV", onClick: ss.handleExportCsv },
