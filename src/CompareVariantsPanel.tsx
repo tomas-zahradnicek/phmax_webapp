@@ -86,6 +86,14 @@ function compareVerdict(result: CompareProductVariantsResult): {
   };
 }
 
+function winnerLabel(left: { variantLabel: string; variantId: string; totalPrimary: number | null }, right: { variantLabel: string; variantId: string; totalPrimary: number | null }): string {
+  if (left.totalPrimary == null || right.totalPrimary == null) return "PHmax: nelze určit";
+  if (left.totalPrimary === right.totalPrimary) return "PHmax: remíza";
+  return left.totalPrimary > right.totalPrimary
+    ? `PHmax: vede ${left.variantLabel || left.variantId}`
+    : `PHmax: vede ${right.variantLabel || right.variantId}`;
+}
+
 export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: CompareVariantsPanelProps) {
   if (!result || result.metrics.length < 2) {
     return (
@@ -111,6 +119,14 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
   const secondaryMissingReason = missingDeltaReason(left.totalSecondary, right.totalSecondary);
   const leftLabel = left.variantLabel || left.variantId;
   const rightLabel = right.variantLabel || right.variantId;
+  const winner = winnerLabel(left, right);
+  const validationBadge = `Validace: A ${left.validationOk === false ? "chyby" : "OK"} / B ${right.validationOk === false ? "chyby" : "OK"}`;
+
+  React.useEffect(() => {
+    if (!copyNotice) return;
+    const timer = window.setTimeout(() => setCopyNotice(""), 2600);
+    return () => window.clearTimeout(timer);
+  }, [copyNotice]);
   const exportCompareJson = () => {
     downloadTextFile(
       exportFilenameStamped(`phmax-${exportSlug}-compare-preview`, "json"),
@@ -167,6 +183,10 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
         <strong>Aktualizováno:</strong> {generatedAt}
       </p>
       <p className={`compare-panel__verdict compare-panel__verdict--${verdict.tone}`}>{verdict.text}</p>
+      <div className="compare-panel__badges" aria-label="Rychlé vyhodnocení porovnání">
+        <span className="compare-panel__badge">{winner}</span>
+        <span className="compare-panel__badge">{validationBadge}</span>
+      </div>
       <p className="compare-panel__basis">
         <strong>A:</strong> {leftLabel} · <strong>B:</strong> {rightLabel}
       </p>

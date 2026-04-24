@@ -5826,6 +5826,23 @@ select:focus {
   color: #334155;
 }
 
+.compare-panel__badges {
+  margin: 0 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.compare-panel__badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(248, 250, 252, 0.9);
+  font-size: 0.75rem;
+  color: #334155;
+}
+
 .compare-panel__basis {
   margin: 0 0 8px;
   font-size: 0.8rem;

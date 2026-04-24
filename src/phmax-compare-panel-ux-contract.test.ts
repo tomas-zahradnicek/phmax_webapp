@@ -32,6 +32,9 @@ describe("UX contract: compare panel side-by-side pattern", () => {
     expect(src).toContain("aria-live=\"polite\"");
     expect(src).toContain("Prohodit A/B");
     expect(src).toContain("aria-pressed={swapped}");
+    expect(src).toContain("Rychlé vyhodnocení porovnání");
+    expect(src).toContain("compare-panel__badge");
+    expect(src).toContain("setTimeout(() => setCopyNotice(\"\")");
   });
 
   it("all products render compare preview panel in named snapshots section", () => {
