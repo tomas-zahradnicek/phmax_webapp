@@ -50,6 +50,7 @@ import {
 } from "./HeroActionIconButton";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import { HeroStatusBar } from "./HeroStatusBar";
+import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
 import { HeroStat } from "./HeroStat";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { MethodologyStrip } from "./MethodologyStrip";
@@ -518,6 +519,29 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     return null;
   }, [detailedResult, basePhmax, effectiveDepts, reduction.adjusted, reduction.factor]);
 
+  const sdVerdict = useMemo(() => {
+    const activeDeptCount = inputMode === "detail" ? detailDepartments.length : effectiveDepts;
+    if (pupils <= 0 || activeDeptCount <= 0) {
+      return {
+        tone: "warning" as const,
+        label: "Doplňte základní vstupy",
+        detail: "Pro výpočet zadejte počet účastníků a počet oddělení (nebo detailní oddělení).",
+      };
+    }
+    if (tableWarning) {
+      return {
+        tone: "warning" as const,
+        label: "Na hraně metodické tabulky",
+        detail: tableWarning,
+      };
+    }
+    return {
+      tone: "ok" as const,
+      label: "Výpočet je připravený",
+      detail: "PHmax je spočtený pro aktuální režim. Další krok: uložte variantu nebo exportujte podklady.",
+    };
+  }, [detailDepartments.length, effectiveDepts, inputMode, pupils, tableWarning]);
+
   const exportRows = useMemo(
     () =>
       buildPhmaxSdExportRows({
@@ -909,6 +933,16 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             inputMode === "detail" ? detailDepartments.length : effectiveDepts,
           )}
         </p>
+        <VerdictNextStepsPanel
+          tone={sdVerdict.tone}
+          verdictLabel={sdVerdict.label}
+          verdictDetail={sdVerdict.detail}
+          actions={[
+            { label: "Uložit scénář", onClick: saveSdSnapshotManually },
+            { label: "Export CSV", onClick: handleExportCsv },
+            { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },
+          ]}
+        />
 
         <div className="field field--hero-select hero-actions__example hero-sd-example-select" style={{ marginTop: 14 }}>
           <span className="field__label field__label--hero" id="sd-hero-example-label">

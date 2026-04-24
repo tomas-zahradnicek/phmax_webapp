@@ -66,6 +66,7 @@ import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { TableOuter } from "./TableOuter";
 import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
+import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
 import {
   ADVANCED_AUDIT_GROUP_LABEL,
   APP_AUTHOR_CREDIT_LINE,
@@ -1538,6 +1539,30 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   })();
 
   const incompleteSections = new Set(validationIssues.map((item) => item.section)).size;
+  const zsVerdict = (() => {
+    if (incompleteSections > 0) {
+      return {
+        tone: "warning" as const,
+        label: "Na hraně: zadání ještě není kompletní",
+        detail:
+          incompleteSections === 1
+            ? "Doplňte poslední nevyplněnou část a znovu zkontrolujte souhrn."
+            : `Doplňte ${incompleteSections} nevyplněné části (tlačítko „Přejít na první nevyplněnou část“ vás navede).`,
+      };
+    }
+    if (warnings.length > 0) {
+      return {
+        tone: "warning" as const,
+        label: "Pozor na hraniční pravidla",
+        detail: "Výpočet proběhl, ale obsahuje upozornění k výjimkám nebo ruční kontrole podle metodiky.",
+      };
+    }
+    return {
+      tone: "ok" as const,
+      label: "Vstupy jsou kompletní",
+      detail: "Souhrn PHmax/PHAmax/PHPmax je připravený pro export, uložení varianty nebo porovnání scénářů.",
+    };
+  })();
   const firstIssueSection = validationIssues[0]?.section ?? "";
   const hasIssue = (sectionId: string) => validationIssues.some((item) => item.section === sectionId);
 
@@ -2427,6 +2452,16 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             <p className="muted-text" style={{ marginTop: 10, marginBottom: 0, fontSize: "0.86rem" }}>
               <strong>Aktuální kontext:</strong> {formatZsLayContextLine(MODE_CONFIG[mode].label, tab, incompleteSections)}
             </p>
+            <VerdictNextStepsPanel
+              tone={zsVerdict.tone}
+              verdictLabel={zsVerdict.label}
+              verdictDetail={zsVerdict.detail}
+              actions={[
+                { label: "Uložit scénář", onClick: saveSnapshotManually },
+                { label: "Export CSV", onClick: handleExportCsv },
+                { label: "Porovnat se zálohou", onClick: handleCompareZsWithNamedSnapshot },
+              ]}
+            />
             <InputOutputLegend compact />
             <div className="results-panel__meta">
               <span className="status-badge status-badge--neutral">Aktivní modul: {tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"}</span>

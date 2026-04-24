@@ -49,6 +49,7 @@ import {
   IconSpinner,
 } from "./HeroActionIconButton";
 import { HeroStatusBar } from "./HeroStatusBar";
+import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
 import { HeroStat } from "./HeroStat";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { GlossaryIconButton } from "./GlossaryIconButton";
@@ -416,6 +417,22 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     };
   }, [rowComputations]);
 
+  const pvVerdict = useMemo(() => {
+    const invalidRows = rowComputations.filter((c) => c.computed.totalPhmax == null).length;
+    if (invalidRows > 0) {
+      return {
+        tone: "warning" as const,
+        label: "Na hraně: část pracovišť ještě není dopočtená",
+        detail: `Doplňte ${invalidRows} pracovišť (kód provozu, počet tříd, hodiny, případně § 16). Pak bude součet PHmax kompletní.`,
+      };
+    }
+    return {
+      tone: "ok" as const,
+      label: "Vstupy jsou kompletní",
+      detail: "Součet PHmax je spočtený pro všechna zadaná pracoviště. Pokračujte uložením scénáře nebo exportem.",
+    };
+  }, [rowComputations]);
+
   const exportRows = useMemo(() => {
     const items = rowComputations.map((c, i) => ({
       index: i + 1,
@@ -707,6 +724,16 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         >
           <strong>Průběh:</strong> {formatPvLayContextLine(rows.length, aggregate.incomplete)}
         </p>
+        <VerdictNextStepsPanel
+          tone={pvVerdict.tone}
+          verdictLabel={pvVerdict.label}
+          verdictDetail={pvVerdict.detail}
+          actions={[
+            { label: "Uložit scénář", onClick: savePvSnapshotManually },
+            { label: "Export CSV", onClick: handleExportCsv },
+            { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },
+          ]}
+        />
 
         <div
           className="field field--hero-select hero-actions__example hero-pv-example-select"

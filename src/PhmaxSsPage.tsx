@@ -36,6 +36,7 @@ import {
 } from "./HeroActionIconButton";
 import { HeroStat } from "./HeroStat";
 import { HeroStatusBar } from "./HeroStatusBar";
+import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -344,6 +345,29 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           minimumFractionDigits: 0,
           maximumFractionDigits: 2,
         });
+  const ssVerdict = (() => {
+    const errorRows = ss.preview.filter((p) => !p.skipped && "error" in p).length;
+    const skippedRows = ss.preview.filter((p) => p.skipped).length;
+    if (errorRows > 0) {
+      return {
+        tone: "danger" as const,
+        label: "Překročení pravidel vstupu",
+        detail: `${errorRows} řádků obsahuje neplatnou kombinaci nebo hodnotu. Opravte je podle hlášek v tabulce evidence.`,
+      };
+    }
+    if (skippedRows > 0) {
+      return {
+        tone: "warning" as const,
+        label: "Na hraně: chybí povinné údaje",
+        detail: `U ${skippedRows} řádků zatím chybí podklady pro výpočet (typicky kód oboru, průměr žáků nebo počet tříd).`,
+      };
+    }
+    return {
+      tone: "ok" as const,
+      label: "Vstupy jsou v limitu orientačního modelu",
+      detail: "Řádky mají platný výpočet PHmax. Pokračujte uložením varianty, exportem nebo porovnáním scénářů.",
+    };
+  })();
 
   return (
     <>
@@ -416,6 +440,16 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         >
           <strong>Průběh:</strong> {formatSsLayContextLine(ssMetrics.rowCount, ss.computedRows.length)}
         </p>
+        <VerdictNextStepsPanel
+          tone={ssVerdict.tone}
+          verdictLabel={ssVerdict.label}
+          verdictDetail={ssVerdict.detail}
+          actions={[
+            { label: "Uložit scénář", onClick: ss.saveSnapshotManually },
+            { label: "Export CSV", onClick: ss.handleExportCsv },
+            { label: "Porovnat se zálohou", onClick: ss.handleCompareSsWithNamedSnapshot },
+          ]}
+        />
 
         <p className="hero__note" style={{ marginTop: 10 }}>
           PHAmax mimo PrŠ (78-62-C/01, 78-62-C/02) dopočítejte plným postupem metodiky MŠMT – navazující kroky a tabulky jsou na{" "}

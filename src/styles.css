@@ -5675,3 +5675,45 @@ select:focus {
 .ss-framework-details[open] > .ss-framework-details__summary::after {
   transform: translateY(-40%) rotate(-135deg);
 }
+
+.verdict-panel {
+  margin-top: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 10px 12px;
+}
+
+.verdict-panel__title {
+  margin: 0;
+  font-weight: 800;
+}
+
+.verdict-panel__detail {
+  margin: 4px 0 0;
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.verdict-panel__actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.verdict-panel--ok {
+  border-color: rgba(22, 163, 74, 0.45);
+  background: rgba(240, 253, 244, 0.9);
+}
+
+.verdict-panel--warning {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(255, 251, 235, 0.9);
+}
+
+.verdict-panel--danger {
+  border-color: rgba(220, 38, 38, 0.4);
+  background: rgba(254, 242, 242, 0.92);
+}
