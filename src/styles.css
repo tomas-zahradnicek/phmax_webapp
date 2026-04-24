@@ -522,6 +522,15 @@ button.pill--hero-toggle--active {
   text-align: center;
 }
 
+.pv-methodology-table .sd-phmax-breakdown__head-num {
+  white-space: nowrap;
+}
+
+.pv-methodology-table__classes-col {
+  width: 1%;
+  white-space: nowrap;
+}
+
 .sd-phmax-breakdown__num {
   text-align: right;
   font-variant-numeric: tabular-nums;
