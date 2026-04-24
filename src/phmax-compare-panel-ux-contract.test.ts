@@ -17,6 +17,8 @@ describe("UX contract: compare panel side-by-side pattern", () => {
     expect(src).toContain("Co to znamená v praxi:");
     expect(src).toContain("compare-panel__verdict");
     expect(src).toContain("compare-panel__practice-note");
+    expect(src).toContain("Export porovnání (CSV)");
+    expect(src).toContain("Export porovnání (JSON)");
   });
 
   it("all products render compare preview panel in named snapshots section", () => {
@@ -30,6 +32,7 @@ describe("UX contract: compare panel side-by-side pattern", () => {
       expect(src).toContain('title="Porovnání 2 variant (náhled)"');
       expect(src).toContain("result={");
       expect(src).toContain("emptyHint=");
+      expect(src).toContain("exportSlug=");
     }
   });
 });

@@ -1029,6 +1029,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                     title="Porovnání 2 variant (náhled)"
                     result={pvComparePreview}
                     emptyHint="Vyberte pojmenovanou zálohu pro porovnání s aktuálním stavem."
+                    exportSlug="pv"
                   />
                 </div>
               </div>

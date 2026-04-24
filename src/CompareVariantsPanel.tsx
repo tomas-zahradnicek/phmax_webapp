@@ -1,10 +1,12 @@
 import React from "react";
 import type { CompareProductVariantsResult } from "./phmax-product-compare";
+import { downloadTextFile, exportCsvLocalized, exportFilenameStamped } from "./export-utils";
 
 type CompareVariantsPanelProps = {
   title: string;
   result: CompareProductVariantsResult | null;
   emptyHint: string;
+  exportSlug: "pv" | "sd" | "zs" | "ss";
 };
 
 function metricText(value: number | null, suffix = ""): string {
@@ -65,7 +67,7 @@ function compareVerdict(result: CompareProductVariantsResult): {
   };
 }
 
-export function CompareVariantsPanel({ title, result, emptyHint }: CompareVariantsPanelProps) {
+export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: CompareVariantsPanelProps) {
   if (!result || result.metrics.length < 2) {
     return (
       <div className="compare-panel compare-panel--empty" role="status" aria-live="polite">
@@ -77,6 +79,33 @@ export function CompareVariantsPanel({ title, result, emptyHint }: CompareVarian
   const left = result.metrics[0];
   const right = result.metrics[1];
   const verdict = compareVerdict(result);
+  const exportCompareJson = () => {
+    downloadTextFile(
+      exportFilenameStamped(`phmax-${exportSlug}-compare-preview`, "json"),
+      JSON.stringify(result, null, 2),
+      "application/json;charset=utf-8",
+    );
+  };
+  const exportCompareCsv = () => {
+    const rows: Array<[string, string | number]> = [];
+    rows.push(["Varianta A", left.variantLabel || left.variantId]);
+    rows.push(["Varianta B", right.variantLabel || right.variantId]);
+    rows.push(["PHmax A", left.totalPrimary == null ? "–" : left.totalPrimary]);
+    rows.push(["PHmax B", right.totalPrimary == null ? "–" : right.totalPrimary]);
+    rows.push(["Sekundární metrika A", left.totalSecondary == null ? "–" : left.totalSecondary]);
+    rows.push(["Sekundární metrika B", right.totalSecondary == null ? "–" : right.totalSecondary]);
+    rows.push(["Validace A", left.validationOk === false ? "chyby" : "OK"]);
+    rows.push(["Validace B", right.validationOk === false ? "chyby" : "OK"]);
+    rows.push(["Doporučení", result.recommendation]);
+    if (result.differences.length > 0) {
+      result.differences.slice(0, 6).forEach((line, i) => rows.push([`Rozdíl ${i + 1}`, line]));
+    }
+    downloadTextFile(
+      exportFilenameStamped(`phmax-${exportSlug}-compare-preview`, "csv"),
+      exportCsvLocalized(rows),
+      "text/csv;charset=utf-8",
+    );
+  };
 
   return (
     <section className="compare-panel" aria-label={title}>
@@ -113,6 +142,14 @@ export function CompareVariantsPanel({ title, result, emptyHint }: CompareVarian
           ))}
         </ul>
       ) : null}
+      <div className="compare-panel__actions" role="group" aria-label="Export porovnání">
+        <button type="button" className="btn ghost btn--hero-named" onClick={exportCompareCsv}>
+          Export porovnání (CSV)
+        </button>
+        <button type="button" className="btn ghost btn--hero-named" onClick={exportCompareJson}>
+          Export porovnání (JSON)
+        </button>
+      </div>
     </section>
   );
 }

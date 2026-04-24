@@ -1209,6 +1209,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                     title="Porovnání 2 variant (náhled)"
                     result={sdComparePreview}
                     emptyHint="Vyberte pojmenovanou zálohu pro porovnání s aktuálním stavem."
+                    exportSlug="sd"
                   />
                 </div>
               </div>

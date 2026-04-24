@@ -2320,6 +2320,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                       title="Porovnání 2 variant (náhled)"
                       result={zsComparePreview}
                       emptyHint="Vyberte pojmenovanou zálohu se součty auditního exportu pro porovnání s aktuálním stavem."
+                      exportSlug="zs"
                     />
                   </div>
                 </div>

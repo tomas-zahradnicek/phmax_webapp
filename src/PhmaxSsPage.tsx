@@ -803,6 +803,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                     title="Porovnání 2 variant (náhled)"
                     result={ssComparePreview}
                     emptyHint="Vyberte pojmenovanou zálohu s validními řádky pro porovnání s aktuálním stavem."
+                    exportSlug="ss"
                   />
                 </div>
               </div>
