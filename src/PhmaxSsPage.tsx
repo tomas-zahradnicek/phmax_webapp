@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import {
   ADVANCED_AUDIT_GROUP_LABEL,
@@ -37,6 +37,7 @@ import {
 import { HeroStat } from "./HeroStat";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
+import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -83,6 +84,10 @@ import {
 } from "./ss/phmax-ss-hero-examples";
 import { PhmaxSsUnitsForm, type SsDashboardMetrics } from "./ss/PhmaxSsUnitsForm";
 import { usePhmaxSsUnits, type SsNamedSnapshot } from "./ss/use-phmax-ss-units";
+import { comparePhmaxProductVariants } from "./phmax-product-compare";
+import { createSsProductAuditProtocol } from "./phmax-product-audit";
+import { phmaxSsDataset } from "./ss/phmax-ss-dataset";
+import { buildSsAuditProtocolInput } from "./ss/phmax-ss-units-derive";
 
 const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
   {
@@ -418,6 +423,25 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       ],
     };
   })();
+  const ssComparePreview = useMemo(() => {
+    const item = ss.namedSnapshots.find((x: SsNamedSnapshot) => x.id === ss.selectedNamedId);
+    if (!item) return null;
+    const inputCurrent = ss.auditProtocolInput;
+    const inputNamed = buildSsAuditProtocolInput(item.snapshot.rows);
+    if (!inputCurrent || !inputNamed) return null;
+    return comparePhmaxProductVariants([
+      {
+        id: "current",
+        label: "Aktuální stav",
+        protocol: createSsProductAuditProtocol(phmaxSsDataset, inputCurrent),
+      },
+      {
+        id: "named",
+        label: item.name,
+        protocol: createSsProductAuditProtocol(phmaxSsDataset, inputNamed),
+      },
+    ]);
+  }, [ss.auditProtocolInput, ss.namedSnapshots, ss.selectedNamedId]);
 
   return (
     <>
@@ -773,6 +797,13 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                   <button type="button" className="btn ghost btn--hero-named" onClick={ss.handleExportSsAuditJson}>
                     Stáhnout auditní protokol (JSON)
                   </button>
+                </div>
+                <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                  <CompareVariantsPanel
+                    title="Porovnání 2 variant (náhled)"
+                    result={ssComparePreview}
+                    emptyHint="Vyberte pojmenovanou zálohu s validními řádky pro porovnání s aktuálním stavem."
+                  />
                 </div>
               </div>
             </div>

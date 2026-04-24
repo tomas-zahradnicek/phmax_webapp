@@ -54,6 +54,7 @@ import { HeroStatusBar } from "./HeroStatusBar";
 import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
 import { HeroStat } from "./HeroStat";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
+import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, SdLegisRef } from "./PhmaxProductLegisUi";
 import { ProductFloatingNav } from "./ProductFloatingNav";
@@ -894,6 +895,20 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     setUiNotice(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
   }, [namedSnapshots, selectedNamedId, buildSdAuditProtocol]);
 
+  const sdComparePreview = useMemo(() => {
+    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!item) return null;
+    const protocolNamed = createSdProductAuditProtocol({
+      pupilsFirstGrade: item.snapshot.pupils,
+      manualDepts: item.snapshot.manualDepts,
+      departments: item.snapshot.departments,
+    });
+    return comparePhmaxProductVariants([
+      { id: "current", label: "Aktuální stav", protocol: buildSdAuditProtocol() },
+      { id: "named", label: item.name, protocol: protocolNamed },
+    ]);
+  }, [namedSnapshots, selectedNamedId, buildSdAuditProtocol]);
+
   useEffect(() => {
     if (!summaryHasSpecial && summarySpecialDepartments.length > 0) {
       setSummarySpecialDepartments([]);
@@ -1188,6 +1203,13 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                   <button type="button" className="btn ghost btn--hero-named" onClick={handleExportAuditJson}>
                     Stáhnout auditní protokol (JSON)
                   </button>
+                </div>
+                <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                  <CompareVariantsPanel
+                    title="Porovnání 2 variant (náhled)"
+                    result={sdComparePreview}
+                    emptyHint="Vyberte pojmenovanou zálohu pro porovnání s aktuálním stavem."
+                  />
                 </div>
               </div>
             </div>

@@ -5782,3 +5782,93 @@ select:focus {
   background: rgba(255, 255, 255, 0.6);
   padding: 10px;
 }
+
+.compare-panel {
+  margin-top: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 10px;
+}
+
+.compare-panel--empty {
+  padding: 8px 10px;
+}
+
+.compare-panel__title {
+  margin: 0 0 8px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.compare-panel__verdict {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.compare-panel__verdict--ok {
+  color: #166534;
+}
+
+.compare-panel__verdict--warning {
+  color: #92400e;
+}
+
+.compare-panel__verdict--neutral {
+  color: #334155;
+}
+
+.compare-panel__empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+.compare-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px;
+}
+
+.compare-panel__card {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.85);
+  padding: 8px;
+}
+
+.compare-panel__variant {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+}
+
+.compare-panel__metric {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.compare-panel__metric + .compare-panel__metric {
+  margin-top: 4px;
+}
+
+.compare-panel__recommendation {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: #0f172a;
+}
+
+.compare-panel__practice-note {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.compare-panel__diffs {
+  margin: 6px 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  color: #334155;
+}

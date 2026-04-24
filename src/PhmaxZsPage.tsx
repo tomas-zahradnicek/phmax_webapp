@@ -67,6 +67,7 @@ import { TableOuter } from "./TableOuter";
 import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
+import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import {
   ADVANCED_AUDIT_GROUP_LABEL,
   APP_AUTHOR_CREDIT_LINE,
@@ -2030,6 +2031,35 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     );
   };
 
+  const zsComparePreview = useMemo(() => {
+    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!item) return null;
+    const stored = parseZsSnapshotAuditTotals(item.snapshot);
+    if (!stored) return null;
+    const currentProtocol = createZsProductAuditProtocol({
+      formSnapshot: buildSnapshot() as Record<string, unknown>,
+      totals: { totalPhmax, breakdown: { totalPha, totalPhp } },
+      validationIssues: warnings.map((w) => ({ severity: "warning" as const, message: w })),
+      narrative: "Aktuální stav",
+    });
+    const namedProtocol = createZsProductAuditProtocol({
+      formSnapshot: {
+        namedBackup: item.name,
+        exportLabel: typeof item.snapshot.exportLabel === "string" ? item.snapshot.exportLabel : "",
+        tabAtSave: stored.tab,
+      },
+      totals: {
+        totalPhmax: stored.totalPhmax,
+        breakdown: { totalPha: stored.totalPha, totalPhp: stored.totalPhp },
+      },
+      narrative: item.name,
+    });
+    return comparePhmaxProductVariants([
+      { id: "current", label: "Aktuální stav", protocol: currentProtocol },
+      { id: "named", label: item.name, protocol: namedProtocol },
+    ]);
+  }, [buildSnapshot, namedSnapshots, selectedNamedId, totalPhmax, totalPha, totalPhp, warnings]);
+
   const scrollToWorkspaceDock = () => {
     workspaceStickyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -2284,6 +2314,13 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                     <button type="button" className="btn ghost btn--hero-named" onClick={handleExportZsAuditJson}>
                       Stáhnout auditní protokol (JSON)
                     </button>
+                  </div>
+                  <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                    <CompareVariantsPanel
+                      title="Porovnání 2 variant (náhled)"
+                      result={zsComparePreview}
+                      emptyHint="Vyberte pojmenovanou zálohu se součty auditního exportu pro porovnání s aktuálním stavem."
+                    />
                   </div>
                 </div>
               </div>

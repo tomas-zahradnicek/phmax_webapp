@@ -54,6 +54,7 @@ import { HeroStatusBar } from "./HeroStatusBar";
 import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
 import { HeroStat } from "./HeroStat";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
+import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import { GlossaryIconButton } from "./GlossaryIconButton";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { MethodologyStrip } from "./MethodologyStrip";
@@ -709,6 +710,25 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     setUiNotice(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
   }, [namedSnapshots, selectedNamedId, buildPvAuditProtocol]);
 
+  const pvComparePreview = useMemo(() => {
+    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!item) return null;
+    const protocolNamed = createPvProductAuditProtocol(
+      item.snapshot.rows.map((r) => ({
+        label: r.label.trim() || undefined,
+        provoz: r.provoz,
+        classCount: r.classCount,
+        avgHoursPerDay: r.avgHours,
+        sec16ClassCount: r.sec16Count,
+        languageGroupCount: r.languageGroups,
+      })),
+    );
+    return comparePhmaxProductVariants([
+      { id: "current", label: "Aktuální stav", protocol: buildPvAuditProtocol() },
+      { id: "named", label: item.name, protocol: protocolNamed },
+    ]);
+  }, [namedSnapshots, selectedNamedId, buildPvAuditProtocol]);
+
   useEffect(() => {
     try {
       localStorage.setItem(PV_STORAGE_KEY, JSON.stringify(buildPvSnapshot()));
@@ -1003,6 +1023,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   <button type="button" className="btn ghost btn--hero-named" onClick={handleExportAuditJson}>
                     Stáhnout auditní protokol (JSON)
                   </button>
+                </div>
+                <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                  <CompareVariantsPanel
+                    title="Porovnání 2 variant (náhled)"
+                    result={pvComparePreview}
+                    emptyHint="Vyberte pojmenovanou zálohu pro porovnání s aktuálním stavem."
+                  />
                 </div>
               </div>
             </div>
