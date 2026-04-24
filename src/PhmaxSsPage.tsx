@@ -815,7 +815,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           Rychlý souhrn: evidujte řádky po oboru/formě/typu třídy; PHmax a PHAmax jsou oddělené rámce.
         </p>
 
-        <details className="ss-framework-details" open>
+        <details className="ss-framework-details">
           <summary className="ss-framework-details__summary">Rozbalit metodický kontext a omezení v aplikaci</summary>
           <p className="muted-text" style={{ marginTop: 10, lineHeight: 1.55 }}>
             {fw.lead}

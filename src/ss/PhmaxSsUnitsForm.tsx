@@ -1,6 +1,9 @@
 import React from "react";
 import {
   ADVANCED_AUDIT_GROUP_LABEL,
+  INLINE_VALIDATION_MSG_POSITIVE_INTEGER,
+  INLINE_VALIDATION_MSG_POSITIVE_NUMBER,
+  INLINE_VALIDATION_MSG_REQUIRED_FIELD,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
   NAMED_BACKUPS_DELETE_LABEL,
   NAMED_BACKUPS_NAME_LABEL,
@@ -239,9 +242,15 @@ function PhmaxSsUnitsFormView({
             {rows.map((row) => (
               <tr key={row.id}>
                 <td className="ss-units-block-cell">
+                  {/** První vlna inline validací pro nejčastější povinná pole řádku. */}
+                  {(() => {
+                    const hasEducationField = row.educationField.trim().length > 0;
+                    const avgValid = isPositiveNumberInput(row.averageStudents);
+                    const classCountValid = isPositiveIntegerInput(row.classCount);
+                    return (
                   <div
                     className={`ss-units-block-card ${
-                      row.educationField.trim() && isPositiveNumberInput(row.averageStudents) && isPositiveIntegerInput(row.classCount)
+                      hasEducationField && avgValid && classCountValid
                         ? "ss-units-block-card--valid"
                         : "ss-units-block-card--invalid"
                     }`}
@@ -321,6 +330,16 @@ function PhmaxSsUnitsFormView({
                       </div>
                     </div>
 
+                    {!hasEducationField || !avgValid || !classCountValid ? (
+                      <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.85rem", lineHeight: 1.45 }}>
+                        {!hasEducationField ? `${INLINE_VALIDATION_MSG_REQUIRED_FIELD} Vyplňte kód oboru z RVP.` : null}
+                        {!hasEducationField && (!avgValid || !classCountValid) ? " " : null}
+                        {!avgValid ? `${INLINE_VALIDATION_MSG_POSITIVE_NUMBER} U pole „${sec.colAvgStudents}“.` : null}
+                        {!avgValid && !classCountValid ? " " : null}
+                        {!classCountValid ? `${INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U pole „${sec.colClassCount}“.` : null}
+                      </p>
+                    ) : null}
+
                     <div className="ss-units-mini ss-units-mini--bottom">
                       <div className="ss-units-mini__labels">
                         <span>{sec.colOborCountInClass}</span>
@@ -393,6 +412,8 @@ function PhmaxSsUnitsFormView({
                       </button>
                     </div>
                   </div>
+                    );
+                  })()}
                 </td>
               </tr>
             ))}

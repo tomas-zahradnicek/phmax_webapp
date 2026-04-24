@@ -11,6 +11,8 @@ import {
   MSG_NAMED_BACKUP_PICK_TO_COMPARE,
   MSG_NAMED_BACKUP_PICK_TO_DELETE,
   MSG_NO_LOCAL_AUTOSAVE_DATA,
+  INLINE_VALIDATION_MSG_POSITIVE_INTEGER,
+  INLINE_VALIDATION_MSG_REQUIRED_FIELD,
   LAY_USER_QUICK_START_PV,
   EXPORT_ORIENTACNI_NOTE,
   formatPvLayContextLine,
@@ -1098,6 +1100,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                       min={0}
                       max={maxClasses}
                     />
+                    {row.classCount <= 0 ? (
+                      <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                        {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} Pro toto pole platí rozsah 1 až {maxClasses}; bez počtu tříd
+                        se pracoviště do PHmax nezapočte.
+                      </p>
+                    ) : null}
                     {row.provoz === "zdravotnicke" ? (
                       <p className="muted-text" style={{ marginTop: 8, fontSize: "0.88rem" }}>
                         U MŠ při zdravotnickém zařízení je PHmax <strong>31 hodin/třídu</strong> týdně – tabulky 1–3 se
@@ -1139,6 +1147,15 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                       step={avgMeta.step}
                       hint={avgMeta.hint}
                     />
+                    {row.avgHours <= 0 ? (
+                      <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                        {INLINE_VALIDATION_MSG_REQUIRED_FIELD} Zadejte hodnotu v rozsahu {avgMeta.min} až {avgMeta.max} h.
+                      </p>
+                    ) : row.avgHours < avgMeta.min || row.avgHours > avgMeta.max ? (
+                      <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                        Hodnota neodpovídá vybranému typu provozu. Povolený rozsah je {avgMeta.min} až {avgMeta.max} h.
+                      </p>
+                    ) : null}
                   </div>
                 ) : null}
 

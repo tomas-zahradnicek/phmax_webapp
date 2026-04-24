@@ -128,6 +128,14 @@ export const MSG_NO_LOCAL_AUTOSAVE_DATA =
 export const MSG_ZS_NAMED_BACKUP_NO_AUDIT_TOTALS =
   "Vybraná záloha neobsahuje uložené součty PHmax / PHAmax / PHPmax pro srovnání. Načtěte ji ve formuláři, přepněte potřebné záložky, nechte spočíst souhrn a uložte znovu jako pojmenovanou zálohu.";
 
+/** Krátké inline validace pro vstupní pole (sjednocené napříč moduly). */
+export const INLINE_VALIDATION_MSG_REQUIRED_FIELD =
+  "Toto pole je povinné pro výpočet.";
+export const INLINE_VALIDATION_MSG_POSITIVE_INTEGER =
+  "Zadejte celé číslo alespoň 1.";
+export const INLINE_VALIDATION_MSG_POSITIVE_NUMBER =
+  "Zadejte číslo větší než 0.";
+
 /** Datum poslední redakční kontroly textů v UI (nikoli datum legislativní účinnosti). */
 export const UI_TEXTS_LAST_REVIEW_DATE = "22. 4. 2026";
 

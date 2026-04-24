@@ -75,6 +75,7 @@ import {
   APP_AUTHOR_EXPORT_ROWS,
   BROWSER_ERROR_NEXT_STEP_HINT,
   CALCULATOR_LIMITS_NOTE,
+  INLINE_VALIDATION_MSG_POSITIVE_INTEGER,
   LAY_USER_QUICK_START_ZS,
   MSG_NAMED_BACKUP_PICK_TO_COMPARE,
   MSG_NO_LOCAL_AUTOSAVE_DATA,
@@ -2545,6 +2546,11 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                         <ResultCard label="Výsledek PHmax – 1. stupeň" value={basic1Phmax} tone="success" />
                         <ResultCard label="Počet tříd × PHmax" value={`${basic1Classes} × ${basicFirstBand.value}`} tone="success" />
                       </div>
+                      {basic1Classes <= 0 || basic1Pupils <= 0 ? (
+                        <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                          {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U 1. stupně doplňte počet tříd i počet žáků.
+                        </p>
+                      ) : null}
                     </div>
                   )}
 
@@ -2559,6 +2565,11 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                         <ResultCard label="Výsledek PHmax – 2. stupeň" value={basic2Phmax} tone="success" />
                         <ResultCard label="Počet tříd × PHmax" value={`${basic2Classes} × ${basicSecondBand.value}`} tone="success" />
                       </div>
+                      {basic2Classes <= 0 || basic2Pupils <= 0 ? (
+                        <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                          {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U 2. stupně doplňte počet tříd i počet žáků.
+                        </p>
+                      ) : null}
                     </div>
                   )}
                 </div>
@@ -2608,6 +2619,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                       </>
                     )}
                   </div>
+                  {(hasSection("sec16_first") && (sec16FirstClasses <= 0 || sec16FirstPupils <= 0)) ||
+                  (hasSection("sec16_second") && (sec16SecondClasses <= 0 || sec16SecondPupils <= 0)) ? (
+                    <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                      {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} Pro výpočet tříd podle § 16/9 vyplňte třídy i žáky v aktivní části.
+                    </p>
+                  ) : null}
                   <div className="grid three section-results-strip">
                     {hasSection("sec16_first") ? (
                       <ResultCard

@@ -11,6 +11,7 @@ import {
   MSG_NAMED_BACKUP_PICK_TO_COMPARE,
   MSG_NAMED_BACKUP_PICK_TO_DELETE,
   MSG_NO_LOCAL_AUTOSAVE_DATA,
+  INLINE_VALIDATION_MSG_POSITIVE_INTEGER,
   LAY_USER_QUICK_START_SD,
   EXPORT_ORIENTACNI_NOTE,
   formatSdLayContextLine,
@@ -1193,6 +1194,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               value={pupils}
               onChange={(v) => setPupils(Math.max(0, Math.round(v)))}
             />
+            {pupils <= 0 ? (
+              <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} Bez počtu účastníků nelze spočítat PHmax.
+              </p>
+            ) : null}
             <p className="muted-text" style={{ marginTop: 12, fontSize: "0.88rem" }}>
               Navržený počet oddělení (÷ 27, nahoru): <strong>{suggested}</strong>
               {pupils > 0
@@ -1228,6 +1234,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                     value={departments}
                     onChange={(v) => setDepartments(Math.max(1, Math.round(v)))}
                   />
+                ) : null}
+                {manualDepts && departments <= 0 ? (
+                  <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                    {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} V souhrnném režimu musí být aspoň jedno běžné oddělení.
+                  </p>
                 ) : null}
               </>
             ) : (
