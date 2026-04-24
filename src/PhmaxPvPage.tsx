@@ -1506,8 +1506,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           </summary>
           <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.86rem", lineHeight: 1.5 }}>
             U každého pracoviště s platným základem z tabulky 1–3 je zobrazen celý řádek matice pro váš počet tříd.
-            Sloupec odpovídající zadané průměrné době provozu je zvýrazněn — hodnota musí souhlasit se základním PHmax
-            před navýšeními § 16/9 a jazykovou přípravou. U MŠ při zdravotnickém zařízení se tabulky 1–3 nepoužívají.
+            Názvy sloupců odpovídají <strong>pásmům průměrné denní doby provozu</strong> ze stejné přílohové mřížky jako
+            tabulky 1–3 níže. Sloupec odpovídající zadané průměrné době provozu je zvýrazněn — hodnota musí souhlasit se
+            základním PHmax před navýšeními § 16/9 a jazykovou přípravou. U MŠ při zdravotnickém zařízení se tabulky 1–3
+            nepoužívají.
           </p>
           {rowComputations.map((c, i) => {
             const { row, computed, provozLabel } = c;

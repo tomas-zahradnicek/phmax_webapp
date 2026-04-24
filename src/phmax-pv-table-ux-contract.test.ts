@@ -17,6 +17,8 @@ describe("UX contract: PV tables readability guards", () => {
     expect(src).toContain("<br />");
     expect(src).toContain("{renderBandLabelWithBreak(lab)}");
     expect(src).toContain("Počet tříd");
+    expect(src).toContain("pásmo průměrné denní doby provozu");
+    expect(src).toContain("počtu tříd");
   });
 
   it("Tabulka 2 keeps 6+continuation segmentation instead of one wide row", () => {
@@ -42,6 +44,8 @@ describe("UX contract: PV tables readability guards", () => {
     expect(src).toContain('segmentIndex === 0 ? "PHmax základ (h/týd.)" : "Pokračování"');
     expect(src).toContain("{renderBandLabelWithBreak(bandLabels[j])}");
     expect(src).toContain('className="sd-phmax-breakdown pv-appendix-verify-matrix"');
+    expect(src).toContain("pásmům průměrné denní doby provozu");
+    expect(src).toContain("tabulky 1–3 níže");
   });
 
   it("print stylesheet keeps PV matrix page-break hints (27C)", () => {

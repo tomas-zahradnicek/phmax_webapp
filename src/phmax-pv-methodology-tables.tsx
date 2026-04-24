@@ -81,6 +81,10 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
       <p className="muted-text" style={{ marginTop: -4, marginBottom: 8, fontSize: "0.84rem" }}>
         Legenda: zelená = aktivní buňka podle výpočtu.
       </p>
+      <p className="muted-text" style={{ marginTop: -2, marginBottom: 10, fontSize: "0.84rem", lineHeight: 1.45 }}>
+        Sloupce udávají <strong>pásmo průměrné denní doby provozu</strong> dle vyhlášky (rozmezí v hodinách za den). Řádky
+        odpovídají <strong>počtu tříd</strong>.
+      </p>
       <label style={{ display: "inline-flex", gap: 8, alignItems: "center", marginBottom: 10 }} onClick={(e) => e.stopPropagation()}>
         <input
           type="checkbox"
