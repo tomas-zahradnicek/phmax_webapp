@@ -5927,3 +5927,9 @@ select:focus {
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.compare-panel__copy-notice {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: #334155;
+}

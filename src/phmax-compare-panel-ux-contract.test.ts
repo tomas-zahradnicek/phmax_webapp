@@ -27,6 +27,9 @@ describe("UX contract: compare panel side-by-side pattern", () => {
     expect(src).toContain("Rozdíl nelze určit, protože alespoň u jedné varianty chybí dopočtená metrika.");
     expect(src).toContain("<strong>Aktualizováno:</strong>");
     expect(src).toContain('rows.push(["Aktualizováno", generatedAt]);');
+    expect(src).toContain("Kopírovat porovnání");
+    expect(src).toContain("Porovnání bylo zkopírováno do schránky.");
+    expect(src).toContain("aria-live=\"polite\"");
   });
 
   it("all products render compare preview panel in named snapshots section", () => {

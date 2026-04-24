@@ -97,6 +97,7 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
 
   const left = result.metrics[0];
   const right = result.metrics[1];
+  const [copyNotice, setCopyNotice] = React.useState("");
   const generatedAt = React.useMemo(() => new Date().toLocaleString("cs-CZ"), [result]);
   const verdict = compareVerdict(result);
   const phmaxDelta = deltaText(left.totalPrimary, right.totalPrimary, " h");
@@ -134,6 +135,26 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
       exportCsvLocalized(rows),
       "text/csv;charset=utf-8",
     );
+  };
+  const copyCompareSummary = async () => {
+    const lines = [
+      `Porovnání variant (${generatedAt})`,
+      `A: ${leftLabel}`,
+      `B: ${rightLabel}`,
+      `PHmax A: ${metricText(left.totalPrimary, " h")}`,
+      `PHmax B: ${metricText(right.totalPrimary, " h")}`,
+      `Rozdíl PHmax (B - A): ${phmaxDelta}`,
+      `Sekundární metrika A: ${metricText(left.totalSecondary)}`,
+      `Sekundární metrika B: ${metricText(right.totalSecondary)}`,
+      `Rozdíl sekundární metriky (B - A): ${secondaryDelta}`,
+      `Doporučení: ${result.recommendation}`,
+    ];
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setCopyNotice("Porovnání bylo zkopírováno do schránky.");
+    } catch {
+      setCopyNotice("Kopírování se nepodařilo (omezení prohlížeče).");
+    }
   };
 
   return (
@@ -188,6 +209,9 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
         </ul>
       ) : null}
       <div className="compare-panel__actions" role="group" aria-label="Export porovnání">
+        <button type="button" className="btn ghost btn--hero-named" onClick={() => void copyCompareSummary()}>
+          Kopírovat porovnání
+        </button>
         <button type="button" className="btn ghost btn--hero-named" onClick={exportCompareCsv}>
           Export porovnání (CSV)
         </button>
@@ -195,6 +219,7 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
           Export porovnání (JSON)
         </button>
       </div>
+      {copyNotice ? <p className="compare-panel__copy-notice" aria-live="polite">{copyNotice}</p> : null}
     </section>
   );
 }
