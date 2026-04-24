@@ -1547,7 +1547,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                             className="sd-phmax-breakdown__head-num"
                             title={lab}
                           >
-                            {j + 1}
+                            {lab}
                           </th>
                         ))}
                       </tr>
