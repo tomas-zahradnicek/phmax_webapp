@@ -92,4 +92,33 @@ describe("calculateNv75DeputyBank", () => {
     expect(r.bonus4cHours).toBe(18);
     expect(r.bankHoursTotal).toBe(29); // ss_konz(10)=11 + 18
   });
+
+  it("OV E/H/L0: při 10+ skupinách se žáci OV nezapočítají do §4c", () => {
+    const r = calculateNv75DeputyBank({
+      activities: [{ kind: "ss_konz", units: 12 }],
+      practicalStudentsGeneralNonOv: 120,
+      practicalStudentsOvEhl0: 200,
+      ovGroupsSchool: 10,
+      ovGroupsInstructor: 0,
+    });
+    expect(r.ovGroupsEquivalent).toBe(10);
+    expect(r.ovDeputyEntitlementCount).toBe(1);
+    expect(r.practicalStudentsGeneralCounted).toBe(120);
+    expect(r.bonus4cHours).toBe(7);
+    expect(r.notes.some((n) => n.includes("nejsou započteni"))).toBe(true);
+  });
+
+  it("OV E/H/L0: při <10 skupinách se žáci OV započítají do §4c", () => {
+    const r = calculateNv75DeputyBank({
+      activities: [{ kind: "ss_konz", units: 12 }],
+      practicalStudentsGeneralNonOv: 50,
+      practicalStudentsOvEhl0: 70,
+      ovGroupsSchool: 8,
+      ovGroupsInstructor: 2, // +1 => 9
+    });
+    expect(r.ovGroupsEquivalent).toBe(9);
+    expect(r.ovDeputyEntitlementCount).toBe(0);
+    expect(r.practicalStudentsGeneralCounted).toBe(120);
+    expect(r.bonus4cHours).toBe(7);
+  });
 });

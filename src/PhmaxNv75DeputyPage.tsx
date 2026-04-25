@@ -45,11 +45,21 @@ const NV75_DEPUTY_KIND_OPTIONS: readonly { value: Nv75DeputyKind; label: string 
   { value: "skolni_klub", label: "Školní klub (příl. 3)" },
 ];
 
-function buildRowsForExport(rows: Nv75DeputyUiRow[], practicalGeneral: number, practicalSec16: number) {
+function buildRowsForExport(
+  rows: Nv75DeputyUiRow[],
+  practicalGeneralNonOv: number,
+  practicalOvEhl0: number,
+  practicalSec16: number,
+  ovGroupsSchool: number,
+  ovGroupsInstructor: number,
+) {
   const result = calculateNv75DeputyBank({
     activities: rows,
-    practicalStudentsGeneral: practicalGeneral,
+    practicalStudentsGeneralNonOv: practicalGeneralNonOv,
+    practicalStudentsOvEhl0: practicalOvEhl0,
     practicalStudentsSec16: practicalSec16,
+    ovGroupsSchool,
+    ovGroupsInstructor,
   });
   const out: [string, string | number][] = [
     ["=== NV75 – banka odpočtů zástupců (orientačně) ===", ""],
@@ -58,7 +68,13 @@ function buildRowsForExport(rows: Nv75DeputyUiRow[], practicalGeneral: number, p
     ["Banka – bonus dle §4c (h/týden)", result.bonus4cHours],
     ["Banka – bonus dle §4d (h/týden)", result.bonus4dHours],
     ["Banka – celkem (h/týden)", result.bankHoursTotal],
-    ["§4c odst. 1 – žáci praktického vyučování", practicalGeneral],
+    ["§4c odst. 1 – žáci praktického vyučování (mimo OV E/H/L0)", practicalGeneralNonOv],
+    ["OV E/H/L0 – žáci (pro posouzení §4c odst. 3)", practicalOvEhl0],
+    ["OV – skupiny školní pracoviště", ovGroupsSchool],
+    ["OV – skupiny u instruktora", ovGroupsInstructor],
+    ["OV – ekvivalent skupin (školní + floor(instruktor/2))", result.ovGroupsEquivalent],
+    ["OV – orientační počet funkcí OV dle vyhl. 13/2005", result.ovDeputyEntitlementCount],
+    ["§4c odst. 1 – žáci skutečně započtení", result.practicalStudentsGeneralCounted],
     ["§4c odst. 2 – žáci praktického vyučování §16/9", practicalSec16],
     ["", ""],
     ["=== Zadané řádky ===", ""],
@@ -75,8 +91,11 @@ function buildRowsForExport(rows: Nv75DeputyUiRow[], practicalGeneral: number, p
 
 export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75DeputyPageProps) {
   const [rows, setRows] = useState<Nv75DeputyUiRow[]>([{ id: 1, kind: "zs", units: 0, additionalWorkplacesEligible: 0 }]);
-  const [practicalGeneral, setPracticalGeneral] = useState(0);
+  const [practicalGeneralNonOv, setPracticalGeneralNonOv] = useState(0);
+  const [practicalOvEhl0, setPracticalOvEhl0] = useState(0);
   const [practicalSec16, setPracticalSec16] = useState(0);
+  const [ovGroupsSchool, setOvGroupsSchool] = useState(0);
+  const [ovGroupsInstructor, setOvGroupsInstructor] = useState(0);
   const [lastSavedAt, setLastSavedAt] = useState("");
   const [uiNotice, setUiNotice] = useState("");
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
@@ -85,10 +104,20 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     try {
       const raw = localStorage.getItem(NV75_STORAGE_KEY);
       if (!raw) return;
-      const s = JSON.parse(raw) as { rows?: Nv75DeputyUiRow[]; practicalGeneral?: number; practicalSec16?: number };
+      const s = JSON.parse(raw) as {
+        rows?: Nv75DeputyUiRow[];
+        practicalGeneralNonOv?: number;
+        practicalOvEhl0?: number;
+        practicalSec16?: number;
+        ovGroupsSchool?: number;
+        ovGroupsInstructor?: number;
+      };
       if (Array.isArray(s.rows) && s.rows.length > 0) setRows(s.rows);
-      if (typeof s.practicalGeneral === "number") setPracticalGeneral(s.practicalGeneral);
+      if (typeof s.practicalGeneralNonOv === "number") setPracticalGeneralNonOv(s.practicalGeneralNonOv);
+      if (typeof s.practicalOvEhl0 === "number") setPracticalOvEhl0(s.practicalOvEhl0);
       if (typeof s.practicalSec16 === "number") setPracticalSec16(s.practicalSec16);
+      if (typeof s.ovGroupsSchool === "number") setOvGroupsSchool(s.ovGroupsSchool);
+      if (typeof s.ovGroupsInstructor === "number") setOvGroupsInstructor(s.ovGroupsInstructor);
     } catch {
       /* ignore */
     }
@@ -96,21 +125,34 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
 
   useEffect(() => {
     try {
-      localStorage.setItem(NV75_STORAGE_KEY, JSON.stringify({ rows, practicalGeneral, practicalSec16 }));
+      localStorage.setItem(
+        NV75_STORAGE_KEY,
+        JSON.stringify({
+          rows,
+          practicalGeneralNonOv,
+          practicalOvEhl0,
+          practicalSec16,
+          ovGroupsSchool,
+          ovGroupsInstructor,
+        }),
+      );
       setLastSavedAt(new Date().toLocaleString("cs-CZ"));
     } catch {
       /* ignore */
     }
-  }, [rows, practicalGeneral, practicalSec16]);
+  }, [rows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor]);
 
   const bank = useMemo(
     () =>
       calculateNv75DeputyBank({
         activities: rows,
-        practicalStudentsGeneral: practicalGeneral,
+        practicalStudentsGeneralNonOv: practicalGeneralNonOv,
+        practicalStudentsOvEhl0: practicalOvEhl0,
         practicalStudentsSec16: practicalSec16,
+        ovGroupsSchool,
+        ovGroupsInstructor,
       }),
-    [rows, practicalGeneral, practicalSec16],
+    [rows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor],
   );
 
   const addRow = useCallback(() => {
@@ -124,14 +166,25 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   }, []);
   const resetAll = useCallback(() => {
     setRows([{ id: 1, kind: "zs", units: 0, additionalWorkplacesEligible: 0 }]);
-    setPracticalGeneral(0);
+    setPracticalGeneralNonOv(0);
+    setPracticalOvEhl0(0);
     setPracticalSec16(0);
+    setOvGroupsSchool(0);
+    setOvGroupsInstructor(0);
     setUiNotice("NV75 banka byla resetována.");
   }, []);
 
   const exportRows = useMemo(
-    () => buildRowsForExport(rows, practicalGeneral, practicalSec16),
-    [rows, practicalGeneral, practicalSec16],
+    () =>
+      buildRowsForExport(
+        rows,
+        practicalGeneralNonOv,
+        practicalOvEhl0,
+        practicalSec16,
+        ovGroupsSchool,
+        ovGroupsInstructor,
+      ),
+    [rows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor],
   );
 
   const handleExportCsv = useCallback(() => {
@@ -166,10 +219,13 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       "Shrnutí – NV75 banka odpočtů zástupců (orientačně)",
       "",
       `Pravidlo §4b: ${bank.appliedRule}`,
+      `§4c odst. 1 – žáci započtení: ${bank.practicalStudentsGeneralCounted}`,
       `Základ banky (§4b): ${bank.bankHoursBase4b} h/týden`,
       `Bonus (§4c): ${bank.bonus4cHours} h/týden`,
       `Bonus (§4d): ${bank.bonus4dHours} h/týden`,
       `Banka odpočtů celkem: ${bank.bankHoursTotal} h/týden`,
+      `OV ekvivalent skupin: ${bank.ovGroupsEquivalent}`,
+      `OV orientační počet funkcí dle vyhl. 13/2005: ${bank.ovDeputyEntitlementCount}`,
       "",
       APP_AUTHOR_CREDIT_LINE,
     ];
@@ -239,14 +295,47 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
 
           <div className="grid two" style={{ marginTop: 10 }}>
             <label className="field">
-              <span className="field__label">§4c odst. 1 – žáci/stud. praktického vyučování</span>
+              <span className="field__label">§4c odst. 1 – žáci/stud. praktického vyučování (mimo OV E/H/L0)</span>
               <input
                 className="input"
                 type="number"
                 min={0}
                 step={1}
-                value={practicalGeneral}
-                onChange={(e) => setPracticalGeneral(Number(e.target.value))}
+                value={practicalGeneralNonOv}
+                onChange={(e) => setPracticalGeneralNonOv(Number(e.target.value))}
+              />
+            </label>
+            <label className="field">
+              <span className="field__label">OV E/H/L0 – žáci (započítání dle §4c odst. 3)</span>
+              <input
+                className="input"
+                type="number"
+                min={0}
+                step={1}
+                value={practicalOvEhl0}
+                onChange={(e) => setPracticalOvEhl0(Number(e.target.value))}
+              />
+            </label>
+            <label className="field">
+              <span className="field__label">OV – skupiny na školních pracovištích</span>
+              <input
+                className="input"
+                type="number"
+                min={0}
+                step={1}
+                value={ovGroupsSchool}
+                onChange={(e) => setOvGroupsSchool(Number(e.target.value))}
+              />
+            </label>
+            <label className="field">
+              <span className="field__label">OV – skupiny vedené instruktorem</span>
+              <input
+                className="input"
+                type="number"
+                min={0}
+                step={1}
+                value={ovGroupsInstructor}
+                onChange={(e) => setOvGroupsInstructor(Number(e.target.value))}
               />
             </label>
             <label className="field">
@@ -316,6 +405,9 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             <div className="result-card"><p className="result-card__label">Základ §4b</p><p className="result-card__value">{bank.bankHoursBase4b}</p></div>
             <div className="result-card"><p className="result-card__label">Bonus §4c+§4d</p><p className="result-card__value">{bank.bonus4cHours + bank.bonus4dHours}</p></div>
             <div className="result-card"><p className="result-card__label">Banka celkem (h/týden)</p><p className="result-card__value">{bank.bankHoursTotal}</p></div>
+            <div className="result-card"><p className="result-card__label">§4c odst. 1 – žáci započtení</p><p className="result-card__value">{bank.practicalStudentsGeneralCounted}</p></div>
+            <div className="result-card"><p className="result-card__label">OV ekvivalent skupin</p><p className="result-card__value">{bank.ovGroupsEquivalent}</p></div>
+            <div className="result-card"><p className="result-card__label">OV funkce dle vyhl. 13/2005</p><p className="result-card__value">{bank.ovDeputyEntitlementCount}</p></div>
           </div>
           {bank.notes.length > 0 ? <p className="muted-text" style={{ marginTop: 10 }}>{bank.notes.join(" | ")}</p> : null}
         </section>

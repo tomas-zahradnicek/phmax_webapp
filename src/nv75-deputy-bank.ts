@@ -34,6 +34,20 @@ export type Nv75DeputyBankInput = {
    */
   practicalStudentsGeneral?: number;
   /**
+   * § 4c odst. 1 – žáci/studenti praktického vyučování nebo přípravy mimo odborný výcvik E/H/L0.
+   * Pokud je vyplněno spolu s `practicalStudentsOvEhl0`, použije se tento rozpad přednostně.
+   */
+  practicalStudentsGeneralNonOv?: number;
+  /**
+   * Žáci odborného výcviku v oborech E/H/L0.
+   * Do §4c se započítají jen pokud je ekvivalent skupin OV < 10 (viz §4c odst. 3 + vyhl. 13/2005).
+   */
+  practicalStudentsOvEhl0?: number;
+  /** Skupiny odborného výcviku vedené školou. */
+  ovGroupsSchool?: number;
+  /** Skupiny vedené instruktorem; počítá se 1/2 zaokrouhlená dolů. */
+  ovGroupsInstructor?: number;
+  /**
    * § 4c odst. 2 – žáci praktického vyučování ve škole dle §16/9.
    * 1–42 => +7 h, pak +2 h za každých dalších započatých 42.
    */
@@ -54,6 +68,9 @@ export type Nv75DeputyBankResult = {
     bonus4dHours: number;
   }[];
   notes: string[];
+  ovGroupsEquivalent: number;
+  ovDeputyEntitlementCount: number;
+  practicalStudentsGeneralCounted: number;
 };
 
 const APPENDIX_GROUP: Record<Nv75DeputyKind, AppendixGroup> = {
@@ -245,7 +262,23 @@ export function calculateNv75DeputyBank(input: Nv75DeputyBankInput): Nv75DeputyB
   }
 
   const bonus4d = rows.reduce((acc, row) => acc + row.bonus4dHours, 0);
-  const bonus4c = bonus4cGeneral(input.practicalStudentsGeneral ?? 0) + bonus4cSec16(input.practicalStudentsSec16 ?? 0);
+  const ovGroupsSchool = clampInt(input.ovGroupsSchool ?? 0);
+  const ovGroupsInstructor = clampInt(input.ovGroupsInstructor ?? 0);
+  const ovGroupsEquivalent = ovGroupsSchool + Math.floor(ovGroupsInstructor / 2);
+  const ovDeputyEntitlementCount =
+    ovGroupsEquivalent < 10 ? 0 : 1 + Math.floor(Math.max(0, ovGroupsEquivalent - 20) / 20);
+  const practicalNonOv = clampInt(input.practicalStudentsGeneralNonOv ?? 0);
+  const practicalOv = clampInt(input.practicalStudentsOvEhl0 ?? 0);
+  const usingSplit = input.practicalStudentsGeneralNonOv != null || input.practicalStudentsOvEhl0 != null;
+  const practicalGeneralCounted = usingSplit
+    ? practicalNonOv + (ovGroupsEquivalent < 10 ? practicalOv : 0)
+    : clampInt(input.practicalStudentsGeneral ?? 0);
+  if (usingSplit && ovGroupsEquivalent >= 10 && practicalOv > 0) {
+    notes.push(
+      "Žáci OV (E/H/L0) nejsou započteni do §4c, protože ekvivalent skupin OV je 10 a více; místo toho vzniká nárok na funkce OV dle vyhl. 13/2005.",
+    );
+  }
+  const bonus4c = bonus4cGeneral(practicalGeneralCounted) + bonus4cSec16(input.practicalStudentsSec16 ?? 0);
 
   return {
     bankHoursTotal: base4b + bonus4c + bonus4d,
@@ -255,5 +288,8 @@ export function calculateNv75DeputyBank(input: Nv75DeputyBankInput): Nv75DeputyB
     appliedRule: rule,
     breakdown: rows,
     notes,
+    ovGroupsEquivalent,
+    ovDeputyEntitlementCount: Math.max(0, ovDeputyEntitlementCount),
+    practicalStudentsGeneralCounted: practicalGeneralCounted,
   };
 }
