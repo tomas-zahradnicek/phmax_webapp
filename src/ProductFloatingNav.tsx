@@ -56,6 +56,14 @@ export function ProductFloatingNav({ active, setProductView }: ProductFloatingNa
         >
           SŠ
         </button>
+        <button
+          type="button"
+          className={`scroll-tools__btn${active === "nv75" ? " scroll-tools__btn--active" : ""}`}
+          title="Kalkulačka NV75 – banka odpočtů zástupců"
+          onClick={() => setProductView("nv75")}
+        >
+          NV75
+        </button>
       </div>
     </div>
   );

@@ -110,11 +110,6 @@ import { MAX_NAMED_SNAPSHOTS } from "./zs-named-snapshots";
 import { createZsProductAuditProtocol, parseZsSnapshotAuditTotals } from "./phmax-product-audit";
 import { comparePhmaxProductVariants } from "./phmax-product-compare";
 import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "./phmax-product-audit-download";
-import {
-  calculateNv75DeputyBank,
-  type Nv75DeputyActivity,
-  type Nv75DeputyKind,
-} from "./nv75-deputy-bank";
 
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
@@ -152,12 +147,6 @@ type WizardChoice =
   | "ph_mixed"
   | "ph_prep";
 type DataMode = "own" | "example";
-type Nv75DeputyUiRow = {
-  id: number;
-  kind: Nv75DeputyKind;
-  units: number;
-  additionalWorkplacesEligible: number;
-};
 
 /** Viditelná legenda + doplněk k nativním tooltipům (`title`) u řádků v seznamech. */
 const ZS_GUIDE_NATIVE_TOOLTIP_LEGEND =
@@ -238,23 +227,6 @@ function getNv75Reference(role: Nv75Role, school: Nv75School) {
     note: "Minimum pro ředitele plavecké školy.",
   };
 }
-
-const NV75_DEPUTY_KIND_OPTIONS: readonly { value: Nv75DeputyKind; label: string }[] = [
-  { value: "ms", label: "MŠ (příl. 2)" },
-  { value: "ms_internat", label: "MŠ internátní / SPC (příl. 2)" },
-  { value: "zs", label: "ZŠ (příl. 2)" },
-  { value: "ss_konz", label: "SŠ a konzervatoř (příl. 2)" },
-  { value: "sd", label: "Školní družina (příl. 2)" },
-  { value: "internat", label: "Internát (příl. 3)" },
-  { value: "zus_individual", label: "ZUŠ – zástupce (individuální výuka) (příl. 3)" },
-  { value: "zus_group", label: "ZUŠ – zástupce (skupinová/kolektivní) (příl. 3)" },
-  { value: "jazykova", label: "Jazyková škola s právem SJZ (příl. 3)" },
-  { value: "ustavni", label: "ŠZ pro ústavní/ochrannou výchovu (příl. 3)" },
-  { value: "domov_mladeze", label: "Domov mládeže (příl. 3)" },
-  { value: "poradenske", label: "Školské poradenské zařízení (příl. 3)" },
-  { value: "vos", label: "Vyšší odborná škola (příl. 3)" },
-  { value: "skolni_klub", label: "Školní klub (příl. 3)" },
-];
 
 function HelpHint({ text }: { text: string }) {
   return (
@@ -378,7 +350,6 @@ function buildShareText(data: {
   warnings: string[];
   inputMode: DataMode;
   exportLabel?: string;
-  extraLines?: string[];
 }) {
   const rows = [
     "Shrnutí kalkulačky ZŠ",
@@ -397,9 +368,6 @@ function buildShareText(data: {
   if (data.warnings.length) {
     rows.push("", "Upozornění:");
     data.warnings.forEach((item) => rows.push(`- ${item}`));
-  }
-  if (data.extraLines && data.extraLines.length > 0) {
-    rows.push("", ...data.extraLines);
   }
   rows.push("", APP_AUTHOR_CREDIT_LINE);
   return rows.join("\n");
@@ -524,11 +492,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [nv75School, setNv75School] = useState<Nv75School>("plavecka_skola");
   const [nv75TeacherMin, setNv75TeacherMin] = useState(22);
   const [nv75TeacherMax, setNv75TeacherMax] = useState(30);
-  const [nv75DeputyRows, setNv75DeputyRows] = useState<Nv75DeputyUiRow[]>([
-    { id: 1, kind: "zs", units: 0, additionalWorkplacesEligible: 0 },
-  ]);
-  const [nv75PracticalGeneral, setNv75PracticalGeneral] = useState(0);
-  const [nv75PracticalSec16, setNv75PracticalSec16] = useState(0);
   const [selectedExample, setSelectedExample] = useState<ExampleKey>("");
   const [wizardChoice, setWizardChoice] = useState<WizardChoice>("");
   const [dataMode, setDataMode] = useState<DataMode>("own");
@@ -915,24 +878,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const nv75Reference = getNv75Reference(nv75Role, nv75School);
   const nv75TeacherRangeValid = nv75TeacherMin <= nv75TeacherMax;
-  const nv75DeputyActivities = useMemo<Nv75DeputyActivity[]>(
-    () =>
-      nv75DeputyRows.map((row) => ({
-        kind: row.kind,
-        units: Math.max(0, Math.floor(row.units)),
-        additionalWorkplacesEligible: Math.max(0, Math.floor(row.additionalWorkplacesEligible)),
-      })),
-    [nv75DeputyRows],
-  );
-  const nv75DeputyBank = useMemo(
-    () =>
-      calculateNv75DeputyBank({
-        activities: nv75DeputyActivities,
-        practicalStudentsGeneral: nv75PracticalGeneral,
-        practicalStudentsSec16: nv75PracticalSec16,
-      }),
-    [nv75DeputyActivities, nv75PracticalGeneral, nv75PracticalSec16],
-  );
 
   const warnings: string[] = [];
   if (basicType === "full_max_2" && basic1Classes > 0 && basic1Classes < 5) warnings.push("U úplné ZŠ s nejvýše 2 třídami v každém ročníku bývá obvykle na 1. stupni nejméně 5 běžných tříd.");
@@ -941,16 +886,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   if (phpAdjustedValue > 0 && phpAdjustedValue < 180 && !phpExcludedSchool) warnings.push("PHPmax – metodický výpočet vychází 0, protože očištěný rozhodný počet žáků je pod hranicí 180.");
   if (phpExcludedSchool) warnings.push("Škola je označena jako vyloučená z PHPmax – metodický výpočet, proto je výsledek 0.");
   if (minorityType !== "minorityFull1" && minority2Classes > 0) warnings.push("U menšinové školy zadané jen pro 1. stupeň se 2. stupeň nezapočítá.");
-  if (nv75DeputyRows.length === 0) warnings.push("NV75 banka odpočtů: není zadaný žádný druh školy/zařízení.");
-
-  const nv75DeputySummaryLines = [
-    "NV75 – banka odpočtů zástupců (orientačně):",
-    `- Pravidlo §4b: ${nv75DeputyBank.appliedRule}`,
-    `- Základ banky (§4b): ${nv75DeputyBank.bankHoursBase4b} h/týden`,
-    `- Bonifikace (§4c): ${nv75DeputyBank.bonus4cHours} h/týden`,
-    `- Bonifikace (§4d): ${nv75DeputyBank.bonus4dHours} h/týden`,
-    `- Celkem banka: ${nv75DeputyBank.bankHoursTotal} h/týden`,
-  ];
 
   const addMixed = () => setMixedRows((prev) => [...prev, createEmptyMixedRow(Date.now())]);
   const updateMixed = (id: number, key: keyof MixedRow, value: string | number) => setMixedRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
@@ -972,15 +907,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const addGym = () => setGymRows((prev) => [...prev, createEmptyGymRow(Date.now())]);
   const updateGym = (id: number, key: keyof GymRow, value: string | number) => setGymRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removeGym = (id: number) => setGymRows((prev) => prev.filter((r) => r.id !== id));
-  const addNv75DeputyRow = () => {
-    setNv75DeputyRows((prev) => [...prev, { id: Date.now(), kind: "zs", units: 0, additionalWorkplacesEligible: 0 }]);
-  };
-  const updateNv75DeputyRow = (
-    id: number,
-    patch: Partial<Pick<Nv75DeputyUiRow, "kind" | "units" | "additionalWorkplacesEligible">>,
-  ) => setNv75DeputyRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-  const removeNv75DeputyRow = (id: number) =>
-    setNv75DeputyRows((prev) => (prev.length > 1 ? prev.filter((r) => r.id !== id) : prev));
 
 
   const applyResetPhmax = () => {
@@ -1068,9 +994,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     setNv75School("plavecka_skola");
     setNv75TeacherMin(22);
     setNv75TeacherMax(30);
-    setNv75DeputyRows([{ id: 1, kind: "zs", units: 0, additionalWorkplacesEligible: 0 }]);
-    setNv75PracticalGeneral(0);
-    setNv75PracticalSec16(0);
   };
 
   const resetAll = () => {
@@ -1402,9 +1325,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     nv75School,
     nv75TeacherMin,
     nv75TeacherMax,
-    nv75DeputyRows,
-    nv75PracticalGeneral,
-    nv75PracticalSec16,
     mixedMethodFirstZsPupils,
     mixedMethodFirstZsClasses,
     mixedMethodFirstSpecialPupils,
@@ -1474,27 +1394,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     setNv75School(s.nv75School === "plavecka_skola" ? "plavecka_skola" : "plavecka_skola");
     setNv75TeacherMin(typeof s.nv75TeacherMin === "number" ? s.nv75TeacherMin : 22);
     setNv75TeacherMax(typeof s.nv75TeacherMax === "number" ? s.nv75TeacherMax : 30);
-    setNv75DeputyRows(
-      Array.isArray(s.nv75DeputyRows)
-        ? s.nv75DeputyRows
-            .map((row, idx) => {
-              if (!row || typeof row !== "object") return null;
-              const r = row as Record<string, unknown>;
-              const kind = typeof r.kind === "string" ? r.kind : "zs";
-              if (!NV75_DEPUTY_KIND_OPTIONS.some((opt) => opt.value === kind)) return null;
-              return {
-                id: typeof r.id === "number" ? r.id : idx + 1,
-                kind: kind as Nv75DeputyKind,
-                units: typeof r.units === "number" ? r.units : 0,
-                additionalWorkplacesEligible:
-                  typeof r.additionalWorkplacesEligible === "number" ? r.additionalWorkplacesEligible : 0,
-              } as Nv75DeputyUiRow;
-            })
-            .filter((row): row is Nv75DeputyUiRow => row != null)
-        : [{ id: 1, kind: "zs", units: 0, additionalWorkplacesEligible: 0 }],
-    );
-    setNv75PracticalGeneral(typeof s.nv75PracticalGeneral === "number" ? s.nv75PracticalGeneral : 0);
-    setNv75PracticalSec16(typeof s.nv75PracticalSec16 === "number" ? s.nv75PracticalSec16 : 0);
     setMixedMethodFirstZsPupils((s.mixedMethodFirstZsPupils as number) ?? 0);
     setMixedMethodFirstZsClasses((s.mixedMethodFirstZsClasses as number) ?? 0);
     setMixedMethodFirstSpecialPupils((s.mixedMethodFirstSpecialPupils as number) ?? 0);
@@ -1586,7 +1485,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       warnings,
       inputMode: dataMode,
       exportLabel,
-      extraLines: nv75DeputySummaryLines,
     });
     try {
       await navigator.clipboard.writeText(text);
@@ -1606,7 +1504,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         warnings,
         inputMode: dataMode,
         exportLabel,
-        extraLines: nv75DeputySummaryLines,
       }),
     );
     const text = plain.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
@@ -1856,7 +1753,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     phpWizardStep, phpMethodMode, phpExcludedAbroad, phpExcludedForeignSchoolCz,
     phpExcludedIndividual, phpExcludedSchool, selectedExample, wizardChoice, dataMode,
     nv75Role, nv75School, nv75TeacherMin, nv75TeacherMax,
-    nv75DeputyRows, nv75PracticalGeneral, nv75PracticalSec16,
     mixedMethodFirstZsPupils, mixedMethodFirstZsClasses, mixedMethodFirstSpecialPupils,
     mixedMethodFirstSpecialClasses, mixedMethodSecondZsPupils, mixedMethodSecondZsClasses,
     mixedMethodSecondSpecialPupils, mixedMethodSecondSpecialClasses,
@@ -1893,11 +1789,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     ["PHPmax – nezapočítávaní žáci", phpExcludedTotal],
     ["PHPmax – očištěná hodnota", phpAdjustedValue],
     ["Výsledek PHPmax", totalPhp],
-    ["NV75 banka odpočtů – pravidlo §4b", nv75DeputyBank.appliedRule],
-    ["NV75 banka odpočtů – základ (§4b), h/týden", nv75DeputyBank.bankHoursBase4b],
-    ["NV75 banka odpočtů – bonus (§4c), h/týden", nv75DeputyBank.bonus4cHours],
-    ["NV75 banka odpočtů – bonus (§4d), h/týden", nv75DeputyBank.bonus4dHours],
-    ["NV75 banka odpočtů – celkem, h/týden", nv75DeputyBank.bankHoursTotal],
   ];
 
   const buildXlsxContextRows = (): [string, string | number][] => {
@@ -1914,8 +1805,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       ["Průvodce (volba scénáře)", wizardChoice || "–"],
       ["Práce s údaji", dataMode === "example" ? "ukázkový příklad" : "vlastní škola"],
       ["Identifikátor ukázkového příkladu", selectedExample || "–"],
-      ["NV75 banka odpočtů – pravidlo §4b", nv75DeputyBank.appliedRule],
-      ["NV75 banka odpočtů – celkem (h/týden)", nv75DeputyBank.bankHoursTotal],
       ["", ""],
       ["Varování", warnings.length ? warnings.join(" | ") : "–"],
       ["", ""],
@@ -1982,24 +1871,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       ["=== Souhrnné výstupy ===", ""],
     ];
     const out: [string, string | number][] = [...head, ...summaryRows.map((r) => [r[0], r[1]] as [string, string | number])];
-    out.push(["", ""]);
-    out.push(["=== NV75 banka odpočtů zástupců (orientačně) ===", ""]);
-    out.push(["Počet řádků (druhy školy/zařízení)", nv75DeputyRows.length]);
-    out.push(["Pravidlo §4b", nv75DeputyBank.appliedRule]);
-    out.push(["Banka – základ dle §4b (h/týden)", nv75DeputyBank.bankHoursBase4b]);
-    out.push(["Banka – bonus dle §4c (h/týden)", nv75DeputyBank.bonus4cHours]);
-    out.push(["Banka – bonus dle §4d (h/týden)", nv75DeputyBank.bonus4dHours]);
-    out.push(["Banka – celkem (h/týden)", nv75DeputyBank.bankHoursTotal]);
-    out.push(["Praktické vyučování §4c odst. 1 (žáci)", nv75PracticalGeneral]);
-    out.push(["Praktické vyučování §4c odst. 2 (žáci §16/9)", nv75PracticalSec16]);
-    nv75DeputyRows.forEach((row, idx) => {
-      out.push([`NV75 ${idx + 1} – druh`, row.kind]);
-      out.push([`NV75 ${idx + 1} – jednotky`, row.units]);
-      out.push([`NV75 ${idx + 1} – další pracoviště (způsobilá)`, row.additionalWorkplacesEligible]);
-    });
-    if (nv75DeputyBank.notes.length > 0) {
-      out.push(["NV75 – poznámky", nv75DeputyBank.notes.join(" | ")]);
-    }
     if (phaRows.length > 0) {
       out.push(["", ""]);
       out.push(["=== PHAmax – jednotlivé řádky ===", ""]);
@@ -3698,102 +3569,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </section>
         )}
 
-        <section className="card muted section-card" data-section="nv75-bank">
-          <h2 className="section-title">NV75 – kalkulačka banky odpočtů zástupců (orientačně)</h2>
-          <p className="muted-text">
-            Výpočet odpovídá § 4b až § 4d nařízení vlády č. 75/2005 Sb. pro celkové snížení PPČ (banka odpočtů) napříč
-            zadanými druhy školy/zařízení. Slouží jako orientační podklad.
-          </p>
-          <div className="toolbar" style={{ marginTop: 8 }}>
-            <button type="button" className="btn ghost" onClick={addNv75DeputyRow}>Přidat řádek druhu školy/zařízení</button>
-            <button type="button" className="btn ghost" onClick={resetNv75}>Reset NV75 banky</button>
-          </div>
-          <div className="grid two" style={{ marginTop: 12 }}>
-            <NumberField
-              label="§4c odst. 1 – žáci/stud. praktického vyučování (obecně)"
-              value={nv75PracticalGeneral}
-              onChange={setNv75PracticalGeneral}
-            />
-            <NumberField
-              label="§4c odst. 2 – žáci prakt. vyučování ve škole dle §16/9"
-              value={nv75PracticalSec16}
-              onChange={setNv75PracticalSec16}
-            />
-          </div>
-          <div className="sd-phmax-breakdown-scroll" style={{ marginTop: 10 }}>
-            <table className="sd-phmax-breakdown">
-              <thead>
-                <tr>
-                  <th scope="col">Druh školy/zařízení (příl. 2/3)</th>
-                  <th scope="col">Jednotky</th>
-                  <th scope="col">Další pracoviště (způsobilá)</th>
-                  <th scope="col">Akce</th>
-                </tr>
-              </thead>
-              <tbody>
-                {nv75DeputyRows.map((row) => (
-                  <tr key={row.id}>
-                    <td>
-                      <select
-                        className="input"
-                        value={row.kind}
-                        onChange={(e) => updateNv75DeputyRow(row.id, { kind: e.target.value as Nv75DeputyKind })}
-                        aria-label="Druh školy nebo zařízení pro NV75 banku"
-                      >
-                        {NV75_DEPUTY_KIND_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td style={{ maxWidth: 130 }}>
-                      <input
-                        className="input"
-                        type="number"
-                        min={0}
-                        step={1}
-                        value={row.units}
-                        onChange={(e) => updateNv75DeputyRow(row.id, { units: Number(e.target.value) })}
-                        aria-label="Počet jednotek"
-                      />
-                    </td>
-                    <td style={{ maxWidth: 170 }}>
-                      <input
-                        className="input"
-                        type="number"
-                        min={0}
-                        step={1}
-                        value={row.additionalWorkplacesEligible}
-                        onChange={(e) =>
-                          updateNv75DeputyRow(row.id, { additionalWorkplacesEligible: Number(e.target.value) })
-                        }
-                        aria-label="Počet dalších pracovišť splňujících podmínky"
-                      />
-                    </td>
-                    <td>
-                      <button type="button" className="btn ghost" onClick={() => removeNv75DeputyRow(row.id)}>
-                        Odebrat
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="grid four" style={{ marginTop: 12 }}>
-            <ResultCard label="Pravidlo §4b" value={nv75DeputyBank.appliedRule} />
-            <ResultCard label="Základ banky (§4b)" value={nv75DeputyBank.bankHoursBase4b} />
-            <ResultCard label="Bonus (§4c + §4d)" value={nv75DeputyBank.bonus4cHours + nv75DeputyBank.bonus4dHours} />
-            <ResultCard label="Banka odpočtů celkem" tone="success" value={nv75DeputyBank.bankHoursTotal} />
-          </div>
-          {nv75DeputyBank.notes.length > 0 ? (
-            <p className="muted-text" style={{ marginTop: 8 }}>
-              {nv75DeputyBank.notes.join(" | ")}
-            </p>
-          ) : null}
-        </section>
-
         <section className="card muted card--summary section-card section-card--overview" data-section="overview">
           <h2 className="section-title">Celkový přehled</h2>
           <p className="muted-text">Výsledky PHmax, PHAmax a PHPmax se stanovují samostatně. Součet níže slouží jen pro orientaci.</p>
@@ -3838,6 +3613,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               </button>
               <button type="button" className="scroll-tools__btn" onClick={() => setProductView("ss")}>
                 SŠ
+              </button>
+              <button type="button" className="scroll-tools__btn" onClick={() => setProductView("nv75")}>
+                NV75
               </button>
             </div>
           </div>

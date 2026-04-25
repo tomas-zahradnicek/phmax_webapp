@@ -13,9 +13,10 @@ const PILL_SHORT: Record<ProductView, string> = {
   sd: "ŠD",
   zs: "ZŠ",
   ss: "SŠ",
+  nv75: "NV75",
 };
 
-const TAB_ORDER: ProductView[] = ["pv", "sd", "zs", "ss"];
+const TAB_ORDER: ProductView[] = ["pv", "sd", "zs", "ss", "nv75"];
 
 export function ProductViewPills({ productView, setProductView }: ProductViewPillsProps) {
   const moveSelection = useCallback(
@@ -40,7 +41,7 @@ export function ProductViewPills({ productView, setProductView }: ProductViewPil
         setProductView("pv");
       } else if (e.key === "End") {
         e.preventDefault();
-        setProductView("ss");
+        setProductView("nv75");
       }
     },
     [moveSelection, setProductView],
@@ -99,6 +100,19 @@ export function ProductViewPills({ productView, setProductView }: ProductViewPil
         onKeyDown={(e) => onTabListKeyDown(e, "ss")}
       >
         {PILL_SHORT.ss}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        tabIndex={productView === "nv75" ? 0 : -1}
+        aria-selected={productView === "nv75"}
+        title={PRODUCT_CALCULATOR_TITLES.nv75}
+        aria-label={PRODUCT_CALCULATOR_TITLES.nv75}
+        className={`pill pill--hero pill--hero-toggle${productView === "nv75" ? " pill--hero-toggle--active" : ""}`}
+        onClick={() => setProductView("nv75")}
+        onKeyDown={(e) => onTabListKeyDown(e, "nv75")}
+      >
+        {PILL_SHORT.nv75}
       </button>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { PhmaxPvPage } from "./PhmaxPvPage";
 import { PhmaxSdPage } from "./PhmaxSdPage";
 import { PhmaxSsPage } from "./PhmaxSsPage";
+import { PhmaxNv75DeputyPage } from "./PhmaxNv75DeputyPage";
 import { PhmaxZsPage } from "./PhmaxZsPage";
 import type { ProductView } from "./ProductViewPills";
 import { readInitialProductView } from "./product-view-url";
@@ -35,6 +36,8 @@ export default function App() {
       return shell(<PhmaxSsPage productView={productView} setProductView={setProductView} />);
     case "zs":
       return <PhmaxZsPage productView={productView} setProductView={setProductView} />;
+    case "nv75":
+      return shell(<PhmaxNv75DeputyPage productView={productView} setProductView={setProductView} />);
     default: {
       const _missing: never = productView;
       return _missing;
