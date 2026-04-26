@@ -21,7 +21,10 @@ describe("UX contract: NV75 deputy bank result visibility", () => {
     expect(page).toContain("bank.ovDeputyEntitlementText");
     expect(page).toContain("OV – metodický výstup funkcí");
     expect(page).toContain("OV metodický výstup funkcí");
+    expect(page).toContain("Počet skupin odborného výcviku na školních pracovištích");
+    expect(page).toContain("Počet skupin odborného výcviku u instruktora / ve firmách");
     expect(page).toContain("Počet skupin odborného výcviku celkem");
+    expect(page).toContain("Výstup dle §13 odst. 7 vyhl. 13/2005");
   });
 
   it("extended methodology examples remain selectable in the NV75 page", () => {

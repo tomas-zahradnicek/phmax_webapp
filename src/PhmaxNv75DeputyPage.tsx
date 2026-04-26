@@ -431,6 +431,8 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     [rows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor],
   );
   const hasPracticalContext = useMemo(() => rows.some((r) => r.kind === "ss_konz" || r.kind === "vos"), [rows]);
+  const ovInstructorGroupsCounted = Math.floor(Math.max(0, Math.floor(ovGroupsInstructor)) / 2);
+  const hasOvGroups = ovGroupsSchool > 0 || ovGroupsInstructor > 0 || bank.ovGroupsEquivalent > 0;
 
   const addRow = useCallback(() => {
     setRows((prev) => [...prev, { id: Date.now(), kind: "zs", units: 0, additionalWorkplacesEligible: 0 }]);
@@ -793,11 +795,26 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                   <td>—</td>
                   <td>{bank.bankHoursTotal} hodin týdně</td>
                 </tr>
-                {bank.ovGroupsEquivalent > 0 ? (
+                {hasOvGroups ? (
                   <>
+                    <tr>
+                      <th>Počet skupin odborného výcviku na školních pracovištích</th>
+                      <td>{ovGroupsSchool} skupin</td>
+                      <td>započítáno plně</td>
+                    </tr>
+                    <tr>
+                      <th>Počet skupin odborného výcviku u instruktora / ve firmách</th>
+                      <td>{ovGroupsInstructor} skupin</td>
+                      <td>započteno {ovInstructorGroupsCounted} skupin (floor({ovGroupsInstructor} / 2))</td>
+                    </tr>
                     <tr>
                       <th>Počet skupin odborného výcviku celkem</th>
                       <td>{bank.ovGroupsEquivalent} skupin</td>
+                      <td>školní skupiny + započtená polovina instruktorských skupin</td>
+                    </tr>
+                    <tr>
+                      <th>Výstup dle §13 odst. 7 vyhl. 13/2005</th>
+                      <td>{bank.ovDeputyEntitlementCount} funkcí</td>
                       <td>{bank.ovDeputyEntitlementText}</td>
                     </tr>
                   </>
@@ -821,9 +838,11 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               <li>
                 Celkem: <strong>{bank.bankHoursTotal} h/týden</strong>.
               </li>
-              {bank.ovGroupsEquivalent > 0 ? (
+              {hasOvGroups ? (
                 <li>
-                  OV: ekvivalent <strong>{bank.ovGroupsEquivalent} skupin</strong> {"=>"}{" "}
+                  OV: <strong>{ovGroupsSchool} školních skupin</strong> +{" "}
+                  <strong>{ovInstructorGroupsCounted} započtených instruktorských skupin</strong> = ekvivalent{" "}
+                  <strong>{bank.ovGroupsEquivalent} skupin</strong> {"=>"}{" "}
                   <strong>{bank.ovDeputyEntitlementText}</strong> podle <Nv75LegisRef citeId="vyhl13-7" label="vyhl. 13/2005" />.
                 </li>
               ) : null}
