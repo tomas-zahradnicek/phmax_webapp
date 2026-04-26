@@ -121,4 +121,18 @@ describe("calculateNv75DeputyBank", () => {
     expect(r.practicalStudentsGeneralCounted).toBe(120);
     expect(r.bonus4cHours).toBe(7);
   });
+
+  it("příloha 3: druhy vyžadující jednotky mají při 0 jednotkách nulový odpočet", () => {
+    const r = calculateNv75DeputyBank({
+      activities: [
+        { kind: "zus_individual", units: 0 },
+        { kind: "zus_group", units: 0 },
+        { kind: "jazykova", units: 0 },
+        { kind: "domov_mladeze", units: 0 },
+        { kind: "vos", units: 0 },
+      ],
+    });
+    expect(r.bankHoursBase4b).toBe(0);
+    expect(r.bankHoursTotal).toBe(0);
+  });
 });

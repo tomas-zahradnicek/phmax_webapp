@@ -139,18 +139,21 @@ function reductionByKind(kind: Nv75DeputyKind, unitsIn: number) {
       if (units <= 22) return 18;
       return 19;
     case "zus_individual":
+      if (units <= 0) return 0;
       if (units <= 14) return 11;
       if (units <= 29) return 14;
       if (units <= 39) return 18;
       if (units <= 49) return 23;
       return 28;
     case "zus_group":
+      if (units <= 0) return 0;
       if (units <= 14) return 9;
       if (units <= 29) return 12;
       if (units <= 39) return 16;
       if (units <= 49) return 21;
       return 26;
     case "jazykova":
+      if (units <= 0) return 0;
       if (units <= 14) return 9;
       if (units <= 29) return 12;
       return 15;
@@ -160,11 +163,13 @@ function reductionByKind(kind: Nv75DeputyKind, unitsIn: number) {
       if (units <= 22) return 16;
       return 17;
     case "domov_mladeze":
+      if (units <= 0) return 0;
       if (units <= 5) return 10;
       return 10 + ceilDivPositive(units - 5, 7) * 2;
     case "poradenske":
       return 12;
     case "vos":
+      if (units <= 0) return 0;
       if (units <= 8) return 7;
       if (units <= 14) return 11;
       if (units <= 17) return 16;
