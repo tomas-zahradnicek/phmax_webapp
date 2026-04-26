@@ -25,7 +25,9 @@ type Nv75DeputyUiRow = {
   id: number;
   kind: Nv75DeputyKind;
   units: number;
-  additionalWorkplacesEligible: number;
+  additionalWorkplaceUnits?: number[];
+  /** Legacy autosave/preset field; new UI computes this from `additionalWorkplaceUnits`. */
+  additionalWorkplacesEligible?: number;
 };
 type Nv75ExampleKey =
   | ""
@@ -79,6 +81,46 @@ function kindUsesUnits(kind: Nv75DeputyKind) {
 
 function kindUsesAdditionalWorkplaces(kind: Nv75DeputyKind) {
   return kind === "ms" || kind === "zs" || kind === "ss_konz" || kind === "poradenske";
+}
+
+function clampNonNegativeInt(value: number) {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.floor(value));
+}
+
+function workplaceUnitsThreshold(kind: Nv75DeputyKind) {
+  return kind === "poradenske" ? 1 : 3;
+}
+
+function additionalWorkplaceUnitsForRow(row: Nv75DeputyUiRow) {
+  if (!kindUsesAdditionalWorkplaces(row.kind)) return [];
+  if (Array.isArray(row.additionalWorkplaceUnits)) return row.additionalWorkplaceUnits.map(clampNonNegativeInt);
+  const legacyCount = clampNonNegativeInt(row.additionalWorkplacesEligible ?? 0);
+  return Array.from({ length: legacyCount }, () => workplaceUnitsThreshold(row.kind));
+}
+
+function eligibleAdditionalWorkplacesForRow(row: Nv75DeputyUiRow) {
+  const workplaceUnits = additionalWorkplaceUnitsForRow(row);
+  if (row.kind === "poradenske") return workplaceUnits.length;
+  if (row.kind === "ms" || row.kind === "zs" || row.kind === "ss_konz") return workplaceUnits.filter((units) => units >= 3).length;
+  return 0;
+}
+
+function normalizeNv75UiRow(row: Nv75DeputyUiRow): Nv75DeputyUiRow {
+  return {
+    id: row.id,
+    kind: row.kind,
+    units: clampNonNegativeInt(row.units),
+    additionalWorkplaceUnits: additionalWorkplaceUnitsForRow(row),
+  };
+}
+
+function buildCalculationRows(rows: Nv75DeputyUiRow[]) {
+  return rows.map((row) => ({
+    kind: row.kind,
+    units: row.units,
+    additionalWorkplacesEligible: eligibleAdditionalWorkplacesForRow(row),
+  }));
 }
 
 const NV75_EXAMPLES: readonly {
@@ -318,8 +360,9 @@ function buildRowsForExport(
   ovGroupsSchool: number,
   ovGroupsInstructor: number,
 ) {
+  const calculationRows = buildCalculationRows(rows);
   const result = calculateNv75DeputyBank({
-    activities: rows,
+    activities: calculationRows,
     practicalStudentsGeneralNonOv: practicalGeneralNonOv,
     practicalStudentsOvEhl0: practicalOvEhl0,
     practicalStudentsSec16: practicalSec16,
@@ -346,9 +389,11 @@ function buildRowsForExport(
     ["=== Zadané řádky ===", ""],
   ];
   rows.forEach((row, idx) => {
+    const workplaceUnits = additionalWorkplaceUnitsForRow(row);
     out.push([`Řádek ${idx + 1} – druh`, row.kind]);
     out.push([`Řádek ${idx + 1} – jednotky`, row.units]);
-    out.push([`Řádek ${idx + 1} – další pracoviště (způsobilá)`, row.additionalWorkplacesEligible]);
+    out.push([`Řádek ${idx + 1} – další pracoviště (jednotky)`, workplaceUnits.join(" + ") || ""]);
+    out.push([`Řádek ${idx + 1} – další pracoviště (způsobilá dle §4d)`, eligibleAdditionalWorkplacesForRow(row)]);
   });
   if (result.notes.length > 0) out.push(["Poznámky", result.notes.join(" | ")]);
   out.push(["", ""]);
@@ -365,7 +410,7 @@ function buildRowsForExport(
 }
 
 export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75DeputyPageProps) {
-  const [rows, setRows] = useState<Nv75DeputyUiRow[]>([{ id: 1, kind: "zs", units: 0, additionalWorkplacesEligible: 0 }]);
+  const [rows, setRows] = useState<Nv75DeputyUiRow[]>([{ id: 1, kind: "zs", units: 0, additionalWorkplaceUnits: [] }]);
   const [practicalGeneralNonOv, setPracticalGeneralNonOv] = useState(0);
   const [practicalOvEhl0, setPracticalOvEhl0] = useState(0);
   const [practicalSec16, setPracticalSec16] = useState(0);
@@ -388,7 +433,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
         ovGroupsSchool?: number;
         ovGroupsInstructor?: number;
       };
-      if (Array.isArray(s.rows) && s.rows.length > 0) setRows(s.rows);
+      if (Array.isArray(s.rows) && s.rows.length > 0) setRows(s.rows.map(normalizeNv75UiRow));
       if (typeof s.practicalGeneralNonOv === "number") setPracticalGeneralNonOv(s.practicalGeneralNonOv);
       if (typeof s.practicalOvEhl0 === "number") setPracticalOvEhl0(s.practicalOvEhl0);
       if (typeof s.practicalSec16 === "number") setPracticalSec16(s.practicalSec16);
@@ -404,7 +449,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       localStorage.setItem(
         NV75_STORAGE_KEY,
         JSON.stringify({
-          rows,
+          rows: rows.map(normalizeNv75UiRow),
           practicalGeneralNonOv,
           practicalOvEhl0,
           practicalSec16,
@@ -418,24 +463,25 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     }
   }, [rows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor]);
 
+  const calculationRows = useMemo(() => buildCalculationRows(rows), [rows]);
   const bank = useMemo(
     () =>
       calculateNv75DeputyBank({
-        activities: rows,
+        activities: calculationRows,
         practicalStudentsGeneralNonOv: practicalGeneralNonOv,
         practicalStudentsOvEhl0: practicalOvEhl0,
         practicalStudentsSec16: practicalSec16,
         ovGroupsSchool,
         ovGroupsInstructor,
       }),
-    [rows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor],
+    [calculationRows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor],
   );
   const hasPracticalContext = useMemo(() => rows.some((r) => r.kind === "ss_konz" || r.kind === "vos"), [rows]);
   const ovInstructorGroupsCounted = Math.floor(Math.max(0, Math.floor(ovGroupsInstructor)) / 2);
   const hasOvGroups = ovGroupsSchool > 0 || ovGroupsInstructor > 0 || bank.ovGroupsEquivalent > 0;
 
   const addRow = useCallback(() => {
-    setRows((prev) => [...prev, { id: Date.now(), kind: "zs", units: 0, additionalWorkplacesEligible: 0 }]);
+    setRows((prev) => [...prev, { id: Date.now(), kind: "zs", units: 0, additionalWorkplaceUnits: [] }]);
   }, []);
   const removeRow = useCallback((id: number) => {
     setRows((prev) => (prev.length > 1 ? prev.filter((x) => x.id !== id) : prev));
@@ -443,8 +489,38 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const updateRow = useCallback((id: number, patch: Partial<Nv75DeputyUiRow>) => {
     setRows((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
   }, []);
+  const addAdditionalWorkplace = useCallback((id: number) => {
+    setRows((prev) =>
+      prev.map((x) =>
+        x.id === id
+          ? {
+              ...x,
+              additionalWorkplaceUnits: [...additionalWorkplaceUnitsForRow(x), workplaceUnitsThreshold(x.kind)],
+            }
+          : x,
+      ),
+    );
+  }, []);
+  const updateAdditionalWorkplace = useCallback((id: number, workplaceIdx: number, units: number) => {
+    setRows((prev) =>
+      prev.map((x) => {
+        if (x.id !== id) return x;
+        const nextUnits = additionalWorkplaceUnitsForRow(x);
+        nextUnits[workplaceIdx] = clampNonNegativeInt(units);
+        return { ...x, additionalWorkplaceUnits: nextUnits };
+      }),
+    );
+  }, []);
+  const removeAdditionalWorkplace = useCallback((id: number, workplaceIdx: number) => {
+    setRows((prev) =>
+      prev.map((x) => {
+        if (x.id !== id) return x;
+        return { ...x, additionalWorkplaceUnits: additionalWorkplaceUnitsForRow(x).filter((_, idx) => idx !== workplaceIdx) };
+      }),
+    );
+  }, []);
   const resetAll = useCallback(() => {
-    setRows([{ id: 1, kind: "zs", units: 0, additionalWorkplacesEligible: 0 }]);
+    setRows([{ id: 1, kind: "zs", units: 0, additionalWorkplaceUnits: [] }]);
     setPracticalGeneralNonOv(0);
     setPracticalOvEhl0(0);
     setPracticalSec16(0);
@@ -457,7 +533,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     setSelectedExample(id);
     const ex = NV75_EXAMPLES.find((x) => x.id === id);
     if (!ex) return;
-    setRows(ex.rows.map((r, idx) => ({ ...r, id: Date.now() + idx + 1 })));
+    setRows(ex.rows.map((r, idx) => normalizeNv75UiRow({ ...r, id: Date.now() + idx + 1 })));
     setPracticalGeneralNonOv(ex.practicalGeneralNonOv);
     setPracticalOvEhl0(ex.practicalOvEhl0);
     setPracticalSec16(ex.practicalSec16);
@@ -701,7 +777,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                 <tr>
                   <th>Druh školy/zařízení</th>
                   <th>Jednotky</th>
-                  <th>Další pracoviště (způsobilá)</th>
+                  <th>Další pracoviště (§4d)</th>
                   <th>Výsledek pracoviště (h/týden)</th>
                   <th>Akce</th>
                 </tr>
@@ -727,14 +803,34 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                     </td>
                     <td>
                       {kindUsesAdditionalWorkplaces(row.kind) ? (
-                        <input
-                          className="input"
-                          type="number"
-                          min={0}
-                          step={1}
-                          value={row.additionalWorkplacesEligible}
-                          onChange={(e) => updateRow(row.id, { additionalWorkplacesEligible: Number(e.target.value) })}
-                        />
+                        <div style={{ display: "grid", gap: 6 }}>
+                          {additionalWorkplaceUnitsForRow(row).map((units, workplaceIdx) => {
+                            const eligible = row.kind === "poradenske" || units >= 3;
+                            return (
+                              <div key={workplaceIdx} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                <span className="muted-text">#{workplaceIdx + 1}</span>
+                                <input
+                                  className="input"
+                                  type="number"
+                                  min={0}
+                                  step={1}
+                                  value={units}
+                                  onChange={(e) => updateAdditionalWorkplace(row.id, workplaceIdx, Number(e.target.value))}
+                                  style={{ width: 100 }}
+                                  aria-label={`Jednotky dalšího pracoviště ${workplaceIdx + 1}`}
+                                />
+                                <span className="muted-text">{eligible ? "+ §4d" : "bez bonifikace"}</span>
+                                <button type="button" className="btn ghost" onClick={() => removeAdditionalWorkplace(row.id, workplaceIdx)}>
+                                  Odebrat
+                                </button>
+                              </div>
+                            );
+                          })}
+                          <button type="button" className="btn ghost" onClick={() => addAdditionalWorkplace(row.id)}>
+                            Přidat další pracoviště
+                          </button>
+                          <span className="muted-text">Způsobilá pracoviště: {eligibleAdditionalWorkplacesForRow(row)}</span>
+                        </div>
                       ) : (
                         <span className="muted-text">nepoužívá se</span>
                       )}
@@ -834,6 +930,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               </li>
               <li>
                 Bonus dalších pracovišť: <strong>{bank.bonus4dHours} h/týden</strong> podle <Nv75LegisRef citeId="nv75-4d" label="§4d" />.
+                Způsobilost se počítá z detailu dalších pracovišť (MŠ/ZŠ/SŠ nejméně 3 jednotky; ŠPZ každé další pracoviště).
               </li>
               <li>
                 Celkem: <strong>{bank.bankHoursTotal} h/týden</strong>.

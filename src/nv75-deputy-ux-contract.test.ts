@@ -27,6 +27,16 @@ describe("UX contract: NV75 deputy bank result visibility", () => {
     expect(page).toContain("Výstup dle §13 odst. 7 vyhl. 13/2005");
   });
 
+  it("§4d input is derived from workplace units, not only a manual eligible count", () => {
+    const page = readSource("src/PhmaxNv75DeputyPage.tsx");
+
+    expect(page).toContain("additionalWorkplaceUnits");
+    expect(page).toContain("eligibleAdditionalWorkplacesForRow");
+    expect(page).toContain("Přidat další pracoviště");
+    expect(page).toContain("Způsobilá pracoviště:");
+    expect(page).toContain("bez bonifikace");
+  });
+
   it("extended methodology examples remain selectable in the NV75 page", () => {
     const page = readSource("src/PhmaxNv75DeputyPage.tsx");
 
