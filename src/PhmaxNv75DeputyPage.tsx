@@ -339,6 +339,7 @@ function buildRowsForExport(
     ["OV – skupiny u instruktora", ovGroupsInstructor],
     ["OV – ekvivalent skupin (školní + floor(instruktor/2))", result.ovGroupsEquivalent],
     ["OV – orientační počet funkcí OV dle vyhl. 13/2005", result.ovDeputyEntitlementCount],
+    ["OV – metodický výstup funkcí", result.ovDeputyEntitlementText],
     ["§4c odst. 1 – žáci skutečně započtení", result.practicalStudentsGeneralCounted],
     ["§4c odst. 2 – žáci praktického vyučování §16/9", practicalSec16],
     ["", ""],
@@ -515,6 +516,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       `Banka odpočtů celkem: ${bank.bankHoursTotal} h/týden`,
       `OV ekvivalent skupin: ${bank.ovGroupsEquivalent}`,
       `OV orientační počet funkcí dle vyhl. 13/2005: ${bank.ovDeputyEntitlementCount}`,
+      `OV metodický výstup funkcí: ${bank.ovDeputyEntitlementText}`,
       "",
       APP_AUTHOR_CREDIT_LINE,
     ];
@@ -791,6 +793,15 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                   <td>—</td>
                   <td>{bank.bankHoursTotal} hodin týdně</td>
                 </tr>
+                {bank.ovGroupsEquivalent > 0 ? (
+                  <>
+                    <tr>
+                      <th>Počet skupin odborného výcviku celkem</th>
+                      <td>{bank.ovGroupsEquivalent} skupin</td>
+                      <td>{bank.ovDeputyEntitlementText}</td>
+                    </tr>
+                  </>
+                ) : null}
               </tbody>
             </table>
           </div>
@@ -810,6 +821,12 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               <li>
                 Celkem: <strong>{bank.bankHoursTotal} h/týden</strong>.
               </li>
+              {bank.ovGroupsEquivalent > 0 ? (
+                <li>
+                  OV: ekvivalent <strong>{bank.ovGroupsEquivalent} skupin</strong> {"=>"}{" "}
+                  <strong>{bank.ovDeputyEntitlementText}</strong> podle <Nv75LegisRef citeId="vyhl13-7" label="vyhl. 13/2005" />.
+                </li>
+              ) : null}
             </ul>
             <p className="muted-text" style={{ marginTop: 8 }}>
               Odkazy:{" "}

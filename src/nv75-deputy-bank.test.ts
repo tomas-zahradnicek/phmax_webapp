@@ -103,6 +103,7 @@ describe("calculateNv75DeputyBank", () => {
     });
     expect(r.ovGroupsEquivalent).toBe(10);
     expect(r.ovDeputyEntitlementCount).toBe(1);
+    expect(r.ovDeputyEntitlementText).toContain("1 zástupce ředitele školy pro odborný výcvik");
     expect(r.practicalStudentsGeneralCounted).toBe(120);
     expect(r.bonus4cHours).toBe(7);
     expect(r.notes.some((n) => n.includes("nejsou započteni"))).toBe(true);
@@ -118,8 +119,52 @@ describe("calculateNv75DeputyBank", () => {
     });
     expect(r.ovGroupsEquivalent).toBe(9);
     expect(r.ovDeputyEntitlementCount).toBe(0);
+    expect(r.ovDeputyEntitlementText).toBe("Nevzniká samostatný výstup pro funkce OV.");
     expect(r.practicalStudentsGeneralCounted).toBe(120);
     expect(r.bonus4cHours).toBe(7);
+  });
+
+  it.each([
+    [9, 0],
+    [10, 1],
+    [19, 1],
+    [20, 2],
+    [33, 2],
+    [37, 2],
+    [39, 2],
+    [40, 3],
+  ])("OV funkce: při %i ekvivalentních skupinách vyjde %i funkce", (groups, expected) => {
+    const r = calculateNv75DeputyBank({
+      activities: [{ kind: "ss_konz", units: 16 }],
+      practicalStudentsOvEhl0: 331,
+      ovGroupsSchool: groups,
+    });
+    expect(r.ovGroupsEquivalent).toBe(groups);
+    expect(r.ovDeputyEntitlementCount).toBe(expected);
+  });
+
+  it("OV výstup: 37 školních skupin popíše metodickou kombinaci 2 funkcí", () => {
+    const r = calculateNv75DeputyBank({
+      activities: [{ kind: "ss_konz", units: 16 }],
+      practicalStudentsOvEhl0: 331,
+      ovGroupsSchool: 37,
+    });
+    expect(r.ovDeputyEntitlementCount).toBe(2);
+    expect(r.ovDeputyEntitlementText).toBe(
+      "2 zástupci ředitele školy pro odborný výcvik nebo 1 zástupce ředitele školy pro odborný výcvik a 1 vedoucí učitel odborného výcviku",
+    );
+  });
+
+  it("OV výstup: skupiny u instruktora popíše vedoucí učitele odborného výcviku", () => {
+    const r = calculateNv75DeputyBank({
+      activities: [{ kind: "ss_konz", units: 16 }],
+      practicalStudentsOvEhl0: 331,
+      ovGroupsSchool: 16,
+      ovGroupsInstructor: 34,
+    });
+    expect(r.ovGroupsEquivalent).toBe(33);
+    expect(r.ovDeputyEntitlementCount).toBe(2);
+    expect(r.ovDeputyEntitlementText).toBe("2 vedoucí učitelé odborného výcviku");
   });
 
   it("příloha 3: druhy vyžadující jednotky mají při 0 jednotkách nulový odpočet", () => {

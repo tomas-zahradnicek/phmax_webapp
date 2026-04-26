@@ -70,6 +70,7 @@ export type Nv75DeputyBankResult = {
   notes: string[];
   ovGroupsEquivalent: number;
   ovDeputyEntitlementCount: number;
+  ovDeputyEntitlementText: string;
   practicalStudentsGeneralCounted: number;
 };
 
@@ -202,6 +203,29 @@ function bonus4cSec16(studentsIn: number) {
   return 7 + ceilDivPositive(students - 42, 42) * 2;
 }
 
+function ovDeputyEntitlementCountByGroups(groupsIn: number) {
+  const groups = clampInt(groupsIn);
+  if (groups < 10) return 0;
+  if (groups < 20) return 1;
+  return 2 + Math.floor((groups - 20) / 20);
+}
+
+function ovDeputyEntitlementText(count: number, groupsSchool: number, groupsInstructor: number) {
+  if (count <= 0) return "Nevzniká samostatný výstup pro funkce OV.";
+  if (groupsInstructor > 0) {
+    if (count === 1) return "1 vedoucí učitel odborného výcviku";
+    if (count <= 4) return `${count} vedoucí učitelé odborného výcviku`;
+    return `${count} vedoucích učitelů odborného výcviku`;
+  }
+  if (groupsSchool > 0 && count === 1) {
+    return "1 zástupce ředitele školy pro odborný výcvik nebo 1 vedoucí učitel odborného výcviku";
+  }
+  if (groupsSchool > 0 && count === 2) {
+    return "2 zástupci ředitele školy pro odborný výcvik nebo 1 zástupce ředitele školy pro odborný výcvik a 1 vedoucí učitel odborného výcviku";
+  }
+  return `${count} funkcí pro odborný výcvik (zástupce ředitele školy pro odborný výcvik nebo vedoucí učitel odborného výcviku)`;
+}
+
 export function calculateNv75DeputyBank(input: Nv75DeputyBankInput): Nv75DeputyBankResult {
   const rows = input.activities.map((a) => {
     const kindHours = reductionByKind(a.kind, a.units);
@@ -270,8 +294,8 @@ export function calculateNv75DeputyBank(input: Nv75DeputyBankInput): Nv75DeputyB
   const ovGroupsSchool = clampInt(input.ovGroupsSchool ?? 0);
   const ovGroupsInstructor = clampInt(input.ovGroupsInstructor ?? 0);
   const ovGroupsEquivalent = ovGroupsSchool + Math.floor(ovGroupsInstructor / 2);
-  const ovDeputyEntitlementCount =
-    ovGroupsEquivalent < 10 ? 0 : 1 + Math.floor(Math.max(0, ovGroupsEquivalent - 20) / 20);
+  const ovDeputyEntitlementCount = ovDeputyEntitlementCountByGroups(ovGroupsEquivalent);
+  const ovEntitlementText = ovDeputyEntitlementText(ovDeputyEntitlementCount, ovGroupsSchool, ovGroupsInstructor);
   const practicalNonOv = clampInt(input.practicalStudentsGeneralNonOv ?? 0);
   const practicalOv = clampInt(input.practicalStudentsOvEhl0 ?? 0);
   const usingSplit = input.practicalStudentsGeneralNonOv != null || input.practicalStudentsOvEhl0 != null;
@@ -294,7 +318,8 @@ export function calculateNv75DeputyBank(input: Nv75DeputyBankInput): Nv75DeputyB
     breakdown: rows,
     notes,
     ovGroupsEquivalent,
-    ovDeputyEntitlementCount: Math.max(0, ovDeputyEntitlementCount),
+    ovDeputyEntitlementCount,
+    ovDeputyEntitlementText: ovEntitlementText,
     practicalStudentsGeneralCounted: practicalGeneralCounted,
   };
 }
