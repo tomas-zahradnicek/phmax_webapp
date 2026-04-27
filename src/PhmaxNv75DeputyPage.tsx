@@ -21,7 +21,7 @@ type PhmaxNv75DeputyPageProps = {
   setProductView: (v: ProductView) => void;
 };
 
-type Nv75DeputyUiRow = {
+export type Nv75DeputyUiRow = {
   id: number;
   kind: Nv75DeputyKind;
   units: number;
@@ -92,14 +92,14 @@ function workplaceUnitsThreshold(kind: Nv75DeputyKind) {
   return kind === "poradenske" ? 1 : 3;
 }
 
-function additionalWorkplaceUnitsForRow(row: Nv75DeputyUiRow) {
+export function additionalWorkplaceUnitsForRow(row: Nv75DeputyUiRow) {
   if (!kindUsesAdditionalWorkplaces(row.kind)) return [];
   if (Array.isArray(row.additionalWorkplaceUnits)) return row.additionalWorkplaceUnits.map(clampNonNegativeInt);
   const legacyCount = clampNonNegativeInt(row.additionalWorkplacesEligible ?? 0);
   return Array.from({ length: legacyCount }, () => workplaceUnitsThreshold(row.kind));
 }
 
-function eligibleAdditionalWorkplacesForRow(row: Nv75DeputyUiRow) {
+export function eligibleAdditionalWorkplacesForRow(row: Nv75DeputyUiRow) {
   const workplaceUnits = additionalWorkplaceUnitsForRow(row);
   if (row.kind === "poradenske") return workplaceUnits.length;
   if (row.kind === "ms" || row.kind === "zs" || row.kind === "ss_konz") return workplaceUnits.filter((units) => units >= 3).length;
@@ -123,9 +123,23 @@ function buildCalculationRows(rows: Nv75DeputyUiRow[]) {
   }));
 }
 
+function formatAdditionalWorkplacesForExport(row: Nv75DeputyUiRow) {
+  const units = additionalWorkplaceUnitsForRow(row);
+  if (units.length === 0) return "";
+  return units
+    .map((u, idx) => {
+      const eligible = row.kind === "poradenske" || u >= 3;
+      return `#${idx + 1}=${u}j${eligible ? " (+§4d)" : " (bez)"}`;
+    })
+    .join("; ");
+}
+
 const NV75_EXAMPLES: readonly {
   id: Nv75ExampleKey;
   label: string;
+  title: string;
+  description: string;
+  expected: string;
   rows: Nv75DeputyUiRow[];
   practicalGeneralNonOv: number;
   practicalOvEhl0: number;
@@ -135,7 +149,10 @@ const NV75_EXAMPLES: readonly {
 }[] = [
   {
     id: "a_ms",
-    label: "a) 1 druh – MŠ 8 tříd => 14 h",
+    label: "PŘÍKLAD 1: MŠ 8 tříd => banka 14 h",
+    title: "1 druh školy nebo školského zařízení: Mateřská škola",
+    description: "Mateřská škola má celkem 8 tříd (jednotek). Postupuje se podle §4b odst. 1 a přílohy č. 2 bodu 1 NV 75/2005 Sb.",
+    expected: "Očekávaný výsledek: banka odpočtů 14 hodin týdně.",
     rows: [{ id: 1, kind: "ms", units: 8, additionalWorkplacesEligible: 0 }],
     practicalGeneralNonOv: 0,
     practicalOvEhl0: 0,
@@ -145,7 +162,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "b_zs_zus",
-    label: "b) ZŠ 39 + ZUŠ 17 (group) => 56 h",
+    label: "PŘÍKLAD b): ZŠ 39 + ZUŠ 17 (skup.) => 56 h",
+    title: "1 druh z přílohy č. 2 a 1 druh z přílohy č. 3",
+    description: "Právnickou osobu tvoří základní škola a základní umělecká škola; hodnoty se podle §4b odst. 2 písm. a) sčítají.",
+    expected: "Očekávaný výsledek: ZŠ 44 h + ZUŠ 12 h = 56 hodin týdně.",
     rows: [
       { id: 1, kind: "zs", units: 39, additionalWorkplacesEligible: 0 },
       { id: 2, kind: "zus_group", units: 17, additionalWorkplacesEligible: 0 },
@@ -158,7 +178,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "c_zs_zus_klub",
-    label: "c) ZŠ 18 + ZUŠ 10 (group) + klub => 34 h",
+    label: "PŘÍKLAD c): ZŠ 18 + ZUŠ 10 (skup.) + klub => 34 h",
+    title: "1 druh z přílohy č. 2 a více druhů z přílohy č. 3",
+    description: "Hodnoty za ZŠ, ZUŠ a školní klub se sčítají podle §4b odst. 2 písm. b).",
+    expected: "Očekávaný výsledek: 22 + 9 + 3 = 34 hodin týdně.",
     rows: [
       { id: 1, kind: "zs", units: 18, additionalWorkplacesEligible: 0 },
       { id: 2, kind: "zus_group", units: 10, additionalWorkplacesEligible: 0 },
@@ -172,7 +195,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "d_zs_sd_ms",
-    label: "d) více příl.2: ZŠ 18 + ŠD 2 + MŠ 5 => 32 h",
+    label: "PŘÍKLAD d): ZŠ + ŠD + MŠ, více druhů příl. 2 => 32 h",
+    title: "Více druhů škol nebo zařízení podle přílohy č. 2",
+    description: "Jednotky druhů z přílohy č. 2 se sečtou; rozhodne nejvyšší hodnota podle druhu školy, nikoli podle ŠD.",
+    expected: "Očekávaný výsledek: 25 jednotek, výhodnější MŠ => 32 hodin týdně.",
     rows: [
       { id: 1, kind: "zs", units: 18, additionalWorkplacesEligible: 0 },
       { id: 2, kind: "sd", units: 2, additionalWorkplacesEligible: 0 },
@@ -186,7 +212,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "e_zus_jaz",
-    label: "e) více příl.3: ZUŠ 17 (ind.) + jazyková 12 => 23 h",
+    label: "PŘÍKLAD e): ZUŠ 17 (ind.) + jazyková škola 12 => 23 h",
+    title: "Více druhů škol nebo zařízení podle přílohy č. 3",
+    description: "Hodnoty druhů z přílohy č. 3 se sčítají podle §4b odst. 4.",
+    expected: "Očekávaný výsledek: ZUŠ 14 h + jazyková škola 9 h = 23 hodin týdně.",
     rows: [
       { id: 1, kind: "zus_individual", units: 17, additionalWorkplacesEligible: 0 },
       { id: 2, kind: "jazykova", units: 12, additionalWorkplacesEligible: 0 },
@@ -199,7 +228,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "f_zs_sd_zus",
-    label: "f) příl.2+1x příl.3: ZŠ 23 + ŠD 2 + ZUŠ 16 (ind.) => 36 h",
+    label: "PŘÍKLAD f): ZŠ + ŠD + ZUŠ 16 (ind.) => 36 h",
+    title: "Více druhů z přílohy č. 2 a 1 druh z přílohy č. 3",
+    description: "Nejprve se stanoví část za přílohu č. 2 podle §4b odst. 3, poté se přičte hodnota za ZUŠ.",
+    expected: "Očekávaný výsledek: 22 + 14 = 36 hodin týdně.",
     rows: [
       { id: 1, kind: "zs", units: 23, additionalWorkplacesEligible: 0 },
       { id: 2, kind: "sd", units: 2, additionalWorkplacesEligible: 0 },
@@ -213,7 +245,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "g_zs_ss_dm_klub",
-    label: "g) příl.2 + více příl.3: ZŠ 18 + SŠ 12 + DM 7 + klub => 48 h",
+    label: "PŘÍKLAD g): ZŠ + SŠ + DM + klub => 48 h",
+    title: "Více druhů z přílohy č. 2 a více druhů z přílohy č. 3",
+    description: "Část za přílohu č. 2 se stanoví ze součtu jednotek, část za přílohu č. 3 součtem hodnot jednotlivých druhů.",
+    expected: "Očekávaný výsledek: 33 + 12 + 3 = 48 hodin týdně.",
     rows: [
       { id: 1, kind: "zs", units: 18, additionalWorkplacesEligible: 0 },
       { id: 2, kind: "ss_konz", units: 12, additionalWorkplacesEligible: 0 },
@@ -228,7 +263,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "ss_vos_dm",
-    label: "SŠ/VOŠ/DM vzor: SŠ 12 + VOŠ 6 + DM 8 + praxe 319 => 41 h",
+    label: "SŠ/VOŠ/DM: SŠ 12 + VOŠ 6 + DM 8 + praxe 319 => 41 h",
+    title: "Střední a vyšší odborná škola s domovem mládeže a praktickou přípravou",
+    description: "Základní banka za SŠ, VOŠ a DM se sčítá; k ní se přičítá bonus §4c za 319 žáků/studentů praktického vyučování.",
+    expected: "Očekávaný výsledek: 11 + 7 + 12 + 11 = 41 hodin týdně.",
     rows: [
       { id: 1, kind: "ss_konz", units: 12, additionalWorkplacesEligible: 0 },
       { id: 2, kind: "vos", units: 6, additionalWorkplacesEligible: 0 },
@@ -242,11 +280,14 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "bonus_p2_example1",
-    label: "Rozsáhlý §4d/1: ZŠ+ŠD + MŠ (více pracovišť) => 41 h",
+    label: "§4d PŘÍKLAD 1: ZŠ+ŠD + MŠ, více pracovišť => 41 h",
+    title: "Bonifikace dalšího pracoviště: příklad 1",
+    description: "ZŠ+ŠD a MŠ sídlí ve více vzdálených budovách. Základ banky je 35 h; tři způsobilá další pracoviště přidají 3 x 2 h.",
+    expected: "Očekávaný výsledek: 35 + 6 = 41 hodin týdně.",
     rows: [
-      { id: 1, kind: "zs", units: 19, additionalWorkplacesEligible: 2 },
+      { id: 1, kind: "zs", units: 19, additionalWorkplaceUnits: [10, 4] },
       { id: 2, kind: "sd", units: 4, additionalWorkplacesEligible: 0 },
-      { id: 3, kind: "ms", units: 7, additionalWorkplacesEligible: 1 },
+      { id: 3, kind: "ms", units: 7, additionalWorkplaceUnits: [3, 2, 2] },
     ],
     practicalGeneralNonOv: 0,
     practicalOvEhl0: 0,
@@ -256,11 +297,14 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "bonus_p2_example2",
-    label: "Rozsáhlý §4d/2: ZŠ+ŠD + MŠ (3 pracoviště) => 42 h",
+    label: "§4d PŘÍKLAD 2: ZŠ+ŠD + MŠ, 3 pracoviště => 42 h",
+    title: "Bonifikace dalšího pracoviště: příklad 2",
+    description: "ZŠ+ŠD a MŠ mají dvě způsobilá další pracoviště; základ banky je 38 h.",
+    expected: "Očekávaný výsledek: 38 + 4 = 42 hodin týdně.",
     rows: [
-      { id: 1, kind: "zs", units: 23, additionalWorkplacesEligible: 1 },
+      { id: 1, kind: "zs", units: 23, additionalWorkplaceUnits: [6] },
       { id: 2, kind: "sd", units: 4, additionalWorkplacesEligible: 0 },
-      { id: 3, kind: "ms", units: 4, additionalWorkplacesEligible: 1 },
+      { id: 3, kind: "ms", units: 4, additionalWorkplaceUnits: [4] },
     ],
     practicalGeneralNonOv: 0,
     practicalOvEhl0: 0,
@@ -270,8 +314,11 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "bonus_poradenske",
-    label: "Rozsáhlý §4d/3: ŠPZ + 2 další pracoviště => 14 h",
-    rows: [{ id: 1, kind: "poradenske", units: 0, additionalWorkplacesEligible: 2 }],
+    label: "§4d PŘÍKLAD 3: ŠPZ + 2 další pracoviště => 14 h",
+    title: "Školské poradenské zařízení s dalším pracovištěm",
+    description: "U ŠPZ se podle §4d odst. 2 započítá +1 h za každé další pracoviště.",
+    expected: "Očekávaný výsledek: 12 + 1 + 1 = 14 hodin týdně.",
+    rows: [{ id: 1, kind: "poradenske", units: 0, additionalWorkplaceUnits: [1, 1] }],
     practicalGeneralNonOv: 0,
     practicalOvEhl0: 0,
     practicalSec16: 0,
@@ -280,7 +327,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "ss_mix_40",
-    label: "Rozsáhlý SŠ/VOŠ/JŠ/DM: 12+8+29+4 => 40 h",
+    label: "SŠ PŘÍKLAD 2: SŠ + VOŠ + JŠ + DM => 40 h",
+    title: "SŠ, VOŠ, jazyková škola a domov mládeže",
+    description: "Střední škola je druh z přílohy č. 2, ostatní druhy jsou z přílohy č. 3; hodnoty se sčítají.",
+    expected: "Očekávaný výsledek: 11 + 7 + 12 + 10 = 40 hodin týdně.",
     rows: [
       { id: 1, kind: "ss_konz", units: 12, additionalWorkplacesEligible: 0 },
       { id: 2, kind: "vos", units: 8, additionalWorkplacesEligible: 0 },
@@ -295,9 +345,12 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "ss_bonus32",
-    label: "Rozsáhlý §4d SŠ+VOŠ+DM: základ 30 + bonus 2 => 32 h",
+    label: "§4d SŠ: SŠ+VOŠ+DM, další pracoviště SŠ => 32 h",
+    title: "Bonifikace dalšího pracoviště u SŠ, VOŠ a domova mládeže",
+    description: "Základ za SŠ, VOŠ a DM je 30 h; další pracoviště SŠ se 4 třídami přidává +2 h.",
+    expected: "Očekávaný výsledek: 30 + 2 = 32 hodin týdně.",
     rows: [
-      { id: 1, kind: "ss_konz", units: 12, additionalWorkplacesEligible: 1 },
+      { id: 1, kind: "ss_konz", units: 12, additionalWorkplaceUnits: [4] },
       { id: 2, kind: "vos", units: 6, additionalWorkplacesEligible: 0 },
       { id: 3, kind: "domov_mladeze", units: 7, additionalWorkplacesEligible: 0 },
     ],
@@ -309,7 +362,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "ov_16_37",
-    label: "Rozsáhlý OV/1: SŠ 16 tříd, OV skupiny 37 => banka 16 h, OV funkce 2",
+    label: "OV PŘÍKLAD 1: SŠ 16 tříd, 37 školních skupin OV",
+    title: "Střední škola H/L0, odborný výcvik pouze na školním pracovišti",
+    description: "Žáci OV se při 10 a více skupinách nezapočítají do §4c; samostatně se vyhodnotí funkce OV podle vyhl. 13/2005.",
+    expected: "Očekávaný výsledek: banka 16 h; 37 skupin => 2 funkce OV.",
     rows: [{ id: 1, kind: "ss_konz", units: 16, additionalWorkplacesEligible: 0 }],
     practicalGeneralNonOv: 0,
     practicalOvEhl0: 331,
@@ -319,7 +375,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "ov_16_33",
-    label: "Rozsáhlý OV/2: SŠ 16 tříd, OV 16+34(instr) => ekv. 33, funkce 2",
+    label: "OV PŘÍKLAD 2: SŠ 16 tříd, 16 školních + 34 instruktorských skupin",
+    title: "Odborný výcvik na školním pracovišti a u fyzických/právnických osob",
+    description: "Do ekvivalentu se započte 16 školních skupin a polovina 34 instruktorských skupin.",
+    expected: "Očekávaný výsledek: 16 + 17 = 33 skupin; 2 vedoucí učitelé odborného výcviku.",
     rows: [{ id: 1, kind: "ss_konz", units: 16, additionalWorkplacesEligible: 0 }],
     practicalGeneralNonOv: 0,
     practicalOvEhl0: 331,
@@ -329,7 +388,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "ov_28_42",
-    label: "Rozsáhlý OV/3: SŠ 28 tříd + praxe 134, OV 36 => banka 42 h",
+    label: "OV PŘÍKLAD 3: SŠ 28 tříd + praxe 134 + 36 skupin OV",
+    title: "Střední škola E/H/L0 a M, odborný výcvik na školním pracovišti",
+    description: "Banka zahrnuje základ za SŠ a bonus §4c za praktické vyučování mimo OV; skupiny OV dávají samostatný výstup funkcí.",
+    expected: "Očekávaný výsledek: 33 + 9 = 42 h; 36 skupin => 2 funkce OV.",
     rows: [{ id: 1, kind: "ss_konz", units: 28, additionalWorkplacesEligible: 0 }],
     practicalGeneralNonOv: 134,
     practicalOvEhl0: 0,
@@ -339,7 +401,10 @@ const NV75_EXAMPLES: readonly {
   },
   {
     id: "ov_15_36",
-    label: "Rozsáhlý OV/4: SŠ 15 + VOŠ 6 + praxe 319 + OV 71(9 sk.) => 36 h",
+    label: "OV PŘÍKLAD 4: SŠ 15 + VOŠ 6, OV jen 9 skupin => 36 h",
+    title: "Střední škola H/M a VOŠ; OV pod hranicí 10 skupin",
+    description: "Protože je OV jen v 9 skupinách, žáci OV se započítají do počtu žáků praktického vyučování podle §4c odst. 1.",
+    expected: "Očekávaný výsledek: 16 + 7 + 13 = 36 hodin týdně.",
     rows: [
       { id: 1, kind: "ss_konz", units: 15, additionalWorkplacesEligible: 0 },
       { id: 2, kind: "vos", units: 6, additionalWorkplacesEligible: 0 },
@@ -389,10 +454,9 @@ function buildRowsForExport(
     ["=== Zadané řádky ===", ""],
   ];
   rows.forEach((row, idx) => {
-    const workplaceUnits = additionalWorkplaceUnitsForRow(row);
     out.push([`Řádek ${idx + 1} – druh`, row.kind]);
     out.push([`Řádek ${idx + 1} – jednotky`, row.units]);
-    out.push([`Řádek ${idx + 1} – další pracoviště (jednotky)`, workplaceUnits.join(" + ") || ""]);
+    out.push([`Řádek ${idx + 1} – další pracoviště (detail)`, formatAdditionalWorkplacesForExport(row)]);
     out.push([`Řádek ${idx + 1} – další pracoviště (způsobilá dle §4d)`, eligibleAdditionalWorkplacesForRow(row)]);
   });
   if (result.notes.length > 0) out.push(["Poznámky", result.notes.join(" | ")]);
@@ -420,6 +484,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const [lastSavedAt, setLastSavedAt] = useState("");
   const [uiNotice, setUiNotice] = useState("");
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
+  const selectedExampleDetails = useMemo(() => NV75_EXAMPLES.find((x) => x.id === selectedExample), [selectedExample]);
 
   useEffect(() => {
     try {
@@ -699,6 +764,15 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           <p className="muted-text" style={{ marginTop: 6 }}>
             Doplněny i rozsáhlé scénáře: více pracovišť a bonifikace §4d, kombinace SŠ/VOŠ/JŠ/DM i varianty odborného výcviku (OV).
           </p>
+          {selectedExampleDetails ? (
+            <div className="card muted" style={{ marginTop: 10 }}>
+              <h3 className="section-title" style={{ marginTop: 0 }}>{selectedExampleDetails.title}</h3>
+              <p style={{ margin: 0 }}>{selectedExampleDetails.description}</p>
+              <p className="muted-text" style={{ margin: "6px 0 0" }}>
+                <strong>{selectedExampleDetails.expected}</strong>
+              </p>
+            </div>
+          ) : null}
 
           {hasPracticalContext ? (
             <div className="grid two" style={{ marginTop: 10 }}>

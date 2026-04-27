@@ -100,93 +100,158 @@ function clampInt(value: number) {
   return Math.max(0, Math.floor(value));
 }
 
+type ReductionBand = {
+  min?: number;
+  max?: number;
+  hours: number;
+};
+
+type ReductionTable = {
+  bands: readonly ReductionBand[];
+  repeatAfter?: {
+    baseUnits: number;
+    baseHours: number;
+    stepUnits: number;
+    stepHours: number;
+  };
+};
+type Bonus4dRule = {
+  bonusPerEligibleWorkplace: number;
+};
+
+const NV75_REDUCTION_TABLES: Record<Nv75DeputyKind, ReductionTable> = {
+  ms: {
+    bands: [
+      { min: 4, max: 6, hours: 11 },
+      { min: 7, max: 9, hours: 14 },
+      { min: 10, max: 12, hours: 17 },
+    ],
+    repeatAfter: { baseUnits: 12, baseHours: 17, stepUnits: 3, stepHours: 3 },
+  },
+  ms_internat: {
+    bands: [{ min: 3, hours: 15 }],
+  },
+  zs: {
+    bands: [
+      { min: 5, max: 6, hours: 9 },
+      { min: 7, max: 14, hours: 11 },
+      { min: 15, max: 17, hours: 15 },
+      { min: 18, max: 26, hours: 22 },
+      { min: 27, max: 35, hours: 33 },
+    ],
+    repeatAfter: { baseUnits: 35, baseHours: 33, stepUnits: 9, stepHours: 11 },
+  },
+  ss_konz: {
+    bands: [
+      { min: 4, max: 8, hours: 7 },
+      { min: 9, max: 14, hours: 11 },
+      { min: 15, max: 17, hours: 16 },
+      { min: 18, max: 26, hours: 22 },
+      { min: 27, max: 35, hours: 33 },
+    ],
+    repeatAfter: { baseUnits: 35, baseHours: 33, stepUnits: 9, stepHours: 11 },
+  },
+  sd: {
+    bands: [
+      { min: 2, max: 3, hours: 3 },
+      { min: 4, max: 6, hours: 5 },
+      { min: 7, max: 11, hours: 7 },
+      { min: 12, max: 14, hours: 9 },
+      { min: 15, hours: 11 },
+    ],
+  },
+  internat: {
+    bands: [
+      { min: 5, max: 14, hours: 16 },
+      { min: 15, max: 22, hours: 18 },
+      { min: 23, hours: 19 },
+    ],
+  },
+  zus_individual: {
+    bands: [
+      { min: 1, max: 14, hours: 11 },
+      { min: 15, max: 29, hours: 14 },
+      { min: 30, max: 39, hours: 18 },
+      { min: 40, max: 49, hours: 23 },
+      { min: 50, hours: 28 },
+    ],
+  },
+  zus_group: {
+    bands: [
+      { min: 1, max: 14, hours: 9 },
+      { min: 15, max: 29, hours: 12 },
+      { min: 30, max: 39, hours: 16 },
+      { min: 40, max: 49, hours: 21 },
+      { min: 50, hours: 26 },
+    ],
+  },
+  jazykova: {
+    bands: [
+      { min: 1, max: 14, hours: 9 },
+      { min: 15, max: 29, hours: 12 },
+      { min: 30, hours: 15 },
+    ],
+  },
+  ustavni: {
+    bands: [
+      { min: 5, max: 14, hours: 14 },
+      { min: 15, max: 22, hours: 16 },
+      { min: 23, hours: 17 },
+    ],
+  },
+  domov_mladeze: {
+    bands: [{ min: 1, max: 5, hours: 10 }],
+    repeatAfter: { baseUnits: 5, baseHours: 10, stepUnits: 7, stepHours: 2 },
+  },
+  poradenske: {
+    bands: [{ min: 0, hours: 12 }],
+  },
+  vos: {
+    bands: [
+      { min: 1, max: 8, hours: 7 },
+      { min: 9, max: 14, hours: 11 },
+      { min: 15, max: 17, hours: 16 },
+      { min: 18, max: 26, hours: 22 },
+      { min: 27, hours: 33 },
+    ],
+  },
+  skolni_klub: {
+    bands: [{ min: 0, hours: 3 }],
+  },
+};
+const NV75_BONUS4D_RULES: Partial<Record<Nv75DeputyKind, Bonus4dRule>> = {
+  ms: { bonusPerEligibleWorkplace: 2 },
+  zs: { bonusPerEligibleWorkplace: 2 },
+  ss_konz: { bonusPerEligibleWorkplace: 2 },
+  poradenske: { bonusPerEligibleWorkplace: 1 },
+};
+
+function reductionFromTable(table: ReductionTable, units: number) {
+  for (const band of table.bands) {
+    const min = band.min ?? 0;
+    const max = band.max ?? Number.POSITIVE_INFINITY;
+    if (units >= min && units <= max) return band.hours;
+  }
+  if (table.repeatAfter && units > table.repeatAfter.baseUnits) {
+    return (
+      table.repeatAfter.baseHours +
+      ceilDivPositive(units - table.repeatAfter.baseUnits, table.repeatAfter.stepUnits) * table.repeatAfter.stepHours
+    );
+  }
+  return 0;
+}
+
 function reductionByKind(kind: Nv75DeputyKind, unitsIn: number) {
   const units = clampInt(unitsIn);
-  switch (kind) {
-    case "ms":
-      if (units < 4) return 0;
-      if (units <= 6) return 11;
-      if (units <= 9) return 14;
-      if (units <= 12) return 17;
-      return 17 + ceilDivPositive(units - 12, 3) * 3;
-    case "ms_internat":
-      return units >= 3 ? 15 : 0;
-    case "zs":
-      if (units < 5) return 0;
-      if (units <= 6) return 9;
-      if (units <= 14) return 11;
-      if (units <= 17) return 15;
-      if (units <= 26) return 22;
-      if (units <= 35) return 33;
-      return 33 + ceilDivPositive(units - 35, 9) * 11;
-    case "ss_konz":
-      if (units < 4) return 0;
-      if (units <= 8) return 7;
-      if (units <= 14) return 11;
-      if (units <= 17) return 16;
-      if (units <= 26) return 22;
-      if (units <= 35) return 33;
-      return 33 + ceilDivPositive(units - 35, 9) * 11;
-    case "sd":
-      if (units < 2) return 0;
-      if (units <= 3) return 3;
-      if (units <= 6) return 5;
-      if (units <= 11) return 7;
-      if (units <= 14) return 9;
-      return 11;
-    case "internat":
-      if (units < 5) return 0;
-      if (units <= 14) return 16;
-      if (units <= 22) return 18;
-      return 19;
-    case "zus_individual":
-      if (units <= 0) return 0;
-      if (units <= 14) return 11;
-      if (units <= 29) return 14;
-      if (units <= 39) return 18;
-      if (units <= 49) return 23;
-      return 28;
-    case "zus_group":
-      if (units <= 0) return 0;
-      if (units <= 14) return 9;
-      if (units <= 29) return 12;
-      if (units <= 39) return 16;
-      if (units <= 49) return 21;
-      return 26;
-    case "jazykova":
-      if (units <= 0) return 0;
-      if (units <= 14) return 9;
-      if (units <= 29) return 12;
-      return 15;
-    case "ustavni":
-      if (units < 5) return 0;
-      if (units <= 14) return 14;
-      if (units <= 22) return 16;
-      return 17;
-    case "domov_mladeze":
-      if (units <= 0) return 0;
-      if (units <= 5) return 10;
-      return 10 + ceilDivPositive(units - 5, 7) * 2;
-    case "poradenske":
-      return 12;
-    case "vos":
-      if (units <= 0) return 0;
-      if (units <= 8) return 7;
-      if (units <= 14) return 11;
-      if (units <= 17) return 16;
-      if (units <= 26) return 22;
-      return 33;
-    case "skolni_klub":
-      return 3;
-  }
+  return reductionFromTable(NV75_REDUCTION_TABLES[kind], units);
 }
 
 function bonus4dByKind(kind: Nv75DeputyKind, additionalEligibleIn: number) {
   const additionalEligible = clampInt(additionalEligibleIn);
   if (additionalEligible <= 0) return 0;
-  if (kind === "ms" || kind === "zs" || kind === "ss_konz") return additionalEligible * 2;
-  if (kind === "poradenske") return additionalEligible;
-  return 0;
+  const rule = NV75_BONUS4D_RULES[kind];
+  if (!rule) return 0;
+  return additionalEligible * rule.bonusPerEligibleWorkplace;
 }
 
 function bonus4cGeneral(studentsIn: number) {

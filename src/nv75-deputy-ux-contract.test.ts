@@ -35,6 +35,23 @@ describe("UX contract: NV75 deputy bank result visibility", () => {
     expect(page).toContain("Přidat další pracoviště");
     expect(page).toContain("Způsobilá pracoviště:");
     expect(page).toContain("bez bonifikace");
+    expect(page).toContain("formatAdditionalWorkplacesForExport");
+    expect(page).toContain("další pracoviště (detail)");
+  });
+
+  it("appendix 2/3 reductions are represented as auditable data tables", () => {
+    const core = readSource("src/nv75-deputy-bank.ts");
+
+    expect(core).toContain("NV75_REDUCTION_TABLES");
+    expect(core).toContain("function reductionFromTable");
+    expect(core).toContain("repeatAfter");
+    expect(core).toContain("function reductionByKind");
+    expect(core).not.toContain('case "ms":');
+    expect(core).not.toContain('case "ss_konz":');
+    expect(core).not.toContain('case "domov_mladeze":');
+    expect(core).toContain("NV75_BONUS4D_RULES");
+    expect(core).toContain("bonusPerEligibleWorkplace");
+    expect(core).not.toContain('kind === "ms" || kind === "zs" || kind === "ss_konz"');
   });
 
   it("extended methodology examples remain selectable in the NV75 page", () => {
@@ -43,6 +60,10 @@ describe("UX contract: NV75 deputy bank result visibility", () => {
     for (const exampleId of ["bonus_p2_example1", "bonus_poradenske", "ss_mix_40", "ov_16_37", "ov_16_33", "ov_28_42"]) {
       expect(page).toContain(`id: "${exampleId}"`);
     }
+    expect(page).toContain("selectedExampleDetails");
+    expect(page).toContain("Očekávaný výsledek");
+    expect(page).toContain("OV PŘÍKLAD 1");
+    expect(page).toContain("§4d PŘÍKLAD 1");
   });
 });
 
