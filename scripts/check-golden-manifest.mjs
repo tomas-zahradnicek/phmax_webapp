@@ -61,12 +61,18 @@ const requiredPropertyEntries = [
   "src/phmax-pv-sd-property-boundaries.test.ts",
   "src/ss/phmax-ss-property-boundaries.test.ts",
 ];
+const requiredNv75Entries = [
+  "src/nv75-deputy-golden-examples.test.ts",
+  "src/nv75-deputy-ui-flow.test.ts",
+  "src/nv75-deputy-ux-contract.test.ts",
+];
 
 const requiredEntries = [
   ...requiredGoldenBoundaryEntries,
   ...requiredContractEntries,
   ...requiredUiFlowEntries,
   ...requiredPropertyEntries,
+  ...requiredNv75Entries,
 ];
 
 const missing = requiredEntries.filter((entry) => !goldenScript.includes(entry));
