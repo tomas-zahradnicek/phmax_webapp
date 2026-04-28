@@ -434,6 +434,8 @@ function buildRowsForExport(
     ovGroupsSchool,
     ovGroupsInstructor,
   });
+  const exportNow = new Date();
+  const exportTimestamp = `${exportNow.toLocaleString("cs-CZ")} (ISO ${exportNow.toISOString()})`;
   const out: [string, string | number][] = [
     ["=== NV75 – banka odpočtů zástupců (orientačně) ===", ""],
     ["Pravidlo §4b", result.appliedRule],
@@ -450,6 +452,17 @@ function buildRowsForExport(
     ["OV – metodický výstup funkcí", result.ovDeputyEntitlementText],
     ["§4c odst. 1 – žáci skutečně započtení", result.practicalStudentsGeneralCounted],
     ["§4c odst. 2 – žáci praktického vyučování §16/9", practicalSec16],
+    ["", ""],
+    ["=== Release notes NV75 ===", ""],
+    ["Verze release notes", "NV75-RN-2026-04-28"],
+    [
+      "Verze metodiky (legislativní základ)",
+      "NV č. 75/2005 Sb., kalkulace dle příloh č. 2 a 3; referenční účinnost 21. 2. 2005",
+    ],
+    ["Datum a čas exportu (archivní razítko)", exportTimestamp],
+    ["RN-1", "Auditní mini-panel „Použitá pásma“ je nově přímo ve výsledkové tabulce po pracovištích."],
+    ["RN-2", "U každého pracoviště je uvedeno metodické odůvodnění dle §4b (příloha/pásmo) a §4d (bonifikace)."],
+    ["RN-3", "Celkový výsledek je explicitně součet: základ §4b + bonus §4c + bonus §4d."],
     ["", ""],
     ["=== Zadané řádky ===", ""],
   ];
@@ -468,6 +481,11 @@ function buildRowsForExport(
     out.push([`Pracoviště ${i + 1} – základ (h/týden)`, r.hoursByKind]);
     out.push([`Pracoviště ${i + 1} – bonifikace §4d`, r.bonus4dHours]);
     out.push([`Pracoviště ${i + 1} – mezisoučet`, r.hoursByKind + r.bonus4dHours]);
+    out.push([
+      `Pracoviště ${i + 1} – audit §4b`,
+      `§ 4b NV 75/2005 Sb. ve vazbě na přílohu č. ${r.appendix === "p2" ? "2" : "3"}: použito pásmo ${r.reductionBand}.`,
+    ]);
+    out.push([`Pracoviště ${i + 1} – audit §4d`, r.bonus4dRule]);
   });
   for (const [k, v] of APP_AUTHOR_EXPORT_ROWS) out.push([k, v]);
   return out;
@@ -945,6 +963,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                   <th>Pracoviště</th>
                   <th>Počet jednotek</th>
                   <th>Počet hodin do banky odpočtů</th>
+                  <th>Použitá pásma (audit)</th>
                 </tr>
               </thead>
               <tbody>
@@ -953,17 +972,23 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                     <td>{NV75_KIND_LABEL[row.kind]}</td>
                     <td>{row.units}</td>
                     <td>{row.hoursByKind + row.bonus4dHours} hodin týdně</td>
+                    <td>
+                      <div>{`§ 4b NV 75/2005 Sb. ve vazbě na přílohu č. ${row.appendix === "p2" ? "2" : "3"}: použito pásmo ${row.reductionBand}.`}</div>
+                      <div className="muted-text">{row.bonus4dRule}</div>
+                    </td>
                   </tr>
                 ))}
                 <tr>
                   <th>Bonus §4c</th>
                   <td>—</td>
                   <td>{bank.bonus4cHours} hodin týdně</td>
+                  <td><span className="muted-text">Mimo pásma příloh (samostatný bonus dle §4c)</span></td>
                 </tr>
                 <tr>
                   <th>Banka odpočtů celkem</th>
                   <td>—</td>
                   <td>{bank.bankHoursTotal} hodin týdně</td>
+                  <td><strong>Součet základ + bonusy</strong></td>
                 </tr>
                 {hasOvGroups ? (
                   <>
@@ -971,21 +996,25 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                       <th>Počet skupin odborného výcviku na školních pracovištích</th>
                       <td>{ovGroupsSchool} skupin</td>
                       <td>započítáno plně</td>
+                      <td><span className="muted-text">vyhl. 13/2005, §7</span></td>
                     </tr>
                     <tr>
                       <th>Počet skupin odborného výcviku u instruktora / ve firmách</th>
                       <td>{ovGroupsInstructor} skupin</td>
                       <td>započteno {ovInstructorGroupsCounted} skupin (floor({ovGroupsInstructor} / 2))</td>
+                      <td><span className="muted-text">metodické pravidlo 1/2</span></td>
                     </tr>
                     <tr>
                       <th>Počet skupin odborného výcviku celkem</th>
                       <td>{bank.ovGroupsEquivalent} skupin</td>
                       <td>školní skupiny + započtená polovina instruktorských skupin</td>
+                      <td><span className="muted-text">vyhl. 13/2005, §7</span></td>
                     </tr>
                     <tr>
                       <th>Výstup dle §13 odst. 7 vyhl. 13/2005</th>
                       <td>{bank.ovDeputyEntitlementCount} funkcí</td>
                       <td>{bank.ovDeputyEntitlementText}</td>
+                      <td><span className="muted-text">prahy 10 / 20 / +20 skupin</span></td>
                     </tr>
                   </>
                 ) : null}

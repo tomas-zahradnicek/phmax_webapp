@@ -65,7 +65,9 @@ export type Nv75DeputyBankResult = {
     units: number;
     appendix: AppendixGroup;
     hoursByKind: number;
+    reductionBand: string;
     bonus4dHours: number;
+    bonus4dRule: string;
   }[];
   notes: string[];
   ovGroupsEquivalent: number;
@@ -117,6 +119,10 @@ type ReductionTable = {
 };
 type Bonus4dRule = {
   bonusPerEligibleWorkplace: number;
+};
+type ReductionMatch = {
+  hours: number;
+  bandLabel: string;
 };
 
 const NV75_REDUCTION_TABLES: Record<Nv75DeputyKind, ReductionTable> = {
@@ -225,23 +231,39 @@ const NV75_BONUS4D_RULES: Partial<Record<Nv75DeputyKind, Bonus4dRule>> = {
   ss_konz: { bonusPerEligibleWorkplace: 2 },
   poradenske: { bonusPerEligibleWorkplace: 1 },
 };
+const NV75_BONUS4D_RULE_TEXTS: Partial<Record<Nv75DeputyKind, string>> = {
+  ms: "§ 4d NV 75/2005 Sb.: +2 h týdně za každé další pracoviště, pokud je na něm alespoň 1 třída/skupina/oddělení (min. 3 jednotky).",
+  zs: "§ 4d NV 75/2005 Sb.: +2 h týdně za každé další pracoviště, pokud je na něm alespoň 1 třída/skupina/oddělení (min. 3 jednotky).",
+  ss_konz:
+    "§ 4d NV 75/2005 Sb.: +2 h týdně za každé další pracoviště, pokud je na něm alespoň 1 třída/skupina/oddělení (min. 3 jednotky).",
+  poradenske: "§ 4d NV 75/2005 Sb.: +1 h týdně za každé další pracoviště školského poradenského zařízení.",
+};
 
-function reductionFromTable(table: ReductionTable, units: number) {
+function formatBandLabel(min: number, max: number) {
+  if (max === Number.POSITIVE_INFINITY) return `${min}+`;
+  if (min === max) return `${min}`;
+  return `${min}-${max}`;
+}
+
+function reductionFromTable(table: ReductionTable, units: number): ReductionMatch {
   for (const band of table.bands) {
     const min = band.min ?? 0;
     const max = band.max ?? Number.POSITIVE_INFINITY;
-    if (units >= min && units <= max) return band.hours;
+    if (units >= min && units <= max) {
+      return { hours: band.hours, bandLabel: formatBandLabel(min, max) };
+    }
   }
   if (table.repeatAfter && units > table.repeatAfter.baseUnits) {
-    return (
-      table.repeatAfter.baseHours +
-      ceilDivPositive(units - table.repeatAfter.baseUnits, table.repeatAfter.stepUnits) * table.repeatAfter.stepHours
-    );
+    const steps = ceilDivPositive(units - table.repeatAfter.baseUnits, table.repeatAfter.stepUnits);
+    return {
+      hours: table.repeatAfter.baseHours + steps * table.repeatAfter.stepHours,
+      bandLabel: `${table.repeatAfter.baseUnits}+ (po ${table.repeatAfter.stepUnits})`,
+    };
   }
-  return 0;
+  return { hours: 0, bandLabel: "mimo pásmo" };
 }
 
-function reductionByKind(kind: Nv75DeputyKind, unitsIn: number) {
+function reductionByKind(kind: Nv75DeputyKind, unitsIn: number): ReductionMatch {
   const units = clampInt(unitsIn);
   return reductionFromTable(NV75_REDUCTION_TABLES[kind], units);
 }
@@ -252,6 +274,10 @@ function bonus4dByKind(kind: Nv75DeputyKind, additionalEligibleIn: number) {
   const rule = NV75_BONUS4D_RULES[kind];
   if (!rule) return 0;
   return additionalEligible * rule.bonusPerEligibleWorkplace;
+}
+
+function bonus4dRuleLabel(kind: Nv75DeputyKind) {
+  return NV75_BONUS4D_RULE_TEXTS[kind] ?? "§ 4d NV 75/2005 Sb. se na tento druh školy/zařízení nepoužije.";
 }
 
 function bonus4cGeneral(studentsIn: number) {
@@ -293,14 +319,16 @@ function ovDeputyEntitlementText(count: number, groupsSchool: number, groupsInst
 
 export function calculateNv75DeputyBank(input: Nv75DeputyBankInput): Nv75DeputyBankResult {
   const rows = input.activities.map((a) => {
-    const kindHours = reductionByKind(a.kind, a.units);
+    const reduction = reductionByKind(a.kind, a.units);
     const bonus4d = bonus4dByKind(a.kind, a.additionalWorkplacesEligible ?? 0);
     return {
       kind: a.kind,
       units: clampInt(a.units),
       appendix: APPENDIX_GROUP[a.kind],
-      hoursByKind: kindHours,
+      hoursByKind: reduction.hours,
+      reductionBand: reduction.bandLabel,
       bonus4dHours: bonus4d,
+      bonus4dRule: bonus4dRuleLabel(a.kind),
     };
   });
 
@@ -320,7 +348,7 @@ export function calculateNv75DeputyBank(input: Nv75DeputyBankInput): Nv75DeputyB
   const p2CandidateKinds = p2Kinds.filter((k) => k !== "sd");
   let p2HoursCombined = 0;
   if (p2CandidateKinds.length > 0) {
-    p2HoursCombined = Math.max(...p2CandidateKinds.map((k) => reductionByKind(k, p2CombinedUnits)));
+    p2HoursCombined = Math.max(...p2CandidateKinds.map((k) => reductionByKind(k, p2CombinedUnits).hours));
   } else if (p2Count > 1 && p2Kinds[0] === "sd") {
     notes.push(
       "§ 4b odst. 3: při více druzích z přílohy č. 2 nelze rozhodující hodnotu určovat podle školní družiny; v datech je pouze ŠD.",
