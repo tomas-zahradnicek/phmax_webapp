@@ -26,6 +26,14 @@ export function ProductFloatingNav({ active, setProductView }: ProductFloatingNa
       <div className="scroll-tools__product-btns" role="group" aria-label="Přepnout typ kalkulačky">
         <button
           type="button"
+          className={`scroll-tools__btn${active === "dash" ? " scroll-tools__btn--active" : ""}`}
+          title="Souhrnný přehled kalkulaček"
+          onClick={() => setProductView("dash")}
+        >
+          Σ
+        </button>
+        <button
+          type="button"
           className={`scroll-tools__btn${active === "pv" ? " scroll-tools__btn--active" : ""}`}
           title="Kalkulačka pro předškolní vzdělávání"
           onClick={() => setProductView("pv")}

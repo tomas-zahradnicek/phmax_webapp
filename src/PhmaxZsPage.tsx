@@ -1545,6 +1545,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       ) {
         issues.push({ section: "basic", label: "Vyplňte alespoň jednu relevantní sekci v PHmax." });
       }
+      if (basic1Classes > 0 && basic1Pupils === 0) {
+        issues.push({ section: "basic", label: "PHmax: na 1. stupni je vyplněn počet tříd, ale chybí počet žáků." });
+      }
+      if (basic2Classes > 0 && basic2Pupils === 0) {
+        issues.push({ section: "basic", label: "PHmax: na 2. stupni je vyplněn počet tříd, ale chybí počet žáků." });
+      }
     }
     if (tab === "pha" && phaRows.length === 0) {
       issues.push({ section: "pha", label: "Přidejte alespoň jeden řádek do PHAmax." });
@@ -1552,6 +1558,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     if (tab === "php") {
       if (phpYear1 === 0 && phpYear2 === 0 && phpYear3 === 0) {
         issues.push({ section: "php", label: "Zadejte počty žáků pro PHPmax." });
+      }
+      if (phpMethodMode === "three_year_avg" && (phpYear1 === 0 || phpYear2 === 0 || phpYear3 === 0)) {
+        issues.push({ section: "php", label: "PHPmax (3 roky): doplňte všechny 3 roky, nebo přepněte na kratší období." });
       }
     }
     return issues;
@@ -2543,7 +2552,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </div>
         </section>
 
-        {warnings.length > 0 && (
+        {(warnings.length > 0 || validationIssues.length > 0) && (
           <section className="card warning card--warning">
             <h2>Kontrola vstupů</h2>
             {validationIssues.map((item, i) => (
@@ -3602,6 +3611,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               Celkový přehled
             </button>
             <div className="scroll-tools__product-btns" role="group" aria-label="Přepnout typ kalkulačky">
+              <button type="button" className="scroll-tools__btn" onClick={() => setProductView("dash")}>
+                Σ
+              </button>
               <button type="button" className="scroll-tools__btn" onClick={() => setProductView("pv")}>
                 PV
               </button>

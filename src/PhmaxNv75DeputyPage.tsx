@@ -8,7 +8,8 @@ import {
   APP_AUTHOR_EXPORT_ROWS,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
-import { exportCsvLocalized, downloadTextFile } from "./export-utils";
+import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
+import { buildExportMetaRows, buildOfficialArchiveRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductFloatingNav } from "./ProductFloatingNav";
@@ -50,6 +51,41 @@ type Nv75ExampleKey =
   | "ov_15_36";
 
 const NV75_STORAGE_KEY = "edu-cz-nv75-deputy-bank-state";
+const NV75_NAMED_SNAPSHOTS_KEY = "edu-cz-nv75-deputy-bank-named-snapshots";
+const NV75_MAX_NAMED_SNAPSHOTS = 12;
+
+type Nv75NamedSnapshot = {
+  id: string;
+  name: string;
+  savedAt: string;
+  snapshot: {
+    rows: Nv75DeputyUiRow[];
+    practicalGeneralNonOv: number;
+    practicalOvEhl0: number;
+    practicalSec16: number;
+    ovGroupsSchool: number;
+    ovGroupsInstructor: number;
+  };
+};
+
+function readNv75NamedSnapshots(): Nv75NamedSnapshot[] {
+  try {
+    const raw = localStorage.getItem(NV75_NAMED_SNAPSHOTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { items?: Nv75NamedSnapshot[] };
+    return Array.isArray(parsed.items) ? parsed.items : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeNv75NamedSnapshots(items: Nv75NamedSnapshot[]) {
+  try {
+    localStorage.setItem(NV75_NAMED_SNAPSHOTS_KEY, JSON.stringify({ items }));
+  } catch {
+    /* ignore */
+  }
+}
 
 const NV75_DEPUTY_KIND_OPTIONS: readonly { value: Nv75DeputyKind; label: string }[] = [
   { value: "ms", label: "MŠ (příl. 2)" },
@@ -106,7 +142,7 @@ export function eligibleAdditionalWorkplacesForRow(row: Nv75DeputyUiRow) {
   return 0;
 }
 
-function normalizeNv75UiRow(row: Nv75DeputyUiRow): Nv75DeputyUiRow {
+export function normalizeNv75UiRow(row: Nv75DeputyUiRow): Nv75DeputyUiRow {
   return {
     id: row.id,
     kind: row.kind,
@@ -502,7 +538,14 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const [lastSavedAt, setLastSavedAt] = useState("");
   const [uiNotice, setUiNotice] = useState("");
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
+  const [namedSnapshots, setNamedSnapshots] = useState<Nv75NamedSnapshot[]>([]);
+  const [selectedNamedId, setSelectedNamedId] = useState("");
+  const [namedSaveName, setNamedSaveName] = useState("");
   const selectedExampleDetails = useMemo(() => NV75_EXAMPLES.find((x) => x.id === selectedExample), [selectedExample]);
+
+  useEffect(() => {
+    setNamedSnapshots(readNv75NamedSnapshots());
+  }, []);
 
   useEffect(() => {
     try {
@@ -562,6 +605,35 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const hasPracticalContext = useMemo(() => rows.some((r) => r.kind === "ss_konz" || r.kind === "vos"), [rows]);
   const ovInstructorGroupsCounted = Math.floor(Math.max(0, Math.floor(ovGroupsInstructor)) / 2);
   const hasOvGroups = ovGroupsSchool > 0 || ovGroupsInstructor > 0 || bank.ovGroupsEquivalent > 0;
+  const nv75InputWarnings = useMemo(() => {
+    const messages: string[] = [];
+    const noUnitsRows = rows
+      .map((row, idx) => ({ row, idx }))
+      .filter(({ row }) => kindUsesUnits(row.kind) && row.units <= 0)
+      .map(({ idx }) => idx + 1);
+    if (noUnitsRows.length > 0) {
+      messages.push(`Řádky bez jednotek (vyplňte > 0): ${noUnitsRows.join(", ")}.`);
+    }
+    const ovRowsWithoutGroups = hasPracticalContext && practicalOvEhl0 > 0 && ovGroupsSchool === 0 && ovGroupsInstructor === 0;
+    if (ovRowsWithoutGroups) {
+      messages.push(
+        "Jsou zadáni žáci OV (E/H/L0), ale nejsou vyplněny skupiny OV. Pro správné posouzení §4c odst. 3 doplňte skupiny na pracovišti školy nebo u instruktora.",
+      );
+    }
+    const notEligibleWorkplaces = rows
+      .flatMap((row, rowIdx) =>
+        row.kind === "poradenske"
+          ? []
+          : additionalWorkplaceUnitsForRow(row)
+              .map((units, workplaceIdx) => ({ row, rowIdx, units, workplaceIdx }))
+              .filter((x) => kindUsesAdditionalWorkplaces(x.row.kind) && x.units > 0 && x.units < 3),
+      )
+      .map((x) => `ř.${x.rowIdx + 1}/#${x.workplaceIdx + 1}`);
+    if (notEligibleWorkplaces.length > 0) {
+      messages.push(`Další pracoviště bez nároku §4d (< 3 jednotky): ${notEligibleWorkplaces.join(", ")}.`);
+    }
+    return messages;
+  }, [rows, hasPracticalContext, practicalOvEhl0, ovGroupsSchool, ovGroupsInstructor]);
 
   const addRow = useCallback(() => {
     setRows((prev) => [...prev, { id: Date.now(), kind: "zs", units: 0, additionalWorkplaceUnits: [] }]);
@@ -638,8 +710,26 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     [rows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor],
   );
 
+  const buildSnapshot = useCallback(
+    () => ({
+      rows: rows.map(normalizeNv75UiRow),
+      practicalGeneralNonOv,
+      practicalOvEhl0,
+      practicalSec16,
+      ovGroupsSchool,
+      ovGroupsInstructor,
+    }),
+    [rows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor],
+  );
+
   const handleExportCsv = useCallback(() => {
-    downloadTextFile("nv75-banka-odpoctu.csv", exportCsvLocalized(exportRows), "text/csv;charset=utf-8");
+    const rowsCsv = [
+      ...buildExportMetaRows("nv75"),
+      ...buildOfficialArchiveRows("nv75"),
+      EXPORT_CSV_SEPARATOR_ROW,
+      ...exportRows,
+    ];
+    downloadTextFile(exportFilenameStamped("nv75-banka-odpoctu", "csv"), exportCsvLocalized(rowsCsv), "text/csv;charset=utf-8");
     setUiNotice("Exportováno do CSV.");
   }, [exportRows]);
 
@@ -651,11 +741,12 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       await downloadCalculatorXlsx({
         contextRows: [
           ["Aplikace (produkt)", PRODUCT_CALCULATOR_TITLES.nv75],
-          ["Datum a čas exportu", new Date().toLocaleString("cs-CZ")],
+          ...buildExportMetaRows("nv75"),
+          ...buildOfficialArchiveRows("nv75"),
           ["Vytvořil", `${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`],
         ],
         valueRows: exportRows,
-        filename: "nv75-banka-odpoctu.xlsx",
+        filename: exportFilenameStamped("nv75-banka-odpoctu", "xlsx"),
       });
       setUiNotice("Stažen soubor Excel (XLSX).");
     } catch {
@@ -664,6 +755,74 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       setXlsxExportBusy(false);
     }
   }, [exportRows, xlsxExportBusy]);
+
+  const saveNamedSnapshot = useCallback(() => {
+    const name = namedSaveName.trim() || new Date().toLocaleString("cs-CZ");
+    const item: Nv75NamedSnapshot = {
+      id: `n-${Date.now()}`,
+      name,
+      savedAt: new Date().toISOString(),
+      snapshot: buildSnapshot(),
+    };
+    setNamedSnapshots((prev) => {
+      const next = [item, ...prev].slice(0, NV75_MAX_NAMED_SNAPSHOTS);
+      writeNv75NamedSnapshots(next);
+      return next;
+    });
+    setNamedSaveName("");
+    setUiNotice(`Pojmenovaná záloha „${name}“ uložena.`);
+  }, [buildSnapshot, namedSaveName]);
+
+  const compareWithNamedSnapshot = useCallback(() => {
+    const named = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!named) {
+      setUiNotice("Nejprve vyberte uloženou zálohu pro porovnání.");
+      return;
+    }
+    const current = calculateNv75DeputyBank({
+      activities: buildCalculationRows(rows),
+      practicalStudentsGeneralNonOv: practicalGeneralNonOv,
+      practicalStudentsOvEhl0: practicalOvEhl0,
+      practicalStudentsSec16: practicalSec16,
+      ovGroupsSchool,
+      ovGroupsInstructor,
+    });
+    const namedResult = calculateNv75DeputyBank({
+      activities: buildCalculationRows(named.snapshot.rows.map(normalizeNv75UiRow)),
+      practicalStudentsGeneralNonOv: named.snapshot.practicalGeneralNonOv,
+      practicalStudentsOvEhl0: named.snapshot.practicalOvEhl0,
+      practicalStudentsSec16: named.snapshot.practicalSec16,
+      ovGroupsSchool: named.snapshot.ovGroupsSchool,
+      ovGroupsInstructor: named.snapshot.ovGroupsInstructor,
+    });
+    const diff = {
+      comparedAt: new Date().toISOString(),
+      namedSnapshot: { id: named.id, name: named.name, savedAt: named.savedAt },
+      deltas: {
+        bankHoursTotal: Number((current.bankHoursTotal - namedResult.bankHoursTotal).toFixed(2)),
+        bankHoursBase4b: Number((current.bankHoursBase4b - namedResult.bankHoursBase4b).toFixed(2)),
+        bonus4cHours: Number((current.bonus4cHours - namedResult.bonus4cHours).toFixed(2)),
+        bonus4dHours: Number((current.bonus4dHours - namedResult.bonus4dHours).toFixed(2)),
+      },
+      current,
+      named: namedResult,
+    };
+    downloadTextFile(
+      exportFilenameStamped("nv75-compare", "json"),
+      JSON.stringify(diff, null, 2),
+      "application/json;charset=utf-8",
+    );
+    setUiNotice(`Staženo porovnání: aktuální stav vs „${named.name}“ (JSON).`);
+  }, [
+    namedSnapshots,
+    selectedNamedId,
+    rows,
+    practicalGeneralNonOv,
+    practicalOvEhl0,
+    practicalSec16,
+    ovGroupsSchool,
+    ovGroupsInstructor,
+  ]);
 
   const summaryText = useMemo(() => {
     const lines = [
@@ -764,6 +923,37 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               Tisk shrnutí
             </button>
           </div>
+          <div className="grid two" style={{ marginTop: 10, gap: 10 }}>
+            <label className="field">
+              <span className="field__label">Název A/B scénáře (uložit zálohu)</span>
+              <input
+                className="input"
+                type="text"
+                value={namedSaveName}
+                onChange={(e) => setNamedSaveName(e.target.value)}
+                placeholder="např. varianta 2026/27"
+              />
+            </label>
+            <div className="field">
+              <span className="field__label">Uložené scénáře pro porovnání</span>
+              <select className="input" value={selectedNamedId} onChange={(e) => setSelectedNamedId(e.target.value)}>
+                <option value="">Vyberte uložený scénář…</option>
+                {namedSnapshots.map((snap) => (
+                  <option key={snap.id} value={snap.id}>
+                    {snap.name} ({new Date(snap.savedAt).toLocaleString("cs-CZ")})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="toolbar" style={{ marginTop: 8 }}>
+            <button type="button" className="btn ghost" onClick={saveNamedSnapshot}>
+              Uložit A/B scénář
+            </button>
+            <button type="button" className="btn ghost" onClick={compareWithNamedSnapshot}>
+              Porovnat s uloženým scénářem (JSON)
+            </button>
+          </div>
           <label className="field" style={{ marginTop: 10, maxWidth: 760 }}>
             <span className="field__label">Příkladové výpočty (metodika §4b a SŠ/VOŠ/DM)</span>
             <select
@@ -862,6 +1052,14 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               Pole §4c (praktické vyučování/OV) se zobrazují jen při volbě druhu s kontextem SŠ nebo VOŠ.
             </p>
           )}
+          {nv75InputWarnings.length > 0 ? (
+            <div className="card warning card--warning" style={{ marginTop: 10 }}>
+              <h3 style={{ marginTop: 0 }}>Kontrola vstupů NV75</h3>
+              {nv75InputWarnings.map((item, i) => (
+                <div key={`nv75-w-${i}`}>• {item}</div>
+              ))}
+            </div>
+          ) : null}
 
           <div className="sd-phmax-breakdown-scroll" style={{ marginTop: 10 }}>
             <table className="sd-phmax-breakdown">

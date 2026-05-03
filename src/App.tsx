@@ -1,11 +1,13 @@
-import React, { useCallback, useState } from "react";
-import { PhmaxPvPage } from "./PhmaxPvPage";
-import { PhmaxSdPage } from "./PhmaxSdPage";
-import { PhmaxSsPage } from "./PhmaxSsPage";
-import { PhmaxNv75DeputyPage } from "./PhmaxNv75DeputyPage";
-import { PhmaxZsPage } from "./PhmaxZsPage";
+import React, { Suspense, lazy, useCallback, useState } from "react";
 import type { ProductView } from "./ProductViewPills";
 import { readInitialProductView } from "./product-view-url";
+
+const PhmaxPvPage = lazy(() => import("./PhmaxPvPage").then((m) => ({ default: m.PhmaxPvPage })));
+const PhmaxSdPage = lazy(() => import("./PhmaxSdPage").then((m) => ({ default: m.PhmaxSdPage })));
+const PhmaxSsPage = lazy(() => import("./PhmaxSsPage").then((m) => ({ default: m.PhmaxSsPage })));
+const PhmaxNv75DeputyPage = lazy(() => import("./PhmaxNv75DeputyPage").then((m) => ({ default: m.PhmaxNv75DeputyPage })));
+const PhmaxZsPage = lazy(() => import("./PhmaxZsPage").then((m) => ({ default: m.PhmaxZsPage })));
+const PhmaxDashboardPage = lazy(() => import("./PhmaxDashboardPage").then((m) => ({ default: m.PhmaxDashboardPage })));
 
 export default function App() {
   const [productView, setProductViewState] = useState<ProductView>(() => readInitialProductView());
@@ -23,11 +25,27 @@ export default function App() {
 
   const shell = (child: React.ReactNode) => (
     <div className="app-shell app-shell--gradient">
-      <div className="container container--app">{child}</div>
+      <div className="container container--app">
+        <Suspense fallback={<div className="card muted">Načítám kalkulačku…</div>}>{child}</Suspense>
+      </div>
     </div>
   );
 
   switch (productView) {
+    case "dash":
+      return (
+        <Suspense
+          fallback={
+            <div className="app-shell app-shell--gradient">
+              <div className="container container--app">
+                <div className="card muted">Načítám přehled…</div>
+              </div>
+            </div>
+          }
+        >
+          <PhmaxDashboardPage productView={productView} setProductView={setProductView} />
+        </Suspense>
+      );
     case "pv":
       return shell(<PhmaxPvPage productView={productView} setProductView={setProductView} />);
     case "sd":
@@ -35,7 +53,11 @@ export default function App() {
     case "ss":
       return shell(<PhmaxSsPage productView={productView} setProductView={setProductView} />);
     case "zs":
-      return <PhmaxZsPage productView={productView} setProductView={setProductView} />;
+      return (
+        <Suspense fallback={<div className="app-shell app-shell--gradient"><div className="container container--app"><div className="card muted">Načítám kalkulačku…</div></div></div>}>
+          <PhmaxZsPage productView={productView} setProductView={setProductView} />
+        </Suspense>
+      );
     case "nv75":
       return shell(<PhmaxNv75DeputyPage productView={productView} setProductView={setProductView} />);
     default: {

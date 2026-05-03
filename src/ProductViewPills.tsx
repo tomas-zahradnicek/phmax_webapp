@@ -9,6 +9,7 @@ type ProductViewPillsProps = {
 };
 
 const PILL_SHORT: Record<ProductView, string> = {
+  dash: "Σ",
   pv: "PV",
   sd: "ŠD",
   zs: "ZŠ",
@@ -16,7 +17,7 @@ const PILL_SHORT: Record<ProductView, string> = {
   nv75: "NV75",
 };
 
-const TAB_ORDER: ProductView[] = ["pv", "sd", "zs", "ss", "nv75"];
+const TAB_ORDER: ProductView[] = ["dash", "pv", "sd", "zs", "ss", "nv75"];
 
 export function ProductViewPills({ productView, setProductView }: ProductViewPillsProps) {
   const moveSelection = useCallback(
@@ -38,7 +39,7 @@ export function ProductViewPills({ productView, setProductView }: ProductViewPil
         moveSelection(view, -1);
       } else if (e.key === "Home") {
         e.preventDefault();
-        setProductView("pv");
+        setProductView("dash");
       } else if (e.key === "End") {
         e.preventDefault();
         setProductView("nv75");
@@ -49,6 +50,19 @@ export function ProductViewPills({ productView, setProductView }: ProductViewPil
 
   return (
     <div className="hero__product-pills" role="tablist" aria-label="Výběr kalkulačky">
+      <button
+        type="button"
+        role="tab"
+        tabIndex={productView === "dash" ? 0 : -1}
+        aria-selected={productView === "dash"}
+        title={PRODUCT_CALCULATOR_TITLES.dash}
+        aria-label={PRODUCT_CALCULATOR_TITLES.dash}
+        className={`pill pill--hero pill--hero-toggle${productView === "dash" ? " pill--hero-toggle--active" : ""}`}
+        onClick={() => setProductView("dash")}
+        onKeyDown={(e) => onTabListKeyDown(e, "dash")}
+      >
+        {PILL_SHORT.dash}
+      </button>
       <button
         type="button"
         role="tab"

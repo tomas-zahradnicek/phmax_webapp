@@ -1,9 +1,10 @@
 /** Kódy produktů v aplikaci (URL `?view=`, záložky) – jeden zdroj pro typ `ProductView`. */
-export const PRODUCT_VIEW_CODES = ["pv", "sd", "zs", "ss", "nv75"] as const;
+export const PRODUCT_VIEW_CODES = ["dash", "pv", "sd", "zs", "ss", "nv75"] as const;
 export type ProductViewCode = (typeof PRODUCT_VIEW_CODES)[number];
 
 /** Plné názvy produktů – zápatí a přístupnost u kompaktních záložek v hero. */
 export const PRODUCT_CALCULATOR_TITLES = {
+  dash: "Souhrnný přehled kalkulaček (stav v prohlížeči)",
   pv: "Kalkulačka pro předškolní vzdělávání",
   sd: "Kalkulačka pro školní družiny",
   zs: "Kalkulačka pro základní školy",
