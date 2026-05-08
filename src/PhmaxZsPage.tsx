@@ -39,6 +39,7 @@ import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, ZsLegisRef } from "./PhmaxProductLegisUi";
 import { ZS_LEGIS_PARAGRAPH_TOOLTIPS } from "./phmax-zs-legislativa";
 import { QuickOnboarding } from "./QuickOnboarding";
+import { BasicModeSteps } from "./BasicModeSteps";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
@@ -2409,6 +2410,22 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             Aplikace slouží k orientačnímu výpočtu; nejedná se o oficiální výstup zřizovatele.
           </p>
         </QuickOnboarding>
+        {viewMode === "basic" ? (
+        <BasicModeSteps
+          heading="Rychlý start pro ZŠ"
+          lead="Stejný vizuální vzor jako v expertním režimu, zkrácený na 3 kroky."
+          steps={[
+            { title: "Vyberte režim výpočtu školy", text: "V sekci „Typ školy a režim výpočtu“ vyberte správnou variantu." },
+            {
+              title: "Načtěte ukázkový příklad nahoře",
+              text: "V horní liště načtěte ukázku/situaci pro rychlé předvyplnění formuláře.",
+              ctaLabel: "Přejít na ukázkový příklad",
+              ctaTargetId: "zs-hero-example-select",
+            },
+            { title: "Ověřte modulové vstupy", text: "Vyplňte PHmax, PHAmax nebo PHPmax podle aktivní záložky a ověřte průběžný i celkový přehled." },
+          ]}
+        />
+        ) : null}
 
         {viewMode === "expert" ? (
         <section className="card card--onboarding section-card section-card--onboarding">

@@ -60,6 +60,7 @@ import { ProductLegisContextPanel, SdLegisRef } from "./PhmaxProductLegisUi";
 import { SD_LEGIS_ZAKONY_URL } from "./phmax-sd-legislativa";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
+import { BasicModeSteps } from "./BasicModeSteps";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { GlossaryIconButton } from "./GlossaryIconButton";
@@ -1363,6 +1364,22 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           výjimky dle vyhlášky). Pokud je situace hraniční, proveďte ruční kontrolu podle plného znění vyhlášky a metodiky.
         </p>
       </QuickOnboarding>
+      {viewMode === "basic" ? (
+        <BasicModeSteps
+          heading="Rychlý start pro ŠD"
+          lead="Nejkratší postup pro první vyplnění bez studia celé metodiky."
+          steps={[
+            { title: "Vyberte vstupní režim", text: "Vyberte souhrnný nebo detailní režim po odděleních." },
+            {
+              title: "Načtěte ukázkový příklad nahoře",
+              text: "V poli „Příkladové výpočty“ načtěte ukázku a porovnejte očekávaný výsledek.",
+              ctaLabel: "Přejít na ukázkový příklad",
+              ctaTargetId: "sd-hero-example-select",
+            },
+            { title: "Ověřte účastníky a oddělení", text: "Upravte vstupy na vlastní stav a ověřte PHmax i případné krácení dle § 10 odst. 2." },
+          ]}
+        />
+      ) : null}
 
       <section className="card section-card section-card--sd">
         <h2 className="section-title">Vstupy</h2>

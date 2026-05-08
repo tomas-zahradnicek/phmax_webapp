@@ -42,6 +42,7 @@ import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { QuickOnboarding } from "./QuickOnboarding";
+import { BasicModeSteps } from "./BasicModeSteps";
 import {
   PHMAX_SS_FRAMEWORK_FIRST_PHASE,
   PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY,
@@ -906,6 +907,22 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           PHmax“) a vyhodnocení pravidel.
         </p>
       </QuickOnboarding>
+      {viewMode === "basic" ? (
+        <BasicModeSteps
+          heading="Rychlý start pro SŠ"
+          lead="Základní průchod: ukázka -> řádky evidence -> kontrola výsledků."
+          steps={[
+            { title: "Vyberte Základní režim", text: "Začněte jednoduchým vyplněním bez metodických detailů." },
+            {
+              title: "Načtěte ukázkový příklad nahoře",
+              text: "V poli „Příkladové výpočty“ načtěte mini-příklad pro tabulku evidence.",
+              ctaLabel: "Přejít na ukázkový příklad",
+              ctaTargetId: "ss-hero-example-select",
+            },
+            { title: "Ověřte řádky evidence", text: "Upravte obor, průměr žáků, počet tříd a formu; ověřte PHmax a pravidla víceoborových tříd." },
+          ]}
+        />
+      ) : null}
 
       {viewMode === "expert" ? (
         <section

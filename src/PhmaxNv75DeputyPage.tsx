@@ -14,6 +14,7 @@ import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } fro
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
+import { BasicModeSteps } from "./BasicModeSteps";
 import { NV75_DEPUTY_LEGIS_TOOLTIPS, NV75_DEPUTY_LEGIS_URL } from "./nv75-deputy-legislativa";
 import { calculateNv75DeputyBank, type Nv75DeputyKind } from "./nv75-deputy-bank";
 
@@ -900,6 +901,20 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             </p>
           </div>
         </header>
+        <BasicModeSteps
+          heading="Rychlý start pro NV75"
+          lead="Tři kroky bez duplicit metodiky: řádky -> příklad -> kontrola banky odpočtů."
+          steps={[
+            { title: "Vyberte řádky právnické osoby", text: "Vyberte druh školy/zařízení a vyplňte jednotky pro každý řádek." },
+            {
+              title: "Načtěte ukázkový příklad A nahoře",
+              text: "V poli „Příkladové výpočty“ načtěte první ukázku (A) jako mini-předvyplnění.",
+              ctaLabel: "Přejít na ukázkový příklad",
+              ctaTargetId: "nv75-hero-example-select",
+            },
+            { title: "Ověřte banku odpočtů", text: "Ve výsledku ověřte aplikované pravidlo §4b, celkový počet hodin i případný dopad §4c/§4d." },
+          ]}
+        />
 
         <section className="card muted section-card">
           <h2 className="section-title">Vstupy</h2>
@@ -957,6 +972,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           <label className="field" style={{ marginTop: 10, maxWidth: 760 }}>
             <span className="field__label">Příkladové výpočty (metodika §4b a SŠ/VOŠ/DM)</span>
             <select
+              id="nv75-hero-example-select"
               className="input"
               value={selectedExample}
               onChange={(e) => applyExample(e.target.value as Nv75ExampleKey)}

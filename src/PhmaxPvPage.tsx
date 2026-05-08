@@ -61,6 +61,7 @@ import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, PvLegisRef } from "./PhmaxProductLegisUi";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
+import { BasicModeSteps } from "./BasicModeSteps";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
 import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
@@ -1081,6 +1082,22 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           místě (celodenní/polodenní/internátní); nebo oddělená situace, kterou potřebujete vykázat samostatně.
         </p>
       </QuickOnboarding>
+      {viewMode === "basic" ? (
+        <BasicModeSteps
+          heading="Rychlý start pro PV"
+          lead="Krátký postup pro první orientaci bez metodického detailu."
+          steps={[
+            { title: "Vyberte režim zobrazení", text: "V horní liště vyberte Základní režim pro rychlé vyplnění." },
+            {
+              title: "Načtěte ukázkový příklad nahoře",
+              text: "V poli „Příkladové výpočty“ načtěte ukázku a předvyplňte pracoviště.",
+              ctaLabel: "Přejít na ukázkový příklad",
+              ctaTargetId: "pv-hero-example-select",
+            },
+            { title: "Ověřte vlastní pracoviště", text: "Upravte druh provozu, počet tříd a průměr hodin; ověřte součtový přehled PHmax/PHAmax." },
+          ]}
+        />
+      ) : null}
 
       <section className="card muted section-card" aria-label="Součtový přehled pracovišť">
         <h2 className="section-title">Součtový přehled pracovišť</h2>
