@@ -86,6 +86,7 @@ import {
 } from "./phmax-pv-hero-examples";
 import { round2 } from "./phmax-zs-logic";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
+import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { PhmaxPvMethodologyTables123, type PvMethodologyActiveCell } from "./phmax-pv-methodology-tables";
 
 function pvDurationBandTableNo(provoz: PvProvozKind): string {
@@ -1289,6 +1290,23 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                     ) : null}
                   </div>
                 ) : null}
+
+                <FieldWhyPhmaxDetails>
+                  <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+                    <li>
+                      <strong>Druh provozu a počet tříd</strong> určují základ PHmax za třídu (tabulky 1–3 přílohy; u MŠ při zdravotnickém zařízení platí jednotná sazba 31 h/třídu).
+                    </li>
+                    <li>
+                      <strong>Průměrná denní doba provozu</strong> zařazuje řádek do správného sloupce těchto tabulek — ovlivní to výslednou základní složku PHmax.
+                    </li>
+                    <li>
+                      <strong>§ 16 odst. 9 a jazykové skupiny</strong> přičítají sjednocené navýšení (5 h za třídu / +1 h za skupinu podle aplikovaných položek metodiky).
+                    </li>
+                    <li>
+                      <strong>PHAmax</strong> u řádků § 16 vychází z průměrné doby tohoto pracoviště (viz tabulku v detailu řádku).
+                    </li>
+                  </ul>
+                </FieldWhyPhmaxDetails>
 
                 <details className="pv-row-details">
                   <summary>

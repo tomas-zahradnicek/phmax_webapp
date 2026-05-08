@@ -4,6 +4,16 @@ import { CALCULATOR_LIMITS_NOTE, PRODUCT_CALCULATOR_TITLES } from "./calculator-
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
+
+const DASH_QUICK_IDS: Exclude<ProductView, "dash">[] = ["pv", "sd", "zs", "ss", "nv75"];
+
+const DASH_CALC_LABEL: Record<Exclude<ProductView, "dash">, string> = {
+  pv: "PV",
+  sd: "ŠD",
+  zs: "ZŠ",
+  ss: "SŠ",
+  nv75: "NV75",
+};
 import { round2 } from "./phmax-zs-logic";
 import { computePvPhmaxTotal, getPhaMaxPv, type PvProvozKind } from "./phmax-pv-logic";
 import { calculateNv75DeputyBank } from "./nv75-deputy-bank";
@@ -362,6 +372,26 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             </div>
           </div>
         </header>
+
+        <section className="card card--accent section-card section-card--guide" aria-labelledby="dash-user-first-heading">
+          <h2 id="dash-user-first-heading" className="section-title">
+            Začněte uživatelsky nejdříve tady
+          </h2>
+          <p className="muted-text" style={{ marginBottom: 12 }}>
+            V každé kalkulačce nejdřív v horní oblasti stránky vyberte <strong>Příkladové výpočty</strong> — získáte předvyplněnou situaci k orientaci ve vstupech. U ZŠ může navíc pomoci ukázka v horní liště či rozcestník v expertním režimu. V tabulkách PHmax používejte rozbalení{" "}
+            <strong>„Proč tyto vstupy ovlivní PHmax?“</strong> (viz PV, ŠD, ZŠ, NV75) — u <strong>SŠ</strong> doplňuje stejný smysl tlačítko „Proč?“ u každého řádku přehledu.
+          </p>
+          <p className="muted-text" style={{ marginBottom: 12 }}>
+            Rychlé otevření kalkulačky (stav zůstává v paměti tohoto prohlížeče):
+          </p>
+          <div className="toolbar" style={{ flexWrap: "wrap", gap: 8 }}>
+            {DASH_QUICK_IDS.map((id) => (
+              <button key={id} type="button" className="btn ghost" title={PRODUCT_CALCULATOR_TITLES[id]} onClick={() => setProductView(id)}>
+                Otevřít {DASH_CALC_LABEL[id]}
+              </button>
+            ))}
+          </div>
+        </section>
 
         <section className="card muted section-card">
           <h2 className="section-title">Přehled podle uloženého stavu (localStorage)</h2>

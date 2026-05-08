@@ -43,6 +43,7 @@ import { ProductFloatingNav } from "./ProductFloatingNav";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { BasicModeSteps } from "./BasicModeSteps";
+import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import {
   PHMAX_SS_FRAMEWORK_FIRST_PHASE,
   PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY,
@@ -1287,6 +1288,26 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         </div>
         </details>
       ) : null}
+
+      <FieldWhyPhmaxDetails summary="Proč vstupy řádku mění PHmax?">
+        <p style={{ margin: "0 0 8px" }}>
+          Ve výpočtu SŠ použijte nad tabulkou <strong>základ definic</strong>; u každého platného řádku výsledků zapněte rozbalení <strong>„Proč?“</strong> — zobrazí se navázaný výklad pásem, koeficientu formy a součinu z{" "}
+          <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
+            příloh NV č. 123/2018 Sb.
+          </a>.
+        </p>
+        <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+          <li>
+            Průměr žáků a zvolený režim (jeden obor × víc oborů) určuje <strong>řádek a pásmo</strong> v interních tabulkách aplikace.
+          </li>
+          <li>
+            Forma studia použije <strong>koeficient dle § 2 NV č. 123/2018 Sb.</strong> před násobením počtem tříd.
+          </li>
+          <li>
+            U řádků s chybou zůstává technický popis problému přímo v rozbalení místo plné návaznosti pravidel.
+          </li>
+        </ul>
+      </FieldWhyPhmaxDetails>
 
       <PhmaxSsUnitsForm model={ss} hideBackupSubcard />
 

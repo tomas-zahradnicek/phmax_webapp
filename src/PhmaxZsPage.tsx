@@ -40,6 +40,7 @@ import { ProductLegisContextPanel, ZsLegisRef } from "./PhmaxProductLegisUi";
 import { ZS_LEGIS_PARAGRAPH_TOOLTIPS } from "./phmax-zs-legislativa";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { BasicModeSteps } from "./BasicModeSteps";
+import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
@@ -2713,6 +2714,21 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                     </div>
                   )}
                 </div>
+                {(hasSection("basic_first") || hasSection("basic_second")) ? (
+                  <FieldWhyPhmaxDetails>
+                    <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+                      <li>
+                        <strong>Počty tříd a žáků</strong> stanoví průměr žáků ve třídě; podle něj aplikace vybere <strong>pásmo z tabulek řádků B1/B3 či B4/B13</strong> příslušné varianty metodiky ZV — to určuje PHmax za 1 třídu.
+                      </li>
+                      <li>
+                        <strong>PHmax za stupeň</strong> pak vychází z násobnosti <em>platný počet tříd × PHmax za třídu</em>; součástí modulu mohou být samostatně i § 38, § 41, přípravné skupiny aj.
+                      </li>
+                      <li>
+                        Vedle rámcového výpočtu v tabulce vždy zkontrolujte <strong>upozornění a vstupní validace</strong> pro hraniční stavy (např. neúplné vyplnění jedné skupiny vstupů).
+                      </li>
+                    </ul>
+                  </FieldWhyPhmaxDetails>
+                ) : null}
                 <div className="grid four section-results">
                   {hasSection("prep_class") && <ResultCard label="Přípravná třída – výsledek" value={prepClassPhmax} tone="success" />}
                   {hasSection("prep_special") && <ResultCard label="Přípravný stupeň ZŠS – výsledek" value={prepSpecialPhmax} tone="success" />}

@@ -50,6 +50,7 @@ import {
   IconSpinner,
 } from "./HeroActionIconButton";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
+import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
 import { HeroStat } from "./HeroStat";
@@ -1488,6 +1489,20 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             </label>
           </div>
         </div>
+
+        <FieldWhyPhmaxDetails>
+          <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+            <li>
+              <strong>Počet účastníků</strong> a rozdělení do oddělení vstupuje do orientačního výpočtu podle přílohy k vyhlášce č. 74/2005 Sb. — určuje se z nich počet skupin vedených pedagogem.
+            </li>
+            <li>
+              Průměr účastníků na oddělení pod levelem z metodiky může spustit <strong>orientační krácení PHmax podle § 10 odst. 2</strong> téže vyhlášky.
+            </li>
+            <li>
+              <strong>Volby u jednoho oddělení a počtu tříd 1. stupně školy</strong> mění použité minimum skupin při hodnocení plnění.
+            </li>
+          </ul>
+        </FieldWhyPhmaxDetails>
 
         {inputMode === "summary" ? (
           <div className="subcard" style={{ marginTop: 16 }}>

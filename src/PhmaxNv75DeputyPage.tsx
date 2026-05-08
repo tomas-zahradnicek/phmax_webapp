@@ -15,6 +15,7 @@ import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductFloatingNav } from "./ProductFloatingNav";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { BasicModeSteps } from "./BasicModeSteps";
+import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { NV75_DEPUTY_LEGIS_TOOLTIPS, NV75_DEPUTY_LEGIS_URL } from "./nv75-deputy-legislativa";
 import { calculateNv75DeputyBank, type Nv75DeputyKind } from "./nv75-deputy-bank";
 
@@ -988,6 +989,22 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           <p className="muted-text" style={{ marginTop: 6 }}>
             Doplněny i rozsáhlé scénáře: více pracovišť a bonifikace §4d, kombinace SŠ/VOŠ/JŠ/DM i varianty odborného výcviku (OV).
           </p>
+          <FieldWhyPhmaxDetails summary="Proč jednotky v řádcích mění výsledek §4b?">
+            <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+              <li>
+                Každý <strong>druh školy ze seznamu</strong> nese předepsaný orientační čas ze souhrnných částí příloh č. 2 a č. 3 NV č. 75/2005 Sb.; násobí jej počet jeho <strong>jednotek (třídy / skupiny)</strong>.
+              </li>
+              <li>
+                Pro více řádků §4b vybírá aplikace <strong>užitatelné kombinační pravidlo</strong> (odstavce §4b) a sečtené hodiny tvoří <strong>banku odpočtů zástupců</strong>.
+              </li>
+              <li>
+                Údaje v části <strong>§4c</strong> se promítají jen u příznakových řádků (kontext SŠ / VOŠ) a mění jen přírůstkovou část u odborného výcviku — ne mění automaticky řádek §4b samotný.
+              </li>
+              <li>
+                <strong>Další pracoviště §4d</strong> zpřesňuje nárok na dílčí část banky jen tam, kde se podle počtu jednotek na jednotlivém pracovišti splní způsobilost pro §4d.
+              </li>
+            </ul>
+          </FieldWhyPhmaxDetails>
           {selectedExampleDetails ? (
             <div className="card muted" style={{ marginTop: 10 }}>
               <h3 className="section-title" style={{ marginTop: 0 }}>{selectedExampleDetails.title}</h3>
