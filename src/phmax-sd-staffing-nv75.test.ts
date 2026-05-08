@@ -36,7 +36,7 @@ describe("computeSdStaffingSplitNv75", () => {
     expect(s.separateVedoucihoDleT72).toBe(true);
   });
 
-  it("při separateVedoucihoDleT72: false není odečtena tab. 7.2 — zbytek dělí jen dle 7.1 (100/30=3+10 h)", () => {
+  it("při separateVedoucihoDleT72: false není odečtena tab. 7.2 – zbytek dělí jen dle 7.1 (100/30=3+10 h)", () => {
     const s = computeSdStaffingSplitNv75({
       totalPhmax: 100,
       departmentCount: 4,

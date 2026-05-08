@@ -247,7 +247,7 @@ export function getPhmaxPvBase(params: {
   };
 }
 
-/** Celý řádek matice přílohy (tab. 1–3) pro zadaný počet tříd — pro ověření proti tištěné příloze. */
+/** Celý řádek matice přílohy (tab. 1–3) pro zadaný počet tříd – pro ověření proti tištěné příloze. */
 export function getPvAppendixMatrixRow(provoz: PvProvozKind, classCount: number): readonly number[] | null {
   if (provoz === "zdravotnicke" || classCount < 1) return null;
   if (provoz === "polodenni") {

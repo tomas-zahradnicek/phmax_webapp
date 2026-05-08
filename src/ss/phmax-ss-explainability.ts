@@ -19,7 +19,7 @@ export type ExplainabilityInput = {
   rows: ExplainabilityRowInput[];
   /**
    * Výsledek `evaluateBusinessRules` pro danou třídu / seskupení oborů.
-   * Pokud chybí, souhrn nespojuje kontrolu pravidel s výpočtem — použijte tabulku „Kontrola pravidel“ nebo předejte výsledek ručně.
+   * Pokud chybí, souhrn nespojuje kontrolu pravidel s výpočtem – použijte tabulku „Kontrola pravidel“ nebo předejte výsledek ručně.
    */
   businessRules?: BusinessRulesResult;
 };
@@ -211,7 +211,7 @@ function prefixRuleMessages(msgs: readonly RuleMessage[], prefix: string): RuleM
   return msgs.map((m) => ({ ...m, message: `${prefix}${m.message}` }));
 }
 
-/** Jedna třída / řádek formuláře — výsledek `evaluateBusinessRules` pro stejný řádek jako výpočet PHmax. */
+/** Jedna třída / řádek formuláře – výsledek `evaluateBusinessRules` pro stejný řádek jako výpočet PHmax. */
 export type LabeledBusinessRulesResult = {
   label: string;
   result: BusinessRulesResult;
@@ -273,7 +273,7 @@ export function explainFullPhmaxDecision(dataset: Dataset, input: Explainability
   const narrative = businessRulesFromInput
     ? businessRules.allowed
       ? `Výpočet je podle předaných pravidel přípustný. Celkový PHmax školy činí ${calc.summary.totalPhmax} hodin.`
-      : `Výpočet obsahuje nepřípustnou kombinaci vstupů. Přesto byl spočten technický výstup ${calc.summary.totalPhmax} hodin — považujte ho jen za orientační, dokud neodstraníte chyby ve vstupu.`
+      : `Výpočet obsahuje nepřípustnou kombinaci vstupů. Přesto byl spočten technický výstup ${calc.summary.totalPhmax} hodin – považujte ho jen za orientační, dokud neodstraníte chyby ve vstupu.`
     : `Součet ${calc.summary.rowCount} výpočetních řádků: celkový PHmax ${calc.summary.totalPhmax} hodin (${calc.summary.totalClasses} tříd). Kontrolu více oborů v jedné třídě najdete v tabulce „Kontrola pravidel“ níže.`;
 
   return {

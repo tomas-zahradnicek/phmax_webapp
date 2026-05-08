@@ -411,7 +411,7 @@ button.pill--hero-toggle--active {
   color: #fff !important;
 }
 
-/* ŠD: rychlé šablony oddělení — jeden řádek, výrazné tlačítka */
+/* ŠD: rychlé šablony oddělení – jeden řádek, výrazné tlačítka */
 .sd-dept-templates {
   display: flex;
   flex-direction: row;
@@ -424,7 +424,7 @@ button.pill--hero-toggle--active {
   scrollbar-gutter: stable;
 }
 
-/* Musí přebít pozdější `.btn { color: white }` — proto spojený selektor. */
+/* Musí přebít pozdější `.btn { color: white }` – proto spojený selektor. */
 .btn.sd-dept-templates__btn {
   flex: 1 1 0;
   min-width: 0;
@@ -453,7 +453,7 @@ button.pill--hero-toggle--active {
   background: linear-gradient(180deg, #bfdbfe 0%, #93c5fd 100%);
 }
 
-/* ŠD: kompaktní tabulky — méně horizontálního posuvu v užším okně */
+/* ŠD: kompaktní tabulky – méně horizontálního posuvu v užším okně */
 .sd-phmax-breakdown-scroll--compact {
   max-width: 100%;
 }
@@ -1001,7 +1001,7 @@ button.pill--hero-toggle--active {
 }
 
 /* ZŠ: sticky „Aktuální přehled“ vypnout na notebooku / nízkém okně (1366×768, 1600×900…),
-   na širokém Full HD (1920×1080) nechat zapnuté — šířka > 1760px nebo výška > 920px */
+   na širokém Full HD (1920×1080) nechat zapnuté – šířka > 1760px nebo výška > 920px */
 @media (max-height: 760px), (max-width: 1760px) and (max-height: 920px) {
   .workspace-sticky {
     position: static;
@@ -2097,7 +2097,7 @@ input[type="radio"] {
 .section-card--ss::before { background: linear-gradient(90deg, #4338ca, #6366f1); }
 .section-card--ss::after { background: radial-gradient(circle, rgba(99,102,241,0.14), transparent 70%); }
 
-/* SŠ „2. fáze: evidence…“ — kompaktní souhrn + rozbalovač (jako 1. fáze) */
+/* SŠ „2. fáze: evidence…“ – kompaktní souhrn + rozbalovač (jako 1. fáze) */
 .section-card--ss .ss-units-phase2-head {
   margin-top: 12px;
   padding: 14px 16px;
@@ -2136,7 +2136,7 @@ input[type="radio"] {
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
 }
 
-/* SŠ: evidence tříd — tabulka do šířky karty (bez horizontálního posuvníku) */
+/* SŠ: evidence tříd – tabulka do šířky karty (bez horizontálního posuvníku) */
 .ss-units-table {
   table-layout: auto;
   width: 100%;
@@ -2345,7 +2345,7 @@ input[type="radio"] {
   white-space: normal;
 }
 
-/* SŠ evidence řádků — zvýrazněné tlačítko Odstranit u řádku */
+/* SŠ evidence řádků – zvýrazněné tlačítko Odstranit u řádku */
 .section-card--ss .ss-units-row-action {
   appearance: none;
   cursor: pointer;
@@ -3470,7 +3470,7 @@ input[type="radio"] {
     scrollbar-gutter: auto !important;
   }
 
-  /* PV (27C): přílohové matice — držet logické řádky pohromadě, opakovat hlavičku na další stránce */
+  /* PV (27C): přílohové matice – držet logické řádky pohromadě, opakovat hlavičku na další stránce */
   .pv-methodology-table thead,
   .pv-appendix-verify-matrix thead {
     display: table-header-group !important;
@@ -4699,7 +4699,7 @@ input[type="radio"] {
   margin-top: 22px;
 }
 
-/* SŠ evidence: nepřetahovat obal — fixed tabulka drží šířku karty (nadřazené .app-table-wrap má overflow-x: auto) */
+/* SŠ evidence: nepřetahovat obal – fixed tabulka drží šířku karty (nadřazené .app-table-wrap má overflow-x: auto) */
 .app-table-wrap.app-table-wrap--ss-units {
   overflow-x: hidden;
 }

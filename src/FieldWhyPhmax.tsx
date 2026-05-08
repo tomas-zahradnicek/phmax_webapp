@@ -6,7 +6,7 @@ type FieldWhyPhmaxDetailsProps = {
   children: React.ReactNode;
 };
 
-/** Skládací orientační text k PHmax — společný vzor vedle řádkového „Proč?“ u SŠ. */
+/** Skládací orientační text k PHmax – společný vzor vedle řádkového „Proč?“ u SŠ. */
 export function FieldWhyPhmaxDetails({
   summary = "Proč tyto vstupy ovlivní PHmax?",
   children,

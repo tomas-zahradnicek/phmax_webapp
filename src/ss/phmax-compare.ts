@@ -1,5 +1,5 @@
 /**
- * Porovnání variant PHmax SŠ — každá varianta = jeden auditní protokol (`createAuditProtocol`).
+ * Porovnání variant PHmax SŠ – každá varianta = jeden auditní protokol (`createAuditProtocol`).
  */
 import type { Dataset } from "./phmax-ss-validator";
 import { createAuditProtocol, type AuditProtocol, type AuditProtocolInput } from "./phmax-audit";
@@ -121,7 +121,7 @@ function buildRecommendation(metrics: CompareVariantMetrics[]): string {
 
   const withPhmax = metrics.filter((m) => m.totalPhmax !== null) as Array<CompareVariantMetrics & { totalPhmax: number }>;
   if (withPhmax.length === 0) {
-    return "U žádné varianty nelze spočítat PHmax — zkontrolujte vstupy a dataset.";
+    return "U žádné varianty nelze spočítat PHmax – zkontrolujte vstupy a dataset.";
   }
 
   const allowedOnly = withPhmax.filter((m) => m.rulesAllowed !== false && m.explanationAllowed !== false);
@@ -131,10 +131,10 @@ function buildRecommendation(metrics: CompareVariantMetrics[]): string {
   const names = winners.map((w) => `„${w.variantLabel}“`).join(", ");
 
   if (winners.length === pool.length) {
-    return `Varianty mají stejný nejvyšší PHmax (${maxPhmax} h) v porovnávané množině — rozhodují jiná kritéria (např. naplnění tříd, pravidla).`;
+    return `Varianty mají stejný nejvyšší PHmax (${maxPhmax} h) v porovnávané množině – rozhodují jiná kritéria (např. naplnění tříd, pravidla).`;
   }
 
-  return `Nejvyšší PHmax (${maxPhmax} h) v této sadě: ${names}. Doporučení je čistě orientační — vždy ověřte vstupy a metodiku.`;
+  return `Nejvyšší PHmax (${maxPhmax} h) v této sadě: ${names}. Doporučení je čistě orientační – vždy ověřte vstupy a metodiku.`;
 }
 
 /**
@@ -183,14 +183,14 @@ export function compareVariants(dataset: Dataset, variants: CompareVariant[]): C
  * const cmp = compareVariants(phmaxSsDataset, [
  *   {
  *     id: "a",
- *     label: "Varianta A — denní",
+ *     label: "Varianta A – denní",
  *     input: {
  *       rows: [{ code: "23-51-H/01", averageStudents: 18, classCount: 2, form: "denni", oborCountInClass: 1 }],
  *     },
  *   },
  *   {
  *     id: "b",
- *     label: "Varianta B — večerní",
+ *     label: "Varianta B – večerní",
  *     input: {
  *       rows: [{ code: "23-51-H/01", averageStudents: 18, classCount: 2, form: "vecerni", oborCountInClass: 1 }],
  *     },

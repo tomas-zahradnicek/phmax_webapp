@@ -1,5 +1,5 @@
 /**
- * Auditní protokol nad PHmax SŠ — agreguje vstupy, validaci (business rules),
+ * Auditní protokol nad PHmax SŠ – agreguje vstupy, validaci (business rules),
  * výpočet (`phmax-ss-service`), explainability a právní oporu bez úprav engine souborů.
  */
 import type { Dataset } from "./phmax-ss-validator";

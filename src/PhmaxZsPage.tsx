@@ -152,7 +152,7 @@ type DataMode = "own" | "example";
 
 /** Viditelná legenda + doplněk k nativním tooltipům (`title`) u řádků v seznamech. */
 const ZS_GUIDE_NATIVE_TOOLTIP_LEGEND =
-  "U řádků s předpisy najděte myší na položku v seznamu — prohlížeč zobrazí krátký text (atribut title). U tečkovaných citací § v textu stránky použijte stejný postup jako v záložce „Legislativa a výklad (ZŠ)“ (hover nebo Tab).";
+  "U řádků s předpisy najděte myší na položku v seznamu – prohlížeč zobrazí krátký text (atribut title). U tečkovaných citací § v textu stránky použijte stejný postup jako v záložce „Legislativa a výklad (ZŠ)“ (hover nebo Tab).";
 
 const HERO_EXAMPLE_OPTION_TITLES: Partial<Record<Exclude<ExampleKey, "">, string>> = {
   priloha_uplna_zs_sec16: ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"],
@@ -1994,7 +1994,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             message: v.label,
           })),
         ],
-        narrative: `${tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"} — ${MODE_CONFIG[mode].label}${
+        narrative: `${tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"} – ${MODE_CONFIG[mode].label}${
           exportLabel ? `; export: ${exportLabel}` : ""
         }`,
       }),
@@ -2393,7 +2393,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <p>
             Průměry u škol při zdravotnickém zařízení a psychiatrii počítá aplikace jako vyšší z minulého roku a aktuálního sběru – doplňte oba sloupce, pokud je znáte.
             Pojmenované zálohy (max. {MAX_NAMED_SNAPSHOTS}) drží celý stav včetně záložky a pole „Označení pro export“.
-            Srovnání aktuálního stavu se zálohou (JSON) používá uložené součty PHmax / PHAmax / PHPmax — u starších záloh z předchozí verze aplikace tuto položku znovu uložte.
+            Srovnání aktuálního stavu se zálohou (JSON) používá uložené součty PHmax / PHAmax / PHPmax – u starších záloh z předchozí verze aplikace tuto položku znovu uložte.
           </p>
           <p>{EXPORT_ORIENTACNI_NOTE}</p>
           <p className="onboarding-hero-legend">
@@ -2718,7 +2718,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   <FieldWhyPhmaxDetails>
                     <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
                       <li>
-                        <strong>Počty tříd a žáků</strong> stanoví průměr žáků ve třídě; podle něj aplikace vybere <strong>pásmo z tabulek řádků B1/B3 či B4/B13</strong> příslušné varianty metodiky ZV — to určuje PHmax za 1 třídu.
+                        <strong>Počty tříd a žáků</strong> stanoví průměr žáků ve třídě; podle něj aplikace vybere <strong>pásmo z tabulek řádků B1/B3 či B4/B13</strong> příslušné varianty metodiky ZV – to určuje PHmax za 1 třídu.
                       </li>
                       <li>
                         <strong>PHmax za stupeň</strong> pak vychází z násobnosti <em>platný počet tříd × PHmax za třídu</em>; součástí modulu mohou být samostatně i § 38, § 41, přípravné skupiny aj.
@@ -2752,6 +2752,19 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   <h2>
                     Třídy podle <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" />
                   </h2>
+                  <FieldWhyPhmaxDetails summary="Proč má § 16/9 vlastní vstupy a výsledek?">
+                    <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+                      <li>
+                        Třídy podle <strong>§ 16 odst. 9 školského zákona</strong> se v metodice ZV vyhodnocují <strong>odděleně od běžných tříd</strong> – mají vlastní tabulku pásma podle průměru žáků a vlastní PHmax za stupeň.
+                      </li>
+                      <li>
+                        Počty tříd a žáků zde určí pásmo stejným principem jako u běžných stupňů – výsledek se pak přičítá k celkovému PHmax modulu spolu s ostatními sekcemi režimu.
+                      </li>
+                      <li>
+                        Pokud sekci v režimu školy nepotřebujete, ponechte nuly – blok se do součtu nepromítne; při vyplnění jedné strany stupně doplňte oba údaje (třídy i žáky).
+                      </li>
+                    </ul>
+                  </FieldWhyPhmaxDetails>
                   <div className="grid two">
                     {hasSection("sec16_first") && (
                       <>

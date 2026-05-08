@@ -162,7 +162,7 @@ export function createPvProductAuditProtocol(rows: PvWorkplaceAuditRowInput[]): 
     issues.push({
       severity: "info",
       code: "empty",
-      message: "Nejsou zadána žádná pracoviště — součet PHmax je 0.",
+      message: "Nejsou zadána žádná pracoviště – součet PHmax je 0.",
     });
   }
 
@@ -212,7 +212,7 @@ export function createPvProductAuditProtocol(rows: PvWorkplaceAuditRowInput[]): 
   const narrative =
     calculation.ok && calculation.totalPrimary != null
       ? `Součet PHmax za ${rows.length} pracoviště: ${calculation.totalPrimary} h (metodika PV v4, tabulky 1–3 + bonusy § 16 / § 1d).`
-      : "PHmax pro PV se nepodařilo kompletně spočítat — zkontrolujte vstupy a varování u řádků.";
+      : "PHmax pro PV se nepodařilo kompletně spočítat – zkontrolujte vstupy a varování u řádků.";
 
   return {
     meta: {
@@ -249,7 +249,7 @@ export function createSdProductAuditProtocol(input: SdAuditInput): PhmaxProductA
     issues.push({
       severity: "warning",
       code: "table_limit",
-      message: `Tabulka PHmax v aplikaci končí ${SD_MAX_DEPARTMENTS_IN_TABLE} odděleními — u vyššího počtu ověřte přílohu vyhlášky.`,
+      message: `Tabulka PHmax v aplikaci končí ${SD_MAX_DEPARTMENTS_IN_TABLE} odděleními – u vyššího počtu ověřte přílohu vyhlášky.`,
     });
   }
 
@@ -300,7 +300,7 @@ export function createSdProductAuditProtocol(input: SdAuditInput): PhmaxProductA
   const narrative =
     calculation.ok && calculation.totalPrimary != null
       ? `PHmax školní družiny po případném krácení: ${calculation.totalPrimary} h (${effectiveDepts} oddělení, ${input.pupilsFirstGrade} žáků 1. stupně).`
-      : "PHmax pro školní družinu nelze vypočítat — zkontrolujte počet oddělení.";
+      : "PHmax pro školní družinu nelze vypočítat – zkontrolujte počet oddělení.";
 
   return {
     meta: {

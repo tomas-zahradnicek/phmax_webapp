@@ -998,7 +998,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                 Pro více řádků §4b vybírá aplikace <strong>užitatelné kombinační pravidlo</strong> (odstavce §4b) a sečtené hodiny tvoří <strong>banku odpočtů zástupců</strong>.
               </li>
               <li>
-                Údaje v části <strong>§4c</strong> se promítají jen u příznakových řádků (kontext SŠ / VOŠ) a mění jen přírůstkovou část u odborného výcviku — ne mění automaticky řádek §4b samotný.
+                Údaje v části <strong>§4c</strong> se promítají jen u příznakových řádků (kontext SŠ / VOŠ) a mění jen přírůstkovou část u odborného výcviku – ne mění automaticky řádek §4b samotný.
               </li>
               <li>
                 <strong>Další pracoviště §4d</strong> zpřesňuje nárok na dílčí část banky jen tam, kde se podle počtu jednotek na jednotlivém pracovišti splní způsobilost pro §4d.
@@ -1211,13 +1211,13 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                 ))}
                 <tr>
                   <th>Bonus §4c</th>
-                  <td>—</td>
+                  <td>–</td>
                   <td>{bank.bonus4cHours} hodin týdně</td>
                   <td><span className="muted-text">Mimo pásma příloh (samostatný bonus dle §4c)</span></td>
                 </tr>
                 <tr>
                   <th>Banka odpočtů celkem</th>
-                  <td>—</td>
+                  <td>–</td>
                   <td>{bank.bankHoursTotal} hodin týdně</td>
                   <td><strong>Součet základ + bonusy</strong></td>
                 </tr>

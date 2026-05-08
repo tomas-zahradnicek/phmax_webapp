@@ -160,7 +160,7 @@ const PV_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
     term: "Pracoviště (řádek ve formuláři)",
     description: (
       <>
-        Jedna kombinace <strong>místa (nebo jeho části) a druhu provozu</strong> — odpovídá jednomu dílčímu výpočtu v
+        Jedna kombinace <strong>místa (nebo jeho části) a druhu provozu</strong> – odpovídá jednomu dílčímu výpočtu v
         metodice. Při více provozech na stejném místě (např. celodenní i polodenní) přidejte další řádek; součet PHmax z
         řádků odpovídá celkovému PHmax.
       </>
@@ -189,7 +189,7 @@ const PV_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
     term: "MŠ při zdravotnickém zařízení",
     description: (
       <>
-        Samostatný režim výpočtu podle výkazu S 4-01 (v aplikaci volba „Mateřská škola při zdravotnickém zařízení“) —
+        Samostatný režim výpočtu podle výkazu S 4-01 (v aplikaci volba „Mateřská škola při zdravotnickém zařízení“) –
         základ PHmax se nečte z tabulek 1–3 podle hodin, ale podle pravidel metodiky pro tento typ zařízení.
       </>
     ),
@@ -872,7 +872,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             }
           >
             <option value="">Vyberte ukázkový příklad…</option>
-            <optgroup label="Metodika — výkladové příklady">
+            <optgroup label="Metodika – výkladové příklady">
               {PV_HERO_EXAMPLE_METH_KEYS.map((k) => {
                 const m = PV_HERO_EXAMPLE_META[k];
                 return (
@@ -882,7 +882,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 );
               })}
             </optgroup>
-            <optgroup label="Příloha — ilustrace MŠ (bez § 16/9)">
+            <optgroup label="Příloha – ilustrace MŠ (bez § 16/9)">
               {PV_HERO_EXAMPLE_ILL_KEYS.map((k) => {
                 const m = PV_HERO_EXAMPLE_META[k];
                 return (
@@ -1153,6 +1153,20 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           Export a tisk najdete v horní liště u nadpisu stránky.
         </p>
 
+        <FieldWhyPhmaxDetails summary="Proč se PHmax počítá po pracovištích?">
+          <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+            <li>
+              Každé <strong>pracoviště</strong> = jedna kombinace místa (nebo jeho části) a <strong>druhu provozu</strong> – odpovídá jednomu dílčímu výpočtu v metodice; součet řádků v souhrnné tabulce nahoře odpovídá součtu PHmax z pracovišť.
+            </li>
+            <li>
+              U každého pracoviště níže najdete totéž vysvětlení u konkrétních vstupů – tabulky 1–3 přílohy, případně zvláštní režim MŠ u zdravotnického zařízení.
+            </li>
+            <li>
+              Po úpravách vždy ověřte <strong>součtový přehled pracoviští</strong> i případné upozornění u řádků s neúplnými vstupy.
+            </li>
+          </ul>
+        </FieldWhyPhmaxDetails>
+
         <div className="pv-workplace-rows">
           {rowComputations.map(({ row, computed, phaMax, provozLabel }, index) => {
             const maxClasses = getPvMaxClassCount(row.provoz);
@@ -1297,7 +1311,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                       <strong>Druh provozu a počet tříd</strong> určují základ PHmax za třídu (tabulky 1–3 přílohy; u MŠ při zdravotnickém zařízení platí jednotná sazba 31 h/třídu).
                     </li>
                     <li>
-                      <strong>Průměrná denní doba provozu</strong> zařazuje řádek do správného sloupce těchto tabulek — ovlivní to výslednou základní složku PHmax.
+                      <strong>Průměrná denní doba provozu</strong> zařazuje řádek do správného sloupce těchto tabulek – ovlivní to výslednou základní složku PHmax.
                     </li>
                     <li>
                       <strong>§ 16 odst. 9 a jazykové skupiny</strong> přičítají sjednocené navýšení (5 h za třídu / +1 h za skupinu podle aplikovaných položek metodiky).
@@ -1542,7 +1556,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.86rem", lineHeight: 1.5 }}>
             U každého pracoviště s platným základem z tabulky 1–3 je zobrazen celý řádek matice pro váš počet tříd.
             Názvy sloupců odpovídají <strong>pásmům průměrné denní doby provozu</strong> ze stejné přílohové mřížky jako
-            tabulky 1–3 níže. Sloupec odpovídající zadané průměrné době provozu je zvýrazněn — hodnota musí souhlasit se
+            tabulky 1–3 níže. Sloupec odpovídající zadané průměrné době provozu je zvýrazněn – hodnota musí souhlasit se
             základním PHmax před navýšeními § 16/9 a jazykovou přípravou. U MŠ při zdravotnickém zařízení se tabulky 1–3
             nepoužívají.
           </p>
@@ -1556,7 +1570,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                     {row.label.trim() ? ` – ${row.label.trim()}` : ""} ({provozLabel})
                   </h4>
                   <p className="muted-text" style={{ fontSize: "0.84rem", margin: 0 }}>
-                    PHmax se nečte z tabulky podle sloupců doby — používá se 31 h/třídu dle metodiky (S 4-01).
+                    PHmax se nečte z tabulky podle sloupců doby – používá se 31 h/třídu dle metodiky (S 4-01).
                   </p>
                 </div>
               );
@@ -1592,12 +1606,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               <div key={row.id} style={{ marginBottom: 22 }}>
                 <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
                   Pracoviště {i + 1}
-                  {row.label.trim() ? ` – ${row.label.trim()}` : ""} — {provozLabel}, {row.classCount}{" "}
+                  {row.label.trim() ? ` – ${row.label.trim()}` : ""} – {provozLabel}, {row.classCount}{" "}
                   {row.classCount === 1 ? "třída" : row.classCount < 5 ? "třídy" : "tříd"}
                 </h4>
                 {columnSegments.length > 1 ? (
                   <p className="muted-text" style={{ marginTop: 0, marginBottom: 8, fontSize: "0.82rem", lineHeight: 1.45 }}>
-                    Tabulka je rozdělena do navazujících bloků pro lepší čitelnost — druhý a další blok navazuje v pořadí
+                    Tabulka je rozdělena do navazujících bloků pro lepší čitelnost – druhý a další blok navazuje v pořadí
                     sloupců (pásem).
                   </p>
                 ) : null}

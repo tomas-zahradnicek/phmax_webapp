@@ -459,11 +459,11 @@ function PhmaxSsUnitsFormView({
                 if (p.skipped) {
                   return (
                     <tr key={p.rowId}>
-                      <td>{p.label || "—"}</td>
+                      <td>{p.label || "–"}</td>
                       <td colSpan={5} className="muted-text">
                         (nezadáno pro výpočet)
                       </td>
-                      <td className="muted-text">—</td>
+                      <td className="muted-text">–</td>
                     </tr>
                   );
                 }
@@ -472,13 +472,13 @@ function PhmaxSsUnitsFormView({
                   return (
                     <React.Fragment key={p.rowId}>
                       <tr>
-                        <td>{p.label || "—"}</td>
+                        <td>{p.label || "–"}</td>
                         <td>{code}</td>
-                        <td className="muted-text">—</td>
+                        <td className="muted-text">–</td>
                         <td colSpan={2} className="muted-text">
-                          —
+                          –
                         </td>
-                        <td className="app-data-table__num">—</td>
+                        <td className="app-data-table__num">–</td>
                         <td>
                           <span style={{ color: "var(--danger, #b91c1c)" }}>{p.error}</span>
                           <button
@@ -507,7 +507,7 @@ function PhmaxSsUnitsFormView({
                 return (
                   <React.Fragment key={p.rowId}>
                     <tr>
-                      <td>{p.label || "—"}</td>
+                      <td>{p.label || "–"}</td>
                       <td>{r.code}</td>
                       <td className="muted-text">{r.modeKey}</td>
                       <td>{r.intervalLabel}</td>
@@ -585,11 +585,11 @@ function PhmaxSsUnitsFormView({
                     return (
                       <tr key={p.rowId}>
                         <td>{idx + 1}</td>
-                        <td>{p.label || "—"}</td>
+                        <td>{p.label || "–"}</td>
                         <td colSpan={5} className="muted-text">
                           (nezadáno pro výpočet)
                         </td>
-                        <td className="muted-text">—</td>
+                        <td className="muted-text">–</td>
                       </tr>
                     );
                   }
@@ -597,12 +597,12 @@ function PhmaxSsUnitsFormView({
                     return (
                       <tr key={p.rowId}>
                         <td>{idx + 1}</td>
-                        <td>{p.label || "—"}</td>
+                        <td>{p.label || "–"}</td>
                         <td>{code}</td>
-                        <td className="muted-text">—</td>
-                        <td className="muted-text">—</td>
-                        <td className="sd-phmax-breakdown__num">—</td>
-                        <td className="sd-phmax-breakdown__num">—</td>
+                        <td className="muted-text">–</td>
+                        <td className="muted-text">–</td>
+                        <td className="sd-phmax-breakdown__num">–</td>
+                        <td className="sd-phmax-breakdown__num">–</td>
                         <td style={{ color: "var(--danger, #b91c1c)", fontSize: "0.88rem" }}>{p.error}</td>
                       </tr>
                     );
@@ -611,7 +611,7 @@ function PhmaxSsUnitsFormView({
                   return (
                     <tr key={p.rowId}>
                       <td>{idx + 1}</td>
-                      <td>{p.label || "—"}</td>
+                      <td>{p.label || "–"}</td>
                       <td>{r.code}</td>
                       <td className="muted-text">{r.modeKey}</td>
                       <td>{r.intervalLabel}</td>
@@ -643,7 +643,7 @@ function PhmaxSsUnitsFormView({
             style={{ marginTop: 14, padding: "12px 14px", textAlign: "left" }}
           >
             <summary className="ss-why-panel__title" style={{ cursor: "pointer", listStyle: "none" }}>
-              <strong>Celkový výklad PHmax</strong> — součet platných řádků (explainability)
+              <strong>Celkový výklad PHmax</strong> – součet platných řádků (explainability)
             </summary>
             <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", lineHeight: 1.5 }}>
               Do souhrnu jsou sloučeny výsledky z tabulky „Kontrola pravidel“ pro každý platný řádek PHmax (prefix{" "}
@@ -684,11 +684,11 @@ function PhmaxSsUnitsFormView({
                 if (b.skipped) {
                   return (
                     <tr key={b.rowId}>
-                      <td>{b.label || "—"}</td>
+                      <td>{b.label || "–"}</td>
                       <td colSpan={3} className="muted-text">
                         (zadáním kódu oboru v řádku výše)
                       </td>
-                      <td className="muted-text">—</td>
+                      <td className="muted-text">–</td>
                     </tr>
                   );
                 }
@@ -697,10 +697,10 @@ function PhmaxSsUnitsFormView({
                   return (
                     <React.Fragment key={b.rowId}>
                       <tr>
-                        <td>{b.label || "—"}</td>
+                        <td>{b.label || "–"}</td>
                         <td>{b.codesStr}</td>
-                        <td>—</td>
-                        <td>—</td>
+                        <td>–</td>
+                        <td>–</td>
                         <td>
                           <span style={{ color: "var(--danger, #b91c1c)" }}>{b.error}</span>
                           <button
@@ -725,7 +725,7 @@ function PhmaxSsUnitsFormView({
                   );
                 }
                 const r = b.result;
-                const suggestion = [r.suggestedComputation ?? "—", r.recommendedMode ?? "—"].join(" · ");
+                const suggestion = [r.suggestedComputation ?? "–", r.recommendedMode ?? "–"].join(" · ");
                 const errT = joinRuleMessages(r.errors);
                 const warnT = joinRuleMessages(r.warnings);
                 const infoT = joinRuleMessages(r.info);
@@ -733,7 +733,7 @@ function PhmaxSsUnitsFormView({
                 return (
                   <React.Fragment key={b.rowId}>
                     <tr>
-                      <td>{b.label || "—"}</td>
+                      <td>{b.label || "–"}</td>
                       <td>{b.codesStr}</td>
                       <td>{r.allowed ? "Ano" : "Ne"}</td>
                       <td className="muted-text">{suggestion}</td>
@@ -745,7 +745,7 @@ function PhmaxSsUnitsFormView({
                           <div style={{ color: "var(--warning, #b45309)", marginBottom: 4 }}>{warnT}</div>
                         ) : null}
                         {infoT ? <div className="muted-text">{infoT}</div> : null}
-                        {!errT && !warnT && !infoT ? <span className="muted-text">—</span> : null}
+                        {!errT && !warnT && !infoT ? <span className="muted-text">–</span> : null}
                         <button
                           type="button"
                           className="btn ghost ss-why-btn"

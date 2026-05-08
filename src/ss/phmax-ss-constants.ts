@@ -55,10 +55,10 @@ export const PHMAX_SS_UNITS_SECTION = {
   heading: "2. fáze: evidence tříd a skupin",
   /** Krátký souhrn nad rozbalovačem – stejná role jako u 1. fáze. */
   compactLead:
-    "Jeden řádek = dílčí jednotka (kód RVP, průměr, třídy, forma). Režim PHmax lze nechat na Automaticky nebo vynutit ručně; u více oborů ve třídě doplňte další obory a volitelně žáky/obor. PHAmax v horním přehledu jen pro PrŠ 78-62-C/01 a 78-62-C/02 v denní formě — jinak plný postup MŠMT.",
+    "Jeden řádek = dílčí jednotka (kód RVP, průměr, třídy, forma). Režim PHmax lze nechat na Automaticky nebo vynutit ručně; u více oborů ve třídě doplňte další obory a volitelně žáky/obor. PHAmax v horním přehledu jen pro PrŠ 78-62-C/01 a 78-62-C/02 v denní formě – jinak plný postup MŠMT.",
   methodologyDetailsSummary: "Rozbalit podrobný popis evidence řádků a úložiště v prohlížeči",
   lead:
-    "Každý řádek je jedna dílčí jednotka. „Kód oboru“ = přesný kód z RVP (např. 82-51-L/51). Sloupec „Režim PHmax“ může zůstat Automaticky (výběr podle „Oborů ve třídě“ a příznaku „Talent 82“) nebo režim ručně vynutit. U více oborů v jedné třídě vyplňte „Další obory“ a volitelně „Žáci / obor“ — níže proběhne kontrola pravidel. PHAmax v horním přehledu se pro tuto verzi aplikace počítá jen u Praktické školy (78-62-C/01, 78-62-C/02) v denní formě podle tabulky metodiky; u ostatních oborů použijte plný postup MŠMT.",
+    "Každý řádek je jedna dílčí jednotka. „Kód oboru“ = přesný kód z RVP (např. 82-51-L/51). Sloupec „Režim PHmax“ může zůstat Automaticky (výběr podle „Oborů ve třídě“ a příznaku „Talent 82“) nebo režim ručně vynutit. U více oborů v jedné třídě vyplňte „Další obory“ a volitelně „Žáci / obor“ – níže proběhne kontrola pravidel. PHAmax v horním přehledu se pro tuto verzi aplikace počítá jen u Praktické školy (78-62-C/01, 78-62-C/02) v denní formě podle tabulky metodiky; u ostatních oborů použijte plný postup MŠMT.",
   tableCaption: "Dílčí jednotky výpočtu (třída / skupina)",
   colLabel: "Třída / skupina",
   colEducationField: "Kód oboru",
@@ -73,7 +73,7 @@ export const PHMAX_SS_UNITS_SECTION = {
   colClassType: "Typ třídy",
   colNote: "Poznámka",
   addRow: "Přidat řádek",
-  /** Lišta nad formulářem — odstraní poslední řádek (stejná logika jako u jediného řádku). */
+  /** Lišta nad formulářem – odstraní poslední řádek (stejná logika jako u jediného řádku). */
   removeLastRowHeroLabel: "Odstranit poslední řádek",
   removeLastRowHeroTitle:
     "Odstraní poslední řádek v tabulce evidence. Vždy zůstane alespoň jeden řádek; byl-li to poslední vyplněný řádek, vloží se prázdný řádek.",
@@ -103,7 +103,7 @@ export const PHMAX_SS_UNITS_STORAGE_KEY = "phmax-ss-units-draft";
 export const PHMAX_SS_NAMED_SNAPSHOTS_LS_KEY = "phmax-ss-named-snapshots-v1";
 export const PHMAX_SS_MAX_NAMED_SNAPSHOTS = 10;
 
-/** Metodické texty a tabulky § 4 / § 16 / PrŠ — sdílený modul kvůli přehledným diffům a stabilnímu buildu. */
+/** Metodické texty a tabulky § 4 / § 16 / PrŠ – sdílený modul kvůli přehledným diffům a stabilnímu buildu. */
 export {
   PHMAX_SS_CALCULATION_BRANCH_GUIDE,
   PHMAX_SS_NV123_FORM_COEFFICIENTS,

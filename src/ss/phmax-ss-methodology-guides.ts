@@ -4,7 +4,7 @@
  */
 
 /**
- * Rozcestník typu výpočtu dle metodiky MŠMT (grafické schéma — textová podoba pro kontrolu v aplikaci).
+ * Rozcestník typu výpočtu dle metodiky MŠMT (grafické schéma – textová podoba pro kontrolu v aplikaci).
  * Čísla 1–4 odpovídají kruhům ve schématu.
  */
 export const PHMAX_SS_CALCULATION_BRANCH_GUIDE = {
@@ -35,7 +35,7 @@ export const PHMAX_SS_CALCULATION_BRANCH_GUIDE = {
 } as const;
 
 /**
- * Postup výpočtu průměrného počtu žáků ve třídě včetně § 16 odst. 9 (denní forma — z metodiky).
+ * Postup výpočtu průměrného počtu žáků ve třídě včetně § 16 odst. 9 (denní forma – z metodiky).
  */
 export const PHMAX_SS_PAR16_AVERAGE_PUPILS_GUIDE = {
   title: "Průměrný počet žáků ve třídě (§ 16 odst. 9)",
@@ -62,7 +62,7 @@ export const PHMAX_SS_PAR16_AVERAGE_PUPILS_GUIDE = {
     "Průměrný počet žáků v jednooborové třídě oboru vzdělání Mechanik strojů a zařízení v denní formě vzdělávání je 20,25.",
 } as const;
 
-/** Koeficienty NV č. 123/2018 Sb., § 2 — násobek PHmax v „dalších“ formách (jednoobor i víceobor, postupy 1a / 2a). */
+/** Koeficienty NV č. 123/2018 Sb., § 2 – násobek PHmax v „dalších“ formách (jednoobor i víceobor, postupy 1a / 2a). */
 export const PHMAX_SS_NV123_FORM_COEFFICIENTS = [
   { label: "Večerní forma vzdělávání", value: "0,3" },
   { label: "Kombinovaná forma", value: "0,26" },
@@ -71,7 +71,7 @@ export const PHMAX_SS_NV123_FORM_COEFFICIENTS = [
   { label: "Distanční forma vzdělávání", value: "0,05" },
 ] as const;
 
-/** Tabulka z metodiky — PHmax podle průměru žáků (Praktická škola). */
+/** Tabulka z metodiky – PHmax podle průměru žáků (Praktická škola). */
 export const PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE = {
   caption: "Údaje pro stanovení hodnoty PHmax – průměrný počet žáků ve třídě (skupina 78)",
   colBands: ["méně než 4", "4 – 6", "více než 6 – 10", "více než 10"] as const,
@@ -83,7 +83,7 @@ export const PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE = {
     "Vysvětlivka 7: V případě, že se v jedné třídě vzdělávají žáci současně podle oboru Praktická škola dvouletá a Praktická škola jednoletá, stanoví se maximální počet hodin podle toho oboru, v němž se vzdělává vyšší počet žáků. Je-li u obou oborů stejný počet žáků, použije se Praktická škola dvouletá.",
 } as const;
 
-/** Tabulka z metodiky — PHAmax (asistent pedagoga), Praktická škola. */
+/** Tabulka z metodiky – PHAmax (asistent pedagoga), Praktická škola. */
 export const PHMAX_SS_PRACTICAL_SCHOOL_PHAMAX_TABLE = {
   caption:
     "Údaje pro stanovení hodnoty maximálního počtu hodin výuky s asistentem pedagoga – průměrný počet žáků ve třídě (skupina 78)",
@@ -97,7 +97,7 @@ export const PHMAX_SS_PRACTICAL_SCHOOL_PHAMAX_TABLE = {
 } as const;
 
 /**
- * § 4 metodiky — stanovení PHmax / souvislosti PHAmax (textová podoba ke grafům z přílohy).
+ * § 4 metodiky – stanovení PHmax / souvislosti PHAmax (textová podoba ke grafům z přílohy).
  * Slouží ke kontrole vůči oficiálnímu dokumentu; výpočetní jádro aplikace vychází z datasetu.
  */
 export const PHMAX_SS_SECTION4_PHMAX_GUIDE = {
@@ -105,7 +105,7 @@ export const PHMAX_SS_SECTION4_PHMAX_GUIDE = {
   lead:
     "Následující odstavce odpovídají struktuře metodiky (včetně odkazů 1, 1a, 2, 2a, 3, 4). Grafické schémata jsou nahrazena výčtem kroků vhodným pro údržbu v repozitáři.",
   jednooborDaily: {
-    title: "1 — PHmax pro jednooborové třídy (denní forma)",
+    title: "1 – PHmax pro jednooborové třídy (denní forma)",
     paragraphs: [
       "PHmax oboru v jednooborové třídě se rovná hodnotě PHmax v NV pro stanovený průměrný počet žáků, vynásobené počtem jednooborových tříd daného oboru a formy vzdělávání.",
       "Pro třídy s průměrným počtem žáků vyšším než 30 se použijí hodnoty pásma „více než 27“ žáků.",
@@ -121,14 +121,14 @@ export const PHMAX_SS_SECTION4_PHMAX_GUIDE = {
     ] as const,
   },
   jednooborOtherForms: {
-    title: "1a — PHmax jednooborové třídy v dalších formách vzdělávání",
+    title: "1a – PHmax jednooborové třídy v dalších formách vzdělávání",
     paragraphs: [
       "Vychází se z PHmax pro jednooborovou třídu v denní formě, který se vynásobí koeficientem příslušné formy (NV č. 123/2018 Sb., § 2).",
       "Rozhodovací tok (graf metodiky): postupně se zjišťuje kombinovaná → dálková → večerní → distanční forma; při prvním „ano“ se použije příslušný koeficient a výsledkem je PHmax jednooborové třídy v dané formě.",
     ] as const,
   },
   multiDaily: {
-    title: "2 — PHmax pro víceoborové třídy (v souladu s vyhl. č. 13/2005 Sb.)",
+    title: "2 – PHmax pro víceoborové třídy (v souladu s vyhl. č. 13/2005 Sb.)",
     paragraphs: [
       "Výsledné PHmax oboru ve víceoborové třídě = hodnota PHmax v NV pro stanovený průměr žáků × počet příslušných víceoborových tříd daného oboru a formy.",
       "Postup platí i u třídy, kde jeden obor má 17 a více žáků a druhý méně, pokud celkový součet nepřekročí nejvyšší povolený počet žáků ve třídě.",
@@ -144,17 +144,17 @@ export const PHMAX_SS_SECTION4_PHMAX_GUIDE = {
     ] as const,
   },
   multiOtherForms: {
-    title: "2a — PHmax víceoborové třídy v dalších formách vzdělávání",
+    title: "2a – PHmax víceoborové třídy v dalších formách vzdělávání",
     paragraphs: [
-      "Nejprve se stanoví PHmax podle typu třídy (denní výpočet), poté se výsledek vynásobí koeficientem formy — stejná sada koeficientů jako u bodu 1a.",
+      "Nejprve se stanoví PHmax podle typu třídy (denní výpočet), poté se výsledek vynásobí koeficientem formy – stejná sada koeficientů jako u bodu 1a.",
     ] as const,
   },
   transitional: {
-    title: "3 — Víceoborová třída podle přechodného ustanovení (vyhl. č. 145/2018 Sb.)",
+    title: "3 – Víceoborová třída podle přechodného ustanovení (vyhl. č. 145/2018 Sb.)",
     paragraphs: [
       "Jde o třídy s více obory, než připouští vyhláška č. 13/2005 Sb., zřízené v souladu s přechodným ustanovením.",
       "U nejnaplněnějších oborů se použije výpočet pro víceoborovou třídu; u oborů „nad rámec“ výpočet pro jednooborovou třídu. Při stejném počtu žáků lze obory seřadit výhodněji z hlediska výsledného PHmax.",
-      "Zjednodušeně: u přechodné třídy nemá na výpočet vliv rozdílná kategorie dosaženého vzdělání, ročník ani délka vzdělávání — obory se seřadí podle počtu žáků od nejvyššího po nejnižší.",
+      "Zjednodušeně: u přechodné třídy nemá na výpočet vliv rozdílná kategorie dosaženého vzdělání, ročník ani délka vzdělávání – obory se seřadí podle počtu žáků od nejvyššího po nejnižší.",
       "Dvouoborová kombinace kategorií C, J, E, H, L, M nebo K: pro E, H, L, M, K hodnoty pro dvouoborovou třídu; pro C, J hodnoty pro jednooborovou třídu.",
       "Tří a více oborů, přičemž alespoň jeden obor je E nebo H (mohou být i C, J, L, M, K): první tři nejnaplněnější obory podle pravidel víceoborové třídy; každý další podle jednooborové třídy. U těch tří nejvyšších: kategorie E a H → tabulka pro tříoborovou třídu; kategorie L, M, K → tabulka pro dvouoborovou třídu; kategorie C a J → vždy jednooborová třída.",
     ] as const,
@@ -166,7 +166,7 @@ export const PHMAX_SS_SECTION4_PHMAX_GUIDE = {
     ] as const,
   },
   par16AndPractical: {
-    title: "4 — § 16 odst. 9 školského zákona, ústavní / ochranná výchova, Praktická škola",
+    title: "4 – § 16 odst. 9 školského zákona, ústavní / ochranná výchova, Praktická škola",
     paragraphs: [
       "PHmax pro obory kategorie C, J se stanoví jako v jednooborové třídě; obory C, J mají vlastní PHmax v NV.",
       "Společná třída Praktická škola jednoletá a dvouletá: PHmax podle oboru s vyšším počtem žáků; při shodě podle Praktická škola dvouletá.",

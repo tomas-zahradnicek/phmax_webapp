@@ -90,7 +90,7 @@ function buildDifferences(metrics: CompareProductVariantMetrics[]): string[] {
       );
     }
     if (base.product !== cur.product) {
-      lines.push(`Produkt se liší: „${labelA}“ je ${base.product}, „${labelB}“ je ${cur.product} — srovnání může být jen orientační.`);
+      lines.push(`Produkt se liší: „${labelA}“ je ${base.product}, „${labelB}“ je ${cur.product} – srovnání může být jen orientační.`);
     }
   }
   return lines;
@@ -112,7 +112,7 @@ function buildRecommendation(metrics: CompareProductVariantMetrics[]): string {
     CompareProductVariantMetrics & { totalPrimary: number }
   >;
   if (withPrimary.length === 0) {
-    return "U žádné varianty není k dispozici primární metrika (PHmax) — zkontrolujte vstupy.";
+    return "U žádné varianty není k dispozici primární metrika (PHmax) – zkontrolujte vstupy.";
   }
 
   const allowedOnly = withPrimary.filter((m) => m.validationOk !== false);
@@ -122,10 +122,10 @@ function buildRecommendation(metrics: CompareProductVariantMetrics[]): string {
   const names = winners.map((w) => `„${w.variantLabel}“`).join(", ");
 
   if (winners.length === pool.length) {
-    return `Varianty mají stejnou nejvyšší primární metriku (${maxPh} h) — rozhodují jiná kritéria.`;
+    return `Varianty mají stejnou nejvyšší primární metriku (${maxPh} h) – rozhodují jiná kritéria.`;
   }
 
-  return `Nejvyšší PHmax (${maxPh} h) v této sadě: ${names}. Doporučení je orientační — ověřte vstupy a metodiku.`;
+  return `Nejvyšší PHmax (${maxPh} h) v této sadě: ${names}. Doporučení je orientační – ověřte vstupy a metodiku.`;
 }
 
 /**

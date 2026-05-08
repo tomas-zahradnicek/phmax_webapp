@@ -237,7 +237,7 @@ export const B17_B21 = {
   ],
 } as const;
 
-/** Varianta tabulky menšinových škol (B17_B21) — shodně se stavem ve formuláři ZŠ. */
+/** Varianta tabulky menšinových škol (B17_B21) – shodně se stavem ve formuláři ZŠ. */
 export type ZsMinorityBandKind = keyof typeof B17_B21;
 
 export const B22_B25 = {
@@ -353,19 +353,19 @@ export const PHA_TABLE = {
   ],
 } as const;
 
-/** Přípravná třída základní školy — řádek B29 (PHmax). */
+/** Přípravná třída základní školy – řádek B29 (PHmax). */
 export const B29_PREP_CLASS = [
   { label: "méně než 10", test: (x: number) => x < 10, value: 14 },
   { label: "10 a více", test: (x: number) => x >= 10, value: 22 },
 ] as const;
 
-/** Třídy přípravného stupně základní školy speciální — řádek B30 (PHmax). */
+/** Třídy přípravného stupně základní školy speciální – řádek B30 (PHmax). */
 export const B30_PREP_SPECIAL = [
   { label: "méně než 4", test: (x: number) => x < 4, value: 10 },
   { label: "4 a více", test: (x: number) => x >= 4, value: 40 },
 ] as const;
 
-/** Odpovídá tabulce kombinací ZŠSp (NV 123/2018) — který řádek B26–B28 určuje PHmax. */
+/** Odpovídá tabulce kombinací ZŠSp (NV 123/2018) – který řádek B26–B28 určuje PHmax. */
 export function resolveZssSpecialComboTargetRow(
   hasPart1First: boolean,
   hasPart1Second: boolean,

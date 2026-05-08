@@ -20,7 +20,7 @@ export function IconPrint() {
   );
 }
 
-/** Dokument + plus — přidání řádku v tabulkové evidenci (SŠ apod.). */
+/** Dokument + plus – přidání řádku v tabulkové evidenci (SŠ apod.). */
 export function IconAddTableRow() {
   return (
     <svg {...iconProps}>
@@ -31,7 +31,7 @@ export function IconAddTableRow() {
   );
 }
 
-/** Koš — odstranění posledního řádku v evidenci (SŠ apod.). */
+/** Koš – odstranění posledního řádku v evidenci (SŠ apod.). */
 export function IconRemoveTableRow() {
   return (
     <svg {...iconProps}>

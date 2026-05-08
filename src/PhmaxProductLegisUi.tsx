@@ -37,7 +37,7 @@ export function ProductLegisContextPanel({ variant }: { variant: ProductLegisVar
         <div className="methodology-strip__panel">
           <ul className="methodology-strip__list">
             <li>
-              <ZsLegisRef citeId="nv123-1" label="PHmax (NV § 1)" /> a pásma podle průměru žáků —{" "}
+              <ZsLegisRef citeId="nv123-1" label="PHmax (NV § 1)" /> a pásma podle průměru žáků –{" "}
               <ZsLegisRef citeId="nv123-priloha1" label="příloha č. 1 NV 123/2018" />. Součet za školu:{" "}
               <ZsLegisRef citeId="nv123-1-3" label="§ 1 odst. 3 NV" />.
             </li>
@@ -49,7 +49,7 @@ export function ProductLegisContextPanel({ variant }: { variant: ProductLegisVar
             </li>
           </ul>
           <p className="muted-text methodology-strip__note" style={{ marginTop: 10, fontSize: "0.88rem" }}>
-            U citací použijte myš nebo klávesu Tab — zobrazí se stručný výklad. Úplné znění:{" "}
+            U citací použijte myš nebo klávesu Tab – zobrazí se stručný výklad. Úplné znění:{" "}
             <LawLink href={ZS_LEGIS_ZAKONY_URL.nv123}>NV 123/2018</LawLink>
             {" · "}
             <LawLink href={ZS_LEGIS_ZAKONY_URL.vyhl48}>vyhl. 48/2005</LawLink>
@@ -76,7 +76,7 @@ export function ProductLegisContextPanel({ variant }: { variant: ProductLegisVar
               <PvLegisRef citeId="pv-zdr31" label="31 h na třídu" />.
             </li>
             <li>
-              Výjimky z nejnižšího počtu dětí a krácení PHmax: <PvLegisRef citeId="pv-1d3" label="§ 1d odst. 3 vyhl. 14" /> — v
+              Výjimky z nejnižšího počtu dětí a krácení PHmax: <PvLegisRef citeId="pv-1d3" label="§ 1d odst. 3 vyhl. 14" /> – v
               aplikaci se nevyhodnocuje automaticky.
             </li>
           </ul>
@@ -104,12 +104,12 @@ export function ProductLegisContextPanel({ variant }: { variant: ProductLegisVar
           <li>
             Týdenní rozsah PPV a orientační dělič dle <SdLegisRef citeId="sd-nv75-nv" label="NV č. 75/2005 Sb." />, v aplikaci
             s odkazem na <SdLegisRef citeId="sd-nv75-7-1" label="tab. 7.1" /> (vychovatel) a{" "}
-            <SdLegisRef citeId="sd-nv75-7-2" label="tab. 7.2" /> (vedoucí vychovatel) v příloze č. 1 — mechanický model, nikoli
+            <SdLegisRef citeId="sd-nv75-7-2" label="tab. 7.2" /> (vedoucí vychovatel) v příloze č. 1 – mechanický model, nikoli
             personální výkaz.
           </li>
           <li>
             Složité případy (např. <SdLegisRef citeId="sd-skolsky-16" label="§ 16 školského zákona" />, méně než čtyři oddělení)
-            vyžadují úplné znění vyhlášky a metodiku — aplikace je neřeší v plné šíři.
+            vyžadují úplné znění vyhlášky a metodiku – aplikace je neřeší v plné šíři.
           </li>
         </ul>
         <p className="muted-text methodology-strip__note" style={{ marginTop: 10, fontSize: "0.88rem" }}>

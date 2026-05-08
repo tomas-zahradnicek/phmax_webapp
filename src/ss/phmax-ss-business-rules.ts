@@ -321,7 +321,7 @@ export function evaluateBusinessRules(
       pushInfo(
         result,
         'MIXED_TALENT_REGIME',
-        'Ne všechny obory mají v RVP součást přijímacího řízení v podobě talentové zkoušky; kombinace s/bez talentové zkoušky se řídí vyhláškou č. 13/2005 Sb. Aplikace talent odhaduje ze skupiny kódu a názvu programu — ověřte u konkrétních oborů.',
+        'Ne všechny obory mají v RVP součást přijímacího řízení v podobě talentové zkoušky; kombinace s/bez talentové zkoušky se řídí vyhláškou č. 13/2005 Sb. Aplikace talent odhaduje ze skupiny kódu a názvu programu – ověřte u konkrétních oborů.',
         codes,
       );
     }

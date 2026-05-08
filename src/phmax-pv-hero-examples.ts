@@ -1,6 +1,6 @@
 import type { PvProvozKind } from "./phmax-pv-logic";
 
-/** Jedno pracoviště — stejný tvar jako řádek ve `PhmaxPvPage` / localStorage. */
+/** Jedno pracoviště – stejný tvar jako řádek ve `PhmaxPvPage` / localStorage. */
 export type PvHeroExampleRow = {
   id: string;
   label: string;
@@ -54,36 +54,36 @@ export const PV_HERO_EXAMPLE_SELECT_LEGEND =
 
 export const PV_HERO_EXAMPLE_META: Record<Exclude<PvHeroExampleKey, "">, { label: string; title: string }> = {
   meth_pv_1_240: {
-    label: "Př. 1 — 4 třídy, 1× § 16/9, celodenně 10 h → PHmax 240",
+    label: "Př. 1 – 4 třídy, 1× § 16/9, celodenně 10 h → PHmax 240",
     title:
       "4 třídy celodenně 10 h/den: tabulka 2 → základ 235 h + 5 h za 1 třídu § 16/9 = 240 h PHmax. PHAmax pro 1 třídu § 16/9 při ≥ 8 h provozu: 36 h (počítá se zvlášť, nelze „převést“ z PHmax).",
   },
   meth_pv_2_245: {
-    label: "Př. 2 — MŠ § 16/9, 4 třídy, celodenně 9,5 h → PHmax 245",
+    label: "Př. 2 – MŠ § 16/9, 4 třídy, celodenně 9,5 h → PHmax 245",
     title:
       "4 třídy celodenně 9,5 h/den: tabulka 2 → základ 225 h + 5 h za každou ze 4 tříd § 16/9 (+20 h) = 245 h.",
   },
   meth_pv_3_pha27: {
-    label: "Př. 3 — Polodenně 6 h, 1× § 16/9 → PHAmax 27",
+    label: "Př. 3 – Polodenně 6 h, 1× § 16/9 → PHAmax 27",
     title:
       "Polodenní provoz 6 h/den, 1 třída § 16/9: PHAmax = 36 × (6/8) = 27 h (metodika). PHmax z tabulky 1 zvlášť; přebytky PHmax nelze převést na PHAmax.",
   },
   ill_pv_1_single_10: {
     label: "Příloha: jednotřídní, celodenně 10 h → PHmax 62,5",
     title:
-      "Ilustrace MŠ bez tříd § 16/9: 1 třída, průměr 10 h/den, celodenní provoz — PHmax 62,5 h/týd. (tabulka 2).",
+      "Ilustrace MŠ bez tříd § 16/9: 1 třída, průměr 10 h/den, celodenní provoz – PHmax 62,5 h/týd. (tabulka 2).",
   },
   ill_pv_2_two_105: {
     label: "Příloha: dvoutřídní, celodenně 10,5 h → PHmax 125",
-    title: "2 třídy, 10,5 h/den, celodenně — PHmax 125 h/týd.",
+    title: "2 třídy, 10,5 h/den, celodenně – PHmax 125 h/týd.",
   },
   ill_pv_3_three_105: {
     label: "Příloha: trojtřídní, celodenně 10,5 h → PHmax 185",
-    title: "3 třídy, 10,5 h/den, celodenně — PHmax 185 h/týd.",
+    title: "3 třídy, 10,5 h/den, celodenně – PHmax 185 h/týd.",
   },
   ill_pv_4_six_11: {
     label: "Příloha: šestitřídní, celodenně 11 h → PHmax 380",
-    title: "6 tříd, 11 h/den, celodenně — PHmax 380 h/týd.",
+    title: "6 tříd, 11 h/den, celodenně – PHmax 380 h/týd.",
   },
   ill_pv_5_mixed_1625: {
     label: "Příloha: 2 celodenní + 1 polodenní (2 řádky) → součet 162,5",
@@ -93,7 +93,7 @@ export const PV_HERO_EXAMPLE_META: Record<Exclude<PvHeroExampleKey, "">, { label
   ill_pv_6_two_95: {
     label: "Příloha: dvoutřídní, celodenně 9,5 h → PHmax 115",
     title:
-      "2 třídy, 9,5 h/den, celodenně — PHmax 115 h/týd. (metodika uvádí, že hodnota nemusí stačit na organizaci výchovy).",
+      "2 třídy, 9,5 h/den, celodenně – PHmax 115 h/týd. (metodika uvádí, že hodnota nemusí stačit na organizaci výchovy).",
   },
 };
 
@@ -132,7 +132,7 @@ export function pvHeroExampleSnapshot(key: Exclude<PvHeroExampleKey, "">): PvHer
         rows: [
           {
             id: "pv-hero-m3",
-            label: "Příklad 3 (metodika — PHAmax)",
+            label: "Příklad 3 (metodika – PHAmax)",
             provoz: "polodenni",
             classCount: 1,
             avgHours: 6,
@@ -202,7 +202,7 @@ export function pvHeroExampleSnapshot(key: Exclude<PvHeroExampleKey, "">): PvHer
         rows: [
           {
             id: "pv-hero-i5a",
-            label: "Kombinace provozů — celodenní část (příloha)",
+            label: "Kombinace provozů – celodenní část (příloha)",
             provoz: "celodenni",
             classCount: 2,
             avgHours: 10,
@@ -211,7 +211,7 @@ export function pvHeroExampleSnapshot(key: Exclude<PvHeroExampleKey, "">): PvHer
           },
           {
             id: "pv-hero-i5b",
-            label: "Kombinace provozů — polodenní část (příloha)",
+            label: "Kombinace provozů – polodenní část (příloha)",
             provoz: "polodenni",
             classCount: 1,
             avgHours: 6,

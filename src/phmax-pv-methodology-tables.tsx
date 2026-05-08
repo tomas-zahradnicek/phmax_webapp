@@ -52,7 +52,7 @@ function pvCellClass(active: readonly PvMethodologyActiveCell[] | undefined, tab
 }
 
 /**
- * Kompletní tabulky 1–3 přílohy k metodice PHmax PV (vyhl. 14/2005 Sb.) — pro ruční ověření.
+ * Kompletní tabulky 1–3 přílohy k metodice PHmax PV (vyhl. 14/2005 Sb.) – pro ruční ověření.
  * Volitelně zvýrazní buňky odpovídající zadaným pracovištím (stejně jako kontrolní přehled výše).
  */
 export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: readonly PvMethodologyActiveCell[] }) {
@@ -97,14 +97,14 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
       {vis.showEmptyHint ? (
         <p className="muted-text" style={{ marginBottom: 10, fontSize: "0.84rem" }}>
           Zatím není vyplněné žádné pracoviště s tabulkou 1–3. Pro náhled všech matic zapněte „Zobrazit všechny tabulky
-          1–3“, nebo vyplňte pracoviště — pak se zobrazí jen příslušná tabulka.
+          1–3“, nebo vyplňte pracoviště – pak se zobrazí jen příslušná tabulka.
         </p>
       ) : null}
 
       {show(1) ? (
       <>
       <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "14px 0 8px" }}>
-        Tabulka 1 — polodenní provoz
+        Tabulka 1 – polodenní provoz
       </h4>
       <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
         <table className="sd-phmax-breakdown pv-methodology-table">
@@ -142,14 +142,14 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
       {show(2) ? (
       <>
       <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "18px 0 8px" }}>
-        Tabulka 2 — celodenní provoz
+        Tabulka 2 – celodenní provoz
       </h4>
       <p className="muted-text" style={{ marginTop: 2, marginBottom: 8, fontSize: "0.82rem", lineHeight: 1.45 }}>
-        Pro přehlednost je matice uvedena ve <strong>dvou tabulkách</strong> — společně pokrývají všechna pásma provozu; druhá
+        Pro přehlednost je matice uvedena ve <strong>dvou tabulkách</strong> – společně pokrývají všechna pásma provozu; druhá
         tabulka navazuje v pořadí sloupců po první.
       </p>
       <h5 className="section-title" style={{ fontSize: "0.9rem", margin: "0 0 6px", fontWeight: 700 }}>
-        Tabulka 2a — pásma do méně než 9,5 h
+        Tabulka 2a – pásma do méně než 9,5 h
       </h5>
       <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
         <table className="sd-phmax-breakdown pv-methodology-table pv-methodology-table--celodenni-split">
@@ -182,7 +182,7 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
         </table>
       </ScrollGrabRegion>
       <h5 className="section-title" style={{ fontSize: "0.9rem", margin: "16px 0 6px", fontWeight: 700 }}>
-        Tabulka 2b — od 9,5 h včetně
+        Tabulka 2b – od 9,5 h včetně
       </h5>
       <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
         <table className="sd-phmax-breakdown pv-methodology-table pv-methodology-table--celodenni-split">
@@ -227,7 +227,7 @@ export function PhmaxPvMethodologyTables123({ activeCells }: { activeCells?: rea
       {show(3) ? (
       <>
       <h4 className="section-title" style={{ fontSize: "0.98rem", margin: "18px 0 8px" }}>
-        Tabulka 3 — internátní provoz
+        Tabulka 3 – internátní provoz
       </h4>
       <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
         <table className="sd-phmax-breakdown pv-methodology-table">

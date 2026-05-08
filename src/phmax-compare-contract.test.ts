@@ -241,7 +241,7 @@ describe("Compare contract", () => {
       { id: "b", label: "Neplatná B", protocol: invalidB },
     ]);
     expect(out.recommendation).toBe(
-      "U žádné varianty není k dispozici primární metrika (PHmax) — zkontrolujte vstupy.",
+      "U žádné varianty není k dispozici primární metrika (PHmax) – zkontrolujte vstupy.",
     );
   });
 

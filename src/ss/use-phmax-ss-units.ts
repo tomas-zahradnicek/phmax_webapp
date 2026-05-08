@@ -102,7 +102,7 @@ function buildSsExportValueRows(
   out.push(["Součet PHmax (orientačně, platné řádky)", roundedTotal]);
   if (phamaxPracticalTotal != null) {
     out.push([
-      "Součet PHAmax (PrŠ 78-62-C/01, 78-62-C/02, denní forma — tabulka metodiky)",
+      "Součet PHAmax (PrŠ 78-62-C/01, 78-62-C/02, denní forma – tabulka metodiky)",
       phamaxPracticalTotal,
     ]);
   }
@@ -197,7 +197,7 @@ export function usePhmaxSsUnits(
     });
   }, []);
 
-  /** Stejné pravidlo jako u jediného řádku po „Odstranit“ — vždy zůstane alespoň jeden řádek. */
+  /** Stejné pravidlo jako u jediného řádku po „Odstranit“ – vždy zůstane alespoň jeden řádek. */
   const removeLastRow = useCallback(() => {
     setRows((prev) => {
       if (prev.length <= 1) return [createEmptyPhmaxSsUnitRow(1)];

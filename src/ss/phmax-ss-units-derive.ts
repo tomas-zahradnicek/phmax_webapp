@@ -128,7 +128,7 @@ export function deriveSsUnitsBrulesPreview(rows: PhmaxSsUnitRow[]): SsUnitBrules
   });
 }
 
-/** Vstup pro `createSsProductAuditProtocol` / explainability — jen řádky s úspěšným PHmax. */
+/** Vstup pro `createSsProductAuditProtocol` / explainability – jen řádky s úspěšným PHmax. */
 export function buildSsAuditProtocolInput(rows: PhmaxSsUnitRow[]): AuditProtocolInput | null {
   const preview = deriveSsUnitsPreview(rows);
   const brulesPreview = deriveSsUnitsBrulesPreview(rows);

@@ -113,11 +113,11 @@ export function SsWhyPhmaxPanel({
   return (
     <div className="ss-why-panel card muted" style={{ margin: 0, padding: "12px 14px", textAlign: "left" }}>
       <p className="ss-why-panel__title">
-        <strong>Proč tento výsledek?</strong> — orientační výklad k řádku PHmax
+        <strong>Proč tento výsledek?</strong> – orientační výklad k řádku PHmax
       </p>
       <ul className="ss-why-panel__list muted-text" style={{ margin: "8px 0 0", paddingLeft: "1.2rem", lineHeight: 1.55 }}>
         <li>
-          Základ PHmax na třídu vychází z tabulek podle průměru žáků —{" "}
+          Základ PHmax na třídu vychází z tabulek podle průměru žáků –{" "}
           <SsLegisRef citeId="nv123-priloha1" label={SS_LEGIS_CITE_LABELS["nv123-priloha1"]} />. Definice PHmax:{" "}
           <SsLegisRef citeId="nv123-1" label={SS_LEGIS_CITE_LABELS["nv123-1"]} />.
         </li>
@@ -126,11 +126,11 @@ export function SsWhyPhmaxPanel({
           <strong>{row.modeKey}</strong>) v interním datasetu oboru.
         </li>
         <li>
-          {formLabel} — <SsLegisRef citeId="nv123-2" label={SS_LEGIS_CITE_LABELS["nv123-2"]} />.
+          {formLabel} – <SsLegisRef citeId="nv123-2" label={SS_LEGIS_CITE_LABELS["nv123-2"]} />.
         </li>
         <li>
           Součin upravené hodnoty a počtu tříd ({row.classCount}) dává PHmax celkem (srov.{" "}
-          <SsLegisRef citeId="nv123-1-3" label={SS_LEGIS_CITE_LABELS["nv123-1-3"]} /> — součet za školu je součtem řádků).
+          <SsLegisRef citeId="nv123-1-3" label={SS_LEGIS_CITE_LABELS["nv123-1-3"]} /> – součet za školu je součtem řádků).
         </li>
       </ul>
       <p className="muted-text" style={{ marginTop: 10, fontSize: "0.88rem" }}>
@@ -181,7 +181,7 @@ export function SsWhyPhmaxErrorPanel({ error }: { error: string }) {
   return (
     <div className="ss-why-panel card muted" style={{ margin: 0, padding: "12px 14px", textAlign: "left" }}>
       <p className="ss-why-panel__title">
-        <strong>Proč tento výsledek?</strong> — výpočet PHmax selhal
+        <strong>Proč tento výsledek?</strong> – výpočet PHmax selhal
       </p>
       <p className="muted-text" style={{ marginTop: 8, lineHeight: 1.5 }}>
         {error}
@@ -202,7 +202,7 @@ export function SsWhyBrulesEvalErrorPanel({ error }: { error: string }) {
   return (
     <div className="ss-why-panel card muted" style={{ margin: 0, padding: "12px 14px", textAlign: "left" }}>
       <p className="ss-why-panel__title">
-        <strong>Proč tento výsledek?</strong> — kontrola pravidel selhala
+        <strong>Proč tento výsledek?</strong> – kontrola pravidel selhala
       </p>
       <p className="muted-text" style={{ marginTop: 8, lineHeight: 1.5 }}>
         {error}
@@ -222,10 +222,10 @@ export function SsWhyBrulesPanel({ result }: { result: BusinessRulesResult }) {
   return (
     <div className="ss-why-panel card muted" style={{ margin: 0, padding: "12px 14px", textAlign: "left" }}>
       <p className="ss-why-panel__title">
-        <strong>Proč tento výsledek?</strong> — kontrola pravidel a legislativa
+        <strong>Proč tento výsledek?</strong> – kontrola pravidel a legislativa
       </p>
       <p className="muted-text" style={{ marginTop: 6, fontSize: "0.88rem" }}>
-        U citací (např. <SsLegisRef citeId="vyhl13-2a1" label="§ 2a odst. 1" />) najeďte myší nebo použijte Tab + fokus — zobrazí se stručný výklad.
+        U citací (např. <SsLegisRef citeId="vyhl13-2a1" label="§ 2a odst. 1" />) najeďte myší nebo použijte Tab + fokus – zobrazí se stručný výklad.
       </p>
       {result.errors.length > 0 ? (
         <div style={{ marginTop: 8 }}>

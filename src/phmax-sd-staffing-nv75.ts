@@ -9,7 +9,7 @@ export type SdVychovatelPpcFullHours = 28 | 29 | 30;
 /**
  * Vedoucí vychovatel – příl. č. 1, tab. 7.2, řádek „Školní družina / vedoucí vychovatel“.
  * Počet jednotek = počet oddělení družiny (v aplikaci: celkový počet oddělení pro výpočet).
- * Pro 1–2 oddělení tabulka 7.2 rozsah neuvádí — vracíme 0 a informační poznámku.
+ * Pro 1–2 oddělení tabulka 7.2 rozsah neuvádí – vracíme 0 a informační poznámku.
  */
 export function getNv2005VedouciVychovatelHours(departmentCount: number): { hours: number; note?: string } {
   if (departmentCount < 1) {

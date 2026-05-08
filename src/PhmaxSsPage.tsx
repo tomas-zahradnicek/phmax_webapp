@@ -133,7 +133,7 @@ const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
       <>
         Ve víceoborové třídě je v PHmax obsažen <strong>poměrný</strong> počet hodin všeobecně vzdělávací složky a{" "}
         <strong>plný</strong> počet hodin odborné složky vzdělávání. Při součtu PHmax ve víceoborové třídě získáte plný
-        počet hodin pro výuku všeobecné i odborné složky — odpovídá tomu, že všeobecně vzdělávací předměty jsou
+        počet hodin pro výuku všeobecné i odborné složky – odpovídá tomu, že všeobecně vzdělávací předměty jsou
         vyučovány společně a předměty odborné složky se dělí do skupin podle oborů.
       </>
     ),
@@ -149,7 +149,7 @@ const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
           žáci dělí do skupin podle oboru.
         </p>
         <p style={{ margin: "0 0 6px" }}>
-          <strong>Běžné podmínky zřízení</strong> (shrnutí pro orientaci v aplikaci — neúplná náhrada textu vyhlášky):
+          <strong>Běžné podmínky zřízení</strong> (shrnutí pro orientaci v aplikaci – neúplná náhrada textu vyhlášky):
         </p>
         <ul style={{ margin: "0 0 8px", paddingLeft: "1.25rem" }}>
           <li>
@@ -170,7 +170,7 @@ const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
           </li>
           <li>
             lze ji zřídit i tehdy, je-li v jednom oboru více než 17 žáků a v druhém méně než 17, pokud škola{" "}
-            <strong>nemá dva obory</strong> s méně než 17 žáky (zvláštní režim — v kontrole pravidel jako upozornění).
+            <strong>nemá dva obory</strong> s méně než 17 žáky (zvláštní režim – v kontrole pravidel jako upozornění).
           </li>
         </ul>
         <p style={{ margin: "0 0 8px" }}>
@@ -186,7 +186,7 @@ const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
         <p style={{ margin: 0 }}>
           Podle <strong>vyhlášky č. 248/2019 Sb.</strong> (mj. novela vyhl. č. 27/2016 Sb.) ve třídě podle{" "}
           <strong>§ 16 odst. 9 školského zákona</strong> mohou být žáci více oborů <strong>stejné kategorie</strong> dle
-          nařízení o soustavě oborů; <strong>pravidla víceoborových tříd z vyhl. č. 13/2005 Sb. se neuplatní</strong> —
+          nařízení o soustavě oborů; <strong>pravidla víceoborových tříd z vyhl. č. 13/2005 Sb. se neuplatní</strong> –
           v aplikaci režim „třída § 16/9“ u kontroly pravidel.
         </p>
       </>
@@ -208,7 +208,7 @@ const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
     description: (
       <>
         PHmax pro žáky středních škol a konzervatoří vzdělávaných podle <strong>individuálního vzdělávacího plánu</strong>{" "}
-        se samostatně nestanovuje — žáci se započítávají do celkových počtů žáků podle oborů vzdělání a ročníků.
+        se samostatně nestanovuje – žáci se započítávají do celkových počtů žáků podle oborů vzdělání a ročníků.
       </>
     ),
   },
@@ -252,10 +252,10 @@ const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
     ),
   },
   {
-    term: "§ 4 — Stanovení PHmax (a tabulky PrŠ)",
+    term: "§ 4 – Stanovení PHmax (a tabulky PrŠ)",
     description: (
       <>
-        Metodika rozlišuje postupy <strong>1</strong> (jednoobor denně), <strong>1a</strong> (jednoobor jiné formy —
+        Metodika rozlišuje postupy <strong>1</strong> (jednoobor denně), <strong>1a</strong> (jednoobor jiné formy –
         koeficienty NV), <strong>2</strong> (víceobor dle vyhl. 13), <strong>2a</strong> (víceobor jiné formy),{" "}
         <strong>3</strong> (přechodné ustanovení) a <strong>4</strong> (§ 16 odst. 9, Praktická škola, PHAmax). Plný
         textový přepis a tabulky kódů <strong>78-62-C/01</strong> a <strong>78-62-C/02</strong> je v rozbalení{" "}
@@ -271,7 +271,7 @@ const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
         <strong>(2)</strong>, přechodné ustanovení NV <strong>(3)</strong>, třída podle § 16{" "}
         <strong>(4)</strong>. Postup výpočtu průměrného počtu žáků podle § 16 odst. 9 (včetně kroků pro jedno-, dvou- a
         tříoborové třídy a pro třídy § 16/9) je shrnut v rozbalení{" "}
-        <strong>„Metodika: rozcestník a průměr žáků (§ 16 odst. 9)“</strong> na této stránce — pro kontrolu znění vůči
+        <strong>„Metodika: rozcestník a průměr žáků (§ 16 odst. 9)“</strong> na této stránce – pro kontrolu znění vůči
         oficiálnímu dokumentu MŠMT.
       </>
     ),
@@ -850,7 +850,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         onClose={() => setGlossaryOpen(false)}
         terms={SS_GLOSSARY_TERMS}
         triggerRef={glossaryTriggerRef}
-        scopeHint="SŠ — pojmy podle metodiky stanovení PHmax a PHAmax pro střední vzdělávání (kontrola znění oproti oficiálnímu dokumentu)."
+        scopeHint="SŠ – pojmy podle metodiky stanovení PHmax a PHAmax pro střední vzdělávání (kontrola znění oproti oficiálnímu dokumentu)."
       />
 
       <QuickOnboarding
@@ -1200,7 +1200,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               </li>
             ))}
           </ol>
-          <p style={{ margin: "0 0 6px", fontWeight: 600 }}>PHmax Praktická škola — postup a–e</p>
+          <p style={{ margin: "0 0 6px", fontWeight: 600 }}>PHmax Praktická škola – postup a–e</p>
           <ol style={{ margin: "0 0 12px", paddingLeft: "1.25rem" }}>
             {s4.par16AndPractical.practicalPhmaxSteps.map((s: string, i: number) => (
               <li key={i} style={{ marginBottom: 4 }}>
@@ -1242,7 +1242,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           </div>
           <p style={{ margin: "0 0 16px", fontSize: "0.82rem" }}>{PHMAX_SS_PRACTICAL_SCHOOL_PHMAX_TABLE.footnote7}</p>
 
-          <p style={{ margin: "0 0 6px", fontWeight: 600 }}>PHAmax Praktická škola — postup a–e</p>
+          <p style={{ margin: "0 0 6px", fontWeight: 600 }}>PHAmax Praktická škola – postup a–e</p>
           <ol style={{ margin: "0 0 12px", paddingLeft: "1.25rem" }}>
             {s4.par16AndPractical.practicalPhamaxSteps.map((s: string, i: number) => (
               <li key={i} style={{ marginBottom: 4 }}>
@@ -1291,7 +1291,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
 
       <FieldWhyPhmaxDetails summary="Proč vstupy řádku mění PHmax?">
         <p style={{ margin: "0 0 8px" }}>
-          Ve výpočtu SŠ použijte nad tabulkou <strong>základ definic</strong>; u každého platného řádku výsledků zapněte rozbalení <strong>„Proč?“</strong> — zobrazí se navázaný výklad pásem, koeficientu formy a součinu z{" "}
+          Ve výpočtu SŠ použijte nad tabulkou <strong>základ definic</strong>; u každého platného řádku výsledků zapněte rozbalení <strong>„Proč?“</strong> – zobrazí se navázaný výklad pásem, koeficientu formy a součinu z{" "}
           <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
             příloh NV č. 123/2018 Sb.
           </a>.

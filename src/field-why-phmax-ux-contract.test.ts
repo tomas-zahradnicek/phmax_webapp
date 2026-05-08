@@ -31,4 +31,14 @@ describe("UX contract: FieldWhyPhmax + dashboard user-first blok", () => {
     expect(dash).toContain("Otevřít");
     expect(dash).toContain("DASH_QUICK_IDS");
   });
+
+  it("PV má společný FieldWhy nad kartou vstupů a ZŠ u §16", () => {
+    const pv = readSource("src/PhmaxPvPage.tsx");
+    expect(pv).toContain("Proč se PHmax počítá po pracovištích");
+    expect(pv.match(/FieldWhyPhmaxDetails/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+
+    const zs = readSource("src/PhmaxZsPage.tsx");
+    expect(zs).toContain("Proč má § 16/9 vlastní vstupy a výsledek");
+    expect(zs).toContain('data-section="sec16"');
+  });
 });

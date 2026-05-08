@@ -216,7 +216,7 @@ function ZsPhpB46Table({ activeLabel }: { activeLabel?: string | null }) {
   return (
     <div style={{ marginBottom: 20 }}>
       <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 6px" }}>
-        26) PHPmax — řádek B46 (tabulka přílohy k vyhlášce)
+        26) PHPmax – řádek B46 (tabulka přílohy k vyhlášce)
       </h4>
       <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
         <table className="sd-phmax-breakdown zs-methodology-ref">
@@ -253,17 +253,17 @@ function ZsPhpB46Table({ activeLabel }: { activeLabel?: string | null }) {
 }
 
 const PHA_ORDER = [
-  { id: "B35", code: "79-01-C/01", desc: "Základní škola — 1. stupeň", bands: PHA_TABLE.zs1 },
-  { id: "B36", code: "79-01-C/01", desc: "Základní škola — 1. stupeň, těžší postižení", bands: PHA_TABLE.zs1Heavy },
-  { id: "B37", code: "79-01-C/01", desc: "Základní škola — 2. stupeň", bands: PHA_TABLE.zs2 },
-  { id: "B38", code: "79-01-C/01", desc: "Základní škola — 2. stupeň, těžší postižení", bands: PHA_TABLE.zs2Heavy },
-  { id: "B39", code: "79-01-B/01", desc: "Základní škola speciální — I. díl, 1. stupeň", bands: PHA_TABLE.zss1 },
-  { id: "B40", code: "79-01-B/01", desc: "Základní škola speciální — I. díl, 1. stupeň, těžší postižení", bands: PHA_TABLE.zss1Heavy },
-  { id: "B41", code: "79-01-B/01", desc: "Základní škola speciální — I. díl, 2. stupeň", bands: PHA_TABLE.zss2 },
-  { id: "B42", code: "79-01-B/01", desc: "Základní škola speciální — I. díl, 2. stupeň, těžší postižení", bands: PHA_TABLE.zss2Heavy },
-  { id: "B43", code: "79-01-B/01", desc: "Základní škola speciální — II. díl", bands: PHA_TABLE.zssII },
-  { id: "B44", code: "79-01-B/01", desc: "Základní škola speciální — II. díl, těžší postižení", bands: PHA_TABLE.zssIIHeavy },
-  { id: "B45", code: "—", desc: "Přípravný stupeň základní školy speciální", bands: PHA_TABLE.zssPrep },
+  { id: "B35", code: "79-01-C/01", desc: "Základní škola – 1. stupeň", bands: PHA_TABLE.zs1 },
+  { id: "B36", code: "79-01-C/01", desc: "Základní škola – 1. stupeň, těžší postižení", bands: PHA_TABLE.zs1Heavy },
+  { id: "B37", code: "79-01-C/01", desc: "Základní škola – 2. stupeň", bands: PHA_TABLE.zs2 },
+  { id: "B38", code: "79-01-C/01", desc: "Základní škola – 2. stupeň, těžší postižení", bands: PHA_TABLE.zs2Heavy },
+  { id: "B39", code: "79-01-B/01", desc: "Základní škola speciální – I. díl, 1. stupeň", bands: PHA_TABLE.zss1 },
+  { id: "B40", code: "79-01-B/01", desc: "Základní škola speciální – I. díl, 1. stupeň, těžší postižení", bands: PHA_TABLE.zss1Heavy },
+  { id: "B41", code: "79-01-B/01", desc: "Základní škola speciální – I. díl, 2. stupeň", bands: PHA_TABLE.zss2 },
+  { id: "B42", code: "79-01-B/01", desc: "Základní škola speciální – I. díl, 2. stupeň, těžší postižení", bands: PHA_TABLE.zss2Heavy },
+  { id: "B43", code: "79-01-B/01", desc: "Základní škola speciální – II. díl", bands: PHA_TABLE.zssII },
+  { id: "B44", code: "79-01-B/01", desc: "Základní škola speciální – II. díl, těžší postižení", bands: PHA_TABLE.zssIIHeavy },
+  { id: "B45", code: "–", desc: "Přípravný stupeň základní školy speciální", bands: PHA_TABLE.zssPrep },
 ] as const;
 
 function ZsPhaAnnexBlock({
@@ -288,7 +288,7 @@ function ZsPhaAnnexBlock({
         {title}
       </h4>
       <p className="muted-text" style={{ margin: "0 0 8px", fontSize: "0.82rem", lineHeight: 1.45 }}>
-        Tabulka přílohy k vyhlášce — PHAmax pro základní školu / školu speciální. Sloupce odpovídají pásům průměrné doby
+        Tabulka přílohy k vyhlášce – PHAmax pro základní školu / školu speciální. Sloupce odpovídají pásům průměrné doby
         výuky; u řádků B35–B38 se používá stejná struktura jako u PHmax u běžné ZŠ, u B39–B45 u ZŠ speciální a
         přípravného stupně.
       </p>
@@ -352,7 +352,7 @@ function ZsSpecialCombinationTable({ combo }: { combo?: { i1: boolean; i2: boole
   return (
     <div style={{ marginBottom: 20 }}>
       <h4 className="section-title" style={{ fontSize: "0.96rem", margin: "0 0 6px" }}>
-        20) Kombinace společné výuky — ZŠ speciální (B26–B28)
+        20) Kombinace společné výuky – ZŠ speciální (B26–B28)
       </h4>
       <p className="muted-text" style={{ margin: "0 0 8px", fontSize: "0.82rem", lineHeight: 1.45 }}>
         Při současné výuce ve více částech ZŠ speciální se podle metodiky vybírá jeden z řádků B26–B28. Níže je přehled
@@ -469,7 +469,7 @@ export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?:
 
       {show("basic_b1b2") ? (
         <RefBandTable
-          title="4) Základní škola — více než 2 třídy (řádky B1, B2)"
+          title="4) Základní škola – více než 2 třídy (řádky B1, B2)"
           rows={[
             { id: "B1", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B13_MORE_THAN_2.first },
             { id: "B2", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B13_MORE_THAN_2.second },
@@ -479,7 +479,7 @@ export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?:
       ) : null}
       {show("basic_b3b4") ? (
         <RefBandTable
-          title="5) Základní škola — nejvýše 2 třídy (řádky B3, B4)"
+          title="5) Základní škola – nejvýše 2 třídy (řádky B3, B4)"
           rows={[
             { id: "B3", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B34_MAX_2.first },
             { id: "B4", code: "79-01-C/01", desc: "Základní škola (2. stupeň)", bands: B34_MAX_2.second },
@@ -488,16 +488,16 @@ export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?:
         />
       ) : null}
       {show("basic_b5") ? (
-        <RefBandTable title="6) Mateřská škola — řádek B5" rows={[{ id: "B5", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B5 }]} active={ac} />
+        <RefBandTable title="6) Mateřská škola – řádek B5" rows={[{ id: "B5", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B5 }]} active={ac} />
       ) : null}
       {show("basic_b6") ? (
-        <RefBandTable title="7) Speciální mateřská škola — řádek B6" rows={[{ id: "B6", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B6 }]} active={ac} />
+        <RefBandTable title="7) Speciální mateřská škola – řádek B6" rows={[{ id: "B6", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B6 }]} active={ac} />
       ) : null}
       {show("basic_b7") ? (
-        <RefBandTable title="8) Speciální školka — řádek B7" rows={[{ id: "B7", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B7 }]} active={ac} />
+        <RefBandTable title="8) Speciální školka – řádek B7" rows={[{ id: "B7", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B7 }]} active={ac} />
       ) : null}
       {show("basic_b8") ? (
-        <RefBandTable title="9) Praktická škola — řádek B8" rows={[{ id: "B8", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B8 }]} active={ac} />
+        <RefBandTable title="9) Praktická škola – řádek B8" rows={[{ id: "B8", code: "79-01-C/01", desc: "Základní škola (1. stupeň)", bands: B8 }]} active={ac} />
       ) : null}
       {show("sec16") ? (
         <RefBandTable
@@ -532,17 +532,17 @@ export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?:
         />
       ) : null}
       {show("minority_b17") ? (
-        <RefBandTable title="13) Školy pro žáky národnostních menšin — řádek B17" rows={[{ id: "B17", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minority1 }]} active={ac} />
+        <RefBandTable title="13) Školy pro žáky národnostních menšin – řádek B17" rows={[{ id: "B17", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minority1 }]} active={ac} />
       ) : null}
       {show("minority_b18") ? (
-        <RefBandTable title="14) Školy pro žáky národnostních menšin — řádek B18" rows={[{ id: "B18", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minority2 }]} active={ac} />
+        <RefBandTable title="14) Školy pro žáky národnostních menšin – řádek B18" rows={[{ id: "B18", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minority2 }]} active={ac} />
       ) : null}
       {show("minority_b19") ? (
-        <RefBandTable title="15) Školy pro žáky národnostních menšin — řádek B19" rows={[{ id: "B19", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minority3 }]} active={ac} />
+        <RefBandTable title="15) Školy pro žáky národnostních menšin – řádek B19" rows={[{ id: "B19", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minority3 }]} active={ac} />
       ) : null}
       {show("minority_b20b21") ? (
         <RefBandTable
-          title="16) Školy pro žáky národnostních menšin — řádky B20, B21"
+          title="16) Školy pro žáky národnostních menšin – řádky B20, B21"
           rows={[
             { id: "B20", code: "79-01-C/01", desc: "ZŠ (1. stupeň)", bands: B17_B21.minorityFull1 },
             { id: "B21", code: "79-01-C/01", desc: "ZŠ (2. stupeň)", bands: B17_B21.minorityFull2 },
@@ -555,7 +555,7 @@ export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?:
       ) : null}
       {show("special_b26_28") ? (
         <RefBandTable
-          title="18) Základní škola speciální — řádky B26–B28"
+          title="18) Základní škola speciální – řádky B26–B28"
           rows={[
             { id: "B26", code: "79-01-B/01", desc: "I. díl, 1. stupeň", bands: B26_B28.special1 },
             { id: "B27", code: "79-01-B/01", desc: "I. díl, 2. stupeň", bands: B26_B28.special2 },
@@ -568,9 +568,9 @@ export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?:
       {show("mixed_explain") && h.mixedReferenceNote ? <MixedNote note={h.mixedReferenceNote} /> : null}
       {show("prep_b29") ? (
         <ZsTwoColPhTable
-          title="21) Přípravná třída základní školy — řádek B29 (PHmax / PHAmax)"
+          title="21) Přípravná třída základní školy – řádek B29 (PHmax / PHAmax)"
           rowId="B29"
-          code="—"
+          code="–"
           desc="Přípravná třída ZŠ"
           bands={B29_PREP_CLASS}
           activeLabel={h.prepClassLabel}
@@ -578,23 +578,23 @@ export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?:
       ) : null}
       {show("prep_b30") ? (
         <ZsTwoColPhTable
-          title="21) Přípravný stupeň základní školy speciální — řádek B30 (PHmax / PHAmax)"
+          title="21) Přípravný stupeň základní školy speciální – řádek B30 (PHmax / PHAmax)"
           rowId="B30"
-          code="—"
+          code="–"
           desc="Přípravný stupeň ZŠS"
           bands={B30_PREP_SPECIAL}
           activeLabel={h.prepSpecialLabel}
         />
       ) : null}
       {show("par38") ? (
-        <ZsParLawMiniTable title="22) § 38 zákona č. 561/2004 Sb. — řádky B31, B32" categoryHeader="Kategorie" ids={["B31", "B32"]} active={h.par38} />
+        <ZsParLawMiniTable title="22) § 38 zákona č. 561/2004 Sb. – řádky B31, B32" categoryHeader="Kategorie" ids={["B31", "B32"]} active={h.par38} />
       ) : null}
       {show("par41") ? (
-        <ZsParLawMiniTable title="23) § 41 zákona č. 561/2004 Sb. — řádky B33, B34" categoryHeader="Kategorie" ids={["B33", "B34"]} active={h.par41} />
+        <ZsParLawMiniTable title="23) § 41 zákona č. 561/2004 Sb. – řádky B33, B34" categoryHeader="Kategorie" ids={["B33", "B34"]} active={h.par41} />
       ) : null}
       {show("pha_b35_38") ? (
         <ZsPhaAnnexBlock
-          title="24) PHAmax — základní škola (řádky B35–B38, tabulka přílohy)"
+          title="24) PHAmax – základní škola (řádky B35–B38, tabulka přílohy)"
           rowIds={["B35", "B36", "B37", "B38"]}
           active={ac}
           showSec16={showPhaSec16}
@@ -603,7 +603,7 @@ export function PhmaxZsMethodologyReferenceTables({ highlights }: { highlights?:
       ) : null}
       {show("pha_b39_45") ? (
         <ZsPhaAnnexBlock
-          title="25) PHAmax — základní škola speciální a přípravný stupeň (řádky B39–B45, tabulka přílohy)"
+          title="25) PHAmax – základní škola speciální a přípravný stupeň (řádky B39–B45, tabulka přílohy)"
           rowIds={["B39", "B40", "B41", "B42", "B43", "B44", "B45"]}
           active={ac}
           showSec16={false}

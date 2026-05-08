@@ -48,7 +48,7 @@ export const HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA =
 export const CALCULATOR_LIMITS_NOTE =
   "Kalkulačka nenahrazuje oficiální vykazování školy ani závazný výstup pro zřizovatele; neřeší plné napojení na výkazové systémy ani všechny individuální výjimky metodiky.";
 
-/** Krátký průvodce pro neodborné uživatele (PV, ŠD, ZŠ) — tři jasné kroky. */
+/** Krátký průvodce pro neodborné uživatele (PV, ŠD, ZŠ) – tři jasné kroky. */
 export const LAY_USER_QUICK_START_PV =
   "Rychlý start: (1) Přidejte řádek pro každé pracoviště (nebo kombinaci místo + druh provozu), (2) vyplňte třídy a průměrnou denní dobu, (3) sledujte součet PHmax v přehledu. Krácení dle § 1d/3 a další hraniční případy vždy ověřte v předpisech a metodice.";
 
@@ -56,12 +56,12 @@ export const LAY_USER_QUICK_START_SD =
   "Rychlý start: (1) Zvolte souhrnný nebo detailní režim, (2) zadejte účastníky a oddělení, (3) prohlédněte si PHmax a případné krácení. U § 10 odst. 2 a speciálních oddělení může být potřeba ruční kontrola dle metodiky.";
 
 export const LAY_USER_QUICK_START_ZS =
-  "Rychlý start: (1) V horní části zvolte typ školy (režim výpočtu), (2) přepněte záložku PHmax / PHAmax / PHPmax podle toho, co zrovna počítáte, (3) vyplňte tabulky v příslušných sekcích a čtěte souhrn vlevo dole. Moduly se nepropojují do jednoho společného výpočtu — každý má svá pole.";
+  "Rychlý start: (1) V horní části zvolte typ školy (režim výpočtu), (2) přepněte záložku PHmax / PHAmax / PHPmax podle toho, co zrovna počítáte, (3) vyplňte tabulky v příslušných sekcích a čtěte souhrn vlevo dole. Moduly se nepropojují do jednoho společného výpočtu – každý má svá pole.";
 
 export const LAY_USER_QUICK_START_SS =
-  "Rychlý start: (1) Přidejte řádek pro každou třídu nebo skupinu, kterou počítáte zvlášť, (2) vyplňte kód oboru z RVP, průměr žáků, počet tříd a formu studia, (3) u víceoborové třídy doplňte další obory a podívejte se na blok „Kontrola pravidel“ pod tabulkou. PHAmax v horním přehledu jen pro Praktickou školu (78-62-C/01, 78-62-C/02) v denní formě — ostatní dopočtěte dle metodiky MŠMT.";
+  "Rychlý start: (1) Přidejte řádek pro každou třídu nebo skupinu, kterou počítáte zvlášť, (2) vyplňte kód oboru z RVP, průměr žáků, počet tříd a formu studia, (3) u víceoborové třídy doplňte další obory a podívejte se na blok „Kontrola pravidel“ pod tabulkou. PHAmax v horním přehledu jen pro Praktickou školu (78-62-C/01, 78-62-C/02) v denní formě – ostatní dopočtěte dle metodiky MŠMT.";
 
-/** Jednořádek kontextu v přehledu (PV) — srozumitelná orientace mimo odbornou terminologii. */
+/** Jednořádek kontextu v přehledu (PV) – srozumitelná orientace mimo odbornou terminologii. */
 export function formatPvLayContextLine(workplaceCount: number, aggregateIncomplete: boolean): string {
   const base = `PV · pracovišť: ${workplaceCount} · orientační součet PHmax`;
   return aggregateIncomplete ? `${base} · část řádků je neúplná nebo neplatná` : base;
@@ -87,7 +87,7 @@ export function formatZsLayContextLine(
   return `Základní škola · ${modeLabel} · aktivní záložka ${tabLabel} · ${state}`;
 }
 
-/** Jednořádek kontextu v přehledu (SŠ) — evidence dílčích jednotek. */
+/** Jednořádek kontextu v přehledu (SŠ) – evidence dílčích jednotek. */
 export function formatSsLayContextLine(rowCount: number, contributingPhmaxRows: number): string {
   const base = `SŠ · evidence dílčích jednotek · řádků: ${rowCount} · orientační součet PHmax`;
   if (contributingPhmaxRows < rowCount) {
@@ -96,23 +96,23 @@ export function formatSsLayContextLine(rowCount: number, contributingPhmaxRows: 
   return base;
 }
 
-/** Obnova / import — JSON nebo záloha nemá očekávanou strukturu (PV, ŠD, SŠ). */
+/** Obnova / import – JSON nebo záloha nemá očekávanou strukturu (PV, ŠD, SŠ). */
 export const MSG_DATA_UNEXPECTED_SHAPE =
   "Data nelze načíst: soubor nebo záloha nemá očekávanou strukturu. Použijte export z této kalkulačky nebo zkontrolujte JSON.";
 
-/** SŠ — audit JSON bez platného řádku tabulky. */
+/** SŠ – audit JSON bez platného řádku tabulky. */
 export const MSG_SS_AUDIT_NEEDS_VALID_ROW =
   "Audit nelze stáhnout: v tabulce chybí aspoň jeden kompletní řádek (kód oboru z RVP, průměr žáků, počet tříd).";
 
-/** SŠ — porovnání se zálohou, aktuální stav bez platného PHmax. */
+/** SŠ – porovnání se zálohou, aktuální stav bez platného PHmax. */
 export const MSG_SS_COMPARE_CURRENT_INVALID =
-  "Srovnání nelze: v aktuální tabulce není řádek s platným výpočtem PHmax — zkontrolujte kód oboru, průměr žáků a počet tříd.";
+  "Srovnání nelze: v aktuální tabulce není řádek s platným výpočtem PHmax – zkontrolujte kód oboru, průměr žáků a počet tříd.";
 
-/** SŠ — porovnání, záloha bez platných řádků. */
+/** SŠ – porovnání, záloha bez platných řádků. */
 export const MSG_SS_COMPARE_NAMED_INVALID =
   "Srovnání nelze: ve vybrané záloze nejsou uložené platné řádky pro výpočet PHmax.";
 
-/** Pojmenované zálohy — uživatel nevybral položku v seznamu (napříč produkty). */
+/** Pojmenované zálohy – uživatel nevybral položku v seznamu (napříč produkty). */
 export const MSG_NAMED_BACKUP_PICK_FIRST =
   "Nejprve v rozevíracím seznamu vyberte pojmenovanou zálohu.";
 
@@ -122,11 +122,11 @@ export const MSG_NAMED_BACKUP_PICK_TO_DELETE =
 export const MSG_NAMED_BACKUP_PICK_TO_COMPARE =
   "Nejprve v seznamu vyberte zálohu, kterou chcete porovnat s aktuálním výpočtem.";
 
-/** Obnova rozpracovaného stavu — v úložišti prohlížeče nic není (PV, ŠD, ZŠ). */
+/** Obnova rozpracovaného stavu – v úložišti prohlížeče nic není (PV, ŠD, ZŠ). */
 export const MSG_NO_LOCAL_AUTOSAVE_DATA =
-  "V prohlížeči nejsou žádná uložená rozpracovaná data k obnovení — buď ještě nebyla uložena, nebo je někdo smazal (např. akcí „vymazat uložená data“).";
+  "V prohlížeči nejsou žádná uložená rozpracovaná data k obnovení – buď ještě nebyla uložena, nebo je někdo smazal (např. akcí „vymazat uložená data“).";
 
-/** ZŠ — pojmenovaná záloha bez uložených součtů pro JSON srovnání. */
+/** ZŠ – pojmenovaná záloha bez uložených součtů pro JSON srovnání. */
 export const MSG_ZS_NAMED_BACKUP_NO_AUDIT_TOTALS =
   "Vybraná záloha neobsahuje uložené součty PHmax / PHAmax / PHPmax pro srovnání. Načtěte ji ve formuláři, přepněte potřebné záložky, nechte spočíst souhrn a uložte znovu jako pojmenovanou zálohu.";
 

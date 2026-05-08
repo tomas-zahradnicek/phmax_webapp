@@ -1,10 +1,10 @@
 import { SD_MAX_DEPARTMENTS_IN_TABLE, suggestedDepartmentsFromPupils } from "./phmax-sd-logic";
 
 /**
- * Orientační meze počtu oddělení z počtu žáků 1. stupně — pro laický text v UI, ne pro právní normu.
+ * Orientační meze počtu oddělení z počtu žáků 1. stupně – pro laický text v UI, ne pro právní normu.
  * - Doporučeno: běžná metodická orientace dělení 27 (ceil).
  * - Horní mez: při průměru aspoň cca 20 dětí na oddělení (floor ÷ 20, min. 1, max z tabulky).
- * - Spodní větev: při průměru cca až 32 dětí na oddělení (ceil ÷ 32) — může být splatná s výjimkou / vnitřní organizací.
+ * - Spodní větev: při průměru cca až 32 dětí na oddělení (ceil ÷ 32) – může být splatná s výjimkou / vnitřní organizací.
  */
 export function getSdDepartmentRangeFromPupils(pupils: number): {
   recommended: number;
@@ -34,7 +34,7 @@ export function buildSdPlainNarrativeText(params: {
   const pFmt = pupils.toLocaleString("cs-CZ", { maximumFractionDigits: 0 });
   const phmaxFmt = phmaxHours.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const specNote = hasSpecialDepartments
-    ? " U speciálních oddělení může být reálné členění a výpočet jiné — vycházejte z metodiky a § 16/9."
+    ? " U speciálních oddělení může být reálné členění a výpočet jiné – vycházejte z metodiky a § 16/9."
     : "";
 
   let p1: string;

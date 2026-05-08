@@ -155,7 +155,7 @@ const SD_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
     description: (
       <>
         <strong>Souhrnný režim</strong> zadáváte běžná oddělení souhrnně a speciální případně jako další položky.{" "}
-        <strong>Detailní režim</strong> zapisuje každé oddělení zvlášť (typ, počet účastníků, výjimka u řádku) — interně
+        <strong>Detailní režim</strong> zapisuje každé oddělení zvlášť (typ, počet účastníků, výjimka u řádku) – interně
         se vždy převádí na model po odděleních.
       </>
     ),
@@ -165,7 +165,7 @@ const SD_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
     description: (
       <>
         Orientační krácení celkového PHmax, pokud není splněn průměr účastníků 1. stupně na oddělení (typicky pod 20)
-        — viz § 10 odst. 2 vyhlášky č. 74/2005 Sb. V aplikaci se zobrazí koeficient a upravený součet.
+        – viz § 10 odst. 2 vyhlášky č. 74/2005 Sb. V aplikaci se zobrazí koeficient a upravený součet.
       </>
     ),
   },
@@ -1164,7 +1164,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               onChange={(e) => loadSdHeroExample(e.target.value as SdHeroExampleKey)}
             >
               <option value="">Vyberte ukázkový příklad…</option>
-              <optgroup label="Metodika — školní družina (orientačně)">
+              <optgroup label="Metodika – školní družina (orientačně)">
                 {SD_HERO_EXAMPLE_ORDER.map((k) => {
                   const m = SD_HERO_EXAMPLE_META[k];
                   return (
@@ -1493,7 +1493,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         <FieldWhyPhmaxDetails>
           <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
             <li>
-              <strong>Počet účastníků</strong> a rozdělení do oddělení vstupuje do orientačního výpočtu podle přílohy k vyhlášce č. 74/2005 Sb. — určuje se z nich počet skupin vedených pedagogem.
+              <strong>Počet účastníků</strong> a rozdělení do oddělení vstupuje do orientačního výpočtu podle přílohy k vyhlášce č. 74/2005 Sb. – určuje se z nich počet skupin vedených pedagogem.
             </li>
             <li>
               Průměr účastníků na oddělení pod levelem z metodiky může spustit <strong>orientační krácení PHmax podle § 10 odst. 2</strong> téže vyhlášky.
@@ -1741,7 +1741,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                             }
                           />
                         ) : (
-                          "—"
+                          "–"
                         )}
                       </td>
                       <td>
@@ -1923,7 +1923,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             style={{ marginTop: 12 }}
           >
             <summary className="section-title" style={{ fontSize: "0.95rem", cursor: "pointer" }}>
-              Model úvazků dle nařízení vlády č. 75/2005 Sb. (příl. č. 1) — orientačně
+              Model úvazků dle nařízení vlády č. 75/2005 Sb. (příl. č. 1) – orientačně
             </summary>
             <p className="muted-text" style={{ marginTop: 10, marginBottom: 10, fontSize: "0.84rem", lineHeight: 1.5 }}>
               Rozsah přímé pedagogické činnosti (PPV) u školní družiny je v rámci NV uveden v <strong>tab. 7.1 a 7.2</strong>{" "}
@@ -2084,7 +2084,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                       <td>{formatSdFactor(row.reductionFactor)}</td>
                       <td>{formatSdHours(row.finalPhmax)}</td>
                       {detailedResult.specialDepartments > 0 ? (
-                        <td>{row.kind === "special" ? formatSdHours(row.finalPhaMax) : "—"}</td>
+                        <td>{row.kind === "special" ? formatSdHours(row.finalPhaMax) : "–"}</td>
                       ) : null}
                     </tr>
                   ))}
@@ -2381,7 +2381,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                   </th>
                   <th
                     colSpan={21}
-                    title="Týdenní maximální rozsah provozu školních družin — hodiny PHmax pro 1. až 21. oddělení dle přílohy vyhlášky č. 74/2005 Sb."
+                    title="Týdenní maximální rozsah provozu školních družin – hodiny PHmax pro 1. až 21. oddělení dle přílohy vyhlášky č. 74/2005 Sb."
                   >
                     PHmax na oddělení 1–21 (h)
                   </th>
