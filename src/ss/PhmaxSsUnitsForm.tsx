@@ -24,6 +24,7 @@ import { PHMAX_SS_STUDY_FORM_OPTIONS, type ModeKey, type StudyForm } from "./phm
 import { explainSingleRow } from "./phmax-ss-explainability";
 import type { ServiceResolvedRow } from "./phmax-ss-service";
 import { explainInputFromUnitRow } from "./phmax-ss-units-derive";
+import { resolveIsPar16Class } from "./phmax-ss-par16";
 import type { PhmaxSsUnitRow } from "./phmax-ss-types";
 import {
   SsSchoolExplainabilitySummary,
@@ -402,6 +403,26 @@ function PhmaxSsUnitsFormView({
                       </div>
                     </div>
 
+                    <div className="ss-units-par16-row" style={{ marginTop: 10 }}>
+                      <label className="ss-units-checkbox-wrap">
+                        <input
+                          type="checkbox"
+                          checked={row.isPar16Class}
+                          onChange={(e) => updateRow(row.id, { isPar16Class: e.target.checked })}
+                          aria-label={`${sec.colPar16Class}, řádek ${row.id}`}
+                        />
+                        <span>{sec.colPar16Class}</span>
+                      </label>
+                      {row.isPar16Class || resolveIsPar16Class(row) ? (
+                        <p
+                          className="muted-text"
+                          style={{ margin: "8px 0 0", fontSize: "0.85rem", lineHeight: 1.45, maxWidth: "42rem" }}
+                        >
+                          {sec.par16CheckboxHint}
+                        </p>
+                      ) : null}
+                    </div>
+
                     <div className="ss-units-block-actions">
                       <button
                         type="button"
@@ -504,6 +525,7 @@ function PhmaxSsUnitsFormView({
                 }
                 const r = p.resolved;
                 const openOk = whyPhmaxRowId === p.rowId;
+                const par16Row = src ? resolveIsPar16Class(src) : false;
                 return (
                   <React.Fragment key={p.rowId}>
                     <tr>
@@ -514,7 +536,13 @@ function PhmaxSsUnitsFormView({
                       <td className="app-data-table__num">{r.adjustedPhmaxPerClass}</td>
                       <td className="app-data-table__num app-data-table__num--emph">{r.totalPhmax}</td>
                       <td className="muted-text">
-                        OK
+                        {par16Row ? (
+                          <span style={{ color: "var(--warning, #b45309)" }} title={sec.par16CheckboxHint}>
+                            § 16 – orientačně
+                          </span>
+                        ) : (
+                          "OK"
+                        )}
                         <button
                           type="button"
                           className="btn ghost ss-why-btn"

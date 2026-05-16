@@ -89,6 +89,7 @@ import { usePhmaxSsUnits, type SsNamedSnapshot } from "./ss/use-phmax-ss-units";
 import { comparePhmaxProductVariants } from "./phmax-product-compare";
 import { createSsProductAuditProtocol } from "./phmax-product-audit";
 import { phmaxSsDataset } from "./ss/phmax-ss-dataset";
+import { countPar16MarkedRows } from "./ss/phmax-ss-par16";
 import { buildSsAuditProtocolInput } from "./ss/phmax-ss-units-derive";
 
 const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
@@ -385,6 +386,14 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         tone: "warning" as const,
         label: "Na hraně: chybí povinné údaje",
         detail: `U ${skippedRows} řádků zatím chybí podklady pro výpočet (typicky kód oboru, průměr žáků nebo počet tříd).`,
+      };
+    }
+    const par16Rows = countPar16MarkedRows(ss.rows);
+    if (par16Rows > 0) {
+      return {
+        tone: "warning" as const,
+        label: "§ 16/9 – kontrola pravidel, orientační PHmax",
+        detail: `${par16Rows} řádků je označeno jako třída podle § 16 odst. 9. Plný výpočet dle metodiky MŠMT zatím není v aplikaci; ověřte výstup oficiálním postupem.`,
       };
     }
     return {

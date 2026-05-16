@@ -1,4 +1,5 @@
-import type { BusinessRuleOborInput } from "./phmax-ss-business-rules";
+import type { BusinessRuleOborInput, BusinessRulesInput } from "./phmax-ss-business-rules";
+import { resolveIsPar16Class } from "./phmax-ss-par16";
 import type { PhmaxSsUnitRow } from "./phmax-ss-types";
 
 function parseAvgLocal(s: string): number | null {
@@ -56,4 +57,14 @@ export function buildBusinessRuleOboryForRow(row: PhmaxSsUnitRow): BusinessRuleO
     studentsInClass: countMap.get(code) ?? fallbackAvg ?? undefined,
     form: row.studyForm,
   }));
+}
+
+/** Vstup pro `evaluateBusinessRules` z jednoho řádku formuláře. */
+export function buildBusinessRulesInputForRow(row: PhmaxSsUnitRow): BusinessRulesInput | null {
+  const obory = buildBusinessRuleOboryForRow(row);
+  if (!obory) return null;
+  return {
+    obory,
+    isPar16Class: resolveIsPar16Class(row),
+  };
 }

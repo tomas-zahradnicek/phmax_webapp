@@ -22,7 +22,7 @@ export const SS_LEGIS_PARAGRAPH_TOOLTIPS: Record<string, string> = {
   "vyhl13-2c2":
     "Omezení počtu oborů neplatí pro obory s talentovou zkouškou a pro skupinu 82 (vyhl. č. 13/2005 Sb., § 2c odst. 2).",
   "vyhl248-16":
-    "U tříd podle § 16 odst. 9 školského zákona platí zvláštní režim (vyhl. č. 248/2019 Sb.) – v aplikaci zatím jen informativně u business rules.",
+    "U tříd podle § 16 odst. 9 školského zákona platí zvláštní režim (vyhl. č. 248/2019 Sb.). V aplikaci označte řádek přepínačem § 16/9 – proběhne kontrola pravidel; plný výpočet PHmax dle metodiky zatím není.",
   "phamax-nv123":
     "PHAmax = horní hranice hodin asistenta pedagoga; nelze převádět přebytky mezi PHmax a PHAmax; typicky praktické školy – metodika MŠMT.",
 };
@@ -59,6 +59,10 @@ export const SS_BRULE_CODE_LEGIS: Record<string, BruleLegisEntry> = {
   ONE_OBOR: { citeIds: ["nv123-1", "nv123-priloha1"], note: "Jednooborová třída – základní výpočet PHmax podle NV a datasetu." },
   PAR16_CATEGORY_MISMATCH: { citeIds: ["vyhl248-16"], note: "U třídy podle § 16 odst. 9 musí být obory ve stejné kategorii." },
   PAR16_MULTI: { citeIds: ["vyhl248-16"], note: "§ 16 odst. 9 – neuplatní se běžná pravidla víceoborových tříd z § 2a." },
+  PAR16_CALC_PREVIEW_ONLY: {
+    citeIds: ["vyhl248-16"],
+    note: "Plný výpočet PHmax pro § 16/9 zatím není implementován – zobrazená hodnota je orientační z běžného datasetu.",
+  },
   LEGACY_MULTI: { citeIds: ["vyhl13-2a2"], note: "Přechodné ustanovení – třída vzniklá do 2017/2018; omezení navyšování počtu oborů." },
   LEGACY_OVER_LIMIT: { citeIds: ["vyhl13-2a2"], note: "Počet oborů nesmí překročit stav ke dni účinnosti novely." },
   CATEGORY_MISMATCH: { citeIds: ["vyhl13-2a1"], note: "Víceoborová třída vyžaduje stejnou kategorii dosaženého vzdělání." },

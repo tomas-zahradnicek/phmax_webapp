@@ -1,4 +1,5 @@
 import type { ModeKey, StudyForm } from "./phmax-ss-helpers";
+import { inferPar16FromClassType } from "./phmax-ss-par16";
 
 export type PhmaxSsUnitRow = {
   id: number;
@@ -19,6 +20,8 @@ export type PhmaxSsUnitRow = {
   isArt82TalentClass: boolean;
   /** Typ třídy – volný text podle metodiky / evidence. */
   classType: string;
+  /** Třída zřízená podle § 16 odst. 9 školského zákona (kontrola pravidel; plný výpočet zatím ne). */
+  isPar16Class: boolean;
   note: string;
   /** Průměrný počet žáků (řetězec z inputu). */
   averageStudents: string;
@@ -38,6 +41,7 @@ export function createEmptyPhmaxSsUnitRow(id: number): PhmaxSsUnitRow {
     oborStudentCountsRaw: "",
     isArt82TalentClass: false,
     classType: "",
+    isPar16Class: false,
     note: "",
     averageStudents: "",
     classCount: "1",
@@ -85,6 +89,10 @@ export function revivePhmaxSsUnitRow(o: Record<string, unknown>, fallbackId: num
     oborStudentCountsRaw: String(o.oborStudentCountsRaw ?? ""),
     isArt82TalentClass: Boolean(o.isArt82TalentClass),
     classType: String(o.classType ?? ""),
+    isPar16Class:
+      typeof o.isPar16Class === "boolean"
+        ? o.isPar16Class
+        : inferPar16FromClassType(String(o.classType ?? "")),
     note: String(o.note ?? ""),
     averageStudents: String(o.averageStudents ?? ""),
     classCount: String(o.classCount ?? "1"),

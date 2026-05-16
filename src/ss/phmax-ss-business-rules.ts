@@ -1,6 +1,7 @@
 import type { Dataset } from './phmax-ss-validator';
 import type { ModeKey, StudyForm } from './phmax-ss-helpers';
 import { getProgram } from './phmax-ss-helpers';
+import { PHMAX_SS_PAR16_CALC_LIMITATION_WARNING } from './phmax-ss-par16';
 import { chooseDefaultMode } from './phmax-ss-service';
 
 export type BusinessRuleOborInput = {
@@ -140,6 +141,14 @@ export function evaluateBusinessRules(
   const obory = input.obory.map((obor) => normalizeObor(dataset, obor));
   const codes = obory.map((o) => o.code);
   const oborCount = obory.length;
+
+  if (input.isPar16Class) {
+    pushWarning(
+      result,
+      'PAR16_CALC_PREVIEW_ONLY',
+      PHMAX_SS_PAR16_CALC_LIMITATION_WARNING,
+    );
+  }
 
   if (oborCount === 1) {
     result.suggestedComputation = input.isPar16Class ? 'par16' : 'oneObor';

@@ -578,6 +578,7 @@ export function ssHeroExampleSnapshot(key: Exclude<SsHeroExampleKey, "">): SsHer
             averageStudents: "18",
             classCount: "1",
             classType: "třída zřízená podle § 16 odst. 9 školského zákona",
+            isPar16Class: true,
             note: "Metodika stanovuje PHmax/PHAmax pro § 16/9 zvlášť – tento řádek slouží k orientačnímu náhledu; doplňte podle pokynů MŠMT.",
           },
         ],

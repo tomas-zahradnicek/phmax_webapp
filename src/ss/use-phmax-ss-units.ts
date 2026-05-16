@@ -120,6 +120,7 @@ function buildSsExportValueRows(
     out.push([`${prefix} – ${sec.colAdditionalObors}`, r.additionalOborCodes]);
     out.push([`${prefix} – ${sec.colOborStudentCounts}`, r.oborStudentCountsRaw]);
     out.push([`${prefix} – ${sec.colClassType}`, r.classType]);
+    out.push([`${prefix} – ${sec.colPar16Class}`, r.isPar16Class ? "ano" : "ne"]);
     out.push([`${prefix} – ${sec.colNote}`, r.note]);
   });
   return out;

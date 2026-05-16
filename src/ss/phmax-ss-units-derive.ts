@@ -3,7 +3,7 @@
  */
 import type { BusinessRulesResult } from "./phmax-ss-business-rules";
 import { evaluateBusinessRules } from "./phmax-ss-business-rules";
-import { buildBusinessRuleOboryForRow } from "./phmax-ss-brules-row-build";
+import { buildBusinessRulesInputForRow } from "./phmax-ss-brules-row-build";
 import { phmaxSsDataset } from "./phmax-ss-dataset";
 import type { ExplainabilityRowInput } from "./phmax-ss-explainability";
 import { mergeBusinessRulesResults } from "./phmax-ss-explainability";
@@ -101,13 +101,13 @@ export type SsUnitBrulesEntry =
 
 export function deriveSsUnitsBrulesPreview(rows: PhmaxSsUnitRow[]): SsUnitBrulesEntry[] {
   return rows.map((row) => {
-    const obory = buildBusinessRuleOboryForRow(row);
-    if (!obory) {
+    const brInput = buildBusinessRulesInputForRow(row);
+    if (!brInput) {
       return { rowId: row.id, label: row.label, skipped: true as const };
     }
-    const codesStr = obory.map((o) => o.code).join(", ");
+    const codesStr = brInput.obory.map((o) => o.code).join(", ");
     try {
-      const result = evaluateBusinessRules(phmaxSsDataset, { obory });
+      const result = evaluateBusinessRules(phmaxSsDataset, brInput);
       return {
         rowId: row.id,
         label: row.label,
