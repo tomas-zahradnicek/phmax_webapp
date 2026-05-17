@@ -47,7 +47,7 @@ export function VerdictNextStepsPanel({
           <p className="verdict-panel__detail">{verdictDetail}</p>
         </>
       ) : null}
-      {recommendedStep ? (
+      {recommendedStep && workflowSteps.length === 0 ? (
         <p className="verdict-panel__recommended">
           <strong>Doporučený další krok:</strong> {recommendedStep}
         </p>

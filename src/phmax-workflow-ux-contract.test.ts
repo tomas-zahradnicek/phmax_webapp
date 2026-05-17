@@ -9,29 +9,35 @@ function readSource(relPath: string) {
 }
 
 describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
-  it("ZŠ panel drží recommendedStep + workflowSteps a logiku guardů", () => {
+  it("ZŠ drží zsWorkflow a předává kroky do CalculatorWorkflowDock", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
 
     expect(src).toContain("const zsWorkflow = (() => {");
     expect(src).toContain("incompleteSections > 0");
     expect(src).toContain("warnings.length > 0");
-    expect(src).toContain('recommendedStep={zsWorkflow.recommendedStep}');
-    expect(src).toContain("workflowSteps={zsWorkflow.steps}");
+    expect(src).toContain("workflowSteps={zsBasicWizardActive ? [] : zsWorkflow.steps}");
+    expect(src).toContain("CalculatorWorkflowDock");
     expect(src).toContain('{ label: "Vyplnit povinné vstupy v aktivních modulech", state: "active" as const }');
-    expect(src).toContain('{ label: "Zkontrolovat upozornění a hraniční pravidla", state: "active" as const }');
-    expect(src).toContain('{ label: "Uložit, exportovat nebo porovnat variantu", state: "active" as const }');
   });
 
-  it("SŠ panel drží recommendedStep + workflowSteps a logiku guardů", () => {
+  it("NV75 drží nv75Workflow a předává kroky do CalculatorWorkflowDock", () => {
+    const src = readSource("src/PhmaxNv75DeputyPage.tsx");
+
+    expect(src).toContain("const nv75Workflow = useMemo");
+    expect(src).toContain("nv75InputWarnings.length > 0");
+    expect(src).toContain("!bank.appliedRule");
+    expect(src).toContain("workflowSteps={nv75Workflow.steps}");
+    expect(src).toContain("CalculatorWorkflowDock");
+    expect(src).toContain('{ label: "Uložit scénář", onClick: saveNamedSnapshot }');
+  });
+
+  it("SŠ drží ssWorkflow a předává kroky do CalculatorWorkflowDock", () => {
     const src = readSource("src/PhmaxSsPage.tsx");
 
     expect(src).toContain("const ssWorkflow = (() => {");
     expect(src).toContain('const errorRows = ss.preview.filter((p) => !p.skipped && "error" in p).length;');
-    expect(src).toContain("const skippedRows = ss.preview.filter((p) => p.skipped).length;");
-    expect(src).toContain('recommendedStep={ssWorkflow.recommendedStep}');
     expect(src).toContain("workflowSteps={ssWorkflow.steps}");
+    expect(src).toContain("SsHumanSummary");
     expect(src).toContain('{ label: "Opravit chybné kombinace nebo hodnoty", state: "active" as const }');
-    expect(src).toContain('{ label: "Vyplnit povinné údaje u všech řádků", state: "active" as const }');
-    expect(src).toContain('{ label: "Uložit, exportovat nebo porovnat variantu", state: "active" as const }');
   });
 });

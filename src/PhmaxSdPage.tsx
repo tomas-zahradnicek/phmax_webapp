@@ -51,12 +51,16 @@ import {
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
+import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
+import { CalculatorStickyContextBar } from "./CalculatorStickyContextBar";
+import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
+import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { HeroStat } from "./HeroStat";
-import { ResultAnchorCard } from "./ResultAnchorCard";
-import { HeroActionsTiered } from "./HeroActionsTiered";
-import { CollapsibleSection } from "./CollapsibleSection";
 import { PageTableOfContents } from "./PageTableOfContents";
+import { CalculatorWorkspaceLayout } from "./CalculatorWorkspaceLayout";
+import { HeroCompactToolbar } from "./HeroCompactToolbar";
+import { DisplayDensityToggle } from "./DisplayDensityToggle";
+import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { CompareVariantsPanel } from "./CompareVariantsPanel";
@@ -351,6 +355,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     }
   });
   const [selectedSdHeroExample, setSelectedSdHeroExample] = useState<SdHeroExampleKey>("");
+  const [displayDensity, setDisplayDensity] = useDisplayDensity();
+  const [focusMode, setFocusMode] = useCalculatorFocusMode();
+  const heroHeaderRef = useRef<HTMLElement>(null);
   const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
     try {
       const stored = localStorage.getItem(SD_VIEW_MODE_LS_KEY);
@@ -1056,8 +1063,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   ] as const;
 
   return (
-    <div className={`${calculatorShellClassName(viewMode)} app-shell--with-toc`}>
-      <header className="hero hero--feature">
+    <div className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc`}>
+      <header className="hero hero--feature" ref={heroHeaderRef}>
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
 
@@ -1084,6 +1091,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 Expertní
               </label>
             </div>
+            <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="sd-display-density" />
+            <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
             <GlossaryIconButton
               ref={glossaryTriggerRef}
               className="glossary-icon-btn--hero"
@@ -1114,63 +1123,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </div>
         </div>
 
-        <div className="hero-result-layout">
-          <ResultAnchorCard
-            tone={sdVerdict.tone}
-            primaryLabel="PHmax"
-            primaryValue={sdPhmaxDisplay}
-            stats={[
-              { label: "Účastníci (1. st.)", value: pupils },
-              {
-                label: "Oddělení",
-                value: inputMode === "detail" ? detailDepartments.length : effectiveDepts,
-              },
-              {
-                label: "Krácení § 10 odst. 2",
-                value: reduction.applied
-                  ? `ano (${(Math.round(reduction.factor * 1000) / 10).toLocaleString("cs-CZ")} %)`
-                  : "ne",
-              },
-            ]}
-            statusBadge={sdVerdict.label}
-            verdictLabel={sdVerdict.label}
-            verdictDetail={sdVerdict.detail}
-          />
-          <CollapsibleSection
-            summary="Další kroky, workflow a exporty"
-            defaultOpen={viewMode === "expert"}
-            level="advanced"
-          >
-            <p
-              className="muted-text"
-              style={{ margin: "0 0 10px", fontSize: "0.86rem", lineHeight: 1.5 }}
-              aria-live="polite"
-            >
-              <strong>Průběh:</strong>{" "}
-              {formatSdLayContextLine(
-                inputMode,
-                inputMode === "detail" ? detailDepartments.length : effectiveDepts,
-              )}
-            </p>
-            <VerdictNextStepsPanel
-              hideVerdict
-              tone={sdVerdict.tone}
-              verdictLabel={sdVerdict.label}
-              verdictDetail={sdVerdict.detail}
-              recommendedStep={sdWorkflow.recommendedStep}
-              workflowSteps={sdWorkflow.steps}
-              actions={[
-                { label: "Uložit scénář", onClick: saveSdSnapshotManually },
-                { label: "Export CSV", onClick: handleExportCsv },
-                { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },
-              ]}
-            />
-          </CollapsibleSection>
-        </div>
-
-        <section className="hero-zone-actions" aria-label="Akce výpočtu">
-          <p className="hero-zone-label">C. Akce</p>
-          <div className="field field--hero-select hero-actions__example hero-sd-example-select" style={{ marginTop: 14 }}>
+        <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
+          <div className="hero-zone-actions__toolbar-row">
+          <div className="field field--hero-select hero-actions__example hero-sd-example-select">
             <span className="field__label field__label--hero" id="sd-hero-example-label">
               Ukázkový příklad
             </span>
@@ -1206,7 +1161,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </div>
 
           <HeroActionsDrawer>
-            <HeroActionsTiered
+            <HeroCompactToolbar
               primary={
                 <>
                   <button type="button" className="btn btn--light hero-actions-tiered__cta" onClick={saveSdSnapshotManually}>
@@ -1340,9 +1295,20 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               }
             />
           </HeroActionsDrawer>
+          </div>
         </section>
 
       </header>
+
+      <CalculatorStickyContextBar
+        anchorRef={heroHeaderRef}
+        primaryLabel="PHmax"
+        primaryValue={sdPhmaxDisplay}
+        statusText={sdVerdict.label}
+        tone={sdVerdict.tone}
+        onSave={saveSdSnapshotManually}
+        onExport={handleExportCsv}
+      />
 
       <QuickOnboarding
         title="Jak s touto kalkulačkou pracovat"
@@ -1390,6 +1356,40 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           ]}
         />
       ) : null}
+
+      <CalculatorWorkspaceLayout
+        dock={
+          <CalculatorWorkflowDock
+            tone={sdVerdict.tone}
+            primaryLabel="PHmax"
+            primaryValue={sdPhmaxDisplay}
+            stats={[
+              { label: "Účastníci (1. st.)", value: pupils },
+              {
+                label: "Oddělení",
+                value: inputMode === "detail" ? detailDepartments.length : effectiveDepts,
+              },
+              {
+                label: "Krácení § 10 odst. 2",
+                value: reduction.applied
+                  ? `ano (${(Math.round(reduction.factor * 1000) / 10).toLocaleString("cs-CZ")} %)`
+                  : "ne",
+              },
+            ]}
+            statusBadge={sdVerdict.label}
+            verdictLabel={sdVerdict.label}
+            verdictDetail={sdVerdict.detail}
+            workflowSteps={sdWorkflow.steps}
+            viewMode={viewMode}
+            actions={[
+              { label: "Uložit scénář", onClick: saveSdSnapshotManually },
+              { label: "Export CSV", onClick: handleExportCsv },
+              { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },
+            ]}
+          />
+        }
+        main={
+          <>
 
       <section className="card section-card section-card--sd" data-section="sd-vstupy">
         <h2 className="section-title">Vstupy</h2>
@@ -1780,28 +1780,6 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </div>
         )}
 
-        {stickySummary != null ? (
-          <div className="sd-sticky-summary" role="status" aria-live="polite">
-            <div className="sd-sticky-summary__item">
-              <span className="sd-sticky-summary__label">Oddělení</span>
-              <strong className="sd-sticky-summary__value">{stickySummary.departmentsCount}</strong>
-            </div>
-            <div className="sd-sticky-summary__item">
-              <span className="sd-sticky-summary__label">PHmax</span>
-              <strong className="sd-sticky-summary__value">{formatSdHours(stickySummary.phmax)} h</strong>
-            </div>
-            {stickySummary.phamax != null ? (
-              <div className="sd-sticky-summary__item">
-                <span className="sd-sticky-summary__label">PHAmax</span>
-                <strong className="sd-sticky-summary__value">{formatSdHours(stickySummary.phamax)} h</strong>
-              </div>
-            ) : null}
-            <div className="sd-sticky-summary__item">
-              <span className="sd-sticky-summary__label">{stickySummary.coefficientLabel}</span>
-              <strong className="sd-sticky-summary__value">{stickySummary.coefficientValue}</strong>
-            </div>
-          </div>
-        ) : null}
 
         {viewMode === "expert" && detailedResult != null ? (
           <div
@@ -2165,7 +2143,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         {tableWarning ? <p className="card card--warning" style={{ marginTop: 16, padding: 14 }}>{tableWarning}</p> : null}
 
         {viewMode === "expert" && activeMethodikaRow != null ? (
-          <div className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 14 }}>
+          <div className="subcard sd-phmax-breakdown-wrap">
             <h3 className="section-title" style={{ fontSize: "1.05rem", marginBottom: 8 }}>
               Tabulková hodnota PHmax pro {activeMethodikaRow.deptCount} oddělení
             </h3>
@@ -2452,6 +2430,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         </p>
       </section>
 
+          </>
+        }
+      />
       {viewMode === "expert" ? <ProductLegisContextPanel variant="sd" /> : null}
       {viewMode === "expert" ? <MethodologyStrip /> : null}
       <footer className="zs-app-footer">

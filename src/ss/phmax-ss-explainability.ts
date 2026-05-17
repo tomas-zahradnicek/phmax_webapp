@@ -273,7 +273,7 @@ export function explainFullPhmaxDecision(dataset: Dataset, input: Explainability
   const narrative = businessRulesFromInput
     ? businessRules.allowed
       ? `Výpočet je podle předaných pravidel přípustný. Celkový PHmax školy činí ${calc.summary.totalPhmax} hodin.`
-      : `Výpočet obsahuje nepřípustnou kombinaci vstupů. Přesto byl spočten technický výstup ${calc.summary.totalPhmax} hodin – považujte ho jen za orientační, dokud neodstraníte chyby ve vstupu.`
+      : `Výpočet obsahuje nepřípustnou kombinaci vstupů. Přesto byl vypočítán technický výstup ${calc.summary.totalPhmax} hodin – považujte ho jen za orientační, dokud neodstraníte chyby ve vstupu.`
     : `Součet ${calc.summary.rowCount} výpočetních řádků: celkový PHmax ${calc.summary.totalPhmax} hodin (${calc.summary.totalClasses} tříd). Kontrolu více oborů v jedné třídě najdete v tabulce „Kontrola pravidel“ níže.`;
 
   return {

@@ -586,13 +586,27 @@ button.pill--hero-toggle--active {
 
 .hero--feature {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   padding: 16px 20px;
   border-radius: 18px;
   background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #38bdf8 100%);
   color: white;
   box-shadow: var(--shadow-lg);
   margin-bottom: 14px;
+  z-index: 100;
+  isolation: isolate;
+}
+
+.hero--feature > :not(.hero__orb) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Obsah pod hero v DOM – jinak překrývá rozbalené panely toolbaru */
+.calculator-shell .calculator-workspace,
+.calculator-shell .card--onboarding {
+  position: relative;
+  z-index: 1;
 }
 
 .hero__orb {
@@ -1008,18 +1022,12 @@ button.pill--hero-toggle--active {
   }
 }
 
-/* ZŠ: sticky „Aktuální přehled“ vypnout na notebooku / nízkém okně (1366×768, 1600×900…),
-   na širokém Full HD (1920×1080) nechat zapnuté – šířka > 1760px nebo výška > 920px */
-@media (max-height: 760px), (max-width: 1760px) and (max-height: 920px) {
-  .workspace-sticky {
+/* Legacy ZŠ blok uvnitř docku – sticky řeší .calculator-workspace__dock */
+@media (max-width: 1099px) {
+  .calculator-workspace .workspace-sticky {
     position: static;
     top: auto;
     z-index: auto;
-  }
-
-  .workspace-sticky .tabs--sticky {
-    position: static;
-    top: auto;
   }
 }
 
@@ -5857,6 +5865,228 @@ select:focus {
   padding: 10px;
 }
 
+.hero-zone-actions--toolbar {
+  margin-top: 8px;
+  padding: 8px 10px;
+  overflow: visible;
+}
+
+.hero-zone-actions--toolbar .hero-zone-label {
+  display: none;
+}
+
+.hero-zone-actions--toolbar .hero-actions__example {
+  margin-top: 0 !important;
+}
+
+.hero-zone-actions__toolbar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (min-width: 960px) {
+  .hero-zone-actions__toolbar-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 16px;
+  }
+
+  .hero-zone-actions__toolbar-row .hero-actions__example {
+    flex: 1 1 280px;
+    max-width: min(100%, 520px);
+  }
+
+  .hero-zone-actions__toolbar-row .hero-actions-panel-narrow,
+  .hero-zone-actions__toolbar-row .hero-compact-toolbar {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+.hero-zone-actions__toolbar-row {
+  overflow: visible;
+}
+
+.display-density-toggle {
+  font-size: 0.8rem;
+  gap: 10px;
+}
+
+.display-density-toggle label {
+  white-space: nowrap;
+}
+
+.hero-compact-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.hero-compact-toolbar__primary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.hero-compact-toolbar__primary .btn,
+.hero-compact-toolbar__primary .hero-action-icon-btn {
+  margin: 0;
+}
+
+.hero-compact-toolbar__panel {
+  position: relative;
+  z-index: 0;
+}
+
+.hero-compact-toolbar__panel[open] {
+  z-index: 10;
+}
+
+.hero-compact-toolbar__panel-summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.92);
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+}
+
+.hero-compact-toolbar__panel-summary::-webkit-details-marker {
+  display: none;
+}
+
+.hero-compact-toolbar__panel[open] .hero-compact-toolbar__panel-summary {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.hero-compact-toolbar__panel-body {
+  position: absolute;
+  z-index: 200;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: min(100vw - 24px, 420px);
+  max-width: min(100vw - 24px, 480px);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.22);
+  color: #0f172a;
+}
+
+.hero-compact-toolbar__panel-body--backups,
+.hero-compact-toolbar__panel-body--technical {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.hero-compact-toolbar__panel-body .hero-named-grid {
+  width: 100%;
+}
+
+.hero-compact-toolbar__panel-body .hero-actions-tiered__hint {
+  color: var(--muted-strong);
+}
+
+.hero-actions-panel-drawer__body .hero-compact-toolbar {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.hero-actions-panel-drawer__body .hero-compact-toolbar__primary {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.hero-actions-panel-drawer__body .hero-compact-toolbar__panel {
+  width: 100%;
+}
+
+.hero-actions-panel-drawer__body .hero-compact-toolbar__panel-body {
+  position: static;
+  min-width: 0;
+  max-width: none;
+  width: 100%;
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
+  margin-top: 6px;
+}
+
+/* Kompaktní hustota (dense mode) */
+.calculator-shell--density-compact .card:not(.hero) {
+  padding: 12px 14px;
+}
+
+.calculator-shell--density-compact .stack {
+  gap: 10px;
+}
+
+.calculator-shell--density-compact .subcard {
+  padding: 10px 12px;
+}
+
+.calculator-shell--density-compact .section-title {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+.calculator-shell--density-compact .input,
+.calculator-shell--density-compact select.input,
+.calculator-shell--density-compact textarea.input {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+
+.calculator-shell--density-compact .btn {
+  padding: 6px 12px;
+  font-size: 0.88rem;
+}
+
+.calculator-shell--density-compact .hero-zone-actions--toolbar {
+  padding: 6px 8px;
+}
+
+.calculator-shell--density-compact .ux-collapsible__summary {
+  padding: 8px 12px;
+  font-size: 0.92rem;
+}
+
+.calculator-shell--density-compact .calculator-workspace {
+  gap: 12px;
+}
+
+.calculator-shell--density-compact .app-data-table th,
+.calculator-shell--density-compact .app-data-table td,
+.calculator-shell--density-compact .table th,
+.calculator-shell--density-compact .table td {
+  padding: 6px 8px;
+  font-size: 0.86rem;
+}
+
+.calculator-shell--density-compact .result-anchor-card {
+  padding: 10px 12px;
+}
+
+.calculator-shell--density-compact .hero-compact-toolbar__panel-summary {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+}
+
 .compare-panel {
   margin-top: 8px;
   border: 1px solid rgba(148, 163, 184, 0.35);
@@ -6155,6 +6385,98 @@ select:focus {
   align-items: start;
 }
 
+/* Vlna A1: formulář vlevo (široko), kontextový dock vpravo (sticky) */
+.calculator-workspace {
+  display: grid;
+  gap: 18px;
+  align-items: start;
+  margin-top: 12px;
+  width: 100%;
+  max-width: 1520px;
+}
+
+.calculator-workspace__main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.calculator-workspace__dock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.calculator-workspace-dock__title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-strong);
+}
+
+.calculator-workspace-dock__card,
+.calculator-workspace-dock.workspace-sticky {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #edf1f7;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.calculator-workspace-dock .result-anchor-card {
+  position: static;
+  top: auto;
+  width: 100%;
+  max-width: none;
+}
+
+.calculator-workspace-dock .section-jump-nav {
+  margin-top: 4px;
+}
+
+.calculator-workspace-dock .results-panel__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+@media (min-width: 1100px) {
+  .calculator-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+  }
+
+  .calculator-workspace--input-heavy {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
+  }
+
+  .calculator-workspace__dock {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-width: 1099px) {
+  .calculator-workspace {
+    grid-template-columns: 1fr;
+    max-width: none;
+  }
+
+  .calculator-workspace__dock {
+    order: -1;
+  }
+}
+
 .card--onboarding,
 .zs-basic-wizard {
   padding: 16px 18px;
@@ -6177,17 +6499,20 @@ select:focus {
 
 @media (min-width: 960px) {
   .hero-result-layout {
-    grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+    grid-template-columns: max-content minmax(260px, 1fr);
   }
 }
 
 .result-anchor-card {
   position: sticky;
   top: 16px;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 15.5rem;
   border-radius: var(--radius-lg);
-  padding: 18px 20px;
+  padding: 12px 14px;
   background: linear-gradient(180deg, #ffffff 0%, #eef7ff 100%);
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.07);
   border: none;
 }
 
@@ -6205,16 +6530,16 @@ select:focus {
 
 .result-anchor-card__primary-value {
   margin: 0;
-  font-size: clamp(2.25rem, 4.5vw, 3rem);
+  font-size: clamp(1.75rem, 3.2vw, 2.35rem);
   font-weight: 800;
-  line-height: 1.02;
-  color: #0f172a;
+  line-height: 1.05;
+  color: var(--primary);
   letter-spacing: -0.02em;
 }
 
 .result-anchor-card__primary-label {
-  margin: 6px 0 0;
-  font-size: 0.78rem;
+  margin: 4px 0 0;
+  font-size: 0.74rem;
   font-weight: 600;
   color: var(--muted-strong);
   text-transform: uppercase;
@@ -6223,10 +6548,10 @@ select:focus {
 
 .result-anchor-card__status {
   display: inline-block;
-  margin: 10px 0 0;
-  padding: 4px 10px;
+  margin: 8px 0 0;
+  padding: 3px 9px;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 700;
 }
 
@@ -6251,46 +6576,52 @@ select:focus {
 }
 
 .result-anchor-card__stats {
-  margin: 14px 0 0;
+  margin: 10px 0 0;
   padding: 0;
   display: grid;
-  gap: 8px;
+  gap: 6px;
+  width: max-content;
+  max-width: 100%;
 }
 
 .result-anchor-card__stat {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 0.88rem;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 6px 12px;
+  font-size: 0.84rem;
 }
 
 .result-anchor-card__stat dt {
   margin: 0;
-  color: var(--muted);
-  font-weight: 500;
+  color: #2563eb;
+  font-weight: 600;
 }
 
 .result-anchor-card__stat dd {
   margin: 0;
+  font-size: 0.98rem;
   font-weight: 700;
-  color: var(--text);
+  color: var(--primary);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .result-anchor-card__verdict {
-  margin-top: 14px;
-  padding-top: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .result-anchor-card__verdict-label {
   margin: 0;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .result-anchor-card__verdict-detail {
-  margin: 6px 0 0;
-  font-size: 0.88rem;
+  margin: 4px 0 0;
+  font-size: 0.84rem;
   line-height: 1.55;
   color: var(--muted-strong);
 }
@@ -6587,6 +6918,390 @@ select:focus {
 
 .hero--feature .hero__stats--legacy {
   display: none;
+}
+
+/* Workflow dock – modulární sidebar (P1–P2) */
+.workflow-dock {
+  gap: 8px;
+}
+
+.workflow-dock__header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.workflow-dock__context-line {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.workflow-dock__block {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.workflow-dock__block--steps {
+  border-left: 3px solid #2563eb;
+}
+
+.workflow-dock__block--actions {
+  border-left: 3px solid #64748b;
+}
+
+.workflow-dock__block--nav {
+  border-left: 3px solid #94a3b8;
+}
+
+.workflow-dock__summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+  background: #f8fafc;
+}
+
+.workflow-dock__summary-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.workflow-dock__summary-title {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.workflow-dock__summary-hint {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workflow-dock__summary-glyph {
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.workflow-dock--ok .result-anchor-card {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.workflow-dock--warning .result-anchor-card {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+}
+
+.workflow-dock--danger .result-anchor-card {
+  border-left: 4px solid #dc2626;
+  background: linear-gradient(180deg, #ffffff 0%, #fef2f2 100%);
+}
+
+.workflow-dock--neutral .result-anchor-card {
+  border-left: 4px solid #2563eb;
+  background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
+}
+
+.workflow-dock__summary::-webkit-details-marker {
+  display: none;
+}
+
+.workflow-dock__block[open] .workflow-dock__summary-icon {
+  transform: rotate(90deg);
+}
+
+.workflow-dock__summary-icon {
+  font-size: 0.65rem;
+  color: #64748b;
+  transition: transform 120ms ease;
+}
+
+.workflow-dock__steps {
+  margin: 0;
+  padding: 8px 10px 10px 1.35rem;
+  display: grid;
+  gap: 5px;
+}
+
+.workflow-dock__step {
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.workflow-dock__step--done {
+  color: #166534;
+}
+
+.workflow-dock__step--active {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.workflow-dock__step--todo {
+  color: #64748b;
+}
+
+.workflow-dock__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px 10px;
+}
+
+.workflow-dock__action-btn {
+  font-size: 0.78rem;
+  padding: 4px 10px;
+}
+
+.workflow-dock__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calculator-workspace-dock .result-anchor-card__primary-value {
+  font-size: 2.625rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.calculator-workspace-dock .result-anchor-card__primary-label {
+  margin-top: 6px;
+  font-size: 0.8rem;
+}
+
+.calculator-workspace-dock .result-anchor-card__stat dd {
+  font-size: 1.05rem;
+}
+
+.calculator-workspace-dock .result-anchor-card__verdict {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.calculator-workspace__dock {
+  gap: 8px;
+}
+
+.calculator-workspace-dock__card {
+  padding: 10px;
+  gap: 8px;
+}
+
+/* Expert – kompaktní hero (P5) */
+.calculator-shell--expert .hero--feature {
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  min-height: 0;
+  overflow: visible;
+}
+
+.calculator-shell--expert .hero-actions__example {
+  display: none;
+}
+
+.calculator-shell--expert .hero__orb {
+  display: none;
+}
+
+.calculator-shell--expert .hero__grid {
+  display: none;
+}
+
+.calculator-shell--expert .hero-zone-actions--toolbar {
+  margin-top: 4px;
+  padding: 6px 8px;
+}
+
+.calculator-shell--expert .hero__title {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* Kompaktnější toolbar (P4) */
+.hero-compact-toolbar {
+  gap: 4px 6px;
+}
+
+.hero-compact-toolbar__primary {
+  gap: 4px 6px;
+}
+
+.hero-compact-toolbar__primary .btn,
+.hero-compact-toolbar__primary .hero-action-icon-btn {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+}
+
+.hero-compact-toolbar__panel-summary {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+}
+
+.hero-compact-toolbar__divider {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 300;
+  user-select: none;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+@media (min-width: 960px) {
+  .hero-compact-toolbar {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .hero-compact-toolbar__primary {
+    flex-wrap: nowrap;
+  }
+}
+
+/* Focus mode (P7) */
+.calculator-shell--focus .ux-methodology,
+.calculator-shell--focus .methodology-strip,
+.calculator-shell--focus .field-why-phmax,
+.calculator-shell--focus .ss-framework-details,
+.calculator-shell--focus .card--onboarding:not(.hero) {
+  display: none !important;
+}
+
+.calculator-focus-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.calculator-focus-toggle input {
+  margin: 0;
+}
+
+/* Sticky context bar (P6) */
+.calculator-sticky-context {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 8px 14px;
+  margin: 0 0 10px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #0f172a 0%, #1e40af 100%);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+}
+
+.calculator-sticky-context__kpi {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.calculator-sticky-context__value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.calculator-sticky-context__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+}
+
+.calculator-sticky-context__status {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 650;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.calculator-sticky-context__status--ok {
+  background: rgba(34, 197, 94, 0.35);
+}
+
+.calculator-sticky-context__status--warning {
+  background: rgba(245, 158, 11, 0.35);
+}
+
+.calculator-sticky-context__status--danger {
+  background: rgba(239, 68, 68, 0.35);
+}
+
+.calculator-sticky-context__actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+.calculator-sticky-context__export {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* SŠ human summary */
+.ss-human-summary {
+  margin: 0;
+  padding: 8px 10px;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  font-size: 0.82rem;
+  background: #eff6ff;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+}
+
+.ss-human-summary__warn {
+  color: #b45309;
+}
+
+/* NV75 / tabulky – zebra v dock kontextu a compact */
+.calculator-shell--density-compact .app-data-table tbody tr:nth-child(even),
+.calculator-shell--nv75 .app-data-table tbody tr:nth-child(even),
+.PhmaxNv75DeputyPage .table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.calculator-shell--density-compact .app-data-table th,
+.calculator-shell--density-compact .app-data-table td {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+/* Metodika – šedá vrstva (P10) */
+.calculator-shell .methodology-strip,
+.calculator-shell .ux-collapsible--methodology,
+.calculator-shell .field-why-phmax {
+  border-left: 3px solid #94a3b8;
+  background: #f8fafc;
 }
 
 @media (max-width: 959px) {

@@ -50,12 +50,16 @@ import {
   IconSpinner,
 } from "./HeroActionIconButton";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
 import { HeroStat } from "./HeroStat";
-import { ResultAnchorCard } from "./ResultAnchorCard";
-import { HeroActionsTiered } from "./HeroActionsTiered";
-import { CollapsibleSection } from "./CollapsibleSection";
+import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
+import { CalculatorStickyContextBar } from "./CalculatorStickyContextBar";
+import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
+import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { PageTableOfContents } from "./PageTableOfContents";
+import { CalculatorWorkspaceLayout } from "./CalculatorWorkspaceLayout";
+import { HeroCompactToolbar } from "./HeroCompactToolbar";
+import { DisplayDensityToggle } from "./DisplayDensityToggle";
+import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { CompareVariantsPanel } from "./CompareVariantsPanel";
@@ -348,6 +352,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
   const [selectedPvHeroExample, setSelectedPvHeroExample] = useState<PvHeroExampleKey>("");
+  const [displayDensity, setDisplayDensity] = useDisplayDensity();
+  const [focusMode, setFocusMode] = useCalculatorFocusMode();
+  const heroHeaderRef = useRef<HTMLElement>(null);
   const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
     try {
       const stored = localStorage.getItem(PV_VIEW_MODE_LS_KEY);
@@ -469,7 +476,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     return {
       tone: "ok" as const,
       label: "Vstupy jsou kompletní",
-      detail: "Součet PHmax je spočtený pro všechna zadaná pracoviště. Pokračujte uložením scénáře nebo exportem.",
+      detail: "Součet PHmax je vypočítaný pro všechna zadaná pracoviště. Pokračujte uložením scénáře nebo exportem.",
     };
   }, [rowComputations]);
 
@@ -766,8 +773,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const pvStatusBadge = aggregate.incomplete ? "Zkontrolujte vstupy" : "Vstupy kompletní";
 
   return (
-    <div className={`${calculatorShellClassName(viewMode)} app-shell--with-toc`}>
-      <header className="hero hero--feature">
+    <div className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc`}>
+      <header className="hero hero--feature" ref={heroHeaderRef}>
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
 
@@ -794,6 +801,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                 Expertní
               </label>
             </div>
+            <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="pv-display-density" />
+            <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
             <GlossaryIconButton
               ref={glossaryTriggerRef}
               className="glossary-icon-btn--hero"
@@ -827,52 +836,11 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           </div>
         </div>
 
-        <div className="hero-result-layout">
-          <ResultAnchorCard
-            tone={pvVerdict.tone}
-            primaryLabel="PHmax celkem"
-            primaryValue={aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}
-            statusBadge={pvStatusBadge}
-            stats={[
-              { label: "PHAmax celkem", value: aggregate.phaSum > 0 ? aggregate.phaSum : "–" },
-              { label: "Pracoviště ve výpočtu", value: rows.length },
-            ]}
-            verdictLabel={pvVerdict.label}
-            verdictDetail={pvVerdict.detail}
-          />
-          <CollapsibleSection
-            summary="Další kroky, workflow a exporty"
-            defaultOpen={viewMode === "expert"}
-            level="advanced"
-          >
-            <p
-              className="muted-text"
-              style={{ margin: "0 0 10px", fontSize: "0.86rem", lineHeight: 1.5 }}
-              aria-live="polite"
-            >
-              <strong>Průběh:</strong> {formatPvLayContextLine(rows.length, aggregate.incomplete)}
-            </p>
-            <VerdictNextStepsPanel
-              hideVerdict
-              tone={pvVerdict.tone}
-              verdictLabel={pvVerdict.label}
-              verdictDetail={pvVerdict.detail}
-              recommendedStep={pvWorkflow.recommendedStep}
-              workflowSteps={pvWorkflow.steps}
-              actions={[
-                { label: "Uložit scénář", onClick: savePvSnapshotManually },
-                { label: "Export CSV", onClick: handleExportCsv },
-                { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },
-              ]}
-            />
-          </CollapsibleSection>
-        </div>
-
-        <section className="hero-zone-actions" aria-label="Akce výpočtu">
-          <p className="hero-zone-label">C. Akce</p>
+        <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
+          <div className="hero-zone-actions__toolbar-row">
           <div
             className="field field--hero-select hero-actions__example hero-pv-example-select"
-            style={{ marginTop: 14 }}
+           
           >
           <span className="field__label field__label--hero" id="pv-hero-example-label">
             Ukázkový příklad
@@ -929,7 +897,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           </div>
 
           <HeroActionsDrawer>
-            <HeroActionsTiered
+            <HeroCompactToolbar
               primary={
                 <>
                   <button type="button" className="btn btn--light hero-actions-tiered__cta" onClick={savePvSnapshotManually}>
@@ -1063,8 +1031,19 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               }
             />
           </HeroActionsDrawer>
+          </div>
         </section>
       </header>
+
+      <CalculatorStickyContextBar
+        anchorRef={heroHeaderRef}
+        primaryLabel="PHmax celkem"
+        primaryValue={aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}
+        statusText={pvStatusBadge}
+        tone={pvVerdict.tone}
+        onSave={savePvSnapshotManually}
+        onExport={handleExportCsv}
+      />
 
       <QuickOnboarding title="Nápověda – předškolní vzdělávání" open={guideOpen} onDismiss={dismissGuide}>
         <p>
@@ -1109,6 +1088,32 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           ]}
         />
       ) : null}
+
+      <CalculatorWorkspaceLayout
+        variant="input-heavy"
+        dock={
+          <CalculatorWorkflowDock
+            tone={pvVerdict.tone}
+            primaryLabel="PHmax celkem"
+            primaryValue={aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}
+            statusBadge={pvStatusBadge}
+            stats={[
+              { label: "PHAmax celkem", value: aggregate.phaSum > 0 ? aggregate.phaSum : "–" },
+              { label: "Pracoviště ve výpočtu", value: rows.length },
+            ]}
+            verdictLabel={pvVerdict.label}
+            verdictDetail={pvVerdict.detail}
+            workflowSteps={pvWorkflow.steps}
+            viewMode={viewMode}
+            actions={[
+              { label: "Uložit scénář", onClick: savePvSnapshotManually },
+              { label: "Export CSV", onClick: handleExportCsv },
+              { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },
+            ]}
+          />
+        }
+        main={
+          <>
 
       <section className="card muted section-card" data-section="pv-vysledek" aria-label="Součtový přehled pracovišť">
         <h2 className="section-title">Součtový přehled pracovišť</h2>
@@ -1695,6 +1700,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         </p>
       </section>
 
+          </>
+        }
+      />
       {viewMode === "expert" ? <ProductLegisContextPanel variant="pv" /> : null}
       {viewMode === "expert" ? <MethodologyStrip /> : null}
       <footer className="zs-app-footer">

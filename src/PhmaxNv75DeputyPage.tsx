@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { LegisTooltipRef } from "./LegisTooltipRef";
 import {
@@ -14,7 +14,13 @@ import {
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
-import { HeroActionsTiered } from "./HeroActionsTiered";
+import { HeroCompactToolbar } from "./HeroCompactToolbar";
+import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
+import { CalculatorStickyContextBar } from "./CalculatorStickyContextBar";
+import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
+import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
+import { DisplayDensityToggle } from "./DisplayDensityToggle";
+import { useDisplayDensity } from "./useDisplayDensity";
 import {
   HeroIconActionButton,
   IconAddTableRow,
@@ -34,6 +40,7 @@ import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { BasicModeSteps } from "./BasicModeSteps";
 import { ResultAnchorCard, type ResultAnchorTone } from "./ResultAnchorCard";
 import { PageTableOfContents } from "./PageTableOfContents";
+import { CalculatorWorkspaceLayout } from "./CalculatorWorkspaceLayout";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
@@ -565,6 +572,9 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const [namedSnapshots, setNamedSnapshots] = useState<Nv75NamedSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
+  const [displayDensity, setDisplayDensity] = useDisplayDensity();
+  const [focusMode, setFocusMode] = useCalculatorFocusMode();
+  const heroHeaderRef = useRef<HTMLElement>(null);
   const [viewMode, setViewMode] = useState<CalculatorViewMode>(() => {
     try {
       const stored = localStorage.getItem(NV75_VIEW_MODE_LS_KEY);
@@ -927,12 +937,60 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     }
   }, [bank.appliedRule]);
 
-  const nv75AnchorTone: ResultAnchorTone =
-    nv75InputWarnings.length > 0 || !bank.appliedRule
-      ? "warning"
-      : bank.bankHoursTotal > 0
-        ? "ok"
-        : "neutral";
+  const nv75Verdict = useMemo(() => {
+    if (nv75InputWarnings.length > 0) {
+      return {
+        tone: "warning" as const,
+        label: "Zkontrolujte vstupy",
+        detail: nv75InputWarnings[0]!,
+      };
+    }
+    if (!bank.appliedRule) {
+      return {
+        tone: "warning" as const,
+        label: "Doplňte platné řádky",
+        detail: "Každý řádek musí mít druh školy a u použitelných druhů kladný počet jednotek.",
+      };
+    }
+    return {
+      tone: "ok" as const,
+      label: "Banka odpočtů vypočítána",
+      detail: "Výsledek odpovídá aktuálním řádkům a volitelným údajům §4c/§4d. Uložte scénář nebo exportujte podklady.",
+    };
+  }, [bank.appliedRule, nv75InputWarnings]);
+
+  const nv75Workflow = useMemo(() => {
+    if (nv75InputWarnings.length > 0) {
+      return {
+        recommendedStep: "Opravte vstupy podle kontroly NV75.",
+        steps: [
+          { label: "Vyplnit řádky právnické osoby", state: "done" as const },
+          { label: "Opravit varování u řádků", state: "active" as const },
+          { label: "Uložit scénář nebo exportovat", state: "todo" as const },
+        ],
+      };
+    }
+    if (!bank.appliedRule) {
+      return {
+        recommendedStep: "Doplňte alespoň jeden platný řádek s jednotkami.",
+        steps: [
+          { label: "Vyplnit řádky právnické osoby", state: "active" as const },
+          { label: "Zkontrolovat pravidlo §4b", state: "todo" as const },
+          { label: "Uložit scénář nebo exportovat", state: "todo" as const },
+        ],
+      };
+    }
+    return {
+      recommendedStep: "Banka je připravena k uložení scénáře nebo exportu.",
+      steps: [
+        { label: "Vyplnit řádky právnické osoby", state: "done" as const },
+        { label: "Zkontrolovat pravidlo §4b", state: "done" as const },
+        { label: "Uložit scénář nebo exportovat", state: "active" as const },
+      ],
+    };
+  }, [bank.appliedRule, nv75InputWarnings]);
+
+  const nv75AnchorTone: ResultAnchorTone = nv75Verdict.tone;
 
   const nv75TocSections = [
     { id: "nv75-vysledek", label: "Banka odpočtů" },
@@ -955,9 +1013,9 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   }, [summaryText]);
 
   return (
-    <div className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode)} app-shell--with-toc`}>
+    <div className={`app-shell app-shell--gradient calculator-shell--nv75 ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc`}>
       <div className="container container--app">
-        <header className="hero hero--feature">
+        <header className="hero hero--feature" ref={heroHeaderRef}>
           <div className="hero__pills-row">
             <ProductViewPills productView={productView} setProductView={setProductView} />
             <div className="hero__pills-row-trailing">
@@ -981,27 +1039,14 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                   Expertní
                 </label>
               </div>
+              <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="nv75-display-density" />
+              <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
             </div>
           </div>
-          <div className="hero-result-layout">
-            <ResultAnchorCard
-              tone={nv75AnchorTone}
-              primaryLabel="Banka odpočtů celkem"
-              primaryValue={`${bank.bankHoursTotal} h/týden`}
-              stats={[
-                { label: "Pravidlo §4b", value: bank.appliedRule || "–" },
-                { label: "Základ §4b", value: `${bank.bankHoursBase4b} h` },
-                { label: "Bonus §4c + §4d", value: `${bank.bonus4cHours + bank.bonus4dHours} h` },
-              ]}
-              statusBadge={nv75InputWarnings.length > 0 ? "Zkontrolujte vstupy" : bank.bankHoursTotal > 0 ? "Banka spočtena" : "Zadejte řádky"}
-              verdictLabel={nv75InputWarnings.length > 0 ? "Zkontrolujte vstupy" : "Aplikované pravidlo §4b"}
-              verdictDetail={nv75InputWarnings.length > 0 ? nv75InputWarnings[0]! : ruleExplanation}
-            />
-          </div>
-          <section className="hero-zone-actions" aria-label="Akce výpočtu NV75">
-            <p className="hero-zone-label">Akce</p>
+          <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu NV75">
+            <div className="hero-zone-actions__toolbar-row">
             <HeroActionsDrawer>
-              <HeroActionsTiered
+              <HeroCompactToolbar
                 primary={
                   <>
                     <HeroIconActionButton
@@ -1113,8 +1158,18 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                 }
               />
             </HeroActionsDrawer>
+            </div>
           </section>
         </header>
+        <CalculatorStickyContextBar
+          anchorRef={heroHeaderRef}
+          primaryLabel="Banka odpočtů"
+          primaryValue={`${bank.bankHoursTotal} h/týden`}
+          statusText={nv75Verdict.label}
+          tone={nv75Verdict.tone}
+          onSave={saveNamedSnapshot}
+          onExport={handleExportCsv}
+        />
         {viewMode === "basic" ? (
         <BasicModeSteps
           heading="Rychlý start pro NV75"
@@ -1131,6 +1186,32 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           ]}
         />
         ) : null}
+
+        <CalculatorWorkspaceLayout
+          dock={
+            <CalculatorWorkflowDock
+              tone={nv75AnchorTone}
+              primaryLabel="Banka odpočtů celkem"
+              primaryValue={`${bank.bankHoursTotal} h/týden`}
+              stats={[
+                { label: "Pravidlo §4b", value: bank.appliedRule || "–" },
+                { label: "Základ §4b", value: `${bank.bankHoursBase4b} h` },
+                { label: "Bonus §4c + §4d", value: `${bank.bonus4cHours + bank.bonus4dHours} h` },
+              ]}
+              statusBadge={nv75Verdict.label}
+              verdictLabel={nv75Verdict.label}
+              verdictDetail={nv75Verdict.detail}
+              workflowSteps={nv75Workflow.steps}
+              viewMode={viewMode}
+              actions={[
+                { label: "Uložit scénář", onClick: saveNamedSnapshot },
+                { label: "Export CSV", onClick: handleExportCsv },
+                { label: "Porovnat se zálohou", onClick: compareWithNamedSnapshot },
+              ]}
+            />
+          }
+          main={
+            <>
 
         <section className="card muted section-card" data-section="nv75-vstupy">
           <h2 className="section-title">Vstupy</h2>
@@ -1462,6 +1543,9 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           {bank.notes.length > 0 ? <p className="muted-text" style={{ marginTop: 10 }}>{bank.notes.join(" | ")}</p> : null}
         </section>
 
+          </>
+        }
+      />
         <footer className="zs-app-footer">
           <HeroStatusBar variant="nv75" placement="footer" productLabel={PRODUCT_CALCULATOR_TITLES.nv75} lastSavedAt={lastSavedAt} notice={uiNotice} />
           <AuthorCreditFooter />

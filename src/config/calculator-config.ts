@@ -374,3 +374,9 @@ export const MODE_CONFIG: Record<CalculatorMode, ModeConfig> = {
     hideTotalsFromOtherModules: true,
   },
 };
+
+/** Krátký popis režimu pro řádek „Režim“ v kotvě výsledku (bez prefixu PHmax/PHAmax/PHPmax). */
+export function formatModeRežimStatValue(modeLabel: string): string {
+  const stripped = modeLabel.replace(/^(PHmax|PHAmax|PHPmax|NV 75\/2005)\s*–\s*/u, "").trim();
+  return stripped || modeLabel;
+}

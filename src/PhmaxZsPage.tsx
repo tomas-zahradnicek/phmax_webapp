@@ -29,7 +29,7 @@ import {
 } from "./phmax-zs-logic";
 import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
 import type { CalculatorMode, FormSection } from "./config/calculator-config";
-import { MODE_CONFIG } from "./config/calculator-config";
+import { MODE_CONFIG, formatModeRežimStatValue } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
 import { DEFAULT_MODE } from "./config/default-form-state";
 import { GlossaryDialog } from "./GlossaryDialog";
@@ -67,11 +67,16 @@ import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { TableOuter } from "./TableOuter";
 import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
-import { ResultAnchorCard } from "./ResultAnchorCard";
-import { HeroActionsTiered } from "./HeroActionsTiered";
+import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
+import { CalculatorStickyContextBar } from "./CalculatorStickyContextBar";
+import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
+import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { CollapsibleSection } from "./CollapsibleSection";
-import { PageTableOfContents } from "./PageTableOfContents";
+import { PageTableOfContents, type PageTocSection } from "./PageTableOfContents";
+import { CalculatorWorkspaceLayout } from "./CalculatorWorkspaceLayout";
+import { HeroCompactToolbar } from "./HeroCompactToolbar";
+import { DisplayDensityToggle } from "./DisplayDensityToggle";
+import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
 import { ZsModuleGate } from "./ZsModuleGate";
 import { ZsBasicWizard } from "./ZsBasicWizard";
@@ -402,6 +407,9 @@ export type PhmaxZsPageProps = {
 export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [tab, setTab] = useState<TabKey>("phmax");
   const [mode, setMode] = useState<CalculatorMode>(getInitialPreferredMode());
+  const [displayDensity, setDisplayDensity] = useDisplayDensity();
+  const [focusMode, setFocusMode] = useCalculatorFocusMode();
+  const heroHeaderRef = useRef<HTMLElement>(null);
   const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
     try {
       const stored = localStorage.getItem(ZS_VIEW_MODE_LS_KEY);
@@ -2186,19 +2194,37 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     goToZsWizardStep(clampZsBasicWizardStep(zsWizardStep + 1));
   }, [goToSection, goToZsWizardStep, zsWizardHasExceptions, zsWizardStep]);
 
-  const zsTocSections = [
-    { id: "setup", label: "Typ školy a režim" },
-    { id: "basic", label: "Běžné třídy" },
-    { id: "phmax-summary", label: "Souhrn PHmax" },
-    { id: "overview", label: "Celkový přehled" },
-  ] as const;
+  const zsShowPhmaxExceptionsToc =
+    tab === "phmax" &&
+    (viewMode === "expert" || zsWizardHasExceptions || (zsBasicWizardActive && zsWizardStep >= 3));
+
+  const zsTocSections = useMemo((): readonly PageTocSection[] => {
+    const sections: PageTocSection[] = [];
+    if (viewMode === "expert") {
+      sections.push({ id: "guide", label: "Úvod a nápověda" });
+    }
+    sections.push({ id: "setup", label: "Typ školy a režim" });
+    if (tab === "phmax") {
+      sections.push({ id: "basic", label: "Běžné třídy" });
+      if (zsShowPhmaxExceptionsToc) {
+        sections.push({ id: "zs-phmax-exceptions", label: "Výjimky PHmax" });
+      }
+      sections.push({ id: "phmax-summary", label: "Souhrn PHmax" });
+    } else if (tab === "pha") {
+      sections.push({ id: "pha", label: "PHAmax" });
+    } else {
+      sections.push({ id: "php", label: "PHPmax" });
+    }
+    sections.push({ id: "overview", label: "Celkový přehled" });
+    return sections;
+  }, [tab, viewMode, zsShowPhmaxExceptionsToc]);
 
   const zsTabPrimaryLabel = tab === "phmax" ? "PHmax celkem" : tab === "pha" ? "PHAmax celkem" : "PHPmax celkem";
   const zsTabPrimaryValue = tab === "phmax" ? totalPhmax : tab === "pha" ? totalPha : totalPhp;
 
   return (
     <div
-      className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${phmaxPaneShellClass}`}
+      className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${phmaxPaneShellClass}`}
     >
       <div className="container container--app">
         <header className="hero hero--feature">
@@ -2228,6 +2254,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   Expertní
                 </label>
               </div>
+              <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="zs-display-density" />
+              <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
               <GlossaryIconButton
                 ref={glossaryTriggerRef}
                 className="glossary-icon-btn--hero"
@@ -2253,52 +2281,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             </div>
           </div>
 
-          <div className="hero-result-layout">
-            <ResultAnchorCard
-              tone={zsVerdict.tone}
-              primaryLabel={zsTabPrimaryLabel}
-              primaryValue={zsTabPrimaryValue}
-              statusBadge={incompleteSections > 0 ? `Nevyplněné části: ${incompleteSections}` : "Vstupy kompletní"}
-              stats={[
-                { label: "PHmax", value: totalPhmax },
-                { label: "PHAmax", value: totalPha },
-                { label: "PHPmax", value: totalPhp },
-                { label: "Režim", value: MODE_CONFIG[mode].label },
-              ]}
-              verdictLabel={zsVerdict.label}
-              verdictDetail={zsVerdict.detail}
-            />
-            <CollapsibleSection
-              summary="Další kroky, workflow a exporty"
-              defaultOpen={viewMode === "expert"}
-              level="advanced"
-            >
-              <p
-                className="muted-text"
-                style={{ margin: "0 0 10px", fontSize: "0.86rem", lineHeight: 1.5 }}
-                aria-live="polite"
-              >
-                <strong>Průběh:</strong> {formatZsLayContextLine(MODE_CONFIG[mode].label, tab, incompleteSections)}
-              </p>
-              <VerdictNextStepsPanel
-                hideVerdict
-                tone={zsVerdict.tone}
-                verdictLabel={zsVerdict.label}
-                verdictDetail={zsVerdict.detail}
-                recommendedStep={zsWorkflow.recommendedStep}
-                workflowSteps={zsWorkflow.steps}
-                actions={[
-                  { label: "Uložit scénář", onClick: saveSnapshotManually },
-                  { label: "Export CSV", onClick: handleExportCsv },
-                  { label: "Porovnat se zálohou", onClick: handleCompareZsWithNamedSnapshot },
-                ]}
-              />
-            </CollapsibleSection>
-          </div>
-
-          <section className="hero-zone-actions" aria-label="Akce výpočtu">
-            <p className="hero-zone-label">C. Akce</p>
-            <div className="hero-actions">
+          <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
+            <div className="hero-zone-actions__toolbar-row">
             <div className="field field--hero-select hero-actions__example hero-zs-example-select">
               <span className="field__label field__label--hero" id="zs-hero-example-label">
                 Ukázkový příklad
@@ -2374,7 +2358,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               </p>
             </div>
             <HeroActionsDrawer>
-              <HeroActionsTiered
+              <HeroCompactToolbar
                 primary={
                   <>
                     <button type="button" className="btn btn--light hero-actions-tiered__cta" onClick={saveSnapshotManually}>
@@ -2523,6 +2507,16 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </section>
         </header>
 
+        <CalculatorStickyContextBar
+          anchorRef={heroHeaderRef}
+          primaryLabel={zsTabPrimaryLabel}
+          primaryValue={zsTabPrimaryValue}
+          statusText={incompleteSections > 0 ? `Nevyplněné: ${incompleteSections}` : "Vstupy kompletní"}
+          tone={zsVerdict.tone}
+          onSave={saveSnapshotManually}
+          onExport={handleExportCsv}
+        />
+
         <ErrorBoundary title="Obsah kalkulačky pro základní školy se nepodařilo zobrazit">
         <QuickOnboarding
           title="Stručné pokyny"
@@ -2650,9 +2644,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <SectionLead>
             Nejste si jistí, kde začít? Vyberte situaci, která se nejvíc blíží vaší škole. Aplikace vás přesměruje na správnou část kalkulačky a vyplní odpovídající ukázkový příklad.
           </SectionLead>
-          <InputOutputLegend compact />
-
-          <div className="grid two">
+<div className="grid two">
             <div className="field">
               <span id="zs-wizard-choice-label">Jakou situaci chcete řešit?</span>
               <select
@@ -2700,6 +2692,48 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </div>
         </section>
         ) : null}
+
+        <CalculatorWorkspaceLayout
+          dockLabel="Kontext výpočtu"
+          dock={
+<div className="workspace-sticky" id="workspace-results-dock" ref={workspaceStickyRef}>
+            <CalculatorWorkflowDock
+              header={
+                <>
+                  <div className="tabs tabs--sticky tabs--sticky-sdlike">
+                    <button type="button" className={tab === "phmax" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("phmax")}>PHmax</button>
+                    <button type="button" className={tab === "pha" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("pha")}>PHAmax</button>
+                    <button type="button" className={tab === "php" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("php")}>PHPmax</button>
+                  </div>
+                  <p className="muted-text workflow-dock__context-line">
+                    {formatZsLayContextLine(MODE_CONFIG[mode].label, tab, incompleteSections)}
+                  </p>
+                </>
+              }
+              tone={zsVerdict.tone}
+              primaryLabel={zsTabPrimaryLabel}
+              primaryValue={zsTabPrimaryValue}
+              statusBadge={incompleteSections > 0 ? `Nevyplněné části: ${incompleteSections}` : "Vstupy kompletní"}
+              stats={[
+                { label: "PHmax", value: totalPhmax },
+                { label: "PHAmax", value: totalPha },
+                { label: "PHPmax", value: totalPhp },
+                { label: "Režim", value: formatModeRežimStatValue(MODE_CONFIG[mode].label) },
+              ]}
+              verdictLabel={zsVerdict.label}
+              verdictDetail={zsVerdict.detail}
+              workflowSteps={zsBasicWizardActive ? [] : zsWorkflow.steps}
+              viewMode={viewMode}
+              actions={[
+                { label: "Uložit scénář", onClick: saveSnapshotManually },
+                { label: "Export CSV", onClick: handleExportCsv },
+                { label: "Porovnat se zálohou", onClick: handleCompareZsWithNamedSnapshot },
+              ]}
+            />
+        </div>
+          }
+          main={
+            <>
 
         <section className="card card--elevated section-card section-card--setup" data-section="setup" data-wizard-step="1">
           <h2 className="section-title">Typ školy a režim výpočtu</h2>
@@ -2749,95 +2783,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </section>
         )}
 
-        <div className="workspace-sticky" id="workspace-results-dock" ref={workspaceStickyRef}>
-          <div className="tabs tabs--sticky tabs--sticky-sdlike">
-            <button type="button" className={tab === "phmax" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("phmax")}>PHmax</button>
-            <button type="button" className={tab === "pha" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("pha")}>PHAmax</button>
-            <button type="button" className={tab === "php" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("php")}>PHPmax</button>
-          </div>
-
-          <section className="card card--summary section-card section-card--live-results workspace-sticky__summary">
-            <h2 className="section-title">Aktuální přehled výsledků</h2>
-            <SectionLead>
-              Výsledky navazují na metodický postup A–D: vstupní údaje, výpočet průměru, určení pásma a výsledná hodnota. Každý modul se stanovuje samostatně.
-            </SectionLead>
-            <p className="muted-text" style={{ marginTop: 10, marginBottom: 0, fontSize: "0.86rem" }}>
-              <strong>Aktuální kontext:</strong> {formatZsLayContextLine(MODE_CONFIG[mode].label, tab, incompleteSections)}
-            </p>
-            <ResultAnchorCard
-              tone={zsVerdict.tone}
-              primaryLabel={zsTabPrimaryLabel}
-              primaryValue={zsTabPrimaryValue}
-              statusBadge={incompleteSections > 0 ? `Nevyplněné části: ${incompleteSections}` : "Vstupy kompletní"}
-              stats={[
-                { label: "PHmax", value: totalPhmax },
-                { label: "PHAmax", value: totalPha },
-                { label: "PHPmax", value: totalPhp },
-                { label: "Režim", value: MODE_CONFIG[mode].label },
-              ]}
-              verdictLabel={zsVerdict.label}
-              verdictDetail={zsVerdict.detail}
-            />
-            <VerdictNextStepsPanel
-              hideVerdict
-              tone={zsVerdict.tone}
-              verdictLabel={zsVerdict.label}
-              verdictDetail={zsVerdict.detail}
-              recommendedStep={zsWorkflow.recommendedStep}
-              workflowSteps={zsWorkflow.steps}
-              actions={[
-                { label: "Uložit scénář", onClick: saveSnapshotManually },
-                { label: "Export CSV", onClick: handleExportCsv },
-                { label: "Porovnat se zálohou", onClick: handleCompareZsWithNamedSnapshot },
-              ]}
-            />
-            <InputOutputLegend compact />
-            <div className="results-panel__meta">
-              <span className="status-badge status-badge--neutral">Aktivní modul: {tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"}</span>
-              <span className={`status-badge ${incompleteSections > 0 ? "status-badge--warning" : "status-badge--ok"}`}>
-                {incompleteSections > 0 ? `Nevyplněné části: ${incompleteSections}` : "Všechny hlavní části jsou vyplněné"}
-              </span>
-              {firstIssueSection ? (
-                <button type="button" className="status-link" onClick={() => goToSection(firstIssueSection)}>
-                  Přejít na první nevyplněnou část
-                </button>
-              ) : null}
-            </div>
-            <div className="grid four workspace-sticky__stats">
-              <HeroStat label="Výsledek PHmax" value={totalPhmax} />
-              <HeroStat label="Výsledek PHAmax" value={totalPha} />
-              <HeroStat label="Výsledek PHPmax" value={totalPhp} />
-              <HeroStat label="Přehledový součet" value={round2(totalPhmax + totalPha + totalPhp)} />
-            </div>
-            <div
-              className={`workspace-sticky__module-total workspace-sticky__module-total--${tab}`}
-              aria-label="Zvýrazněný výsledek aktivní záložky"
-            >
-              <span className="workspace-sticky__module-total-label">
-                {tab === "phmax" ? "Aktivní modul · PHmax" : tab === "pha" ? "Aktivní modul · PHAmax" : "Aktivní modul · PHPmax"}
-              </span>
-              <span className="workspace-sticky__module-total-value">
-                {tab === "phmax" ? totalPhmax : tab === "pha" ? totalPha : totalPhp}
-              </span>
-            </div>
-            {jumpSections.length > 1 ? (
-              <div className="section-jump-nav" role="navigation" aria-label="Skok na sekci výpočtu">
-                {jumpSections.map(({ id, label }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    className={`section-jump-nav__btn${activeScrollSection === id ? " section-jump-nav__btn--active" : ""}`}
-                    onClick={() => goToSection(id)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </section>
-        </div>
-
-{tab === "phmax" && (
+        {tab === "phmax" && (
           <div className="stack">
             {showPhmaxSubNav ? (
               <PhmaxZsPhmaxSubNav active={effectivePhmaxPane} onChange={handlePhmaxSubTabChange} />
@@ -2940,7 +2886,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               </section>
             )}
 
-            <div className="grid two">
+            <div className="grid two" data-section="zs-phmax-exceptions">
               {(hasSection("sec16_first") || hasSection("sec16_second")) && (
                 <ZsModuleGate sectionId="sec16" title="Třídy podle § 16 odst. 9" viewMode={viewMode}>
                 <section className="card section-card section-card--module section-card--module-support" data-section="sec16" data-wizard-step="3" data-phmax-pane="exceptions">
@@ -3857,6 +3803,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             <ResultCard label="Přehledový součet" tone="success" value={round2(totalPhmax + totalPha + totalPhp)} />
           </div>
         </section>
+
+            </>
+          }
+        />
         </ErrorBoundary>
 
         {viewMode === "expert" ? <ProductLegisContextPanel variant="zs" /> : null}

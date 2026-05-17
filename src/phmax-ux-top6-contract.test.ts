@@ -18,7 +18,11 @@ describe("UX TOP 6 contract", () => {
       "src/ZsModuleGate.tsx",
       "src/ZsBasicWizard.tsx",
       "src/zs-basic-wizard.ts",
-      "src/HeroActionsTiered.tsx",
+      "src/HeroCompactToolbar.tsx",
+      "src/CalculatorWorkflowDock.tsx",
+      "src/DisplayDensityToggle.tsx",
+      "src/display-density.ts",
+      "src/CalculatorStickyContextBar.tsx",
     ]) {
       expect(fs.existsSync(path.resolve(repoRoot, file))).toBe(true);
     }
@@ -27,20 +31,24 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".page-toc");
     expect(css).toContain(".calculator-shell--basic .ux-expert-only");
     expect(css).toContain(".zs-basic-wizard-active");
+    expect(css).toContain(".hero-compact-toolbar");
+    expect(css).toContain(".calculator-shell--density-compact");
+    expect(css).toContain(".workflow-dock");
+    expect(css).toContain(".calculator-sticky-context");
   });
 
-  it("PV/ŠD/SŠ používají ResultAnchorCard a PageTableOfContents", () => {
+  it("PV/ŠD/SŠ používají CalculatorWorkflowDock a PageTableOfContents", () => {
     for (const page of ["src/PhmaxPvPage.tsx", "src/PhmaxSdPage.tsx", "src/PhmaxSsPage.tsx"]) {
       const src = readSource(page);
-      expect(src).toContain("ResultAnchorCard");
+      expect(src).toContain("CalculatorWorkflowDock");
       expect(src).toContain("PageTableOfContents");
-      expect(src).toContain("calculatorShellClassName(viewMode)");
+      expect(src).toContain("calculatorShellClassName(viewMode, displayDensity, focusMode)");
       expect(src).not.toContain("ProductFloatingNav");
     }
   });
 
-  it("kalkulačky mají tiered hero akce (TOP 4 vzor)", () => {
-    expect(readSource("src/HeroActionsTiered.tsx")).toContain('aria-label="Hlavní akce"');
+  it("kalkulačky mají kompaktní hero toolbar a hustotu zobrazení", () => {
+    expect(readSource("src/HeroCompactToolbar.tsx")).toContain('aria-label="Hlavní akce"');
     for (const page of [
       "src/PhmaxPvPage.tsx",
       "src/PhmaxSdPage.tsx",
@@ -48,18 +56,21 @@ describe("UX TOP 6 contract", () => {
       "src/PhmaxNv75DeputyPage.tsx",
       "src/PhmaxZsPage.tsx",
     ]) {
-      expect(readSource(page)).toContain("HeroActionsTiered");
+      const src = readSource(page);
+      expect(src).toContain("HeroCompactToolbar");
+      expect(src).toContain("DisplayDensityToggle");
+      expect(src).toContain("hero-zone-actions--toolbar");
     }
     expect(readSource("src/PhmaxSdPage.tsx")).toContain('data-section="sd-vysledek"');
     expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain('data-section="ss-vysledek"');
     expect(readSource("src/PhmaxNv75DeputyPage.tsx")).toContain("hero-zone-actions");
-    expect(readSource("src/PhmaxZsPage.tsx")).toContain("hero-result-layout");
-    expect(readSource("src/PhmaxZsPage.tsx")).toContain("Další kroky, workflow a exporty");
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain("CalculatorWorkspaceLayout");
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain("CalculatorWorkflowDock");
   });
 
-  it("ZŠ má ResultAnchorCard, ZsModuleGate a PageTableOfContents", () => {
+  it("ZŠ má CalculatorWorkflowDock, ZsModuleGate a PageTableOfContents", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
-    expect(src).toContain("ResultAnchorCard");
+    expect(src).toContain("CalculatorWorkflowDock");
     expect(src).toContain("ZsModuleGate");
     expect(src).toContain("PageTableOfContents");
     expect(src).toContain("ux-expert-only");
@@ -72,13 +83,21 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain('data-wizard-step="4"');
   });
 
-  it("NV75 má ResultAnchorCard, režim basic/expert a PageTableOfContents", () => {
+  it("NV75 má CalculatorWorkflowDock, režim basic/expert a PageTableOfContents", () => {
     const src = readSource("src/PhmaxNv75DeputyPage.tsx");
-    expect(src).toContain("ResultAnchorCard");
+    expect(src).toContain("CalculatorWorkflowDock");
     expect(src).toContain("PageTableOfContents");
-    expect(src).toContain("calculatorShellClassName(viewMode)");
+    expect(src).toContain("calculatorShellClassName(viewMode, displayDensity, focusMode)");
     expect(src).not.toContain("ProductFloatingNav");
     expect(src).toContain('data-section="nv75-vstupy"');
     expect(src).toContain('data-section="nv75-vysledek"');
+    expect(src).toContain("CalculatorWorkflowDock");
+    expect(src).toContain("const nv75Workflow = useMemo");
+  });
+
+  it("ZŠ TOC obsahuje panely wizardu PHmax", () => {
+    const src = readSource("src/PhmaxZsPage.tsx");
+    expect(src).toContain('id: "zs-phmax-exceptions"');
+    expect(src).toContain('data-section="zs-phmax-exceptions"');
   });
 });

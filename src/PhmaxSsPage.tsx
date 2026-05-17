@@ -35,13 +35,18 @@ import {
 } from "./HeroActionIconButton";
 import { HeroStat } from "./HeroStat";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
+import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
+import { CalculatorStickyContextBar } from "./CalculatorStickyContextBar";
+import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
+import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
+import { SsHumanSummary } from "./SsHumanSummary";
 import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import { MethodologyStrip } from "./MethodologyStrip";
-import { ResultAnchorCard } from "./ResultAnchorCard";
-import { HeroActionsTiered } from "./HeroActionsTiered";
-import { CollapsibleSection } from "./CollapsibleSection";
 import { PageTableOfContents } from "./PageTableOfContents";
+import { CalculatorWorkspaceLayout } from "./CalculatorWorkspaceLayout";
+import { HeroCompactToolbar } from "./HeroCompactToolbar";
+import { DisplayDensityToggle } from "./DisplayDensityToggle";
+import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { QuickOnboarding } from "./QuickOnboarding";
@@ -325,6 +330,9 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       : null;
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [ssGuideOpen, setSsGuideOpen] = useState(false);
+  const [displayDensity, setDisplayDensity] = useDisplayDensity();
+  const [focusMode, setFocusMode] = useCalculatorFocusMode();
+  const heroHeaderRef = useRef<HTMLElement>(null);
   const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
     try {
       const stored = localStorage.getItem(SS_VIEW_MODE_LS_KEY);
@@ -405,6 +413,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       detail: "Řádky mají platný výpočet PHmax. Pokračujte uložením varianty, exportem nebo porovnáním scénářů.",
     };
   })();
+  const ssErrorRows = ss.preview.filter((p) => !p.skipped && "error" in p).length;
+  const ssOkRows = ss.preview.filter((p) => !p.skipped && !("error" in p)).length;
   const ssWorkflow = (() => {
     const errorRows = ss.preview.filter((p) => !p.skipped && "error" in p).length;
     const skippedRows = ss.preview.filter((p) => p.skipped).length;
@@ -464,8 +474,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   ] as const;
 
   return (
-    <div className={`${calculatorShellClassName(viewMode)} app-shell--with-toc`}>
-      <header className="hero hero--feature">
+    <div className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc`}>
+      <header className="hero hero--feature" ref={heroHeaderRef}>
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
 
@@ -492,6 +502,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
                 Expertní
               </label>
             </div>
+            <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="ss-display-density" />
+            <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
             <GlossaryIconButton
               ref={glossaryTriggerRef}
               className="glossary-icon-btn--hero"
@@ -533,47 +545,6 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           </div>
         </div>
 
-        <div className="hero-result-layout">
-          <ResultAnchorCard
-            tone={ssVerdict.tone}
-            primaryLabel="Součet PHmax"
-            primaryValue={phmaxHeroValue}
-            stats={[
-              { label: "PHAmax (PrŠ)", value: phamaxHeroValue, title: "Jen PrŠ 78-62-C/01 a 78-62-C/02, denní forma" },
-              { label: "Řádků ve formuláři", value: ssMetrics.rowCount },
-            ]}
-            statusBadge={ssVerdict.label}
-            verdictLabel={ssVerdict.label}
-            verdictDetail={ssVerdict.detail}
-          />
-          <CollapsibleSection
-            summary="Další kroky, workflow a exporty"
-            defaultOpen={viewMode === "expert"}
-            level="advanced"
-          >
-            <p
-              className="muted-text"
-              style={{ margin: "0 0 10px", fontSize: "0.86rem", lineHeight: 1.5 }}
-              aria-live="polite"
-            >
-              <strong>Průběh:</strong> {formatSsLayContextLine(ssMetrics.rowCount, ss.computedRows.length)}
-            </p>
-            <VerdictNextStepsPanel
-              hideVerdict
-              tone={ssVerdict.tone}
-              verdictLabel={ssVerdict.label}
-              verdictDetail={ssVerdict.detail}
-              recommendedStep={ssWorkflow.recommendedStep}
-              workflowSteps={ssWorkflow.steps}
-              actions={[
-                { label: "Uložit scénář", onClick: ss.saveSnapshotManually },
-                { label: "Export CSV", onClick: ss.handleExportCsv },
-                { label: "Porovnat se zálohou", onClick: ss.handleCompareSsWithNamedSnapshot },
-              ]}
-            />
-          </CollapsibleSection>
-        </div>
-
         {viewMode === "expert" ? (
           <p className="hero__note" style={{ marginTop: 10 }}>
             PHAmax mimo PrŠ (78-62-C/01, 78-62-C/02) dopočítejte plným postupem metodiky MŠMT – navazující kroky a tabulky jsou na{" "}
@@ -584,8 +555,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           </p>
         ) : null}
 
-        <section className="hero-zone-actions" aria-label="Akce výpočtu">
-          <p className="hero-zone-label">C. Akce</p>
+        <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
+          <div className="hero-zone-actions__toolbar-row">
           <div className="hero-actions hero-actions--compact">
           <div className="field field--hero-select hero-actions__example hero-ss-example-select">
             <span className="field__label field__label--hero" id="ss-hero-example-label">
@@ -701,8 +672,10 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               </p>
             ) : null}
           </div>
+          </div>
+
           <HeroActionsDrawer>
-            <HeroActionsTiered
+            <HeroCompactToolbar
               primary={
                 <>
                   <button type="button" className="btn btn--light hero-actions-tiered__cta" onClick={ss.saveSnapshotManually}>
@@ -867,6 +840,16 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           </div>
         </section>
       </header>
+
+      <CalculatorStickyContextBar
+        anchorRef={heroHeaderRef}
+        primaryLabel="Součet PHmax"
+        primaryValue={phmaxHeroValue}
+        statusText={ssVerdict.label}
+        tone={ssVerdict.tone}
+        onSave={ss.saveSnapshotManually}
+        onExport={ss.handleExportCsv}
+      />
 
       <GlossaryDialog
         open={glossaryOpen}
@@ -1036,7 +1019,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         <summary className="section-title" style={{ cursor: "pointer", fontSize: "1.02rem" }}>
           Metodika: rozcestník a průměr žáků (§ 16 odst. 9)
         </summary>
-        <div style={{ marginTop: 14 }}>
+        <div>
           <h3 className="section-title" style={{ fontSize: "0.98rem", margin: "0 0 8px" }}>
             {PHMAX_SS_CALCULATION_BRANCH_GUIDE.title}
           </h3>
@@ -1333,10 +1316,48 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         </ul>
       </FieldWhyPhmaxDetails>
 
+      <CalculatorWorkspaceLayout
+        variant="input-heavy"
+        dock={
+          <CalculatorWorkflowDock
+            header={
+              <SsHumanSummary
+                classCount={ss.computedRows.length}
+                phmaxTotal={ssMetrics.phmaxTotal}
+                rowCount={ssMetrics.rowCount}
+                okRows={ssOkRows}
+                conflictCount={ssErrorRows}
+              />
+            }
+            tone={ssVerdict.tone}
+            primaryLabel="Součet PHmax"
+            primaryValue={phmaxHeroValue}
+            stats={[
+              { label: "PHAmax (PrŠ)", value: phamaxHeroValue, title: "Jen PrŠ 78-62-C/01 a 78-62-C/02, denní forma" },
+              { label: "Řádků ve formuláři", value: ssMetrics.rowCount },
+            ]}
+            statusBadge={ssVerdict.label}
+            verdictLabel={ssVerdict.label}
+            verdictDetail={ssVerdict.detail}
+            workflowSteps={ssWorkflow.steps}
+            viewMode={viewMode}
+            actions={[
+              { label: "Uložit scénář", onClick: ss.saveSnapshotManually },
+              { label: "Export CSV", onClick: ss.handleExportCsv },
+              { label: "Porovnat se zálohou", onClick: ss.handleCompareSsWithNamedSnapshot },
+            ]}
+          />
+        }
+        main={
+          <>
+
       <section data-section="ss-vstupy">
         <PhmaxSsUnitsForm model={ss} hideBackupSubcard showExpertPanels={viewMode === "expert"} />
       </section>
 
+          </>
+        }
+      />
       {viewMode === "expert" ? <MethodologyStrip /> : null}
 
       <footer className="zs-app-footer">
