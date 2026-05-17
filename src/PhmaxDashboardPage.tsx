@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { CALCULATOR_LIMITS_NOTE, PRODUCT_CALCULATOR_TITLES } from "./calculator-ui-constants";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { ProductFloatingNav } from "./ProductFloatingNav";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 
 const DASH_QUICK_IDS: Exclude<ProductView, "dash">[] = ["pv", "sd", "zs", "ss", "nv75"];
@@ -398,33 +397,23 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           <p className="muted-text" style={{ marginBottom: 14 }}>
             Slouží jen k orientaci v tomto prohlížeči. Metriky počítám stejnou logikou jako v příslušné kartě (kde je k tomu dostupná data).
           </p>
-          <div className="sd-phmax-breakdown-scroll">
-            <table className="sd-phmax-breakdown">
-              <thead>
-                <tr>
-                  <th>Kalkulačka</th>
-                  <th>Stav</th>
-                  <th>Shrnutí</th>
-                  <th>Pojm. zálohy</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    <td>{row.title}</td>
-                    <td>{row.status}</td>
-                    <td className="muted-text">{row.detail}</td>
-                    <td className="sd-phmax-breakdown__num">{row.namedBackups}</td>
-                    <td>
-                      <button type="button" className="btn ghost" onClick={() => setProductView(row.id)}>
-                        Otevřít
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="dash-cards">
+            {rows.map((row) => {
+              const metricMatch = row.detail.match(/PHmax[^:]*:\s*([\d.,]+|–)/i);
+              const metric = metricMatch?.[1] ?? "–";
+              return (
+                <article key={row.id} className="dash-card">
+                  <h3 className="dash-card__title">{row.title}</h3>
+                  <p className="dash-card__metric">{metric}</p>
+                  <p className="dash-card__meta">{row.status}</p>
+                  <p className="dash-card__meta">{row.detail}</p>
+                  <p className="dash-card__meta">Pojmenované zálohy: {row.namedBackups}</p>
+                  <button type="button" className="btn primary" onClick={() => setProductView(row.id)}>
+                    Otevřít
+                  </button>
+                </article>
+              );
+            })}
           </div>
         </section>
 
@@ -439,7 +428,6 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           <AuthorCreditFooter />
         </footer>
       </div>
-      <ProductFloatingNav active={productView} setProductView={setProductView} />
     </div>
   );
 }

@@ -1056,7 +1056,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   ] as const;
 
   return (
-    <div className={calculatorShellClassName(viewMode)}>
+    <div className={`${calculatorShellClassName(viewMode)} app-shell--with-toc`}>
       <header className="hero hero--feature">
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
@@ -1204,7 +1204,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             ) : null}
           </div>
 
-          <div className="hero-actions hero-actions--stacked">
+          <div className="hero-actions hero-actions--stacked hero-actions--labeled-desktops">
             <HeroActionsDrawer>
             <div className="hero-actions--stacked__row">
               <span className="hero-actions__cluster" role="group" aria-label="Tisk">
@@ -2474,11 +2474,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         />
         <AuthorCreditFooter />
       </footer>
-      <PageTableOfContents
-        sections={sdTocSections}
-        productView={productView}
-        setProductView={setProductView}
-      />
+      <PageTableOfContents sections={sdTocSections} />
       <GlossaryDialog
         open={glossaryOpen}
         onClose={() => setGlossaryOpen(false)}

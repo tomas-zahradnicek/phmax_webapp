@@ -922,7 +922,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   }, [summaryText]);
 
   return (
-    <div className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode)}`}>
+    <div className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode)} app-shell--with-toc`}>
       <div className="container container--app">
         <header className="hero hero--feature">
           <div className="hero__pills-row">
@@ -1368,11 +1368,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           <AuthorCreditFooter />
         </footer>
       </div>
-      <PageTableOfContents
-        sections={nv75TocSections}
-        productView={productView}
-        setProductView={setProductView}
-      />
+      <PageTableOfContents sections={nv75TocSections} />
     </div>
   );
 }

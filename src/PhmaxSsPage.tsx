@@ -463,7 +463,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   ] as const;
 
   return (
-    <div className={calculatorShellClassName(viewMode)}>
+    <div className={`${calculatorShellClassName(viewMode)} app-shell--with-toc`}>
       <header className="hero hero--feature">
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
@@ -1349,11 +1349,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         <AuthorCreditFooter />
       </footer>
 
-      <PageTableOfContents
-        sections={ssTocSections}
-        productView={productView}
-        setProductView={setProductView}
-      />
+      <PageTableOfContents sections={ssTocSections} />
     </div>
   );
 }

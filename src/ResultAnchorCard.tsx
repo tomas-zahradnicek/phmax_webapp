@@ -12,6 +12,8 @@ type ResultAnchorCardProps = {
   tone?: ResultAnchorTone;
   primaryLabel: string;
   primaryValue: React.ReactNode;
+  /** Krátký stav pod hodnotou (např. „Vstupy kompletní“). */
+  statusBadge?: string;
   stats?: readonly ResultAnchorStat[];
   verdictLabel: string;
   verdictDetail: string;
@@ -24,6 +26,7 @@ export function ResultAnchorCard({
   tone = "neutral",
   primaryLabel,
   primaryValue,
+  statusBadge,
   stats = [],
   verdictLabel,
   verdictDetail,
@@ -33,8 +36,11 @@ export function ResultAnchorCard({
       className={`result-anchor-card result-anchor-card--${tone}`}
       aria-label="Hlavní výsledek výpočtu"
     >
-      <p className="result-anchor-card__primary-label">{primaryLabel}</p>
       <p className="result-anchor-card__primary-value">{primaryValue}</p>
+      <p className="result-anchor-card__primary-label">{primaryLabel}</p>
+      {statusBadge ? (
+        <p className={`result-anchor-card__status result-anchor-card__status--${tone}`}>{statusBadge}</p>
+      ) : null}
       {stats.length > 0 ? (
         <dl className="result-anchor-card__stats">
           {stats.map((s) => (

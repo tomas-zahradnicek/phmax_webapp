@@ -18,6 +18,7 @@ describe("UX TOP 6 contract", () => {
       "src/ZsModuleGate.tsx",
       "src/ZsBasicWizard.tsx",
       "src/zs-basic-wizard.ts",
+      "src/HeroActionsTiered.tsx",
     ]) {
       expect(fs.existsSync(path.resolve(repoRoot, file))).toBe(true);
     }
@@ -36,6 +37,11 @@ describe("UX TOP 6 contract", () => {
       expect(src).toContain("calculatorShellClassName(viewMode)");
       expect(src).not.toContain("ProductFloatingNav");
     }
+  });
+
+  it("PV má tiered hero akce (TOP 4 vzor)", () => {
+    expect(readSource("src/PhmaxPvPage.tsx")).toContain("HeroActionsTiered");
+    expect(readSource("src/HeroActionsTiered.tsx")).toContain('aria-label="Hlavní akce"');
   });
 
   it("ZŠ má ResultAnchorCard, ZsModuleGate a PageTableOfContents", () => {
