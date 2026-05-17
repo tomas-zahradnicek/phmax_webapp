@@ -60,7 +60,6 @@ import {
   IconPrintSummary,
   IconResetAll,
   IconRestoreQuick,
-  IconSaveQuick,
   IconSpinner,
 } from "./HeroActionIconButton";
 import { ErrorBoundary } from "./ErrorBoundary";
@@ -70,6 +69,8 @@ import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
 import { ResultAnchorCard } from "./ResultAnchorCard";
+import { HeroActionsTiered } from "./HeroActionsTiered";
+import { CollapsibleSection } from "./CollapsibleSection";
 import { PageTableOfContents } from "./PageTableOfContents";
 import { calculatorShellClassName } from "./calculator-view-mode";
 import { ZsModuleGate } from "./ZsModuleGate";
@@ -2252,6 +2253,49 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             </div>
           </div>
 
+          <div className="hero-result-layout">
+            <ResultAnchorCard
+              tone={zsVerdict.tone}
+              primaryLabel={zsTabPrimaryLabel}
+              primaryValue={zsTabPrimaryValue}
+              statusBadge={incompleteSections > 0 ? `Nevyplněné části: ${incompleteSections}` : "Vstupy kompletní"}
+              stats={[
+                { label: "PHmax", value: totalPhmax },
+                { label: "PHAmax", value: totalPha },
+                { label: "PHPmax", value: totalPhp },
+                { label: "Režim", value: MODE_CONFIG[mode].label },
+              ]}
+              verdictLabel={zsVerdict.label}
+              verdictDetail={zsVerdict.detail}
+            />
+            <CollapsibleSection
+              summary="Další kroky, workflow a exporty"
+              defaultOpen={viewMode === "expert"}
+              level="advanced"
+            >
+              <p
+                className="muted-text"
+                style={{ margin: "0 0 10px", fontSize: "0.86rem", lineHeight: 1.5 }}
+                aria-live="polite"
+              >
+                <strong>Průběh:</strong> {formatZsLayContextLine(MODE_CONFIG[mode].label, tab, incompleteSections)}
+              </p>
+              <VerdictNextStepsPanel
+                hideVerdict
+                tone={zsVerdict.tone}
+                verdictLabel={zsVerdict.label}
+                verdictDetail={zsVerdict.detail}
+                recommendedStep={zsWorkflow.recommendedStep}
+                workflowSteps={zsWorkflow.steps}
+                actions={[
+                  { label: "Uložit scénář", onClick: saveSnapshotManually },
+                  { label: "Export CSV", onClick: handleExportCsv },
+                  { label: "Porovnat se zálohou", onClick: handleCompareZsWithNamedSnapshot },
+                ]}
+              />
+            </CollapsibleSection>
+          </div>
+
           <section className="hero-zone-actions" aria-label="Akce výpočtu">
             <p className="hero-zone-label">C. Akce</p>
             <div className="hero-actions">
@@ -2330,155 +2374,150 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               </p>
             </div>
             <HeroActionsDrawer>
-              <div className="hero-actions__group hero-actions__group--primary">
-                <HeroIconActionButton
-                  className="btn btn--light"
-                  label="Tisk stránky"
-                  icon={<IconPrint />}
-                  onClick={() => window.print()}
-                />
-                <HeroIconActionButton
-                  className="btn ghost"
-                  label="Rychle uložit průběh do prohlížeče"
-                  icon={<IconSaveQuick />}
-                  onClick={saveSnapshotManually}
-                />
-                <HeroIconActionButton
-                  className="btn ghost"
-                  label="Rychle obnovit uložený průběh"
-                  icon={<IconRestoreQuick />}
-                  onClick={restoreSnapshot}
-                />
-              </div>
-              <hr className="hero-actions__divider" aria-hidden="true" />
-              <div className="hero-actions__group hero-actions__group--meta">
-                <HeroIconActionButton
-                  className="btn ghost"
-                  label="Vymazat uložená data v prohlížeči"
-                  icon={<IconClearStored />}
-                  onClick={clearStoredSnapshot}
-                />
-                <HeroIconActionButton
-                  className="btn ghost"
-                  label="Vymazat všechny údaje ve formuláři"
-                  icon={<IconResetAll />}
-                  onClick={resetAll}
-                />
-              </div>
-              <div className="hero-actions__group hero-actions__group--named">
-                <div className="hero-named-grid" aria-label="Export a pojmenované zálohy">
-                  <p className="muted-text" style={{ gridColumn: "1 / -1", margin: "0 0 6px", fontSize: "0.85rem", lineHeight: 1.45 }}>
-                    {namedBackupsMicrocopy(MAX_NAMED_SNAPSHOTS, "kompletní stav ZŠ včetně aktivní záložky a označení pro export")}
-                  </p>
-                  <label className="hero-named-field hero-named-field--export">
-                    <span className="field__label field__label--hero-named">Označení pro export</span>
-                    <input
-                      type="text"
-                      className="input"
-                      placeholder="např. název školy, školní rok…"
-                      value={exportLabel}
-                      onChange={(e) => setExportLabel(e.target.value)}
-                      aria-label="Označení pro export a shrnutí"
-                    />
-                  </label>
-                  <label className="hero-named-field hero-named-field--backup-name">
-                    <span className="field__label field__label--hero-named">
-                      {NAMED_BACKUPS_NAME_LABEL}
-                      <span
-                        title={namedBackupsMicrocopy(MAX_NAMED_SNAPSHOTS, "kompletní stav ZŠ včetně aktivní záložky a označení pro export")}
-                        aria-label={namedBackupsMicrocopy(MAX_NAMED_SNAPSHOTS, "kompletní stav ZŠ včetně aktivní záložky a označení pro export")}
-                        className="help-hint"
-                      >
-                        i
-                      </span>
-                    </span>
-                    <input
-                      type="text"
-                      className="input"
-                      placeholder="např. stav 2026/27"
-                      value={namedSaveName}
-                      onChange={(e) => setNamedSaveName(e.target.value)}
-                      aria-label="Název pojmenované zálohy"
-                    />
-                  </label>
-                  <div className="hero-named-field hero-named-field--save">
-                    <span className="hero-named-field__btn-slot" aria-hidden="true" />
-                    <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
-                      {NAMED_BACKUPS_SAVE_LABEL}
+              <HeroActionsTiered
+                primary={
+                  <>
+                    <button type="button" className="btn btn--light hero-actions-tiered__cta" onClick={saveSnapshotManually}>
+                      Uložit průběh
                     </button>
-                  </div>
-                  <div className="hero-named-field hero-named-field--select">
-                    <select
-                      className="input"
-                      value={selectedNamedId}
-                      onChange={(e) => setSelectedNamedId(e.target.value)}
-                      aria-label="Vybrat uloženou zálohu"
-                    >
-                      <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
-                      {namedSnapshots.map((n) => (
-                        <option key={n.id} value={n.id}>
-                          {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="hero-named-field hero-named-field--restore-delete">
-                    <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
-                      {NAMED_BACKUPS_RESTORE_LABEL}
-                    </button>
-                    <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
-                      {NAMED_BACKUPS_DELETE_LABEL}
-                    </button>
-                  </div>
-                <div className="hero-named-field ux-expert-only" style={{ gridColumn: "1 / -1" }}>
-                  <p className="hero-actions__group-title">{ADVANCED_AUDIT_GROUP_LABEL}</p>
-                  <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareZsWithNamedSnapshot}>
-                    {NAMED_BACKUPS_COMPARE_JSON_LABEL}
-                  </button>
-                  <button type="button" className="btn ghost btn--hero-named" onClick={handleExportZsAuditJson}>
-                    Stáhnout auditní protokol (JSON)
-                  </button>
-                </div>
-                  <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
-                    <CompareVariantsPanel
-                      title="Porovnání 2 variant (náhled)"
-                      result={zsComparePreview}
-                      emptyHint="Vyberte pojmenovanou zálohu se součty auditního exportu pro porovnání s aktuálním stavem."
-                      exportSlug="zs"
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn btn--light"
+                      label="Tisk stránky"
+                      icon={<IconPrint />}
+                      onClick={() => window.print()}
                     />
-                  </div>
-                </div>
-              </div>
-
-              <div className="hero-actions__group hero-actions__group--exports">
-                <HeroIconActionButton
-                  className="btn ghost"
-                  label="Exportovat data jako CSV"
-                  icon={<IconCsv />}
-                  onClick={handleExportCsv}
-                />
-                <HeroIconActionButton
-                  className="btn ghost"
-                  label={xlsxExportBusy ? "Připravuji Excel…" : "Stáhnout shrnutí jako Excel (.xlsx)"}
-                  icon={xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
-                  disabled={xlsxExportBusy}
-                  aria-busy={xlsxExportBusy}
-                  showLabel={xlsxExportBusy}
-                  onClick={() => void handleExportXlsx()}
-                />
-                <HeroIconActionButton
-                  className="btn ghost"
-                  label="Kopírovat textové shrnutí do schránky"
-                  icon={<IconCopy />}
-                  onClick={copySummaryToClipboard}
-                />
-                <HeroIconActionButton
-                  className="btn ghost"
-                  label="Tisk textového shrnutí"
-                  icon={<IconPrintSummary />}
-                  onClick={printSummaryWindow}
-                />
-              </div>
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost"
+                      label="Export CSV"
+                      icon={<IconCsv />}
+                      onClick={handleExportCsv}
+                    />
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost"
+                      label={xlsxExportBusy ? "Připravuji Excel…" : "Export Excel"}
+                      icon={xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
+                      disabled={xlsxExportBusy}
+                      aria-busy={xlsxExportBusy}
+                      onClick={() => void handleExportXlsx()}
+                    />
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn btn--light"
+                      label="Tisk shrnutí"
+                      icon={<IconPrintSummary />}
+                      onClick={printSummaryWindow}
+                    />
+                  </>
+                }
+                backups={
+                  <>
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost"
+                      label="Obnovit uložený průběh"
+                      icon={<IconRestoreQuick />}
+                      onClick={restoreSnapshot}
+                    />
+                    <div className="hero-named-grid hero-actions-tiered__named" aria-label="Pojmenované zálohy">
+                      <p className="hero-actions-tiered__hint">
+                        {namedBackupsMicrocopy(MAX_NAMED_SNAPSHOTS, "kompletní stav ZŠ včetně aktivní záložky a označení pro export")}
+                      </p>
+                      <label className="hero-named-field hero-named-field--export">
+                        <span className="field__label field__label--hero-named">Označení pro export</span>
+                        <input
+                          type="text"
+                          className="input"
+                          placeholder="např. název školy, školní rok…"
+                          value={exportLabel}
+                          onChange={(e) => setExportLabel(e.target.value)}
+                          aria-label="Označení pro export a shrnutí"
+                        />
+                      </label>
+                      <label className="hero-named-field hero-named-field--backup-name">
+                        <span className="field__label field__label--hero-named">{NAMED_BACKUPS_NAME_LABEL}</span>
+                        <input
+                          type="text"
+                          className="input"
+                          placeholder="např. stav 2026/27"
+                          value={namedSaveName}
+                          onChange={(e) => setNamedSaveName(e.target.value)}
+                          aria-label="Název pojmenované zálohy"
+                        />
+                      </label>
+                      <div className="hero-named-field hero-named-field--save">
+                        <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
+                          {NAMED_BACKUPS_SAVE_LABEL}
+                        </button>
+                      </div>
+                      <div className="hero-named-field hero-named-field--select">
+                        <select
+                          className="input"
+                          value={selectedNamedId}
+                          onChange={(e) => setSelectedNamedId(e.target.value)}
+                          aria-label="Vybrat uloženou zálohu"
+                        >
+                          <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
+                          {namedSnapshots.map((n) => (
+                            <option key={n.id} value={n.id}>
+                              {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="hero-named-field hero-named-field--restore-delete">
+                        <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
+                          {NAMED_BACKUPS_RESTORE_LABEL}
+                        </button>
+                        <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
+                          {NAMED_BACKUPS_DELETE_LABEL}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                }
+                technical={
+                  <>
+                    <button type="button" className="btn ghost btn--hero-named ux-expert-only" onClick={handleCompareZsWithNamedSnapshot}>
+                      {NAMED_BACKUPS_COMPARE_JSON_LABEL}
+                    </button>
+                    <button type="button" className="btn ghost btn--hero-named ux-expert-only" onClick={handleExportZsAuditJson}>
+                      Stáhnout audit (JSON)
+                    </button>
+                    <div className="ux-expert-only hero-actions-tiered__compare">
+                      <CompareVariantsPanel
+                        title="Porovnání 2 variant (náhled)"
+                        result={zsComparePreview}
+                        emptyHint="Vyberte pojmenovanou zálohu se součty auditního exportu pro porovnání s aktuálním stavem."
+                        exportSlug="zs"
+                      />
+                    </div>
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost"
+                      label="Kopírovat shrnutí"
+                      icon={<IconCopy />}
+                      onClick={copySummaryToClipboard}
+                    />
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost"
+                      label="Vymazat uložená data"
+                      icon={<IconClearStored />}
+                      onClick={clearStoredSnapshot}
+                    />
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost"
+                      label="Vymazat formulář"
+                      icon={<IconResetAll />}
+                      onClick={resetAll}
+                    />
+                  </>
+                }
+              />
             </HeroActionsDrawer>
             </div>
           </section>

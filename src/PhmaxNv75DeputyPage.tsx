@@ -2,12 +2,30 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { LegisTooltipRef } from "./LegisTooltipRef";
 import {
+  ADVANCED_AUDIT_GROUP_LABEL,
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   APP_AUTHOR_EXPORT_ROWS,
+  NAMED_BACKUPS_COMPARE_JSON_LABEL,
+  NAMED_BACKUPS_NAME_LABEL,
+  NAMED_BACKUPS_SAVE_LABEL,
+  NAMED_BACKUPS_SELECT_PLACEHOLDER,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
+import { HeroActionsDrawer } from "./HeroActionsDrawer";
+import { HeroActionsTiered } from "./HeroActionsTiered";
+import {
+  HeroIconActionButton,
+  IconAddTableRow,
+  IconCopy,
+  IconCsv,
+  IconExcel,
+  IconPrint,
+  IconPrintSummary,
+  IconResetAll,
+  IconSpinner,
+} from "./HeroActionIconButton";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { buildExportMetaRows, buildOfficialArchiveRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
@@ -846,6 +864,21 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     ovGroupsInstructor,
   ]);
 
+  const restoreNamedSnapshot = useCallback(() => {
+    const named = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!named) {
+      setUiNotice("Nejprve vyberte uloženou zálohu.");
+      return;
+    }
+    setRows(named.snapshot.rows.map(normalizeNv75UiRow));
+    setPracticalGeneralNonOv(named.snapshot.practicalGeneralNonOv);
+    setPracticalOvEhl0(named.snapshot.practicalOvEhl0);
+    setPracticalSec16(named.snapshot.practicalSec16);
+    setOvGroupsSchool(named.snapshot.ovGroupsSchool);
+    setOvGroupsInstructor(named.snapshot.ovGroupsInstructor);
+    setUiNotice(`Obnovena záloha „${named.name}“.`);
+  }, [namedSnapshots, selectedNamedId]);
+
   const summaryText = useMemo(() => {
     const lines = [
       "Shrnutí – NV75 banka odpočtů zástupců (orientačně)",
@@ -960,10 +993,127 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                 { label: "Základ §4b", value: `${bank.bankHoursBase4b} h` },
                 { label: "Bonus §4c + §4d", value: `${bank.bonus4cHours + bank.bonus4dHours} h` },
               ]}
+              statusBadge={nv75InputWarnings.length > 0 ? "Zkontrolujte vstupy" : bank.bankHoursTotal > 0 ? "Banka spočtena" : "Zadejte řádky"}
               verdictLabel={nv75InputWarnings.length > 0 ? "Zkontrolujte vstupy" : "Aplikované pravidlo §4b"}
               verdictDetail={nv75InputWarnings.length > 0 ? nv75InputWarnings[0]! : ruleExplanation}
             />
           </div>
+          <section className="hero-zone-actions" aria-label="Akce výpočtu NV75">
+            <p className="hero-zone-label">Akce</p>
+            <HeroActionsDrawer>
+              <HeroActionsTiered
+                primary={
+                  <>
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost hero-actions-tiered__cta"
+                      label="Přidat řádek"
+                      icon={<IconAddTableRow />}
+                      onClick={addRow}
+                    />
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost"
+                      label="Export CSV"
+                      icon={<IconCsv />}
+                      onClick={handleExportCsv}
+                    />
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost"
+                      label={xlsxExportBusy ? "Připravuji Excel…" : "Export Excel"}
+                      icon={xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
+                      disabled={xlsxExportBusy}
+                      aria-busy={xlsxExportBusy}
+                      onClick={() => void handleExportXlsx()}
+                    />
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn btn--light"
+                      label="Tisk stránky"
+                      icon={<IconPrint />}
+                      onClick={() => window.print()}
+                    />
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn btn--light"
+                      label="Tisk shrnutí"
+                      icon={<IconPrintSummary />}
+                      onClick={printSummary}
+                    />
+                  </>
+                }
+                backups={
+                  <>
+                    <p className="hero-actions-tiered__hint">
+                      Průběh se ukládá automaticky v prohlížeči
+                      {lastSavedAt ? ` (naposledy ${lastSavedAt})` : ""}. Pojmenované scénáře pro porovnání variant:
+                    </p>
+                    <div className="hero-named-grid hero-named-grid--simple hero-actions-tiered__named" aria-label="Pojmenované scénáře">
+                      <label className="hero-named-field hero-named-field--backup-name">
+                        <span className="field__label field__label--hero-named">{NAMED_BACKUPS_NAME_LABEL}</span>
+                        <input
+                          type="text"
+                          className="input"
+                          placeholder="např. varianta 2026/27"
+                          value={namedSaveName}
+                          onChange={(e) => setNamedSaveName(e.target.value)}
+                          aria-label="Název pojmenované zálohy"
+                        />
+                      </label>
+                      <div className="hero-named-field hero-named-field--save">
+                        <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
+                          {NAMED_BACKUPS_SAVE_LABEL}
+                        </button>
+                      </div>
+                      <div className="hero-named-field hero-named-field--select">
+                        <select
+                          className="input"
+                          value={selectedNamedId}
+                          onChange={(e) => setSelectedNamedId(e.target.value)}
+                          aria-label="Vybrat uloženou zálohu"
+                        >
+                          <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
+                          {namedSnapshots.map((snap) => (
+                            <option key={snap.id} value={snap.id}>
+                              {snap.name} ({new Date(snap.savedAt).toLocaleString("cs-CZ")})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="hero-named-field hero-named-field--restore-delete">
+                        <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
+                          Obnovit scénář
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                }
+                technical={
+                  <>
+                    <button type="button" className="btn ghost btn--hero-named ux-expert-only" onClick={compareWithNamedSnapshot}>
+                      {NAMED_BACKUPS_COMPARE_JSON_LABEL}
+                    </button>
+                    <p className="hero-actions-tiered__hint ux-expert-only">{ADVANCED_AUDIT_GROUP_LABEL}</p>
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost"
+                      label="Kopírovat shrnutí"
+                      icon={<IconCopy />}
+                      onClick={() => void copySummary()}
+                    />
+                    <HeroIconActionButton
+                      showLabel
+                      className="btn ghost"
+                      label="Vymazat formulář"
+                      icon={<IconResetAll />}
+                      onClick={resetAll}
+                    />
+                  </>
+                }
+              />
+            </HeroActionsDrawer>
+          </section>
         </header>
         {viewMode === "basic" ? (
         <BasicModeSteps
@@ -984,57 +1134,6 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
 
         <section className="card muted section-card" data-section="nv75-vstupy">
           <h2 className="section-title">Vstupy</h2>
-          <div className="toolbar">
-            <button type="button" className="btn ghost" onClick={addRow}>
-              Přidat řádek
-            </button>
-            <button type="button" className="btn ghost" onClick={resetAll}>
-              Reset
-            </button>
-            <button type="button" className="btn ghost" onClick={handleExportCsv}>
-              Export CSV
-            </button>
-            <button type="button" className="btn ghost" onClick={() => void handleExportXlsx()} disabled={xlsxExportBusy}>
-              {xlsxExportBusy ? "Exportuji…" : "Export XLSX"}
-            </button>
-            <button type="button" className="btn ghost" onClick={() => void copySummary()}>
-              Kopírovat shrnutí
-            </button>
-            <button type="button" className="btn ghost" onClick={printSummary}>
-              Tisk shrnutí
-            </button>
-          </div>
-          <div className="grid two ux-expert-only" style={{ marginTop: 10, gap: 10 }}>
-            <label className="field">
-              <span className="field__label">Název A/B scénáře (uložit zálohu)</span>
-              <input
-                className="input"
-                type="text"
-                value={namedSaveName}
-                onChange={(e) => setNamedSaveName(e.target.value)}
-                placeholder="např. varianta 2026/27"
-              />
-            </label>
-            <div className="field">
-              <span className="field__label">Uložené scénáře pro porovnání</span>
-              <select className="input" value={selectedNamedId} onChange={(e) => setSelectedNamedId(e.target.value)}>
-                <option value="">Vyberte uložený scénář…</option>
-                {namedSnapshots.map((snap) => (
-                  <option key={snap.id} value={snap.id}>
-                    {snap.name} ({new Date(snap.savedAt).toLocaleString("cs-CZ")})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="toolbar ux-expert-only" style={{ marginTop: 8 }}>
-            <button type="button" className="btn ghost" onClick={saveNamedSnapshot}>
-              Uložit A/B scénář
-            </button>
-            <button type="button" className="btn ghost" onClick={compareWithNamedSnapshot}>
-              Porovnat s uloženým scénářem (JSON)
-            </button>
-          </div>
           <label className="field" style={{ marginTop: 10, maxWidth: 760 }}>
             <span className="field__label">Příkladové výpočty (metodika §4b a SŠ/VOŠ/DM)</span>
             <select

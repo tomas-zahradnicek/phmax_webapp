@@ -39,9 +39,22 @@ describe("UX TOP 6 contract", () => {
     }
   });
 
-  it("PV má tiered hero akce (TOP 4 vzor)", () => {
-    expect(readSource("src/PhmaxPvPage.tsx")).toContain("HeroActionsTiered");
+  it("kalkulačky mají tiered hero akce (TOP 4 vzor)", () => {
     expect(readSource("src/HeroActionsTiered.tsx")).toContain('aria-label="Hlavní akce"');
+    for (const page of [
+      "src/PhmaxPvPage.tsx",
+      "src/PhmaxSdPage.tsx",
+      "src/PhmaxSsPage.tsx",
+      "src/PhmaxNv75DeputyPage.tsx",
+      "src/PhmaxZsPage.tsx",
+    ]) {
+      expect(readSource(page)).toContain("HeroActionsTiered");
+    }
+    expect(readSource("src/PhmaxSdPage.tsx")).toContain('data-section="sd-vysledek"');
+    expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain('data-section="ss-vysledek"');
+    expect(readSource("src/PhmaxNv75DeputyPage.tsx")).toContain("hero-zone-actions");
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain("hero-result-layout");
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain("Další kroky, workflow a exporty");
   });
 
   it("ZŠ má ResultAnchorCard, ZsModuleGate a PageTableOfContents", () => {

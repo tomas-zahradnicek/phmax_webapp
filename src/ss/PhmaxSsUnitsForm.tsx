@@ -452,7 +452,7 @@ function PhmaxSsUnitsFormView({
         </p>
       ) : null}
 
-      <div style={{ marginTop: 22 }}>
+      <div style={{ marginTop: 22 }} data-section="ss-vysledek">
         <h3 style={{ marginTop: 0, marginBottom: 10, fontSize: "1.05rem", fontWeight: 700 }}>{sec.previewHeading}</h3>
         <p className="muted-text" style={{ marginBottom: 12, lineHeight: 1.5 }}>
           {sec.previewHint}
