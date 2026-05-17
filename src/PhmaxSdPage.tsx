@@ -54,12 +54,15 @@ import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
 import { HeroStat } from "./HeroStat";
+import { ResultAnchorCard } from "./ResultAnchorCard";
+import { CollapsibleSection } from "./CollapsibleSection";
+import { PageTableOfContents } from "./PageTableOfContents";
+import { calculatorShellClassName } from "./calculator-view-mode";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, SdLegisRef } from "./PhmaxProductLegisUi";
 import { SD_LEGIS_ZAKONY_URL } from "./phmax-sd-legislativa";
-import { ProductFloatingNav } from "./ProductFloatingNav";
 import { QuickOnboarding } from "./QuickOnboarding";
 import { BasicModeSteps } from "./BasicModeSteps";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -1040,8 +1043,20 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     }
   }, [buildSdSnapshot]);
 
+  const sdPhmaxDisplay =
+    detailedResult != null
+      ? formatSdHours(detailedResult.finalPhmax)
+      : basePhmax != null
+        ? formatSdHours(reduction.adjusted)
+        : "–";
+
+  const sdTocSections = [
+    { id: "sd-vstupy", label: "Vstupy a oddělení" },
+    { id: "sd-vysledek", label: "Výsledek PHmax" },
+  ] as const;
+
   return (
-    <>
+    <div className={calculatorShellClassName(viewMode)}>
       <header className="hero hero--feature">
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
@@ -1097,56 +1112,60 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               čtyř oddělení platí další pravidla – vždy vycházejte z úplného znění vyhlášky a metodiky.
             </p>
           </div>
-          <div className="hero__stats hero__stats--compact hero__stats--sd">
-            <p className="hero-zone-kpi">B. Hlavní KPI</p>
-            <HeroStat compact label="Účastníci (1. st.)" value={pupils} />
-            <HeroStat compact label="Oddělení" value={inputMode === "detail" ? detailDepartments.length : effectiveDepts} />
-            <HeroStat
-              compact
-              label="PHmax"
-              value={
-                detailedResult != null
-                  ? formatSdHours(detailedResult.finalPhmax)
-                  : basePhmax != null
-                    ? formatSdHours(reduction.adjusted)
-                    : "–"
-              }
-            />
-            <HeroStat
-              compact
-              label="Krácení § 10 odst. 2"
-              value={
-                reduction.applied
-                  ? `ano (${(Math.round(reduction.factor * 1000) / 10).toLocaleString("cs-CZ")} %)`
-                  : "ne"
-              }
-            />
-          </div>
         </div>
 
-        <p
-          className="muted-text"
-          style={{ marginTop: 6, fontSize: "0.86rem", lineHeight: 1.5, maxWidth: "48rem" }}
-          aria-live="polite"
-        >
-          <strong>Průběh:</strong>{" "}
-          {formatSdLayContextLine(
-            inputMode,
-            inputMode === "detail" ? detailDepartments.length : effectiveDepts,
-          )}
-        </p>
-        <VerdictNextStepsPanel
-          tone={sdVerdict.tone}
-          verdictLabel={sdVerdict.label}
-          verdictDetail={sdVerdict.detail}
-          recommendedStep={sdWorkflow.recommendedStep}
-          workflowSteps={sdWorkflow.steps}
-          actions={[
-            { label: "Uložit scénář", onClick: saveSdSnapshotManually },
-            { label: "Export CSV", onClick: handleExportCsv },
-            { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },
-          ]}
-        />
+        <div className="hero-result-layout">
+          <ResultAnchorCard
+            tone={sdVerdict.tone}
+            primaryLabel="PHmax"
+            primaryValue={sdPhmaxDisplay}
+            stats={[
+              { label: "Účastníci (1. st.)", value: pupils },
+              {
+                label: "Oddělení",
+                value: inputMode === "detail" ? detailDepartments.length : effectiveDepts,
+              },
+              {
+                label: "Krácení § 10 odst. 2",
+                value: reduction.applied
+                  ? `ano (${(Math.round(reduction.factor * 1000) / 10).toLocaleString("cs-CZ")} %)`
+                  : "ne",
+              },
+            ]}
+            verdictLabel={sdVerdict.label}
+            verdictDetail={sdVerdict.detail}
+          />
+          <CollapsibleSection
+            summary="Další kroky, workflow a exporty"
+            defaultOpen={viewMode === "expert"}
+            level="advanced"
+          >
+            <p
+              className="muted-text"
+              style={{ margin: "0 0 10px", fontSize: "0.86rem", lineHeight: 1.5 }}
+              aria-live="polite"
+            >
+              <strong>Průběh:</strong>{" "}
+              {formatSdLayContextLine(
+                inputMode,
+                inputMode === "detail" ? detailDepartments.length : effectiveDepts,
+              )}
+            </p>
+            <VerdictNextStepsPanel
+              hideVerdict
+              tone={sdVerdict.tone}
+              verdictLabel={sdVerdict.label}
+              verdictDetail={sdVerdict.detail}
+              recommendedStep={sdWorkflow.recommendedStep}
+              workflowSteps={sdWorkflow.steps}
+              actions={[
+                { label: "Uložit scénář", onClick: saveSdSnapshotManually },
+                { label: "Export CSV", onClick: handleExportCsv },
+                { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },
+              ]}
+            />
+          </CollapsibleSection>
+        </div>
 
         <section className="hero-zone-actions" aria-label="Akce výpočtu">
           <p className="hero-zone-label">C. Akce</p>
@@ -1310,7 +1329,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                     {NAMED_BACKUPS_DELETE_LABEL}
                   </button>
                 </div>
-                <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                <div className="hero-named-field ux-expert-only" style={{ gridColumn: "1 / -1" }}>
                   <p className="hero-actions__group-title">{ADVANCED_AUDIT_GROUP_LABEL}</p>
                   <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareWithNamedSnapshot}>
                     {NAMED_BACKUPS_COMPARE_JSON_LABEL}
@@ -1319,7 +1338,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                     Stáhnout auditní protokol (JSON)
                   </button>
                 </div>
-                <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
+                <div className="hero-named-field ux-expert-only" style={{ gridColumn: "1 / -1" }}>
                   <CompareVariantsPanel
                     title="Porovnání 2 variant (náhled)"
                     result={sdComparePreview}
@@ -1382,7 +1401,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         />
       ) : null}
 
-      <section className="card section-card section-card--sd">
+      <section className="card section-card section-card--sd" data-section="sd-vstupy">
         <h2 className="section-title">Vstupy</h2>
         <InputOutputLegend />
         <p className="muted-text" style={{ marginTop: 10 }}>
@@ -2455,13 +2474,17 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         />
         <AuthorCreditFooter />
       </footer>
-      <ProductFloatingNav active={productView} setProductView={setProductView} />
+      <PageTableOfContents
+        sections={sdTocSections}
+        productView={productView}
+        setProductView={setProductView}
+      />
       <GlossaryDialog
         open={glossaryOpen}
         onClose={() => setGlossaryOpen(false)}
         terms={SD_GLOSSARY_TERMS}
         triggerRef={glossaryTriggerRef}
       />
-    </>
+    </div>
   );
 }

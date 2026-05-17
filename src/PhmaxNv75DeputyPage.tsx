@@ -12,9 +12,12 @@ import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./e
 import { buildExportMetaRows, buildOfficialArchiveRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { ProductFloatingNav } from "./ProductFloatingNav";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { BasicModeSteps } from "./BasicModeSteps";
+import { ResultAnchorCard, type ResultAnchorTone } from "./ResultAnchorCard";
+import { PageTableOfContents } from "./PageTableOfContents";
+import { CollapsibleSection } from "./CollapsibleSection";
+import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { NV75_DEPUTY_LEGIS_TOOLTIPS, NV75_DEPUTY_LEGIS_URL } from "./nv75-deputy-legislativa";
 import { calculateNv75DeputyBank, type Nv75DeputyKind } from "./nv75-deputy-bank";
@@ -54,6 +57,7 @@ type Nv75ExampleKey =
 
 const NV75_STORAGE_KEY = "edu-cz-nv75-deputy-bank-state";
 const NV75_NAMED_SNAPSHOTS_KEY = "edu-cz-nv75-deputy-bank-named-snapshots";
+const NV75_VIEW_MODE_LS_KEY = "phmax-nv75-view-mode";
 const NV75_MAX_NAMED_SNAPSHOTS = 12;
 
 type Nv75NamedSnapshot = {
@@ -543,11 +547,27 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const [namedSnapshots, setNamedSnapshots] = useState<Nv75NamedSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
+  const [viewMode, setViewMode] = useState<CalculatorViewMode>(() => {
+    try {
+      const stored = localStorage.getItem(NV75_VIEW_MODE_LS_KEY);
+      return stored === "expert" ? "expert" : "basic";
+    } catch {
+      return "basic";
+    }
+  });
   const selectedExampleDetails = useMemo(() => NV75_EXAMPLES.find((x) => x.id === selectedExample), [selectedExample]);
 
   useEffect(() => {
     setNamedSnapshots(readNv75NamedSnapshots());
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(NV75_VIEW_MODE_LS_KEY, viewMode);
+    } catch {
+      /* ignore */
+    }
+  }, [viewMode]);
 
   useEffect(() => {
     try {
@@ -874,6 +894,18 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     }
   }, [bank.appliedRule]);
 
+  const nv75AnchorTone: ResultAnchorTone =
+    nv75InputWarnings.length > 0 || !bank.appliedRule
+      ? "warning"
+      : bank.bankHoursTotal > 0
+        ? "ok"
+        : "neutral";
+
+  const nv75TocSections = [
+    { id: "nv75-vysledek", label: "Banka odpočtů" },
+    { id: "nv75-vstupy", label: "Vstupy a řádky" },
+  ] as const;
+
   const printSummary = useCallback(() => {
     const plain = stripAppAuthorCreditFromPlainSummary(summaryText);
     const text = plain.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
@@ -890,18 +922,50 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   }, [summaryText]);
 
   return (
-    <div className="app-shell app-shell--gradient">
+    <div className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode)}`}>
       <div className="container container--app">
         <header className="hero hero--feature">
-          <div className="hero__content">
+          <div className="hero__pills-row">
             <ProductViewPills productView={productView} setProductView={setProductView} />
-            <h1 className="hero__title">NV75 – banka odpočtů zástupců</h1>
-            <p className="hero__subtitle">
-              Samostatná kalkulačka dle §4b až §4d NV č. 75/2005 Sb. pro orientační výpočet celkového snížení PPČ
-              zástupců ředitele.
-            </p>
+            <div className="hero__pills-row-trailing">
+              <div className="checks" role="group" aria-label="Režim zobrazení NV75">
+                <label>
+                  <input
+                    type="radio"
+                    name="nv75-view-mode"
+                    checked={viewMode === "basic"}
+                    onChange={() => setViewMode("basic")}
+                  />
+                  Základní
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="nv75-view-mode"
+                    checked={viewMode === "expert"}
+                    onChange={() => setViewMode("expert")}
+                  />
+                  Expertní
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="hero-result-layout">
+            <ResultAnchorCard
+              tone={nv75AnchorTone}
+              primaryLabel="Banka odpočtů celkem"
+              primaryValue={`${bank.bankHoursTotal} h/týden`}
+              stats={[
+                { label: "Pravidlo §4b", value: bank.appliedRule || "–" },
+                { label: "Základ §4b", value: `${bank.bankHoursBase4b} h` },
+                { label: "Bonus §4c + §4d", value: `${bank.bonus4cHours + bank.bonus4dHours} h` },
+              ]}
+              verdictLabel={nv75InputWarnings.length > 0 ? "Zkontrolujte vstupy" : "Aplikované pravidlo §4b"}
+              verdictDetail={nv75InputWarnings.length > 0 ? nv75InputWarnings[0]! : ruleExplanation}
+            />
           </div>
         </header>
+        {viewMode === "basic" ? (
         <BasicModeSteps
           heading="Rychlý start pro NV75"
           lead="Tři kroky bez duplicit metodiky: řádky -> příklad -> kontrola banky odpočtů."
@@ -916,8 +980,9 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             { title: "Ověřte banku odpočtů", text: "Ve výsledku ověřte aplikované pravidlo §4b, celkový počet hodin i případný dopad §4c/§4d." },
           ]}
         />
+        ) : null}
 
-        <section className="card muted section-card">
+        <section className="card muted section-card" data-section="nv75-vstupy">
           <h2 className="section-title">Vstupy</h2>
           <div className="toolbar">
             <button type="button" className="btn ghost" onClick={addRow}>
@@ -939,7 +1004,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               Tisk shrnutí
             </button>
           </div>
-          <div className="grid two" style={{ marginTop: 10, gap: 10 }}>
+          <div className="grid two ux-expert-only" style={{ marginTop: 10, gap: 10 }}>
             <label className="field">
               <span className="field__label">Název A/B scénáře (uložit zálohu)</span>
               <input
@@ -962,7 +1027,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               </select>
             </div>
           </div>
-          <div className="toolbar" style={{ marginTop: 8 }}>
+          <div className="toolbar ux-expert-only" style={{ marginTop: 8 }}>
             <button type="button" className="btn ghost" onClick={saveNamedSnapshot}>
               Uložit A/B scénář
             </button>
@@ -1173,7 +1238,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           </div>
         </section>
 
-        <section className="card muted section-card section-card--overview">
+        <section className="card muted section-card section-card--overview" data-section="nv75-vysledek">
           <h2 className="section-title">Výsledek banky odpočtů</h2>
           <div className="grid four">
             <div className="result-card"><p className="result-card__label">Pravidlo <Nv75LegisRef citeId="nv75-4b" label="§4b" /></p><p className="result-card__value">{bank.appliedRule}</p></div>
@@ -1187,6 +1252,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             <div className="result-card"><p className="result-card__label">OV ekvivalent skupin</p><p className="result-card__value">{bank.ovGroupsEquivalent}</p></div>
             <div className="result-card"><p className="result-card__label">OV funkce dle <Nv75LegisRef citeId="vyhl13-7" label="vyhl. 13/2005" /></p><p className="result-card__value">{bank.ovDeputyEntitlementCount}</p></div>
           </div>
+          <CollapsibleSection summary="Detailní audit pracovišť a pásma" defaultOpen={viewMode === "expert"} level="advanced">
           <div className="sd-phmax-breakdown-scroll" style={{ marginTop: 12 }}>
             <table className="sd-phmax-breakdown">
               <thead>
@@ -1252,6 +1318,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               </tbody>
             </table>
           </div>
+          </CollapsibleSection>
           <div className="card muted" style={{ marginTop: 12 }}>
             <h3 className="section-title" style={{ marginTop: 0 }}>Odůvodnění výsledku (metodika + NV75)</h3>
             <ul className="methodology-strip__list">
@@ -1301,7 +1368,11 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           <AuthorCreditFooter />
         </footer>
       </div>
-      <ProductFloatingNav active={productView} setProductView={setProductView} />
+      <PageTableOfContents
+        sections={nv75TocSections}
+        productView={productView}
+        setProductView={setProductView}
+      />
     </div>
   );
 }

@@ -69,6 +69,18 @@ import { TableOuter } from "./TableOuter";
 import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { VerdictNextStepsPanel } from "./VerdictNextStepsPanel";
+import { ResultAnchorCard } from "./ResultAnchorCard";
+import { PageTableOfContents } from "./PageTableOfContents";
+import { calculatorShellClassName } from "./calculator-view-mode";
+import { ZsModuleGate } from "./ZsModuleGate";
+import { ZsBasicWizard } from "./ZsBasicWizard";
+import {
+  clampZsBasicWizardStep,
+  readZsBasicWizardStep,
+  resolveZsWizardScrollSection,
+  ZS_BASIC_WIZARD_LS_KEY,
+  type ZsBasicWizardStep,
+} from "./zs-basic-wizard";
 import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import {
   ADVANCED_AUDIT_GROUP_LABEL,
@@ -413,6 +425,16 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       /* ignore */
     }
   }, [viewMode]);
+
+  const [zsWizardStep, setZsWizardStep] = useState<ZsBasicWizardStep>(readZsBasicWizardStep);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ZS_BASIC_WIZARD_LS_KEY, String(zsWizardStep));
+    } catch {
+      /* ignore */
+    }
+  }, [zsWizardStep]);
 
   const visibleSections = useMemo(() => getVisibleSections(mode), [mode]);
   const hasSection = (section: FormSection) => visibleSections.includes(section);
@@ -1322,6 +1344,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     phpExcludedSchool,
     selectedExample,
     wizardChoice,
+    zsWizardStep,
     dataMode,
     nv75Role,
     nv75School,
@@ -1391,6 +1414,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     setPhpExcludedSchool(Boolean(s.phpExcludedSchool));
     setSelectedExample((s.selectedExample as ExampleKey) ?? "");
     setWizardChoice((s.wizardChoice as WizardChoice) ?? "");
+    if (typeof s.zsWizardStep === "number") {
+      setZsWizardStep(clampZsBasicWizardStep(s.zsWizardStep));
+    }
     setDataMode((s.dataMode as DataMode) ?? "own");
     setNv75Role(s.nv75Role === "reditel" ? "reditel" : "ucitel");
     setNv75School(s.nv75School === "plavecka_skola" ? "plavecka_skola" : "plavecka_skola");
@@ -2075,8 +2101,81 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     workspaceStickyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const zsBasicWizardActive = viewMode === "basic" && tab === "phmax";
+
+  const zsWizardVisibleExceptionIds = useMemo(() => {
+    const ids: string[] = [];
+    if (hasSection("sec16_first") || hasSection("sec16_second")) ids.push("sec16");
+    if (hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) {
+      ids.push("special");
+    }
+    if (hasSection("psych_groups")) ids.push("psych");
+    if (hasSection("health_groups")) ids.push("health");
+    if (hasSection("minority_first")) ids.push("minority");
+    if (hasSection("gym_groups")) ids.push("gym");
+    if (hasSection("dominant_c_first") || hasSection("dominant_b_first")) ids.push("mixed");
+    if (hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) {
+      ids.push("extras");
+    }
+    return ids;
+  }, [mode, visibleSections]);
+
+  const zsWizardHasExceptions = zsWizardVisibleExceptionIds.length > 0;
+
+  const zsWizardChoiceOptions = useMemo(
+    () =>
+      [
+        { value: "php_small", label: "Menší škola – PHPmax", title: WIZARD_CHOICE_TITLES.php_small },
+        { value: "php_deductions", label: "PHPmax – nezapočítávaní žáci", title: WIZARD_CHOICE_TITLES.php_deductions },
+        { value: "ph_inclusion", label: "Inkluze a § 16/9", title: WIZARD_CHOICE_TITLES.ph_inclusion },
+        { value: "ph_psych", label: "Škola při psychiatrii", title: WIZARD_CHOICE_TITLES.ph_psych },
+        { value: "ph_health", label: "ZŠ při zdravotnickém zařízení", title: WIZARD_CHOICE_TITLES.ph_health },
+        { value: "ph_mixed", label: "Smíšené třídy", title: WIZARD_CHOICE_TITLES.ph_mixed },
+        { value: "ph_prep", label: "Přípravná třída / stupeň ZŠS", title: WIZARD_CHOICE_TITLES.ph_prep },
+      ] as const,
+    [],
+  );
+
+  const goToZsWizardStep = useCallback(
+    (step: ZsBasicWizardStep) => {
+      setZsWizardStep(step);
+      window.requestAnimationFrame(() => {
+        goToSection(resolveZsWizardScrollSection(step, zsWizardVisibleExceptionIds));
+      });
+    },
+    [goToSection, zsWizardVisibleExceptionIds],
+  );
+
+  const handleZsWizardBack = useCallback(() => {
+    goToZsWizardStep(clampZsBasicWizardStep(zsWizardStep - 1));
+  }, [goToZsWizardStep, zsWizardStep]);
+
+  const handleZsWizardNext = useCallback(() => {
+    if (zsWizardStep >= 4) {
+      goToSection("overview");
+      return;
+    }
+    if (zsWizardStep === 3 && !zsWizardHasExceptions) {
+      goToZsWizardStep(4);
+      return;
+    }
+    goToZsWizardStep(clampZsBasicWizardStep(zsWizardStep + 1));
+  }, [goToSection, goToZsWizardStep, zsWizardHasExceptions, zsWizardStep]);
+
+  const zsTocSections = [
+    { id: "setup", label: "Typ školy a režim" },
+    { id: "basic", label: "Běžné třídy" },
+    { id: "phmax-summary", label: "Souhrn PHmax" },
+    { id: "overview", label: "Celkový přehled" },
+  ] as const;
+
+  const zsTabPrimaryLabel = tab === "phmax" ? "PHmax celkem" : tab === "pha" ? "PHAmax celkem" : "PHPmax celkem";
+  const zsTabPrimaryValue = tab === "phmax" ? totalPhmax : tab === "pha" ? totalPha : totalPhp;
+
   return (
-    <div className={`app-shell app-shell--gradient${validationHighlight ? " app-shell--validation-hint" : ""}`}>
+    <div
+      className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode)}${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}`}
+    >
       <div className="container container--app">
         <header className="hero hero--feature">
           <div className="hero__orb hero__orb--one" />
@@ -2127,15 +2226,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                 Soustředí se na PHmax, PHAmax a PHPmax.
                 Hodí se zejména ředitelům a vedení škol.
               </p>
-            </div>
-
-            <div className="hero__stats">
-              <p className="hero-zone-kpi">B. Hlavní KPI</p>
-              <HeroStat label="Aktivní modul" value={tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"} />
-              <HeroStat label="Zvolený režim" value={MODE_CONFIG[mode].label} />
-              <HeroStat label="Výsledek PHmax" value={totalPhmax} />
-              <HeroStat label="Výsledek PHAmax" value={totalPha} />
-              <HeroStat label="Výsledek PHPmax" value={totalPhp} />
             </div>
           </div>
 
@@ -2317,15 +2407,15 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                       {NAMED_BACKUPS_DELETE_LABEL}
                     </button>
                   </div>
-                  <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
-                    <p className="hero-actions__group-title">{ADVANCED_AUDIT_GROUP_LABEL}</p>
-                    <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareZsWithNamedSnapshot}>
-                      {NAMED_BACKUPS_COMPARE_JSON_LABEL}
-                    </button>
-                    <button type="button" className="btn ghost btn--hero-named" onClick={handleExportZsAuditJson}>
-                      Stáhnout auditní protokol (JSON)
-                    </button>
-                  </div>
+                <div className="hero-named-field ux-expert-only" style={{ gridColumn: "1 / -1" }}>
+                  <p className="hero-actions__group-title">{ADVANCED_AUDIT_GROUP_LABEL}</p>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={handleCompareZsWithNamedSnapshot}>
+                    {NAMED_BACKUPS_COMPARE_JSON_LABEL}
+                  </button>
+                  <button type="button" className="btn ghost btn--hero-named" onClick={handleExportZsAuditJson}>
+                    Stáhnout auditní protokol (JSON)
+                  </button>
+                </div>
                   <div className="hero-named-field" style={{ gridColumn: "1 / -1" }}>
                     <CompareVariantsPanel
                       title="Porovnání 2 variant (náhled)"
@@ -2411,21 +2501,36 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             Aplikace slouží k orientačnímu výpočtu; nejedná se o oficiální výstup zřizovatele.
           </p>
         </QuickOnboarding>
-        {viewMode === "basic" ? (
-        <BasicModeSteps
-          heading="Rychlý start pro ZŠ"
-          lead="Stejný vizuální vzor jako v expertním režimu, zkrácený na 3 kroky."
-          steps={[
-            { title: "Vyberte režim výpočtu školy", text: "V sekci „Typ školy a režim výpočtu“ vyberte správnou variantu." },
-            {
-              title: "Načtěte ukázkový příklad nahoře",
-              text: "V horní liště načtěte ukázku/situaci pro rychlé předvyplnění formuláře.",
-              ctaLabel: "Přejít na ukázkový příklad",
-              ctaTargetId: "zs-hero-example-select",
-            },
-            { title: "Ověřte modulové vstupy", text: "Vyplňte PHmax, PHAmax nebo PHPmax podle aktivní záložky a ověřte průběžný i celkový přehled." },
-          ]}
-        />
+        {zsBasicWizardActive ? (
+          <ZsBasicWizard
+            step={zsWizardStep}
+            modeLabel={MODE_CONFIG[mode].label}
+            hasExceptionModules={zsWizardHasExceptions}
+            wizardChoice={wizardChoice}
+            wizardOptions={zsWizardChoiceOptions}
+            onWizardChoice={(value) => applyWizardChoice(value as WizardChoice)}
+            onStepChange={goToZsWizardStep}
+            onBack={handleZsWizardBack}
+            onNext={handleZsWizardNext}
+          />
+        ) : viewMode === "basic" ? (
+          <BasicModeSteps
+            heading="Rychlý start pro ZŠ"
+            lead="Pro průvodce krok za krokem přepněte na záložku PHmax. Zde stručný přehled pro PHAmax a PHPmax."
+            steps={[
+              { title: "Vyberte režim výpočtu školy", text: "V sekci „Typ školy a režim výpočtu“ vyberte správnou variantu." },
+              {
+                title: "Načtěte ukázkový příklad nahoře",
+                text: "V horní liště načtěte ukázku/situaci pro rychlé předvyplnění formuláře.",
+                ctaLabel: "Přejít na ukázkový příklad",
+                ctaTargetId: "zs-hero-example-select",
+              },
+              {
+                title: "Ověřte modulové vstupy",
+                text: "Vyplňte PHAmax nebo PHPmax podle aktivní záložky a ověřte průběžný přehled.",
+              },
+            ]}
+          />
         ) : null}
 
         {viewMode === "expert" ? (
@@ -2534,7 +2639,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         </section>
         ) : null}
 
-        <section className="card card--elevated section-card section-card--setup" data-section="setup">
+        <section className="card card--elevated section-card section-card--setup" data-section="setup" data-wizard-step="1">
           <h2 className="section-title">Typ školy a režim výpočtu</h2>
           <SectionLead>
             Tady vyberete, jaký typ výpočtu chcete zobrazit. Rozcestník výše vám může s výběrem pomoci.
@@ -2597,7 +2702,21 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             <p className="muted-text" style={{ marginTop: 10, marginBottom: 0, fontSize: "0.86rem" }}>
               <strong>Aktuální kontext:</strong> {formatZsLayContextLine(MODE_CONFIG[mode].label, tab, incompleteSections)}
             </p>
+            <ResultAnchorCard
+              tone={zsVerdict.tone}
+              primaryLabel={zsTabPrimaryLabel}
+              primaryValue={zsTabPrimaryValue}
+              stats={[
+                { label: "PHmax", value: totalPhmax },
+                { label: "PHAmax", value: totalPha },
+                { label: "PHPmax", value: totalPhp },
+                { label: "Režim", value: MODE_CONFIG[mode].label },
+              ]}
+              verdictLabel={zsVerdict.label}
+              verdictDetail={zsVerdict.detail}
+            />
             <VerdictNextStepsPanel
+              hideVerdict
               tone={zsVerdict.tone}
               verdictLabel={zsVerdict.label}
               verdictDetail={zsVerdict.detail}
@@ -2657,8 +2776,17 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
 {tab === "phmax" && (
           <div className="stack">
+            {zsBasicWizardActive && zsWizardStep === 3 && !zsWizardHasExceptions ? (
+              <section className="card muted section-card" data-wizard-step="3" data-section="wizard-exceptions-empty">
+                <h2 className="section-title">Výjimky</h2>
+                <p className="muted-text" style={{ margin: 0 }}>
+                  Pro zvolený režim „{MODE_CONFIG[mode].label}“ nejsou v metodice viditelné doplňkové moduly (§ 16/9, ZŠ
+                  speciální, psychiatrie…). Pokračujte na souhrn nebo změňte režim v kroku 1.
+                </p>
+              </section>
+            ) : null}
             {(hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) && (
-              <section className={`card section-card section-card--module section-card--module-basic${hasIssue("basic") ? " card--needs-attention" : ""}`} data-section="basic">
+              <section className={`card section-card section-card--module section-card--module-basic${hasIssue("basic") ? " card--needs-attention" : ""}`} data-section="basic" data-wizard-step="2">
                 <h2>Běžné třídy ZŠ</h2>
 
                 {hasSection("school_variant_first_stage_only") ? (
@@ -2748,7 +2876,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
             <div className="grid two">
               {(hasSection("sec16_first") || hasSection("sec16_second")) && (
-                <section className="card section-card section-card--module section-card--module-support" data-section="sec16">
+                <ZsModuleGate sectionId="sec16" title="Třídy podle § 16 odst. 9" viewMode={viewMode}>
+                <section className="card section-card section-card--module section-card--module-support" data-section="sec16" data-wizard-step="3">
                   <h2>
                     Třídy podle <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" />
                   </h2>
@@ -2831,10 +2960,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                     />
                   </div>
                 </section>
+                </ZsModuleGate>
               )}
 
               {(hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) && (
-              <section className="card section-card section-card--module section-card--module-special" data-section="special">
+                <ZsModuleGate sectionId="special" title="ZŠ speciální" viewMode={viewMode}>
+              <section className="card section-card section-card--module section-card--module-special" data-section="special" data-wizard-step="3">
                 <h2>ZŠ speciální</h2>
                 <div className="grid two">
                   <NumberField label="I. díl 1. stupeň – třídy" value={special1Classes} onChange={setSpecial1Classes} />
@@ -2857,12 +2988,14 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   <ResultCard label="PHmax ZŠ speciální – celkem" value={specialPhmax} tone="success" />
                 </div>
               </section>
+                </ZsModuleGate>
               )}
             </div>
 
             <div className="grid two">
               {hasSection("psych_groups") && (
-                <section className="card section-card section-card--module section-card--module-psych" data-section="psych">
+                <ZsModuleGate sectionId="psych" title="Škola při psychiatrické nemocnici" viewMode={viewMode}>
+                <section className="card section-card section-card--module section-card--module-psych" data-section="psych" data-wizard-step="3">
                   <h2>Škola při psychiatrické nemocnici <HelpHint text="U této části se pracuje s aktuálním údajem nebo s vyšší hodnotou z aktuálního a předchozího údaje podle zvoleného režimu. Výsledek se pak určí podle příslušného pásma pro 1. stupeň, 2. stupeň nebo společnou výuku." /></h2>
                   <p className="muted-text">Najeďte na ikonu „i“ u nadpisu pro stručnou metodickou nápovědu.</p>
                   <TableOuter aria-label="Tabulka školy při psychiatrické nemocnici">
@@ -2906,10 +3039,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   </TableOuter>
                   <button className="btn ghost" onClick={addPsych}>Přidat třídu / řádek</button>
                 </section>
+                </ZsModuleGate>
               )}
 
               {hasSection("health_groups") && (
-                <section className="card section-card section-card--module section-card--module-psych" data-section="health">
+                <ZsModuleGate sectionId="health" title="ZŠ při zdravotnickém zařízení" viewMode={viewMode}>
+                <section className="card section-card section-card--module section-card--module-psych" data-section="health" data-wizard-step="3">
                   <h2>
                     ZŠ při zdravotnickém zařízení (mimo psychiatrii){" "}
                     <HelpHint text="Řádky B11–B13 dle metodiky ZV v5. Průměr žáků ve třídě se stanoví jako vyšší z průměru za předchozí školní rok a z údaje k aktuálnímu sběru (stejná logika jako u psychiatrické školy). B11 = 1. stupeň, B12 = 2. stupeň, B13 = společná výuka 1. a 2. stupně." />
@@ -2958,10 +3093,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                     Přidat třídu / řádek
                   </button>
                 </section>
+                </ZsModuleGate>
               )}
 
               {hasSection("minority_first") && (
-                <section className="card section-card section-card--module section-card--module-minority" data-section="minority">
+                <ZsModuleGate sectionId="minority" title="ZŠ s jazykem národnostní menšiny" viewMode={viewMode}>
+                <section className="card section-card section-card--module section-card--module-minority" data-section="minority" data-wizard-step="3">
                   <h2>ZŠ s jazykem národnostní menšiny</h2>
                   <select value={minorityType} onChange={(e) => setMinorityType(e.target.value as keyof typeof B17_B21)}>
                     <option value="minority1">1 třída 1. stupně</option>
@@ -3001,12 +3138,14 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                     <ResultCard label="PHmax – jazyk menšiny celkem" value={minorityPhmax} tone="success" />
                   </div>
                 </section>
+                </ZsModuleGate>
               )}
             </div>
 
             <div className="grid two">
               {hasSection("gym_groups") && (
-                <section className="card section-card section-card--module section-card--module-gym" data-section="gym">
+                <ZsModuleGate sectionId="gym" title="Nižší ročníky víceletých gymnázií" viewMode={viewMode}>
+                <section className="card section-card section-card--module section-card--module-gym" data-section="gym" data-wizard-step="3">
                   <h2>Nižší ročníky víceletých gymnázií</h2>
                   <p className="muted-text gym-module__lead">
                     Každý řádek je jeden typ nižšího ročníku gymnázia. Zadejte třídy a žáci; průměr, pásmo a PHmax se dopočítají. Tabulka používá celou šířku karty – na velmi úzkém displeji se může zobrazit posuvník.
@@ -3055,10 +3194,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   </ScrollGrabRegion>
                   <button type="button" className="btn ghost gym-module__add" onClick={addGym}>Přidat třídu / řádek</button>
                 </section>
+                </ZsModuleGate>
               )}
 
               {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
-                <section className="card section-card section-card--module section-card--module-mixed mixed-module" data-section="mixed">
+                <ZsModuleGate sectionId="mixed" title="Smíšené třídy a ZŠ speciální" viewMode={viewMode}>
+                <section className="card section-card section-card--module section-card--module-mixed mixed-module" data-section="mixed" data-wizard-step="3">
                   <h2>
                     Smíšené třídy <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" /> a ZŠ speciální{" "}
                     <HelpHint text="Podle metodiky se tyto třídy posuzují samostatně podle převažujícího oboru vzdělání. Pokud ve třídě převažuje obor 79-01-C/01, použijí se řádky B9 až B10. Pokud převažuje 79-01-B/01 nebo je počet žáků shodný, použijí se řádky B26 až B28." />
@@ -3125,11 +3266,21 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                     </div>
                   </div>
                 </section>
+                </ZsModuleGate>
               )}
             </div>
 
             {(hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) && (
-              <section className="card section-card section-card--module section-card--module-extras" data-section="extras">
+              <ZsModuleGate
+                sectionId="extras"
+                title={
+                  hasSection("prep_class") || hasSection("prep_special")
+                    ? "Samostatné položky PHmax"
+                    : "§ 38 a § 41 (navýšení PHmax)"
+                }
+                viewMode={viewMode}
+              >
+              <section className="card section-card section-card--module section-card--module-extras" data-section="extras" data-wizard-step="3">
                 <h2>
                   {hasSection("prep_class") || hasSection("prep_special") ? (
                     "Samostatné položky PHmax"
@@ -3235,13 +3386,14 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                   ) : null}
                 </div>
               </section>
+              </ZsModuleGate>
             )}
 
             <div className="toolbar">
               <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax</button>
             </div>
 
-            <section className="card muted card--summary section-card section-card--summary-phmax" data-section="phmax-summary">
+            <section className="card muted card--summary section-card section-card--summary-phmax" data-section="phmax-summary" data-wizard-step="4">
               <h2 className="section-title">Souhrn výsledků PHmax</h2>
               <div className="grid four">
                 <ResultCard label="Běžné třídy" value={basicPhmax} />
@@ -3431,6 +3583,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         )}
 
         {tab === "pha" && (
+          <ZsModuleGate sectionId="pha" title="PHAmax – asistenti pedagoga" viewMode={viewMode} defaultOpenInBasic>
           <section className={`card section-card section-card--pha${hasIssue("pha") ? " card--needs-attention" : ""}`} data-section="pha">
             <h2>PHAmax – asistenti pedagoga</h2>
             <p className="muted-text">
@@ -3490,9 +3643,11 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               <ResultCard label="PHAmax – asistenti pedagoga celkem" value={totalPha} />
             </div>
           </section>
+          </ZsModuleGate>
         )}
 
         {tab === "php" && (
+          <ZsModuleGate sectionId="php" title="PHPmax – metodický výpočet" viewMode={viewMode} defaultOpenInBasic>
           <section className={`card section-card section-card--php${hasIssue("php") ? " card--needs-attention" : ""}`} data-section="php">
             <h2>PHPmax – metodický výpočet <HelpHint text="PHPmax se stanoví podle průměrného počtu žáků za předcházející tři roky. Do tohoto počtu se nezapočítávají žáci vzdělávaní v zahraničí, v zahraniční škole v ČR a v individuálním vzdělávání." /></h2>
             <p className="muted-text">
@@ -3622,9 +3777,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               </>
             )}
           </section>
+          </ZsModuleGate>
         )}
 
-        <section className="card muted card--summary section-card section-card--overview" data-section="overview">
+        <section className="card muted card--summary section-card section-card--overview" data-section="overview" data-wizard-step="4">
           <h2 className="section-title">Celkový přehled</h2>
           <p className="muted-text">Výsledky PHmax, PHAmax a PHPmax se stanovují samostatně. Součet níže slouží jen pro orientaci.</p>
           <p className="muted-text">PHmax, PHAmax – asistenti pedagoga a PHPmax – metodický výpočet se stanovují odděleně. Součet níže je přehledový.</p>
@@ -3693,6 +3849,11 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <AuthorCreditFooter />
         </footer>
 
+        <PageTableOfContents
+          sections={zsTocSections}
+          productView={productView}
+          setProductView={setProductView}
+        />
         <GlossaryDialog
           open={glossaryOpen}
           onClose={() => setGlossaryOpen(false)}

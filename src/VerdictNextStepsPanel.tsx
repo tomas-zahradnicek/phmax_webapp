@@ -23,6 +23,8 @@ type VerdictNextStepsPanelProps = {
   actions: readonly NextStepAction[];
   recommendedStep?: string;
   workflowSteps?: readonly WorkflowStep[];
+  /** Skryje text verdiktu (zobrazuje ho např. ResultAnchorCard). */
+  hideVerdict?: boolean;
 };
 
 /**
@@ -35,11 +37,16 @@ export function VerdictNextStepsPanel({
   actions,
   recommendedStep,
   workflowSteps = [],
+  hideVerdict = false,
 }: VerdictNextStepsPanelProps) {
   return (
     <section className={`verdict-panel verdict-panel--${tone}`} aria-label="Verdikt a doporučené další kroky">
-      <p className="verdict-panel__title">{verdictLabel}</p>
-      <p className="verdict-panel__detail">{verdictDetail}</p>
+      {!hideVerdict ? (
+        <>
+          <p className="verdict-panel__title">{verdictLabel}</p>
+          <p className="verdict-panel__detail">{verdictDetail}</p>
+        </>
+      ) : null}
       {recommendedStep ? (
         <p className="verdict-panel__recommended">
           <strong>Doporučený další krok:</strong> {recommendedStep}

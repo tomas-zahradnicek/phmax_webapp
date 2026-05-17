@@ -33,6 +33,7 @@ import {
   SsWhyPhmaxErrorPanel,
   SsWhyPhmaxPanel,
 } from "./SsWhyPanels";
+import { CollapsibleSection } from "../CollapsibleSection";
 import { usePhmaxSsUnits } from "./use-phmax-ss-units";
 import type { PhmaxSsUnitsModel } from "./use-phmax-ss-units";
 
@@ -75,9 +76,12 @@ function SsWhyPhmaxWithExplain({ resolved, unitRow }: { resolved: ServiceResolve
 function PhmaxSsUnitsFormView({
   model,
   hideBackupSubcard = false,
+  showExpertPanels = true,
 }: {
   model: PhmaxSsUnitsModel;
   hideBackupSubcard?: boolean;
+  /** Kontrola pravidel, audit JSON, tlačítka Proč? – v základním režimu sbaleno / skryto. */
+  showExpertPanels?: boolean;
 }) {
   const sec = PHMAX_SS_UNITS_SECTION;
   const {
@@ -665,25 +669,28 @@ function PhmaxSsUnitsFormView({
           </ScrollGrabRegion>
         </details>
 
-        {schoolPhmaxExplain ? (
-          <details
-            className="card muted ss-explain-school-wrap"
-            style={{ marginTop: 14, padding: "12px 14px", textAlign: "left" }}
-          >
-            <summary className="ss-why-panel__title" style={{ cursor: "pointer", listStyle: "none" }}>
-              <strong>Celkový výklad PHmax</strong> – součet platných řádků (explainability)
-            </summary>
-            <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", lineHeight: 1.5 }}>
-              Do souhrnu jsou sloučeny výsledky z tabulky „Kontrola pravidel“ pro každý platný řádek PHmax (prefix{" "}
-              <code className="methodology-strip__code">[označení řádku]</code> u zpráv). Řádky bez vyplněného oboru pro
-              kontrolu se do pravidel nezapočítávají. Engine:{" "}
-              <code className="methodology-strip__code">phmax-ss-explainability</code>.
-            </p>
-            <SsSchoolExplainabilitySummary result={schoolPhmaxExplain} />
-          </details>
+        {showExpertPanels ? (
+          schoolPhmaxExplain ? (
+            <details
+              className="card muted ss-explain-school-wrap"
+              style={{ marginTop: 14, padding: "12px 14px", textAlign: "left" }}
+            >
+              <summary className="ss-why-panel__title" style={{ cursor: "pointer", listStyle: "none" }}>
+                <strong>Celkový výklad PHmax</strong> – součet platných řádků (explainability)
+              </summary>
+              <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", lineHeight: 1.5 }}>
+                Do souhrnu jsou sloučeny výsledky z tabulky „Kontrola pravidel“ pro každý platný řádek PHmax (prefix{" "}
+                <code className="methodology-strip__code">[označení řádku]</code> u zpráv). Řádky bez vyplněného oboru pro
+                kontrolu se do pravidel nezapočítávají. Engine:{" "}
+                <code className="methodology-strip__code">phmax-ss-explainability</code>.
+              </p>
+              <SsSchoolExplainabilitySummary result={schoolPhmaxExplain} />
+            </details>
+          ) : null
         ) : null}
       </div>
 
+      {showExpertPanels ? (
       <div style={{ marginTop: 28 }}>
         <h3 style={{ marginTop: 0, marginBottom: 10, fontSize: "1.05rem", fontWeight: 700 }}>{sec.brulesHeading}</h3>
         <p className="muted-text" style={{ marginBottom: 12, lineHeight: 1.5 }}>
@@ -799,6 +806,58 @@ function PhmaxSsUnitsFormView({
           </table>
         </ScrollGrabRegion>
       </div>
+      ) : (
+        <CollapsibleSection summary={sec.brulesHeading} defaultOpen={false} level="advanced">
+          <p className="muted-text" style={{ marginBottom: 12, lineHeight: 1.5 }}>
+            {sec.brulesHint}
+          </p>
+          <ScrollGrabRegion className="app-table-wrap" role="region" aria-label={sec.brulesHeading}>
+            <table className="app-data-table">
+              <thead>
+                <tr>
+                  <th scope="col">Označení</th>
+                  <th scope="col">Obory</th>
+                  <th scope="col">Povoleno</th>
+                  <th scope="col">Zprávy</th>
+                </tr>
+              </thead>
+              <tbody>
+                {brulesPreview.map((b) => {
+                  if (b.skipped) {
+                    return (
+                      <tr key={b.rowId}>
+                        <td colSpan={4} className="muted-text">
+                          {b.label || "–"} – doplnit kód oboru
+                        </td>
+                      </tr>
+                    );
+                  }
+                  if ("error" in b) {
+                    return (
+                      <tr key={b.rowId}>
+                        <td>{b.label || "–"}</td>
+                        <td>{b.codesStr}</td>
+                        <td>–</td>
+                        <td style={{ color: "var(--danger, #b91c1c)" }}>{b.error}</td>
+                      </tr>
+                    );
+                  }
+                  const r = b.result;
+                  const msg = [...r.errors, ...r.warnings].map((m) => m.message).join(" · ") || "OK";
+                  return (
+                    <tr key={b.rowId}>
+                      <td>{b.label || "–"}</td>
+                      <td>{b.codesStr}</td>
+                      <td>{r.allowed ? "Ano" : "Ne"}</td>
+                      <td>{msg}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </ScrollGrabRegion>
+        </CollapsibleSection>
+      )}
     </section>
   );
 }
@@ -817,12 +876,24 @@ function PhmaxSsUnitsFormWithOwnState({
 export type PhmaxSsUnitsFormProps = {
   model?: PhmaxSsUnitsModel;
   hideBackupSubcard?: boolean;
+  showExpertPanels?: boolean;
   onDashboardMetrics?: OnSsDashboardMetrics;
 };
 
-export function PhmaxSsUnitsForm({ model, hideBackupSubcard, onDashboardMetrics }: PhmaxSsUnitsFormProps) {
+export function PhmaxSsUnitsForm({
+  model,
+  hideBackupSubcard,
+  showExpertPanels = true,
+  onDashboardMetrics,
+}: PhmaxSsUnitsFormProps) {
   if (model) {
-    return <PhmaxSsUnitsFormView model={model} hideBackupSubcard={hideBackupSubcard} />;
+    return (
+      <PhmaxSsUnitsFormView
+        model={model}
+        hideBackupSubcard={hideBackupSubcard}
+        showExpertPanels={showExpertPanels}
+      />
+    );
   }
   return (
     <PhmaxSsUnitsFormWithOwnState onDashboardMetrics={onDashboardMetrics} hideBackupSubcard={hideBackupSubcard} />
