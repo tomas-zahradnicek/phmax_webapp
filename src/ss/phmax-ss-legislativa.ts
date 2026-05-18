@@ -59,9 +59,9 @@ export const SS_BRULE_CODE_LEGIS: Record<string, BruleLegisEntry> = {
   ONE_OBOR: { citeIds: ["nv123-1", "nv123-priloha1"], note: "Jednooborová třída – základní výpočet PHmax podle NV a datasetu." },
   PAR16_CATEGORY_MISMATCH: { citeIds: ["vyhl248-16"], note: "U třídy podle § 16 odst. 9 musí být obory ve stejné kategorii." },
   PAR16_MULTI: { citeIds: ["vyhl248-16"], note: "§ 16 odst. 9 – neuplatní se běžná pravidla víceoborových tříd z § 2a." },
-  PAR16_CALC_PREVIEW_ONLY: {
+  PAR16_CALC_APPLIED: {
     citeIds: ["vyhl248-16"],
-    note: "Plný výpočet PHmax pro § 16/9 zatím není implementován – zobrazená hodnota je orientační z běžného datasetu.",
+    note: "PHmax třídy § 16/9 – mapování průměru na pásma NV dle metodiky MŠMT (§ 4 bod 4).",
   },
   LEGACY_MULTI: { citeIds: ["vyhl13-2a2"], note: "Přechodné ustanovení – třída vzniklá do 2017/2018; omezení navyšování počtu oborů." },
   LEGACY_OVER_LIMIT: { citeIds: ["vyhl13-2a2"], note: "Počet oborů nesmí překročit stav ke dni účinnosti novely." },

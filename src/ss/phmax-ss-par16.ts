@@ -1,8 +1,8 @@
 import type { PhmaxSsUnitRow } from "./phmax-ss-types";
 
-/** Upozornění v kontrole pravidel a v UI, dokud není implementována větev výpočtu § 16. */
-export const PHMAX_SS_PAR16_CALC_LIMITATION_WARNING =
-  "Plný výpočet PHmax podle § 16 odst. 9 (pásma metodiky) zatím není v aplikaci – PHmax níže je orientační hodnota z běžného datasetu NV.";
+/** Krátká poznámka v UI u přepínače § 16/9. */
+export const PHMAX_SS_PAR16_CHECKBOX_HINT =
+  "Třída zřízená podle § 16 odst. 9 školského zákona – PHmax se počítá podle pásem metodiky (§ 4 bod 4), ne běžným jednooborovým pásmem dle skutečného průměru.";
 
 const PAR16_CLASS_TYPE_RE =
   /§\s*16|par\.?\s*16|odst\.?\s*9|podle\s+§\s*16|zřízen[áa]\s+podle\s+§\s*16/i;

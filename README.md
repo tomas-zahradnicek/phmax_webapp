@@ -51,10 +51,23 @@ npm run test:golden
 
 - **PHmax:** orientační výpočet po řádcích (dataset NV, režimy jednoobor / víceobor / přechodné), kontrola pravidel vyhl. č. 13/2005 Sb.
 - **PHAmax:** součet jen pro Praktickou školu (`78-62-C/01`, `78-62-C/02`, denní forma) podle tabulky metodiky v3/2026.
-- **§ 16 odst. 9:** přepínač na řádku, kontrola business rules a upozornění; **plný výpočet PHmax dle metodiky zatím není** (hodnota v náhledu je orientační z běžného datasetu).
+- **§ 16 odst. 9:** přepínač na řádku, kontrola business rules a výpočet PHmax dle pásem metodiky (mapování průměru na pásma NV); golden testy v `phmax-ss-par16-golden.test.ts`.
 - **Mimo rozsah:** další dílčí výpočty PHAmax dle metodiky, školní agregace průměrů podle § 4 – plný postup MŠMT.
 
 Metodika: [MŠMT – PHmax pro SŠ 2026](https://msmt.gov.cz/vzdelavani/skolstvi-v-cr/ekonomika-skolstvi/metodika-vypoctu-phmax-pro-ss-2026).
+
+Podrobný pracovní list (scénáře A–F, tabulka zápisu): [docs/ss-acceptance-checklist.md](docs/ss-acceptance-checklist.md).
+
+## SŠ acceptance checklist (pro předání)
+
+Krátká kontrola před předáním modulu SŠ; detailní kroky a golden smoke hodnoty jsou v [docs/ss-acceptance-checklist.md](docs/ss-acceptance-checklist.md).
+
+- Ověřit **1–2 reálné řádky** z evidence školy (kód RVP, průměr, třídy, forma) a porovnat PHmax s vlastním podkladem.
+- Automatický smoke v aplikaci: ukázka **jednoobor** (`39-41-L/01`, 17 žáků, 2 třídy, denní) → součet PHmax **100**; **PrŠ** (`78-62-C/01`, 4 žáci, 1 třída, denní) → PHmax **30** a **PHAmax > 0** v horním přehledu.
+- **Víceoborová třída:** vyplnit Další obory / žáci – zkontrolovat blok Kontrola pravidel (varování u konfliktu).
+- **§ 16 odst. 9:** zapnout přepínač – PHmax dle pásem metodiky (golden: avg 8→50, 5→35, 12→53); kontrola `PAR16_CALC_APPLIED`; reálná škola ve scénáři F checklistu.
+- Export **CSV**, kontrola sloupců a archivní poznámky; na sdíleném PC po testu smazat uložená data.
+- Před releasem: `npm run test:golden`, `npm run build`, `npm run check:readme-sync`.
 
 ## NV75 changelog (aktuální vydání)
 

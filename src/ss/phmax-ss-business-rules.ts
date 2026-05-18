@@ -1,7 +1,6 @@
 import type { Dataset } from './phmax-ss-validator';
 import type { ModeKey, StudyForm } from './phmax-ss-helpers';
 import { getProgram } from './phmax-ss-helpers';
-import { PHMAX_SS_PAR16_CALC_LIMITATION_WARNING } from './phmax-ss-par16';
 import { chooseDefaultMode } from './phmax-ss-service';
 
 export type BusinessRuleOborInput = {
@@ -142,14 +141,6 @@ export function evaluateBusinessRules(
   const codes = obory.map((o) => o.code);
   const oborCount = obory.length;
 
-  if (input.isPar16Class) {
-    pushWarning(
-      result,
-      'PAR16_CALC_PREVIEW_ONLY',
-      PHMAX_SS_PAR16_CALC_LIMITATION_WARNING,
-    );
-  }
-
   if (oborCount === 1) {
     result.suggestedComputation = input.isPar16Class ? 'par16' : 'oneObor';
     result.recommendedMode =
@@ -160,6 +151,14 @@ export function evaluateBusinessRules(
         isArt82TalentClass: obory[0].group === '82',
       });
     pushInfo(result, 'ONE_OBOR', 'Jde o jednooborovou třídu.');
+    if (input.isPar16Class) {
+      pushInfo(
+        result,
+        'PAR16_CALC_APPLIED',
+        'PHmax se počítá podle pásem metodiky § 16 odst. 9 (mapování průměru na pásma NV, denní forma jako základ).',
+        codes,
+      );
+    }
     return result;
   }
 

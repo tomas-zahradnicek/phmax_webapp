@@ -9,6 +9,8 @@ const requiredSnippets = [
   "npm run check:ci-summary-manifest",
   "npm run check:golden-manifest",
   "npm run check:ci-guards-manifest",
+  "SŠ acceptance checklist",
+  "docs/ss-acceptance-checklist.md",
 ];
 
 const missing = requiredSnippets.filter((snippet) => !readme.includes(snippet));

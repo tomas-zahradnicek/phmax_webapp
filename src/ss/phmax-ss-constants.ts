@@ -36,7 +36,7 @@ export const PHMAX_SS_FRAMEWORK_FIRST_PHASE = {
   lead:
     "U středního vzdělávání se podle metodiky pracuje s dílčími jednotkami (typicky třída nebo skupina) zvlášť podle kombinace oboru, formy a typu. PHmax a PHAmax jsou dva oddělené rámce – přebytky z jednoho nelze přelévat do druhého.",
   implementationNote:
-    "Sekce 2 eviduje dílčí jednotky (řádky), počítá orientační PHmax z datasetu NV podle zvoleného režimu a formy, kontrolu pravidel pro víceoborové třídy (sloupce Další obory / žáci), přepínač § 16/9 (kontrola pravidel, plný výpočet zatím ne) a součet PHAmax pro Praktickou školu (kódy 78-62-C/01 a 78-62-C/02, denní forma) podle tabulky z metodiky. Další dílčí výpočty PHAmax dle metodiky mimo PrŠ zatím v aplikaci nejsou.",
+    "Sekce 2 eviduje dílčí jednotky (řádky), počítá PHmax z datasetu NV podle zvoleného režimu a formy (včetně § 16/9 – mapování pásem metodiky), kontrolu pravidel pro víceoborové třídy (sloupce Další obory / žáci) a součet PHAmax pro Praktickou školu (kódy 78-62-C/01 a 78-62-C/02, denní forma) podle tabulky z metodiky. Další dílčí výpočty PHAmax dle metodiky mimo PrŠ zatím v aplikaci nejsou.",
   inputs: [
     "Evidence dílčích jednotek výpočtu: vždy zvlášť podle oboru vzdělání, formy a typu třídy (jak metodika vyžaduje rozlišovat).",
     "Údaje pro stanovení povinného minima přímé pedagogické činnosti dle nařízení vlády a metodiky.",
@@ -73,7 +73,7 @@ export const PHMAX_SS_UNITS_SECTION = {
   colClassType: "Typ třídy",
   colPar16Class: "Třída podle § 16 odst. 9",
   par16CheckboxHint:
-    "Zapněte u tříd zřízených podle § 16 odst. 9 školského zákona. Proběhne kontrola pravidel (vyhl. č. 248/2019 Sb.); plný výpočet PHmax dle metodiky zatím není – PHmax v náhledu je orientační z datasetu NV.",
+    "Zapněte u tříd zřízených podle § 16 odst. 9 školského zákona. PHmax se počítá podle pásem metodiky (6–10 → 17–20, >10–14 → více než 20–24, <6 → 70 % pásma 17–20).",
   colNote: "Poznámka",
   addRow: "Přidat řádek",
   /** Lišta nad formulářem – odstraní poslední řádek (stejná logika jako u jediného řádku). */

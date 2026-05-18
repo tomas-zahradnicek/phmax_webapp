@@ -9,6 +9,7 @@ import type { ExplainabilityRowInput } from "./phmax-ss-explainability";
 import { mergeBusinessRulesResults } from "./phmax-ss-explainability";
 import type { AuditProtocolInput } from "./phmax-audit";
 import type { ModeKey } from "./phmax-ss-helpers";
+import { resolveIsPar16Class } from "./phmax-ss-par16";
 import { calculatePhmaxRow, type ServiceResolvedRow } from "./phmax-ss-service";
 import type { PhmaxSsUnitRow } from "./phmax-ss-types";
 
@@ -39,6 +40,7 @@ export function explainInputFromUnitRow(row: PhmaxSsUnitRow): ExplainabilityRowI
     mode: row.phmaxMode === "" ? undefined : row.phmaxMode,
     oborCountInClass: obParsed,
     isArt82TalentClass: row.isArt82TalentClass,
+    isPar16Class: resolveIsPar16Class(row),
   };
 }
 
@@ -79,6 +81,7 @@ export function deriveSsUnitsPreview(rows: PhmaxSsUnitRow[]): SsUnitPreviewEntry
         mode,
         oborCountInClass,
         isArt82TalentClass: row.isArt82TalentClass,
+        isPar16Class: resolveIsPar16Class(row),
       });
       return { rowId: row.id, label: row.label, skipped: false as const, resolved };
     } catch (e) {

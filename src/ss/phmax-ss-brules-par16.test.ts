@@ -5,7 +5,7 @@ import { phmaxSsDataset } from "./phmax-ss-dataset";
 import { createEmptyPhmaxSsUnitRow } from "./phmax-ss-types";
 
 describe("SŠ § 16 business rules", () => {
-  it("předá isPar16Class do evaluateBusinessRules a vrátí varování o orientačním výpočtu", () => {
+  it("předá isPar16Class do evaluateBusinessRules a označí výpočet § 16", () => {
     const row = {
       ...createEmptyPhmaxSsUnitRow(1),
       educationField: "79-41-K/41",
@@ -17,6 +17,7 @@ describe("SŠ § 16 business rules", () => {
     expect(input?.isPar16Class).toBe(true);
     const result = evaluateBusinessRules(phmaxSsDataset, input!);
     expect(result.suggestedComputation).toBe("par16");
-    expect(result.warnings.some((w) => w.code === "PAR16_CALC_PREVIEW_ONLY")).toBe(true);
+    expect(result.info.some((w) => w.code === "PAR16_CALC_APPLIED")).toBe(true);
+    expect(result.warnings.some((w) => w.code === "PAR16_CALC_PREVIEW_ONLY")).toBe(false);
   });
 });

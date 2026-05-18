@@ -6551,7 +6551,123 @@ select:focus {
 
   .calculator-workspace__dock {
     order: -1;
+    position: sticky;
+    top: 8px;
+    z-index: 8;
   }
+
+  .calculator-workspace__main [data-section] {
+    scroll-margin-top: 12rem;
+  }
+
+  .calculator-workspace-dock .result-anchor-card__primary-value {
+    font-size: 2rem;
+  }
+
+  .workflow-dock__mobile-fold {
+    border: 1px solid color-mix(in srgb, #e2e8f0 55%, transparent);
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .workflow-dock__mobile-fold-summary {
+    cursor: pointer;
+    list-style: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 10px;
+    align-items: center;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    background: #f8fafc;
+  }
+
+  .workflow-dock__mobile-fold-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .workflow-dock__mobile-fold-label {
+    font-weight: 700;
+    color: #334155;
+    grid-column: 1;
+  }
+
+  .workflow-dock__mobile-fold-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0f172a;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  .workflow-dock__mobile-fold-hint {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #64748b;
+    grid-column: 1;
+  }
+
+  .workflow-dock__mobile-fold-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 10px 10px;
+  }
+
+  .page-toc-mobile-trigger {
+    bottom: 4.5rem;
+  }
+}
+
+.zs-pha-php-basic-guide__intro {
+  margin-bottom: 14px;
+}
+
+.zs-pha-php-basic-guide__phmax-hint {
+  margin: 10px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.zs-pha-php-basic-guide__preview {
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.zs-pha-php-basic-guide__steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.zs-pha-php-basic-guide__step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.zs-pha-php-basic-guide__step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.zs-pha-php-basic-guide__step-title {
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
 .card--onboarding,

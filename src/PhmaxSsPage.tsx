@@ -403,8 +403,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
     if (par16Rows > 0) {
       return {
         tone: "warning" as const,
-        label: "§ 16/9 – kontrola pravidel, orientační PHmax",
-        detail: `${par16Rows} řádků je označeno jako třída podle § 16 odst. 9. Plný výpočet dle metodiky MŠMT zatím není v aplikaci; ověřte výstup oficiálním postupem.`,
+        label: "§ 16/9 – výpočet pásem metodiky",
+        detail: `${par16Rows} řádků je označeno jako třída podle § 16 odst. 9. PHmax používá mapování pásem NV; u složitějších tříd (více oborů) ověřte průměr žáků a kontrolu pravidel.`,
       };
     }
     return {

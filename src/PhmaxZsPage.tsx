@@ -40,7 +40,6 @@ import { ProductLegisContextPanel, ZsLegisRef } from "./PhmaxProductLegisUi";
 import { ZS_LEGIS_PARAGRAPH_TOOLTIPS } from "./phmax-zs-legislativa";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
-import { BasicModeSteps } from "./BasicModeSteps";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
@@ -82,6 +81,7 @@ import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
 import { ZsModuleGate } from "./ZsModuleGate";
 import { ZsBasicWizard } from "./ZsBasicWizard";
+import { ZsPhaPhpBasicGuide } from "./ZsPhaPhpBasicGuide";
 import {
   PhmaxZsPhmaxSubNav,
   phmaxPaneFromWizardStep,
@@ -2530,23 +2530,23 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             onBack={handleZsWizardBack}
             onNext={handleZsWizardNext}
           />
-        ) : viewMode === "basic" ? (
-          <BasicModeSteps
-            heading="Rychlý start pro ZŠ"
-            lead="Pro průvodce krok za krokem přepněte na záložku PHmax. Zde stručný přehled pro PHAmax a PHPmax."
-            steps={[
-              { title: "Vyberte režim výpočtu školy", text: "V sekci „Typ školy a režim výpočtu“ vyberte správnou variantu." },
-              {
-                title: "Načtěte ukázkový příklad nahoře",
-                text: "V horní liště načtěte ukázku/situaci pro rychlé předvyplnění formuláře.",
-                ctaLabel: "Přejít na ukázkový příklad",
-                ctaTargetId: "zs-hero-example-select",
-              },
-              {
-                title: "Ověřte modulové vstupy",
-                text: "Vyplňte PHAmax nebo PHPmax podle aktivní záložky a ověřte průběžný přehled.",
-              },
-            ]}
+        ) : viewMode === "basic" && tab === "pha" ? (
+          <ZsPhaPhpBasicGuide
+            tab="pha"
+            totalValue={totalPha}
+            onOpenPhmaxWizard={() => {
+              setTab("phmax");
+              goToZsWizardStep(1);
+            }}
+          />
+        ) : viewMode === "basic" && tab === "php" ? (
+          <ZsPhaPhpBasicGuide
+            tab="php"
+            totalValue={totalPhp}
+            onOpenPhmaxWizard={() => {
+              setTab("phmax");
+              goToZsWizardStep(1);
+            }}
           />
         ) : null}
 

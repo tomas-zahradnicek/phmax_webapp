@@ -541,9 +541,7 @@ function PhmaxSsUnitsFormView({
                       <td className="app-data-table__num app-data-table__num--emph">{r.totalPhmax}</td>
                       <td className="muted-text">
                         {par16Row ? (
-                          <span style={{ color: "var(--warning, #b45309)" }} title={sec.par16CheckboxHint}>
-                            § 16 – orientačně
-                          </span>
+                          <span title={sec.par16CheckboxHint}>§ 16</span>
                         ) : (
                           "OK"
                         )}

@@ -5,6 +5,7 @@ import {
   getProgram,
   listAvailableModes,
 } from './phmax-ss-helpers';
+import { calculatePar16PhmaxRow } from './phmax-ss-par16-calc';
 
 export type ServiceRowInput = {
   code: string;
@@ -16,6 +17,8 @@ export type ServiceRowInput = {
   /** Použije se jen při automatickém výběru režimu (`mode` není zadán). */
   oborCountInClass?: number;
   isArt82TalentClass?: boolean;
+  /** Třída podle § 16 odst. 9 – mapování pásem metodiky (viz `calculatePar16PhmaxRow`). */
+  isPar16Class?: boolean;
 };
 
 export type ServiceSingleInput = ServiceRowInput;
@@ -108,6 +111,10 @@ export function calculatePhmaxRow(
   dataset: Dataset,
   input: ServiceSingleInput,
 ): SingleCalculationResult {
+  if (input.isPar16Class) {
+    return calculatePar16PhmaxRow(dataset, input);
+  }
+
   const form: StudyForm = input.form ?? 'denni';
   assertFiniteNonNegative(input.averageStudents, 'Průměrný počet žáků');
   assertPositiveInteger(input.classCount, 'Počet tříd');

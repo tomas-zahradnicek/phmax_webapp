@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CALCULATOR_WORKSPACE_DOCK_LABEL } from "./calculator-ui-constants";
 import { ResultAnchorCard, type ResultAnchorStat, type ResultAnchorTone } from "./ResultAnchorCard";
 import type { CalculatorViewMode } from "./calculator-view-mode";
+import { useMatchMedia } from "./useMatchMedia";
 
 export type WorkflowDockStep = {
   label: string;
@@ -48,6 +49,7 @@ function workflowStepsSummary(steps: readonly WorkflowDockStep[]): { title: stri
 
 /**
  * Jednotný pravý dock: KPI, jeden postup, akce v accordionu — bez opakovaných workflow boxů.
+ * Na úzkém displeji lze souhrn sbalit; záložky v hlavičce docku zůstávají vždy viditelné.
  */
 export function CalculatorWorkflowDock({
   dockTitle = CALCULATOR_WORKSPACE_DOCK_LABEL,
@@ -65,18 +67,18 @@ export function CalculatorWorkflowDock({
   footer,
   className,
 }: CalculatorWorkflowDockProps) {
+  const isWideDock = useMatchMedia("(min-width: 1100px)");
+  const [mobileBodyOpen, setMobileBodyOpen] = useState(true);
   const stepsOpen = viewMode === "basic" && workflowSteps.length > 0;
   const actionsOpen = false;
   const stepsSummary = workflowSteps.length > 0 ? workflowStepsSummary(workflowSteps) : null;
 
-  return (
-    <div
-      className={["calculator-workspace-dock__card workflow-dock", `workflow-dock--${tone}`, className]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <p className="calculator-workspace-dock__title">{dockTitle}</p>
-      {header ? <div className="workflow-dock__header">{header}</div> : null}
+  useEffect(() => {
+    if (isWideDock) setMobileBodyOpen(true);
+  }, [isWideDock]);
+
+  const dockBody = (
+    <>
       <ResultAnchorCard
         tone={tone}
         primaryLabel={primaryLabel}
@@ -146,6 +148,33 @@ export function CalculatorWorkflowDock({
         </details>
       ) : null}
       {footer ? <div className="workflow-dock__footer">{footer}</div> : null}
+    </>
+  );
+
+  return (
+    <div
+      className={["calculator-workspace-dock__card workflow-dock", `workflow-dock--${tone}`, className]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <p className="calculator-workspace-dock__title">{dockTitle}</p>
+      {header ? <div className="workflow-dock__header">{header}</div> : null}
+      {isWideDock ? (
+        dockBody
+      ) : (
+        <details
+          className="workflow-dock__mobile-fold"
+          open={mobileBodyOpen}
+          onToggle={(e) => setMobileBodyOpen(e.currentTarget.open)}
+        >
+          <summary className="workflow-dock__mobile-fold-summary">
+            <span className="workflow-dock__mobile-fold-label">{primaryLabel}</span>
+            <span className="workflow-dock__mobile-fold-value">{primaryValue}</span>
+            <span className="workflow-dock__mobile-fold-hint">{verdictLabel}</span>
+          </summary>
+          <div className="workflow-dock__mobile-fold-body">{dockBody}</div>
+        </details>
+      )}
     </div>
   );
 }
