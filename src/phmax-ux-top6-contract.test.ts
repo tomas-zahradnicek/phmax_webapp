@@ -18,8 +18,12 @@ describe("UX TOP 6 contract", () => {
       "src/ZsModuleGate.tsx",
       "src/ZsBasicWizard.tsx",
       "src/zs-basic-wizard.ts",
+      "src/useQuickOnboarding.ts",
       "src/HeroCompactToolbar.tsx",
+      "src/HeroToolbarDropdown.tsx",
+      "src/hero-toolbar-portal-context.tsx",
       "src/CalculatorWorkflowDock.tsx",
+      "src/CalculatorProductShell.tsx",
       "src/DisplayDensityToggle.tsx",
       "src/display-density.ts",
       "src/CalculatorStickyContextBar.tsx",
@@ -35,20 +39,46 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".calculator-shell--density-compact");
     expect(css).toContain(".workflow-dock");
     expect(css).toContain(".calculator-sticky-context");
+    expect(css).toContain(".ux-semantic--info");
+    expect(css).toContain(".hero-compact-toolbar__primary .hero-action-icon-btn");
+    expect(css).toContain(".hero-toolbar-dropdown-portal-root");
+    expect(css).toContain(".hero-expert-strip");
+    expect(css).toContain(".dash-kpi-strip");
+    expect(css).toContain("--calculator-dock-min");
   });
 
-  it("PV/ŠD/SŠ používají CalculatorWorkflowDock a PageTableOfContents", () => {
+  it("PV/ŠD/SŠ používají CalculatorProductShell, CalculatorWorkflowDock a TOC", () => {
     for (const page of ["src/PhmaxPvPage.tsx", "src/PhmaxSdPage.tsx", "src/PhmaxSsPage.tsx"]) {
       const src = readSource(page);
+      expect(src).toContain("CalculatorProductShell");
       expect(src).toContain("CalculatorWorkflowDock");
-      expect(src).toContain("PageTableOfContents");
+      expect(src).toMatch(/PageTableOfContents|tocSections=/);
       expect(src).toContain("calculatorShellClassName(viewMode, displayDensity, focusMode)");
       expect(src).not.toContain("ProductFloatingNav");
     }
   });
 
+  it("všechny kalkulačky sdílí workspaceDockLabel Kontext výpočtu", () => {
+    expect(readSource("src/calculator-ui-constants.ts")).toContain(
+      'CALCULATOR_WORKSPACE_DOCK_LABEL = "Kontext výpočtu"',
+    );
+    for (const page of [
+      "src/PhmaxPvPage.tsx",
+      "src/PhmaxSdPage.tsx",
+      "src/PhmaxSsPage.tsx",
+      "src/PhmaxZsPage.tsx",
+      "src/PhmaxNv75DeputyPage.tsx",
+    ]) {
+      const src = readSource(page);
+      expect(src).toContain("workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}");
+    }
+    expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("CALCULATOR_WORKSPACE_DOCK_LABEL");
+    expect(readSource("src/CalculatorWorkspaceLayout.tsx")).toContain("CALCULATOR_WORKSPACE_DOCK_LABEL");
+  });
+
   it("kalkulačky mají kompaktní hero toolbar a hustotu zobrazení", () => {
     expect(readSource("src/HeroCompactToolbar.tsx")).toContain('aria-label="Hlavní akce"');
+    expect(readSource("src/HeroCompactToolbar.tsx")).toContain("HeroToolbarSaveButton");
     for (const page of [
       "src/PhmaxPvPage.tsx",
       "src/PhmaxSdPage.tsx",
@@ -64,15 +94,17 @@ describe("UX TOP 6 contract", () => {
     expect(readSource("src/PhmaxSdPage.tsx")).toContain('data-section="sd-vysledek"');
     expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain('data-section="ss-vysledek"');
     expect(readSource("src/PhmaxNv75DeputyPage.tsx")).toContain("hero-zone-actions");
-    expect(readSource("src/PhmaxZsPage.tsx")).toContain("CalculatorWorkspaceLayout");
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain("CalculatorProductShell");
     expect(readSource("src/PhmaxZsPage.tsx")).toContain("CalculatorWorkflowDock");
   });
 
-  it("ZŠ má CalculatorWorkflowDock, ZsModuleGate a PageTableOfContents", () => {
+  it("ZŠ má CalculatorProductShell (MASTER), CalculatorWorkflowDock a PageTableOfContents", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
+    expect(src).toContain("CalculatorProductShell");
+    expect(src).toContain("dockSticky");
     expect(src).toContain("CalculatorWorkflowDock");
     expect(src).toContain("ZsModuleGate");
-    expect(src).toContain("PageTableOfContents");
+    expect(src).toMatch(/PageTableOfContents|tocSections=/);
     expect(src).toContain("ux-expert-only");
     for (const moduleId of ["psych", "health", "minority", "gym", "mixed", "extras", "pha", "php"]) {
       expect(src).toContain(`sectionId="${moduleId}"`);
@@ -81,12 +113,45 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("zs-basic-wizard-active");
     expect(src).toContain('data-wizard-step="1"');
     expect(src).toContain('data-wizard-step="4"');
+    expect(src).toContain('data-wizard-step="5"');
+    expect(readSource("src/zs-basic-wizard.ts")).toContain("ZS_BASIC_WIZARD_STEP_COUNT = 5");
   });
 
-  it("NV75 má CalculatorWorkflowDock, režim basic/expert a PageTableOfContents", () => {
+  it("produkty sdílí useQuickOnboarding a hero tlačítko nápovědy", () => {
+    for (const page of [
+      "src/PhmaxPvPage.tsx",
+      "src/PhmaxSdPage.tsx",
+      "src/PhmaxZsPage.tsx",
+      "src/PhmaxSsPage.tsx",
+      "src/PhmaxNv75DeputyPage.tsx",
+    ]) {
+      const src = readSource(page);
+      expect(src).toContain("useQuickOnboarding");
+      expect(src).toContain("QuickOnboardingHeroButton");
+      expect(src).toContain("QuickOnboarding");
+    }
+    expect(readSource("src/calculator-ui-constants.ts")).toContain("PHMAX_PV_ONBOARDING_LS_KEY");
+    expect(readSource("src/calculator-ui-constants.ts")).toContain("PHMAX_SS_ONBOARDING_LS_KEY");
+    expect(readSource("src/calculator-ui-constants.ts")).toContain("PHMAX_NV75_ONBOARDING_LS_KEY");
+  });
+
+  it("PV/ŠD/SŠ/NV75 sdílí buildBasicQuickStartSteps", () => {
+    expect(readSource("src/basic-quick-start.ts")).toContain("buildBasicQuickStartSteps");
+    for (const page of [
+      "src/PhmaxPvPage.tsx",
+      "src/PhmaxSdPage.tsx",
+      "src/PhmaxSsPage.tsx",
+      "src/PhmaxNv75DeputyPage.tsx",
+    ]) {
+      expect(readSource(page)).toContain("buildBasicQuickStartSteps");
+    }
+  });
+
+  it("NV75 má CalculatorProductShell, CalculatorWorkflowDock a TOC", () => {
     const src = readSource("src/PhmaxNv75DeputyPage.tsx");
+    expect(src).toContain("CalculatorProductShell");
     expect(src).toContain("CalculatorWorkflowDock");
-    expect(src).toContain("PageTableOfContents");
+    expect(src).toMatch(/tocSections=|PageTableOfContents/);
     expect(src).toContain("calculatorShellClassName(viewMode, displayDensity, focusMode)");
     expect(src).not.toContain("ProductFloatingNav");
     expect(src).toContain('data-section="nv75-vstupy"');

@@ -6,6 +6,7 @@ import {
   HERO_ACTIONS_TRIGGER_LABEL,
 } from "./calculator-ui-constants";
 import { useMatchMedia } from "./useMatchMedia";
+import { HeroToolbarPortalContext } from "./hero-toolbar-portal-context";
 
 type HeroActionsDrawerProps = {
   /** Text hlavního tlačítka v úzkém rozložení */
@@ -101,7 +102,7 @@ export function HeroActionsDrawer({
   }, [open]);
 
   if (!narrow) {
-    return <>{children}</>;
+    return <HeroToolbarPortalContext.Provider value={true}>{children}</HeroToolbarPortalContext.Provider>;
   }
 
   return (
@@ -149,7 +150,7 @@ export function HeroActionsDrawer({
                   </button>
                 </header>
                 <div className="hero-actions-panel-drawer__body" aria-labelledby={headingId}>
-                  {children}
+                  <HeroToolbarPortalContext.Provider value={false}>{children}</HeroToolbarPortalContext.Provider>
                 </div>
               </aside>
             </div>,

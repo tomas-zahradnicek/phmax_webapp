@@ -1,4 +1,6 @@
 import React from "react";
+import { HeroIconActionButton, IconSaveQuick } from "./HeroActionIconButton";
+import { HeroToolbarDropdown } from "./HeroToolbarDropdown";
 
 type HeroCompactToolbarProps = {
   primary: React.ReactNode;
@@ -28,14 +30,34 @@ export function HeroCompactToolbar({
       <span className="hero-compact-toolbar__divider" aria-hidden>
         │
       </span>
-      <details className="hero-compact-toolbar__panel">
-        <summary className="hero-compact-toolbar__panel-summary">{backupsSummary}</summary>
-        <div className="hero-compact-toolbar__panel-body hero-compact-toolbar__panel-body--backups">{backups}</div>
-      </details>
-      <details className="hero-compact-toolbar__panel hero-compact-toolbar__panel--technical">
-        <summary className="hero-compact-toolbar__panel-summary">{technicalSummary}</summary>
-        <div className="hero-compact-toolbar__panel-body hero-compact-toolbar__panel-body--technical">{technical}</div>
-      </details>
+      <HeroToolbarDropdown summary={backupsSummary} panelClassName="hero-compact-toolbar__panel-body--backups">
+        {backups}
+      </HeroToolbarDropdown>
+      <HeroToolbarDropdown
+        summary={technicalSummary}
+        className="hero-compact-toolbar__panel--technical"
+        panelClassName="hero-compact-toolbar__panel-body--technical"
+      >
+        {technical}
+      </HeroToolbarDropdown>
     </div>
+  );
+}
+
+/** Uložení průběhu v kompaktní hero liště – ikona + tooltip; na desktopu jen ikona (CSS). */
+export function HeroToolbarSaveButton({
+  onClick,
+  label = "Uložit průběh",
+}: {
+  onClick: () => void;
+  label?: string;
+}) {
+  return (
+    <HeroIconActionButton
+      className="btn btn--light hero-actions-tiered__cta"
+      label={label}
+      icon={<IconSaveQuick />}
+      onClick={onClick}
+    />
   );
 }

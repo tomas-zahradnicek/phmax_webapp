@@ -14,6 +14,8 @@ import {
   NAMED_BACKUPS_SAVE_LABEL,
   NAMED_BACKUPS_SELECT_PLACEHOLDER,
   namedBackupsMicrocopy,
+  CALCULATOR_WORKSPACE_DOCK_LABEL,
+  PHMAX_SS_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
@@ -36,20 +38,21 @@ import {
 import { HeroStat } from "./HeroStat";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
-import { CalculatorStickyContextBar } from "./CalculatorStickyContextBar";
+import { CalculatorProductShell } from "./CalculatorProductShell";
 import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { SsHumanSummary } from "./SsHumanSummary";
 import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import { MethodologyStrip } from "./MethodologyStrip";
-import { PageTableOfContents } from "./PageTableOfContents";
-import { CalculatorWorkspaceLayout } from "./CalculatorWorkspaceLayout";
-import { HeroCompactToolbar } from "./HeroCompactToolbar";
+import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
+import { HeroExpertStrip } from "./HeroExpertStrip";
 import { DisplayDensityToggle } from "./DisplayDensityToggle";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
-import { QuickOnboarding } from "./QuickOnboarding";
+import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
+import { useQuickOnboarding } from "./useQuickOnboarding";
+import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick-start";
 import { BasicModeSteps } from "./BasicModeSteps";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import {
@@ -329,7 +332,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       ? SS_HERO_EXAMPLE_META[selectedSsHeroExample as Exclude<SsHeroExampleKey, "">]
       : null;
   const [glossaryOpen, setGlossaryOpen] = useState(false);
-  const [ssGuideOpen, setSsGuideOpen] = useState(false);
+  const { guideOpen: ssGuideOpen, dismissGuide: dismissSsGuide, toggleGuide: toggleSsGuideFromHero } =
+    useQuickOnboarding(PHMAX_SS_ONBOARDING_LS_KEY, { scrollAnchorId: "ss-quick-onboarding" });
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
   const [focusMode, setFocusMode] = useCalculatorFocusMode();
   const heroHeaderRef = useRef<HTMLElement>(null);
@@ -365,10 +369,6 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       /* ignore */
     }
   }, [viewMode]);
-
-  const toggleSsGuideFromHero = useCallback(() => {
-    setSsGuideOpen((o) => !o);
-  }, []);
 
   const phmaxHeroValue = ssMetrics.phmaxTotal.toLocaleString("cs-CZ", {
     minimumFractionDigits: 0,
@@ -509,18 +509,21 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               className="glossary-icon-btn--hero"
               onClick={() => setGlossaryOpen(true)}
             />
-            <button
-              type="button"
-              className="btn btn--hero-help"
-              onClick={toggleSsGuideFromHero}
-              aria-expanded={ssGuideOpen}
-            >
-              {ssGuideOpen ? "Skrýt nápovědu" : "Nápověda"}
-            </button>
+            <QuickOnboardingHeroButton guideOpen={ssGuideOpen} onToggle={toggleSsGuideFromHero} />
           </div>
         </div>
 
-        <div className="grid two hero__grid">
+        <HeroExpertStrip
+          title="PHmax a PHAmax – střední školy"
+          kpis={[
+            { label: "PHmax", value: phmaxHeroValue },
+            { label: "PHAmax PrŠ", value: phamaxHeroValue },
+            { label: "Řádky", value: ssMetrics.rowCount },
+            { label: "Stav", value: ssVerdict.label },
+          ]}
+        />
+
+        <div className="grid two hero__grid hero__grid--context">
           <div>
             <p className="hero-zone-label">A. Kontext výpočtu</p>
             <h1 className="hero__title">PHmax a PHAmax – střední školy</h1>
@@ -557,7 +560,6 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
 
         <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
           <div className="hero-zone-actions__toolbar-row">
-          <div className="hero-actions hero-actions--compact">
           <div className="field field--hero-select hero-actions__example hero-ss-example-select">
             <span className="field__label field__label--hero" id="ss-hero-example-label">
               Ukázkový příklad
@@ -672,15 +674,12 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               </p>
             ) : null}
           </div>
-          </div>
 
           <HeroActionsDrawer>
             <HeroCompactToolbar
               primary={
                 <>
-                  <button type="button" className="btn btn--light hero-actions-tiered__cta" onClick={ss.saveSnapshotManually}>
-                    Uložit průběh
-                  </button>
+                  <HeroToolbarSaveButton onClick={ss.saveSnapshotManually} />
                   <HeroIconActionButton
                     showLabel
                     className="btn ghost"
@@ -841,16 +840,6 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         </section>
       </header>
 
-      <CalculatorStickyContextBar
-        anchorRef={heroHeaderRef}
-        primaryLabel="Součet PHmax"
-        primaryValue={phmaxHeroValue}
-        statusText={ssVerdict.label}
-        tone={ssVerdict.tone}
-        onSave={ss.saveSnapshotManually}
-        onExport={ss.handleExportCsv}
-      />
-
       <GlossaryDialog
         open={glossaryOpen}
         onClose={() => setGlossaryOpen(false)}
@@ -862,8 +851,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       <QuickOnboarding
         title="Nápověda – střední školy (PHmax / PHAmax)"
         open={ssGuideOpen}
-        onDismiss={() => setSsGuideOpen(false)}
-        dismissButtonLabel="Skrýt nápovědu"
+        onDismiss={dismissSsGuide}
         anchorId="ss-quick-onboarding"
       >
         <p>
@@ -916,18 +904,16 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       </QuickOnboarding>
       {viewMode === "basic" ? (
         <BasicModeSteps
-          heading="Rychlý start pro SŠ"
+          heading={basicQuickStartHeading("SŠ")}
           lead="Základní průchod: ukázka -> řádky evidence -> kontrola výsledků."
-          steps={[
-            { title: "Vyberte Základní režim", text: "Začněte jednoduchým vyplněním bez metodických detailů." },
-            {
-              title: "Načtěte ukázkový příklad nahoře",
-              text: "V poli „Příkladové výpočty“ načtěte mini-příklad pro tabulku evidence.",
-              ctaLabel: "Přejít na ukázkový příklad",
-              ctaTargetId: "ss-hero-example-select",
-            },
-            { title: "Ověřte řádky evidence", text: "Upravte obor, průměr žáků, počet tříd a formu; ověřte PHmax a pravidla víceoborových tříd." },
-          ]}
+          steps={buildBasicQuickStartSteps({
+            selectTitle: "Vyberte Základní režim",
+            selectText: "Začněte jednoduchým vyplněním bez metodických detailů.",
+            exampleTargetId: "ss-hero-example-select",
+            exampleText: "V poli „Příkladové výpočty“ načtěte mini-příklad pro tabulku evidence.",
+            verifyTitle: "Ověřte řádky evidence",
+            verifyText: "Upravte obor, průměr žáků, počet tříd a formu; ověřte PHmax a pravidla víceoborových tříd.",
+          })}
         />
       ) : null}
 
@@ -1316,8 +1302,18 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         </ul>
       </FieldWhyPhmaxDetails>
 
-      <CalculatorWorkspaceLayout
-        variant="input-heavy"
+      <CalculatorProductShell
+        sticky={{
+          anchorRef: heroHeaderRef,
+          primaryLabel: "Součet PHmax",
+          primaryValue: phmaxHeroValue,
+          statusText: ssVerdict.label,
+          tone: ssVerdict.tone,
+          onSave: ss.saveSnapshotManually,
+          onExport: ss.handleExportCsv,
+        }}
+        workspaceVariant="input-heavy"
+        workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
         dock={
           <CalculatorWorkflowDock
             header={
@@ -1350,6 +1346,14 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         }
         main={
           <>
+      <SsHumanSummary
+        className="ss-human-summary--main"
+        classCount={ss.computedRows.length}
+        phmaxTotal={ssMetrics.phmaxTotal}
+        rowCount={ssMetrics.rowCount}
+        okRows={ssOkRows}
+        conflictCount={ssErrorRows}
+      />
 
       <section data-section="ss-vstupy">
         <PhmaxSsUnitsForm model={ss} hideBackupSubcard showExpertPanels={viewMode === "expert"} />
@@ -1357,21 +1361,21 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
 
           </>
         }
+        afterWorkspace={viewMode === "expert" ? <MethodologyStrip /> : null}
+        footer={
+          <footer className="zs-app-footer">
+            <HeroStatusBar
+              productLabel={PRODUCT_CALCULATOR_TITLES.ss}
+              lastSavedAt=""
+              notice=""
+              variant="ss"
+              placement="footer"
+            />
+            <AuthorCreditFooter />
+          </footer>
+        }
+        tocSections={ssTocSections}
       />
-      {viewMode === "expert" ? <MethodologyStrip /> : null}
-
-      <footer className="zs-app-footer">
-        <HeroStatusBar
-          productLabel={PRODUCT_CALCULATOR_TITLES.ss}
-          lastSavedAt=""
-          notice=""
-          variant="ss"
-          placement="footer"
-        />
-        <AuthorCreditFooter />
-      </footer>
-
-      <PageTableOfContents sections={ssTocSections} />
     </div>
   );
 }

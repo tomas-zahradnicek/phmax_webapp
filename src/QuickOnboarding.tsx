@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useRef } from "react";
+import { QUICK_ONBOARDING_DISMISS_LABEL, QUICK_ONBOARDING_OPEN_LABEL } from "./calculator-ui-constants";
 
 type QuickOnboardingProps = {
   title: string;
@@ -17,7 +18,7 @@ export function QuickOnboarding({
   open,
   onDismiss,
   anchorId,
-  dismissButtonLabel = "Skrýt návod",
+  dismissButtonLabel = QUICK_ONBOARDING_DISMISS_LABEL,
 }: QuickOnboardingProps) {
   const dismissRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -91,5 +92,19 @@ export function QuickOnboarding({
         <div className="onboarding-quick__body">{children}</div>
       </div>
     </div>
+  );
+}
+
+type QuickOnboardingHeroButtonProps = {
+  guideOpen: boolean;
+  onToggle: () => void;
+};
+
+/** Sjednocené tlačítko Nápověda / Skrýt nápovědu v hero liště. */
+export function QuickOnboardingHeroButton({ guideOpen, onToggle }: QuickOnboardingHeroButtonProps) {
+  return (
+    <button type="button" className="btn btn--hero-help" onClick={onToggle} aria-expanded={guideOpen}>
+      {guideOpen ? QUICK_ONBOARDING_DISMISS_LABEL : QUICK_ONBOARDING_OPEN_LABEL}
+    </button>
   );
 }

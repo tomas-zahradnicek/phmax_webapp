@@ -1,4 +1,5 @@
 import React from "react";
+import { CALCULATOR_WORKSPACE_DOCK_LABEL } from "./calculator-ui-constants";
 import { ResultAnchorCard, type ResultAnchorStat, type ResultAnchorTone } from "./ResultAnchorCard";
 import type { CalculatorViewMode } from "./calculator-view-mode";
 
@@ -49,7 +50,7 @@ function workflowStepsSummary(steps: readonly WorkflowDockStep[]): { title: stri
  * Jednotný pravý dock: KPI, jeden postup, akce v accordionu — bez opakovaných workflow boxů.
  */
 export function CalculatorWorkflowDock({
-  dockTitle = "Živý výsledek",
+  dockTitle = CALCULATOR_WORKSPACE_DOCK_LABEL,
   header,
   tone = "neutral",
   primaryLabel,

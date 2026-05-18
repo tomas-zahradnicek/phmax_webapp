@@ -252,12 +252,20 @@ function zsSnapshotHasAnyInput(): boolean {
   return Object.keys(data as object).length > 0;
 }
 
+type DashboardKpi = {
+  label: string;
+  value: string;
+};
+
 type DashboardRow = {
   id: Exclude<ProductView, "dash">;
   title: string;
   status: string;
   detail: string;
   namedBackups: number;
+  hasData: boolean;
+  primaryKpi: DashboardKpi;
+  secondaryKpis: DashboardKpi[];
 };
 
 function buildDashboardRows(): DashboardRow[] {
@@ -272,7 +280,16 @@ function buildDashboardRows(): DashboardRow[] {
     {
       id: "pv",
       title: PRODUCT_CALCULATOR_TITLES.pv,
+      hasData: pv.present,
       status: pv.present ? "data v prohlížeči" : "žádná uložená data",
+      primaryKpi: {
+        label: "PHmax",
+        value: pv.phmax != null ? String(pv.phmax) : "–",
+      },
+      secondaryKpis: [
+        { label: "PHAmax", value: pv.pha != null ? String(pv.pha) : "–" },
+        { label: "Pracoviště", value: String(pv.rowCount) },
+      ],
       detail: pv.present
         ? `Pracoviště: ${pv.rowCount}${pv.incomplete ? " · součet PHmax může být neúplný" : ""} · PHmax: ${
             pv.phmax ?? "–"
@@ -283,7 +300,16 @@ function buildDashboardRows(): DashboardRow[] {
     {
       id: "sd",
       title: PRODUCT_CALCULATOR_TITLES.sd,
+      hasData: Boolean(sd),
       status: sd ? "data v prohlížeči" : "žádná uložená data",
+      primaryKpi: {
+        label: "Oddělení",
+        value: sd ? String(sd.departments) : "–",
+      },
+      secondaryKpis: [
+        { label: "Účastníci", value: sd ? String(sd.pupils) : "–" },
+        { label: "Režim", value: sd ? (sd.inputMode === "detail" ? "detailní" : "souhrnný") : "–" },
+      ],
       detail: sd
         ? `Účastníci: ${sd.pupils}, oddělení: ${sd.departments}, režim: ${sd.inputMode === "detail" ? "detailní" : "souhrnný"} · PHmax dopočítejte v modulu ŠD.`
         : "Po uložení stavu v ŠD se zde zobrazí základ vstupů.",
@@ -292,7 +318,16 @@ function buildDashboardRows(): DashboardRow[] {
     {
       id: "zs",
       title: PRODUCT_CALCULATOR_TITLES.zs,
+      hasData: zsSnapshotHasAnyInput() || zsTotals != null,
       status: zsSnapshotHasAnyInput() || zsTotals != null ? "data v prohlížeči" : "žádná uložená data",
+      primaryKpi: {
+        label: "PHmax",
+        value: zsTotals != null ? String(zsTotals.totalPhmax) : "–",
+      },
+      secondaryKpis: [
+        { label: "PHAmax", value: zsTotals != null ? String(zsTotals.totalPha) : "–" },
+        { label: "PHPmax", value: zsTotals != null ? String(zsTotals.totalPhp) : "–" },
+      ],
       detail: zsTotals
         ? `Součty z autosave (záložka ${String(zsTotals.tab ?? "–")}): PHmax ${zsTotals.totalPhmax}, PHAmax ${zsTotals.totalPha}, PHPmax ${zsTotals.totalPhp}.`
         : zsSnapshotHasAnyInput()
@@ -303,7 +338,19 @@ function buildDashboardRows(): DashboardRow[] {
     {
       id: "ss",
       title: PRODUCT_CALCULATOR_TITLES.ss,
+      hasData: ss.present,
       status: ss.present ? "data v prohlížeči" : "žádná uložená data",
+      primaryKpi: {
+        label: "PHmax",
+        value: ss.phmax != null ? String(ss.phmax) : "–",
+      },
+      secondaryKpis: [
+        {
+          label: "PHAmax PrŠ",
+          value: ss.phamaxPractical != null ? String(ss.phamaxPractical) : "–",
+        },
+        { label: "Řádky", value: String(ss.rowCount) },
+      ],
       detail: ss.present
         ? `Řádky evidence: ${ss.rowCount}, součet PHmax (platné řádky): ${ss.phmax}${ss.phamaxPractical != null ? `, PHAmax (PrŠ, denní): ${ss.phamaxPractical}` : ""}`
         : "Po vyplnění SŠ se zde zobrazí orientační PHmax ze stejné logiky jako ve formuláři.",
@@ -312,7 +359,16 @@ function buildDashboardRows(): DashboardRow[] {
     {
       id: "nv75",
       title: PRODUCT_CALCULATOR_TITLES.nv75,
+      hasData: nv.rowCount > 0 || nv.bankTotal != null,
       status: nv.rowCount > 0 || nv.bankTotal != null ? "data v prohlížeči" : "žádná uložená data",
+      primaryKpi: {
+        label: "Banka h/týd",
+        value: nv.bankTotal != null ? String(nv.bankTotal) : "–",
+      },
+      secondaryKpis: [
+        { label: "Řádky", value: String(nv.rowCount) },
+        { label: "§4b", value: nv.rule ?? "–" },
+      ],
       detail:
         nv.rowCount > 0
           ? `Řádky: ${nv.rowCount}${nv.rule ? ` · §4b pravidlo: ${nv.rule}` : ""}, banka celkem: ${
@@ -397,23 +453,40 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           <p className="muted-text" style={{ marginBottom: 14 }}>
             Slouží jen k orientaci v tomto prohlížeči. Metriky počítám stejnou logikou jako v příslušné kartě (kde je k tomu dostupná data).
           </p>
+          <div className="dash-kpi-strip" aria-label="Souhrnné KPI modulů">
+            {rows.map((row) => (
+              <article
+                key={row.id}
+                className={["dash-kpi-tile", row.hasData ? "" : "dash-kpi-tile--empty"].filter(Boolean).join(" ")}
+              >
+                <span className="dash-kpi-tile__module">{DASH_CALC_LABEL[row.id]}</span>
+                <strong className="dash-kpi-tile__value">{row.primaryKpi.value}</strong>
+                <span className="dash-kpi-tile__hint">{row.primaryKpi.label}</span>
+              </article>
+            ))}
+          </div>
           <div className="dash-cards">
-            {rows.map((row) => {
-              const metricMatch = row.detail.match(/PHmax[^:]*:\s*([\d.,]+|–)/i);
-              const metric = metricMatch?.[1] ?? "–";
-              return (
-                <article key={row.id} className="dash-card">
-                  <h3 className="dash-card__title">{row.title}</h3>
-                  <p className="dash-card__metric">{metric}</p>
-                  <p className="dash-card__meta">{row.status}</p>
-                  <p className="dash-card__meta">{row.detail}</p>
-                  <p className="dash-card__meta">Pojmenované zálohy: {row.namedBackups}</p>
-                  <button type="button" className="btn primary" onClick={() => setProductView(row.id)}>
-                    Otevřít
-                  </button>
-                </article>
-              );
-            })}
+            {rows.map((row) => (
+              <article key={row.id} className="dash-card">
+                <h3 className="dash-card__title">{row.title}</h3>
+                <p className="dash-card__metric">
+                  {row.primaryKpi.label}: {row.primaryKpi.value}
+                </p>
+                <div className="dash-card__kpis" aria-label="Doplňkové metriky">
+                  {row.secondaryKpis.map((kpi) => (
+                    <span key={kpi.label} className="dash-card__kpi-pill">
+                      {kpi.label}: <strong>{kpi.value}</strong>
+                    </span>
+                  ))}
+                </div>
+                <p className="dash-card__meta">{row.status}</p>
+                <p className="dash-card__meta">{row.detail}</p>
+                <p className="dash-card__meta">Pojmenované zálohy: {row.namedBackups}</p>
+                <button type="button" className="btn primary" onClick={() => setProductView(row.id)}>
+                  Otevřít
+                </button>
+              </article>
+            ))}
           </div>
         </section>
 

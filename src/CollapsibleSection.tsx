@@ -7,6 +7,8 @@ type CollapsibleSectionProps = {
   defaultOpen?: boolean;
   className?: string;
   level?: "default" | "advanced";
+  /** Volitelný počet v závorce v nadpisu (např. řádků auditu). */
+  count?: number;
 };
 
 /**
@@ -18,6 +20,7 @@ export function CollapsibleSection({
   defaultOpen = false,
   className = "",
   level = "default",
+  count,
 }: CollapsibleSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -33,7 +36,15 @@ export function CollapsibleSection({
       open={open}
       onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
     >
-      <summary className="ux-collapsible__summary">{summary}</summary>
+      <summary className="ux-collapsible__summary">
+        {summary}
+        {count != null && count > 0 ? (
+          <span className="ux-collapsible__count" aria-hidden>
+            {" "}
+            ({count})
+          </span>
+        ) : null}
+      </summary>
       <div className="ux-collapsible__body">{children}</div>
     </details>
   );

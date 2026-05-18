@@ -42,7 +42,7 @@ export function phmaxPaneFromWizardStep(step: number): PhmaxZsPhmaxPane {
   return "summary";
 }
 
-export function wizardStepFromPhmaxPane(pane: PhmaxZsPhmaxPane): 2 | 3 | 4 {
+export function wizardStepFromPhmaxPane(pane: PhmaxZsPhmaxPane): 2 | 3 | 4 | 5 {
   if (pane === "classes") return 2;
   if (pane === "exceptions") return 3;
   return 4;

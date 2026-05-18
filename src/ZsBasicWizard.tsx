@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  ZS_BASIC_WIZARD_STEP_COUNT,
   ZS_BASIC_WIZARD_STEPS,
   type ZsBasicWizardStep,
 } from "./zs-basic-wizard";
@@ -35,12 +36,12 @@ export function ZsBasicWizard({
 }: ZsBasicWizardProps) {
   const meta = ZS_BASIC_WIZARD_STEPS[step - 1]!;
   const isFirst = step === 1;
-  const isLast = step === 4;
+  const isLast = step === ZS_BASIC_WIZARD_STEP_COUNT;
 
   return (
     <section className="card card--onboarding section-card zs-basic-wizard" aria-label="Průvodce výpočtem PHmax">
       <div className="zs-basic-wizard__head">
-        <div className="pill pill--step">Průvodce · krok {step} ze 4</div>
+        <div className="pill pill--step">Průvodce · krok {step} ze {ZS_BASIC_WIZARD_STEP_COUNT}</div>
         <h2 className="section-title">{meta.label}</h2>
         <p className="muted-text zs-basic-wizard__lead">{meta.lead}</p>
         <p className="muted-text zs-basic-wizard__context">

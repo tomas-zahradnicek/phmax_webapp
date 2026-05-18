@@ -12,6 +12,19 @@ export const PRODUCT_CALCULATOR_TITLES = {
   nv75: "Kalkulačka NV75 – banka odpočtů zástupců",
 } as const satisfies Record<ProductViewCode, string>;
 
+/** Popisek pravého docku (aria-label aside + nadpis workflow karty) – sladěno s hero „A. Kontext výpočtu“. */
+export const CALCULATOR_WORKSPACE_DOCK_LABEL = "Kontext výpočtu";
+
+/** Sjednocené texty tlačítka nápovědy v hero (PV, ŠD, ZŠ, SŠ). */
+export const QUICK_ONBOARDING_OPEN_LABEL = "Nápověda";
+export const QUICK_ONBOARDING_DISMISS_LABEL = "Skrýt nápovědu";
+
+export const PHMAX_PV_ONBOARDING_LS_KEY = "phmax-pv-onboarding";
+export const PHMAX_SD_ONBOARDING_LS_KEY = "phmax-sd-onboarding";
+export const PHMAX_ZS_ONBOARDING_LS_KEY = "phmax-zs-onboarding";
+export const PHMAX_SS_ONBOARDING_LS_KEY = "phmax-ss-onboarding";
+export const PHMAX_NV75_ONBOARDING_LS_KEY = "phmax-nv75-onboarding";
+
 /** Sjednocené texty pro panel akcí (PV, ŠD, ZŠ na úzkém displeji). */
 export const HERO_ACTIONS_TRIGGER_LABEL = "Akce, tisk, uložení a export…";
 export const HERO_ACTIONS_DRAWER_TITLE = "Akce a export";
@@ -60,6 +73,9 @@ export const LAY_USER_QUICK_START_ZS =
 
 export const LAY_USER_QUICK_START_SS =
   "Rychlý start: (1) Přidejte řádek pro každou třídu nebo skupinu, kterou počítáte zvlášť, (2) vyplňte kód oboru z RVP, průměr žáků, počet tříd a formu studia, (3) u víceoborové třídy doplňte další obory a podívejte se na blok „Kontrola pravidel“ pod tabulkou. PHAmax v horním přehledu jen pro Praktickou školu (78-62-C/01, 78-62-C/02) v denní formě – ostatní dopočtěte dle metodiky MŠMT.";
+
+export const LAY_USER_QUICK_START_NV75 =
+  "Rychlý start: (1) Vyberte druh školy/zařízení u každého řádku právnické osoby, (2) načtěte ukázkový příklad A v horní liště, (3) ověřte banku odpočtů – pravidlo §4b, základ a bonusy §4c/§4d. Výsledek je orientační; u složitých struktur ověřte plné znění NV.";
 
 /** Jednořádek kontextu v přehledu (PV) – srozumitelná orientace mimo odbornou terminologii. */
 export function formatPvLayContextLine(workplaceCount: number, aggregateIncomplete: boolean): string {

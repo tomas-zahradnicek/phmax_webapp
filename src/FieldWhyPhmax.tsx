@@ -12,7 +12,7 @@ export function FieldWhyPhmaxDetails({
   children,
 }: FieldWhyPhmaxDetailsProps) {
   return (
-    <details className="subcard muted field-why-phmax" style={{ marginTop: 12 }}>
+    <details className="subcard muted field-why-phmax ux-semantic--info" style={{ marginTop: 12 }}>
       <summary className="field-why-phmax__summary" style={{ cursor: "pointer", fontWeight: 600 }}>
         {summary}
       </summary>

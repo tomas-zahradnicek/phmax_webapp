@@ -24,6 +24,8 @@ import {
   NAMED_BACKUPS_SELECT_PLACEHOLDER,
   namedBackupsMicrocopy,
   namedBackupSavedNotice,
+  CALCULATOR_WORKSPACE_DOCK_LABEL,
+  PHMAX_SD_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
@@ -52,13 +54,12 @@ import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
-import { CalculatorStickyContextBar } from "./CalculatorStickyContextBar";
 import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { HeroStat } from "./HeroStat";
-import { PageTableOfContents } from "./PageTableOfContents";
-import { CalculatorWorkspaceLayout } from "./CalculatorWorkspaceLayout";
-import { HeroCompactToolbar } from "./HeroCompactToolbar";
+import { CalculatorProductShell } from "./CalculatorProductShell";
+import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
+import { HeroExpertStrip } from "./HeroExpertStrip";
 import { DisplayDensityToggle } from "./DisplayDensityToggle";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
@@ -67,7 +68,9 @@ import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, SdLegisRef } from "./PhmaxProductLegisUi";
 import { SD_LEGIS_ZAKONY_URL } from "./phmax-sd-legislativa";
-import { QuickOnboarding } from "./QuickOnboarding";
+import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
+import { useQuickOnboarding } from "./useQuickOnboarding";
+import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick-start";
 import { BasicModeSteps } from "./BasicModeSteps";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
@@ -186,7 +189,6 @@ type PhmaxSdPageProps = {
 const SD_HERO_EXAMPLE_SELECT_LEGEND =
   "Najeďte myší na řádek v seznamu pro stručný popis situace a orientační očekávaný výsledek. Čísla odpovídají výpočtu v této aplikaci (včetně přesných mezikroků; metodika někdy zaokrouhluje jinak).";
 
-const SD_ONBOARDING_KEY = "phmax-sd-onboarding";
 const SD_VIEW_MODE_LS_KEY = "phmax-sd-view-mode";
 const SD_STORAGE_KEY = "edu-cz-sd-calculator-state";
 const SD_NAMED_SNAPSHOTS_LS_KEY = "edu-cz-sd-named-snapshots-v1";
@@ -347,12 +349,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const [namedSnapshots, setNamedSnapshots] = useState<NamedSdSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
-  const [guideOpen, setGuideOpen] = useState(() => {
-    try {
-      return localStorage.getItem(SD_ONBOARDING_KEY) !== "1";
-    } catch {
-      return true;
-    }
+  const { guideOpen, dismissGuide, toggleGuide } = useQuickOnboarding(PHMAX_SD_ONBOARDING_LS_KEY, {
+    scrollAnchorId: "sd-quick-onboarding",
   });
   const [selectedSdHeroExample, setSelectedSdHeroExample] = useState<SdHeroExampleKey>("");
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
@@ -377,24 +375,6 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       : null;
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
-
-  const dismissGuide = useCallback(() => {
-    try {
-      localStorage.setItem(SD_ONBOARDING_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-    setGuideOpen(false);
-  }, []);
-
-  const openGuide = useCallback(() => {
-    try {
-      localStorage.removeItem(SD_ONBOARDING_KEY);
-    } catch {
-      /* ignore */
-    }
-    setGuideOpen(true);
-  }, []);
 
   useEffect(() => {
     setNamedSnapshots(readNamedSdSnapshotsFromLs());
@@ -1098,18 +1078,21 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               className="glossary-icon-btn--hero"
               onClick={() => setGlossaryOpen(true)}
             />
-            <button
-              type="button"
-              className="btn btn--hero-help"
-              onClick={() => (guideOpen ? dismissGuide() : openGuide())}
-              aria-expanded={guideOpen}
-            >
-              {guideOpen ? "Skrýt nápovědu" : "Nápověda"}
-            </button>
+            <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} />
           </div>
         </div>
 
-        <div className="grid two hero__grid">
+        <HeroExpertStrip
+          title="PHmax ve školní družině"
+          kpis={[
+            { label: "PHmax", value: sdPhmaxDisplay },
+            { label: "Účastníci", value: pupils },
+            { label: "Oddělení", value: inputMode === "detail" ? detailDepartments.length : effectiveDepts },
+            { label: "Stav", value: sdVerdict.label },
+          ]}
+        />
+
+        <div className="grid two hero__grid hero__grid--context">
           <div>
             <p className="hero-zone-label">A. Kontext výpočtu</p>
             <h1 className="hero__title hero__title--sd">PHmax ve školní družině</h1>
@@ -1164,9 +1147,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <HeroCompactToolbar
               primary={
                 <>
-                  <button type="button" className="btn btn--light hero-actions-tiered__cta" onClick={saveSdSnapshotManually}>
-                    Uložit průběh
-                  </button>
+                  <HeroToolbarSaveButton onClick={saveSdSnapshotManually} />
                   <HeroIconActionButton
                     showLabel
                     className="btn ghost"
@@ -1300,21 +1281,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
       </header>
 
-      <CalculatorStickyContextBar
-        anchorRef={heroHeaderRef}
-        primaryLabel="PHmax"
-        primaryValue={sdPhmaxDisplay}
-        statusText={sdVerdict.label}
-        tone={sdVerdict.tone}
-        onSave={saveSdSnapshotManually}
-        onExport={handleExportCsv}
-      />
-
       <QuickOnboarding
         title="Jak s touto kalkulačkou pracovat"
         open={guideOpen}
         onDismiss={dismissGuide}
-        dismissButtonLabel="Skrýt nápovědu"
+        anchorId="sd-quick-onboarding"
       >
         <p>
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
@@ -1342,22 +1313,30 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       </QuickOnboarding>
       {viewMode === "basic" ? (
         <BasicModeSteps
-          heading="Rychlý start pro ŠD"
+          heading={basicQuickStartHeading("ŠD")}
           lead="Nejkratší postup pro první vyplnění bez studia celé metodiky."
-          steps={[
-            { title: "Vyberte vstupní režim", text: "Vyberte souhrnný nebo detailní režim po odděleních." },
-            {
-              title: "Načtěte ukázkový příklad nahoře",
-              text: "V poli „Příkladové výpočty“ načtěte ukázku a porovnejte očekávaný výsledek.",
-              ctaLabel: "Přejít na ukázkový příklad",
-              ctaTargetId: "sd-hero-example-select",
-            },
-            { title: "Ověřte účastníky a oddělení", text: "Upravte vstupy na vlastní stav a ověřte PHmax i případné krácení dle § 10 odst. 2." },
-          ]}
+          steps={buildBasicQuickStartSteps({
+            selectTitle: "Vyberte vstupní režim",
+            selectText: "Vyberte souhrnný nebo detailní režim po odděleních.",
+            exampleTargetId: "sd-hero-example-select",
+            exampleText: "V poli „Příkladové výpočty“ načtěte ukázku a porovnejte očekávaný výsledek.",
+            verifyTitle: "Ověřte účastníky a oddělení",
+            verifyText: "Upravte vstupy na vlastní stav a ověřte PHmax i případné krácení dle § 10 odst. 2.",
+          })}
         />
       ) : null}
 
-      <CalculatorWorkspaceLayout
+      <CalculatorProductShell
+        sticky={{
+          anchorRef: heroHeaderRef,
+          primaryLabel: "PHmax",
+          primaryValue: sdPhmaxDisplay,
+          statusText: sdVerdict.label,
+          tone: sdVerdict.tone,
+          onSave: saveSdSnapshotManually,
+          onExport: handleExportCsv,
+        }}
+        workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
         dock={
           <CalculatorWorkflowDock
             tone={sdVerdict.tone}
@@ -2432,20 +2411,26 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
           </>
         }
+        afterWorkspace={
+          <>
+            {viewMode === "expert" ? <ProductLegisContextPanel variant="sd" /> : null}
+            {viewMode === "expert" ? <MethodologyStrip /> : null}
+          </>
+        }
+        footer={
+          <footer className="zs-app-footer">
+            <HeroStatusBar
+              productLabel={PRODUCT_CALCULATOR_TITLES.sd}
+              lastSavedAt={lastSavedAt}
+              notice={uiNotice}
+              variant="sd"
+              placement="footer"
+            />
+            <AuthorCreditFooter />
+          </footer>
+        }
+        tocSections={sdTocSections}
       />
-      {viewMode === "expert" ? <ProductLegisContextPanel variant="sd" /> : null}
-      {viewMode === "expert" ? <MethodologyStrip /> : null}
-      <footer className="zs-app-footer">
-        <HeroStatusBar
-          productLabel={PRODUCT_CALCULATOR_TITLES.sd}
-          lastSavedAt={lastSavedAt}
-          notice={uiNotice}
-          variant="sd"
-          placement="footer"
-        />
-        <AuthorCreditFooter />
-      </footer>
-      <PageTableOfContents sections={sdTocSections} />
       <GlossaryDialog
         open={glossaryOpen}
         onClose={() => setGlossaryOpen(false)}

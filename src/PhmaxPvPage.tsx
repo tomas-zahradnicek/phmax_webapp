@@ -25,6 +25,8 @@ import {
   NAMED_BACKUPS_SELECT_PLACEHOLDER,
   namedBackupsMicrocopy,
   namedBackupSavedNotice,
+  CALCULATOR_WORKSPACE_DOCK_LABEL,
+  PHMAX_PV_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
@@ -52,12 +54,11 @@ import {
 import { HeroStatusBar } from "./HeroStatusBar";
 import { HeroStat } from "./HeroStat";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
-import { CalculatorStickyContextBar } from "./CalculatorStickyContextBar";
+import { CalculatorProductShell } from "./CalculatorProductShell";
 import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
-import { PageTableOfContents } from "./PageTableOfContents";
-import { CalculatorWorkspaceLayout } from "./CalculatorWorkspaceLayout";
-import { HeroCompactToolbar } from "./HeroCompactToolbar";
+import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
+import { HeroExpertStrip } from "./HeroExpertStrip";
 import { DisplayDensityToggle } from "./DisplayDensityToggle";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
@@ -67,7 +68,9 @@ import { GlossaryIconButton } from "./GlossaryIconButton";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, PvLegisRef } from "./PhmaxProductLegisUi";
-import { QuickOnboarding } from "./QuickOnboarding";
+import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
+import { useQuickOnboarding } from "./useQuickOnboarding";
+import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick-start";
 import { BasicModeSteps } from "./BasicModeSteps";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
@@ -203,7 +206,6 @@ const PV_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
   },
 ];
 
-const PV_ONBOARDING_KEY = "phmax-pv-onboarding";
 const PV_VIEW_MODE_LS_KEY = "phmax-pv-view-mode";
 const PV_STORAGE_KEY = "edu-cz-pv-calculator-state";
 const PV_NAMED_SNAPSHOTS_LS_KEY = "edu-cz-pv-named-snapshots-v1";
@@ -365,35 +367,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   });
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
-  const [guideOpen, setGuideOpen] = useState(() => {
-    try {
-      return localStorage.getItem(PV_ONBOARDING_KEY) !== "1";
-    } catch {
-      return true;
-    }
+  const { guideOpen, dismissGuide, toggleGuide } = useQuickOnboarding(PHMAX_PV_ONBOARDING_LS_KEY, {
+    scrollAnchorId: "pv-quick-onboarding",
   });
   const selectedPvHeroExampleMeta =
     selectedPvHeroExample && selectedPvHeroExample in PV_HERO_EXAMPLE_META
       ? PV_HERO_EXAMPLE_META[selectedPvHeroExample as Exclude<PvHeroExampleKey, "">]
       : null;
-
-  const dismissGuide = useCallback(() => {
-    try {
-      localStorage.setItem(PV_ONBOARDING_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-    setGuideOpen(false);
-  }, []);
-
-  const openGuide = useCallback(() => {
-    try {
-      localStorage.removeItem(PV_ONBOARDING_KEY);
-    } catch {
-      /* ignore */
-    }
-    setGuideOpen(true);
-  }, []);
 
   useEffect(() => {
     try {
@@ -808,18 +788,24 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               className="glossary-icon-btn--hero"
               onClick={() => setGlossaryOpen(true)}
             />
-            <button
-              type="button"
-              className="btn btn--hero-help"
-              onClick={() => (guideOpen ? dismissGuide() : openGuide())}
-              aria-expanded={guideOpen}
-            >
-              {guideOpen ? "Skrýt nápovědu" : "Nápověda"}
-            </button>
+            <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} />
           </div>
         </div>
 
-        <div className="grid two hero__grid">
+        <HeroExpertStrip
+          title="PHmax a PHAmax – předškolní vzdělávání"
+          kpis={[
+            {
+              label: "PHmax celkem",
+              value: aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum,
+            },
+            { label: "PHAmax", value: aggregate.phaSum > 0 ? aggregate.phaSum : "–" },
+            { label: "Pracoviště", value: rows.length },
+            { label: "Stav", value: pvStatusBadge },
+          ]}
+        />
+
+        <div className="grid two hero__grid hero__grid--context">
           <div>
             <p className="hero-zone-label">A. Kontext výpočtu</p>
             <h1 className="hero__title hero__title--sd">PHmax a PHAmax – předškolní vzdělávání</h1>
@@ -900,9 +886,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             <HeroCompactToolbar
               primary={
                 <>
-                  <button type="button" className="btn btn--light hero-actions-tiered__cta" onClick={savePvSnapshotManually}>
-                    Uložit průběh
-                  </button>
+                  <HeroToolbarSaveButton onClick={savePvSnapshotManually} />
                   <HeroIconActionButton
                     showLabel
                     className="btn ghost"
@@ -1035,17 +1019,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         </section>
       </header>
 
-      <CalculatorStickyContextBar
-        anchorRef={heroHeaderRef}
-        primaryLabel="PHmax celkem"
-        primaryValue={aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}
-        statusText={pvStatusBadge}
-        tone={pvVerdict.tone}
-        onSave={savePvSnapshotManually}
-        onExport={handleExportCsv}
-      />
-
-      <QuickOnboarding title="Nápověda – předškolní vzdělávání" open={guideOpen} onDismiss={dismissGuide}>
+      <QuickOnboarding
+        title="Nápověda – předškolní vzdělávání"
+        open={guideOpen}
+        onDismiss={dismissGuide}
+        anchorId="pv-quick-onboarding"
+      >
         <p>
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
         </p>
@@ -1074,23 +1053,31 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       </QuickOnboarding>
       {viewMode === "basic" ? (
         <BasicModeSteps
-          heading="Rychlý start pro PV"
+          heading={basicQuickStartHeading("PV")}
           lead="Krátký postup pro první orientaci bez metodického detailu."
-          steps={[
-            { title: "Vyberte režim zobrazení", text: "V horní liště vyberte Základní režim pro rychlé vyplnění." },
-            {
-              title: "Načtěte ukázkový příklad nahoře",
-              text: "V poli „Příkladové výpočty“ načtěte ukázku a předvyplňte pracoviště.",
-              ctaLabel: "Přejít na ukázkový příklad",
-              ctaTargetId: "pv-hero-example-select",
-            },
-            { title: "Ověřte vlastní pracoviště", text: "Upravte druh provozu, počet tříd a průměr hodin; ověřte součtový přehled PHmax/PHAmax." },
-          ]}
+          steps={buildBasicQuickStartSteps({
+            selectTitle: "Vyberte režim zobrazení",
+            selectText: "V horní liště vyberte Základní režim pro rychlé vyplnění.",
+            exampleTargetId: "pv-hero-example-select",
+            exampleText: "V poli „Příkladové výpočty“ načtěte ukázku a předvyplňte pracoviště.",
+            verifyTitle: "Ověřte vlastní pracoviště",
+            verifyText: "Upravte druh provozu, počet tříd a průměr hodin; ověřte součtový přehled PHmax/PHAmax.",
+          })}
         />
       ) : null}
 
-      <CalculatorWorkspaceLayout
-        variant="input-heavy"
+      <CalculatorProductShell
+        sticky={{
+          anchorRef: heroHeaderRef,
+          primaryLabel: "PHmax celkem",
+          primaryValue: aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum,
+          statusText: pvStatusBadge,
+          tone: pvVerdict.tone,
+          onSave: savePvSnapshotManually,
+          onExport: handleExportCsv,
+        }}
+        workspaceVariant="input-heavy"
+        workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
         dock={
           <CalculatorWorkflowDock
             tone={pvVerdict.tone}
@@ -1702,20 +1689,26 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
           </>
         }
+        afterWorkspace={
+          <>
+            {viewMode === "expert" ? <ProductLegisContextPanel variant="pv" /> : null}
+            {viewMode === "expert" ? <MethodologyStrip /> : null}
+          </>
+        }
+        footer={
+          <footer className="zs-app-footer">
+            <HeroStatusBar
+              productLabel={PRODUCT_CALCULATOR_TITLES.pv}
+              lastSavedAt={lastSavedAt}
+              notice={uiNotice}
+              variant="pv"
+              placement="footer"
+            />
+            <AuthorCreditFooter />
+          </footer>
+        }
+        tocSections={pvTocSections}
       />
-      {viewMode === "expert" ? <ProductLegisContextPanel variant="pv" /> : null}
-      {viewMode === "expert" ? <MethodologyStrip /> : null}
-      <footer className="zs-app-footer">
-        <HeroStatusBar
-          productLabel={PRODUCT_CALCULATOR_TITLES.pv}
-          lastSavedAt={lastSavedAt}
-          notice={uiNotice}
-          variant="pv"
-          placement="footer"
-        />
-        <AuthorCreditFooter />
-      </footer>
-      <PageTableOfContents sections={pvTocSections} />
       <GlossaryDialog
         open={glossaryOpen}
         onClose={() => setGlossaryOpen(false)}

@@ -38,6 +38,7 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
     expect(src).toContain('const errorRows = ss.preview.filter((p) => !p.skipped && "error" in p).length;');
     expect(src).toContain("workflowSteps={ssWorkflow.steps}");
     expect(src).toContain("SsHumanSummary");
+    expect(src).toContain("ss-human-summary--main");
     expect(src).toContain('{ label: "Opravit chybné kombinace nebo hodnoty", state: "active" as const }');
   });
 });

@@ -1,16 +1,10 @@
 import React from "react";
-
-type BasicModeStep = {
-  title: string;
-  text: string;
-  ctaLabel?: string;
-  ctaTargetId?: string;
-};
+import type { BasicQuickStartStep } from "./basic-quick-start";
 
 type BasicModeStepsProps = {
   heading: string;
   lead?: string;
-  steps: readonly BasicModeStep[];
+  steps: readonly BasicQuickStartStep[];
 };
 
 export function BasicModeSteps({ heading, lead, steps }: BasicModeStepsProps) {

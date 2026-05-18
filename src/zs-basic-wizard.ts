@@ -1,6 +1,8 @@
 export const ZS_BASIC_WIZARD_LS_KEY = "phmax-zs-basic-wizard-step";
 
-export type ZsBasicWizardStep = 1 | 2 | 3 | 4;
+export type ZsBasicWizardStep = 1 | 2 | 3 | 4 | 5;
+
+export const ZS_BASIC_WIZARD_STEP_COUNT = 5;
 
 export const ZS_BASIC_WIZARD_STEPS: ReadonlyArray<{
   step: ZsBasicWizardStep;
@@ -24,8 +26,13 @@ export const ZS_BASIC_WIZARD_STEPS: ReadonlyArray<{
   },
   {
     step: 4,
-    label: "Souhrn",
-    lead: "Zkontrolujte souhrn PHmax a celkový přehled. Poté můžete přepnout na PHAmax nebo PHPmax.",
+    label: "Souhrn PHmax",
+    lead: "Zkontrolujte souhrn PHmax a dílčí moduly. Ověřte varování a chybějící vstupy.",
+  },
+  {
+    step: 5,
+    label: "Celkový přehled",
+    lead: "Porovnejte PHmax, PHAmax a PHPmax. Poté můžete přepnout záložku PHAmax nebo PHPmax.",
   },
 ];
 
@@ -44,7 +51,7 @@ export function readZsBasicWizardStep(): ZsBasicWizardStep {
   try {
     const raw = localStorage.getItem(ZS_BASIC_WIZARD_LS_KEY);
     const n = Number(raw);
-    if (n >= 1 && n <= 4) return n as ZsBasicWizardStep;
+    if (n >= 1 && n <= ZS_BASIC_WIZARD_STEP_COUNT) return n as ZsBasicWizardStep;
   } catch {
     /* ignore */
   }
@@ -53,7 +60,7 @@ export function readZsBasicWizardStep(): ZsBasicWizardStep {
 
 export function clampZsBasicWizardStep(step: number): ZsBasicWizardStep {
   if (step <= 1) return 1;
-  if (step >= 4) return 4;
+  if (step >= ZS_BASIC_WIZARD_STEP_COUNT) return ZS_BASIC_WIZARD_STEP_COUNT;
   return step as ZsBasicWizardStep;
 }
 
@@ -63,11 +70,14 @@ export function resolveZsWizardScrollSection(
 ): string {
   if (step === 1) return "setup";
   if (step === 2) return "basic";
-  if (step === 4) return "phmax-summary";
-  for (const id of EXCEPTION_SECTION_IDS) {
-    if (visibleExceptionSectionIds.includes(id)) return id;
+  if (step === 3) {
+    for (const id of EXCEPTION_SECTION_IDS) {
+      if (visibleExceptionSectionIds.includes(id)) return id;
+    }
+    return "phmax-summary";
   }
-  return "phmax-summary";
+  if (step === 4) return "phmax-summary";
+  return "overview";
 }
 
 export function isZsWizardExceptionSection(sectionId: string): boolean {

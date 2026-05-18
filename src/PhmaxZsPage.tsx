@@ -38,7 +38,8 @@ import { exportCsvLocalized, downloadTextFile } from "./export-utils";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, ZsLegisRef } from "./PhmaxProductLegisUi";
 import { ZS_LEGIS_PARAGRAPH_TOOLTIPS } from "./phmax-zs-legislativa";
-import { QuickOnboarding } from "./QuickOnboarding";
+import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
+import { useQuickOnboarding } from "./useQuickOnboarding";
 import { BasicModeSteps } from "./BasicModeSteps";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -73,8 +74,9 @@ import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { PageTableOfContents, type PageTocSection } from "./PageTableOfContents";
-import { CalculatorWorkspaceLayout } from "./CalculatorWorkspaceLayout";
-import { HeroCompactToolbar } from "./HeroCompactToolbar";
+import { CalculatorProductShell } from "./CalculatorProductShell";
+import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
+import { HeroExpertStrip } from "./HeroExpertStrip";
 import { DisplayDensityToggle } from "./DisplayDensityToggle";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
@@ -117,6 +119,8 @@ import {
   NAMED_BACKUPS_RESTORE_LABEL,
   NAMED_BACKUPS_SAVE_LABEL,
   NAMED_BACKUPS_SELECT_PLACEHOLDER,
+  CALCULATOR_WORKSPACE_DOCK_LABEL,
+  PHMAX_ZS_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
   TABLE_SCROLL_HINT,
   namedBackupsMicrocopy,
@@ -140,8 +144,6 @@ import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
 const ZS_VIEW_MODE_LS_KEY = "phmax-zs-view-mode";
-
-const ZS_ONBOARDING_KEY = "phmax-zs-onboarding";
 
 type TabKey = "phmax" | "pha" | "php";
 
@@ -541,13 +543,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [lastSavedAt, setLastSavedAt] = useState<string>("");
   const [uiNotice, setUiNotice] = useState<string>("");
   const [exportLabel, setExportLabel] = useState("");
-  const [zsGuideOpen, setZsGuideOpen] = useState(() => {
-    try {
-      return localStorage.getItem(ZS_ONBOARDING_KEY) !== "1";
-    } catch {
-      return true;
-    }
-  });
+  const { guideOpen: zsGuideOpen, dismissGuide: dismissZsGuide, toggleGuide: toggleZsGuideFromHero } =
+    useQuickOnboarding(PHMAX_ZS_ONBOARDING_LS_KEY, { scrollAnchorId: "zs-quick-guide" });
 
   const isFull = basicType === "full_more_than_2" || basicType === "full_max_2";
 
@@ -1488,37 +1485,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     setUiNotice("Rozpracované údaje byly uloženy.");
   };
 
-  const dismissZsGuide = () => {
-    try {
-      localStorage.setItem(ZS_ONBOARDING_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-    setZsGuideOpen(false);
-  };
-
-  const scrollZsGuideIntoView = useCallback(() => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        document.getElementById("zs-quick-guide")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    });
-  }, []);
-
-  const toggleZsGuideFromHero = () => {
-    if (zsGuideOpen) {
-      dismissZsGuide();
-    } else {
-      try {
-        localStorage.removeItem(ZS_ONBOARDING_KEY);
-      } catch {
-        /* ignore */
-      }
-      setZsGuideOpen(true);
-      scrollZsGuideIntoView();
-    }
-  };
-
   const copySummaryToClipboard = async () => {
     const text = buildShareText({
       modeLabel: MODE_CONFIG[mode].label,
@@ -2183,7 +2149,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   }, [goToZsWizardStep, zsWizardStep]);
 
   const handleZsWizardNext = useCallback(() => {
-    if (zsWizardStep >= 4) {
+    if (zsWizardStep >= 5) {
       goToSection("overview");
       return;
     }
@@ -2227,7 +2193,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${phmaxPaneShellClass}`}
     >
       <div className="container container--app">
-        <header className="hero hero--feature">
+        <header className="hero hero--feature" ref={heroHeaderRef}>
           <div className="hero__orb hero__orb--one" />
           <div className="hero__orb hero__orb--two" />
 
@@ -2261,22 +2227,30 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                 className="glossary-icon-btn--hero"
                 onClick={() => setGlossaryOpen(true)}
               />
-              <button type="button" className="btn btn--hero-guide" onClick={toggleZsGuideFromHero}>
-                {zsGuideOpen ? "Skrýt nápovědu" : "Stručné pokyny"}
-              </button>
+              <QuickOnboardingHeroButton guideOpen={zsGuideOpen} onToggle={toggleZsGuideFromHero} />
             </div>
           </div>
 
-          <div className="grid two hero__grid">
+          <HeroExpertStrip
+            title="PHmax, PHAmax a PHPmax – základní škola"
+            kpis={[
+              { label: zsTabPrimaryLabel.replace(" celkem", ""), value: zsTabPrimaryValue },
+              { label: "PHmax", value: totalPhmax },
+              { label: "Režim", value: MODE_CONFIG[mode].label },
+              {
+                label: "Stav",
+                value: incompleteSections > 0 ? `${incompleteSections} nevyplněno` : "Vstupy kompletní",
+              },
+            ]}
+          />
+
+          <div className="grid two hero__grid hero__grid--context">
             <div>
               <p className="hero-zone-label">A. Kontext výpočtu</p>
-              <h1 className="hero__title">
-                Přehledný průvodce výpočtem PHmax, PHAmax a PHPmax
-              </h1>
-              <p className="hero__text">
-                Aplikace spojuje rozcestník, ukázkové situace, metodické nápovědy a samotný výpočet.
-                Soustředí se na PHmax, PHAmax a PHPmax.
-                Hodí se zejména ředitelům a vedení škol.
+              <h1 className="hero__title hero__title--zs">PHmax, PHAmax a PHPmax – základní škola</h1>
+              <p className="hero__text hero__text--zs">
+                Orientační výpočet podle metodiky PHmax, PHAmax a PHPmax pro ZŠ (verze 5 / 2026) a souvisejících
+                předpisů. Ukázkové situace a zálohy scénářů jsou v horní liště; podrobnosti k modulům najdete v nápovědě.
               </p>
             </div>
           </div>
@@ -2361,9 +2335,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               <HeroCompactToolbar
                 primary={
                   <>
-                    <button type="button" className="btn btn--light hero-actions-tiered__cta" onClick={saveSnapshotManually}>
-                      Uložit průběh
-                    </button>
+                    <HeroToolbarSaveButton onClick={saveSnapshotManually} />
                     <HeroIconActionButton
                       showLabel
                       className="btn btn--light"
@@ -2507,23 +2479,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </section>
         </header>
 
-        <CalculatorStickyContextBar
-          anchorRef={heroHeaderRef}
-          primaryLabel={zsTabPrimaryLabel}
-          primaryValue={zsTabPrimaryValue}
-          statusText={incompleteSections > 0 ? `Nevyplněné: ${incompleteSections}` : "Vstupy kompletní"}
-          tone={zsVerdict.tone}
-          onSave={saveSnapshotManually}
-          onExport={handleExportCsv}
-        />
-
         <ErrorBoundary title="Obsah kalkulačky pro základní školy se nepodařilo zobrazit">
         <QuickOnboarding
           title="Stručné pokyny"
           open={zsGuideOpen}
           onDismiss={dismissZsGuide}
           anchorId="zs-quick-guide"
-          dismissButtonLabel="Skrýt nápovědu"
         >
           <p>
             <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
@@ -2693,10 +2654,20 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         </section>
         ) : null}
 
-        <CalculatorWorkspaceLayout
-          dockLabel="Kontext výpočtu"
+        <CalculatorProductShell
+          sticky={{
+            anchorRef: heroHeaderRef,
+            primaryLabel: zsTabPrimaryLabel,
+            primaryValue: zsTabPrimaryValue,
+            statusText: incompleteSections > 0 ? `Nevyplněné: ${incompleteSections}` : "Vstupy kompletní",
+            tone: zsVerdict.tone,
+            onSave: saveSnapshotManually,
+            onExport: handleExportCsv,
+          }}
+          workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
+          dockSticky
+          dockStickyRef={workspaceStickyRef}
           dock={
-<div className="workspace-sticky" id="workspace-results-dock" ref={workspaceStickyRef}>
             <CalculatorWorkflowDock
               header={
                 <>
@@ -2730,7 +2701,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                 { label: "Porovnat se zálohou", onClick: handleCompareZsWithNamedSnapshot },
               ]}
             />
-        </div>
           }
           main={
             <>
@@ -3792,7 +3762,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </ZsModuleGate>
         )}
 
-        <section className="card muted card--summary section-card section-card--overview" data-section="overview" data-wizard-step="4" data-phmax-pane="summary">
+        <section className="card muted card--summary section-card section-card--overview" data-section="overview" data-wizard-step="5" data-phmax-pane="summary">
           <h2 className="section-title">Celkový přehled</h2>
           <p className="muted-text">Výsledky PHmax, PHAmax a PHPmax se stanovují samostatně. Součet níže slouží jen pro orientaci.</p>
           <p className="muted-text">PHmax, PHAmax – asistenti pedagoga a PHPmax – metodický výpočet se stanovují odděleně. Součet níže je přehledový.</p>
@@ -3806,24 +3776,28 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
             </>
           }
+          afterWorkspace={
+            <>
+              {viewMode === "expert" ? <ProductLegisContextPanel variant="zs" /> : null}
+              {viewMode === "expert" ? <MethodologyStrip /> : null}
+            </>
+          }
+          footer={
+            <footer className="zs-app-footer">
+              <HeroStatusBar
+                productLabel={PRODUCT_CALCULATOR_TITLES.zs}
+                lastSavedAt={lastSavedAt}
+                notice={uiNotice}
+                variant="zs"
+                placement="footer"
+              />
+              <AuthorCreditFooter />
+            </footer>
+          }
+          tocSections={zsTocSections}
         />
         </ErrorBoundary>
 
-        {viewMode === "expert" ? <ProductLegisContextPanel variant="zs" /> : null}
-        {viewMode === "expert" ? <MethodologyStrip /> : null}
-
-        <footer className="zs-app-footer">
-          <HeroStatusBar
-            productLabel={PRODUCT_CALCULATOR_TITLES.zs}
-            lastSavedAt={lastSavedAt}
-            notice={uiNotice}
-            variant="zs"
-            placement="footer"
-          />
-          <AuthorCreditFooter />
-        </footer>
-
-        <PageTableOfContents sections={zsTocSections} />
         <GlossaryDialog
           open={glossaryOpen}
           onClose={() => setGlossaryOpen(false)}

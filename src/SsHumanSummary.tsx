@@ -6,6 +6,7 @@ type SsHumanSummaryProps = {
   rowCount: number;
   okRows: number;
   conflictCount: number;
+  className?: string;
 };
 
 /** Stručný lidský souhrn pro dock SŠ. */
@@ -15,10 +16,14 @@ export function SsHumanSummary({
   rowCount,
   okRows,
   conflictCount,
+  className,
 }: SsHumanSummaryProps) {
   const phmaxDisplay = phmaxTotal.toLocaleString("cs-CZ", { maximumFractionDigits: 2 });
   return (
-    <ul className="ss-human-summary" aria-label="Stručný přehled výpočtu">
+    <ul
+      className={["ss-human-summary", "ux-semantic--info", className].filter(Boolean).join(" ")}
+      aria-label="Stručný přehled výpočtu"
+    >
       <li>
         <strong>{classCount}</strong> {classCount === 1 ? "třída" : classCount < 5 ? "třídy" : "tříd"}
       </li>

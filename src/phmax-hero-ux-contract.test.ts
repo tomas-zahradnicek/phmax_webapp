@@ -20,7 +20,7 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
   it("všechny produktové stránky mají sticky workspace dock a workflow panel", () => {
     for (const page of PRODUCT_PAGES) {
       const src = readSource(page);
-      expect(src, page).toContain("CalculatorWorkspaceLayout");
+      expect(src, page).toMatch(/CalculatorProductShell|CalculatorWorkspaceLayout/);
       expect(src, page).toMatch(/calculator-workspace-dock|CalculatorWorkflowDock/);
       expect(src, page).toContain("HeroCompactToolbar");
       expect(src, page).toContain("useDisplayDensity");
@@ -28,6 +28,10 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
       expect(src, page).toContain("CalculatorWorkflowDock");
     }
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__block--steps");
+    expect(readSource("src/HeroToolbarDropdown.tsx")).toContain("createPortal");
+    expect(readSource("src/HeroActionsDrawer.tsx")).toContain("HeroToolbarPortalContext");
+    expect(readSource("src/HeroExpertStrip.tsx")).toContain("hero-expert-strip");
+    expect(readSource("src/CalculatorProductShell.tsx")).toContain("CalculatorWorkspaceLayout");
   });
 
   it("NV75 má nv75Workflow a doporučený krok", () => {
@@ -46,5 +50,8 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
     expect(src).toContain('data-phmax-pane="classes"');
     expect(src).toContain('data-phmax-pane="exceptions"');
     expect(src).toContain('data-phmax-pane="summary"');
+    expect(src).toContain('ref={heroHeaderRef}');
+    expect(src).toContain("hero__title--zs");
+    expect(src).toContain("hero-zone-actions--toolbar");
   });
 });

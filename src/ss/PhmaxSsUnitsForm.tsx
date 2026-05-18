@@ -807,7 +807,7 @@ function PhmaxSsUnitsFormView({
         </ScrollGrabRegion>
       </div>
       ) : (
-        <CollapsibleSection summary={sec.brulesHeading} defaultOpen={false} level="advanced">
+        <CollapsibleSection summary={sec.brulesHeading} count={brulesPreview.length} defaultOpen={false} level="advanced">
           <p className="muted-text" style={{ marginBottom: 12, lineHeight: 1.5 }}>
             {sec.brulesHint}
           </p>

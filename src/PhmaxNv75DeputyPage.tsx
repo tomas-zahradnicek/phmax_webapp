@@ -11,12 +11,16 @@ import {
   NAMED_BACKUPS_NAME_LABEL,
   NAMED_BACKUPS_SAVE_LABEL,
   NAMED_BACKUPS_SELECT_PLACEHOLDER,
+  CALCULATOR_LIMITS_NOTE,
+  CALCULATOR_WORKSPACE_DOCK_LABEL,
+  LAY_USER_QUICK_START_NV75,
+  PHMAX_NV75_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { HeroCompactToolbar } from "./HeroCompactToolbar";
+import { HeroExpertStrip } from "./HeroExpertStrip";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
-import { CalculatorStickyContextBar } from "./CalculatorStickyContextBar";
 import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { DisplayDensityToggle } from "./DisplayDensityToggle";
@@ -37,10 +41,12 @@ import { buildExportMetaRows, buildOfficialArchiveRows, EXPORT_CSV_SEPARATOR_ROW
 import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
+import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick-start";
 import { BasicModeSteps } from "./BasicModeSteps";
+import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
+import { useQuickOnboarding } from "./useQuickOnboarding";
 import { ResultAnchorCard, type ResultAnchorTone } from "./ResultAnchorCard";
-import { PageTableOfContents } from "./PageTableOfContents";
-import { CalculatorWorkspaceLayout } from "./CalculatorWorkspaceLayout";
+import { CalculatorProductShell } from "./CalculatorProductShell";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
@@ -583,6 +589,9 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       return "basic";
     }
   });
+  const { guideOpen, dismissGuide, toggleGuide } = useQuickOnboarding(PHMAX_NV75_ONBOARDING_LS_KEY, {
+    scrollAnchorId: "nv75-quick-onboarding",
+  });
   const selectedExampleDetails = useMemo(() => NV75_EXAMPLES.find((x) => x.id === selectedExample), [selectedExample]);
 
   useEffect(() => {
@@ -1041,8 +1050,31 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               </div>
               <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="nv75-display-density" />
               <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
+              <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} />
             </div>
           </div>
+
+          <HeroExpertStrip
+            title="Banka odpočtů – NV č. 75/2016 Sb. (§4b–§4d)"
+            kpis={[
+              { label: "Banka celkem", value: `${bank.bankHoursTotal} h/týd` },
+              { label: "Řádky", value: rows.length },
+              { label: "§4b", value: bank.appliedRule ?? "–" },
+              { label: "Stav", value: nv75Verdict.label },
+            ]}
+          />
+
+          <div className="grid two hero__grid hero__grid--context">
+            <div>
+              <p className="hero-zone-label">A. Kontext výpočtu</p>
+              <h1 className="hero__title">Banka odpočtů zástupců ředitele</h1>
+              <p className="hero__text">
+                Orientační výpočet banky hodin podle <strong>§4b–§4d NV č. 75/2016 Sb.</strong> V expertním režimu zůstává
+                kompaktní lišta akcí; podrobný audit a tabulky jsou níže ve formuláři.
+              </p>
+            </div>
+          </div>
+
           <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu NV75">
             <div className="hero-zone-actions__toolbar-row">
             <HeroActionsDrawer>
@@ -1161,33 +1193,45 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             </div>
           </section>
         </header>
-        <CalculatorStickyContextBar
-          anchorRef={heroHeaderRef}
-          primaryLabel="Banka odpočtů"
-          primaryValue={`${bank.bankHoursTotal} h/týden`}
-          statusText={nv75Verdict.label}
-          tone={nv75Verdict.tone}
-          onSave={saveNamedSnapshot}
-          onExport={handleExportCsv}
-        />
+
+        <QuickOnboarding
+          title="Nápověda – NV75 banka odpočtů"
+          open={guideOpen}
+          onDismiss={dismissGuide}
+          anchorId="nv75-quick-onboarding"
+        >
+          <p>
+            <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
+          </p>
+          <p>{LAY_USER_QUICK_START_NV75}</p>
+        </QuickOnboarding>
         {viewMode === "basic" ? (
-        <BasicModeSteps
-          heading="Rychlý start pro NV75"
-          lead="Tři kroky bez duplicit metodiky: řádky -> příklad -> kontrola banky odpočtů."
-          steps={[
-            { title: "Vyberte řádky právnické osoby", text: "Vyberte druh školy/zařízení a vyplňte jednotky pro každý řádek." },
-            {
-              title: "Načtěte ukázkový příklad A nahoře",
-              text: "V poli „Příkladové výpočty“ načtěte první ukázku (A) jako mini-předvyplnění.",
-              ctaLabel: "Přejít na ukázkový příklad",
-              ctaTargetId: "nv75-hero-example-select",
-            },
-            { title: "Ověřte banku odpočtů", text: "Ve výsledku ověřte aplikované pravidlo §4b, celkový počet hodin i případný dopad §4c/§4d." },
-          ]}
-        />
+          <BasicModeSteps
+            heading={basicQuickStartHeading("NV75")}
+            lead="Tři kroky bez duplicit metodiky: řádky → příklad → kontrola banky odpočtů."
+            steps={buildBasicQuickStartSteps({
+              selectTitle: "Vyberte řádky právnické osoby",
+              selectText: "Vyberte druh školy/zařízení a vyplňte jednotky pro každý řádek.",
+              exampleTargetId: "nv75-hero-example-select",
+              exampleText: "V poli „Příkladové výpočty“ načtěte první ukázku (A) jako mini-předvyplnění.",
+              verifyTitle: "Ověřte banku odpočtů",
+              verifyText: "Ve výsledku ověřte aplikované pravidlo §4b, celkový počet hodin i případný dopad §4c/§4d.",
+            })}
+          />
         ) : null}
 
-        <CalculatorWorkspaceLayout
+        <CalculatorProductShell
+          sticky={{
+            anchorRef: heroHeaderRef,
+            primaryLabel: "Banka odpočtů",
+            primaryValue: `${bank.bankHoursTotal} h/týden`,
+            statusText: nv75Verdict.label,
+            tone: nv75Verdict.tone,
+            onSave: saveNamedSnapshot,
+            onExport: handleExportCsv,
+          }}
+          workspaceVariant="input-heavy"
+          workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
           dock={
             <CalculatorWorkflowDock
               tone={nv75AnchorTone}
@@ -1432,7 +1476,12 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             <div className="result-card"><p className="result-card__label">OV ekvivalent skupin</p><p className="result-card__value">{bank.ovGroupsEquivalent}</p></div>
             <div className="result-card"><p className="result-card__label">OV funkce dle <Nv75LegisRef citeId="vyhl13-7" label="vyhl. 13/2005" /></p><p className="result-card__value">{bank.ovDeputyEntitlementCount}</p></div>
           </div>
-          <CollapsibleSection summary="Detailní audit pracovišť a pásma" defaultOpen={viewMode === "expert"} level="advanced">
+          <CollapsibleSection
+            summary="Detailní audit pracovišť a pásma"
+            count={rows.length}
+            defaultOpen={viewMode === "expert"}
+            level="advanced"
+          >
           <div className="sd-phmax-breakdown-scroll" style={{ marginTop: 12 }}>
             <table className="sd-phmax-breakdown">
               <thead>
@@ -1544,14 +1593,16 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
         </section>
 
           </>
-        }
-      />
-        <footer className="zs-app-footer">
-          <HeroStatusBar variant="nv75" placement="footer" productLabel={PRODUCT_CALCULATOR_TITLES.nv75} lastSavedAt={lastSavedAt} notice={uiNotice} />
-          <AuthorCreditFooter />
-        </footer>
+          }
+          footer={
+            <footer className="zs-app-footer">
+              <HeroStatusBar variant="nv75" placement="footer" productLabel={PRODUCT_CALCULATOR_TITLES.nv75} lastSavedAt={lastSavedAt} notice={uiNotice} />
+              <AuthorCreditFooter />
+            </footer>
+          }
+          tocSections={nv75TocSections}
+        />
       </div>
-      <PageTableOfContents sections={nv75TocSections} />
     </div>
   );
 }

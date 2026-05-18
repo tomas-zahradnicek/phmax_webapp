@@ -1,4 +1,5 @@
 ﻿import React from "react";
+import { CALCULATOR_WORKSPACE_DOCK_LABEL } from "./calculator-ui-constants";
 
 type CalculatorWorkspaceLayoutProps = {
   main: React.ReactNode;
@@ -14,7 +15,7 @@ type CalculatorWorkspaceLayoutProps = {
 export function CalculatorWorkspaceLayout({
   main,
   dock,
-  dockLabel = "Živý výsledek výpočtu",
+  dockLabel = CALCULATOR_WORKSPACE_DOCK_LABEL,
   variant = "default",
 }: CalculatorWorkspaceLayoutProps) {
   return (
