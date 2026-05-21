@@ -126,6 +126,11 @@ describe("UX TOP 6 contract", () => {
     expect(readSource("src/zs-basic-wizard.ts")).toContain("ZS_BASIC_WIZARD_STEP_COUNT = 5");
   });
 
+  it("kořen repa neobsahuje legacy PhmaxSsPage (jen src/)", () => {
+    expect(fs.existsSync(path.join(repoRoot, "PhmaxSsPage.tsx"))).toBe(false);
+    expect(fs.existsSync(path.join(repoRoot, "src", "PhmaxSsPage.tsx"))).toBe(true);
+  });
+
   it("produkty sdílí useQuickOnboarding a hero tlačítko nápovědy", () => {
     for (const page of [
       "src/PhmaxPvPage.tsx",

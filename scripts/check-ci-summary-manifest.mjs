@@ -6,16 +6,16 @@ const workflow = fs.readFileSync(
 );
 
 const requiredSnippets = [
-  'echo "## Test summary"',
-  'echo "- Unit tests: ${{ steps.unit_tests.outcome }}"',
-  'echo "- Golden tests: ${{ steps.golden_tests.outcome }}"',
-  '>> "$GITHUB_STEP_SUMMARY"',
+  "npm run check:golden-manifest",
+  "npm run test:golden",
+  "npm run test",
+  "npm run check:no-legacy-root-pages",
 ];
 
 const missing = requiredSnippets.filter((snippet) => !workflow.includes(snippet));
 
 if (missing.length > 0) {
-  console.error("CI summary manifest is missing required snippets:");
+  console.error("CI workflow is missing required steps:");
   for (const snippet of missing) {
     console.error(`- ${snippet}`);
   }

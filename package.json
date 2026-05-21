@@ -13,6 +13,7 @@
     "check:ci-summary-manifest": "node scripts/check-ci-summary-manifest.mjs",
     "check:golden-manifest": "node scripts/check-golden-manifest.mjs",
     "check:readme-sync": "node scripts/check-readme-sync.mjs",
+    "check:no-legacy-root-pages": "node scripts/check-no-legacy-root-pages.mjs",
     "test:watch": "vitest",
     "extract:ss-metodika": "node scripts/extract-ss-metodika-docx.mjs",
     "docs:concat-md": "node scripts/concat-zdroje-md.mjs",
