@@ -52,14 +52,18 @@ export function CalculatorProductShell({
   return (
     <>
       {sticky ? <CalculatorStickyContextBar {...sticky} /> : null}
-      {beforeWorkspace}
+      {beforeWorkspace ? (
+        <div className="calculator-shell__supplement calculator-shell__supplement--before">{beforeWorkspace}</div>
+      ) : null}
       <CalculatorWorkspaceLayout
         variant={workspaceVariant}
         dockLabel={workspaceDockLabel}
         main={main}
         dock={dockNode}
       />
-      {afterWorkspace}
+      {afterWorkspace ? (
+        <div className="calculator-shell__supplement calculator-shell__supplement--after">{afterWorkspace}</div>
+      ) : null}
       {footer}
       {tocSections && tocSections.length > 0 ? <PageTableOfContents sections={tocSections} /> : null}
     </>

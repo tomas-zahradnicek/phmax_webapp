@@ -41,6 +41,8 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".workflow-dock");
     expect(css).toContain(".workflow-dock__mobile-fold");
     expect(css).toContain(".zs-pha-php-basic-guide");
+    expect(css).toContain(".calculator-shell__supplement--before");
+    expect(css).toContain(".calculator-shell--focus .calculator-shell__supplement--after");
     expect(css).toContain(".calculator-sticky-context");
     expect(css).toContain(".ux-semantic--info");
     expect(css).toContain(".hero-compact-toolbar__primary .hero-action-icon-btn");
@@ -115,6 +117,8 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("ZsBasicWizard");
     expect(src).toContain("ZsPhaPhpBasicGuide");
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__mobile-fold");
+    expect(readSource("src/CalculatorProductShell.tsx")).toContain("calculator-shell__supplement--before");
+    expect(readSource("src/App.tsx")).toContain("recordDashboardProductVisit");
     expect(src).toContain("zs-basic-wizard-active");
     expect(src).toContain('data-wizard-step="1"');
     expect(src).toContain('data-wizard-step="4"');

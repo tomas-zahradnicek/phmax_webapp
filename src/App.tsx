@@ -1,5 +1,6 @@
-import React, { Suspense, lazy, useCallback, useState } from "react";
+import React, { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import type { ProductView } from "./ProductViewPills";
+import { recordDashboardProductVisit, type DashboardVisitProduct } from "./phmax-dashboard-visits";
 import { readInitialProductView } from "./product-view-url";
 
 const PhmaxPvPage = lazy(() => import("./PhmaxPvPage").then((m) => ({ default: m.PhmaxPvPage })));
@@ -13,6 +14,7 @@ export default function App() {
   const [productView, setProductViewState] = useState<ProductView>(() => readInitialProductView());
   const setProductView = useCallback((v: ProductView) => {
     setProductViewState(v);
+    if (v !== "dash") recordDashboardProductVisit(v as DashboardVisitProduct);
     window.scrollTo(0, 0);
     try {
       const url = new URL(window.location.href);
@@ -22,6 +24,10 @@ export default function App() {
       /* ignore */
     }
   }, []);
+
+  useEffect(() => {
+    if (productView !== "dash") recordDashboardProductVisit(productView as DashboardVisitProduct);
+  }, [productView]);
 
   const shell = (child: React.ReactNode) => (
     <div className="app-shell app-shell--gradient">

@@ -32,6 +32,9 @@ describe("UX contract: FieldWhyPhmax + dashboard user-first blok", () => {
     expect(dash).toContain("DASH_QUICK_IDS");
     expect(dash).toContain("dash-kpi-strip");
     expect(dash).toContain("primaryKpi");
+    expect(dash).toContain("lastVisit");
+    expect(dash).toContain("modulesWithData");
+    expect(readSource("src/App.tsx")).toContain("recordDashboardProductVisit");
   });
 
   it("PV má společný FieldWhy nad kartou vstupů a ZŠ u §16", () => {

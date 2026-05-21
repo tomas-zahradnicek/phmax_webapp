@@ -22,6 +22,7 @@ import { PHMAX_SS_UNITS_STORAGE_KEY } from "./ss/phmax-ss-constants";
 import { deriveSsUnitsPreview } from "./ss/phmax-ss-units-derive";
 import { revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
+import { formatDashboardProductVisit } from "./phmax-dashboard-visits";
 
 type PhmaxDashboardPageProps = {
   productView: ProductView;
@@ -264,6 +265,7 @@ type DashboardRow = {
   detail: string;
   namedBackups: number;
   hasData: boolean;
+  lastVisit: string;
   primaryKpi: DashboardKpi;
   secondaryKpis: DashboardKpi[];
 };
@@ -296,6 +298,7 @@ function buildDashboardRows(): DashboardRow[] {
           } · PHAmax: ${pv.pha ?? "–"}`
         : "Po prvním uložení v PV se zde objeví orientační PHmax.",
       namedBackups: namedCount(LS_PV_NAMED),
+      lastVisit: formatDashboardProductVisit("pv"),
     },
     {
       id: "sd",
@@ -314,6 +317,7 @@ function buildDashboardRows(): DashboardRow[] {
         ? `Účastníci: ${sd.pupils}, oddělení: ${sd.departments}, režim: ${sd.inputMode === "detail" ? "detailní" : "souhrnný"} · PHmax dopočítejte v modulu ŠD.`
         : "Po uložení stavu v ŠD se zde zobrazí základ vstupů.",
       namedBackups: namedCount(LS_SD_NAMED),
+      lastVisit: formatDashboardProductVisit("sd"),
     },
     {
       id: "zs",
@@ -334,6 +338,7 @@ function buildDashboardRows(): DashboardRow[] {
           ? "Stav ZŠ je uložen; otevřete ZŠ – po uložení autosave se doplní řádek _phmaxAuditTotals pro souhrnné PHmax/PHAmax/PHPmax."
           : "Zatím nebyl uložen žádný stav ZŠ v tomto prohlížeči.",
       namedBackups: zsNamed,
+      lastVisit: formatDashboardProductVisit("zs"),
     },
     {
       id: "ss",
@@ -355,6 +360,7 @@ function buildDashboardRows(): DashboardRow[] {
         ? `Řádky evidence: ${ss.rowCount}, součet PHmax (platné řádky): ${ss.phmax}${ss.phamaxPractical != null ? `, PHAmax (PrŠ, denní): ${ss.phamaxPractical}` : ""}`
         : "Po vyplnění SŠ se zde zobrazí orientační PHmax ze stejné logiky jako ve formuláři.",
       namedBackups: 0,
+      lastVisit: formatDashboardProductVisit("ss"),
     },
     {
       id: "nv75",
@@ -376,6 +382,7 @@ function buildDashboardRows(): DashboardRow[] {
             }${nv.practicalFilled ? " · §4c kontext doplněn" : ""}`
           : "Po uložení vstupů v NV75 se zobrazí banka odpočtů a pravidlo §4b.",
       namedBackups: namedCount(LS_NV75_NAMED),
+      lastVisit: formatDashboardProductVisit("nv75"),
     },
   ];
   return rows;
@@ -401,6 +408,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   }, []);
 
   const rows = useMemo(() => buildDashboardRows(), [refreshAt]);
+  const modulesWithData = rows.filter((r) => r.hasData).length;
 
   return (
     <div className="app-shell app-shell--gradient">
@@ -450,8 +458,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
 
         <section className="card muted section-card">
           <h2 className="section-title">Přehled podle uloženého stavu (localStorage)</h2>
-          <p className="muted-text" style={{ marginBottom: 14 }}>
+          <p className="muted-text" style={{ marginBottom: 8 }}>
             Slouží jen k orientaci v tomto prohlížeči. Metriky počítám stejnou logikou jako v příslušné kartě (kde je k tomu dostupná data).
+          </p>
+          <p className="dash-overview-summary muted-text">
+            Moduly s uloženými daty: <strong>{modulesWithData}</strong> z {rows.length} · poslední návštěva modulu je u každé karty níže.
           </p>
           <div className="dash-kpi-strip" aria-label="Souhrnné KPI modulů">
             {rows.map((row) => (
@@ -480,6 +491,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   ))}
                 </div>
                 <p className="dash-card__meta">{row.status}</p>
+                <p className="dash-card__meta">Naposledy otevřeno: {row.lastVisit}</p>
                 <p className="dash-card__meta">{row.detail}</p>
                 <p className="dash-card__meta">Pojmenované zálohy: {row.namedBackups}</p>
                 <button type="button" className="btn primary" onClick={() => setProductView(row.id)}>

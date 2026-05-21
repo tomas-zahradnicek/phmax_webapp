@@ -7072,6 +7072,11 @@ select:focus {
 }
 
 /* Dashboard KPI (P8) */
+.dash-overview-summary {
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+}
+
 .dash-kpi-strip {
   display: grid;
   gap: 10px;
@@ -7553,12 +7558,20 @@ select:focus {
   }
 }
 
-/* Focus mode (P7) */
+/* Focus mode (P7) – skrýt metodiku, TOC a doplňkové bloky mimo workspace */
 .calculator-shell--focus .ux-methodology,
 .calculator-shell--focus .methodology-strip,
 .calculator-shell--focus .field-why-phmax,
 .calculator-shell--focus .ss-framework-details,
-.calculator-shell--focus .card--onboarding:not(.hero) {
+.calculator-shell--focus .card--onboarding:not(.hero),
+.calculator-shell--focus .calculator-shell__supplement--before,
+.calculator-shell--focus .calculator-shell__supplement--after,
+.calculator-shell--focus .page-toc,
+.calculator-shell--focus .page-toc-mobile-trigger {
+  display: none !important;
+}
+
+.calculator-shell--focus .section-card--guide {
   display: none !important;
 }
 
