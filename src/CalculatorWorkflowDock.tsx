@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { CALCULATOR_WORKSPACE_DOCK_LABEL } from "./calculator-ui-constants";
+import { CalculatorMobileScrollResults } from "./CalculatorMobileScrollResults";
 import { ResultAnchorCard, type ResultAnchorStat, type ResultAnchorTone } from "./ResultAnchorCard";
 import type { CalculatorViewMode } from "./calculator-view-mode";
 import { useMatchMedia } from "./useMatchMedia";
@@ -68,7 +69,9 @@ export function CalculatorWorkflowDock({
   className,
 }: CalculatorWorkflowDockProps) {
   const isWideDock = useMatchMedia("(min-width: 1100px)");
+  const mobileFoldRef = useRef<HTMLDetailsElement>(null);
   const [mobileBodyOpen, setMobileBodyOpen] = useState(false);
+  const [mobileScrollResultsVisible, setMobileScrollResultsVisible] = useState(false);
   const stepsOpen = viewMode === "basic" && workflowSteps.length > 0;
   const actionsOpen = false;
   const stepsSummary = workflowSteps.length > 0 ? workflowStepsSummary(workflowSteps) : null;
@@ -76,6 +79,21 @@ export function CalculatorWorkflowDock({
   useEffect(() => {
     if (isWideDock) setMobileBodyOpen(true);
   }, [isWideDock]);
+
+  useEffect(() => {
+    if (isWideDock) {
+      setMobileScrollResultsVisible(false);
+      return;
+    }
+    const fold = mobileFoldRef.current;
+    if (!fold) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setMobileScrollResultsVisible(!entry.isIntersecting),
+      { root: null, threshold: 0 },
+    );
+    observer.observe(fold);
+    return () => observer.disconnect();
+  }, [isWideDock, primaryValue, verdictLabel]);
 
   const dockBody = (
     <>
@@ -152,7 +170,16 @@ export function CalculatorWorkflowDock({
   );
 
   return (
-    <div
+    <>
+      <CalculatorMobileScrollResults
+        visible={mobileScrollResultsVisible}
+        tone={tone}
+        primaryLabel={primaryLabel}
+        primaryValue={primaryValue}
+        stats={stats}
+        statusBadge={statusBadge}
+      />
+      <div
       className={["calculator-workspace-dock__card workflow-dock", `workflow-dock--${tone}`, className]
         .filter(Boolean)
         .join(" ")}
@@ -163,6 +190,7 @@ export function CalculatorWorkflowDock({
         dockBody
       ) : (
         <details
+          ref={mobileFoldRef}
           className="workflow-dock__mobile-fold"
           open={mobileBodyOpen}
           onToggle={(e) => setMobileBodyOpen(e.currentTarget.open)}
@@ -176,5 +204,6 @@ export function CalculatorWorkflowDock({
         </details>
       )}
     </div>
+    </>
   );
 }

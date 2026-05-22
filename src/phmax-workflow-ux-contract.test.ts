@@ -9,6 +9,15 @@ function readSource(relPath: string) {
 }
 
 describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
+  it("CalculatorWorkflowDock má mobilní plovoucí souhrn výsledků při scrollu", () => {
+    const dock = readSource("src/CalculatorWorkflowDock.tsx");
+    const css = readSource("src/styles.css");
+    expect(dock).toContain("CalculatorMobileScrollResults");
+    expect(dock).toContain("mobileFoldRef");
+    expect(dock).toContain("IntersectionObserver");
+    expect(css).toContain(".calculator-mobile-scroll-results");
+  });
+
   it("ZŠ drží zsWorkflow a předává kroky do CalculatorWorkflowDock", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
 

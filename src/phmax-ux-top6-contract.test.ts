@@ -120,6 +120,7 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("ZsBasicWizard");
     expect(src).toContain("ZsPhaPhpBasicGuide");
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__mobile-fold");
+    expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("CalculatorMobileScrollResults");
     expect(readSource("src/CalculatorProductShell.tsx")).toContain("calculator-shell__supplement--before");
     expect(readSource("src/App.tsx")).toContain("recordDashboardProductVisit");
     expect(src).toContain("zs-basic-wizard-active");
