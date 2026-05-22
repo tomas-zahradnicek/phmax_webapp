@@ -69,7 +69,7 @@ export function CalculatorWorkflowDock({
   className,
 }: CalculatorWorkflowDockProps) {
   const isWideDock = useMatchMedia("(min-width: 1100px)");
-  const mobileFoldRef = useRef<HTMLDetailsElement>(null);
+  const mobileFoldSummaryRef = useRef<HTMLElement>(null);
   const [mobileBodyOpen, setMobileBodyOpen] = useState(false);
   const [mobileScrollResultsVisible, setMobileScrollResultsVisible] = useState(false);
   const stepsOpen = viewMode === "basic" && workflowSteps.length > 0;
@@ -85,15 +85,41 @@ export function CalculatorWorkflowDock({
       setMobileScrollResultsVisible(false);
       return;
     }
-    const fold = mobileFoldRef.current;
-    if (!fold) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setMobileScrollResultsVisible(!entry.isIntersecting),
-      { root: null, threshold: 0 },
-    );
-    observer.observe(fold);
-    return () => observer.disconnect();
-  }, [isWideDock, primaryValue, verdictLabel]);
+
+    const syncVisibility = () => {
+      const summary = mobileFoldSummaryRef.current;
+      if (!summary) {
+        setMobileScrollResultsVisible(window.scrollY > 200);
+        return;
+      }
+      const rect = summary.getBoundingClientRect();
+      const summaryAboveViewport = rect.bottom < 8;
+      setMobileScrollResultsVisible(summaryAboveViewport && window.scrollY > 120);
+    };
+
+    let observer: IntersectionObserver | null = null;
+
+    const attach = () => {
+      syncVisibility();
+      const summary = mobileFoldSummaryRef.current;
+      if (!summary) return;
+      observer?.disconnect();
+      observer = new IntersectionObserver(() => syncVisibility(), { root: null, threshold: [0, 1] });
+      observer.observe(summary);
+    };
+
+    attach();
+    const rafId = window.requestAnimationFrame(attach);
+
+    window.addEventListener("scroll", syncVisibility, { passive: true });
+    window.addEventListener("resize", syncVisibility, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      observer?.disconnect();
+      window.removeEventListener("scroll", syncVisibility);
+      window.removeEventListener("resize", syncVisibility);
+    };
+  }, [isWideDock, primaryValue, verdictLabel, mobileBodyOpen]);
 
   const dockBody = (
     <>
@@ -190,12 +216,11 @@ export function CalculatorWorkflowDock({
         dockBody
       ) : (
         <details
-          ref={mobileFoldRef}
           className="workflow-dock__mobile-fold"
           open={mobileBodyOpen}
           onToggle={(e) => setMobileBodyOpen(e.currentTarget.open)}
         >
-          <summary className="workflow-dock__mobile-fold-summary">
+          <summary ref={mobileFoldSummaryRef} className="workflow-dock__mobile-fold-summary">
             <span className="workflow-dock__mobile-fold-label">{primaryLabel}</span>
             <span className="workflow-dock__mobile-fold-value">{primaryValue}</span>
             <span className="workflow-dock__mobile-fold-hint">{verdictLabel}</span>

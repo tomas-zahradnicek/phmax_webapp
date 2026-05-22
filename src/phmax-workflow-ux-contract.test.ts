@@ -13,9 +13,11 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
     const dock = readSource("src/CalculatorWorkflowDock.tsx");
     const css = readSource("src/styles.css");
     expect(dock).toContain("CalculatorMobileScrollResults");
-    expect(dock).toContain("mobileFoldRef");
-    expect(dock).toContain("IntersectionObserver");
+    expect(dock).toContain("mobileFoldSummaryRef");
     expect(css).toContain(".calculator-mobile-scroll-results");
+    expect(css).toContain("display: block !important");
+    expect(css).toMatch(/@media \(min-width: 1100px\)[\s\S]*\.calculator-mobile-scroll-results/);
+    expect(dock).toContain("IntersectionObserver");
   });
 
   it("ZŠ drží zsWorkflow a předává kroky do CalculatorWorkflowDock", () => {
