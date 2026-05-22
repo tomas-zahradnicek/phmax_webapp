@@ -29,7 +29,11 @@ import {
   PHMAX_PV_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
-import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
+import {
+  APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES,
+  getAppAuthorPrintFooterHtml,
+  stripAppAuthorCreditFromPlainSummary,
+} from "./app-author-print";
 import {
   confirmDestructive,
   MSG_CONFIRM_CLEAR_BROWSER_STORAGE,
@@ -667,8 +671,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     if (!win) return;
     win.document.write(
       `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí PHmax PV</title>` +
-        `<style>body{font-family:system-ui,Segoe UI,sans-serif;margin:16px;font-size:11pt;line-height:1.45;color:#0f172a}a{color:#1d4ed8}</style>` +
-        `</head><body><h1 style="font-size:13pt">Shrnutí – předškolní vzdělávání</h1><p>${text}</p>${getAppAuthorPrintFooterHtml()}</body></html>`,
+        `<style>${APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES}</style>` +
+        `</head><body class="print-summary-doc"><main class="print-summary-doc__main">` +
+        `<h1 style="font-size:12pt;margin:0 0 8px;font-weight:800">Shrnutí – předškolní vzdělávání</h1><p>${text}</p></main>` +
+        `${getAppAuthorPrintFooterHtml()}</body></html>`,
     );
     win.document.close();
     win.focus();

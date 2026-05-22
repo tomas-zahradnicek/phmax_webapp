@@ -68,7 +68,7 @@ export function CalculatorWorkflowDock({
   className,
 }: CalculatorWorkflowDockProps) {
   const isWideDock = useMatchMedia("(min-width: 1100px)");
-  const [mobileBodyOpen, setMobileBodyOpen] = useState(true);
+  const [mobileBodyOpen, setMobileBodyOpen] = useState(false);
   const stepsOpen = viewMode === "basic" && workflowSteps.length > 0;
   const actionsOpen = false;
   const stepsSummary = workflowSteps.length > 0 ? workflowStepsSummary(workflowSteps) : null;

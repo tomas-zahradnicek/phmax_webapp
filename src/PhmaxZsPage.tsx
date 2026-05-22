@@ -134,7 +134,11 @@ import {
   MSG_CONFIRM_ZS_RESET_PHMAX,
   MSG_CONFIRM_ZS_RESET_PHP,
 } from "./confirm-destructive";
-import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
+import {
+  APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES,
+  getAppAuthorPrintFooterHtml,
+  stripAppAuthorCreditFromPlainSummary,
+} from "./app-author-print";
 import { useZsNamedSnapshots } from "./useZsNamedSnapshots";
 import { MAX_NAMED_SNAPSHOTS } from "./zs-named-snapshots";
 import { createZsProductAuditProtocol, parseZsSnapshotAuditTotals } from "./phmax-product-audit";
@@ -1521,13 +1525,11 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     if (!win) return;
     win.document.write(
       `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí kalkulačky ZŠ</title>` +
-        `<style>` +
-        `@page{margin:10mm 12mm;size:A4}` +
-        `body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0;font-size:9pt;line-height:1.4;color:#0f172a}` +
+        `<style>${APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES}` +
         `h1{font-size:12pt;margin:0 0 8px;font-weight:800}` +
         `.box{border:1px solid #94a3b8;border-radius:6px;padding:10px 12px;background:#fff}` +
-        `a{color:#1d4ed8}` +
-        `</style></head><body><h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div>${getAppAuthorPrintFooterHtml()}</body></html>`,
+        `</style></head><body class="print-summary-doc"><main class="print-summary-doc__main">` +
+        `<h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div></main>${getAppAuthorPrintFooterHtml()}</body></html>`,
     );
     win.document.close();
     win.focus();

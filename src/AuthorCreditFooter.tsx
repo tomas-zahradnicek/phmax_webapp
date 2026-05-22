@@ -4,7 +4,7 @@ import { APP_AUTHOR_DISPLAY_NAME, APP_AUTHOR_EMAIL } from "./calculator-ui-const
 
 export function AuthorCreditFooter() {
   return (
-    <div className="zs-app-footer__credits muted-text">
+    <div className="zs-app-footer__credits">
       <p className="zs-app-footer__author">
         Vytvořil:{" "}
         <a href={`mailto:${APP_AUTHOR_EMAIL}`}>{APP_AUTHOR_DISPLAY_NAME}</a>

@@ -6,12 +6,14 @@ Metodika: [MŠMT – PHmax pro SŠ 2026](https://msmt.gov.cz/vzdelavani/skolstvi
 
 ## Co aplikace v 0.2 počítá / nepočítá
 
-| Oblast | V aplikaci | Mimo aplikaci (ručně / MŠMT) |
-|--------|------------|------------------------------|
-| PHmax po řádcích (dataset NV, režimy, koeficienty formy) | Ano (orientační) | Složité agregace školy dle § 4 |
-| PHAmax | Jen PrŠ `78-62-C/01`, `78-62-C/02`, **denní forma** | Ostatní obory, jiné formy |
-| § 16 odst. 9 | Přepínač, kontrola pravidel, varování | Plný výpočet pásem § 16 |
-| Víceoborové třídy | Kontrola pravidel (sloupce Další obory / žáci) | — |
+
+| Oblast                                                   | V aplikaci                                          | Mimo aplikaci (ručně / MŠMT)   |
+| -------------------------------------------------------- | --------------------------------------------------- | ------------------------------ |
+| PHmax po řádcích (dataset NV, režimy, koeficienty formy) | Ano (orientační)                                    | Složité agregace školy dle § 4 |
+| PHAmax                                                   | Jen PrŠ `78-62-C/01`, `78-62-C/02`, **denní forma** | Ostatní obory, jiné formy      |
+| § 16 odst. 9                                             | Přepínač, kontrola pravidel, varování               | Plný výpočet pásem § 16        |
+| Víceoborové třídy                                        | Kontrola pravidel (sloupce Další obory / žáci)      | —                              |
+
 
 ## Příprava
 
@@ -25,13 +27,15 @@ Zapište do tabulky: **očekávané (metodika / škola)** vs **aplikace** vs **p
 
 ### A – Běžný jednoobor (PHmax)
 
-| Pole | Hodnota k ověření |
-|------|-------------------|
-| Kód oboru | např. `39-41-L/01` |
-| Průměr žáků | např. 17 |
-| Počet tříd | 2 |
-| Forma | denní |
+
+| Pole        | Hodnota k ověření       |
+| ----------- | ----------------------- |
+| Kód oboru   | např. `39-41-L/01`      |
+| Průměr žáků | např. 17                |
+| Počet tříd  | 2                       |
+| Forma       | denní                   |
 | Režim PHmax | Automaticky / jednoobor |
+
 
 **Automatický smoke (golden):** PHmax celkem **100** (50 × 2, pásmo 17–20).
 
@@ -41,11 +45,13 @@ Stejný obor, **večerní forma** – očekávaný součet PHmax **30** (koefici
 
 ### C – Praktická škola + PHAmax
 
-| Pole | Hodnota |
-|------|---------|
-| Kód | `78-62-C/01` nebo `78-62-C/02` |
-| Průměr žáků | např. 4 |
-| Forma | **denní** |
+
+| Pole        | Hodnota                        |
+| ----------- | ------------------------------ |
+| Kód         | `78-62-C/01` nebo `78-62-C/02` |
+| Průměr žáků | např. 4                        |
+| Forma       | **denní**                      |
+
 
 - V horním docku / souhrnu: **PHAmax PrŠ** > 0 (ne „–“).
 - PHmax řádku: golden smoke **30** (1 třída, pásmo 4–6).
@@ -55,20 +61,15 @@ Stejný obor, **večerní forma** – očekávaný součet PHmax **30** (koefici
 - Vyplňte **Další obory** a volitelně **Žáci / obor**.
 - Ověřte blok **Kontrola pravidel** – varování/chyby odpovídají situaci (ne mechanicky „OK“ u konfliktu).
 
-### E – § 16 odst. 9 (synteticky + golden)
+### E – § 16 odst. 9 (omezení 0.2)
 
-- Na řádku zapněte **Třída dle § 16 odst. 9**, obor např. `39-41-L/01`, denní forma.
+- Na řádku zapněte **Třída dle § 16 odst. 9**.
 - Očekávejte:
-  - info `PAR16_CALC_APPLIED` v kontrole pravidel (jednoobor),
-  - stav řádku **§ 16** (ne varování „orientačně“),
-  - verdikt stránky **§ 16/9 – výpočet pásem metodiky** při označených řádcích.
-- **Golden smoke** (`npm run test:golden`, soubor `phmax-ss-par16-golden.test.ts`):
-  - průměr **8** → PHmax na třídu **50** (pásmo 17–20),
-  - průměr **5** → **35** (70 % pásma 17–20),
-  - průměr **12** → **53** (pásmo více než 20–24),
-  - průměr **17**, 2 třídy → celkem **100**.
+  - varování `PAR16_CALC_PREVIEW_ONLY` / text o neúplném výpočtu,
+  - stav řádku **§ 16 – orientačně** (ne čisté „OK“),
+  - verdikt stránky s upozorněním, pokud je § 16 řádků více.
 
-Ruční ověření na reálné evidenci školy zůstává ve scénáři **F**.
+**Neověřujte** shodu PHmax s plnou metodikou § 16 – to záměrně není implementováno.
 
 ### F – Reálná škola (povinné)
 
@@ -81,9 +82,9 @@ Vyberte **min. jeden** reálný řádek z vaší evidence:
 
 ## Export a archivace
 
-- [ ] CSV export obsahuje `Verze metodiky` / orientační poznámku (kde je v exportu použita).
-- [ ] Uložený soubor má datum v názvu (aplikace doplňuje při exportu).
-- [ ] Na sdíleném PC: po testu **Vymazat uložená data** nebo anonymní režim.
+- CSV export obsahuje `Verze metodiky` / orientační poznámku (kde je v exportu použita).
+- Uložený soubor má datum v názvu (aplikace doplňuje při exportu).
+- Na sdíleném PC: po testu **Vymazat uložená data** nebo anonymní režim.
 
 ## Regrese před předáním
 
@@ -95,11 +96,13 @@ npm run check:readme-sync
 
 ## Záznam výsledku (šablona)
 
-| Datum | Tester | Škola / scénář | Výsledek | Poznámka |
-|-------|--------|----------------|----------|----------|
-| | | A – jednoobor | OK / NOK | |
-| | | C – PrŠ PHAmax | OK / NOK | |
-| | | E – § 16 | OK (varování) / NOK | |
-| | | F – reálná data | OK / NOK | |
+
+| Datum | Tester | Škola / scénář  | Výsledek            | Poznámka                                                              |
+| ----- | ------ | --------------- | ------------------- | --------------------------------------------------------------------- |
+|       |        | A – jednoobor   | OK / NOK            |                                                                       |
+|       |        | C – PrŠ PHAmax  | OK / NOK            |                                                                       |
+|       |        | E – § 16        | OK (varování) / NOK |                                                                       |
+|       |        | F – reálná data | OK / NOK            | F – reálná škola | Neověřeno | Nemám k dispozici reálná vstupní data. |
+
 
 **NOK** = rozdíl oproti metodice nebo škole; přiložte screenshot řádku + rozbalení „Proč?“.

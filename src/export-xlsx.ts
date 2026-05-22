@@ -3,6 +3,17 @@ import ExcelJS from "exceljs";
 export type ExportKeyValueRow = readonly [string, string | number];
 
 const HEADER_FILL = "FFE8EEF7";
+const AUTHOR_FOOTER_LABEL = "Vytvořil:";
+
+function styleAuthorFooterRows(sheet: ExcelJS.Worksheet) {
+  sheet.eachRow((row) => {
+    const label = String(row.getCell(1).value ?? "");
+    if (label !== AUTHOR_FOOTER_LABEL) return;
+    row.font = { size: 8, color: { argb: "FF64748B" } };
+    row.alignment = { vertical: "middle", wrapText: true };
+    row.height = 16;
+  });
+}
 
 function addKeyValueSheet(workbook: ExcelJS.Workbook, name: string, rows: readonly ExportKeyValueRow[]) {
   const sheet = workbook.addWorksheet(name, {
@@ -28,6 +39,7 @@ function addKeyValueSheet(workbook: ExcelJS.Workbook, name: string, rows: readon
 
   sheet.getColumn(1).width = 48;
   sheet.getColumn(2).width = 56;
+  styleAuthorFooterRows(sheet);
 }
 
 /**

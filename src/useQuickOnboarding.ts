@@ -5,30 +5,15 @@ type UseQuickOnboardingOptions = {
   scrollAnchorId?: string;
 };
 
-export function useQuickOnboarding(storageKey: string, options?: UseQuickOnboardingOptions) {
-  const [guideOpen, setGuideOpen] = useState(() => {
-    try {
-      return localStorage.getItem(storageKey) !== "1";
-    } catch {
-      return true;
-    }
-  });
+/** Nápověda je výchozí zavřená; otevře se jen přes tlačítko (toggleGuide / openGuide). */
+export function useQuickOnboarding(_storageKey: string, options?: UseQuickOnboardingOptions) {
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const dismissGuide = useCallback(() => {
-    try {
-      localStorage.setItem(storageKey, "1");
-    } catch {
-      /* ignore */
-    }
     setGuideOpen(false);
-  }, [storageKey]);
+  }, []);
 
   const openGuide = useCallback(() => {
-    try {
-      localStorage.removeItem(storageKey);
-    } catch {
-      /* ignore */
-    }
     setGuideOpen(true);
     const anchorId = options?.scrollAnchorId;
     if (!anchorId) return;
@@ -37,7 +22,7 @@ export function useQuickOnboarding(storageKey: string, options?: UseQuickOnboard
         document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
-  }, [options?.scrollAnchorId, storageKey]);
+  }, [options?.scrollAnchorId]);
 
   const toggleGuide = useCallback(() => {
     if (guideOpen) dismissGuide();

@@ -23,7 +23,7 @@ import {
   MSG_NAMED_BACKUP_PICK_TO_DELETE,
   namedBackupSavedNotice,
 } from "../calculator-ui-constants";
-import { getAppAuthorPrintFooterHtml } from "../app-author-print";
+import { APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES, getAppAuthorPrintFooterHtml } from "../app-author-print";
 import {
   PHMAX_SS_MAX_NAMED_SNAPSHOTS,
   PHMAX_SS_NAMED_SNAPSHOTS_LS_KEY,
@@ -431,12 +431,11 @@ export function usePhmaxSsUnits(
     if (!win) return;
     win.document.write(
       `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí PHmax SŠ</title>` +
-        `<style>` +
-        `@page{margin:10mm 12mm;size:A4}` +
-        `body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0;font-size:9pt;line-height:1.4;color:#0f172a}` +
+        `<style>${APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES}` +
         `h1{font-size:12pt;margin:0 0 8px;font-weight:800}` +
         `.box{border:1px solid #94a3b8;border-radius:6px;padding:10px 12px;background:#fff}` +
-        `</style></head><body><h1>Shrnutí PHmax SŠ</h1><div class="box">${text}</div>${getAppAuthorPrintFooterHtml()}</body></html>`,
+        `</style></head><body class="print-summary-doc"><main class="print-summary-doc__main">` +
+        `<h1>Shrnutí PHmax SŠ</h1><div class="box">${text}</div></main>${getAppAuthorPrintFooterHtml()}</body></html>`,
     );
     win.document.close();
     win.focus();

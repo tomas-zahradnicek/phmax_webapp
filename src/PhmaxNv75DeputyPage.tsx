@@ -38,7 +38,11 @@ import {
 } from "./HeroActionIconButton";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { buildExportMetaRows, buildOfficialArchiveRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
-import { getAppAuthorPrintFooterHtml, stripAppAuthorCreditFromPlainSummary } from "./app-author-print";
+import {
+  APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES,
+  getAppAuthorPrintFooterHtml,
+  stripAppAuthorCreditFromPlainSummary,
+} from "./app-author-print";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick-start";
@@ -1013,8 +1017,10 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     if (!win) return;
     win.document.write(
       `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>NV75 banka odpočtů</title>` +
-        `<style>body{font-family:system-ui,Segoe UI,sans-serif;margin:16px;font-size:11pt;line-height:1.45;color:#0f172a}</style>` +
-        `</head><body><h1 style="font-size:13pt">NV75 – banka odpočtů zástupců</h1><p>${text}</p>${getAppAuthorPrintFooterHtml()}</body></html>`,
+        `<style>${APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES}</style>` +
+        `</head><body class="print-summary-doc"><main class="print-summary-doc__main">` +
+        `<h1 style="font-size:12pt;margin:0 0 8px;font-weight:800">NV75 – banka odpočtů zástupců</h1><p>${text}</p></main>` +
+        `${getAppAuthorPrintFooterHtml()}</body></html>`,
     );
     win.document.close();
     win.focus();

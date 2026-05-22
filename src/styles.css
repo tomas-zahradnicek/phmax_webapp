@@ -620,6 +620,16 @@ button.pill--hero-toggle--active {
   z-index: 1;
 }
 
+.hero--feature .checks label,
+.hero--feature .display-density-toggle label {
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.hero--feature .hero-zone-label,
+.hero--feature .hero-zone-kpi {
+  color: rgba(255, 255, 255, 0.92);
+}
+
 /* Obsah pod hero v DOM – jinak překrývá rozbalené panely toolbaru */
 .calculator-shell .calculator-workspace,
 .calculator-shell .card--onboarding {
@@ -3128,25 +3138,31 @@ input[type="radio"] {
 .glossary-modal {
   position: fixed;
   inset: 0;
-  z-index: 30;
+  z-index: 10200;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0)
+    env(safe-area-inset-left, 0);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .glossary-modal__backdrop {
   position: absolute;
   inset: 0;
+  z-index: 0;
   background: rgba(15, 23, 42, 0.42);
   backdrop-filter: blur(4px);
 }
 .glossary-modal__panel {
   position: relative;
+  z-index: 1;
+  isolation: isolate;
   max-width: 860px;
   margin: 48px auto;
-  background: white;
+  background: #ffffff;
   border: 1px solid rgba(148,163,184,0.22);
   border-radius: 24px;
   box-shadow: 0 30px 70px rgba(15,23,42,0.20);
   padding: 22px;
-  z-index: 1;
-  max-height: calc(100vh - 96px);
+  max-height: min(calc(100dvh - 96px), calc(100vh - 96px));
   overflow: auto;
 }
 .glossary-modal__head {
@@ -3179,8 +3195,8 @@ input[type="radio"] {
 
 @media (max-width: 900px) {
   .glossary-modal__panel {
-    margin: 16px;
-    max-height: calc(100vh - 32px);
+    margin: 12px auto;
+    max-height: min(calc(100dvh - 24px), calc(100vh - 24px));
   }
   .results-panel__meta,
   .hero-meta-badges,
@@ -3269,9 +3285,20 @@ input[type="radio"] {
   gap: 14px;
 }
 
+.zs-app-footer__credits {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
 .zs-app-footer__author {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 1em;
   text-align: center;
 }
 
@@ -3280,17 +3307,9 @@ input[type="radio"] {
   font-weight: 600;
 }
 
-.zs-app-footer__credits {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  text-align: center;
-}
-
 .zs-app-footer__version {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.8em;
   color: var(--muted);
 }
 
@@ -3428,7 +3447,12 @@ input[type="radio"] {
     width: 100% !important;
   }
 
+  .app-shell,
+  .app-shell--with-toc,
   .app-shell--gradient {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
     background: white !important;
   }
 
@@ -4021,30 +4045,42 @@ input[type="radio"] {
     font-size: 8.5pt !important;
   }
 
-  /* ZŠ: zápatí s autorem (stav ukládání zůstává skrytý přes .hero-status) */
+  /* Zápatí s autorem na poslední stránce tisku (stav ukládání skrytý přes .hero-status) */
   .zs-app-footer {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 0 !important;
-    margin-top: 10px !important;
+    display: block !important;
+    margin-top: auto !important;
     margin-bottom: 0 !important;
-    padding-top: 6px !important;
-    border-top: 1px solid #94a3b8 !important;
+    padding: 0 0 2mm !important;
+    border-top: none !important;
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
+  .zs-app-footer__credits {
+    gap: 1px !important;
+    font-size: 6.5pt !important;
+    line-height: 1.3 !important;
+    color: #64748b !important;
+  }
+
   .zs-app-footer__author {
-    font-size: 7.5pt !important;
+    font-size: 1em !important;
     text-align: center !important;
-    color: #475569 !important;
     margin: 0 !important;
   }
 
   .zs-app-footer__author a {
-    color: #1d4ed8 !important;
-    text-decoration: underline;
-    font-weight: 600;
+    color: #64748b !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+  }
+
+  .zs-app-footer__version {
+    font-size: 0.85em !important;
+    line-height: 1.25 !important;
+    text-align: center !important;
+    color: #94a3b8 !important;
+    margin: 0 !important;
   }
 
   a[href]::after {
@@ -6549,15 +6585,24 @@ select:focus {
     max-width: none;
   }
 
+  /* Dock scrolluje s obsahem – sticky by zabral většinu výšky a nechal jen spodní třetinu formuláře */
   .calculator-workspace__dock {
     order: -1;
-    position: sticky;
-    top: 8px;
-    z-index: 8;
+    position: static;
+    top: auto;
+    z-index: auto;
+  }
+
+  .calculator-sticky-context {
+    display: none !important;
+  }
+
+  .calculator-workspace__main {
+    padding-bottom: 5rem;
   }
 
   .calculator-workspace__main [data-section] {
-    scroll-margin-top: 12rem;
+    scroll-margin-top: 1rem;
   }
 
   .calculator-workspace-dock .result-anchor-card__primary-value {
@@ -6614,10 +6659,17 @@ select:focus {
     flex-direction: column;
     gap: 8px;
     padding: 0 10px 10px;
+    max-height: min(42vh, 280px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .calculator-workspace-dock__card.workflow-dock {
+    max-height: none;
   }
 
   .page-toc-mobile-trigger {
-    bottom: 4.5rem;
+    bottom: max(1rem, env(safe-area-inset-bottom, 0));
   }
 }
 
@@ -7563,7 +7615,7 @@ select:focus {
 .calculator-shell--focus .methodology-strip,
 .calculator-shell--focus .field-why-phmax,
 .calculator-shell--focus .ss-framework-details,
-.calculator-shell--focus .card--onboarding:not(.hero),
+.calculator-shell--focus .card--onboarding:not(.hero):not(.glossary-modal__panel),
 .calculator-shell--focus .calculator-shell__supplement--before,
 .calculator-shell--focus .calculator-shell__supplement--after,
 .calculator-shell--focus .page-toc,
@@ -7652,9 +7704,18 @@ select:focus {
   gap: 6px;
 }
 
+.calculator-sticky-context__actions .btn.ghost,
 .calculator-sticky-context__export {
+  background: transparent !important;
   color: #fff !important;
-  border-color: rgba(255, 255, 255, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow: none !important;
+}
+
+.calculator-sticky-context__actions .btn.ghost:hover,
+.calculator-sticky-context__export:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.72) !important;
 }
 
 /* Sémantické boxy (P4) – info / OK / varování / neutrální */

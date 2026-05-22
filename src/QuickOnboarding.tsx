@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 import { QUICK_ONBOARDING_DISMISS_LABEL, QUICK_ONBOARDING_OPEN_LABEL } from "./calculator-ui-constants";
 
 type QuickOnboardingProps = {
@@ -72,7 +73,7 @@ export function QuickOnboarding({
 
   if (!open) return null;
 
-  return (
+  const modal = (
     <div className="glossary-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <div className="glossary-modal__backdrop" onClick={onDismiss} aria-hidden="true" />
       <div
@@ -93,6 +94,8 @@ export function QuickOnboarding({
       </div>
     </div>
   );
+
+  return typeof document !== "undefined" ? createPortal(modal, document.body) : modal;
 }
 
 type QuickOnboardingHeroButtonProps = {

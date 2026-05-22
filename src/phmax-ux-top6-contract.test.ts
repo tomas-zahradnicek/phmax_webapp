@@ -43,6 +43,9 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".zs-pha-php-basic-guide");
     expect(css).toContain(".calculator-shell__supplement--before");
     expect(css).toContain(".calculator-shell--focus .calculator-shell__supplement--after");
+    expect(css).toContain("z-index: 10200");
+    expect(css).toContain(".calculator-sticky-context");
+    expect(css).toContain("display: none !important");
     expect(css).toContain(".calculator-sticky-context");
     expect(css).toContain(".ux-semantic--info");
     expect(css).toContain(".hero-compact-toolbar__primary .hero-action-icon-btn");
@@ -129,6 +132,12 @@ describe("UX TOP 6 contract", () => {
   it("kořen repa neobsahuje legacy PhmaxSsPage (jen src/)", () => {
     expect(fs.existsSync(path.join(repoRoot, "PhmaxSsPage.tsx"))).toBe(false);
     expect(fs.existsSync(path.join(repoRoot, "src", "PhmaxSsPage.tsx"))).toBe(true);
+  });
+
+  it("useQuickOnboarding je výchozí zavřený a nečte localStorage", () => {
+    const hook = readSource("src/useQuickOnboarding.ts");
+    expect(hook).toContain("useState(false)");
+    expect(hook).not.toContain("localStorage");
   });
 
   it("produkty sdílí useQuickOnboarding a hero tlačítko nápovědy", () => {
