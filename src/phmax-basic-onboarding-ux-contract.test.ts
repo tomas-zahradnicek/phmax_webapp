@@ -20,18 +20,22 @@ describe("UX contract: basic onboarding steps + CTA", () => {
     expect(steps).toContain("{step.ctaLabel}");
   });
 
-  it("PV/ŠD/SŠ/NV75 používají buildBasicQuickStartSteps se třemi kroky", () => {
+  it("PV/SŠ/NV75 používají buildBasicQuickStartSteps se třemi kroky, ŠD má SdBasicWizard", () => {
     const pv = readSource("src/PhmaxPvPage.tsx");
     const sd = readSource("src/PhmaxSdPage.tsx");
     const ss = readSource("src/PhmaxSsPage.tsx");
     const nv75 = readSource("src/PhmaxNv75DeputyPage.tsx");
 
-    for (const src of [pv, sd, ss, nv75]) {
+    for (const src of [pv, ss, nv75]) {
       expect(src).toContain("buildBasicQuickStartSteps");
       expect(src).toContain("selectTitle:");
       expect(src).toContain("verifyTitle:");
       expect(src).toContain("exampleTargetId:");
     }
+
+    expect(sd).toContain("SdBasicWizard");
+    expect(sd).toContain("sd-basic-wizard");
+    expect(readSource("src/sd-basic-wizard.ts")).toContain("SD_BASIC_WIZARD_STEP_COUNT = 3");
   });
 
   it("CTA cíl míří na existující hero example select id", () => {
@@ -43,8 +47,10 @@ describe("UX contract: basic onboarding steps + CTA", () => {
     expect(pv).toContain('exampleTargetId: "pv-hero-example-select"');
     expect(pv).toContain('id="pv-hero-example-select"');
 
-    expect(sd).toContain('exampleTargetId: "sd-hero-example-select"');
     expect(sd).toContain('id="sd-hero-example-select"');
+    expect(readSource("src/sd-basic-wizard.ts")).toContain('SD_HERO_EXAMPLE_SELECT_ID = "sd-hero-example-select"');
+    expect(readSource("src/SdBasicWizard.tsx")).toContain("SD_HERO_EXAMPLE_SELECT_ID");
+    expect(readSource("src/SdBasicWizard.tsx")).toContain("document.getElementById");
 
     expect(ss).toContain('exampleTargetId: "ss-hero-example-select"');
     expect(ss).toContain('id="ss-hero-example-select"');

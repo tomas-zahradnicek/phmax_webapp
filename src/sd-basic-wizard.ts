@@ -1,5 +1,7 @@
 export const SD_BASIC_WIZARD_LS_KEY = "phmax-sd-basic-wizard-step";
 
+export const SD_HERO_EXAMPLE_SELECT_ID = "sd-hero-example-select";
+
 export type SdBasicWizardStep = 1 | 2 | 3;
 
 export const SD_BASIC_WIZARD_STEP_COUNT = 3;

@@ -1,7 +1,9 @@
 import React from "react";
+import { BASIC_QUICK_START_EXAMPLE_CTA_LABEL } from "./basic-quick-start";
 import {
   SD_BASIC_WIZARD_STEP_COUNT,
   SD_BASIC_WIZARD_STEPS,
+  SD_HERO_EXAMPLE_SELECT_ID,
   type SdBasicWizardStep,
 } from "./sd-basic-wizard";
 
@@ -17,6 +19,13 @@ export function SdBasicWizard({ step, onStepChange, onBack, onNext }: SdBasicWiz
   const isFirst = step === 1;
   const isLast = step === SD_BASIC_WIZARD_STEP_COUNT;
 
+  const focusExampleSelect = () => {
+    const el = document.getElementById(SD_HERO_EXAMPLE_SELECT_ID);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (el instanceof HTMLElement) el.focus();
+  };
+
   return (
     <section className="card card--onboarding section-card zs-basic-wizard sd-basic-wizard" aria-label="Průvodce výpočtem PHmax ve školní družině">
       <div className="zs-basic-wizard__head">
@@ -25,6 +34,11 @@ export function SdBasicWizard({ step, onStepChange, onBack, onNext }: SdBasicWiz
         </div>
         <h2 className="section-title">{meta.label}</h2>
         <p className="muted-text zs-basic-wizard__lead">{meta.lead}</p>
+        {step === 1 ? (
+          <button type="button" className="btn ghost" style={{ marginTop: 10 }} onClick={focusExampleSelect}>
+            {BASIC_QUICK_START_EXAMPLE_CTA_LABEL}
+          </button>
+        ) : null}
       </div>
 
       <ol className="zs-basic-wizard__steps" aria-label="Kroky průvodce">
