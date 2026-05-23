@@ -1,8 +1,8 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { APP_VERSION } from "./app-version";
 import { PHMAX_CURRENT_RELEASE_NOTES } from "./app-release-notes";
-import { markWhatsNewSeen, shouldAutoOpenWhatsNew } from "./app-whats-new";
+import { markWhatsNewSeen } from "./app-whats-new";
 import { useModalDialogA11y } from "./modal-dialog-a11y";
 
 type AppWhatsNewContextValue = {
@@ -37,12 +37,6 @@ export function AppWhatsNewProvider({ children }: AppWhatsNewProviderProps) {
   const openWhatsNew = useCallback(() => {
     returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setOpen(true);
-  }, []);
-
-  useEffect(() => {
-    if (!shouldAutoOpenWhatsNew(APP_VERSION)) return;
-    const id = window.requestAnimationFrame(() => setOpen(true));
-    return () => window.cancelAnimationFrame(id);
   }, []);
 
   useModalDialogA11y({
