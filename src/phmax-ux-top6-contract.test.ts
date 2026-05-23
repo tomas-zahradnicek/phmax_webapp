@@ -34,6 +34,8 @@ describe("UX TOP 6 contract", () => {
     const css = readSource("src/styles.css");
     expect(css).toContain(".result-anchor-card");
     expect(css).toContain(".page-toc");
+    expect(css).toContain("body:has(.calculator-mobile-scroll-results) .page-toc-mobile-trigger");
+    expect(css).toContain("--calculator-mobile-results-reserve");
     expect(css).toContain(".calculator-shell--basic .ux-expert-only");
     expect(css).toContain(".zs-basic-wizard-active");
     expect(css).toContain(".hero-compact-toolbar");

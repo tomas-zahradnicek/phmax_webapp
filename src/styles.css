@@ -7338,6 +7338,36 @@ select:focus {
     padding-bottom: calc(10.5rem + env(safe-area-inset-bottom, 0px));
   }
 
+  /*
+   * Plovoucí souhrn výsledků je v portalu na body – Obsah stránky musí být nad ním.
+   * Rezerva = výška souhrnu + spodní mezera + mezera pro tlačítko Obsah.
+   */
+  body:has(.calculator-mobile-scroll-results) {
+    --calculator-mobile-results-reserve: calc(max(12px, 3vh) + min(46vh, 320px) + 12px);
+  }
+
+  body:has(.calculator-mobile-scroll-results) .page-toc-mobile-trigger {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--calculator-mobile-results-reserve));
+    z-index: 50;
+  }
+
+  body:has(.calculator-mobile-scroll-results) .page-toc--rail {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--calculator-mobile-results-reserve) + 44px);
+    z-index: 50;
+  }
+
+  body:has(.calculator-mobile-scroll-results) .calculator-workspace__main {
+    padding-bottom: calc(
+      var(--calculator-mobile-results-reserve) + 3.5rem + env(safe-area-inset-bottom, 0px)
+    );
+  }
+
+  body:has(.calculator-mobile-scroll-results) .container--app {
+    padding-bottom: calc(
+      var(--calculator-mobile-results-reserve) + 3.5rem + env(safe-area-inset-bottom, 0px)
+    );
+  }
+
   .calculator-workspace__main [data-section] {
     scroll-margin-top: 1rem;
   }
@@ -7403,10 +7433,6 @@ select:focus {
 
   .calculator-workspace-dock__card.workflow-dock {
     max-height: none;
-  }
-
-  .page-toc-mobile-trigger {
-    bottom: max(1rem, env(safe-area-inset-bottom, 0));
   }
 }
 
