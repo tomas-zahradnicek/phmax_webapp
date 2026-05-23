@@ -59,8 +59,9 @@ export function CalculatorMobileScrollResults({
 
   if (!visible || typeof document === "undefined") return null;
 
-  const showBody = !compact || pinned;
-  const statusInHero = !showBody && statusBadge;
+  const hasStats = stats.length > 0;
+  const showBody = hasStats || !compact || pinned;
+  const statusInHero = compact && !pinned && statusBadge;
 
   const panel = (
     <aside
@@ -69,6 +70,7 @@ export function CalculatorMobileScrollResults({
         "calculator-mobile-scroll-results--interactive",
         pinned ? "calculator-mobile-scroll-results--pinned" : "",
         compact && !pinned ? "calculator-mobile-scroll-results--compact" : "",
+        hasStats ? "calculator-mobile-scroll-results--with-stats" : "",
         `calculator-mobile-scroll-results--${tone}`,
       ]
         .filter(Boolean)

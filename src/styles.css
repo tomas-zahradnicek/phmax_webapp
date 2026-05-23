@@ -7153,7 +7153,7 @@ select:focus {
     left: max(10px, env(safe-area-inset-left, 0px));
     right: max(10px, env(safe-area-inset-right, 0px));
     z-index: 45;
-    max-height: min(30vh, 240px);
+    max-height: min(46vh, 320px);
     overflow: hidden;
     -webkit-overflow-scrolling: touch;
     padding: 10px 12px;
@@ -7176,16 +7176,13 @@ select:focus {
     background: rgba(255, 255, 255, 0.98);
   }
 
-  .calculator-mobile-scroll-results--compact .calculator-mobile-scroll-results__body {
-    display: none;
-  }
-
   .calculator-mobile-scroll-results--compact .calculator-mobile-scroll-results__tap-hint {
     margin-top: 4px;
     padding-top: 0;
   }
 
-  .calculator-mobile-scroll-results--compact .calculator-mobile-scroll-results__hero {
+  .calculator-mobile-scroll-results--compact:not(.calculator-mobile-scroll-results--with-stats)
+    .calculator-mobile-scroll-results__hero {
     border-bottom: none;
     margin-bottom: 0;
     padding-bottom: 0;
@@ -7193,6 +7190,19 @@ select:focus {
 
   .calculator-mobile-scroll-results--compact .calculator-mobile-scroll-results__status {
     margin-top: 4px;
+  }
+
+  .calculator-mobile-scroll-results--compact .calculator-mobile-scroll-results__stats {
+    margin-top: 4px;
+    gap: 4px 8px;
+  }
+
+  .calculator-mobile-scroll-results--compact .calculator-mobile-scroll-results__stat dt {
+    font-size: 0.58rem;
+  }
+
+  .calculator-mobile-scroll-results--compact .calculator-mobile-scroll-results__stat dd {
+    font-size: 0.78rem;
   }
 
   .calculator-mobile-scroll-results__body {
@@ -7325,7 +7335,7 @@ select:focus {
   }
 
   .calculator-workspace__main {
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(10.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   .calculator-workspace__main [data-section] {
