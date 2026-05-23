@@ -11,7 +11,7 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Nápověda – stručné pokyny v hero liště a 3krokový průvodce v základním režimu u PV, ŠD, SŠ a NV75.",
+    "Nápověda – stručné pokyny v horní liště a 3krokový průvodce v základním režimu u PV, ŠD, SŠ a NV75.",
     "Mobilní souhrn – při posunu stránky zobrazí plovoucí panel s výsledkem; klepnutím přejdete k docku (krátké připnutí).",
     "Tisk – vylepšené tiskové výstupy a patička dokumentu s autorským kreditem.",
   ],

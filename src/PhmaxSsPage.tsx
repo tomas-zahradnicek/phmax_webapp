@@ -59,7 +59,7 @@ import {
   SS_HERO_EXAMPLE_SELECT_ID,
 } from "./ss-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass } from "./calculator-section-focus";
+import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
@@ -528,6 +528,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             <GlossaryIconButton
               ref={glossaryTriggerRef}
               className="glossary-icon-btn--hero"
+              expanded={glossaryOpen}
               onClick={() => setGlossaryOpen(true)}
             />
             <QuickOnboardingHeroButton guideOpen={ssGuideOpen} onToggle={toggleSsGuideFromHero} buttonRef={ssHelpButtonRef} />
@@ -1365,6 +1366,14 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               ) : null
             }
             actions={[
+              ...(ssHasInputIssue
+                ? [
+                    {
+                      label: "Přejít k chybě",
+                      onClick: () => scrollToFirstNeedsAttentionSection(["ss-vstupy"]),
+                    },
+                  ]
+                : []),
               { label: "Uložit scénář", onClick: ss.saveSnapshotManually },
               { label: "Export CSV", onClick: ss.handleExportCsv },
               { label: "Porovnat se zálohou", onClick: ss.handleCompareSsWithNamedSnapshot },

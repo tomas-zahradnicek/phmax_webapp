@@ -11,6 +11,8 @@ const requiredSnippets = [
   "npm run check:ci-guards-manifest",
   "SŠ acceptance checklist",
   "docs/ss-acceptance-checklist.md",
+  "Verze 0.2.1 (UX)",
+  "skip link",
 ];
 
 const missing = requiredSnippets.filter((snippet) => !readme.includes(snippet));

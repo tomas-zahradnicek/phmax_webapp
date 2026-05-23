@@ -1,7 +1,13 @@
 import React, { forwardRef } from "react";
 
-export const GlossaryIconButton = forwardRef<HTMLButtonElement, { onClick: () => void; className?: string }>(
-  function GlossaryIconButton({ onClick, className }, ref) {
+type GlossaryIconButtonProps = {
+  onClick: () => void;
+  className?: string;
+  expanded?: boolean;
+};
+
+export const GlossaryIconButton = forwardRef<HTMLButtonElement, GlossaryIconButtonProps>(
+  function GlossaryIconButton({ onClick, className, expanded = false }, ref) {
     return (
       <button
         ref={ref}
@@ -11,6 +17,7 @@ export const GlossaryIconButton = forwardRef<HTMLButtonElement, { onClick: () =>
         title="Otevřít slovníček pojmů"
         aria-label="Otevřít slovníček pojmů"
         aria-haspopup="dialog"
+        aria-expanded={expanded}
       >
         <span className="glossary-icon-btn__book" aria-hidden="true">
           📘

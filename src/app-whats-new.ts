@@ -17,7 +17,3 @@ export function markWhatsNewSeen(version: string): void {
     /* ignore */
   }
 }
-
-export function shouldAutoOpenWhatsNew(appVersion: string): boolean {
-  return readWhatsNewSeenVersion() !== appVersion;
-}

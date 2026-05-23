@@ -82,7 +82,7 @@ import {
   type SdBasicWizardStep,
 } from "./sd-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass } from "./calculator-section-focus";
+import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import { useUiNotice } from "./useUiNotice";
@@ -1103,6 +1103,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <GlossaryIconButton
               ref={glossaryTriggerRef}
               className="glossary-icon-btn--hero"
+              expanded={glossaryOpen}
               onClick={() => setGlossaryOpen(true)}
             />
             <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} buttonRef={helpButtonRef} />
@@ -1391,6 +1392,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               ) : null
             }
             actions={[
+              ...(sdHasInputIssue
+                ? [
+                    {
+                      label: "Přejít k chybě",
+                      onClick: () => scrollToFirstNeedsAttentionSection(["sd-vstupy"]),
+                    },
+                  ]
+                : []),
               { label: "Uložit scénář", onClick: saveSdSnapshotManually },
               { label: "Export CSV", onClick: handleExportCsv },
               { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },

@@ -32,12 +32,15 @@ describe("UX contract: release notes + přístupnost", () => {
 
   it("modály a mobilní TOC – klávesnice a focus trap", () => {
     expect(readSource("src/modal-dialog-a11y.ts")).toContain("useModalDialogA11y");
+    expect(readSource("src/modal-dialog-a11y.ts")).toContain('document.body.style.overflow = "hidden"');
     expect(readSource("src/QuickOnboarding.tsx")).toContain("useModalDialogA11y");
     expect(readSource("src/GlossaryDialog.tsx")).toContain("useModalDialogA11y");
     expect(readSource("src/GlossaryDialog.tsx")).toContain("createPortal");
+    expect(readSource("src/GlossaryIconButton.tsx")).toContain("aria-expanded");
     expect(readSource("src/PageTableOfContents.tsx")).toContain('e.key === "Escape"');
     expect(readSource("src/PageTableOfContents.tsx")).toContain("aria-controls");
-    expect(readSource("src/useQuickOnboarding.ts")).toContain("helpButtonRef");
-    expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain('role="region"');
+    expect(readSource("src/calculator-section-focus.ts")).toContain("scrollToFirstNeedsAttentionSection");
+    expect(readSource("src/PhmaxPvPage.tsx")).toContain("Přejít k chybě");
+    expect(fs.existsSync(path.resolve(repoRoot, "docs/keyboard-a11y-checklist.md"))).toBe(true);
   });
 });

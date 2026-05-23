@@ -52,8 +52,10 @@ import {
   NV75_HERO_EXAMPLE_SELECT_ID,
 } from "./nv75-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass } from "./calculator-section-focus";
+import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
+import { BasicComparePreview } from "./BasicComparePreview";
+import type { CompareProductVariantsResult } from "./phmax-product-compare";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
@@ -910,6 +912,54 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     setUiNotice(`Obnovena záloha „${named.name}“.`);
   }, [namedSnapshots, selectedNamedId]);
 
+  const nv75ComparePreview = useMemo((): CompareProductVariantsResult | null => {
+    const named = namedSnapshots.find((x) => x.id === selectedNamedId);
+    if (!named) return null;
+    const namedResult = calculateNv75DeputyBank({
+      activities: buildCalculationRows(named.snapshot.rows.map(normalizeNv75UiRow)),
+      practicalStudentsGeneralNonOv: named.snapshot.practicalGeneralNonOv,
+      practicalStudentsOvEhl0: named.snapshot.practicalOvEhl0,
+      practicalStudentsSec16: named.snapshot.practicalSec16,
+      ovGroupsSchool: named.snapshot.ovGroupsSchool,
+      ovGroupsInstructor: named.snapshot.ovGroupsInstructor,
+    });
+    return {
+      variants: [],
+      metrics: [
+        {
+          variantId: "current",
+          variantLabel: "Aktuální stav",
+          product: "ss",
+          totalPrimary: bank.bankHoursTotal,
+          totalSecondary: null,
+          validationOk: nv75InputWarnings.length === 0,
+        },
+        {
+          variantId: "named",
+          variantLabel: named.name,
+          product: "ss",
+          totalPrimary: namedResult.bankHoursTotal,
+          totalSecondary: null,
+          validationOk: true,
+        },
+      ],
+      comparison: { totalPrimary: [], totalSecondary: [] },
+      differences: [],
+      recommendation: "",
+    };
+  }, [
+    bank.bankHoursTotal,
+    namedSnapshots,
+    nv75InputWarnings.length,
+    selectedNamedId,
+    rows,
+    practicalGeneralNonOv,
+    practicalOvEhl0,
+    practicalSec16,
+    ovGroupsSchool,
+    ovGroupsInstructor,
+  ]);
+
   const summaryText = useMemo(() => {
     const lines = [
       "Shrnutí – NV75 banka odpočtů zástupců (orientačně)",
@@ -1270,7 +1320,24 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               verdictDetail={nv75Verdict.detail}
               workflowSteps={nv75BasicWizardActive ? [] : nv75Workflow.steps}
               viewMode={viewMode}
+              footer={
+                viewMode === "basic" && selectedNamedId ? (
+                  <BasicComparePreview
+                    result={nv75ComparePreview}
+                    emptyHint="Vyberte pojmenovanou zálohu pro rychlé porovnání banky odpočtů."
+                    metricLabel="Banka odpočtů"
+                  />
+                ) : null
+              }
               actions={[
+                ...(nv75HasInputIssue
+                  ? [
+                      {
+                        label: "Přejít k chybě",
+                        onClick: () => scrollToFirstNeedsAttentionSection(["nv75-vstupy"]),
+                      },
+                    ]
+                  : []),
                 { label: "Uložit scénář", onClick: saveNamedSnapshot },
                 { label: "Export CSV", onClick: handleExportCsv },
                 { label: "Porovnat se zálohou", onClick: compareWithNamedSnapshot },

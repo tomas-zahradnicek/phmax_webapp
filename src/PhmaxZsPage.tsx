@@ -42,6 +42,7 @@ import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
+import { sectionNeedsAttentionClass } from "./calculator-section-focus";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
@@ -2230,6 +2231,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               <GlossaryIconButton
                 ref={glossaryTriggerRef}
                 className="glossary-icon-btn--hero"
+                expanded={glossaryOpen}
                 onClick={() => setGlossaryOpen(true)}
               />
               <QuickOnboardingHeroButton guideOpen={zsGuideOpen} onToggle={toggleZsGuideFromHero} buttonRef={zsHelpButtonRef} />
@@ -2702,6 +2704,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               workflowSteps={zsBasicWizardActive ? [] : zsWorkflow.steps}
               viewMode={viewMode}
               actions={[
+                ...(firstIssueSection
+                  ? [{ label: "Přejít k chybě", onClick: () => goToSection(firstIssueSection) }]
+                  : []),
                 { label: "Uložit scénář", onClick: saveSnapshotManually },
                 { label: "Export CSV", onClick: handleExportCsv },
                 { label: "Porovnat se zálohou", onClick: handleCompareZsWithNamedSnapshot },
@@ -2774,7 +2779,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               </section>
             ) : null}
             {(hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) && (
-              <section className={`card section-card section-card--module section-card--module-basic${hasIssue("basic") ? " card--needs-attention" : ""}`} data-section="basic" data-wizard-step="2" data-phmax-pane="classes">
+              <section className={`card section-card section-card--module section-card--module-basic${sectionNeedsAttentionClass(hasIssue("basic"))}`} data-section="basic" data-wizard-step="2" data-phmax-pane="classes">
                 <h2>Běžné třídy ZŠ</h2>
 
                 {hasSection("school_variant_first_stage_only") ? (
@@ -3572,7 +3577,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
         {tab === "pha" && (
           <ZsModuleGate sectionId="pha" title="PHAmax – asistenti pedagoga" viewMode={viewMode} defaultOpenInBasic>
-          <section className={`card section-card section-card--pha${hasIssue("pha") ? " card--needs-attention" : ""}`} data-section="pha">
+          <section className={`card section-card section-card--pha${sectionNeedsAttentionClass(hasIssue("pha"))}`} data-section="pha">
             <h2>PHAmax – asistenti pedagoga</h2>
             <p className="muted-text">
               U tříd <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> a ZŠ speciální podle metodiky (
@@ -3636,7 +3641,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
         {tab === "php" && (
           <ZsModuleGate sectionId="php" title="PHPmax – metodický výpočet" viewMode={viewMode} defaultOpenInBasic>
-          <section className={`card section-card section-card--php${hasIssue("php") ? " card--needs-attention" : ""}`} data-section="php">
+          <section className={`card section-card section-card--php${sectionNeedsAttentionClass(hasIssue("php"))}`} data-section="php">
             <h2>PHPmax – metodický výpočet <HelpHint text="PHPmax se stanoví podle průměrného počtu žáků za předcházející tři roky. Do tohoto počtu se nezapočítávají žáci vzdělávaní v zahraničí, v zahraniční škole v ČR a v individuálním vzdělávání." /></h2>
             <p className="muted-text">
               Postup výpočtu (kroky A–D): rozhodné počty, očištění dat, výpočet a interpretace. Najeďte na ikonu „i“ u nadpisů pro stručnou metodickou nápovědu.

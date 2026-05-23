@@ -82,7 +82,7 @@ import {
   PV_HERO_EXAMPLE_SELECT_ID,
 } from "./pv-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass } from "./calculator-section-focus";
+import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -813,6 +813,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             <GlossaryIconButton
               ref={glossaryTriggerRef}
               className="glossary-icon-btn--hero"
+              expanded={glossaryOpen}
               onClick={() => setGlossaryOpen(true)}
             />
             <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} buttonRef={helpButtonRef} />
@@ -1126,6 +1127,14 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               ) : null
             }
             actions={[
+              ...(pvHasInputIssue
+                ? [
+                    {
+                      label: "Přejít k chybě",
+                      onClick: () => scrollToFirstNeedsAttentionSection(["pv-vstupy"]),
+                    },
+                  ]
+                : []),
               { label: "Uložit scénář", onClick: savePvSnapshotManually },
               { label: "Export CSV", onClick: handleExportCsv },
               { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },

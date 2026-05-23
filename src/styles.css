@@ -7806,6 +7806,18 @@ select:focus {
   display: flex;
 }
 
+.calculator-shell--expert .hero__title,
+.calculator-shell--expert .hero-expert-strip__title {
+  color: #fff !important;
+  text-shadow: 0 1px 5px rgba(15, 23, 42, 0.38);
+}
+
+.calculator-shell--expert .hero__text,
+.calculator-shell--expert .hero-expert-strip__kpi-label,
+.calculator-shell--expert .hero-expert-strip__kpi-value {
+  color: rgba(255, 255, 255, 0.96) !important;
+}
+
 .hero-expert-strip__title {
   margin: 0;
   font-size: 1.05rem;

@@ -67,12 +67,17 @@ const requiredNv75Entries = [
   "src/nv75-deputy-ux-contract.test.ts",
 ];
 
+const requiredUxContractEntries = [
+  "src/phmax-a11y-release-contract.test.ts",
+];
+
 const requiredEntries = [
   ...requiredGoldenBoundaryEntries,
   ...requiredContractEntries,
   ...requiredUiFlowEntries,
   ...requiredPropertyEntries,
   ...requiredNv75Entries,
+  ...requiredUxContractEntries,
 ];
 
 const missing = requiredEntries.filter((entry) => !goldenScript.includes(entry));
