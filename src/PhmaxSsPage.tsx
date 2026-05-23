@@ -52,8 +52,16 @@ import { calculatorShellClassName } from "./calculator-view-mode";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
-import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick-start";
-import { BasicModeSteps } from "./BasicModeSteps";
+import { ProductBasicWizard } from "./ProductBasicWizard";
+import {
+  SS_BASIC_WIZARD_LS_KEY,
+  SS_BASIC_WIZARD_STEPS,
+  SS_HERO_EXAMPLE_SELECT_ID,
+} from "./ss-basic-wizard";
+import { useProductBasicWizard } from "./use-product-basic-wizard";
+import { sectionNeedsAttentionClass } from "./calculator-section-focus";
+import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
+import { BasicComparePreview } from "./BasicComparePreview";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import {
   PHMAX_SS_FRAMEWORK_FIRST_PHASE,
@@ -473,8 +481,21 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
     { id: "ss-metodika", label: "Metodika (pokročilé)" },
   ] as const;
 
+  const ssHasInputIssue = ssErrorRows > 0;
+  const ssBasicWizardActive = viewMode === "basic";
+  const { step: ssWizardStep, goToStep: goToSsWizardStep, handleBack: handleSsWizardBack, handleNext: handleSsWizardNext } =
+    useProductBasicWizard({
+      lsKey: SS_BASIC_WIZARD_LS_KEY,
+      steps: SS_BASIC_WIZARD_STEPS,
+      active: ssBasicWizardActive,
+    });
+
+  useFocusExampleOnMount(SS_HERO_EXAMPLE_SELECT_ID);
+
   return (
-    <div className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc`}>
+    <div
+      className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${ssBasicWizardActive ? ` product-basic-wizard-active ss-wizard-step-${ssWizardStep}` : ""}${ssHasInputIssue ? " app-shell--validation-hint" : ""}`}
+    >
       <header className="hero hero--feature" ref={heroHeaderRef}>
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
@@ -902,18 +923,15 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           PHmax“) a vyhodnocení pravidel.
         </p>
       </QuickOnboarding>
-      {viewMode === "basic" ? (
-        <BasicModeSteps
-          heading={basicQuickStartHeading("SŠ")}
-          lead="Základní průchod: ukázka -> řádky evidence -> kontrola výsledků."
-          steps={buildBasicQuickStartSteps({
-            selectTitle: "Vyberte Základní režim",
-            selectText: "Začněte jednoduchým vyplněním bez metodických detailů.",
-            exampleTargetId: "ss-hero-example-select",
-            exampleText: "V poli „Příkladové výpočty“ načtěte mini-příklad pro tabulku evidence.",
-            verifyTitle: "Ověřte řádky evidence",
-            verifyText: "Upravte obor, průměr žáků, počet tříd a formu; ověřte PHmax a pravidla víceoborových tříd.",
-          })}
+      {ssBasicWizardActive ? (
+        <ProductBasicWizard
+          productLabel="SŠ"
+          steps={SS_BASIC_WIZARD_STEPS}
+          step={ssWizardStep}
+          heroExampleSelectId={SS_HERO_EXAMPLE_SELECT_ID}
+          onStepChange={goToSsWizardStep}
+          onBack={handleSsWizardBack}
+          onNext={handleSsWizardNext}
         />
       ) : null}
 
@@ -1335,8 +1353,16 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             statusBadge={ssVerdict.label}
             verdictLabel={ssVerdict.label}
             verdictDetail={ssVerdict.detail}
-            workflowSteps={ssWorkflow.steps}
+            workflowSteps={ssBasicWizardActive ? [] : ssWorkflow.steps}
             viewMode={viewMode}
+            footer={
+              viewMode === "basic" && ss.selectedNamedId ? (
+                <BasicComparePreview
+                  result={ssComparePreview}
+                  emptyHint="Vyberte pojmenovanou zálohu pro rychlé porovnání PHmax."
+                />
+              ) : null
+            }
             actions={[
               { label: "Uložit scénář", onClick: ss.saveSnapshotManually },
               { label: "Export CSV", onClick: ss.handleExportCsv },
@@ -1355,7 +1381,11 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         conflictCount={ssErrorRows}
       />
 
-      <section data-section="ss-vstupy">
+      <section
+        className={`card section-card section-card--ss${sectionNeedsAttentionClass(ssHasInputIssue)}`}
+        data-section="ss-vstupy"
+        data-wizard-step="2"
+      >
         <PhmaxSsUnitsForm model={ss} hideBackupSubcard showExpertPanels={viewMode === "expert"} />
       </section>
 

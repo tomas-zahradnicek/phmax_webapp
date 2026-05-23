@@ -3,16 +3,6 @@ import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { CALCULATOR_LIMITS_NOTE, PRODUCT_CALCULATOR_TITLES } from "./calculator-ui-constants";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
-
-const DASH_QUICK_IDS: Exclude<ProductView, "dash">[] = ["pv", "sd", "zs", "ss", "nv75"];
-
-const DASH_CALC_LABEL: Record<Exclude<ProductView, "dash">, string> = {
-  pv: "PV",
-  sd: "ŠD",
-  zs: "ZŠ",
-  ss: "SŠ",
-  nv75: "NV75",
-};
 import { round2 } from "./phmax-zs-logic";
 import { computePvPhmaxTotal, getPhaMaxPv, type PvProvozKind } from "./phmax-pv-logic";
 import { calculateNv75DeputyBank } from "./nv75-deputy-bank";
@@ -24,7 +14,35 @@ import { revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
 import { formatDashboardProductVisit, readLastActiveProduct } from "./phmax-dashboard-visits";
 import { clearAllPhmaxLocalStorage } from "./phmax-local-storage-clear";
+import { requestFocusExampleSelect } from "./phmax-focus-example-hint";
 import { useUiNotice } from "./useUiNotice";
+
+const DASH_QUICK_IDS: Exclude<ProductView, "dash">[] = ["pv", "sd", "zs", "ss", "nv75"];
+
+const DASH_START_MODULES: ReadonlyArray<{
+  id: Exclude<ProductView, "dash">;
+  lead: string;
+}> = [
+  { id: "sd", lead: "Nejkratší vstup – školní družina, ukázka v horní liště." },
+  { id: "zs", lead: "PHmax / PHAmax / PHPmax pro základní školu." },
+  { id: "ss", lead: "Střední škola – evidence tříd a řádkový PHmax." },
+];
+
+const DASH_START_EXAMPLE_IDS: Record<Exclude<ProductView, "dash">, string> = {
+  pv: "pv-hero-example-select",
+  sd: "sd-hero-example-select",
+  zs: "zs-hero-example-select",
+  ss: "ss-hero-example-select",
+  nv75: "nv75-hero-example-select",
+};
+
+const DASH_CALC_LABEL: Record<Exclude<ProductView, "dash">, string> = {
+  pv: "PV",
+  sd: "ŠD",
+  zs: "ZŠ",
+  ss: "SŠ",
+  nv75: "NV75",
+};
 
 type PhmaxDashboardPageProps = {
   productView: ProductView;
@@ -427,6 +445,15 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   const modulesWithData = rows.filter((r) => r.hasData).length;
   const lastActive = readLastActiveProduct();
   const continueRow = lastActive ? rows.find((row) => row.id === lastActive) ?? null : null;
+  const showNewUserGuide = !lastActive;
+
+  const openModuleWithExampleHint = useCallback(
+    (id: Exclude<ProductView, "dash">) => {
+      requestFocusExampleSelect();
+      setProductView(id);
+    },
+    [setProductView],
+  );
 
   return (
     <div className="app-shell app-shell--gradient">
@@ -480,6 +507,29 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             <button type="button" className="btn primary" onClick={() => setProductView(continueRow.id)}>
               Pokračovat v {DASH_CALC_LABEL[continueRow.id]}
             </button>
+          </section>
+        ) : null}
+
+        {showNewUserGuide ? (
+          <section className="card card--accent section-card dash-new-user-card" aria-labelledby="dash-new-user-heading">
+            <h2 id="dash-new-user-heading" className="section-title">
+              Nejste si jisti? Začněte u jedné kalkulačky
+            </h2>
+            <p className="muted-text" style={{ marginBottom: 12 }}>
+              Bez automatického modalu – po otevření modulu vás aplikace posune k poli{" "}
+              <strong>Příkladové výpočty</strong> v horní liště. Ukázku pak můžete upravit na vlastní školu.
+            </p>
+            <div className="dash-new-user-card__grid">
+              {DASH_START_MODULES.map((item) => (
+                <article key={item.id} className="dash-new-user-card__tile">
+                  <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
+                  <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
+                  <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
+                    Otevřít {DASH_CALC_LABEL[item.id]} a ukázku
+                  </button>
+                </article>
+              ))}
+            </div>
           </section>
         ) : null}
 

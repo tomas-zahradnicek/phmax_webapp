@@ -14,7 +14,11 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
     const css = readSource("src/styles.css");
     expect(dock).toContain("CalculatorMobileScrollResults");
     expect(dock).toContain("mobileFoldSummaryRef");
+    expect(dock).toContain("MOBILE_SCROLL_PIN_MS");
+    expect(dock).toContain("mobileScrollPinnedUntil");
+    expect(dock).toContain("handleMobileScrollActivate");
     expect(css).toContain(".calculator-mobile-scroll-results");
+    expect(css).toContain(".calculator-mobile-scroll-results--pinned");
     expect(css).toContain("display: block !important");
     expect(css).toMatch(/@media \(min-width: 1100px\)[\s\S]*\.calculator-mobile-scroll-results/);
     expect(dock).toContain("IntersectionObserver");
@@ -37,7 +41,7 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
     expect(src).toContain("const nv75Workflow = useMemo");
     expect(src).toContain("nv75InputWarnings.length > 0");
     expect(src).toContain("!bank.appliedRule");
-    expect(src).toContain("workflowSteps={nv75Workflow.steps}");
+    expect(src).toContain("workflowSteps={nv75BasicWizardActive ? [] : nv75Workflow.steps}");
     expect(src).toContain("CalculatorWorkflowDock");
     expect(src).toContain('{ label: "Uložit scénář", onClick: saveNamedSnapshot }');
   });
@@ -47,7 +51,7 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
 
     expect(src).toContain("const ssWorkflow = (() => {");
     expect(src).toContain('const errorRows = ss.preview.filter((p) => !p.skipped && "error" in p).length;');
-    expect(src).toContain("workflowSteps={ssWorkflow.steps}");
+    expect(src).toContain("workflowSteps={ssBasicWizardActive ? [] : ssWorkflow.steps}");
     expect(src).toContain("SsHumanSummary");
     expect(src).toContain("ss-human-summary--main");
     expect(src).toContain('{ label: "Opravit chybné kombinace nebo hodnoty", state: "active" as const }');

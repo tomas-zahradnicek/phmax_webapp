@@ -8,6 +8,9 @@ import {
 import { PHMAX_SS_NAMED_SNAPSHOTS_LS_KEY, PHMAX_SS_UNITS_STORAGE_KEY } from "./ss/phmax-ss-constants";
 import { NAMED_SNAPSHOTS_LS_KEY } from "./zs-named-snapshots";
 import { SD_BASIC_WIZARD_LS_KEY } from "./sd-basic-wizard";
+import { PV_BASIC_WIZARD_LS_KEY } from "./pv-basic-wizard";
+import { SS_BASIC_WIZARD_LS_KEY } from "./ss-basic-wizard";
+import { NV75_BASIC_WIZARD_LS_KEY } from "./nv75-basic-wizard";
 import { ZS_BASIC_WIZARD_LS_KEY } from "./zs-basic-wizard";
 
 /** Všechna klíče kalkulačky v localStorage (včetně preferencí a návštěv). */
@@ -16,6 +19,7 @@ export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
   "edu-cz-pv-named-snapshots-v1",
   "phmax-pv-view-mode",
   PHMAX_PV_ONBOARDING_LS_KEY,
+  PV_BASIC_WIZARD_LS_KEY,
   "edu-cz-sd-calculator-state",
   "edu-cz-sd-named-snapshots-v1",
   "phmax-sd-view-mode",
@@ -31,9 +35,11 @@ export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
   "phmax-ss-view-mode",
   "phmax-ss-framework-phase1-notes",
   PHMAX_SS_ONBOARDING_LS_KEY,
+  SS_BASIC_WIZARD_LS_KEY,
   "edu-cz-nv75-deputy-bank-state",
   "edu-cz-nv75-deputy-bank-named-snapshots",
   PHMAX_NV75_ONBOARDING_LS_KEY,
+  NV75_BASIC_WIZARD_LS_KEY,
   "phmax-display-density",
   "phmax-calculator-focus",
   "phmax-dash-last-active-product",

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { CALCULATOR_WORKSPACE_DOCK_LABEL } from "./calculator-ui-constants";
-import { CalculatorMobileScrollResults, CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID } from "./CalculatorMobileScrollResults";
+import { CalculatorMobileScrollResults, CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID, MOBILE_SCROLL_PIN_MS, scrollToWorkflowDock } from "./CalculatorMobileScrollResults";
 import { ResultAnchorCard, type ResultAnchorStat, type ResultAnchorTone } from "./ResultAnchorCard";
 import type { CalculatorViewMode } from "./calculator-view-mode";
 import { useMatchMedia } from "./useMatchMedia";
@@ -72,6 +72,11 @@ export function CalculatorWorkflowDock({
   const mobileFoldSummaryRef = useRef<HTMLElement>(null);
   const [mobileBodyOpen, setMobileBodyOpen] = useState(false);
   const [mobileScrollResultsVisible, setMobileScrollResultsVisible] = useState(false);
+  const [mobileScrollPinnedUntil, setMobileScrollPinnedUntil] = useState(0);
+  const mobileScrollPinned = mobileScrollPinnedUntil > Date.now();
+  const pinTimerRef = useRef<number | null>(null);
+  const pinnedUntilRef = useRef(0);
+  pinnedUntilRef.current = mobileScrollPinnedUntil;
   const stepsOpen = viewMode === "basic" && workflowSteps.length > 0;
   const actionsOpen = false;
   const stepsSummary = workflowSteps.length > 0 ? workflowStepsSummary(workflowSteps) : null;
@@ -81,12 +86,28 @@ export function CalculatorWorkflowDock({
   }, [isWideDock]);
 
   useEffect(() => {
+    if (mobileScrollPinnedUntil <= Date.now()) return;
+    const remaining = mobileScrollPinnedUntil - Date.now();
+    pinTimerRef.current = window.setTimeout(() => {
+      setMobileScrollPinnedUntil(0);
+      pinTimerRef.current = null;
+    }, remaining);
+    return () => {
+      if (pinTimerRef.current != null) window.clearTimeout(pinTimerRef.current);
+    };
+  }, [mobileScrollPinnedUntil]);
+
+  useEffect(() => {
     if (isWideDock) {
       setMobileScrollResultsVisible(false);
       return;
     }
 
     const syncVisibility = () => {
+      if (pinnedUntilRef.current > Date.now()) {
+        setMobileScrollResultsVisible(true);
+        return;
+      }
       const summary = mobileFoldSummaryRef.current;
       if (!summary) {
         setMobileScrollResultsVisible(window.scrollY > 200);
@@ -119,7 +140,13 @@ export function CalculatorWorkflowDock({
       window.removeEventListener("scroll", syncVisibility);
       window.removeEventListener("resize", syncVisibility);
     };
-  }, [isWideDock, primaryValue, verdictLabel, mobileBodyOpen]);
+  }, [isWideDock, primaryValue, verdictLabel, mobileBodyOpen, mobileScrollPinnedUntil]);
+
+  const handleMobileScrollActivate = () => {
+    scrollToWorkflowDock();
+    setMobileBodyOpen(true);
+    setMobileScrollPinnedUntil(Date.now() + MOBILE_SCROLL_PIN_MS);
+  };
 
   const dockBody = (
     <>
@@ -198,12 +225,14 @@ export function CalculatorWorkflowDock({
   return (
     <>
       <CalculatorMobileScrollResults
-        visible={mobileScrollResultsVisible}
+        visible={mobileScrollResultsVisible || mobileScrollPinned}
+        pinned={mobileScrollPinned}
         tone={tone}
         primaryLabel={primaryLabel}
         primaryValue={primaryValue}
         stats={stats}
         statusBadge={statusBadge}
+        onActivate={handleMobileScrollActivate}
       />
       <div
       id={CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID}

@@ -77,11 +77,14 @@ import { useQuickOnboarding } from "./useQuickOnboarding";
 import { SdBasicWizard } from "./SdBasicWizard";
 import {
   SD_BASIC_WIZARD_LS_KEY,
-  clampSdBasicWizardStep,
-  readSdBasicWizardStep,
-  sdWizardScrollSection,
+  SD_HERO_EXAMPLE_SELECT_ID,
+  SD_BASIC_WIZARD_STEPS,
   type SdBasicWizardStep,
 } from "./sd-basic-wizard";
+import { useProductBasicWizard } from "./use-product-basic-wizard";
+import { sectionNeedsAttentionClass } from "./calculator-section-focus";
+import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
+import { BasicComparePreview } from "./BasicComparePreview";
 import { useUiNotice } from "./useUiNotice";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
@@ -367,7 +370,6 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
   const [focusMode, setFocusMode] = useCalculatorFocusMode();
   const heroHeaderRef = useRef<HTMLElement>(null);
-  const [sdWizardStep, setSdWizardStep] = useState<SdBasicWizardStep>(readSdBasicWizardStep);
   const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
     try {
       const stored = localStorage.getItem(SD_VIEW_MODE_LS_KEY);
@@ -391,14 +393,6 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   useEffect(() => {
     setNamedSnapshots(readNamedSdSnapshotsFromLs());
   }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(SD_BASIC_WIZARD_LS_KEY, String(sdWizardStep));
-    } catch {
-      /* ignore */
-    }
-  }, [sdWizardStep]);
 
   useEffect(() => {
     try {
@@ -1060,35 +1054,15 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         : "–";
 
   const sdBasicWizardActive = viewMode === "basic";
+  const sdHasInputIssue = sdVerdict.tone !== "ok";
+  const { step: sdWizardStep, goToStep: goToSdWizardStep, handleBack: handleSdWizardBack, handleNext: handleSdWizardNext } =
+    useProductBasicWizard({
+      lsKey: SD_BASIC_WIZARD_LS_KEY,
+      steps: SD_BASIC_WIZARD_STEPS,
+      active: sdBasicWizardActive,
+    });
 
-  const goToSdSection = useCallback((sectionId: string) => {
-    const element = document.querySelector(`[data-section="${sectionId}"]`);
-    if (element instanceof HTMLElement) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, []);
-
-  const goToSdWizardStep = useCallback(
-    (step: SdBasicWizardStep) => {
-      setSdWizardStep(step);
-      window.requestAnimationFrame(() => {
-        goToSdSection(sdWizardScrollSection(step));
-      });
-    },
-    [goToSdSection],
-  );
-
-  const handleSdWizardBack = useCallback(() => {
-    goToSdWizardStep(clampSdBasicWizardStep(sdWizardStep - 1));
-  }, [goToSdWizardStep, sdWizardStep]);
-
-  const handleSdWizardNext = useCallback(() => {
-    if (sdWizardStep >= 3) {
-      goToSdSection("sd-vysledek");
-      return;
-    }
-    goToSdWizardStep(clampSdBasicWizardStep(sdWizardStep + 1));
-  }, [goToSdSection, goToSdWizardStep, sdWizardStep]);
+  useFocusExampleOnMount(SD_HERO_EXAMPLE_SELECT_ID);
 
   const sdTocSections = [
     { id: "sd-vysledek", label: "Výsledek PHmax" },
@@ -1096,7 +1070,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   ] as const;
 
   return (
-    <div className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${sdBasicWizardActive ? ` sd-basic-wizard-active sd-wizard-step-${sdWizardStep}` : ""}`}>
+    <div className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${sdBasicWizardActive ? ` product-basic-wizard-active sd-wizard-step-${sdWizardStep}` : ""}${sdHasInputIssue ? " app-shell--validation-hint" : ""}`}>
       <header className="hero hero--feature" ref={heroHeaderRef}>
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
@@ -1407,6 +1381,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             verdictDetail={sdVerdict.detail}
             workflowSteps={sdBasicWizardActive ? [] : sdWorkflow.steps}
             viewMode={viewMode}
+            footer={
+              viewMode === "basic" && selectedNamedId ? (
+                <BasicComparePreview
+                  result={sdComparePreview}
+                  emptyHint="Vyberte pojmenovanou zálohu pro rychlé porovnání PHmax."
+                />
+              ) : null
+            }
             actions={[
               { label: "Uložit scénář", onClick: saveSdSnapshotManually },
               { label: "Export CSV", onClick: handleExportCsv },
@@ -1417,7 +1399,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         main={
           <>
 
-      <section className="card section-card section-card--sd" data-section="sd-vstupy" data-wizard-step="2">
+      <section className={`card section-card section-card--sd${sectionNeedsAttentionClass(sdHasInputIssue)}`} data-section="sd-vstupy" data-wizard-step="2">
         <h2 className="section-title">Vstupy</h2>
         <InputOutputLegend />
         <p className="muted-text" style={{ marginTop: 10 }}>

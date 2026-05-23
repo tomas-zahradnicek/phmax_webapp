@@ -45,8 +45,15 @@ import {
 } from "./app-author-print";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
-import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick-start";
-import { BasicModeSteps } from "./BasicModeSteps";
+import { ProductBasicWizard } from "./ProductBasicWizard";
+import {
+  NV75_BASIC_WIZARD_LS_KEY,
+  NV75_BASIC_WIZARD_STEPS,
+  NV75_HERO_EXAMPLE_SELECT_ID,
+} from "./nv75-basic-wizard";
+import { useProductBasicWizard } from "./use-product-basic-wizard";
+import { sectionNeedsAttentionClass } from "./calculator-section-focus";
+import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
@@ -1028,8 +1035,19 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     win.print();
   }, [summaryText]);
 
+  const nv75HasInputIssue = nv75InputWarnings.length > 0;
+  const nv75BasicWizardActive = viewMode === "basic";
+  const { step: nv75WizardStep, goToStep: goToNv75WizardStep, handleBack: handleNv75WizardBack, handleNext: handleNv75WizardNext } =
+    useProductBasicWizard({
+      lsKey: NV75_BASIC_WIZARD_LS_KEY,
+      steps: NV75_BASIC_WIZARD_STEPS,
+      active: nv75BasicWizardActive,
+    });
+
+  useFocusExampleOnMount(NV75_HERO_EXAMPLE_SELECT_ID);
+
   return (
-    <div className={`app-shell app-shell--gradient calculator-shell--nv75 ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc`}>
+    <div className={`app-shell app-shell--gradient calculator-shell--nv75 ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${nv75BasicWizardActive ? ` product-basic-wizard-active nv75-wizard-step-${nv75WizardStep}` : ""}${nv75HasInputIssue ? " app-shell--validation-hint" : ""}`}>
       <div className="container container--app">
         <header className="hero hero--feature" ref={heroHeaderRef}>
           <div className="hero__pills-row">
@@ -1212,18 +1230,15 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           </p>
           <p>{LAY_USER_QUICK_START_NV75}</p>
         </QuickOnboarding>
-        {viewMode === "basic" ? (
-          <BasicModeSteps
-            heading={basicQuickStartHeading("NV75")}
-            lead="Tři kroky bez duplicit metodiky: řádky → příklad → kontrola banky odpočtů."
-            steps={buildBasicQuickStartSteps({
-              selectTitle: "Vyberte řádky právnické osoby",
-              selectText: "Vyberte druh školy/zařízení a vyplňte jednotky pro každý řádek.",
-              exampleTargetId: "nv75-hero-example-select",
-              exampleText: "V poli „Příkladové výpočty“ načtěte první ukázku (A) jako mini-předvyplnění.",
-              verifyTitle: "Ověřte banku odpočtů",
-              verifyText: "Ve výsledku ověřte aplikované pravidlo §4b, celkový počet hodin i případný dopad §4c/§4d.",
-            })}
+        {nv75BasicWizardActive ? (
+          <ProductBasicWizard
+            productLabel="NV75"
+            steps={NV75_BASIC_WIZARD_STEPS}
+            step={nv75WizardStep}
+            heroExampleSelectId={NV75_HERO_EXAMPLE_SELECT_ID}
+            onStepChange={goToNv75WizardStep}
+            onBack={handleNv75WizardBack}
+            onNext={handleNv75WizardNext}
           />
         ) : null}
 
@@ -1252,7 +1267,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               statusBadge={nv75Verdict.label}
               verdictLabel={nv75Verdict.label}
               verdictDetail={nv75Verdict.detail}
-              workflowSteps={nv75Workflow.steps}
+              workflowSteps={nv75BasicWizardActive ? [] : nv75Workflow.steps}
               viewMode={viewMode}
               actions={[
                 { label: "Uložit scénář", onClick: saveNamedSnapshot },
@@ -1264,7 +1279,11 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           main={
             <>
 
-        <section className="card muted section-card" data-section="nv75-vstupy">
+        <section
+          className={`card muted section-card${sectionNeedsAttentionClass(nv75HasInputIssue)}`}
+          data-section="nv75-vstupy"
+          data-wizard-step="2"
+        >
           <h2 className="section-title">Vstupy</h2>
           <label className="field" style={{ marginTop: 10, maxWidth: 760 }}>
             <span className="field__label">Příkladové výpočty (metodika §4b a SŠ/VOŠ/DM)</span>

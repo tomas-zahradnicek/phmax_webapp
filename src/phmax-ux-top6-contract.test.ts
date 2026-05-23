@@ -40,6 +40,10 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".calculator-shell--density-compact");
     expect(css).toContain(".workflow-dock");
     expect(css).toContain(".workflow-dock__mobile-fold");
+    expect(css).toContain(".calculator-mobile-scroll-results--pinned");
+    expect(css).toContain(".product-basic-wizard-active");
+    expect(css).toContain(".basic-compare-preview");
+    expect(css).toContain(".dash-new-user-card");
     expect(css).toContain(".zs-pha-php-basic-guide");
     expect(css).toContain(".calculator-shell__supplement--before");
     expect(css).toContain(".calculator-shell--focus .calculator-shell__supplement--after");
@@ -159,10 +163,12 @@ describe("UX TOP 6 contract", () => {
     expect(readSource("src/calculator-ui-constants.ts")).toContain("PHMAX_NV75_ONBOARDING_LS_KEY");
   });
 
-  it("PV/SŠ/NV75 sdílí buildBasicQuickStartSteps, ŠD má SdBasicWizard", () => {
-    expect(readSource("src/basic-quick-start.ts")).toContain("buildBasicQuickStartSteps");
+  it("PV/SŠ/NV75 sdílí ProductBasicWizard, ŠD má SdBasicWizard", () => {
+    expect(readSource("src/product-basic-wizard.ts")).toContain("PRODUCT_BASIC_WIZARD_STEP_COUNT = 3");
     for (const page of ["src/PhmaxPvPage.tsx", "src/PhmaxSsPage.tsx", "src/PhmaxNv75DeputyPage.tsx"]) {
-      expect(readSource(page)).toContain("buildBasicQuickStartSteps");
+      const src = readSource(page);
+      expect(src).toContain("ProductBasicWizard");
+      expect(src).toContain("useProductBasicWizard");
     }
     const sd = readSource("src/PhmaxSdPage.tsx");
     expect(sd).toContain("SdBasicWizard");

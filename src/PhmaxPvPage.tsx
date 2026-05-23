@@ -75,8 +75,16 @@ import { ProductLegisContextPanel, PvLegisRef } from "./PhmaxProductLegisUi";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
-import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick-start";
-import { BasicModeSteps } from "./BasicModeSteps";
+import { ProductBasicWizard } from "./ProductBasicWizard";
+import {
+  PV_BASIC_WIZARD_LS_KEY,
+  PV_BASIC_WIZARD_STEPS,
+  PV_HERO_EXAMPLE_SELECT_ID,
+} from "./pv-basic-wizard";
+import { useProductBasicWizard } from "./use-product-basic-wizard";
+import { sectionNeedsAttentionClass } from "./calculator-section-focus";
+import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
+import { BasicComparePreview } from "./BasicComparePreview";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
 import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
@@ -758,9 +766,21 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   ] as const;
 
   const pvStatusBadge = aggregate.incomplete ? "Zkontrolujte vstupy" : "Vstupy kompletní";
+  const pvBasicWizardActive = viewMode === "basic";
+  const pvHasInputIssue = aggregate.incomplete;
+  const { step: pvWizardStep, goToStep: goToPvWizardStep, handleBack: handlePvWizardBack, handleNext: handlePvWizardNext } =
+    useProductBasicWizard({
+      lsKey: PV_BASIC_WIZARD_LS_KEY,
+      steps: PV_BASIC_WIZARD_STEPS,
+      active: pvBasicWizardActive,
+    });
+
+  useFocusExampleOnMount(PV_HERO_EXAMPLE_SELECT_ID);
 
   return (
-    <div className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc`}>
+    <div
+      className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${pvBasicWizardActive ? ` product-basic-wizard-active pv-wizard-step-${pvWizardStep}` : ""}${pvHasInputIssue ? " app-shell--validation-hint" : ""}`}
+    >
       <header className="hero hero--feature" ref={heroHeaderRef}>
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
@@ -1058,18 +1078,15 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           místě (celodenní/polodenní/internátní); nebo oddělená situace, kterou potřebujete vykázat samostatně.
         </p>
       </QuickOnboarding>
-      {viewMode === "basic" ? (
-        <BasicModeSteps
-          heading={basicQuickStartHeading("PV")}
-          lead="Krátký postup pro první orientaci bez metodického detailu."
-          steps={buildBasicQuickStartSteps({
-            selectTitle: "Vyberte režim zobrazení",
-            selectText: "V horní liště vyberte Základní režim pro rychlé vyplnění.",
-            exampleTargetId: "pv-hero-example-select",
-            exampleText: "V poli „Příkladové výpočty“ načtěte ukázku a předvyplňte pracoviště.",
-            verifyTitle: "Ověřte vlastní pracoviště",
-            verifyText: "Upravte druh provozu, počet tříd a průměr hodin; ověřte součtový přehled PHmax/PHAmax.",
-          })}
+      {pvBasicWizardActive ? (
+        <ProductBasicWizard
+          productLabel="PV"
+          steps={PV_BASIC_WIZARD_STEPS}
+          step={pvWizardStep}
+          heroExampleSelectId={PV_HERO_EXAMPLE_SELECT_ID}
+          onStepChange={goToPvWizardStep}
+          onBack={handlePvWizardBack}
+          onNext={handlePvWizardNext}
         />
       ) : null}
 
@@ -1097,8 +1114,16 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             ]}
             verdictLabel={pvVerdict.label}
             verdictDetail={pvVerdict.detail}
-            workflowSteps={pvWorkflow.steps}
+            workflowSteps={pvBasicWizardActive ? [] : pvWorkflow.steps}
             viewMode={viewMode}
+            footer={
+              viewMode === "basic" && selectedNamedId ? (
+                <BasicComparePreview
+                  result={pvComparePreview}
+                  emptyHint="Vyberte pojmenovanou zálohu pro rychlé porovnání PHmax."
+                />
+              ) : null
+            }
             actions={[
               { label: "Uložit scénář", onClick: savePvSnapshotManually },
               { label: "Export CSV", onClick: handleExportCsv },
@@ -1155,7 +1180,11 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         </ScrollGrabRegion>
       </section>
 
-      <section className="card section-card section-card--sd" data-section="pv-vstupy">
+      <section
+        className={`card section-card section-card--pv${sectionNeedsAttentionClass(pvHasInputIssue)}`}
+        data-section="pv-vstupy"
+        data-wizard-step="2"
+      >
         <h2 className="section-title">Vstupy (pracoviště)</h2>
         <InputOutputLegend />
         <p className="section-lead muted-text print-hide" style={{ marginTop: 0 }}>

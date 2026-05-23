@@ -24,7 +24,7 @@ import { PHMAX_SS_STUDY_FORM_OPTIONS, type ModeKey, type StudyForm } from "./phm
 import { explainSingleRow } from "./phmax-ss-explainability";
 import type { ServiceResolvedRow } from "./phmax-ss-service";
 import { explainInputFromUnitRow } from "./phmax-ss-units-derive";
-import { resolveIsPar16Class } from "./phmax-ss-par16";
+import { resolveIsPar16Class, PHMAX_SS_PAR16_ROW_SUMMARY } from "./phmax-ss-par16";
 import type { PhmaxSsUnitRow } from "./phmax-ss-types";
 import {
   SsSchoolExplainabilitySummary,
@@ -560,6 +560,17 @@ function PhmaxSsUnitsFormView({
                       <tr className="ss-why-row">
                         <td colSpan={7} id={`ss-why-phmax-${p.rowId}`}>
                           {src ? <SsWhyPhmaxWithExplain resolved={r} unitRow={src} /> : <SsWhyPhmaxPanel row={r} />}
+                          {par16Row ? (
+                            <p className="muted-text ss-par16-row-summary" style={{ marginTop: 10 }}>
+                              {PHMAX_SS_PAR16_ROW_SUMMARY}
+                            </p>
+                          ) : null}
+                        </td>
+                      </tr>
+                    ) : par16Row ? (
+                      <tr className="ss-par16-summary-row">
+                        <td colSpan={7}>
+                          <p className="muted-text ss-par16-row-summary">{PHMAX_SS_PAR16_ROW_SUMMARY}</p>
                         </td>
                       </tr>
                     ) : null}

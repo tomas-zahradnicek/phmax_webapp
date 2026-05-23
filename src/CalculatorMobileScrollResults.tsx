@@ -1,16 +1,20 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ResultAnchorStat, ResultAnchorTone } from "./ResultAnchorCard";
 
 export const CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID = "calculator-workflow-dock-anchor";
 
+const MOBILE_SCROLL_PIN_MS = 5000;
+
 type CalculatorMobileScrollResultsProps = {
   visible: boolean;
+  pinned?: boolean;
   tone?: ResultAnchorTone;
   primaryLabel: string;
   primaryValue: React.ReactNode;
   stats?: readonly ResultAnchorStat[];
   statusBadge?: string;
+  onActivate?: () => void;
 };
 
 function scrollToWorkflowDock(): void {
@@ -25,22 +29,31 @@ function scrollToWorkflowDock(): void {
 /** Kompaktní plovoucí souhrn výsledků na mobilu po odscrollování docku. */
 export function CalculatorMobileScrollResults({
   visible,
+  pinned = false,
   tone = "neutral",
   primaryLabel,
   primaryValue,
   stats = [],
   statusBadge,
+  onActivate,
 }: CalculatorMobileScrollResultsProps) {
   const handleActivate = useCallback(() => {
-    scrollToWorkflowDock();
-  }, []);
-
-  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLElement>) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      scrollToWorkflowDock();
+    if (onActivate) {
+      onActivate();
+      return;
     }
-  }, []);
+    scrollToWorkflowDock();
+  }, [onActivate]);
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLElement>) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        handleActivate();
+      }
+    },
+    [handleActivate],
+  );
 
   if (!visible || typeof document === "undefined") return null;
 
@@ -49,8 +62,11 @@ export function CalculatorMobileScrollResults({
       className={[
         "calculator-mobile-scroll-results",
         "calculator-mobile-scroll-results--interactive",
+        pinned ? "calculator-mobile-scroll-results--pinned" : "",
         `calculator-mobile-scroll-results--${tone}`,
-      ].join(" ")}
+      ]
+        .filter(Boolean)
+        .join(" ")}
       role="button"
       tabIndex={0}
       aria-label="Souhrn výsledků při posunu stránky. Klepnutím zobrazíte plný souhrn nahoře."
@@ -76,9 +92,13 @@ export function CalculatorMobileScrollResults({
           ))}
         </dl>
       ) : null}
-      <p className="calculator-mobile-scroll-results__tap-hint">Klepnutím zobrazíte souhrn nahoře</p>
+      <p className="calculator-mobile-scroll-results__tap-hint">
+        {pinned ? "Souhrn připnut – klepnutím zobrazíte dock nahoře" : "Klepnutím zobrazíte souhrn nahoře"}
+      </p>
     </aside>
   );
 
   return createPortal(panel, document.body);
 }
+
+export { MOBILE_SCROLL_PIN_MS, scrollToWorkflowDock };
