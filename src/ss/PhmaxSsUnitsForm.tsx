@@ -35,6 +35,7 @@ import {
   SsWhyPhmaxPanel,
 } from "./SsWhyPanels";
 import { CollapsibleSection } from "../CollapsibleSection";
+import { sanitizeIntegerInputString } from "../integer-input";
 import { usePhmaxSsUnits } from "./use-phmax-ss-units";
 import type { PhmaxSsUnitsModel } from "./use-phmax-ss-units";
 
@@ -299,8 +300,10 @@ function PhmaxSsUnitsFormView({
                           type="text"
                           className="input"
                           inputMode="numeric"
-                          value={row.classCount}
-                          onChange={(e) => updateRow(row.id, { classCount: e.target.value })}
+                          value={sanitizeIntegerInputString(row.classCount)}
+                          onChange={(e) =>
+                            updateRow(row.id, { classCount: sanitizeIntegerInputString(e.target.value) })
+                          }
                           aria-label={`${sec.colClassCount}, řádek ${row.id}`}
                         />
                         <select
@@ -356,8 +359,10 @@ function PhmaxSsUnitsFormView({
                           type="text"
                           className="input"
                           inputMode="numeric"
-                          value={row.oborCountInClass}
-                          onChange={(e) => updateRow(row.id, { oborCountInClass: e.target.value })}
+                          value={sanitizeIntegerInputString(row.oborCountInClass)}
+                          onChange={(e) =>
+                            updateRow(row.id, { oborCountInClass: sanitizeIntegerInputString(e.target.value) })
+                          }
                           aria-label={`${sec.colOborCountInClass}, řádek ${row.id}`}
                           title="Pro režim „Automaticky“; při ručním režimu se pole typicky nechá 1."
                         />

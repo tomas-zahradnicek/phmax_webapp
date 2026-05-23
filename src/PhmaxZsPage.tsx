@@ -28,6 +28,7 @@ import {
   GymRow,
 } from "./phmax-zs-logic";
 import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
+import { IntegerInput } from "./IntegerInput";
 import { FieldHintButton } from "./FieldHintButton";
 import { HeroExampleSelect } from "./HeroExampleSelect";
 import { ZS_HERO_EXAMPLE_GROUPS, type ZsHeroExampleKey } from "./zs-hero-example-groups";
@@ -2927,10 +2928,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                                 <option value="current_only">Jen aktuální rok</option>
                               </select>
                             </td>
-                            <td><input type="number" value={row.currentPupils} onChange={(e) => updatePsych(row.id, "currentPupils", Number(e.target.value) || 0)} /></td>
-                            <td><input type="number" value={row.currentClasses} onChange={(e) => updatePsych(row.id, "currentClasses", Number(e.target.value) || 0)} /></td>
-                            <td><input type="number" value={row.prevPupils} onChange={(e) => updatePsych(row.id, "prevPupils", Number(e.target.value) || 0)} /></td>
-                            <td><input type="number" value={row.prevClasses} onChange={(e) => updatePsych(row.id, "prevClasses", Number(e.target.value) || 0)} /></td>
+                            <td><IntegerInput value={row.currentPupils} onChange={(v) => updatePsych(row.id, "currentPupils", v)} /></td>
+                            <td><IntegerInput value={row.currentClasses} onChange={(v) => updatePsych(row.id, "currentClasses", v)} /></td>
+                            <td><IntegerInput value={row.prevPupils} onChange={(v) => updatePsych(row.id, "prevPupils", v)} /></td>
+                            <td><IntegerInput value={row.prevClasses} onChange={(v) => updatePsych(row.id, "prevClasses", v)} /></td>
                             <td>{row.usedAvg}</td>
                             <td>{row.bandLabel} / {row.perClass}</td>
                             <td><button className="icon-btn" onClick={() => removePsych(row.id)}>✕</button></td>
@@ -2979,10 +2980,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                                 <option value="current_only">Jen aktuální rok</option>
                               </select>
                             </td>
-                            <td><input type="number" value={row.currentPupils} onChange={(e) => updateHealth(row.id, "currentPupils", Number(e.target.value) || 0)} /></td>
-                            <td><input type="number" value={row.currentClasses} onChange={(e) => updateHealth(row.id, "currentClasses", Number(e.target.value) || 0)} /></td>
-                            <td><input type="number" value={row.prevPupils} onChange={(e) => updateHealth(row.id, "prevPupils", Number(e.target.value) || 0)} /></td>
-                            <td><input type="number" value={row.prevClasses} onChange={(e) => updateHealth(row.id, "prevClasses", Number(e.target.value) || 0)} /></td>
+                            <td><IntegerInput value={row.currentPupils} onChange={(v) => updateHealth(row.id, "currentPupils", v)} /></td>
+                            <td><IntegerInput value={row.currentClasses} onChange={(v) => updateHealth(row.id, "currentClasses", v)} /></td>
+                            <td><IntegerInput value={row.prevPupils} onChange={(v) => updateHealth(row.id, "prevPupils", v)} /></td>
+                            <td><IntegerInput value={row.prevClasses} onChange={(v) => updateHealth(row.id, "prevClasses", v)} /></td>
                             <td>{row.usedAvg}</td>
                             <td>{row.bandLabel} / {row.perClass}</td>
                             <td><button type="button" className="icon-btn" onClick={() => removeHealth(row.id)}>✕</button></td>
@@ -3082,8 +3083,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                               <option value="sport6">Gymnázium sportovní 6leté</option>
                             </select>
                           </td>
-                          <td><input type="number" value={row.classes} onChange={(e) => updateGym(row.id, "classes", Number(e.target.value) || 0)} /></td>
-                          <td><input type="number" value={row.pupils} onChange={(e) => updateGym(row.id, "pupils", Number(e.target.value) || 0)} /></td>
+                          <td><IntegerInput value={row.classes} onChange={(v) => updateGym(row.id, "classes", v)} /></td>
+                          <td><IntegerInput value={row.pupils} onChange={(v) => updateGym(row.id, "pupils", v)} /></td>
                           <td>{row.avg}</td>
                           <td>{row.bandLabel}</td>
                           <td>{row.perClass}</td>
@@ -3527,8 +3528,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                           <option value="zssPrep">Přípravný stupeň ZŠ speciální (ř. B45)</option>
                         </select>
                       </td>
-                      <td><input type="number" value={row.classes} onChange={(e) => updatePha(row.id, "classes", Number(e.target.value) || 0)} /></td>
-                      <td><input type="number" value={row.pupils} onChange={(e) => updatePha(row.id, "pupils", Number(e.target.value) || 0)} /></td>
+                      <td><IntegerInput value={row.classes} onChange={(v) => updatePha(row.id, "classes", v)} /></td>
+                      <td><IntegerInput value={row.pupils} onChange={(v) => updatePha(row.id, "pupils", v)} /></td>
                       <td>{row.avg}</td>
                       <td>{row.bandLabel}</td>
                       <td>{row.perClass}</td>

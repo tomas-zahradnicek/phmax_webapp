@@ -91,6 +91,7 @@ import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { GlossaryIconButton } from "./GlossaryIconButton";
 import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
+import { IntegerInput } from "./IntegerInput";
 import { round2 } from "./phmax-zs-logic";
 import { buildPhmaxSdExportRows } from "./phmax-sd-export-rows";
 import {
@@ -1736,17 +1737,15 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                         </select>
                       </td>
                       <td>
-                        <input
-                          type="number"
+                        <IntegerInput
                           className="input"
                           min={0}
-                          step="1"
                           value={row.participants}
-                          onChange={(e) =>
+                          onChange={(participants) =>
                             setDetailDepartments((prev) =>
                               prev.map((x, idx) =>
                                 idx === i
-                                  ? { ...x, participants: Math.max(0, Math.round(Number(e.target.value) || 0)) }
+                                  ? { ...x, participants: Math.max(0, Math.round(participants)) }
                                   : x,
                               ),
                             )

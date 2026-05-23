@@ -61,6 +61,7 @@ import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
 import { ResultAnchorCard, type ResultAnchorTone } from "./ResultAnchorCard";
+import { IntegerInput } from "./IntegerInput";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
@@ -1412,63 +1413,38 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                 <span className="field__label">
                   <Nv75LegisRef citeId="nv75-4c1" label="§4c odst. 1" /> – žáci/stud. praktického vyučování (mimo OV E/H/L0)
                 </span>
-                <input
+                <IntegerInput
                   className="input"
-                  type="number"
                   min={0}
-                  step={1}
                   value={practicalGeneralNonOv}
-                  onChange={(e) => setPracticalGeneralNonOv(Number(e.target.value))}
+                  onChange={setPracticalGeneralNonOv}
                 />
               </label>
               <label className="field">
                 <span className="field__label">
                   OV E/H/L0 – žáci (započítání dle <Nv75LegisRef citeId="nv75-4c3" label="§4c odst. 3" />)
                 </span>
-                <input
+                <IntegerInput
                   className="input"
-                  type="number"
                   min={0}
-                  step={1}
                   value={practicalOvEhl0}
-                  onChange={(e) => setPracticalOvEhl0(Number(e.target.value))}
+                  onChange={setPracticalOvEhl0}
                 />
               </label>
               <label className="field">
                 <span className="field__label">OV – skupiny na školních pracovištích</span>
-                <input
-                  className="input"
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={ovGroupsSchool}
-                  onChange={(e) => setOvGroupsSchool(Number(e.target.value))}
-                />
+                <IntegerInput className="input" min={0} value={ovGroupsSchool} onChange={setOvGroupsSchool} />
               </label>
               <label className="field">
                 <span className="field__label">OV – skupiny vedené instruktorem</span>
-                <input
-                  className="input"
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={ovGroupsInstructor}
-                  onChange={(e) => setOvGroupsInstructor(Number(e.target.value))}
-                />
+                <IntegerInput className="input" min={0} value={ovGroupsInstructor} onChange={setOvGroupsInstructor} />
               </label>
               <label className="field">
                 <span className="field__label">
                   <Nv75LegisRef citeId="nv75-4c2" label="§4c odst. 2" /> – žáci prakt. vyučování ve škole dle{" "}
                   <Nv75LegisRef citeId="skolsky-16-9" label="§16 odst. 9" />
                 </span>
-                <input
-                  className="input"
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={practicalSec16}
-                  onChange={(e) => setPracticalSec16(Number(e.target.value))}
-                />
+                <IntegerInput className="input" min={0} value={practicalSec16} onChange={setPracticalSec16} />
               </label>
             </div>
           ) : (
@@ -1510,7 +1486,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                     </td>
                     <td>
                       {kindUsesUnits(row.kind) ? (
-                        <input className="input" type="number" min={0} step={1} value={row.units} onChange={(e) => updateRow(row.id, { units: Number(e.target.value) })} />
+                        <IntegerInput className="input" min={0} value={row.units} onChange={(units) => updateRow(row.id, { units })} />
                       ) : (
                         <span className="muted-text">nepoužívá se</span>
                       )}
@@ -1523,13 +1499,11 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                             return (
                               <div key={workplaceIdx} style={{ display: "flex", gap: 6, alignItems: "center" }}>
                                 <span className="muted-text">#{workplaceIdx + 1}</span>
-                                <input
+                                <IntegerInput
                                   className="input"
-                                  type="number"
                                   min={0}
-                                  step={1}
                                   value={units}
-                                  onChange={(e) => updateAdditionalWorkplace(row.id, workplaceIdx, Number(e.target.value))}
+                                  onChange={(next) => updateAdditionalWorkplace(row.id, workplaceIdx, next)}
                                   style={{ width: 100 }}
                                   aria-label={`Jednotky dalšího pracoviště ${workplaceIdx + 1}`}
                                 />

@@ -1,5 +1,6 @@
 import React from "react";
 import { TABLE_SCROLL_HINT } from "./calculator-ui-constants";
+import { IntegerInput } from "./IntegerInput";
 import { round2 } from "./phmax-zs-logic";
 
 export type MixedBand = { label: string; value: number };
@@ -47,14 +48,12 @@ export function MixedStageTable({
 }: MixedStageTableProps) {
   const numInput = (value: number, onChange: (n: number) => void, aria: string) => (
     <td>
-      <input
-        type="number"
+      <IntegerInput
         min={0}
-        inputMode="numeric"
         className={`mixed-sheet__input${emphasizeEmpty && value === 0 ? " mixed-sheet__input--empty" : ""}`}
         value={value}
         aria-label={aria}
-        onChange={(e) => onChange(Number(e.target.value) || 0)}
+        onChange={onChange}
       />
     </td>
   );

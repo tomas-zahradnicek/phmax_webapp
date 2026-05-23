@@ -1,5 +1,7 @@
 import React from "react";
 import { FieldHintButton } from "./FieldHintButton";
+import { IntegerInput } from "./IntegerInput";
+import { isIntegerNumberStep } from "./integer-input";
 
 const INPUT_OUTPUT_LEGEND_TEXT =
   "Oranžový okraj značí pole k vyplnění; šedý levý pruh u karty značí dopočítanou hodnotu, kterou nelze přímo měnit.";
@@ -121,6 +123,7 @@ export function NumberField({
   disabled = false,
 }: NumberFieldProps) {
   const isEmptyLikeZero = value === 0;
+  const integerField = isIntegerNumberStep(step);
 
   return (
     <label className="number-field number-field--entry">
@@ -130,21 +133,33 @@ export function NumberField({
       </span>
 
       <div className="number-field__control number-field__control--large">
-        <input
-          className={`number-field__input${isEmptyLikeZero ? " is-empty" : ""}${disabled ? " is-disabled" : ""}`}
-          type="number"
-          inputMode="numeric"
-          min={min}
-          max={max}
-          step={step}
-          disabled={disabled}
-          value={value}
-          onChange={(e) => {
-            const raw = e.target.value;
-            const next = raw === "" ? 0 : Number(raw);
-            onChange(Number.isFinite(next) ? next : 0);
-          }}
-        />
+        {integerField ? (
+          <IntegerInput
+            className={`number-field__input${isEmptyLikeZero ? " is-empty" : ""}${disabled ? " is-disabled" : ""}`}
+            min={min}
+            max={max}
+            disabled={disabled}
+            value={value}
+            emptyWhenZero
+            onChange={onChange}
+          />
+        ) : (
+          <input
+            className={`number-field__input${isEmptyLikeZero ? " is-empty" : ""}${disabled ? " is-disabled" : ""}`}
+            type="number"
+            inputMode="decimal"
+            min={min}
+            max={max}
+            step={step}
+            disabled={disabled}
+            value={value}
+            onChange={(e) => {
+              const raw = e.target.value;
+              const next = raw === "" ? 0 : Number(raw);
+              onChange(Number.isFinite(next) ? next : 0);
+            }}
+          />
+        )}
       </div>
 
       <div className="number-field__meta">
