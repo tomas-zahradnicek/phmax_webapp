@@ -37,7 +37,8 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
   it("NV75 má nv75Workflow a doporučený krok", () => {
     const src = readSource("src/PhmaxNv75DeputyPage.tsx");
     expect(src).toContain("const nv75Workflow = useMemo");
-    expect(src).toContain("workflowSteps={nv75Workflow.steps}");
+    expect(src).toContain("workflowSteps={nv75BasicWizardActive ? [] : nv75Workflow.steps}");
+    expect(src).toContain("ProductBasicWizard");
     expect(src).toContain("CalculatorWorkflowDock");
   });
 
