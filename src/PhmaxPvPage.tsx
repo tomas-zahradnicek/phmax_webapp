@@ -42,6 +42,7 @@ import {
 } from "./confirm-destructive";
 import { buildExportMetaRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
+import { HeroExampleSelect, heroExampleOptionsFromKeys } from "./HeroExampleSelect";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import {
   HeroIconActionButton,
@@ -387,6 +388,20 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     selectedPvHeroExample && selectedPvHeroExample in PV_HERO_EXAMPLE_META
       ? PV_HERO_EXAMPLE_META[selectedPvHeroExample as Exclude<PvHeroExampleKey, "">]
       : null;
+
+  const pvHeroExampleGroups = useMemo(
+    () => [
+      {
+        label: "Metodika – výkladové příklady",
+        options: heroExampleOptionsFromKeys(PV_HERO_EXAMPLE_METH_KEYS, PV_HERO_EXAMPLE_META),
+      },
+      {
+        label: "Příloha – ilustrace MŠ (bez § 16/9)",
+        options: heroExampleOptionsFromKeys(PV_HERO_EXAMPLE_ILL_KEYS, PV_HERO_EXAMPLE_META),
+      },
+    ],
+    [],
+  );
 
   useEffect(() => {
     try {
@@ -859,43 +874,21 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           <span className="field__label field__label--hero" id="pv-hero-example-label">
             Ukázkový příklad
           </span>
-          <select
+          <HeroExampleSelect
             id="pv-hero-example-select"
-            className="input"
             aria-labelledby="pv-hero-example-label"
             aria-describedby="pv-hero-example-legend"
             title="Ukázkové příklady z metodiky a z přílohy k PHmax / PHAmax u předškolního vzdělávání. Najeďte na řádek pro detaily."
             value={selectedPvHeroExample}
-            onChange={(e) =>
-              applyPvHeroExampleSelection(e.target.value as PvHeroExampleKey, {
+            groups={pvHeroExampleGroups}
+            onChange={(key) =>
+              applyPvHeroExampleSelection(key as PvHeroExampleKey, {
                 setSelected: setSelectedPvHeroExample,
                 setRows,
                 setNotice: setUiNotice,
               })
             }
-          >
-            <option value="">Vyberte ukázkový příklad…</option>
-            <optgroup label="Metodika – výkladové příklady">
-              {PV_HERO_EXAMPLE_METH_KEYS.map((k) => {
-                const m = PV_HERO_EXAMPLE_META[k];
-                return (
-                  <option key={k} value={k} title={m.title}>
-                    {m.label}
-                  </option>
-                );
-              })}
-            </optgroup>
-            <optgroup label="Příloha – ilustrace MŠ (bez § 16/9)">
-              {PV_HERO_EXAMPLE_ILL_KEYS.map((k) => {
-                const m = PV_HERO_EXAMPLE_META[k];
-                return (
-                  <option key={k} value={k} title={m.title}>
-                    {m.label}
-                  </option>
-                );
-              })}
-            </optgroup>
-          </select>
+          />
           <p
             id="pv-hero-example-legend"
             className="muted-text"

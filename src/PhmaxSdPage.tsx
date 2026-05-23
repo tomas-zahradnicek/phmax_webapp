@@ -41,6 +41,7 @@ import {
 } from "./confirm-destructive";
 import { buildExportMetaRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
+import { HeroExampleSelect, heroExampleOptionsFromKeys } from "./HeroExampleSelect";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import {
   HeroIconActionButton,
@@ -387,6 +388,15 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     selectedSdHeroExample && selectedSdHeroExample in SD_HERO_EXAMPLE_META
       ? SD_HERO_EXAMPLE_META[selectedSdHeroExample as Exclude<SdHeroExampleKey, "">]
       : null;
+  const sdHeroExampleGroups = useMemo(
+    () => [
+      {
+        label: "Metodika – školní družina (orientačně)",
+        options: heroExampleOptionsFromKeys(SD_HERO_EXAMPLE_ORDER, SD_HERO_EXAMPLE_META),
+      },
+    ],
+    [],
+  );
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -1140,27 +1150,15 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <span className="field__label field__label--hero" id="sd-hero-example-label">
               Ukázkový příklad
             </span>
-            <select
+            <HeroExampleSelect
               id="sd-hero-example-select"
-              className="input"
               aria-labelledby="sd-hero-example-label"
               aria-describedby="sd-hero-example-legend"
               title="Ukázkové příklady z metodiky k školní družině (PHmax / PHAmax). Najeďte na řádek pro detaily a očekávané hodnoty."
               value={selectedSdHeroExample}
-              onChange={(e) => loadSdHeroExample(e.target.value as SdHeroExampleKey)}
-            >
-              <option value="">Vyberte ukázkový příklad…</option>
-              <optgroup label="Metodika – školní družina (orientačně)">
-                {SD_HERO_EXAMPLE_ORDER.map((k) => {
-                  const m = SD_HERO_EXAMPLE_META[k];
-                  return (
-                    <option key={k} value={k} title={m.title}>
-                      {m.label}
-                    </option>
-                  );
-                })}
-              </optgroup>
-            </select>
+              groups={sdHeroExampleGroups}
+              onChange={(key) => loadSdHeroExample(key as SdHeroExampleKey)}
+            />
             <p id="sd-hero-example-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
               {SD_HERO_EXAMPLE_SELECT_LEGEND}
             </p>

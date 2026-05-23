@@ -18,6 +18,7 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
     expect(dock).toContain("mobileScrollPinnedUntil");
     expect(dock).toContain("handleMobileScrollActivate");
     expect(css).toContain(".calculator-mobile-scroll-results");
+    expect(css).toContain(".hero-example-sheet");
     expect(css).toContain(".calculator-mobile-scroll-results__hero");
     expect(css).toContain(".calculator-mobile-scroll-results--pinned");
     expect(css).toContain("display: block !important");

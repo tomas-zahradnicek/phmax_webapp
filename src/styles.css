@@ -432,6 +432,164 @@ button.pill--hero-toggle--active {
   color: rgba(255, 255, 255, 0.86) !important;
 }
 
+/* Mobilní výběr ukázkového příkladu – kompaktní panel místo systémového seznamu */
+.hero-example-select__trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hero-example-select__trigger-text {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-example-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: max(8px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px))
+    max(8px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.hero-example-sheet__panel {
+  width: min(100%, 520px);
+  max-height: min(78vh, 640px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px 16px 12px 12px;
+  background: #fff;
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+}
+
+.hero-example-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  flex-shrink: 0;
+}
+
+.hero-example-sheet__title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #0f172a;
+}
+
+.hero-example-sheet__close {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hero-example-sheet__body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 0 10px;
+}
+
+.hero-example-sheet__group {
+  margin: 0;
+  padding: 0;
+}
+
+.hero-example-sheet__group-title {
+  margin: 10px 14px 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.hero-example-sheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hero-example-sheet__option {
+  display: block;
+  width: 100%;
+  border: none;
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  background: transparent;
+  padding: 10px 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hero-example-sheet__option-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #0f172a;
+}
+
+.hero-example-sheet__option--selected {
+  background: rgba(219, 234, 254, 0.65);
+}
+
+.hero-example-sheet__option--selected .hero-example-sheet__option-label {
+  color: #1d4ed8;
+}
+
+.hero-example-sheet__option:focus-visible,
+.hero-example-sheet__close:focus-visible,
+.hero-example-select__trigger:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .hero-pv-example-select select,
+  .hero-sd-example-select select,
+  .hero-zs-example-select select,
+  .hero-ss-example-select select,
+  .field--hero-select.hero-actions__example select,
+  #nv75-hero-example-select {
+    font-size: clamp(0.78rem, 3.1vw, 0.875rem);
+    line-height: 1.35;
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+
+  .hero-pv-example-select .muted-text,
+  .hero-sd-example-select .muted-text,
+  .hero-zs-example-select .muted-text,
+  .hero-ss-example-select .muted-text {
+    font-size: 0.78rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .field--hero-select .field__label--hero {
+    font-size: 0.82rem;
+  }
+}
+
 .hero-zs-example-select .muted-text,
 .hero-ss-example-select .muted-text {
   color: #fff !important;
@@ -4541,7 +4699,14 @@ input[type="radio"] {
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(251, 146, 60, 0.12);
 }
 
-.hero-actions .field--hero-select select {
+.hero-actions .field--hero-select select,
+.hero-pv-example-select select,
+.hero-sd-example-select select,
+.hero-ss-example-select select,
+.hero-actions .field--hero-select .hero-example-select__trigger,
+.hero-pv-example-select .hero-example-select__trigger,
+.hero-sd-example-select .hero-example-select__trigger,
+.hero-ss-example-select .hero-example-select__trigger {
   border: 2px solid rgba(251, 191, 130, 0.65);
   border-left: 4px solid #fb923c;
   background-color: #fff;
@@ -4561,7 +4726,8 @@ input[type="radio"] {
 
 .hero-named-field .input:focus-visible,
 .hero-named-field select.input:focus-visible,
-.hero-actions .field--hero-select select:focus-visible {
+.hero-actions .field--hero-select select:focus-visible,
+.hero-actions .field--hero-select .hero-example-select__trigger:focus-visible {
   outline-color: rgba(234, 88, 12, 0.55);
   border-color: rgba(234, 88, 12, 0.5);
 }

@@ -15,6 +15,7 @@ describe("UX contract: release notes + přístupnost", () => {
     expect(readSource("src/FieldHintButton.tsx")).toContain("FieldHintButton");
     expect(readSource("src/AuthorCreditFooter.tsx")).toContain("openWhatsNew");
     expect(readSource("src/CalculatorMobileScrollResults.tsx")).toContain("calculator-mobile-scroll-results__hero");
+    expect(readSource("src/HeroExampleSelect.tsx")).toContain("hero-example-sheet");
     const whatsNew = readSource("src/AppWhatsNewContext.tsx");
     expect(whatsNew).toContain("openWhatsNew");
     expect(whatsNew).not.toContain("shouldAutoOpenWhatsNew");

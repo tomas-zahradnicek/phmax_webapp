@@ -20,6 +20,7 @@ import {
 } from "./calculator-ui-constants";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { GlossaryIconButton } from "./GlossaryIconButton";
+import { HeroExampleSelect, heroExampleOptionsFromKeys } from "./HeroExampleSelect";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import {
   HeroIconActionButton,
@@ -339,6 +340,43 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
     selectedSsHeroExample && selectedSsHeroExample in SS_HERO_EXAMPLE_META
       ? SS_HERO_EXAMPLE_META[selectedSsHeroExample as Exclude<SsHeroExampleKey, "">]
       : null;
+  const ssHeroExampleGroups = useMemo(
+    () => [
+      {
+        label: "Jednoobor a agregát",
+        options: heroExampleOptionsFromKeys(SS_HERO_EXAMPLE_GROUP_AGGREGAT_JEDNO, SS_HERO_EXAMPLE_META),
+      },
+      {
+        label: "Maturitní obory (denní)",
+        options: heroExampleOptionsFromKeys(SS_HERO_EXAMPLE_GROUP_MATURITNI, SS_HERO_EXAMPLE_META),
+      },
+      {
+        label: "Obory z praxe (přijímací řízení / výkaz)",
+        options: heroExampleOptionsFromKeys(SS_HERO_EXAMPLE_GROUP_PRIJIMACI, SS_HERO_EXAMPLE_META),
+      },
+      {
+        label: "Gymnázium",
+        options: heroExampleOptionsFromKeys(SS_HERO_EXAMPLE_GROUP_GYMNAZIUM, SS_HERO_EXAMPLE_META),
+      },
+      {
+        label: "Víceoborová třída",
+        options: heroExampleOptionsFromKeys(SS_HERO_EXAMPLE_GROUP_VICEOBOR, SS_HERO_EXAMPLE_META),
+      },
+      {
+        label: "Forma studia a režim",
+        options: heroExampleOptionsFromKeys(SS_HERO_EXAMPLE_GROUP_FORMA_REGIME, SS_HERO_EXAMPLE_META),
+      },
+      {
+        label: "Skupina 82 / talent",
+        options: heroExampleOptionsFromKeys(SS_HERO_EXAMPLE_GROUP_82_TALENT, SS_HERO_EXAMPLE_META),
+      },
+      {
+        label: "Zvláštní typ školy (PrŠ, § 16/9)",
+        options: heroExampleOptionsFromKeys(SS_HERO_EXAMPLE_GROUP_SPECIAL_TYP, SS_HERO_EXAMPLE_META),
+      },
+    ],
+    [],
+  );
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const { guideOpen: ssGuideOpen, dismissGuide: dismissSsGuide, toggleGuide: toggleSsGuideFromHero, helpButtonRef: ssHelpButtonRef } =
     useQuickOnboarding(PHMAX_SS_ONBOARDING_LS_KEY, { scrollAnchorId: "ss-quick-onboarding" });
@@ -587,103 +625,21 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             <span className="field__label field__label--hero" id="ss-hero-example-label">
               Ukázkový příklad
             </span>
-            <select
+            <HeroExampleSelect
               id="ss-hero-example-select"
-              className="input"
               aria-labelledby="ss-hero-example-label"
               aria-describedby="ss-hero-example-legend"
               title="Ukázkový orientační příklad pro SŠ. Po načtení upravte vstupy podle reálné evidence tříd školy."
               value={selectedSsHeroExample}
-              onChange={(e) =>
-                applySsHeroExampleSelection(e.target.value as SsHeroExampleKey, {
+              groups={ssHeroExampleGroups}
+              onChange={(key) =>
+                applySsHeroExampleSelection(key as SsHeroExampleKey, {
                   setSelected: setSelectedSsHeroExample,
                   applySnapshot: ss.applySsRowsSnapshot,
                   setNotice: ss.setUiNotice,
                 })
               }
-            >
-              <option value="">Vyberte ukázkový příklad…</option>
-              <optgroup label="Jednoobor a agregát">
-                {SS_HERO_EXAMPLE_GROUP_AGGREGAT_JEDNO.map((k) => {
-                  const m = SS_HERO_EXAMPLE_META[k];
-                  return (
-                    <option key={k} value={k} title={m.title}>
-                      {m.label}
-                    </option>
-                  );
-                })}
-              </optgroup>
-              <optgroup label="Maturitní obory (denní)">
-                {SS_HERO_EXAMPLE_GROUP_MATURITNI.map((k) => {
-                  const m = SS_HERO_EXAMPLE_META[k];
-                  return (
-                    <option key={k} value={k} title={m.title}>
-                      {m.label}
-                    </option>
-                  );
-                })}
-              </optgroup>
-              <optgroup label="Obory z praxe (přijímací řízení / výkaz)">
-                {SS_HERO_EXAMPLE_GROUP_PRIJIMACI.map((k) => {
-                  const m = SS_HERO_EXAMPLE_META[k];
-                  return (
-                    <option key={k} value={k} title={m.title}>
-                      {m.label}
-                    </option>
-                  );
-                })}
-              </optgroup>
-              <optgroup label="Gymnázium">
-                {SS_HERO_EXAMPLE_GROUP_GYMNAZIUM.map((k) => {
-                  const m = SS_HERO_EXAMPLE_META[k];
-                  return (
-                    <option key={k} value={k} title={m.title}>
-                      {m.label}
-                    </option>
-                  );
-                })}
-              </optgroup>
-              <optgroup label="Víceoborová třída">
-                {SS_HERO_EXAMPLE_GROUP_VICEOBOR.map((k) => {
-                  const m = SS_HERO_EXAMPLE_META[k];
-                  return (
-                    <option key={k} value={k} title={m.title}>
-                      {m.label}
-                    </option>
-                  );
-                })}
-              </optgroup>
-              <optgroup label="Forma studia a režim">
-                {SS_HERO_EXAMPLE_GROUP_FORMA_REGIME.map((k) => {
-                  const m = SS_HERO_EXAMPLE_META[k];
-                  return (
-                    <option key={k} value={k} title={m.title}>
-                      {m.label}
-                    </option>
-                  );
-                })}
-              </optgroup>
-              <optgroup label="Skupina 82 / talent">
-                {SS_HERO_EXAMPLE_GROUP_82_TALENT.map((k) => {
-                  const m = SS_HERO_EXAMPLE_META[k];
-                  return (
-                    <option key={k} value={k} title={m.title}>
-                      {m.label}
-                    </option>
-                  );
-                })}
-              </optgroup>
-              <optgroup label="Zvláštní typ školy (PrŠ, § 16/9)">
-                {SS_HERO_EXAMPLE_GROUP_SPECIAL_TYP.map((k) => {
-                  const m = SS_HERO_EXAMPLE_META[k];
-                  return (
-                    <option key={k} value={k} title={m.title}>
-                      {m.label}
-                    </option>
-                  );
-                })}
-              </optgroup>
-            </select>
+            />
             <p
               id="ss-hero-example-legend"
               className="muted-text"
