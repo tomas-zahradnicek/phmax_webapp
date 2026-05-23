@@ -1,7 +1,12 @@
 import React, { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import type { ProductView } from "./ProductViewPills";
-import { recordDashboardProductVisit, type DashboardVisitProduct } from "./phmax-dashboard-visits";
+import {
+  recordDashboardProductVisit,
+  recordLastActiveProduct,
+  type DashboardVisitProduct,
+} from "./phmax-dashboard-visits";
 import { readInitialProductView } from "./product-view-url";
+import { UiToastHost } from "./ui-toast";
 
 const PhmaxPvPage = lazy(() => import("./PhmaxPvPage").then((m) => ({ default: m.PhmaxPvPage })));
 const PhmaxSdPage = lazy(() => import("./PhmaxSdPage").then((m) => ({ default: m.PhmaxSdPage })));
@@ -14,7 +19,11 @@ export default function App() {
   const [productView, setProductViewState] = useState<ProductView>(() => readInitialProductView());
   const setProductView = useCallback((v: ProductView) => {
     setProductViewState(v);
-    if (v !== "dash") recordDashboardProductVisit(v as DashboardVisitProduct);
+    if (v !== "dash") {
+      const product = v as DashboardVisitProduct;
+      recordDashboardProductVisit(product);
+      recordLastActiveProduct(product);
+    }
     window.scrollTo(0, 0);
     try {
       const url = new URL(window.location.href);
@@ -26,7 +35,11 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (productView !== "dash") recordDashboardProductVisit(productView as DashboardVisitProduct);
+    if (productView !== "dash") {
+      const product = productView as DashboardVisitProduct;
+      recordDashboardProductVisit(product);
+      recordLastActiveProduct(product);
+    }
   }, [productView]);
 
   const shell = (child: React.ReactNode) => (
@@ -37,9 +50,10 @@ export default function App() {
     </div>
   );
 
+  let page: React.ReactNode;
   switch (productView) {
     case "dash":
-      return (
+      page = (
         <Suspense
           fallback={
             <div className="app-shell app-shell--gradient">
@@ -52,23 +66,44 @@ export default function App() {
           <PhmaxDashboardPage productView={productView} setProductView={setProductView} />
         </Suspense>
       );
+      break;
     case "pv":
-      return shell(<PhmaxPvPage productView={productView} setProductView={setProductView} />);
+      page = shell(<PhmaxPvPage productView={productView} setProductView={setProductView} />);
+      break;
     case "sd":
-      return shell(<PhmaxSdPage productView={productView} setProductView={setProductView} />);
+      page = shell(<PhmaxSdPage productView={productView} setProductView={setProductView} />);
+      break;
     case "ss":
-      return shell(<PhmaxSsPage productView={productView} setProductView={setProductView} />);
+      page = shell(<PhmaxSsPage productView={productView} setProductView={setProductView} />);
+      break;
     case "zs":
-      return (
-        <Suspense fallback={<div className="app-shell app-shell--gradient"><div className="container container--app"><div className="card muted">Načítám kalkulačku…</div></div></div>}>
+      page = (
+        <Suspense
+          fallback={
+            <div className="app-shell app-shell--gradient">
+              <div className="container container--app">
+                <div className="card muted">Načítám kalkulačku…</div>
+              </div>
+            </div>
+          }
+        >
           <PhmaxZsPage productView={productView} setProductView={setProductView} />
         </Suspense>
       );
+      break;
     case "nv75":
-      return shell(<PhmaxNv75DeputyPage productView={productView} setProductView={setProductView} />);
+      page = shell(<PhmaxNv75DeputyPage productView={productView} setProductView={setProductView} />);
+      break;
     default: {
       const _missing: never = productView;
-      return _missing;
+      page = _missing;
     }
   }
+
+  return (
+    <>
+      <UiToastHost />
+      {page}
+    </>
+  );
 }

@@ -1,6 +1,7 @@
 import type { ProductView } from "./ProductViewPills";
 
 const LS_PREFIX = "phmax-dash-last-visit-";
+const LS_LAST_ACTIVE = "phmax-dash-last-active-product";
 
 export type DashboardVisitProduct = Exclude<ProductView, "dash">;
 
@@ -34,6 +35,28 @@ export function readDashboardProductVisit(product: DashboardVisitProduct): Date 
   } catch {
     return null;
   }
+}
+
+export function recordLastActiveProduct(product: DashboardVisitProduct): void {
+  const ls = storage();
+  if (!ls) return;
+  try {
+    ls.setItem(LS_LAST_ACTIVE, product);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function readLastActiveProduct(): DashboardVisitProduct | null {
+  const ls = storage();
+  if (!ls) return null;
+  try {
+    const raw = ls.getItem(LS_LAST_ACTIVE);
+    if (raw === "pv" || raw === "sd" || raw === "zs" || raw === "ss" || raw === "nv75") return raw;
+  } catch {
+    /* ignore */
+  }
+  return null;
 }
 
 export function formatDashboardProductVisit(product: DashboardVisitProduct): string {

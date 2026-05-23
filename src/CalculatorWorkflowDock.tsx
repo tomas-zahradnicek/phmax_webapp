@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { CALCULATOR_WORKSPACE_DOCK_LABEL } from "./calculator-ui-constants";
-import { CalculatorMobileScrollResults } from "./CalculatorMobileScrollResults";
+import { CalculatorMobileScrollResults, CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID } from "./CalculatorMobileScrollResults";
 import { ResultAnchorCard, type ResultAnchorStat, type ResultAnchorTone } from "./ResultAnchorCard";
 import type { CalculatorViewMode } from "./calculator-view-mode";
 import { useMatchMedia } from "./useMatchMedia";
@@ -206,6 +206,7 @@ export function CalculatorWorkflowDock({
         statusBadge={statusBadge}
       />
       <div
+      id={CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID}
       className={["calculator-workspace-dock__card workflow-dock", `workflow-dock--${tone}`, className]
         .filter(Boolean)
         .join(" ")}

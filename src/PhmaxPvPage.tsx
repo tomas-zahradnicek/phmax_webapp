@@ -74,6 +74,7 @@ import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, PvLegisRef } from "./PhmaxProductLegisUi";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
+import { useUiNotice } from "./useUiNotice";
 import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick-start";
 import { BasicModeSteps } from "./BasicModeSteps";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -353,7 +354,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [rows, setRows] = useState<PvWorkplaceRowState[]>(() => loadPvRowsFromStorage());
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState("");
-  const [uiNotice, setUiNotice] = useState("");
+  const [uiNotice, setUiNotice] = useUiNotice();
   const [namedSnapshots, setNamedSnapshots] = useState<NamedPvSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");

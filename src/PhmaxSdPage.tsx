@@ -74,8 +74,15 @@ import { ProductLegisContextPanel, SdLegisRef } from "./PhmaxProductLegisUi";
 import { SD_LEGIS_ZAKONY_URL } from "./phmax-sd-legislativa";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
-import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick-start";
-import { BasicModeSteps } from "./BasicModeSteps";
+import { SdBasicWizard } from "./SdBasicWizard";
+import {
+  SD_BASIC_WIZARD_LS_KEY,
+  clampSdBasicWizardStep,
+  readSdBasicWizardStep,
+  sdWizardScrollSection,
+  type SdBasicWizardStep,
+} from "./sd-basic-wizard";
+import { useUiNotice } from "./useUiNotice";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { GlossaryIconButton } from "./GlossaryIconButton";
@@ -349,7 +356,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const detailHasSpecial = useMemo(() => detailDepartments.some((d) => d.kind === "special"), [detailDepartments]);
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState("");
-  const [uiNotice, setUiNotice] = useState("");
+  const [uiNotice, setUiNotice] = useUiNotice();
   const [namedSnapshots, setNamedSnapshots] = useState<NamedSdSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
@@ -360,6 +367,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
   const [focusMode, setFocusMode] = useCalculatorFocusMode();
   const heroHeaderRef = useRef<HTMLElement>(null);
+  const [sdWizardStep, setSdWizardStep] = useState<SdBasicWizardStep>(readSdBasicWizardStep);
   const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
     try {
       const stored = localStorage.getItem(SD_VIEW_MODE_LS_KEY);
@@ -383,6 +391,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   useEffect(() => {
     setNamedSnapshots(readNamedSdSnapshotsFromLs());
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SD_BASIC_WIZARD_LS_KEY, String(sdWizardStep));
+    } catch {
+      /* ignore */
+    }
+  }, [sdWizardStep]);
 
   useEffect(() => {
     try {
@@ -1043,13 +1059,44 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         ? formatSdHours(reduction.adjusted)
         : "–";
 
+  const sdBasicWizardActive = viewMode === "basic";
+
+  const goToSdSection = useCallback((sectionId: string) => {
+    const element = document.querySelector(`[data-section="${sectionId}"]`);
+    if (element instanceof HTMLElement) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
+  const goToSdWizardStep = useCallback(
+    (step: SdBasicWizardStep) => {
+      setSdWizardStep(step);
+      window.requestAnimationFrame(() => {
+        goToSdSection(sdWizardScrollSection(step));
+      });
+    },
+    [goToSdSection],
+  );
+
+  const handleSdWizardBack = useCallback(() => {
+    goToSdWizardStep(clampSdBasicWizardStep(sdWizardStep - 1));
+  }, [goToSdWizardStep, sdWizardStep]);
+
+  const handleSdWizardNext = useCallback(() => {
+    if (sdWizardStep >= 3) {
+      goToSdSection("sd-vysledek");
+      return;
+    }
+    goToSdWizardStep(clampSdBasicWizardStep(sdWizardStep + 1));
+  }, [goToSdSection, goToSdWizardStep, sdWizardStep]);
+
   const sdTocSections = [
     { id: "sd-vysledek", label: "Výsledek PHmax" },
     { id: "sd-vstupy", label: "Vstupy a oddělení" },
   ] as const;
 
   return (
-    <div className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc`}>
+    <div className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${sdBasicWizardActive ? ` sd-basic-wizard-active sd-wizard-step-${sdWizardStep}` : ""}`}>
       <header className="hero hero--feature" ref={heroHeaderRef}>
         <div className="hero__orb hero__orb--one" />
         <div className="hero__orb hero__orb--two" />
@@ -1317,18 +1364,12 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           výjimky dle vyhlášky). Pokud je situace hraniční, proveďte ruční kontrolu podle plného znění vyhlášky a metodiky.
         </p>
       </QuickOnboarding>
-      {viewMode === "basic" ? (
-        <BasicModeSteps
-          heading={basicQuickStartHeading("ŠD")}
-          lead="Nejkratší postup pro první vyplnění bez studia celé metodiky."
-          steps={buildBasicQuickStartSteps({
-            selectTitle: "Vyberte vstupní režim",
-            selectText: "Vyberte souhrnný nebo detailní režim po odděleních.",
-            exampleTargetId: "sd-hero-example-select",
-            exampleText: "V poli „Příkladové výpočty“ načtěte ukázku a porovnejte očekávaný výsledek.",
-            verifyTitle: "Ověřte účastníky a oddělení",
-            verifyText: "Upravte vstupy na vlastní stav a ověřte PHmax i případné krácení dle § 10 odst. 2.",
-          })}
+      {sdBasicWizardActive ? (
+        <SdBasicWizard
+          step={sdWizardStep}
+          onStepChange={goToSdWizardStep}
+          onBack={handleSdWizardBack}
+          onNext={handleSdWizardNext}
         />
       ) : null}
 
@@ -1364,7 +1405,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             statusBadge={sdVerdict.label}
             verdictLabel={sdVerdict.label}
             verdictDetail={sdVerdict.detail}
-            workflowSteps={sdWorkflow.steps}
+            workflowSteps={sdBasicWizardActive ? [] : sdWorkflow.steps}
             viewMode={viewMode}
             actions={[
               { label: "Uložit scénář", onClick: saveSdSnapshotManually },
@@ -1376,7 +1417,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         main={
           <>
 
-      <section className="card section-card section-card--sd" data-section="sd-vstupy">
+      <section className="card section-card section-card--sd" data-section="sd-vstupy" data-wizard-step="2">
         <h2 className="section-title">Vstupy</h2>
         <InputOutputLegend />
         <p className="muted-text" style={{ marginTop: 10 }}>
@@ -1796,7 +1837,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </div>
         ) : null}
 
-        <div className="grid two section-results" data-section="sd-vysledek" style={{ marginTop: 18 }}>
+        <div className="grid two section-results" data-section="sd-vysledek" data-wizard-step="3" style={{ marginTop: 18 }}>
           {detailedResult != null ? (
             <>
               <ResultCard label="Oddělení (celkem)" value={detailedResult.totalDepartments} tone="primary" />

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useUiNotice } from "../useUiNotice";
 import {
   MSG_CONFIRM_CLEAR_BROWSER_STORAGE,
   MSG_CONFIRM_RESET_FORM_ALL,
@@ -168,7 +169,7 @@ export function usePhmaxSsUnits(
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
   const [exportLabel, setExportLabel] = useState("");
-  const [uiNotice, setUiNotice] = useState("");
+  const [uiNotice, setUiNotice] = useUiNotice();
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
 
   useEffect(() => {

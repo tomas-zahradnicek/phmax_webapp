@@ -49,6 +49,7 @@ import { basicQuickStartHeading, buildBasicQuickStartSteps } from "./basic-quick
 import { BasicModeSteps } from "./BasicModeSteps";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
+import { useUiNotice } from "./useUiNotice";
 import { ResultAnchorCard, type ResultAnchorTone } from "./ResultAnchorCard";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { CollapsibleSection } from "./CollapsibleSection";
@@ -577,7 +578,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const [ovGroupsInstructor, setOvGroupsInstructor] = useState(0);
   const [selectedExample, setSelectedExample] = useState<Nv75ExampleKey>("");
   const [lastSavedAt, setLastSavedAt] = useState("");
-  const [uiNotice, setUiNotice] = useState("");
+  const [uiNotice, setUiNotice] = useUiNotice();
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [namedSnapshots, setNamedSnapshots] = useState<Nv75NamedSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");

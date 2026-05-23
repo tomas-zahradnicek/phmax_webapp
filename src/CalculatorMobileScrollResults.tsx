@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { createPortal } from "react-dom";
 import type { ResultAnchorStat, ResultAnchorTone } from "./ResultAnchorCard";
+
+export const CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID = "calculator-workflow-dock-anchor";
 
 type CalculatorMobileScrollResultsProps = {
   visible: boolean;
@@ -11,6 +13,15 @@ type CalculatorMobileScrollResultsProps = {
   statusBadge?: string;
 };
 
+function scrollToWorkflowDock(): void {
+  const el = document.getElementById(CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID);
+  if (el instanceof HTMLElement) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 /** Kompaktní plovoucí souhrn výsledků na mobilu po odscrollování docku. */
 export function CalculatorMobileScrollResults({
   visible,
@@ -20,14 +31,31 @@ export function CalculatorMobileScrollResults({
   stats = [],
   statusBadge,
 }: CalculatorMobileScrollResultsProps) {
+  const handleActivate = useCallback(() => {
+    scrollToWorkflowDock();
+  }, []);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      scrollToWorkflowDock();
+    }
+  }, []);
+
   if (!visible || typeof document === "undefined") return null;
 
   const panel = (
     <aside
-      className={["calculator-mobile-scroll-results", `calculator-mobile-scroll-results--${tone}`].join(" ")}
-      role="status"
-      aria-live="polite"
-      aria-label="Souhrn výsledků při posunu stránky"
+      className={[
+        "calculator-mobile-scroll-results",
+        "calculator-mobile-scroll-results--interactive",
+        `calculator-mobile-scroll-results--${tone}`,
+      ].join(" ")}
+      role="button"
+      tabIndex={0}
+      aria-label="Souhrn výsledků při posunu stránky. Klepnutím zobrazíte plný souhrn nahoře."
+      onClick={handleActivate}
+      onKeyDown={handleKeyDown}
     >
       <div className="calculator-mobile-scroll-results__head">
         <p className="calculator-mobile-scroll-results__value">{primaryValue}</p>
@@ -48,6 +76,7 @@ export function CalculatorMobileScrollResults({
           ))}
         </dl>
       ) : null}
+      <p className="calculator-mobile-scroll-results__tap-hint">Klepnutím zobrazíte souhrn nahoře</p>
     </aside>
   );
 

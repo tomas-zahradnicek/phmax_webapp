@@ -22,7 +22,9 @@ import { PHMAX_SS_UNITS_STORAGE_KEY } from "./ss/phmax-ss-constants";
 import { deriveSsUnitsPreview } from "./ss/phmax-ss-units-derive";
 import { revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
-import { formatDashboardProductVisit } from "./phmax-dashboard-visits";
+import { formatDashboardProductVisit, readLastActiveProduct } from "./phmax-dashboard-visits";
+import { clearAllPhmaxLocalStorage } from "./phmax-local-storage-clear";
+import { useUiNotice } from "./useUiNotice";
 
 type PhmaxDashboardPageProps = {
   productView: ProductView;
@@ -390,12 +392,26 @@ function buildDashboardRows(): DashboardRow[] {
 
 export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboardPageProps) {
   const [refreshAt, setRefreshAt] = useState(() => new Date());
-  const [notice, setNotice] = useState("");
+  const [notice, publishNotice] = useUiNotice();
 
   const refresh = useCallback(() => {
     setRefreshAt(new Date());
-    setNotice("Souhrnný přehled byl znovu načten z prohlížeče.");
-  }, []);
+    publishNotice("Souhrnný přehled byl znovu načten z prohlížeče.");
+  }, [publishNotice]);
+
+  const handleClearLocalData = useCallback(() => {
+    const confirmed = window.confirm(
+      "Opravdu smazat všechna uložená data kalkulaček v tomto prohlížeči? Tuto akci nelze vrátit.",
+    );
+    if (!confirmed) return;
+    const removed = clearAllPhmaxLocalStorage();
+    setRefreshAt(new Date());
+    publishNotice(
+      removed > 0
+        ? `Smazáno ${removed} uložených položek z prohlížeče.`
+        : "V prohlížeči nebyla nalezena uložená data kalkulaček.",
+    );
+  }, [publishNotice]);
 
   useEffect(() => {
     const onVisibility = () => {
@@ -409,6 +425,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
 
   const rows = useMemo(() => buildDashboardRows(), [refreshAt]);
   const modulesWithData = rows.filter((r) => r.hasData).length;
+  const lastActive = readLastActiveProduct();
+  const continueRow = lastActive ? rows.find((row) => row.id === lastActive) ?? null : null;
 
   return (
     <div className="app-shell app-shell--gradient">
@@ -420,6 +438,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             <ProductViewPills productView={productView} setProductView={setProductView} />
             <button type="button" className="btn ghost" onClick={refresh}>
               Obnovit z prohlížeče
+            </button>
+            <button type="button" className="btn ghost" onClick={handleClearLocalData}>
+              Vymazat lokální data
             </button>
           </div>
           <div className="hero__grid" style={{ marginTop: 8 }}>
@@ -435,6 +456,32 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             </div>
           </div>
         </header>
+
+        {continueRow ? (
+          <section className="card card--accent section-card dash-continue-card" aria-labelledby="dash-continue-heading">
+            <h2 id="dash-continue-heading" className="section-title">
+              Pokračovat v {DASH_CALC_LABEL[continueRow.id]}
+            </h2>
+            <p className="muted-text" style={{ marginBottom: 12 }}>
+              Naposledy jste pracovali v modulu <strong>{continueRow.title}</strong>. Níže je rychlý náhled z uloženého stavu v tomto prohlížeči.
+            </p>
+            <div className="dash-continue-card__kpi" aria-label="Hlavní metrika modulu">
+              <span className="dash-continue-card__kpi-label">{continueRow.primaryKpi.label}</span>
+              <strong className="dash-continue-card__kpi-value">{continueRow.primaryKpi.value}</strong>
+            </div>
+            <div className="dash-card__kpis" style={{ marginTop: 10 }} aria-label="Doplňkové metriky">
+              {continueRow.secondaryKpis.map((kpi) => (
+                <span key={kpi.label} className="dash-card__kpi-pill">
+                  {kpi.label}: <strong>{kpi.value}</strong>
+                </span>
+              ))}
+            </div>
+            <p className="dash-card__meta">{continueRow.status}</p>
+            <button type="button" className="btn primary" onClick={() => setProductView(continueRow.id)}>
+              Pokračovat v {DASH_CALC_LABEL[continueRow.id]}
+            </button>
+          </section>
+        ) : null}
 
         <section className="card card--accent section-card section-card--guide" aria-labelledby="dash-user-first-heading">
           <h2 id="dash-user-first-heading" className="section-title">

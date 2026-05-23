@@ -159,16 +159,14 @@ describe("UX TOP 6 contract", () => {
     expect(readSource("src/calculator-ui-constants.ts")).toContain("PHMAX_NV75_ONBOARDING_LS_KEY");
   });
 
-  it("PV/ŠD/SŠ/NV75 sdílí buildBasicQuickStartSteps", () => {
+  it("PV/SŠ/NV75 sdílí buildBasicQuickStartSteps, ŠD má SdBasicWizard", () => {
     expect(readSource("src/basic-quick-start.ts")).toContain("buildBasicQuickStartSteps");
-    for (const page of [
-      "src/PhmaxPvPage.tsx",
-      "src/PhmaxSdPage.tsx",
-      "src/PhmaxSsPage.tsx",
-      "src/PhmaxNv75DeputyPage.tsx",
-    ]) {
+    for (const page of ["src/PhmaxPvPage.tsx", "src/PhmaxSsPage.tsx", "src/PhmaxNv75DeputyPage.tsx"]) {
       expect(readSource(page)).toContain("buildBasicQuickStartSteps");
     }
+    const sd = readSource("src/PhmaxSdPage.tsx");
+    expect(sd).toContain("SdBasicWizard");
+    expect(sd).toContain("sd-basic-wizard");
   });
 
   it("NV75 má CalculatorProductShell, CalculatorWorkflowDock a TOC", () => {
