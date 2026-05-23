@@ -227,6 +227,7 @@ export function CalculatorWorkflowDock({
       <CalculatorMobileScrollResults
         visible={mobileScrollResultsVisible || mobileScrollPinned}
         pinned={mobileScrollPinned}
+        compact
         tone={tone}
         primaryLabel={primaryLabel}
         primaryValue={primaryValue}

@@ -17,6 +17,7 @@ import {
   PHMAX_NV75_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
+import { HeroExampleSelect } from "./HeroExampleSelect";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { HeroCompactToolbar } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
@@ -607,6 +608,15 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     scrollAnchorId: "nv75-quick-onboarding",
   });
   const selectedExampleDetails = useMemo(() => NV75_EXAMPLES.find((x) => x.id === selectedExample), [selectedExample]);
+  const nv75HeroExampleGroups = useMemo(
+    () => [
+      {
+        label: "Příkladové výpočty (metodika §4b a SŠ/VOŠ/DM)",
+        options: NV75_EXAMPLES.map((ex) => ({ value: ex.id, label: ex.label, title: ex.title })),
+      },
+    ],
+    [],
+  );
 
   useEffect(() => {
     setNamedSnapshots(readNv75NamedSnapshots());
@@ -1355,20 +1365,17 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
         >
           <h2 className="section-title">Vstupy</h2>
           <label className="field" style={{ marginTop: 10, maxWidth: 760 }}>
-            <span className="field__label">Příkladové výpočty (metodika §4b a SŠ/VOŠ/DM)</span>
-            <select
+            <span className="field__label" id="nv75-hero-example-label">
+              Příkladové výpočty (metodika §4b a SŠ/VOŠ/DM)
+            </span>
+            <HeroExampleSelect
               id="nv75-hero-example-select"
-              className="input"
+              aria-labelledby="nv75-hero-example-label"
+              placeholder="Vyberte příklad…"
               value={selectedExample}
-              onChange={(e) => applyExample(e.target.value as Nv75ExampleKey)}
-            >
-              <option value="">Vyberte příklad…</option>
-              {NV75_EXAMPLES.map((ex) => (
-                <option key={ex.id} value={ex.id}>
-                  {ex.label}
-                </option>
-              ))}
-            </select>
+              groups={nv75HeroExampleGroups}
+              onChange={(key) => applyExample(key as Nv75ExampleKey)}
+            />
           </label>
           <p className="muted-text" style={{ marginTop: 6 }}>
             Doplněny i rozsáhlé scénáře: více pracovišť a bonifikace §4d, kombinace SŠ/VOŠ/JŠ/DM i varianty odborného výcviku (OV).

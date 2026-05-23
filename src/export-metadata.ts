@@ -1,3 +1,4 @@
+import { APP_AUTHOR_EXPORT_ROWS } from "./calculator-ui-constants";
 import { APP_VERSION } from "./app-version";
 
 export type ExportProductKind = "pv" | "sd" | "zs" | "ss" | "nv75";
@@ -21,6 +22,21 @@ export function buildExportMetaRows(kind: ExportProductKind): readonly [string, 
     ["Export vytvořen (místní čas)", when],
     ["Metodický rámec (orientační)", METHODOLOGY[kind]],
   ];
+}
+
+/** Autorský řádek pro CSV / XLSX (sjednoceno s `APP_AUTHOR_EXPORT_ROWS`). */
+export function buildExportAuthorRows(): readonly [string, string | number][] {
+  return APP_AUTHOR_EXPORT_ROWS.map(([key, value]) => [key, value] as const);
+}
+
+/** Metadata + autor pro kontextový list Excelu (bez oddělovače). */
+export function buildExportContextRows(kind: ExportProductKind): readonly [string, string | number][] {
+  return [...buildExportMetaRows(kind), ...buildExportAuthorRows()];
+}
+
+/** Metadata + autor před datovým blokem exportu. */
+export function buildExportCsvPreamble(kind: ExportProductKind): readonly (readonly [string, string | number])[] {
+  return [...buildExportMetaRows(kind), ...buildExportAuthorRows(), EXPORT_CSV_SEPARATOR_ROW];
 }
 
 /** Rozšířené archivní řádky pro oficiální podklady (volitelně do CSV/XLSX). */

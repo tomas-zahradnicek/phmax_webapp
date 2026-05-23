@@ -335,6 +335,16 @@ function deriveSsDashboardVerdict(): DashboardVerdict | null {
   };
 }
 
+function deriveSdDashboardVerdict(sd: NonNullable<ReturnType<typeof readSdBrief>>): DashboardVerdict {
+  return {
+    tone: "ok",
+    label: "Vstupy uloženy – ověřte PHmax v modulu",
+    detail: `Účastníci ${sd.pupils}, oddělení ${sd.departments}, režim ${
+      sd.inputMode === "detail" ? "detailní" : "souhrnný"
+    }. Stejný stav jako v docku ŠD po otevření modulu.`,
+  };
+}
+
 function derivePvDashboardVerdict(pv: ReturnType<typeof summarizePvFromLs>): DashboardVerdict | null {
   if (!pv.present) return null;
   if (pv.incomplete) {
@@ -416,13 +426,7 @@ function buildDashboardRows(): DashboardRow[] {
         : "Po uložení stavu v ŠD se zde zobrazí základ vstupů.",
       namedBackups: namedCount(LS_SD_NAMED),
       lastVisit: formatDashboardProductVisit("sd"),
-      verdict: sd
-        ? {
-            tone: "ok",
-            label: "Vstupy uloženy",
-            detail: `Účastníci ${sd.pupils}, oddělení ${sd.departments} – detail PHmax v modulu ŠD.`,
-          }
-        : null,
+      verdict: sd ? deriveSdDashboardVerdict(sd) : null,
     },
     {
       id: "zs",

@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Mobilní souhrn – hlavní výsledek zůstává čitelný při posunu stránky; klepnutím přejdete k horní liště (krátké připnutí).",
-    "Nápověda u polí – ikona „i“ a legislativní odkazy fungují klepnutím na mobilu i najetím na PC.",
-    "Základní režim – přehlednější porovnání variant, dashboard s verdiktem u „Pokračovat“, upřesnění SŠ §16 u souhrnu.",
+    "Mobilní souhrn – hlavní číslo dole na obrazovce, kompaktní pruh při posunu (PV, ZŠ a další moduly).",
+    "Výběr ukázky – kompaktní panel na mobilu u ZŠ a NV75; stejný režim jako u PV, ŠD a SŠ.",
+    "Dashboard a export – sjednocené verdikty „Pokračovat“, legenda porovnání variant A/B a metadata exportu.",
   ],
 };

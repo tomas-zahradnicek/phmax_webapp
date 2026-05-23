@@ -7,13 +7,12 @@ import {
   msgConfirmDeleteNamedBackup,
 } from "../confirm-destructive";
 import { downloadTextFile, exportCsvLocalized, exportFilenameStamped } from "../export-utils";
-import { buildExportMetaRows, EXPORT_CSV_SEPARATOR_ROW } from "../export-metadata";
+import { buildExportContextRows, buildExportCsvPreamble } from "../export-metadata";
 import { createSsProductAuditProtocol } from "../phmax-product-audit";
 import { comparePhmaxProductVariants } from "../phmax-product-compare";
 import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "../phmax-product-audit-download";
 import {
   APP_AUTHOR_DISPLAY_NAME,
-  APP_AUTHOR_EMAIL,
   BROWSER_ERROR_NEXT_STEP_HINT,
   MSG_DATA_UNEXPECTED_SHAPE,
   MSG_SS_AUDIT_NEEDS_VALID_ROW,
@@ -373,11 +372,7 @@ export function usePhmaxSsUnits(
   );
 
   const handleExportCsv = useCallback(() => {
-    const rowsCsv = [
-      ...buildExportMetaRows("ss"),
-      EXPORT_CSV_SEPARATOR_ROW,
-      ...exportValueRows,
-    ];
+    const rowsCsv = [...buildExportCsvPreamble("ss"), ...exportValueRows];
     downloadTextFile(exportFilenameStamped("phmax-ss", "csv"), exportCsvLocalized(rowsCsv), "text/csv;charset=utf-8");
     setUiNotice("Export CSV byl stažen.");
   }, [exportValueRows]);
@@ -390,8 +385,7 @@ export function usePhmaxSsUnits(
       await downloadCalculatorXlsx({
         contextRows: [
           ["Aplikace (produkt)", "PHmax / PHAmax – střední školy (dílčí jednotky)"],
-          ...buildExportMetaRows("ss"),
-          ["Vytvořil", `${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`],
+          ...buildExportContextRows("ss"),
         ],
         valueRows: exportValueRows,
         filename: exportFilenameStamped("phmax-ss", "xlsx"),

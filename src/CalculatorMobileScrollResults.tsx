@@ -9,6 +9,7 @@ const MOBILE_SCROLL_PIN_MS = 5000;
 type CalculatorMobileScrollResultsProps = {
   visible: boolean;
   pinned?: boolean;
+  compact?: boolean;
   tone?: ResultAnchorTone;
   primaryLabel: string;
   primaryValue: React.ReactNode;
@@ -30,6 +31,7 @@ function scrollToWorkflowDock(): void {
 export function CalculatorMobileScrollResults({
   visible,
   pinned = false,
+  compact = true,
   tone = "neutral",
   primaryLabel,
   primaryValue,
@@ -57,12 +59,16 @@ export function CalculatorMobileScrollResults({
 
   if (!visible || typeof document === "undefined") return null;
 
+  const showBody = !compact || pinned;
+  const statusInHero = !showBody && statusBadge;
+
   const panel = (
     <aside
       className={[
         "calculator-mobile-scroll-results",
         "calculator-mobile-scroll-results--interactive",
         pinned ? "calculator-mobile-scroll-results--pinned" : "",
+        compact && !pinned ? "calculator-mobile-scroll-results--compact" : "",
         `calculator-mobile-scroll-results--${tone}`,
       ]
         .filter(Boolean)
@@ -80,9 +86,15 @@ export function CalculatorMobileScrollResults({
       >
         <p className="calculator-mobile-scroll-results__value">{primaryValue}</p>
         <p className="calculator-mobile-scroll-results__label">{primaryLabel}</p>
+        {statusInHero ? (
+          <p className={`calculator-mobile-scroll-results__status calculator-mobile-scroll-results__status--${tone}`}>
+            {statusBadge}
+          </p>
+        ) : null}
       </div>
+      {showBody ? (
       <div className="calculator-mobile-scroll-results__body">
-        {statusBadge ? (
+        {statusBadge && !statusInHero ? (
           <p className={`calculator-mobile-scroll-results__status calculator-mobile-scroll-results__status--${tone}`}>
             {statusBadge}
           </p>
@@ -98,6 +110,7 @@ export function CalculatorMobileScrollResults({
           </dl>
         ) : null}
       </div>
+      ) : null}
       <p className="calculator-mobile-scroll-results__tap-hint">
         {pinned ? "Souhrn připnut – klepnutím zobrazíte dock nahoře" : "Klepnutím zobrazíte souhrn nahoře"}
       </p>

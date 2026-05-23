@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { APP_AUTHOR_EXPORT_ROWS } from "./calculator-ui-constants";
-import { buildExportMetaRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
+import { buildExportCsvPreamble, buildExportMetaRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import { exportCsvLocalized, exportFilenameStamped } from "./export-utils";
 
 describe("Export metadata contract", () => {
@@ -17,6 +17,13 @@ describe("Export metadata contract", () => {
       expect(rows[2][0]).toBe("Metodický rámec (orientační)");
       expect(String(rows[2][1]).length).toBeGreaterThan(20);
     }
+  });
+
+  it("buildExportCsvPreamble obsahuje metadata, autora a oddělovač", () => {
+    const rows = buildExportCsvPreamble("ss");
+    expect(rows[0][0]).toBe("Verze aplikace");
+    expect(rows.some((r) => r[0] === "Vytvořil:")).toBe(true);
+    expect(rows[rows.length - 1]).toEqual(EXPORT_CSV_SEPARATOR_ROW);
   });
 
   it("CSV blok metadata + separator + author rows drží hlavičku a pořadí", () => {

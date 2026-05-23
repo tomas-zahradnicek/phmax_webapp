@@ -21,16 +21,21 @@ export function BasicComparePreview({
   emptyHint,
   metricLabel = "PHmax",
   inactive = false,
-  legend = "Aktuální stav · uložená záloha",
+  legend = "Porovnání variant",
 }: BasicComparePreviewProps) {
   if (inactive || !result || result.metrics.length < 2) {
     return (
       <div
         className="basic-compare-preview basic-compare-preview--inactive"
         role="status"
-        aria-disabled="true"
+        aria-label="Porovnání variant – neaktivní"
       >
         <p className="basic-compare-preview__title">{legend}</p>
+        <p className="basic-compare-preview__legend-keys" aria-hidden>
+          <span className="basic-compare-preview__key">A</span> aktuální stav
+          <span className="basic-compare-preview__key-divider">·</span>
+          <span className="basic-compare-preview__key basic-compare-preview__key--b">B</span> uložená záloha
+        </p>
         <p className="muted-text basic-compare-preview__inactive-hint">{emptyHint}</p>
       </div>
     );
@@ -46,16 +51,22 @@ export function BasicComparePreview({
   return (
     <div className="basic-compare-preview" role="region" aria-label="Porovnání variant">
       <p className="basic-compare-preview__title">{legend}</p>
+      <p className="basic-compare-preview__legend-keys" aria-hidden>
+        <span className="basic-compare-preview__key">A</span> aktuální
+        <span className="basic-compare-preview__key-divider">·</span>
+        <span className="basic-compare-preview__key basic-compare-preview__key--b">B</span>{" "}
+        {right.variantLabel || "záloha"}
+      </p>
       <div className="basic-compare-preview__grid">
-        <div className="basic-compare-preview__col">
-          <span className="basic-compare-preview__label">Aktuální stav</span>
+        <div className="basic-compare-preview__col basic-compare-preview__col--a">
+          <span className="basic-compare-preview__label">A · aktuální</span>
           <strong className="basic-compare-preview__value">
             {formatMetric(left.totalPrimary, " h")}
           </strong>
           <span className="muted-text basic-compare-preview__hint">{metricLabel}</span>
         </div>
-        <div className="basic-compare-preview__col">
-          <span className="basic-compare-preview__label">{right.variantLabel || "Záloha"}</span>
+        <div className="basic-compare-preview__col basic-compare-preview__col--b">
+          <span className="basic-compare-preview__label">B · {right.variantLabel || "záloha"}</span>
           <strong className="basic-compare-preview__value">
             {formatMetric(right.totalPrimary, " h")}
           </strong>

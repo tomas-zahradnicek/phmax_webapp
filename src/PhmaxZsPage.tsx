@@ -29,6 +29,8 @@ import {
 } from "./phmax-zs-logic";
 import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
 import { FieldHintButton } from "./FieldHintButton";
+import { HeroExampleSelect } from "./HeroExampleSelect";
+import { ZS_HERO_EXAMPLE_GROUPS, type ZsHeroExampleKey } from "./zs-hero-example-groups";
 import type { CalculatorMode, FormSection } from "./config/calculator-config";
 import { MODE_CONFIG, formatModeRežimStatValue } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
@@ -159,20 +161,7 @@ type PhpWizardStep = "a" | "b" | "c" | "d";
 type PhpMethodMode = "three_year_avg" | "short_period";
 type Nv75Role = "ucitel" | "reditel";
 type Nv75School = "plavecka_skola";
-type ExampleKey =
-  | ""
-  | "priloha_uplna_zs_sec16"
-  | "priloha_zs_1st_sec16"
-  | "phmax_bezna_zs"
-  | "phpmax_tri_roky"
-  | "psychiatricka_nemocnice"
-  | "smisene_tridy"
-  | "pripravna_trida"
-  | "mala_skola_pod_limitem"
-  | "skola_s_odecty_phpmax"
-  | "inkluzivni_skola"
-  | "priloha_phamax_uplna_zs_sec16_zss"
-  | "zdravotnicke_zs";
+type ExampleKey = ZsHeroExampleKey;
 type WizardChoice =
   | ""
   | "php_small"
@@ -187,26 +176,6 @@ type DataMode = "own" | "example";
 /** Viditelná legenda + doplněk k nativním tooltipům (`title`) u řádků v seznamech. */
 const ZS_GUIDE_NATIVE_TOOLTIP_LEGEND =
   "U řádků s předpisy najděte myší na položku v seznamu – prohlížeč zobrazí krátký text (atribut title). U tečkovaných citací § v textu stránky použijte stejný postup jako v záložce „Legislativa a výklad (ZŠ)“ (hover nebo Tab).";
-
-const HERO_EXAMPLE_OPTION_TITLES: Partial<Record<Exclude<ExampleKey, "">, string>> = {
-  priloha_uplna_zs_sec16: ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"],
-  priloha_zs_1st_sec16: ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"],
-  smisene_tridy:
-    "Smíšené třídy § 16 odst. 9 (obor C/01) a ZŠ speciální (B/01) – v metodice řádky B9–B10 vs. B26–B28 podle převažujícího oboru; součet dle přílohy (např. 570 h).",
-  phmax_bezna_zs: ZS_LEGIS_PARAGRAPH_TOOLTIPS["nv123-priloha1"],
-  inkluzivni_skola: `${ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"]} Kombinace běžných tříd a § 16/9; čísla se mohou lišit od modelu v příloze.`,
-  psychiatricka_nemocnice:
-    "Škola při psychiatrické nemocnici – samostatné tabulky PHmax pro 1. stupeň, 2. stupeň nebo společnou výuku; průměr často jako vyšší z aktuálního a předchozího sběru (dle zvoleného režimu).",
-  zdravotnicke_zs:
-    "ZŠ při zdravotnickém zařízení mimo psychiatrii – řádky B11–B13 metodiky ZV, pásma podle průměru žáků ve třídě.",
-  pripravna_trida:
-    "Přípravná třída ZŠ a přípravný stupeň ZŠ speciální – PHmax se stanovuje samostatně (mimo součet běžných řádků B1–B28).",
-  priloha_phamax_uplna_zs_sec16_zss: `${ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"]} ${ZS_LEGIS_PARAGRAPH_TOOLTIPS["phamax-nv123"]}`,
-  phpmax_tri_roky:
-    "PHPmax – průměrný počet žáků za tři školní roky (nebo kratší období); část žáků lze z výpočtu vyloučit dle metodiky.",
-  mala_skola_pod_limitem: "Menší škola pod limitem pro PHPmax – v metodice ZV jiná pravidla pro určení PHPmax.",
-  skola_s_odecty_phpmax: "PHPmax se silnějšími odečty žáků nezapočítávaných do průměru dle metodiky.",
-};
 
 const WIZARD_CHOICE_TITLES: Record<Exclude<WizardChoice, "">, string> = {
   php_small: "Menší škola – PHPmax se určí podle metodiky z průměrného počtu žáků a příslušných pásem.",
@@ -2265,72 +2234,15 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               <span className="field__label field__label--hero" id="zs-hero-example-label">
                 Ukázkový příklad
               </span>
-              <select
+              <HeroExampleSelect
                 id="zs-hero-example-select"
                 aria-labelledby="zs-hero-example-label"
                 aria-describedby="zs-hero-example-legend"
                 title="Ukázkové příklady z metodiky ZŠ. Najeďte na konkrétní řádek v seznamu pro stručný výklad situace a předpisů."
                 value={selectedExample}
-                onChange={(e) => loadExample(e.target.value as ExampleKey)}
-              >
-                <option value="">Vyberte ukázkový příklad…</option>
-                <optgroup label="Příloha – modelové postupy PHmax">
-                  <option
-                    value="priloha_uplna_zs_sec16"
-                    title={HERO_EXAMPLE_OPTION_TITLES.priloha_uplna_zs_sec16}
-                  >
-                    Úplná ZŠ + třídy § 16/9 (obě st., 934 h dle modelu A–D)
-                  </option>
-                  <option
-                    value="priloha_zs_1st_sec16"
-                    title={HERO_EXAMPLE_OPTION_TITLES.priloha_zs_1st_sec16}
-                  >
-                    ZŠ jen 1. stupeň + § 16/9 (92 h dle modelu A–D)
-                  </option>
-                  <option value="smisene_tridy" title={HERO_EXAMPLE_OPTION_TITLES.smisene_tridy}>
-                    Smíšené třídy § 16/9 + obory C/01 a B/01 (570 h, příloha)
-                  </option>
-                </optgroup>
-                <optgroup label="PHmax – další ukázky">
-                  <option value="phmax_bezna_zs" title={HERO_EXAMPLE_OPTION_TITLES.phmax_bezna_zs}>
-                    Běžná úplná ZŠ bez § 16/9 v datech (jen běžné třídy)
-                  </option>
-                  <option value="inkluzivni_skola" title={HERO_EXAMPLE_OPTION_TITLES.inkluzivni_skola}>
-                    Inkluzivní škola (běžné + § 16/9, jiná čísla než v příloze)
-                  </option>
-                  <option
-                    value="psychiatricka_nemocnice"
-                    title={HERO_EXAMPLE_OPTION_TITLES.psychiatricka_nemocnice}
-                  >
-                    Škola při psychiatrické nemocnici
-                  </option>
-                  <option value="zdravotnicke_zs" title={HERO_EXAMPLE_OPTION_TITLES.zdravotnicke_zs}>
-                    ZŠ při zdravotnickém zařízení (mimo psychiatrii, B11–B13)
-                  </option>
-                  <option value="pripravna_trida" title={HERO_EXAMPLE_OPTION_TITLES.pripravna_trida}>
-                    Přípravná třída
-                  </option>
-                </optgroup>
-                <optgroup label="Příloha – PHAmax (asistenti pedagoga)">
-                  <option
-                    value="priloha_phamax_uplna_zs_sec16_zss"
-                    title={HERO_EXAMPLE_OPTION_TITLES.priloha_phamax_uplna_zs_sec16_zss}
-                  >
-                    Úplná ZŠ § 16/9 + ZŠ speciální, rozlišení AD1/AD2 (474 h, ř. B35–B44 dle metodiky v5)
-                  </option>
-                </optgroup>
-                <optgroup label="PHPmax – ukázky">
-                  <option value="phpmax_tri_roky" title={HERO_EXAMPLE_OPTION_TITLES.phpmax_tri_roky}>
-                    Tříletý průměr + dílčí nezapočtení žáků
-                  </option>
-                  <option value="mala_skola_pod_limitem" title={HERO_EXAMPLE_OPTION_TITLES.mala_skola_pod_limitem}>
-                    Menší škola pod limitem PHPmax
-                  </option>
-                  <option value="skola_s_odecty_phpmax" title={HERO_EXAMPLE_OPTION_TITLES.skola_s_odecty_phpmax}>
-                    Škola s vyššími odečty žáků
-                  </option>
-                </optgroup>
-              </select>
+                groups={ZS_HERO_EXAMPLE_GROUPS}
+                onChange={(key) => loadExample(key as ExampleKey)}
+              />
               <p id="zs-hero-example-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "44rem", lineHeight: 1.5 }}>
                 {ZS_GUIDE_NATIVE_TOOLTIP_LEGEND}
               </p>

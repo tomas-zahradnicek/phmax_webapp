@@ -11,6 +11,12 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.2.3 (UX)
+
+- **Mobil:** plovoucí souhrn dole (hlavní číslo viditelné při scrollu); výběr ukázky u ZŠ a NV75.
+- **Dashboard:** sjednocené verdikty u „Pokračovat“; porovnání variant A/B v základním režimu.
+- **Export:** jednotná metadata a autor v CSV/XLSX (SŠ a společné helpery).
+
 ## Verze 0.2.2 (UX)
 
 - **Mobil:** plovoucí souhrn – hlavní číslo zůstává nahoře při posunu; nápověda u polí (ikona „i“) funguje klepnutím.
