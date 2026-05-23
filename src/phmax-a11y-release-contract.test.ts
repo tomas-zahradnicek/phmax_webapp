@@ -9,10 +9,12 @@ function readSource(relPath: string) {
 }
 
 describe("UX contract: release notes + přístupnost", () => {
-  it("Co je nového 0.2.1 – footer odkaz bez automatického popupu", () => {
+  it("Co je nového 0.2.2 – footer odkaz bez automatického popupu", () => {
     expect(readSource("src/app-release-notes.ts")).toContain("PHMAX_CURRENT_RELEASE_NOTES");
-    expect(readSource("src/app-release-notes.ts")).toContain("Mobilní souhrn");
+    expect(readSource("src/app-release-notes.ts")).toContain("ikona „i“");
+    expect(readSource("src/FieldHintButton.tsx")).toContain("FieldHintButton");
     expect(readSource("src/AuthorCreditFooter.tsx")).toContain("openWhatsNew");
+    expect(readSource("src/CalculatorMobileScrollResults.tsx")).toContain("calculator-mobile-scroll-results__hero");
     const whatsNew = readSource("src/AppWhatsNewContext.tsx");
     expect(whatsNew).toContain("openWhatsNew");
     expect(whatsNew).not.toContain("shouldAutoOpenWhatsNew");

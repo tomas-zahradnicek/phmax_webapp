@@ -10,6 +10,7 @@ import { eligibleAdditionalWorkplacesForRow, normalizeNv75UiRow, type Nv75Deputy
 import { readNamedSnapshotsFromLs } from "./zs-named-snapshots";
 import { PHMAX_SS_UNITS_STORAGE_KEY } from "./ss/phmax-ss-constants";
 import { deriveSsUnitsPreview } from "./ss/phmax-ss-units-derive";
+import { countPar16MarkedRows, PHMAX_SS_PAR16_DOCK_HINT } from "./ss/phmax-ss-par16";
 import { revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
 import { formatDashboardProductVisit, readLastActiveProduct } from "./phmax-dashboard-visits";
@@ -279,6 +280,12 @@ type DashboardKpi = {
   value: string;
 };
 
+type DashboardVerdict = {
+  label: string;
+  detail: string;
+  tone: "ok" | "warning" | "danger" | "neutral";
+};
+
 type DashboardRow = {
   id: Exclude<ProductView, "dash">;
   title: string;
@@ -289,7 +296,76 @@ type DashboardRow = {
   lastVisit: string;
   primaryKpi: DashboardKpi;
   secondaryKpis: DashboardKpi[];
+  verdict: DashboardVerdict | null;
 };
+
+function deriveSsDashboardVerdict(): DashboardVerdict | null {
+  const raw = typeof localStorage === "undefined" ? null : localStorage.getItem(PHMAX_SS_UNITS_STORAGE_KEY);
+  const rows = parseSsDraftRows(raw);
+  if (rows.length === 0) return null;
+  const preview = deriveSsUnitsPreview(rows);
+  const errorRows = preview.filter((p) => !p.skipped && "error" in p).length;
+  if (errorRows > 0) {
+    return {
+      tone: "danger",
+      label: "Překročení pravidel vstupu",
+      detail: `${errorRows} řádků obsahuje neplatnou kombinaci nebo hodnotu.`,
+    };
+  }
+  const skippedRows = preview.filter((p) => p.skipped).length;
+  if (skippedRows > 0) {
+    return {
+      tone: "warning",
+      label: "Na hraně: chybí povinné údaje",
+      detail: `U ${skippedRows} řádků zatím chybí podklady pro výpočet.`,
+    };
+  }
+  const par16Rows = countPar16MarkedRows(rows);
+  if (par16Rows > 0) {
+    return {
+      tone: "warning",
+      label: "§ 16/9 – výpočet pásem metodiky",
+      detail: `${par16Rows} řádků § 16/9. ${PHMAX_SS_PAR16_DOCK_HINT}`,
+    };
+  }
+  return {
+    tone: "ok",
+    label: "Vstupy jsou v limitu orientačního modelu",
+    detail: "Řádky mají platný výpočet PHmax (stejný stav jako v docku modulu).",
+  };
+}
+
+function derivePvDashboardVerdict(pv: ReturnType<typeof summarizePvFromLs>): DashboardVerdict | null {
+  if (!pv.present) return null;
+  if (pv.incomplete) {
+    return {
+      tone: "warning",
+      label: "Na hraně: neúplný součet",
+      detail: "Některá pracoviště nemají vyplněné povinné údaje – součet PHmax může být neúplný.",
+    };
+  }
+  return {
+    tone: "ok",
+    label: "Vstupy jsou v limitu orientačního modelu",
+    detail: "Pracoviště mají platný výpočet PHmax (stejný stav jako v docku modulu).",
+  };
+}
+
+function deriveNv75DashboardVerdict(nv: ReturnType<typeof readNv75State>): DashboardVerdict | null {
+  if (nv.rowCount === 0 && nv.bankTotal == null) return null;
+  if (nv.bankTotal == null) {
+    return {
+      tone: "warning",
+      label: "Banka nelze spočítat",
+      detail: "Zkontrolujte řádky a praktickou složku v modulu NV75.",
+    };
+  }
+  return {
+    tone: "ok",
+    label: nv.rule ? `Pravidlo ${nv.rule}` : "Banka odpočtů",
+    detail: `Banka odpočtů celkem ${nv.bankTotal} h/týden (náhled z uloženého stavu).`,
+  };
+}
 
 function buildDashboardRows(): DashboardRow[] {
   const pv = summarizePvFromLs();
@@ -320,6 +396,7 @@ function buildDashboardRows(): DashboardRow[] {
         : "Po prvním uložení v PV se zde objeví orientační PHmax.",
       namedBackups: namedCount(LS_PV_NAMED),
       lastVisit: formatDashboardProductVisit("pv"),
+      verdict: derivePvDashboardVerdict(pv),
     },
     {
       id: "sd",
@@ -339,6 +416,13 @@ function buildDashboardRows(): DashboardRow[] {
         : "Po uložení stavu v ŠD se zde zobrazí základ vstupů.",
       namedBackups: namedCount(LS_SD_NAMED),
       lastVisit: formatDashboardProductVisit("sd"),
+      verdict: sd
+        ? {
+            tone: "ok",
+            label: "Vstupy uloženy",
+            detail: `Účastníci ${sd.pupils}, oddělení ${sd.departments} – detail PHmax v modulu ŠD.`,
+          }
+        : null,
     },
     {
       id: "zs",
@@ -360,6 +444,20 @@ function buildDashboardRows(): DashboardRow[] {
           : "Zatím nebyl uložen žádný stav ZŠ v tomto prohlížeči.",
       namedBackups: zsNamed,
       lastVisit: formatDashboardProductVisit("zs"),
+      verdict:
+        zsTotals != null
+          ? {
+              tone: "ok",
+              label: "Souhrn z autosave",
+              detail: `PHmax ${zsTotals.totalPhmax}, PHAmax ${zsTotals.totalPha}, PHPmax ${zsTotals.totalPhp} (záložka ${String(zsTotals.tab ?? "phmax")}).`,
+            }
+          : zsSnapshotHasAnyInput()
+            ? {
+                tone: "warning",
+                label: "Stav uložen",
+                detail: "Otevřete ZŠ – po výpočtu se v docku zobrazí aktuální verdikt.",
+              }
+            : null,
     },
     {
       id: "ss",
@@ -382,6 +480,7 @@ function buildDashboardRows(): DashboardRow[] {
         : "Po vyplnění SŠ se zde zobrazí orientační PHmax ze stejné logiky jako ve formuláři.",
       namedBackups: 0,
       lastVisit: formatDashboardProductVisit("ss"),
+      verdict: deriveSsDashboardVerdict(),
     },
     {
       id: "nv75",
@@ -404,6 +503,7 @@ function buildDashboardRows(): DashboardRow[] {
           : "Po uložení vstupů v NV75 se zobrazí banka odpočtů a pravidlo §4b.",
       namedBackups: namedCount(LS_NV75_NAMED),
       lastVisit: formatDashboardProductVisit("nv75"),
+      verdict: deriveNv75DashboardVerdict(nv),
     },
   ];
   return rows;
@@ -492,8 +592,19 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               Pokračovat v {DASH_CALC_LABEL[continueRow.id]}
             </h2>
             <p className="muted-text" style={{ marginBottom: 12 }}>
-              Naposledy jste pracovali v modulu <strong>{continueRow.title}</strong>. Níže je rychlý náhled z uloženého stavu v tomto prohlížeči.
+              Naposledy jste pracovali v modulu <strong>{continueRow.title}</strong>. Níže je rychlý náhled z uloženého stavu a poslední verdikt z kontextu výpočtu (dock).
             </p>
+            {continueRow.verdict ? (
+              <div
+                className={`dash-continue-card__verdict dash-continue-card__verdict--${continueRow.verdict.tone}`}
+                role="status"
+              >
+                <strong>{continueRow.verdict.label}</strong>
+                <p className="muted-text" style={{ margin: 0 }}>
+                  {continueRow.verdict.detail}
+                </p>
+              </div>
+            ) : null}
             <div className="dash-continue-card__kpi" aria-label="Hlavní metrika modulu">
               <span className="dash-continue-card__kpi-label">{continueRow.primaryKpi.label}</span>
               <strong className="dash-continue-card__kpi-value">{continueRow.primaryKpi.value}</strong>

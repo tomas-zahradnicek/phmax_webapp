@@ -67,7 +67,9 @@ Stejný obor, **večerní forma** – očekávaný součet PHmax **30** (koefici
 - Očekávejte:
   - varování `PAR16_CALC_PREVIEW_ONLY` / text o neúplném výpočtu,
   - stav řádku **§ 16 – orientačně** (ne čisté „OK“),
-  - verdikt stránky s upozorněním, pokud je § 16 řádků více.
+  - verdikt stránky s upozorněním, pokud je § 16 řádků více,
+  - u řádku v přehledu výsledků větu z konstanty `PHMAX_SS_PAR16_ROW_SUMMARY` (stejný smysl jako v kódu),
+  - v docku **Kontext výpočtu** upozornění `PHMAX_SS_PAR16_DOCK_HINT` (§ 16 je náhled, ne plný výpočet MŠMT).
 
 **Neověřujte** shodu PHmax s plnou metodikou § 16 – to záměrně není implementováno.
 
@@ -96,13 +98,15 @@ npm run check:readme-sync
 
 ## Záznam výsledku (šablona)
 
+Vyplní **tester** po ručním ověření (scénář F vyžaduje reálná data školy – bez nich ponechte „Neověřeno“).
 
-| Datum | Tester | Škola / scénář  | Výsledek            | Poznámka                                                              |
-| ----- | ------ | --------------- | ------------------- | --------------------------------------------------------------------- |
-|       |        | A – jednoobor   | OK / NOK            |                                                                       |
-|       |        | C – PrŠ PHAmax  | OK / NOK            |                                                                       |
-|       |        | E – § 16        | OK (varování) / NOK |                                                                       |
-|       |        | F – reálná data | OK / NOK            | F – reálná škola | Neověřeno | Nemám k dispozici reálná vstupní data. |
+
+| Datum | Tester | Škola / scénář  | Výsledek             | Poznámka                                        |
+| ----- | ------ | --------------- | -------------------- | ----------------------------------------------- |
+|       |        | A – jednoobor   | OK / NOK             |                                                 |
+|       |        | C – PrŠ PHAmax  | OK / NOK             |                                                 |
+|       |        | E – § 16        | OK (varování) / NOK  | Ověřit větu u řádku + dock hint                 |
+|       |        | F – reálná data | Neověřeno / OK / NOK | Bez reálných vstupů školy zatím neověřitelné     |
 
 
 **NOK** = rozdíl oproti metodice nebo škole; přiložte screenshot řádku + rozbalení „Proč?“.

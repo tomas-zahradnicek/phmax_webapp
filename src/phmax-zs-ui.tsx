@@ -1,4 +1,5 @@
 import React from "react";
+import { FieldHintButton } from "./FieldHintButton";
 
 const INPUT_OUTPUT_LEGEND_TEXT =
   "Oranžový okraj značí pole k vyplnění; šedý levý pruh u karty značí dopočítanou hodnotu, kterou nelze přímo měnit.";
@@ -35,11 +36,7 @@ function formatResultValue(value: React.ReactNode): React.ReactNode {
 }
 
 function HintBadge({ text }: { text: string }) {
-  return (
-    <span className="help-hint help-hint--ui" title={text} aria-label={text}>
-      i
-    </span>
-  );
+  return <FieldHintButton text={text} />;
 }
 
 function inferMethodStep(label: string, tone: NonNullable<ResultCardProps["tone"]>): MethodStep {

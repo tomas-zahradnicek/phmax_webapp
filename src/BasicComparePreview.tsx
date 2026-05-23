@@ -5,6 +5,9 @@ type BasicComparePreviewProps = {
   result: CompareProductVariantsResult | null;
   emptyHint: string;
   metricLabel?: string;
+  /** Záloha není vybraná – zobrazí neaktivní stav místo prázdného boxu. */
+  inactive?: boolean;
+  legend?: string;
 };
 
 function formatMetric(value: number | null, suffix = ""): string {
@@ -17,11 +20,18 @@ export function BasicComparePreview({
   result,
   emptyHint,
   metricLabel = "PHmax",
+  inactive = false,
+  legend = "Aktuální stav · uložená záloha",
 }: BasicComparePreviewProps) {
-  if (!result || result.metrics.length < 2) {
+  if (inactive || !result || result.metrics.length < 2) {
     return (
-      <div className="basic-compare-preview basic-compare-preview--empty" role="status">
-        <p className="muted-text">{emptyHint}</p>
+      <div
+        className="basic-compare-preview basic-compare-preview--inactive"
+        role="status"
+        aria-disabled="true"
+      >
+        <p className="basic-compare-preview__title">{legend}</p>
+        <p className="muted-text basic-compare-preview__inactive-hint">{emptyHint}</p>
       </div>
     );
   }
@@ -35,7 +45,7 @@ export function BasicComparePreview({
 
   return (
     <div className="basic-compare-preview" role="region" aria-label="Porovnání variant">
-      <p className="basic-compare-preview__title">Porovnání s uloženou zálohou</p>
+      <p className="basic-compare-preview__title">{legend}</p>
       <div className="basic-compare-preview__grid">
         <div className="basic-compare-preview__col">
           <span className="basic-compare-preview__label">Aktuální stav</span>

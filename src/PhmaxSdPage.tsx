@@ -1384,10 +1384,11 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             workflowSteps={sdBasicWizardActive ? [] : sdWorkflow.steps}
             viewMode={viewMode}
             footer={
-              viewMode === "basic" && selectedNamedId ? (
+              viewMode === "basic" ? (
                 <BasicComparePreview
                   result={sdComparePreview}
-                  emptyHint="Vyberte pojmenovanou zálohu pro rychlé porovnání PHmax."
+                  inactive={!selectedNamedId}
+                  emptyHint="Vyberte pojmenovanou zálohu v horní liště pro rychlé porovnání PHmax."
                 />
               ) : null
             }

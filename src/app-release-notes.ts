@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Nápověda – stručné pokyny v horní liště a 3krokový průvodce v základním režimu u PV, ŠD, SŠ a NV75.",
-    "Mobilní souhrn – při posunu stránky zobrazí plovoucí panel s výsledkem; klepnutím přejdete k docku (krátké připnutí).",
-    "Tisk – vylepšené tiskové výstupy a patička dokumentu s autorským kreditem.",
+    "Mobilní souhrn – hlavní výsledek zůstává čitelný při posunu stránky; klepnutím přejdete k horní liště (krátké připnutí).",
+    "Nápověda u polí – ikona „i“ a legislativní odkazy fungují klepnutím na mobilu i najetím na PC.",
+    "Základní režim – přehlednější porovnání variant, dashboard s verdiktem u „Pokračovat“, upřesnění SŠ §16 u souhrnu.",
   ],
 };

@@ -73,25 +73,31 @@ export function CalculatorMobileScrollResults({
       onClick={handleActivate}
       onKeyDown={handleKeyDown}
     >
-      <div className="calculator-mobile-scroll-results__head">
+      <div
+        className="calculator-mobile-scroll-results__hero"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
         <p className="calculator-mobile-scroll-results__value">{primaryValue}</p>
         <p className="calculator-mobile-scroll-results__label">{primaryLabel}</p>
       </div>
-      {statusBadge ? (
-        <p className={`calculator-mobile-scroll-results__status calculator-mobile-scroll-results__status--${tone}`}>
-          {statusBadge}
-        </p>
-      ) : null}
-      {stats.length > 0 ? (
-        <dl className="calculator-mobile-scroll-results__stats">
-          {stats.map((stat) => (
-            <div key={stat.label} className="calculator-mobile-scroll-results__stat">
-              <dt>{stat.label}</dt>
-              <dd title={stat.title}>{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
+      <div className="calculator-mobile-scroll-results__body">
+        {statusBadge ? (
+          <p className={`calculator-mobile-scroll-results__status calculator-mobile-scroll-results__status--${tone}`}>
+            {statusBadge}
+          </p>
+        ) : null}
+        {stats.length > 0 ? (
+          <dl className="calculator-mobile-scroll-results__stats">
+            {stats.map((stat) => (
+              <div key={stat.label} className="calculator-mobile-scroll-results__stat">
+                <dt>{stat.label}</dt>
+                <dd title={stat.title}>{stat.value}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
+      </div>
       <p className="calculator-mobile-scroll-results__tap-hint">
         {pinned ? "Souhrn připnut – klepnutím zobrazíte dock nahoře" : "Klepnutím zobrazíte souhrn nahoře"}
       </p>

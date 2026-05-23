@@ -28,6 +28,7 @@ import {
   GymRow,
 } from "./phmax-zs-logic";
 import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
+import { FieldHintButton } from "./FieldHintButton";
 import type { CalculatorMode, FormSection } from "./config/calculator-config";
 import { MODE_CONFIG, formatModeRežimStatValue } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
@@ -264,11 +265,7 @@ function getNv75Reference(role: Nv75Role, school: Nv75School) {
 }
 
 function HelpHint({ text }: { text: string }) {
-  return (
-    <span title={text} className="help-hint" aria-label={text}>
-      i
-    </span>
-  );
+  return <FieldHintButton text={text} />;
 }
 
 function SectionLead({ children }: { children: React.ReactNode }) {

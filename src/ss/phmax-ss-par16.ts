@@ -9,6 +9,10 @@ export const PHMAX_SS_PAR16_CHECKBOX_HINT =
 export const PHMAX_SS_PAR16_ROW_SUMMARY =
   "Aplikace spočítala orientační PHmax dle pásem metodiky § 4 bod 4; ověřte kategorii oborů, formu studia a plný postup v metodice MŠMT před oficiálním výkazem.";
 
+/** Upozornění v docku Kontext výpočtu, pokud jsou řádky § 16/9 (stejný tón jako u řádků). */
+export const PHMAX_SS_PAR16_DOCK_HINT =
+  "Řádky § 16 odst. 9: zobrazený PHmax je orientační náhled dle pásem metodiky, ne plný výpočet podle celého postupu MŠMT.";
+
 const PAR16_CLASS_TYPE_RE =
   /§\s*16|par\.?\s*16|odst\.?\s*9|podle\s+§\s*16|zřízen[áa]\s+podle\s+§\s*16/i;
 

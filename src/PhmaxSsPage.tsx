@@ -108,7 +108,7 @@ import { usePhmaxSsUnits, type SsNamedSnapshot } from "./ss/use-phmax-ss-units";
 import { comparePhmaxProductVariants } from "./phmax-product-compare";
 import { createSsProductAuditProtocol } from "./phmax-product-audit";
 import { phmaxSsDataset } from "./ss/phmax-ss-dataset";
-import { countPar16MarkedRows } from "./ss/phmax-ss-par16";
+import { countPar16MarkedRows, PHMAX_SS_PAR16_DOCK_HINT } from "./ss/phmax-ss-par16";
 import { buildSsAuditProtocolInput } from "./ss/phmax-ss-units-derive";
 
 const SS_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
@@ -390,6 +390,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           minimumFractionDigits: 0,
           maximumFractionDigits: 2,
         });
+  const ssPar16RowCount = countPar16MarkedRows(ss.rows);
   const ssVerdict = (() => {
     const errorRows = ss.preview.filter((p) => !p.skipped && "error" in p).length;
     const skippedRows = ss.preview.filter((p) => p.skipped).length;
@@ -407,7 +408,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         detail: `U ${skippedRows} řádků zatím chybí podklady pro výpočet (typicky kód oboru, průměr žáků nebo počet tříd).`,
       };
     }
-    const par16Rows = countPar16MarkedRows(ss.rows);
+    const par16Rows = ssPar16RowCount;
     if (par16Rows > 0) {
       return {
         tone: "warning" as const,
@@ -1358,11 +1359,17 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
             workflowSteps={ssBasicWizardActive ? [] : ssWorkflow.steps}
             viewMode={viewMode}
             footer={
-              viewMode === "basic" && ss.selectedNamedId ? (
-                <BasicComparePreview
-                  result={ssComparePreview}
-                  emptyHint="Vyberte pojmenovanou zálohu pro rychlé porovnání PHmax."
-                />
+              viewMode === "basic" ? (
+                <>
+                  {ssPar16RowCount > 0 ? (
+                    <p className="workflow-dock__footnote muted-text">{PHMAX_SS_PAR16_DOCK_HINT}</p>
+                  ) : null}
+                  <BasicComparePreview
+                    result={ssComparePreview}
+                    inactive={!ss.selectedNamedId}
+                    emptyHint="Vyberte pojmenovanou zálohu v horní liště pro rychlé porovnání PHmax."
+                  />
+                </>
               ) : null
             }
             actions={[

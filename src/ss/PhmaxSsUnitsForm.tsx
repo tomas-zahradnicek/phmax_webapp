@@ -13,6 +13,7 @@ import {
   namedBackupsMicrocopy,
 } from "../calculator-ui-constants";
 import { ScrollGrabRegion } from "../ScrollGrabRegion";
+import { FieldHintButton } from "../FieldHintButton";
 import { IconJson } from "../HeroActionIconButton";
 import {
   PHMAX_SS_MAX_NAMED_SNAPSHOTS,
@@ -176,13 +177,9 @@ function PhmaxSsUnitsFormView({
           <label className="field" style={{ marginTop: 0 }}>
             <span className="field__label">
               {NAMED_BACKUPS_NAME_LABEL}
-              <span
-                title={namedBackupsMicrocopy(PHMAX_SS_MAX_NAMED_SNAPSHOTS, "řádky evidence SŠ v této sekci")}
-                aria-label={namedBackupsMicrocopy(PHMAX_SS_MAX_NAMED_SNAPSHOTS, "řádky evidence SŠ v této sekci")}
-                className="help-hint"
-              >
-                i
-              </span>
+              <FieldHintButton
+                text={namedBackupsMicrocopy(PHMAX_SS_MAX_NAMED_SNAPSHOTS, "řádky evidence SŠ v této sekci")}
+              />
             </span>
             <input
               type="text"
