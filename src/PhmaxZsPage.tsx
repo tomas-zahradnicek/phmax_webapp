@@ -1721,6 +1721,17 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   }, [tab]);
 
   const validationHighlight = validationIssues.length > 0;
+  const zsInputBannerItems = useMemo(
+    () => [
+      ...validationIssues.map((item) => ({
+        label: item.label,
+        onFix: () => goToSection(item.section),
+      })),
+      ...warnings.map((w) => ({ label: w })),
+    ],
+    [validationIssues, warnings],
+  );
+  const showZsInputBanner = zsInputBannerItems.length > 0;
 
   useEffect(() => {
     try {
@@ -2575,11 +2586,11 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         </section>
         ) : null}
 
-        {validationHighlight && validationIssues[0] ? (
+        {showZsInputBanner ? (
           <CalculatorInputIssueBanner
             label="Pro smysluplný výpočet doplňte chybějící údaje"
-            detail={validationIssues[0].label}
-            onFix={() => goToSection(firstIssueSection)}
+            items={zsInputBannerItems}
+            onFix={firstIssueSection ? () => goToSection(firstIssueSection) : undefined}
           />
         ) : null}
 
@@ -2673,17 +2684,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           </div>
         </section>
 
-        {(warnings.length > 0 || validationIssues.length > 0) && (
-          <section className="card warning card--warning">
-            <h2>Kontrola vstupů</h2>
-            {validationIssues.map((item, i) => (
-              <div key={`v-${i}`} className="warning-row">
-                • {item.label} <button type="button" className="status-link" onClick={() => goToSection(item.section)}>Přejít</button>
-              </div>
-            ))}
-            {warnings.map((w, i) => <div key={`w-${i}`}>• {w}</div>)}
-          </section>
-        )}
 
         {tab === "phmax" && (
           <div className="stack">

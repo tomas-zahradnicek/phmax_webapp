@@ -7404,6 +7404,30 @@ select:focus {
     align-self: center;
   }
 
+  .app-shell--validation-hint .calculator-input-issue-banner {
+    position: sticky;
+    top: 0;
+    z-index: 46;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+  }
+
+  .calculator-input-issue-banner__list {
+    margin: 6px 0 0;
+    padding-left: 1.15rem;
+    font-size: 0.84rem;
+    line-height: 1.45;
+    color: #78350f;
+  }
+
+  .calculator-input-issue-banner__list-item {
+    margin: 4px 0;
+  }
+
+  .calculator-input-issue-banner__list-action {
+    margin-left: 6px;
+    font-size: inherit;
+  }
+
   .dash-continue-card__fill-status {
     margin: 0 0 10px;
     font-size: 0.95rem;

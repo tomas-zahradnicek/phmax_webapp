@@ -11,6 +11,13 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.2.4 (UX)
+
+- **Mobil:** dynamická výška plovoucího souhrnu; tlačítko Skrýt/Zobrazit souhrn; záložka Obsah sedí podle skutečné výšky panelu.
+- **Vstupy:** jednotný banner nahoře s „Přejít k chybě“ (PV, ŠD, ZŠ, SŠ, NV75); u ZŠ sloučeno s původní Kontrolou vstupů, banner je sticky.
+- **Dashboard:** stavy „Ještě nevyplněno“ / „Vstupy v pořádku“; průvodce doplněn o mobilní tip (souhrn dole + Obsah).
+- **Texty:** bez technického žargonu (localStorage, cesty ke zdrojům).
+
 ## Verze 0.2.3 (UX)
 
 - **Mobil:** plovoucí souhrn dole (hlavní číslo viditelné při scrollu); výběr ukázky u ZŠ a NV75.
@@ -57,6 +64,7 @@ npm run test:golden
   - `npm run check:ci-summary-manifest`
   - `npm run check:golden-manifest`
   - `npm run check:ci-guards-manifest`
+- Ruční smoke na mobilu (cca 5 min): [docs/mobile-smoke-checklist.md](docs/mobile-smoke-checklist.md)
 
 ## Struktura (zkráceně)
 

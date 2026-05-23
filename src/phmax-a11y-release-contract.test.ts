@@ -9,9 +9,9 @@ function readSource(relPath: string) {
 }
 
 describe("UX contract: release notes + přístupnost", () => {
-  it("Co je nového 0.2.3 – footer odkaz bez automatického popupu", () => {
+  it("Co je nového – footer odkaz bez automatického popupu", () => {
     expect(readSource("src/app-release-notes.ts")).toContain("PHMAX_CURRENT_RELEASE_NOTES");
-    expect(readSource("src/app-release-notes.ts")).toContain("ZŠ a NV75");
+    expect(readSource("src/app-release-notes.ts")).toContain("Skrýt/Zobrazit souhrn");
     expect(readSource("src/zs-hero-example-groups.ts")).toContain("ZS_HERO_EXAMPLE_GROUPS");
     expect(readSource("src/FieldHintButton.tsx")).toContain("FieldHintButton");
     expect(readSource("src/AuthorCreditFooter.tsx")).toContain("openWhatsNew");
@@ -45,6 +45,9 @@ describe("UX contract: release notes + přístupnost", () => {
     expect(readSource("src/PageTableOfContents.tsx")).toContain("aria-controls");
     expect(readSource("src/calculator-section-focus.ts")).toContain("scrollToFirstNeedsAttentionSection");
     expect(readSource("src/PhmaxPvPage.tsx")).toContain("Přejít k chybě");
+    expect(readSource("src/PhmaxZsPage.tsx")).not.toContain("Kontrola vstupů");
+    expect(readSource("src/styles.css")).toContain(".app-shell--validation-hint .calculator-input-issue-banner");
+    expect(fs.existsSync(path.resolve(repoRoot, "docs/mobile-smoke-checklist.md"))).toBe(true);
     expect(fs.existsSync(path.resolve(repoRoot, "docs/keyboard-a11y-checklist.md"))).toBe(true);
   });
 });

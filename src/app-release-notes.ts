@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Mobilní souhrn – hlavní číslo dole na obrazovce, kompaktní pruh při posunu (PV, ZŠ a další moduly).",
-    "Výběr ukázky – kompaktní panel na mobilu u ZŠ a NV75; stejný režim jako u PV, ŠD a SŠ.",
-    "Dashboard a export – sjednocené verdikty „Pokračovat“, legenda porovnání variant A/B a metadata exportu.",
+    "Mobilní souhrn – dynamická výška podle obsahu, tlačítko Skrýt/Zobrazit souhrn a záložka Obsah nad panelem.",
+    "Neúplné vstupy – jednotný banner nahoře s odkazem Přejít k chybě (PV, ŠD, ZŠ, SŠ, NV75); u ZŠ bez duplicitní sekce Kontrola vstupů.",
+    "Dashboard – stavy Ještě nevyplněno / Vstupy v pořádku; průvodce doplněn o mobilní tip (souhrn dole + Obsah).",
   ],
 };
