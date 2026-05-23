@@ -35,7 +35,8 @@ import {
   SsWhyPhmaxPanel,
 } from "./SsWhyPanels";
 import { CollapsibleSection } from "../CollapsibleSection";
-import { sanitizeIntegerInputString } from "../integer-input";
+import { sanitizeIntegerInputString, selectInputContents } from "../integer-input";
+import { sanitizeNumericInputString } from "../numeric-input";
 import { usePhmaxSsUnits } from "./use-phmax-ss-units";
 import type { PhmaxSsUnitsModel } from "./use-phmax-ss-units";
 
@@ -292,8 +293,11 @@ function PhmaxSsUnitsFormView({
                           type="text"
                           className="input"
                           inputMode="decimal"
-                          value={row.averageStudents}
-                          onChange={(e) => updateRow(row.id, { averageStudents: e.target.value })}
+                          value={sanitizeNumericInputString(row.averageStudents)}
+                          onFocus={selectInputContents}
+                          onChange={(e) =>
+                            updateRow(row.id, { averageStudents: sanitizeNumericInputString(e.target.value) })
+                          }
                           aria-label={`${sec.colAvgStudents}, řádek ${row.id}`}
                         />
                         <input
@@ -360,6 +364,7 @@ function PhmaxSsUnitsFormView({
                           className="input"
                           inputMode="numeric"
                           value={sanitizeIntegerInputString(row.oborCountInClass)}
+                          onFocus={selectInputContents}
                           onChange={(e) =>
                             updateRow(row.id, { oborCountInClass: sanitizeIntegerInputString(e.target.value) })
                           }

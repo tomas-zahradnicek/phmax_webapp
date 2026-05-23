@@ -1,12 +1,13 @@
 import React, { useState } from "react";
+import { selectInputContents } from "./integer-input";
 import {
-  clampInteger,
-  formatIntegerInputDisplay,
-  parseIntegerInput,
-  selectInputContents,
-} from "./integer-input";
+  clampNumber,
+  formatNumericInputDisplay,
+  parseNumericInput,
+  sanitizeNumericInputString,
+} from "./numeric-input";
 
-type IntegerInputProps = Omit<
+type NumericInputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   "type" | "value" | "onChange" | "inputMode"
 > & {
@@ -18,8 +19,8 @@ type IntegerInputProps = Omit<
   emptyWhenZero?: boolean;
 };
 
-/** Vstup pro celá čísla bez úvodních nul (např. 20 místo 020). */
-export function IntegerInput({
+/** Vstup pro desetinná čísla bez úvodních nul v celé části (např. 10 místo 010). */
+export function NumericInput({
   value,
   onChange,
   min,
@@ -30,19 +31,16 @@ export function IntegerInput({
   onFocus,
   onBlur,
   ...rest
-}: IntegerInputProps) {
+}: NumericInputProps) {
   const [draft, setDraft] = useState<string | null>(null);
-  const formatted =
-    emptyWhenZero && (!Number.isFinite(value) || value === 0)
-      ? ""
-      : formatIntegerInputDisplay(value);
+  const formatted = formatNumericInputDisplay(value, emptyWhenZero);
   const displayValue = draft ?? formatted;
 
   return (
     <input
       {...rest}
       type="text"
-      inputMode="numeric"
+      inputMode="decimal"
       autoComplete="off"
       disabled={disabled}
       className={className}
@@ -60,10 +58,10 @@ export function IntegerInput({
         onBlur?.(event);
       }}
       onChange={(event) => {
-        const raw = event.target.value.replace(/[^\d]/g, "");
-        setDraft(raw);
-        if (raw === "") return;
-        onChange(clampInteger(parseIntegerInput(raw), min, max));
+        const sanitized = sanitizeNumericInputString(event.target.value);
+        setDraft(sanitized);
+        if (sanitized === "") return;
+        onChange(clampNumber(parseNumericInput(sanitized), min, max));
       }}
     />
   );

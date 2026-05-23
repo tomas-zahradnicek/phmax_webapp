@@ -1,6 +1,7 @@
 import React from "react";
 import { FieldHintButton } from "./FieldHintButton";
 import { IntegerInput } from "./IntegerInput";
+import { NumericInput } from "./NumericInput";
 import { isIntegerNumberStep } from "./integer-input";
 
 const INPUT_OUTPUT_LEGEND_TEXT =
@@ -144,20 +145,14 @@ export function NumberField({
             onChange={onChange}
           />
         ) : (
-          <input
+          <NumericInput
             className={`number-field__input${isEmptyLikeZero ? " is-empty" : ""}${disabled ? " is-disabled" : ""}`}
-            type="number"
-            inputMode="decimal"
             min={min}
             max={max}
-            step={step}
             disabled={disabled}
             value={value}
-            onChange={(e) => {
-              const raw = e.target.value;
-              const next = raw === "" ? 0 : Number(raw);
-              onChange(Number.isFinite(next) ? next : 0);
-            }}
+            emptyWhenZero
+            onChange={onChange}
           />
         )}
       </div>

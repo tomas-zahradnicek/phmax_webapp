@@ -1,3 +1,18 @@
+import type { FocusEvent } from "react";
+
+/** Po focusu označí celý obsah – nová číslice nahradí hodnotu (2 místo 12). */
+export function selectInputContents(event: FocusEvent<HTMLInputElement>): void {
+  const el = event.currentTarget;
+  requestAnimationFrame(() => {
+    el.select();
+    try {
+      el.setSelectionRange(0, el.value.length);
+    } catch {
+      // některé prohlížeče / stavy pole to nepodporují
+    }
+  });
+}
+
 /** Parsuje zadaný text na nezáporné celé číslo (bez úvodních nul). */
 export function parseIntegerInput(raw: string): number {
   const digits = raw.replace(/\D/g, "");

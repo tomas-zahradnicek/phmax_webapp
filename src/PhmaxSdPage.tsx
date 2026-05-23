@@ -1483,6 +1483,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 {manualDepts ? (
                   <NumberField
                     label="Počet běžných oddělení školní družiny"
+                    min={1}
                     value={departments}
                     onChange={(v) => setDepartments(Math.max(1, Math.round(v)))}
                   />
