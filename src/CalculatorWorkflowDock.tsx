@@ -235,11 +235,13 @@ export function CalculatorWorkflowDock({
         onActivate={handleMobileScrollActivate}
       />
       <div
-      id={CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID}
-      className={["calculator-workspace-dock__card workflow-dock", `workflow-dock--${tone}`, className]
-        .filter(Boolean)
-        .join(" ")}
-    >
+        id={CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID}
+        role="region"
+        aria-label={dockTitle}
+        className={["calculator-workspace-dock__card workflow-dock", `workflow-dock--${tone}`, className]
+          .filter(Boolean)
+          .join(" ")}
+      >
       <p className="calculator-workspace-dock__title">{dockTitle}</p>
       {header ? <div className="workflow-dock__header">{header}</div> : null}
       {isWideDock ? (
@@ -250,7 +252,11 @@ export function CalculatorWorkflowDock({
           open={mobileBodyOpen}
           onToggle={(e) => setMobileBodyOpen(e.currentTarget.open)}
         >
-          <summary ref={mobileFoldSummaryRef} className="workflow-dock__mobile-fold-summary">
+          <summary
+            ref={mobileFoldSummaryRef}
+            className="workflow-dock__mobile-fold-summary"
+            aria-label={`${dockTitle}: ${primaryLabel} ${primaryValue}. ${verdictLabel}. Rozbalit nebo sbalit.`}
+          >
             <span className="workflow-dock__mobile-fold-label">{primaryLabel}</span>
             <span className="workflow-dock__mobile-fold-value">{primaryValue}</span>
             <span className="workflow-dock__mobile-fold-hint">{verdictLabel}</span>

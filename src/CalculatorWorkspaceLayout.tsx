@@ -1,5 +1,6 @@
 ﻿import React from "react";
 import { CALCULATOR_WORKSPACE_DOCK_LABEL } from "./calculator-ui-constants";
+import { PHMAX_CALCULATOR_MAIN_ID } from "./phmax-main-landmarks";
 
 type CalculatorWorkspaceLayoutProps = {
   main: React.ReactNode;
@@ -23,7 +24,9 @@ export function CalculatorWorkspaceLayout({
       className={`calculator-workspace${variant === "input-heavy" ? " calculator-workspace--input-heavy" : ""}`}
       aria-label="Pracovní plocha kalkulačky"
     >
-      <div className="calculator-workspace__main">{main}</div>
+      <div className="calculator-workspace__main" id={PHMAX_CALCULATOR_MAIN_ID} tabIndex={-1}>
+        {main}
+      </div>
       <aside className="calculator-workspace__dock" aria-label={dockLabel}>
         {dock}
       </aside>

@@ -14,6 +14,7 @@ import { revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
 import { formatDashboardProductVisit, readLastActiveProduct } from "./phmax-dashboard-visits";
 import { clearAllPhmaxLocalStorage } from "./phmax-local-storage-clear";
+import { PHMAX_DASHBOARD_MAIN_ID } from "./phmax-main-landmarks";
 import { requestFocusExampleSelect } from "./phmax-focus-example-hint";
 import { useUiNotice } from "./useUiNotice";
 
@@ -484,6 +485,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           </div>
         </header>
 
+        <main id={PHMAX_DASHBOARD_MAIN_ID} tabIndex={-1}>
         {continueRow ? (
           <section className="card card--accent section-card dash-continue-card" aria-labelledby="dash-continue-heading">
             <h2 id="dash-continue-heading" className="section-title">
@@ -598,6 +600,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             ))}
           </div>
         </section>
+
+        </main>
 
         <footer className="zs-app-footer">
           <HeroStatusBar

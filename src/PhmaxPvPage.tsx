@@ -380,7 +380,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   });
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
-  const { guideOpen, dismissGuide, toggleGuide } = useQuickOnboarding(PHMAX_PV_ONBOARDING_LS_KEY, {
+  const { guideOpen, dismissGuide, toggleGuide, helpButtonRef } = useQuickOnboarding(PHMAX_PV_ONBOARDING_LS_KEY, {
     scrollAnchorId: "pv-quick-onboarding",
   });
   const selectedPvHeroExampleMeta =
@@ -815,7 +815,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               className="glossary-icon-btn--hero"
               onClick={() => setGlossaryOpen(true)}
             />
-            <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} />
+            <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} buttonRef={helpButtonRef} />
           </div>
         </div>
 
@@ -1051,6 +1051,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         open={guideOpen}
         onDismiss={dismissGuide}
         anchorId="pv-quick-onboarding"
+        returnFocusRef={helpButtonRef}
       >
         <p>
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}

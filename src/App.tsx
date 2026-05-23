@@ -1,5 +1,7 @@
 import React, { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import type { ProductView } from "./ProductViewPills";
+import { AppWhatsNewProvider } from "./AppWhatsNewContext";
+import { SkipToMainLink } from "./SkipToMainLink";
 import {
   recordDashboardProductVisit,
   recordLastActiveProduct,
@@ -101,9 +103,10 @@ export default function App() {
   }
 
   return (
-    <>
+    <AppWhatsNewProvider>
+      <SkipToMainLink productView={productView} />
       <UiToastHost />
       {page}
-    </>
+    </AppWhatsNewProvider>
   );
 }

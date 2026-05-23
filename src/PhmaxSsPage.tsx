@@ -340,7 +340,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       ? SS_HERO_EXAMPLE_META[selectedSsHeroExample as Exclude<SsHeroExampleKey, "">]
       : null;
   const [glossaryOpen, setGlossaryOpen] = useState(false);
-  const { guideOpen: ssGuideOpen, dismissGuide: dismissSsGuide, toggleGuide: toggleSsGuideFromHero } =
+  const { guideOpen: ssGuideOpen, dismissGuide: dismissSsGuide, toggleGuide: toggleSsGuideFromHero, helpButtonRef: ssHelpButtonRef } =
     useQuickOnboarding(PHMAX_SS_ONBOARDING_LS_KEY, { scrollAnchorId: "ss-quick-onboarding" });
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
   const [focusMode, setFocusMode] = useCalculatorFocusMode();
@@ -530,7 +530,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               className="glossary-icon-btn--hero"
               onClick={() => setGlossaryOpen(true)}
             />
-            <QuickOnboardingHeroButton guideOpen={ssGuideOpen} onToggle={toggleSsGuideFromHero} />
+            <QuickOnboardingHeroButton guideOpen={ssGuideOpen} onToggle={toggleSsGuideFromHero} buttonRef={ssHelpButtonRef} />
           </div>
         </div>
 
@@ -874,6 +874,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         open={ssGuideOpen}
         onDismiss={dismissSsGuide}
         anchorId="ss-quick-onboarding"
+        returnFocusRef={ssHelpButtonRef}
       >
         <p>
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}

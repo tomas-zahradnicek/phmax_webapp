@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 
 export type PageTocSection = {
   id: string;
@@ -25,11 +25,15 @@ function scrollToSection(sectionId: string, scrollOffset: number) {
 }
 
 /**
- * Sticky obsah stránky: aktivní sekce (scroll spy), výrazná hierarchie, jen „Nahoru“ navíc.
+ * Sticky obsah stránky: aktivní sekce (scroll spy), výrazná hierarchie, jen
+ * mobilní panel s klávesnicí (Escape zavře, Tab cyklí uvnitř).
  */
 export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOfContentsProps) {
   const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileNavId = useId().replace(/:/g, "");
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   const updateActiveFromScroll = useCallback(() => {
     if (sections.length === 0) return;
@@ -66,6 +70,55 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
     }
   }, [sections, activeId]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setMobileOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const id = window.requestAnimationFrame(() => {
+      const first = navRef.current?.querySelector<HTMLElement>(".page-toc__link");
+      first?.focus();
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const nav = navRef.current;
+    if (!nav) return;
+    const selector = 'button, [href], [tabindex]:not([tabindex="-1"])';
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const nodes = Array.from(nav.querySelectorAll<HTMLElement>(selector)).filter(
+        (el) => !el.hasAttribute("disabled"),
+      );
+      if (nodes.length === 0) return;
+      const first = nodes[0]!;
+      const last = nodes[nodes.length - 1]!;
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    nav.addEventListener("keydown", onKeyDown);
+    return () => nav.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
   if (sections.length === 0) return null;
 
   const navBody = (
@@ -82,6 +135,7 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
               onClick={() => {
                 scrollToSection(s.id, scrollOffset);
                 setMobileOpen(false);
+                triggerRef.current?.focus();
               }}
             >
               {s.label}
@@ -102,14 +156,18 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         className="page-toc-mobile-trigger"
         aria-expanded={mobileOpen}
+        aria-controls={mobileNavId}
         onClick={() => setMobileOpen((o) => !o)}
       >
         {mobileOpen ? "Skrýt obsah" : "Obsah stránky"}
       </button>
       <nav
+        ref={navRef}
+        id={mobileNavId}
         className={`page-toc page-toc--rail${mobileOpen ? " page-toc--mobile-open" : ""}`}
         aria-label="Obsah stránky"
       >

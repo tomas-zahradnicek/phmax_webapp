@@ -601,7 +601,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       return "basic";
     }
   });
-  const { guideOpen, dismissGuide, toggleGuide } = useQuickOnboarding(PHMAX_NV75_ONBOARDING_LS_KEY, {
+  const { guideOpen, dismissGuide, toggleGuide, helpButtonRef } = useQuickOnboarding(PHMAX_NV75_ONBOARDING_LS_KEY, {
     scrollAnchorId: "nv75-quick-onboarding",
   });
   const selectedExampleDetails = useMemo(() => NV75_EXAMPLES.find((x) => x.id === selectedExample), [selectedExample]);
@@ -1075,7 +1075,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               </div>
               <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="nv75-display-density" />
               <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
-              <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} />
+              <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} buttonRef={helpButtonRef} />
             </div>
           </div>
 
@@ -1224,6 +1224,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           open={guideOpen}
           onDismiss={dismissGuide}
           anchorId="nv75-quick-onboarding"
+          returnFocusRef={helpButtonRef}
         >
           <p>
             <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}

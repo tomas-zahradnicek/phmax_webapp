@@ -363,7 +363,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const [namedSnapshots, setNamedSnapshots] = useState<NamedSdSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
-  const { guideOpen, dismissGuide, toggleGuide } = useQuickOnboarding(PHMAX_SD_ONBOARDING_LS_KEY, {
+  const { guideOpen, dismissGuide, toggleGuide, helpButtonRef } = useQuickOnboarding(PHMAX_SD_ONBOARDING_LS_KEY, {
     scrollAnchorId: "sd-quick-onboarding",
   });
   const [selectedSdHeroExample, setSelectedSdHeroExample] = useState<SdHeroExampleKey>("");
@@ -1105,7 +1105,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
               className="glossary-icon-btn--hero"
               onClick={() => setGlossaryOpen(true)}
             />
-            <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} />
+            <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} buttonRef={helpButtonRef} />
           </div>
         </div>
 
@@ -1313,6 +1313,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         open={guideOpen}
         onDismiss={dismissGuide}
         anchorId="sd-quick-onboarding"
+        returnFocusRef={helpButtonRef}
       >
         <p>
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}

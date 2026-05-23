@@ -12,6 +12,7 @@ import { PV_BASIC_WIZARD_LS_KEY } from "./pv-basic-wizard";
 import { SS_BASIC_WIZARD_LS_KEY } from "./ss-basic-wizard";
 import { NV75_BASIC_WIZARD_LS_KEY } from "./nv75-basic-wizard";
 import { ZS_BASIC_WIZARD_LS_KEY } from "./zs-basic-wizard";
+import { PHMAX_WHATS_NEW_SEEN_LS_KEY } from "./app-whats-new";
 
 /** Všechna klíče kalkulačky v localStorage (včetně preferencí a návštěv). */
 export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
@@ -43,6 +44,7 @@ export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
   "phmax-display-density",
   "phmax-calculator-focus",
   "phmax-dash-last-active-product",
+  PHMAX_WHATS_NEW_SEEN_LS_KEY,
 ];
 
 const DASH_VISIT_PREFIX = "phmax-dash-last-visit-";

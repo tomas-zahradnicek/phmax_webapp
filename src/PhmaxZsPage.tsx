@@ -550,7 +550,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [uiNotice, setUiNotice] = useUiNotice();
   useFocusExampleOnMount("zs-hero-example-select");
   const [exportLabel, setExportLabel] = useState("");
-  const { guideOpen: zsGuideOpen, dismissGuide: dismissZsGuide, toggleGuide: toggleZsGuideFromHero } =
+  const { guideOpen: zsGuideOpen, dismissGuide: dismissZsGuide, toggleGuide: toggleZsGuideFromHero, helpButtonRef: zsHelpButtonRef } =
     useQuickOnboarding(PHMAX_ZS_ONBOARDING_LS_KEY, { scrollAnchorId: "zs-quick-guide" });
 
   const isFull = basicType === "full_more_than_2" || basicType === "full_max_2";
@@ -2232,7 +2232,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                 className="glossary-icon-btn--hero"
                 onClick={() => setGlossaryOpen(true)}
               />
-              <QuickOnboardingHeroButton guideOpen={zsGuideOpen} onToggle={toggleZsGuideFromHero} />
+              <QuickOnboardingHeroButton guideOpen={zsGuideOpen} onToggle={toggleZsGuideFromHero} buttonRef={zsHelpButtonRef} />
             </div>
           </div>
 
@@ -2490,6 +2490,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           open={zsGuideOpen}
           onDismiss={dismissZsGuide}
           anchorId="zs-quick-guide"
+          returnFocusRef={zsHelpButtonRef}
         >
           <p>
             <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}

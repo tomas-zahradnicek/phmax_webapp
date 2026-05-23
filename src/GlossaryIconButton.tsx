@@ -10,6 +10,7 @@ export const GlossaryIconButton = forwardRef<HTMLButtonElement, { onClick: () =>
         onClick={onClick}
         title="Otevřít slovníček pojmů"
         aria-label="Otevřít slovníček pojmů"
+        aria-haspopup="dialog"
       >
         <span className="glossary-icon-btn__book" aria-hidden="true">
           📘

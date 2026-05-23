@@ -1,4 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
+import { createPortal } from "react-dom";
+import { useModalDialogA11y } from "./modal-dialog-a11y";
 
 export type GlossaryTerm = { term: string; description: React.ReactNode };
 
@@ -14,65 +16,18 @@ type GlossaryDialogProps = {
 export function GlossaryDialog({ open, onClose, terms, triggerRef, scopeHint }: GlossaryDialogProps) {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const wasOpenRef = useRef(false);
 
-  useEffect(() => {
-    if (!open) return;
-    const id = window.requestAnimationFrame(() => {
-      closeBtnRef.current?.focus();
-    });
-    return () => window.cancelAnimationFrame(id);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const panel = panelRef.current;
-    if (!panel) return;
-    const selector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return;
-      const nodes = Array.from(panel.querySelectorAll<HTMLElement>(selector)).filter(
-        (el) => !el.hasAttribute("disabled"),
-      );
-      if (nodes.length === 0) return;
-      const first = nodes[0];
-      const last = nodes[nodes.length - 1];
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else if (document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    panel.addEventListener("keydown", onKeyDown);
-    return () => panel.removeEventListener("keydown", onKeyDown);
-  }, [open]);
-
-  useEffect(() => {
-    if (wasOpenRef.current && !open) {
-      triggerRef.current?.focus();
-    }
-    wasOpenRef.current = open;
-  }, [open, triggerRef]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  useModalDialogA11y({
+    open,
+    onClose,
+    panelRef,
+    initialFocusRef: closeBtnRef,
+    returnFocusRef: triggerRef,
+  });
 
   if (!open) return null;
 
-  return (
+  const modal = (
     <div
       className="glossary-modal"
       role="dialog"
@@ -116,4 +71,6 @@ export function GlossaryDialog({ open, onClose, terms, triggerRef, scopeHint }: 
       </div>
     </div>
   );
+
+  return typeof document !== "undefined" ? createPortal(modal, document.body) : modal;
 }

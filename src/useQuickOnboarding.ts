@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 type UseQuickOnboardingOptions = {
   /** Po otevření posune stránku na panel nápovědy. */
@@ -8,6 +8,7 @@ type UseQuickOnboardingOptions = {
 /** Nápověda je výchozí zavřená; otevře se jen přes tlačítko (toggleGuide / openGuide). */
 export function useQuickOnboarding(_storageKey: string, options?: UseQuickOnboardingOptions) {
   const [guideOpen, setGuideOpen] = useState(false);
+  const helpButtonRef = useRef<HTMLButtonElement>(null);
 
   const dismissGuide = useCallback(() => {
     setGuideOpen(false);
@@ -29,5 +30,5 @@ export function useQuickOnboarding(_storageKey: string, options?: UseQuickOnboar
     else openGuide();
   }, [dismissGuide, guideOpen, openGuide]);
 
-  return { guideOpen, dismissGuide, openGuide, toggleGuide };
+  return { guideOpen, dismissGuide, openGuide, toggleGuide, helpButtonRef };
 }

@@ -3313,6 +3313,66 @@ input[type="radio"] {
   color: var(--muted);
 }
 
+.skip-link {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top, 0px));
+  left: max(8px, env(safe-area-inset-left, 0px));
+  z-index: 10350;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #1e40af;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.link-btn {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  color: #2563eb;
+  font: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  color: #1d4ed8;
+}
+
+.link-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.app-whats-new-modal__list {
+  margin: 12px 0 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.app-whats-new-modal__panel {
+  max-width: min(520px, 96vw);
+}
+
 .onboarding-hero-legend {
   margin: 0;
   font-size: 0.88rem;
