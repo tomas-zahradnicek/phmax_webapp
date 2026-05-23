@@ -71,12 +71,10 @@ export function CalculatorWorkflowDock({
   const isWideDock = useMatchMedia("(min-width: 1100px)");
   const mobileFoldSummaryRef = useRef<HTMLElement>(null);
   const [mobileBodyOpen, setMobileBodyOpen] = useState(false);
-  const [mobileScrollResultsVisible, setMobileScrollResultsVisible] = useState(false);
   const [mobileScrollPinnedUntil, setMobileScrollPinnedUntil] = useState(0);
   const mobileScrollPinned = mobileScrollPinnedUntil > Date.now();
+  const showMobileScrollResults = !isWideDock;
   const pinTimerRef = useRef<number | null>(null);
-  const pinnedUntilRef = useRef(0);
-  pinnedUntilRef.current = mobileScrollPinnedUntil;
   const stepsOpen = viewMode === "basic" && workflowSteps.length > 0;
   const actionsOpen = false;
   const stepsSummary = workflowSteps.length > 0 ? workflowStepsSummary(workflowSteps) : null;
@@ -96,51 +94,6 @@ export function CalculatorWorkflowDock({
       if (pinTimerRef.current != null) window.clearTimeout(pinTimerRef.current);
     };
   }, [mobileScrollPinnedUntil]);
-
-  useEffect(() => {
-    if (isWideDock) {
-      setMobileScrollResultsVisible(false);
-      return;
-    }
-
-    const syncVisibility = () => {
-      if (pinnedUntilRef.current > Date.now()) {
-        setMobileScrollResultsVisible(true);
-        return;
-      }
-      const summary = mobileFoldSummaryRef.current;
-      if (!summary) {
-        setMobileScrollResultsVisible(window.scrollY > 200);
-        return;
-      }
-      const rect = summary.getBoundingClientRect();
-      const summaryAboveViewport = rect.bottom < 8;
-      setMobileScrollResultsVisible(summaryAboveViewport && window.scrollY > 120);
-    };
-
-    let observer: IntersectionObserver | null = null;
-
-    const attach = () => {
-      syncVisibility();
-      const summary = mobileFoldSummaryRef.current;
-      if (!summary) return;
-      observer?.disconnect();
-      observer = new IntersectionObserver(() => syncVisibility(), { root: null, threshold: [0, 1] });
-      observer.observe(summary);
-    };
-
-    attach();
-    const rafId = window.requestAnimationFrame(attach);
-
-    window.addEventListener("scroll", syncVisibility, { passive: true });
-    window.addEventListener("resize", syncVisibility, { passive: true });
-    return () => {
-      window.cancelAnimationFrame(rafId);
-      observer?.disconnect();
-      window.removeEventListener("scroll", syncVisibility);
-      window.removeEventListener("resize", syncVisibility);
-    };
-  }, [isWideDock, primaryValue, verdictLabel, mobileBodyOpen, mobileScrollPinnedUntil]);
 
   const handleMobileScrollActivate = () => {
     scrollToWorkflowDock();
@@ -225,7 +178,7 @@ export function CalculatorWorkflowDock({
   return (
     <>
       <CalculatorMobileScrollResults
-        visible={mobileScrollResultsVisible || mobileScrollPinned}
+        visible={showMobileScrollResults}
         pinned={mobileScrollPinned}
         compact
         tone={tone}

@@ -75,7 +75,7 @@ export function CalculatorMobileScrollResults({
         .join(" ")}
       role="button"
       tabIndex={0}
-      aria-label="Souhrn výsledků při posunu stránky. Klepnutím zobrazíte plný souhrn nahoře."
+      aria-label="Souhrn výsledků. Klepnutím zobrazíte plný souhrn nahoře."
       onClick={handleActivate}
       onKeyDown={handleKeyDown}
     >

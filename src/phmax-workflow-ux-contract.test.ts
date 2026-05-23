@@ -9,11 +9,11 @@ function readSource(relPath: string) {
 }
 
 describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
-  it("CalculatorWorkflowDock má mobilní plovoucí souhrn výsledků při scrollu", () => {
+  it("CalculatorWorkflowDock má mobilní plovoucí souhrn výsledků stále viditelný", () => {
     const dock = readSource("src/CalculatorWorkflowDock.tsx");
     const css = readSource("src/styles.css");
     expect(dock).toContain("CalculatorMobileScrollResults");
-    expect(dock).toContain("mobileFoldSummaryRef");
+    expect(dock).toContain("showMobileScrollResults");
     expect(dock).toContain("MOBILE_SCROLL_PIN_MS");
     expect(dock).toContain("mobileScrollPinnedUntil");
     expect(dock).toContain("handleMobileScrollActivate");
@@ -24,7 +24,6 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
     expect(css).toContain(".calculator-mobile-scroll-results--pinned");
     expect(css).toContain("display: block !important");
     expect(css).toMatch(/@media \(min-width: 1100px\)[\s\S]*\.calculator-mobile-scroll-results/);
-    expect(dock).toContain("IntersectionObserver");
   });
 
   it("ZŠ drží zsWorkflow a předává kroky do CalculatorWorkflowDock", () => {
