@@ -299,6 +299,20 @@ type DashboardRow = {
   verdict: DashboardVerdict | null;
 };
 
+function dashboardModuleFillLabel(hasData: boolean, verdict: DashboardVerdict | null): string {
+  if (!hasData) return "Ještě nevyplněno";
+  if (verdict?.tone === "ok") return "Vstupy v pořádku";
+  if (verdict) return verdict.label;
+  return "Uložený stav – otevřete modul";
+}
+
+function dashboardFillStatusClass(hasData: boolean, verdict: DashboardVerdict | null): string {
+  if (!hasData) return "dash-continue-card__fill-status--empty";
+  if (verdict?.tone === "ok") return "dash-continue-card__fill-status--ok";
+  if (verdict) return "dash-continue-card__fill-status--warning";
+  return "dash-continue-card__fill-status--empty";
+}
+
 function deriveSsDashboardVerdict(): DashboardVerdict | null {
   const raw = typeof localStorage === "undefined" ? null : localStorage.getItem(PHMAX_SS_UNITS_STORAGE_KEY);
   const rows = parseSsDraftRows(raw);
@@ -390,7 +404,7 @@ function buildDashboardRows(): DashboardRow[] {
       id: "pv",
       title: PRODUCT_CALCULATOR_TITLES.pv,
       hasData: pv.present,
-      status: pv.present ? "data v prohlížeči" : "žádná uložená data",
+      status: dashboardModuleFillLabel(pv.present, derivePvDashboardVerdict(pv)),
       primaryKpi: {
         label: "PHmax",
         value: pv.phmax != null ? String(pv.phmax) : "–",
@@ -412,7 +426,7 @@ function buildDashboardRows(): DashboardRow[] {
       id: "sd",
       title: PRODUCT_CALCULATOR_TITLES.sd,
       hasData: Boolean(sd),
-      status: sd ? "data v prohlížeči" : "žádná uložená data",
+      status: dashboardModuleFillLabel(Boolean(sd), sd ? deriveSdDashboardVerdict(sd) : null),
       primaryKpi: {
         label: "Oddělení",
         value: sd ? String(sd.departments) : "–",
@@ -432,7 +446,22 @@ function buildDashboardRows(): DashboardRow[] {
       id: "zs",
       title: PRODUCT_CALCULATOR_TITLES.zs,
       hasData: zsSnapshotHasAnyInput() || zsTotals != null,
-      status: zsSnapshotHasAnyInput() || zsTotals != null ? "data v prohlížeči" : "žádná uložená data",
+      status: dashboardModuleFillLabel(
+        zsSnapshotHasAnyInput() || zsTotals != null,
+        zsTotals != null
+          ? {
+              tone: "ok",
+              label: "Souhrn z autosave",
+              detail: "",
+            }
+          : zsSnapshotHasAnyInput()
+            ? {
+                tone: "warning",
+                label: "Stav uložen",
+                detail: "",
+              }
+            : null,
+      ),
       primaryKpi: {
         label: "PHmax",
         value: zsTotals != null ? String(zsTotals.totalPhmax) : "–",
@@ -467,7 +496,7 @@ function buildDashboardRows(): DashboardRow[] {
       id: "ss",
       title: PRODUCT_CALCULATOR_TITLES.ss,
       hasData: ss.present,
-      status: ss.present ? "data v prohlížeči" : "žádná uložená data",
+      status: dashboardModuleFillLabel(ss.present, deriveSsDashboardVerdict()),
       primaryKpi: {
         label: "PHmax",
         value: ss.phmax != null ? String(ss.phmax) : "–",
@@ -490,7 +519,7 @@ function buildDashboardRows(): DashboardRow[] {
       id: "nv75",
       title: PRODUCT_CALCULATOR_TITLES.nv75,
       hasData: nv.rowCount > 0 || nv.bankTotal != null,
-      status: nv.rowCount > 0 || nv.bankTotal != null ? "data v prohlížeči" : "žádná uložená data",
+      status: dashboardModuleFillLabel(nv.rowCount > 0 || nv.bankTotal != null, deriveNv75DashboardVerdict(nv)),
       primaryKpi: {
         label: "Banka h/týd",
         value: nv.bankTotal != null ? String(nv.bankTotal) : "–",
@@ -596,7 +625,12 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               Pokračovat v {DASH_CALC_LABEL[continueRow.id]}
             </h2>
             <p className="muted-text" style={{ marginBottom: 12 }}>
-              Naposledy jste pracovali v modulu <strong>{continueRow.title}</strong>. Níže je rychlý náhled z uloženého stavu a poslední verdikt z kontextu výpočtu (dock).
+              Naposledy jste pracovali v modulu <strong>{continueRow.title}</strong>. Níže je rychlý náhled z uloženého stavu v tomto prohlížeči.
+            </p>
+            <p
+              className={`dash-continue-card__fill-status ${dashboardFillStatusClass(continueRow.hasData, continueRow.verdict)}`}
+            >
+              {dashboardModuleFillLabel(continueRow.hasData, continueRow.verdict)}
             </p>
             {continueRow.verdict ? (
               <div
@@ -671,7 +705,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         </section>
 
         <section className="card muted section-card">
-          <h2 className="section-title">Přehled podle uloženého stavu (localStorage)</h2>
+          <h2 className="section-title">Přehled podle uloženého stavu v prohlížeči</h2>
           <p className="muted-text" style={{ marginBottom: 8 }}>
             Slouží jen k orientaci v tomto prohlížeči. Metriky počítám stejnou logikou jako v příslušné kartě (kde je k tomu dostupná data).
           </p>
@@ -694,6 +728,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             {rows.map((row) => (
               <article key={row.id} className="dash-card">
                 <h3 className="dash-card__title">{row.title}</h3>
+                {row.verdict ? (
+                  <p className={`dash-card__verdict dash-card__verdict--${row.verdict.tone}`}>{row.status}</p>
+                ) : (
+                  <p className={`dash-card__verdict ${row.hasData ? "" : "dash-card__verdict--warning"}`}>{row.status}</p>
+                )}
                 <p className="dash-card__metric">
                   {row.primaryKpi.label}: {row.primaryKpi.value}
                 </p>
@@ -704,9 +743,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                     </span>
                   ))}
                 </div>
-                <p className="dash-card__meta">{row.status}</p>
-                <p className="dash-card__meta">Naposledy otevřeno: {row.lastVisit}</p>
                 <p className="dash-card__meta">{row.detail}</p>
+                <p className="dash-card__meta">Naposledy otevřeno: {row.lastVisit}</p>
                 <p className="dash-card__meta">Pojmenované zálohy: {row.namedBackups}</p>
                 <button type="button" className="btn primary" onClick={() => setProductView(row.id)}>
                   Otevřít

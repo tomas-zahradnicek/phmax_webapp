@@ -4,6 +4,7 @@ import {
   ADVANCED_AUDIT_GROUP_LABEL,
   CALCULATOR_LIMITS_NOTE,
   LAY_USER_QUICK_START_SS,
+  LAY_USER_QUICK_START_MOBILE_UX,
   EXPORT_ORIENTACNI_NOTE,
   formatSsLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
@@ -38,6 +39,7 @@ import {
 } from "./HeroActionIconButton";
 import { HeroStat } from "./HeroStat";
 import { HeroStatusBar } from "./HeroStatusBar";
+import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
@@ -67,15 +69,11 @@ import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import {
   PHMAX_SS_FRAMEWORK_FIRST_PHASE,
   PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY,
-  PHMAX_SS_LEGISLATIVE_MD_REL_PATH,
   PHMAX_SS_UNITS_SECTION,
-  PHMAX_SS_UNITS_STORAGE_KEY,
-  PHMAX_SS_LOCAL_DOC_EXAMPLE_NAMES,
   PHMAX_SS_MAX_NAMED_SNAPSHOTS,
   PHMAX_SS_METHODOLOGY_LABEL,
   PHMAX_SS_MSMT_PAGE_URL,
   PHMAX_SS_RIZENI_SKOLY_URL,
-  PHMAX_SS_SOURCE_FOLDER_HINT,
 } from "./ss/phmax-ss-constants";
 import {
   PHMAX_SS_CALCULATION_BRANCH_GUIDE,
@@ -521,6 +519,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   ] as const;
 
   const ssHasInputIssue = ssErrorRows > 0;
+  const ssNeedsInputBanner = ssVerdict.tone !== "ok";
   const ssBasicWizardActive = viewMode === "basic";
   const { step: ssWizardStep, goToStep: goToSsWizardStep, handleBack: handleSsWizardBack, handleNext: handleSsWizardNext } =
     useProductBasicWizard({
@@ -597,14 +596,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               <a href={PHMAX_SS_RIZENI_SKOLY_URL} target="_blank" rel="noopener noreferrer" className="status-link">
                 metodické doporučení (ŘŠ)
               </a>
-              . Kód SŠ je oddělený od ZŠ, PV a ŠD (složka{" "}
-              <code className="methodology-strip__code">src/ss/</code>).
-            </p>
-            <p className="hero__note" style={{ marginTop: 10 }}>
-              {PHMAX_SS_SOURCE_FOLDER_HINT} Příklad názvu souboru:{" "}
-              <code className="methodology-strip__code">{PHMAX_SS_LOCAL_DOC_EXAMPLE_NAMES[0]}</code>. Legislativní vrstva
-              (pravidla × zdroj):{" "}
-              <code className="methodology-strip__code">{PHMAX_SS_LEGISLATIVE_MD_REL_PATH}</code>.
+              .
             </p>
           </div>
         </div>
@@ -838,6 +830,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
         </p>
         <p>{LAY_USER_QUICK_START_SS}</p>
+        <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
         <p>
           Kalkulačka je orientační; výsledky ověřte vůči aktuální{" "}
           <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
@@ -870,9 +863,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           vždy zůstane alespoň jeden řádek), rychlé <strong>uložení / obnovení</strong> průběhu v prohlížeči,{" "}
           <strong>vymazání uložených dat</strong> nebo <strong>vyčištění formuláře</strong>, pojmenované zálohy (max.{" "}
           {PHMAX_SS_MAX_NAMED_SNAPSHOTS}), export <strong>CSV</strong> a <strong>Excel</strong>, kopie a tisk textového
-          shrnutí, <strong>auditní JSON</strong>. Řádky evidence se automaticky ukládají do{" "}
-          <code className="methodology-strip__code">localStorage</code> (klíč{" "}
-          <code className="methodology-strip__code">{PHMAX_SS_UNITS_STORAGE_KEY}</code>).
+          shrnutí,           <strong>auditní JSON</strong>. Řádky evidence se ukládají automaticky v tomto prohlížeči.
         </p>
         <p>{EXPORT_ORIENTACNI_NOTE}</p>
         <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
@@ -1278,6 +1269,14 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           </li>
         </ul>
       </FieldWhyPhmaxDetails>
+
+      {ssNeedsInputBanner ? (
+        <CalculatorInputIssueBanner
+          label="Pro smysluplný výpočet doplňte nebo opravte vstupy"
+          detail={ssVerdict.detail}
+          onFix={() => scrollToFirstNeedsAttentionSection(["ss-vstupy"])}
+        />
+      ) : null}
 
       <CalculatorProductShell
         sticky={{

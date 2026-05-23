@@ -14,6 +14,7 @@ import {
   CALCULATOR_LIMITS_NOTE,
   CALCULATOR_WORKSPACE_DOCK_LABEL,
   LAY_USER_QUICK_START_NV75,
+  LAY_USER_QUICK_START_MOBILE_UX,
   PHMAX_NV75_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
@@ -62,6 +63,7 @@ import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
 import { ResultAnchorCard, type ResultAnchorTone } from "./ResultAnchorCard";
 import { IntegerInput } from "./IntegerInput";
+import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
@@ -1097,6 +1099,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   }, [summaryText]);
 
   const nv75HasInputIssue = nv75InputWarnings.length > 0;
+  const nv75NeedsInputBanner = nv75Verdict.tone !== "ok";
   const nv75BasicWizardActive = viewMode === "basic";
   const { step: nv75WizardStep, goToStep: goToNv75WizardStep, handleBack: handleNv75WizardBack, handleNext: handleNv75WizardNext } =
     useProductBasicWizard({
@@ -1291,6 +1294,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
           </p>
           <p>{LAY_USER_QUICK_START_NV75}</p>
+          <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
         </QuickOnboarding>
         {nv75BasicWizardActive ? (
           <ProductBasicWizard
@@ -1301,6 +1305,14 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             onStepChange={goToNv75WizardStep}
             onBack={handleNv75WizardBack}
             onNext={handleNv75WizardNext}
+          />
+        ) : null}
+
+        {nv75NeedsInputBanner ? (
+          <CalculatorInputIssueBanner
+            label="Pro smysluplný výpočet banky odpočtů doplňte vstupy"
+            detail={nv75Verdict.detail}
+            onFix={() => scrollToFirstNeedsAttentionSection(["nv75-vstupy"])}
           />
         ) : null}
 

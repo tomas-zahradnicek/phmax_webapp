@@ -77,6 +77,10 @@ export const LAY_USER_QUICK_START_SS =
 export const LAY_USER_QUICK_START_NV75 =
   "Rychlý start: (1) Vyberte druh školy/zařízení u každého řádku právnické osoby, (2) načtěte ukázkový příklad A v horní liště, (3) ověřte banku odpočtů – pravidlo §4b, základ a bonusy §4c/§4d. Výsledek je orientační; u složitých struktur ověřte plné znění NV.";
 
+/** Mobilní UX – plovoucí souhrn dole a záložka Obsah (společné pro všechny kalkulačky). */
+export const LAY_USER_QUICK_START_MOBILE_UX =
+  "Mobil a tablet: výsledek sledujte v pruhu dole – klepnutím přejdete k plnému souhrnu nahoře. Záložka Obsah (vpravo nad souhrnem) vede na sekce formuláře; souhrn lze dočasně skrýt tlačítkem Skrýt souhrn.";
+
 /** Jednořádek kontextu v přehledu (PV) – srozumitelná orientace mimo odbornou terminologii. */
 export function formatPvLayContextLine(workplaceCount: number, aggregateIncomplete: boolean): string {
   const base = `PV · pracovišť: ${workplaceCount} · orientační součet PHmax`;
@@ -159,7 +163,7 @@ export const UI_TEXTS_LAST_REVIEW_DATE = "22. 4. 2026";
 
 /** Doplňková nápověda pro chybové hlášky úložiště/exportu. */
 export const BROWSER_ERROR_NEXT_STEP_HINT =
-  "Zkuste jiný prohlížeč nebo ověřte, že pro tento web není blokované localStorage/stahování souborů.";
+  "Zkuste jiný prohlížeč nebo ověřte, že pro tento web není blokované ukládání dat ve prohlížeči ani stahování souborů.";
 
 /** Sjednocené popisky pro pojmenované zálohy napříč produkty. */
 export const NAMED_BACKUPS_NAME_LABEL = "Název zálohy";

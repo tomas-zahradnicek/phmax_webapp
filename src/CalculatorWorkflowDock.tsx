@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { CALCULATOR_WORKSPACE_DOCK_LABEL } from "./calculator-ui-constants";
 import { CalculatorMobileScrollResults, CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID, MOBILE_SCROLL_PIN_MS, scrollToWorkflowDock } from "./CalculatorMobileScrollResults";
+import { readMobileSummaryDismissed, writeMobileSummaryDismissed } from "./mobile-scroll-results-layout";
 import { ResultAnchorCard, type ResultAnchorStat, type ResultAnchorTone } from "./ResultAnchorCard";
 import type { CalculatorViewMode } from "./calculator-view-mode";
 import { useMatchMedia } from "./useMatchMedia";
@@ -71,6 +72,7 @@ export function CalculatorWorkflowDock({
   const isWideDock = useMatchMedia("(min-width: 1100px)");
   const mobileFoldSummaryRef = useRef<HTMLElement>(null);
   const [mobileBodyOpen, setMobileBodyOpen] = useState(false);
+  const [mobileSummaryDismissed, setMobileSummaryDismissed] = useState(readMobileSummaryDismissed);
   const [mobileScrollPinnedUntil, setMobileScrollPinnedUntil] = useState(0);
   const mobileScrollPinned = mobileScrollPinnedUntil > Date.now();
   const showMobileScrollResults = !isWideDock;
@@ -99,6 +101,14 @@ export function CalculatorWorkflowDock({
     scrollToWorkflowDock();
     setMobileBodyOpen(true);
     setMobileScrollPinnedUntil(Date.now() + MOBILE_SCROLL_PIN_MS);
+  };
+
+  const toggleMobileSummaryDismissed = () => {
+    setMobileSummaryDismissed((prev) => {
+      const next = !prev;
+      writeMobileSummaryDismissed(next);
+      return next;
+    });
   };
 
   const dockBody = (
@@ -180,6 +190,8 @@ export function CalculatorWorkflowDock({
       <CalculatorMobileScrollResults
         visible={showMobileScrollResults}
         pinned={mobileScrollPinned}
+        dismissed={mobileSummaryDismissed}
+        onDismissToggle={toggleMobileSummaryDismissed}
         compact
         tone={tone}
         primaryLabel={primaryLabel}

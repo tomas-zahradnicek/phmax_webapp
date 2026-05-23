@@ -32,7 +32,7 @@ export const PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY = "phmax-ss-framework-phase1
 export const PHMAX_SS_FRAMEWORK_FIRST_PHASE = {
   heading: "1. fáze: rámec vstupů a výstupů",
   phase1NotesFieldLabel: "Poznámky k rámci (volitelně)",
-  phase1NotesFieldHint: `Vlastní záznamy; nezasahují do výpočtu. Ukládají se jen v tomto prohlížeči (localStorage, klíč ${PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY}).`,
+  phase1NotesFieldHint: "Vlastní záznamy; nezasahují do výpočtu. Ukládají se jen v tomto prohlížeči.",
   lead:
     "U středního vzdělávání se podle metodiky pracuje s dílčími jednotkami (typicky třída nebo skupina) zvlášť podle kombinace oboru, formy a typu. PHmax a PHAmax jsou dva oddělené rámce – přebytky z jednoho nelze přelévat do druhého.",
   implementationNote:
@@ -82,7 +82,7 @@ export const PHMAX_SS_UNITS_SECTION = {
     "Odstraní poslední řádek v tabulce evidence. Vždy zůstane alespoň jeden řádek; byl-li to poslední vyplněný řádek, vloží se prázdný řádek.",
   removeRow: "Odstranit",
   emptyHint: "Vyplňte kód oboru, průměr žáků a počet tříd – níže se zobrazí orientační PHmax.",
-  storageNote: "Řádky se ukládají jen v tomto prohlížeči (localStorage, klíč phmax-ss-units-draft).",
+  storageNote: "Řádky se ukládají jen v tomto prohlížeči (automaticky při psaní).",
   previewHeading: "Orientační výpočet PHmax (řádek po řádku)",
   previewHint:
     "Řádky bez platného kódu oboru nebo bez kladného průměru a počtu tříd se přeskakují. Chyba u jednoho řádku neblokuje ostatní. Režim „Automaticky“ vybere pásmo podle počtu oborů ve třídě a příznaku talentové 82; jinak lze režim vynutit.",

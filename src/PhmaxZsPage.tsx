@@ -80,6 +80,7 @@ import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { PageTableOfContents, type PageTocSection } from "./PageTableOfContents";
+import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
@@ -113,6 +114,7 @@ import {
   CALCULATOR_LIMITS_NOTE,
   INLINE_VALIDATION_MSG_POSITIVE_INTEGER,
   LAY_USER_QUICK_START_ZS,
+  LAY_USER_QUICK_START_MOBILE_UX,
   MSG_NAMED_BACKUP_PICK_TO_COMPARE,
   MSG_NO_LOCAL_AUTOSAVE_DATA,
   MSG_ZS_NAMED_BACKUP_NO_AUDIT_TOTALS,
@@ -2408,6 +2410,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
           </p>
           <p>{LAY_USER_QUICK_START_ZS}</p>
+          <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
           <p>
             <strong>PHmax</strong> zadejte podle typu školy v rozbalovacím režimu; u specialit (psychiatrie, zdravotnické zařízení,
             menšina, gymnázia…) přepněte na odpovídající položku. <strong>PHAmax</strong> a <strong>PHPmax</strong> mají vlastní záložky.
@@ -2570,6 +2573,14 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             </div>
           </div>
         </section>
+        ) : null}
+
+        {validationHighlight && validationIssues[0] ? (
+          <CalculatorInputIssueBanner
+            label="Pro smysluplný výpočet doplňte chybějící údaje"
+            detail={validationIssues[0].label}
+            onFix={() => goToSection(firstIssueSection)}
+          />
         ) : null}
 
         <CalculatorProductShell

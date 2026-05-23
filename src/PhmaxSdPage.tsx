@@ -13,6 +13,7 @@ import {
   MSG_NO_LOCAL_AUTOSAVE_DATA,
   INLINE_VALIDATION_MSG_POSITIVE_INTEGER,
   LAY_USER_QUICK_START_SD,
+  LAY_USER_QUICK_START_MOBILE_UX,
   EXPORT_ORIENTACNI_NOTE,
   formatSdLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
@@ -62,6 +63,7 @@ import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { HeroStat } from "./HeroStat";
+import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
@@ -1319,6 +1321,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
         </p>
         <p>{LAY_USER_QUICK_START_SD}</p>
+        <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
         <p>
           Vyplňte počet účastníků a případně počet oddělení (jinak se dopočítá dělením 27). Výsledek vychází z přílohy k
           vyhlášce č. 74/2005 Sb.; u průměru pod 20 na oddělení může aplikovat orientační krácení dle § 10 odst. 2.
@@ -1345,6 +1348,14 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           onStepChange={goToSdWizardStep}
           onBack={handleSdWizardBack}
           onNext={handleSdWizardNext}
+        />
+      ) : null}
+
+      {sdHasInputIssue ? (
+        <CalculatorInputIssueBanner
+          label="Pro smysluplný výpočet PHmax zkontrolujte vstupy"
+          detail={sdVerdict.detail}
+          onFix={() => scrollToFirstNeedsAttentionSection(["sd-vstupy"])}
         />
       ) : null}
 

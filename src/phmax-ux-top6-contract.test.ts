@@ -37,6 +37,9 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain("body:has(.calculator-mobile-scroll-results) .page-toc-mobile-trigger");
     expect(css).toContain("writing-mode: vertical-rl");
     expect(css).toContain("--calculator-mobile-results-reserve");
+    expect(css).toContain("--calculator-mobile-results-height");
+    expect(css).toContain(".calculator-mobile-summary-chip");
+    expect(css).toContain(".calculator-input-issue-banner");
     expect(css).toContain(".calculator-shell--basic .ux-expert-only");
     expect(css).toContain(".zs-basic-wizard-active");
     expect(css).toContain(".hero-compact-toolbar");
@@ -128,6 +131,8 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("ZsPhaPhpBasicGuide");
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__mobile-fold");
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("CalculatorMobileScrollResults");
+    expect(readSource("src/CalculatorMobileScrollResults.tsx")).toContain("publishMobileResultsHeight");
+    expect(readSource("src/calculator-ui-constants.ts")).toContain("LAY_USER_QUICK_START_MOBILE_UX");
     expect(readSource("src/CalculatorProductShell.tsx")).toContain("calculator-shell__supplement--before");
     expect(readSource("src/App.tsx")).toContain("recordDashboardProductVisit");
     expect(src).toContain("zs-basic-wizard-active");

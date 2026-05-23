@@ -14,6 +14,7 @@ import {
   INLINE_VALIDATION_MSG_POSITIVE_INTEGER,
   INLINE_VALIDATION_MSG_REQUIRED_FIELD,
   LAY_USER_QUICK_START_PV,
+  LAY_USER_QUICK_START_MOBILE_UX,
   EXPORT_ORIENTACNI_NOTE,
   formatPvLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
@@ -59,6 +60,7 @@ import {
 import { HeroStatusBar } from "./HeroStatusBar";
 import { HeroStat } from "./HeroStat";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
+import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
@@ -1051,6 +1053,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
         </p>
         <p>{LAY_USER_QUICK_START_PV}</p>
+        <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
         <p>
           Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a vyhlášky č.
           14/2005 Sb. Každé <strong>číslované pracoviště</strong> ve formuláři (Pracoviště 1, 2…) odpovídá jedné
@@ -1082,6 +1085,14 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           onStepChange={goToPvWizardStep}
           onBack={handlePvWizardBack}
           onNext={handlePvWizardNext}
+        />
+      ) : null}
+
+      {pvHasInputIssue ? (
+        <CalculatorInputIssueBanner
+          label="Pro smysluplný součet PHmax doplňte pracoviště"
+          detail="Některá pracoviště nemají vyplněnou průměrnou denní dobu nebo další povinné údaje."
+          onFix={() => scrollToFirstNeedsAttentionSection(["pv-vstupy"])}
         />
       ) : null}
 

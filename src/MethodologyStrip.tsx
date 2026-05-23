@@ -1,7 +1,6 @@
 import React from "react";
 import { UI_TEXTS_LAST_REVIEW_DATE } from "./calculator-ui-constants";
 import {
-  PHMAX_SS_LEGISLATIVE_MD_REL_PATH,
   PHMAX_SS_MSMT_PAGE_URL,
   PHMAX_SS_METHODOLOGY_LABEL,
   PHMAX_SS_RIZENI_SKOLY_URL,
@@ -76,9 +75,7 @@ export function MethodologyStrip() {
             <a href={PHMAX_SS_RIZENI_SKOLY_URL} target="_blank" rel="noopener noreferrer" className="status-link">
               metodické doporučení (ŘŠ)
             </a>
-            . Legislativní shrnutí v repozitáři:{" "}
-            <code className="methodology-strip__code">{PHMAX_SS_LEGISLATIVE_MD_REL_PATH}</code> (viz také{" "}
-            <code className="methodology-strip__code">docs/zdroje/README.md</code>).
+            . Legislativní shrnutí pro vývojáře je součástí repozitáře projektu; v aplikaci stačí oficiální odkazy výše.
           </li>
         </ul>
         <p className="methodology-strip__note muted-text">
