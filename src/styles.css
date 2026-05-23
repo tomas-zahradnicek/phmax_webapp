@@ -7339,32 +7339,67 @@ select:focus {
   }
 
   /*
-   * Plovoucí souhrn výsledků je v portalu na body – Obsah stránky musí být nad ním.
-   * Rezerva = výška souhrnu + spodní mezera + mezera pro tlačítko Obsah.
+   * Plovoucí souhrn výsledků je v portalu na body – záložka Obsah těsně nad ním (vertikálně).
    */
   body:has(.calculator-mobile-scroll-results) {
     --calculator-mobile-results-reserve: calc(max(12px, 3vh) + min(46vh, 320px) + 12px);
+    --calculator-mobile-toc-tab-size: 2.65rem;
   }
 
   body:has(.calculator-mobile-scroll-results) .page-toc-mobile-trigger {
-    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--calculator-mobile-results-reserve));
+    left: auto;
+    right: max(10px, env(safe-area-inset-right, 0px));
+    bottom: calc(
+      env(safe-area-inset-bottom, 0px) + max(12px, 3vh) + min(46vh, 320px) + 6px
+    );
     z-index: 50;
+    padding: 10px 7px;
+    border-radius: 10px 10px 0 0;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    white-space: nowrap;
+    line-height: 1.2;
+    letter-spacing: 0.03em;
+    max-height: min(28vh, 11rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body:has(.calculator-mobile-scroll-results) .page-toc-mobile-trigger[aria-expanded="true"] {
+    writing-mode: horizontal-tb;
+    padding: 8px 12px;
+    border-radius: 999px;
+    max-height: none;
   }
 
   body:has(.calculator-mobile-scroll-results) .page-toc--rail {
-    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--calculator-mobile-results-reserve) + 44px);
+    left: auto;
+    right: max(10px, env(safe-area-inset-right, 0px));
+    bottom: calc(
+      env(safe-area-inset-bottom, 0px) + max(12px, 3vh) + min(46vh, 320px) + var(--calculator-mobile-toc-tab-size) + 10px
+    );
+    top: auto;
+    width: min(300px, calc(100vw - 20px));
+    max-height: min(42vh, 360px);
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
     z-index: 50;
+    transform: translateY(6px);
+  }
+
+  body:has(.calculator-mobile-scroll-results) .page-toc--rail.page-toc--mobile-open {
+    transform: translateY(0);
   }
 
   body:has(.calculator-mobile-scroll-results) .calculator-workspace__main {
     padding-bottom: calc(
-      var(--calculator-mobile-results-reserve) + 3.5rem + env(safe-area-inset-bottom, 0px)
+      var(--calculator-mobile-results-reserve) + var(--calculator-mobile-toc-tab-size) + env(safe-area-inset-bottom, 0px)
     );
   }
 
   body:has(.calculator-mobile-scroll-results) .container--app {
     padding-bottom: calc(
-      var(--calculator-mobile-results-reserve) + 3.5rem + env(safe-area-inset-bottom, 0px)
+      var(--calculator-mobile-results-reserve) + var(--calculator-mobile-toc-tab-size) + env(safe-area-inset-bottom, 0px)
     );
   }
 

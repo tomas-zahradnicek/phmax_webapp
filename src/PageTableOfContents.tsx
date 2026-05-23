@@ -161,9 +161,10 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
         className="page-toc-mobile-trigger"
         aria-expanded={mobileOpen}
         aria-controls={mobileNavId}
+        aria-label={mobileOpen ? "Skrýt obsah stránky" : "Zobrazit obsah stránky"}
         onClick={() => setMobileOpen((o) => !o)}
       >
-        {mobileOpen ? "Skrýt obsah" : "Obsah stránky"}
+        {mobileOpen ? "Skrýt" : "Obsah"}
       </button>
       <nav
         ref={navRef}
