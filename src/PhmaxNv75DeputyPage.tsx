@@ -1553,14 +1553,16 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                     </td>
                     <td>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        <button
-                          type="button"
-                          className="btn ghost"
-                          onClick={() => insertRowAfter(row.id)}
-                          aria-label={`Vložit řádek pod řádek ${idx + 1}`}
-                        >
-                          Vložit
-                        </button>
+                        {(rows.length === 1 || idx === rows.length - 1) ? (
+                          <button
+                            type="button"
+                            className="btn ghost"
+                            onClick={() => insertRowAfter(row.id)}
+                            aria-label={`Vložit řádek pod řádek ${idx + 1}`}
+                          >
+                            Vložit
+                          </button>
+                        ) : null}
                         <button type="button" className="btn ghost" onClick={() => removeRow(row.id)}>
                           Odebrat
                         </button>
