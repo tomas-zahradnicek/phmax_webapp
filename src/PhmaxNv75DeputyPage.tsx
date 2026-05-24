@@ -84,6 +84,10 @@ export type Nv75DeputyUiRow = {
   /** Legacy autosave/preset field; new UI computes this from `additionalWorkplaceUnits`. */
   additionalWorkplacesEligible?: number;
 };
+
+function createDefaultNv75UiRow(): Nv75DeputyUiRow {
+  return { id: Date.now(), kind: "zs", units: 0, additionalWorkplaceUnits: [] };
+}
 type Nv75ExampleKey =
   | ""
   | "a_ms"
@@ -722,7 +726,16 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   }, [rows, hasPracticalContext, practicalOvEhl0, ovGroupsSchool, ovGroupsInstructor]);
 
   const addRow = useCallback(() => {
-    setRows((prev) => [...prev, { id: Date.now(), kind: "zs", units: 0, additionalWorkplaceUnits: [] }]);
+    setRows((prev) => [...prev, createDefaultNv75UiRow()]);
+  }, []);
+  const insertRowAfter = useCallback((afterId: number) => {
+    setRows((prev) => {
+      const idx = prev.findIndex((x) => x.id === afterId);
+      if (idx < 0) return [...prev, createDefaultNv75UiRow()];
+      const next = [...prev];
+      next.splice(idx + 1, 0, createDefaultNv75UiRow());
+      return next;
+    });
   }, []);
   const removeRow = useCallback((id: number) => {
     setRows((prev) => (prev.length > 1 ? prev.filter((x) => x.id !== id) : prev));
@@ -1539,9 +1552,19 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                       {(bank.breakdown[idx]?.hoursByKind ?? 0) + (bank.breakdown[idx]?.bonus4dHours ?? 0)}
                     </td>
                     <td>
-                      <button type="button" className="btn ghost" onClick={() => removeRow(row.id)}>
-                        Odebrat
-                      </button>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        <button
+                          type="button"
+                          className="btn ghost"
+                          onClick={() => insertRowAfter(row.id)}
+                          aria-label={`Vložit řádek pod řádek ${idx + 1}`}
+                        >
+                          Vložit
+                        </button>
+                        <button type="button" className="btn ghost" onClick={() => removeRow(row.id)}>
+                          Odebrat
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
