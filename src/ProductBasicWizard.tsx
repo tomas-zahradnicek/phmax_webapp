@@ -2,6 +2,7 @@ import React from "react";
 import { BASIC_QUICK_START_EXAMPLE_CTA_LABEL } from "./basic-quick-start";
 import {
   PRODUCT_BASIC_WIZARD_STEP_COUNT,
+  basicWizardStepButtonClass,
   type ProductBasicWizardStep,
   type ProductBasicWizardStepMeta,
 } from "./product-basic-wizard";
@@ -58,7 +59,6 @@ export function ProductBasicWizard({
       <div className="zs-basic-wizard__progress">
         <ol className="zs-basic-wizard__steps" aria-label="Kroky průvodce">
           {steps.map((item, index) => {
-            const done = item.step < step;
             const active = item.step === step;
             const previousStep = index > 0 ? steps[index - 1]! : null;
             return (
@@ -79,7 +79,7 @@ export function ProductBasicWizard({
                 ) : null}
                 <button
                   type="button"
-                  className={`zs-basic-wizard__step${active ? " zs-basic-wizard__step--active" : ""}${done ? " zs-basic-wizard__step--done" : ""}`}
+                  className={basicWizardStepButtonClass(item.step, step)}
                   aria-current={active ? "step" : undefined}
                   onClick={() => onStepChange(item.step)}
                 >
@@ -90,9 +90,6 @@ export function ProductBasicWizard({
             );
           })}
         </ol>
-        <p className="muted-text zs-basic-wizard__flow-hint" aria-hidden="true">
-          {steps.map((item) => item.label).join(" → ")}
-        </p>
 
         <div className="zs-basic-wizard__nav">
           <button type="button" className="btn ghost" onClick={onBack} disabled={isFirst}>

@@ -32,3 +32,20 @@ export function productWizardScrollSection(
 ): string {
   return steps[step - 1]!.scrollSectionId;
 }
+
+/** Třídy pill tlačítka kroku průvodce (sdílené PV/SŠ/NV75/ZŠ). */
+export function basicWizardStepButtonClass(itemStep: number, currentStep: number): string {
+  const done = itemStep < currentStep;
+  const active = itemStep === currentStep;
+  const ahead = itemStep > currentStep;
+  const aheadNext = itemStep === currentStep + 1;
+  return [
+    "zs-basic-wizard__step",
+    active ? "zs-basic-wizard__step--active" : "",
+    done ? "zs-basic-wizard__step--done" : "",
+    ahead ? "zs-basic-wizard__step--ahead" : "",
+    aheadNext ? "zs-basic-wizard__step--ahead-next" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}

@@ -4,6 +4,7 @@ import {
   ZS_BASIC_WIZARD_STEPS,
   type ZsBasicWizardStep,
 } from "./zs-basic-wizard";
+import { basicWizardStepButtonClass } from "./product-basic-wizard";
 
 type WizardChoiceOption = {
   value: string;
@@ -77,7 +78,6 @@ export function ZsBasicWizard({
       <div className="zs-basic-wizard__progress">
         <ol className="zs-basic-wizard__steps" aria-label="Kroky průvodce">
           {ZS_BASIC_WIZARD_STEPS.map((item, index) => {
-            const done = item.step < step;
             const active = item.step === step;
             const previousStep = index > 0 ? ZS_BASIC_WIZARD_STEPS[index - 1]! : null;
             return (
@@ -98,7 +98,7 @@ export function ZsBasicWizard({
                 ) : null}
                 <button
                   type="button"
-                  className={`zs-basic-wizard__step${active ? " zs-basic-wizard__step--active" : ""}${done ? " zs-basic-wizard__step--done" : ""}`}
+                  className={basicWizardStepButtonClass(item.step, step)}
                   aria-current={active ? "step" : undefined}
                   onClick={() => onStepChange(item.step)}
                 >
@@ -109,9 +109,6 @@ export function ZsBasicWizard({
             );
           })}
         </ol>
-        <p className="muted-text zs-basic-wizard__flow-hint" aria-hidden="true">
-          {ZS_BASIC_WIZARD_STEPS.map((item) => item.label).join(" → ")}
-        </p>
 
         <div className="zs-basic-wizard__nav">
           <button type="button" className="btn ghost" onClick={onBack} disabled={isFirst}>

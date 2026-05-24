@@ -728,15 +728,6 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const addRow = useCallback(() => {
     setRows((prev) => [...prev, createDefaultNv75UiRow()]);
   }, []);
-  const insertRowAfter = useCallback((afterId: number) => {
-    setRows((prev) => {
-      const idx = prev.findIndex((x) => x.id === afterId);
-      if (idx < 0) return [...prev, createDefaultNv75UiRow()];
-      const next = [...prev];
-      next.splice(idx + 1, 0, createDefaultNv75UiRow());
-      return next;
-    });
-  }, []);
   const removeRow = useCallback((id: number) => {
     setRows((prev) => (prev.length > 1 ? prev.filter((x) => x.id !== id) : prev));
   }, []);
@@ -1552,24 +1543,23 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                       {(bank.breakdown[idx]?.hoursByKind ?? 0) + (bank.breakdown[idx]?.bonus4dHours ?? 0)}
                     </td>
                     <td>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {(rows.length === 1 || idx === rows.length - 1) ? (
-                          <button
-                            type="button"
-                            className="btn ghost"
-                            onClick={() => insertRowAfter(row.id)}
-                            aria-label={`Vložit řádek pod řádek ${idx + 1}`}
-                          >
-                            Vložit
-                          </button>
-                        ) : null}
-                        <button type="button" className="btn ghost" onClick={() => removeRow(row.id)}>
-                          Odebrat
-                        </button>
-                      </div>
+                      <button type="button" className="btn ghost" onClick={() => removeRow(row.id)}>
+                        Odebrat
+                      </button>
                     </td>
                   </tr>
                 ))}
+                <tr className="nv75-units-add-row">
+                  <td>
+                    <button type="button" className="btn ghost nv75-units-add-row__btn" onClick={addRow}>
+                      Vložit druh školy/zařízení
+                    </button>
+                  </td>
+                  <td />
+                  <td />
+                  <td />
+                  <td />
+                </tr>
               </tbody>
             </table>
           </div>
