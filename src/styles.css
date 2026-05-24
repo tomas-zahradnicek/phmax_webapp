@@ -6958,13 +6958,61 @@ select:focus {
   font-size: 0.86rem;
 }
 
+.zs-basic-wizard__progress {
+  margin-top: 16px;
+}
+
 .zs-basic-wizard__steps {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 0;
   list-style: none;
-  margin: 16px 0 0;
+  margin: 0;
   padding: 0;
+}
+
+.zs-basic-wizard__steps-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zs-basic-wizard__step-arrow {
+  color: #94a3b8;
+  font-size: 1.15rem;
+  line-height: 1;
+  font-weight: 700;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+.zs-basic-wizard__step-arrow--done {
+  color: #0284c7;
+}
+
+.zs-basic-wizard__step-arrow--next {
+  color: #0284c7;
+  animation: zs-basic-wizard-arrow-nudge 1.4s ease-in-out infinite;
+}
+
+@keyframes zs-basic-wizard-arrow-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.75;
+  }
+
+  50% {
+    transform: translateX(3px);
+    opacity: 1;
+  }
+}
+
+.zs-basic-wizard__flow-hint {
+  margin: 10px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 .zs-basic-wizard__step {
@@ -7016,8 +7064,8 @@ select:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 16px;
-  justify-content: flex-end;
+  margin-top: 12px;
+  justify-content: flex-start;
 }
 
 .hero-result-layout {

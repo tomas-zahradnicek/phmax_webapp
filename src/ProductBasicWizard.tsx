@@ -55,33 +55,53 @@ export function ProductBasicWizard({
         ) : null}
       </div>
 
-      <ol className="zs-basic-wizard__steps" aria-label="Kroky průvodce">
-        {steps.map((item) => {
-          const done = item.step < step;
-          const active = item.step === step;
-          return (
-            <li key={item.step}>
-              <button
-                type="button"
-                className={`zs-basic-wizard__step${active ? " zs-basic-wizard__step--active" : ""}${done ? " zs-basic-wizard__step--done" : ""}`}
-                aria-current={active ? "step" : undefined}
-                onClick={() => onStepChange(item.step)}
-              >
-                <span className="zs-basic-wizard__step-num">{item.step}</span>
-                <span className="zs-basic-wizard__step-label">{item.label}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
+      <div className="zs-basic-wizard__progress">
+        <ol className="zs-basic-wizard__steps" aria-label="Kroky průvodce">
+          {steps.map((item, index) => {
+            const done = item.step < step;
+            const active = item.step === step;
+            const previousStep = index > 0 ? steps[index - 1]! : null;
+            return (
+              <li key={item.step} className="zs-basic-wizard__steps-item">
+                {previousStep ? (
+                  <span
+                    className={[
+                      "zs-basic-wizard__step-arrow",
+                      previousStep.step < step ? "zs-basic-wizard__step-arrow--done" : "",
+                      previousStep.step === step ? "zs-basic-wizard__step-arrow--next" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    aria-hidden="true"
+                  >
+                    →
+                  </span>
+                ) : null}
+                <button
+                  type="button"
+                  className={`zs-basic-wizard__step${active ? " zs-basic-wizard__step--active" : ""}${done ? " zs-basic-wizard__step--done" : ""}`}
+                  aria-current={active ? "step" : undefined}
+                  onClick={() => onStepChange(item.step)}
+                >
+                  <span className="zs-basic-wizard__step-num">{item.step}</span>
+                  <span className="zs-basic-wizard__step-label">{item.label}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+        <p className="muted-text zs-basic-wizard__flow-hint" aria-hidden="true">
+          {steps.map((item) => item.label).join(" → ")}
+        </p>
 
-      <div className="zs-basic-wizard__nav">
-        <button type="button" className="btn ghost" onClick={onBack} disabled={isFirst}>
-          Zpět
-        </button>
-        <button type="button" className="btn primary" onClick={onNext}>
-          {isLast ? "Přejít na výsledek" : "Další krok"}
-        </button>
+        <div className="zs-basic-wizard__nav">
+          <button type="button" className="btn ghost" onClick={onBack} disabled={isFirst}>
+            Zpět
+          </button>
+          <button type="button" className="btn primary" onClick={onNext}>
+            {isLast ? "Přejít na výsledek" : "Další krok"}
+          </button>
+        </div>
       </div>
     </section>
   );
