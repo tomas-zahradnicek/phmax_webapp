@@ -7152,7 +7152,7 @@ select:focus {
     bottom: calc(env(safe-area-inset-bottom, 0px) + max(12px, 3vh));
     left: max(10px, env(safe-area-inset-left, 0px));
     right: max(10px, env(safe-area-inset-right, 0px));
-    z-index: 45;
+    z-index: 55;
     max-height: min(46vh, 320px);
     overflow: hidden;
     -webkit-overflow-scrolling: touch;
@@ -7356,7 +7356,7 @@ select:focus {
     position: fixed;
     bottom: calc(env(safe-area-inset-bottom, 0px) + max(12px, 3vh));
     right: max(10px, env(safe-area-inset-right, 0px));
-    z-index: 45;
+    z-index: 55;
     padding: 8px 12px;
     border-radius: 999px;
     border: 1px solid rgba(148, 163, 184, 0.45);
@@ -7371,61 +7371,6 @@ select:focus {
   .calculator-mobile-summary-chip:focus-visible {
     outline: 2px solid #2563eb;
     outline-offset: 2px;
-  }
-
-  .calculator-input-issue-banner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 10px 14px;
-    margin: 0 16px 12px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(217, 119, 6, 0.45);
-    background: rgba(254, 243, 199, 0.55);
-  }
-
-  .calculator-input-issue-banner__label {
-    display: block;
-    font-size: 0.92rem;
-    color: #92400e;
-  }
-
-  .calculator-input-issue-banner__detail {
-    margin: 4px 0 0;
-    font-size: 0.84rem;
-    line-height: 1.45;
-    color: #78350f;
-  }
-
-  .calculator-input-issue-banner__action {
-    flex-shrink: 0;
-    align-self: center;
-  }
-
-  .app-shell--validation-hint .calculator-input-issue-banner {
-    position: sticky;
-    top: 0;
-    z-index: 46;
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
-  }
-
-  .calculator-input-issue-banner__list {
-    margin: 6px 0 0;
-    padding-left: 1.15rem;
-    font-size: 0.84rem;
-    line-height: 1.45;
-    color: #78350f;
-  }
-
-  .calculator-input-issue-banner__list-item {
-    margin: 4px 0;
-  }
-
-  .calculator-input-issue-banner__list-action {
-    margin-left: 6px;
-    font-size: inherit;
   }
 
   .dash-continue-card__fill-status {
@@ -8063,6 +8008,62 @@ select:focus {
   font-size: 0.88rem;
 }
 
+/* Banner neúplných vstupů – všechny moduly, sticky při app-shell--validation-hint */
+.calculator-input-issue-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 14px;
+  margin: 0 16px 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(217, 119, 6, 0.45);
+  background: rgba(254, 243, 199, 0.55);
+}
+
+.app-shell--validation-hint .calculator-input-issue-banner {
+  position: sticky;
+  top: 0;
+  z-index: 46;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+}
+
+.calculator-input-issue-banner__label {
+  display: block;
+  font-size: 0.92rem;
+  color: #92400e;
+}
+
+.calculator-input-issue-banner__detail {
+  margin: 4px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #78350f;
+}
+
+.calculator-input-issue-banner__action {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.calculator-input-issue-banner__list {
+  margin: 6px 0 0;
+  padding-left: 1.15rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #78350f;
+}
+
+.calculator-input-issue-banner__list-item {
+  margin: 4px 0;
+}
+
+.calculator-input-issue-banner__list-action {
+  margin-left: 6px;
+  font-size: inherit;
+}
+
 .dash-kpi-strip {
   display: grid;
   gap: 10px;
@@ -8108,6 +8109,33 @@ select:focus {
   font-size: 0.75rem;
   color: var(--muted);
   line-height: 1.3;
+}
+
+.dash-kpi-tile__status {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.dash-kpi-tile__status--empty {
+  color: #64748b;
+}
+
+.dash-kpi-tile__status--ok {
+  color: #166534;
+}
+
+.dash-kpi-tile__status--warning {
+  color: #92400e;
+}
+
+.dash-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .dash-cards {

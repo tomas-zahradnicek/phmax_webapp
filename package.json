@@ -15,6 +15,8 @@
     "check:readme-sync": "node scripts/check-readme-sync.mjs",
     "check:no-legacy-root-pages": "node scripts/check-no-legacy-root-pages.mjs",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
     "extract:ss-metodika": "node scripts/extract-ss-metodika-docx.mjs",
     "docs:concat-md": "node scripts/concat-zdroje-md.mjs",
     "docs:concat-ts": "node scripts/concat-zdroje-ts.mjs",
@@ -26,10 +28,11 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "jszip": "^3.10.1",
+    "@playwright/test": "^1.60.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
+    "jszip": "^3.10.1",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
     "vitest": "^2.1.6"

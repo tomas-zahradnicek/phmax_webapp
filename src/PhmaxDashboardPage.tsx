@@ -313,6 +313,12 @@ function dashboardFillStatusClass(hasData: boolean, verdict: DashboardVerdict | 
   return "dash-continue-card__fill-status--empty";
 }
 
+function dashboardKpiStatusClass(row: DashboardRow): string {
+  if (!row.hasData) return "dash-kpi-tile__status--empty";
+  if (row.verdict?.tone === "ok") return "dash-kpi-tile__status--ok";
+  return "dash-kpi-tile__status--warning";
+}
+
 function deriveSsDashboardVerdict(): DashboardVerdict | null {
   const raw = typeof localStorage === "undefined" ? null : localStorage.getItem(PHMAX_SS_UNITS_STORAGE_KEY);
   const rows = parseSsDraftRows(raw);
@@ -655,9 +661,16 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               ))}
             </div>
             <p className="dash-card__meta">{continueRow.status}</p>
-            <button type="button" className="btn primary" onClick={() => setProductView(continueRow.id)}>
-              Pokračovat v {DASH_CALC_LABEL[continueRow.id]}
-            </button>
+            <div className="dash-card__actions">
+              <button type="button" className="btn primary" onClick={() => setProductView(continueRow.id)}>
+                Pokračovat v {DASH_CALC_LABEL[continueRow.id]}
+              </button>
+              {!continueRow.hasData ? (
+                <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(continueRow.id)}>
+                  Začít u ukázkového příkladu
+                </button>
+              ) : null}
+            </div>
           </section>
         ) : null}
 
@@ -711,6 +724,12 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           </p>
           <p className="dash-overview-summary muted-text">
             Moduly s uloženými daty: <strong>{modulesWithData}</strong> z {rows.length} · poslední návštěva modulu je u každé karty níže.
+            {modulesWithData === 0 ? (
+              <>
+                {" "}
+                Zatím nic neuloženo v tomto prohlížeči – u každého modulu můžete začít tlačítkem <strong>Začít u ukázky</strong>.
+              </>
+            ) : null}
           </p>
           <div className="dash-kpi-strip" aria-label="Souhrnné KPI modulů">
             {rows.map((row) => (
@@ -721,6 +740,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 <span className="dash-kpi-tile__module">{DASH_CALC_LABEL[row.id]}</span>
                 <strong className="dash-kpi-tile__value">{row.primaryKpi.value}</strong>
                 <span className="dash-kpi-tile__hint">{row.primaryKpi.label}</span>
+                <span className={`dash-kpi-tile__status ${dashboardKpiStatusClass(row)}`}>{row.status}</span>
               </article>
             ))}
           </div>
@@ -746,9 +766,16 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 <p className="dash-card__meta">{row.detail}</p>
                 <p className="dash-card__meta">Naposledy otevřeno: {row.lastVisit}</p>
                 <p className="dash-card__meta">Pojmenované zálohy: {row.namedBackups}</p>
-                <button type="button" className="btn primary" onClick={() => setProductView(row.id)}>
-                  Otevřít
-                </button>
+                <div className="dash-card__actions">
+                  <button type="button" className="btn primary" onClick={() => setProductView(row.id)}>
+                    Otevřít
+                  </button>
+                  {!row.hasData ? (
+                    <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(row.id)}>
+                      Začít u ukázky
+                    </button>
+                  ) : null}
+                </div>
               </article>
             ))}
           </div>

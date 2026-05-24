@@ -65,6 +65,7 @@ npm run test:golden
   - `npm run check:golden-manifest`
   - `npm run check:ci-guards-manifest`
 - Ruční smoke na mobilu (cca 5 min): [docs/mobile-smoke-checklist.md](docs/mobile-smoke-checklist.md)
+- Automatický mobilní smoke (PV): `npm run test:e2e` (jednorázově `npm run test:e2e:install`)
 
 ## Struktura (zkráceně)
 
