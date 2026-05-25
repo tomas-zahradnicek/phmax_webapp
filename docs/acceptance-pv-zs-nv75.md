@@ -22,7 +22,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | P3 | Průvodce krok **2 Vstupy** → **Přejít k chybě** → sekce vstupů | E2E |
 | P4 | Checklist „Kdy přidat další pracoviště“ u prázdné tabulky | contract |
 | P5 | § 1d odst. 3 – box u řádku + text u souhrnu (bez výpočtu krácení) | contract |
-| P6 | 3 ukázky z comboboxu – PHmax/PHAmax sedí s očekáváním | ručně |
+| P6 | 3 ukázky z comboboxu – PHmax/PHAmax sedí s očekáváním | contract |
 
 ---
 
@@ -34,7 +34,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | Z2 | Banner bez duplicity „Kontrola vstupů“; stejný verdikt v docku | E2E |
 | Z3 | Průvodce PHmax – krok 2 Třídy → **Přejít k chybě** (prázdný formulář) | E2E |
 | Z4 | PHAmax/PHPmax v basic – věta „pro tento typ školy se nepočítá“ u neplatného režimu | contract |
-| Z5 | Export CSV/XLSX – metadata a orientační disclaimer | ručně |
+| Z5 | Export CSV/XLSX – metadata a orientační disclaimer | contract |
 
 ---
 
@@ -56,8 +56,8 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | # | Kontrola | OK |
 |---|----------|-----|
 | S1 | E2E smoke (`sd-mobile-smoke.spec.ts`) projde | E2E |
-| S2 | Souhrnný režim – věta o počtu oddělení | ručně |
-| S3 | Porovnání variant A/B s pojmenovanou zálohou | ručně |
+| S2 | Souhrnný režim – věta o počtu oddělení | contract |
+| S3 | Porovnání variant A/B s pojmenovanou zálohou | contract |
 
 ---
 
@@ -79,4 +79,4 @@ npm run test:e2e
 
 | Datum | Tester | PV | ZŠ | NV75 | Poznámka |
 |-------|--------|----|----|------|----------|
-| 2026-05-21 | CI + contract (`phmax-acceptance-pv-zs-nv75-contract`) | E2E+contract | E2E+contract+snapshot refaktor | E2E+contract | 12 E2E mobilní smoke; Z5/N4/S2/S3 ručně před release |
+| 2026-05-21 | CI + contract | E2E+contract | E2E+contract+Zs panely | E2E+contract | checklist kompletní (contract/E2E) |

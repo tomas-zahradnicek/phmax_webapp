@@ -94,6 +94,10 @@ import {
   type ZsFormSnapshotSetters,
 } from "./zs/zs-form-snapshot";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
+import { buildZsExtendedExportMetaRows, ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
+import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
+import { ZsPhpTabPanel } from "./zs/ZsPhpTabPanel";
+import { ZsPhmaxBasicSection } from "./zs/ZsPhmaxBasicSection";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
@@ -1914,19 +1918,20 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const buildExtendedCsvRows = (): readonly (readonly [string, string | number])[] => {
     const tabLabel = tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax";
+    const exportNow = new Date();
     const head: [string, string | number][] = [
-      ["=== Export kalkulačky ZŠ – rozšířený ===", ""],
-      ["Verze aplikace", APP_VERSION],
-      ["Datum a čas exportu (ISO)", new Date().toISOString()],
-      ["Datum a čas exportu (místní)", new Date().toLocaleString("cs-CZ")],
-      ["Metodický podklad (orientačně)", METHODIKA_VERSION_LABEL],
-      ["Režim výpočtu (typ školy)", MODE_CONFIG[mode].label],
-      ["Aktivní záložka při exportu", tabLabel],
-      ["Označení exportu / škola", exportLabel.trim() || "–"],
-      ["Průvodce (volba scénáře)", wizardChoice || "–"],
-      ["Práce s údaji", dataMode === "example" ? "ukázkový příklad" : "vlastní škola"],
-      ["Identifikátor ukázkového příkladu", selectedExample || "–"],
-      ["", ""],
+      ...buildZsExtendedExportMetaRows({
+        appVersion: APP_VERSION,
+        methodikaLabel: METHODIKA_VERSION_LABEL,
+        modeLabel: MODE_CONFIG[mode].label,
+        tabLabel,
+        exportLabel,
+        wizardChoice,
+        dataMode,
+        selectedExample,
+        exportIso: exportNow.toISOString(),
+        exportLocal: exportNow.toLocaleString("cs-CZ"),
+      }),
       ["=== PHmax – vstupy (agregované) ===", ""],
       ["basicType (kód)", basicType],
       ["Běžné třídy – 1. st. počet tříd", basic1Classes],
@@ -2546,7 +2551,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <p>
             <strong>Právní a metodický podklad:</strong> metodika PHmax, PHAmax a PHPmax pro ZV (typicky verze 5 / 2026),{" "}
             <ZsLegisRef citeId="nv123-1" label="NV č. 123/2018 Sb." />, <ZsLegisRef citeId="vyhl48" label="vyhl. č. 48/2005 Sb." />.
-            Aplikace slouží k orientačnímu výpočtu; nejedná se o oficiální výstup zřizovatele.
+            {ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER}
           </p>
         </QuickOnboarding>
         {zsBasicWizardActive ? (
@@ -2803,94 +2808,37 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                 </p>
               </section>
             ) : null}
-            {(hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) && (
-              <section className={`card section-card section-card--module section-card--module-basic${sectionNeedsAttentionClass(hasIssue("basic"))}`} data-section="basic" data-wizard-step="2" data-phmax-pane="classes">
-                <h2>Běžné třídy ZŠ</h2>
-
-                {hasSection("school_variant_first_stage_only") ? (
-                  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
-                    <option value="first_only_1">Neúplná ZŠ – 1 třída 1. stupně</option>
-                    <option value="first_only_2">Neúplná ZŠ – 2 třídy 1. stupně</option>
-                    <option value="first_only_3">Neúplná ZŠ – 3 třídy 1. stupně</option>
-                    <option value="first_only_4">Neúplná ZŠ – 4 a více tříd 1. stupně</option>
-                  </select>
-                ) : (
-                  <select value={basicType} onChange={(e) => setBasicType(e.target.value as BasicType)}>
-                    <option value="full_more_than_2">Úplná ZŠ – více než 2 třídy v některém ročníku</option>
-                    <option value="full_max_2">Úplná ZŠ – nejvýše 2 třídy v každém ročníku</option>
-                  </select>
-                )}
-
-                <div className="grid two">
-                  {hasSection("basic_first") && (
-                    <div className="subcard">
-                      <h3>1. stupeň</h3>
-                      <div className="grid two">
-                        <NumberField label="Počet tříd" value={basic1Classes} onChange={setBasic1Classes} />
-                        <NumberField label="Počet žáků" value={basic1Pupils} onChange={setBasic1Pupils} />
-                        <ResultCard label="Průměrný počet žáků ve třídě" value={round2(basic1Avg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax na 1 třídu" value={`${basicFirstBand.label} / ${basicFirstBand.value}`} tone="primary" />
-                        <ResultCard label="Výsledek PHmax – 1. stupeň" value={basic1Phmax} tone="success" />
-                        <ResultCard label="Počet tříd × PHmax" value={`${basic1Classes} × ${basicFirstBand.value}`} tone="success" />
-                      </div>
-                      {basic1Classes <= 0 || basic1Pupils <= 0 ? (
-                        <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
-                          {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U 1. stupně doplňte počet tříd i počet žáků.
-                        </p>
-                      ) : null}
-                    </div>
-                  )}
-
-                  {hasSection("basic_second") && (
-                    <div className="subcard">
-                      <h3>2. stupeň</h3>
-                      <div className="grid two">
-                        <NumberField label="Počet tříd" value={basic2Classes} onChange={setBasic2Classes} />
-                        <NumberField label="Počet žáků" value={basic2Pupils} onChange={setBasic2Pupils} />
-                        <ResultCard label="Průměrný počet žáků ve třídě" value={round2(basic2Avg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax na 1 třídu" value={`${basicSecondBand.label} / ${basicSecondBand.value}`} tone="primary" />
-                        <ResultCard label="Výsledek PHmax – 2. stupeň" value={basic2Phmax} tone="success" />
-                        <ResultCard label="Počet tříd × PHmax" value={`${basic2Classes} × ${basicSecondBand.value}`} tone="success" />
-                      </div>
-                      {basic2Classes <= 0 || basic2Pupils <= 0 ? (
-                        <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
-                          {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U 2. stupně doplňte počet tříd i počet žáků.
-                        </p>
-                      ) : null}
-                    </div>
-                  )}
-                </div>
-                {(hasSection("basic_first") || hasSection("basic_second")) ? (
-                  <FieldWhyPhmaxDetails>
-                    <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
-                      <li>
-                        <strong>Počty tříd a žáků</strong> stanoví průměr žáků ve třídě; podle něj aplikace vybere <strong>pásmo z tabulek řádků B1/B3 či B4/B13</strong> příslušné varianty metodiky ZV – to určuje PHmax za 1 třídu.
-                      </li>
-                      <li>
-                        <strong>PHmax za stupeň</strong> pak vychází z násobnosti <em>platný počet tříd × PHmax za třídu</em>; součástí modulu mohou být samostatně i § 38, § 41, přípravné skupiny aj.
-                      </li>
-                      <li>
-                        Vedle rámcového výpočtu v tabulce vždy zkontrolujte <strong>upozornění a vstupní validace</strong> pro hraniční stavy (např. neúplné vyplnění jedné skupiny vstupů).
-                      </li>
-                    </ul>
-                  </FieldWhyPhmaxDetails>
-                ) : null}
-                <div className="grid four section-results">
-                  {hasSection("prep_class") && <ResultCard label="Přípravná třída – výsledek" value={prepClassPhmax} tone="success" />}
-                  {hasSection("prep_special") && <ResultCard label="Přípravný stupeň ZŠS – výsledek" value={prepSpecialPhmax} tone="success" />}
-                  {hasSection("par38") && <ResultCard label="§ 38 – výsledek" value={par38Phmax} tone="success" />}
-                  {hasSection("par41") && <ResultCard label="§ 41 – výsledek" value={par41Phmax} tone="success" />}
-                </div>
-
-                {(hasSection("basic_first") || hasSection("basic_second")) && (
-                  <div className="grid three section-results-strip">
-                    {hasSection("basic_first") ? <ResultCard label="PHmax – 1. stupeň" value={basic1Phmax} tone="success" /> : null}
-                    {hasSection("basic_second") ? <ResultCard label="PHmax – 2. stupeň" value={basic2Phmax} tone="success" /> : null}
-                    <ResultCard label="PHmax – běžné třídy celkem" value={basicPhmax} tone="success" />
-                  </div>
-                )}
-              </section>
-            )}
+            <ZsPhmaxBasicSection
+              hasBasicIssue={hasIssue("basic")}
+              showBasicFirst={hasSection("basic_first")}
+              showBasicSecond={hasSection("basic_second")}
+              showSchoolVariantFirstOnly={hasSection("school_variant_first_stage_only")}
+              showPrepClass={hasSection("prep_class")}
+              showPrepSpecial={hasSection("prep_special")}
+              showPar38={hasSection("par38")}
+              showPar41={hasSection("par41")}
+              basicType={basicType}
+              onBasicTypeChange={setBasicType}
+              basic1Classes={basic1Classes}
+              basic1Pupils={basic1Pupils}
+              basic2Classes={basic2Classes}
+              basic2Pupils={basic2Pupils}
+              onBasic1ClassesChange={setBasic1Classes}
+              onBasic1PupilsChange={setBasic1Pupils}
+              onBasic2ClassesChange={setBasic2Classes}
+              onBasic2PupilsChange={setBasic2Pupils}
+              basic1Avg={basic1Avg}
+              basic2Avg={basic2Avg}
+              basicFirstBand={basicFirstBand}
+              basicSecondBand={basicSecondBand}
+              basic1Phmax={basic1Phmax}
+              basic2Phmax={basic2Phmax}
+              basicPhmax={basicPhmax}
+              prepClassPhmax={prepClassPhmax}
+              prepSpecialPhmax={prepSpecialPhmax}
+              par38Phmax={par38Phmax}
+              par41Phmax={par41Phmax}
+            />
 
             <div className="grid two" data-section="zs-phmax-exceptions">
               {(hasSection("sec16_first") || hasSection("sec16_second")) && (
@@ -3601,201 +3549,47 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         )}
 
         {tab === "pha" && (
-          <ZsModuleGate sectionId="pha" title="PHAmax – asistenti pedagoga" viewMode={viewMode} defaultOpenInBasic>
-          <section className={`card section-card section-card--pha${sectionNeedsAttentionClass(hasIssue("pha"))}`} data-section="pha">
-            <h2>PHAmax – asistenti pedagoga</h2>
-            <p className="muted-text">
-              U tříd <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> a ZŠ speciální podle metodiky (
-              <ZsLegisRef citeId="nv123-1" label="NV č. 123/2018 Sb." />, <ZsLegisRef citeId="vyhl48" label="vyhl. č. 48/2005 Sb." />
-              ) rozlišujte příznak třídy: AD1 (ostatní zdravotní postižení dle{" "}
-              <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" />) vs. AD2 (těžší varianty – tělesné postižení, PVCH,
-              souběžné postižení, autismus). Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v5;
-              průměr žáků ve skupině stejného typu určí pásmo a hodnotu PHAmax na třídu. Přípravný stupeň ZŠ speciální je
-              řádek B45 (samostatná volba).
-            </p>
-            <InputOutputLegend compact />
-            <TableOuter variant="pha" aria-label="Tabulka PHAmax – asistenti pedagoga">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Typ třídy</th><th>Třídy</th><th>Žáci</th><th>Průměr</th><th>Pásmo</th><th>PHAmax – asistenti pedagoga / třída</th><th>Mezisoučet</th><th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {phaComputedRows.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
-                    </tr>
-                  ) : phaComputedRows.map((row) => (
-                    <tr key={row.id}>
-                      <td>
-                        <select value={row.kind} onChange={(e) => updatePha(row.id, "kind", e.target.value)}>
-                          <option value="zs1">ZŠ §16/9 – 1. stupeň (ř. B35)</option>
-                          <option value="zs1Heavy">ZŠ §16/9 – 1. stupeň, těžší varianty (ř. B36)</option>
-                          <option value="zs2">ZŠ §16/9 – 2. stupeň (ř. B37)</option>
-                          <option value="zs2Heavy">ZŠ §16/9 – 2. stupeň, těžší varianty (ř. B38)</option>
-                          <option value="zss1">ZŠ speciální I. díl – 1. stupeň (ř. B39)</option>
-                          <option value="zss1Heavy">ZŠ speciální I. díl – 1. stupeň, těžší varianty (ř. B40)</option>
-                          <option value="zss2">ZŠ speciální I. díl – 2. stupeň (ř. B41)</option>
-                          <option value="zss2Heavy">ZŠ speciální I. díl – 2. stupeň, těžší varianty (ř. B42)</option>
-                          <option value="zssII">ZŠ speciální II. díl (ř. B43)</option>
-                          <option value="zssIIHeavy">ZŠ speciální II. díl, těžší varianty (ř. B44)</option>
-                          <option value="zssPrep">Přípravný stupeň ZŠ speciální (ř. B45)</option>
-                        </select>
-                      </td>
-                      <td><IntegerInput value={row.classes} onChange={(v) => updatePha(row.id, "classes", v)} /></td>
-                      <td><IntegerInput value={row.pupils} onChange={(v) => updatePha(row.id, "pupils", v)} /></td>
-                      <td>{row.avg}</td>
-                      <td>{row.bandLabel}</td>
-                      <td>{row.perClass}</td>
-                      <td>{row.subtotal}</td>
-                      <td><button className="icon-btn" onClick={() => removePha(row.id)}>✕</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </TableOuter>
-            <div className="toolbar">
-              <button className="btn ghost" onClick={addPha}>Přidat třídu / řádek</button>
-              <button className="btn ghost" onClick={resetPha}>Vymazat údaje PHAmax – asistenti pedagoga</button>
-              <ResultCard label="PHAmax – asistenti pedagoga celkem" value={totalPha} />
-            </div>
-          </section>
-          </ZsModuleGate>
+          <ZsPhaTabPanel
+            viewMode={viewMode}
+            hasPhaIssue={hasIssue("pha")}
+            phaComputedRows={phaComputedRows}
+            totalPha={totalPha}
+            onAdd={addPha}
+            onReset={resetPha}
+            onUpdate={updatePha}
+            onRemove={removePha}
+          />
         )}
 
         {tab === "php" && (
-          <ZsModuleGate sectionId="php" title="PHPmax – metodický výpočet" viewMode={viewMode} defaultOpenInBasic>
-          <section className={`card section-card section-card--php${sectionNeedsAttentionClass(hasIssue("php"))}`} data-section="php">
-            <h2>PHPmax – metodický výpočet <HelpHint text="PHPmax se stanoví podle průměrného počtu žáků za předcházející tři roky. Do tohoto počtu se nezapočítávají žáci vzdělávaní v zahraničí, v zahraniční škole v ČR a v individuálním vzdělávání." /></h2>
-            <p className="muted-text">
-              Postup výpočtu (kroky A–D): rozhodné počty, očištění dat, výpočet a interpretace. Najeďte na ikonu „i“ u nadpisů pro stručnou metodickou nápovědu.
-            </p>
-            <InputOutputLegend compact />
-
-            <div className="tabs tabs--compact">
-              <button className={phpWizardStep === "a" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("a")}>
-                A. Vstupy
-              </button>
-              <button className={phpWizardStep === "b" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("b")}>
-                B. Očištění
-              </button>
-              <button className={phpWizardStep === "c" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("c")}>
-                C. Výpočet
-              </button>
-              <button className={phpWizardStep === "d" ? "tab active" : "tab"} onClick={() => setPhpWizardStep("d")}>
-                D. Výklad
-              </button>
-            </div>
-
-            <div className="toolbar">
-              <button className="btn ghost" onClick={resetPhp}>Vymazat údaje PHPmax – metodický výpočet</button>
-            </div>
-
-            <div className="checks">
-              <label>
-                <input
-                  type="radio"
-                  checked={phpMethodMode === "three_year_avg"}
-                  onChange={() => setPhpMethodMode("three_year_avg")}
-                />
-                Použít průměr za 3 roky
-              </label>
-
-              <label>
-                <input
-                  type="radio"
-                  checked={phpMethodMode === "short_period"}
-                  onChange={() => setPhpMethodMode("short_period")}
-                />
-                Použít kratší období než 3 roky
-              </label>
-            </div>
-
-            {phpWizardStep === "a" && (
-              <>
-                <h3>Zadání počtu žáků <HelpHint text="Rozhodná hodnota pro PHPmax vychází zpravidla z průměru za tři předcházející roky." /></h3>
-                <div className="grid three">
-                  <NumberField label="Počet žáků – rok 1" value={phpYear1} onChange={setPhpYear1} />
-                  <NumberField label="Počet žáků – rok 2" value={phpYear2} onChange={setPhpYear2} />
-                  <NumberField label="Počet žáků – rok 3" value={phpYear3} onChange={setPhpYear3} />
-                </div>
-                <div className="grid three">
-                  <ResultCard label="Metoda" value={phpMethodMode === "three_year_avg" ? "Průměr za 3 roky" : "Kratší období"} />
-                  <ResultCard label="Rozhodná hodnota" value={phpBaseValue} />
-                  <ResultCard label="Stav školy" value={phpExcludedSchool ? "Vyloučená z PHPmax – metodický výpočet" : "Standardní posouzení"} />
-                </div>
-              </>
-            )}
-
-            {phpWizardStep === "b" && (
-              <>
-                <h3>Žáci nezapočítávaní do výpočtu <HelpHint text="Do rozhodného počtu se nezapočítávají žáci vzdělávaní v zahraničí, v zahraniční škole v ČR a v individuálním vzdělávání." /></h3>
-                <div className="grid three">
-                  <NumberField label="Vzdělávání v zahraničí" value={phpExcludedAbroad} onChange={setPhpExcludedAbroad} />
-                  <NumberField label="Zahraniční škola v ČR" value={phpExcludedForeignSchoolCz} onChange={setPhpExcludedForeignSchoolCz} />
-                  <NumberField label="Individuální vzdělávání" value={phpExcludedIndividual} onChange={setPhpExcludedIndividual} />
-                </div>
-                <div className="checks">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={phpExcludedSchool}
-                      onChange={(e) => setPhpExcludedSchool(e.target.checked)}
-                    />
-                    Tato škola se do PHPmax – metodický výpočet nezapočítává
-                  </label>
-                </div>
-                <div className="grid three">
-                  <ResultCard label="Součet vyloučených žáků" value={phpExcludedTotal} />
-                  <ResultCard label="Rozhodná hodnota" value={phpBaseValue} />
-                  <ResultCard label="Očištěná hodnota" value={phpAdjustedValue} />
-                </div>
-              </>
-            )}
-
-            {phpWizardStep === "c" && (
-              <>
-                <h3>Výpočet výsledné hodnoty PHPmax – metodický výpočet</h3>
-                <div className="grid three">
-                  <ResultCard label="Rozhodná hodnota" value={phpBaseValue} />
-                  <ResultCard label="Součet nezapočítávaných žáků" value={phpExcludedTotal} />
-                  <ResultCard label="Očištěná hodnota" value={phpAdjustedValue} />
-                </div>
-                <div className="grid three">
-                  <ResultCard label="Zařazení do pásma" value={phpBand.label} />
-                  <ResultCard label="PHPmax – metodický výpočet" value={phpBand.value} />
-                  <ResultCard label="PHPmax – metodický výpočet celkem" value={totalPhp} />
-                </div>
-              </>
-            )}
-
-            {phpWizardStep === "d" && (
-              <>
-                <h3>Jak výsledek interpretovat v praxi <HelpHint text="Výsledkem je týdenní rozsah financované přímé pedagogické činnosti podle příslušného pásma PHPmax." /></h3>
-                <div className="subcard">
-                  <p className="muted-text">
-                    1. Nejprve se určí rozhodná hodnota podle zvolené metody.
-                  </p>
-                  <p className="muted-text">
-                    2. Poté se odečtou žáci, kteří se do výpočtu nezapočítávají.
-                  </p>
-                  <p className="muted-text">
-                    3. Očištěná hodnota se porovná s pásmy PHP_TABLE.
-                  </p>
-                  <p className="muted-text">
-                    4. Pokud je škola vyloučená z PHPmax – metodický výpočet, výsledek je 0 bez ohledu na počty žáků.
-                  </p>
-                </div>
-                <div className="grid three">
-                  <ResultCard label="Rozhodná hodnota" value={phpBaseValue} />
-                  <ResultCard label="Očištěná hodnota" value={phpAdjustedValue} />
-                  <ResultCard label="Výsledek PHPmax – metodický výpočet" value={totalPhp} />
-                </div>
-              </>
-            )}
-          </section>
-          </ZsModuleGate>
+          <ZsPhpTabPanel
+            viewMode={viewMode}
+            hasPhpIssue={hasIssue("php")}
+            phpWizardStep={phpWizardStep}
+            phpMethodMode={phpMethodMode}
+            phpYear1={phpYear1}
+            phpYear2={phpYear2}
+            phpYear3={phpYear3}
+            phpExcludedAbroad={phpExcludedAbroad}
+            phpExcludedForeignSchoolCz={phpExcludedForeignSchoolCz}
+            phpExcludedIndividual={phpExcludedIndividual}
+            phpExcludedSchool={phpExcludedSchool}
+            phpBaseValue={phpBaseValue}
+            phpExcludedTotal={phpExcludedTotal}
+            phpAdjustedValue={phpAdjustedValue}
+            phpBand={phpBand}
+            totalPhp={totalPhp}
+            onWizardStepChange={setPhpWizardStep}
+            onMethodModeChange={setPhpMethodMode}
+            onYear1Change={setPhpYear1}
+            onYear2Change={setPhpYear2}
+            onYear3Change={setPhpYear3}
+            onExcludedAbroadChange={setPhpExcludedAbroad}
+            onExcludedForeignSchoolCzChange={setPhpExcludedForeignSchoolCz}
+            onExcludedIndividualChange={setPhpExcludedIndividual}
+            onExcludedSchoolChange={setPhpExcludedSchool}
+            onReset={resetPhp}
+          />
         )}
 
         <section className="card muted card--summary section-card section-card--overview" data-section="overview" data-wizard-step="5" data-phmax-pane="summary">

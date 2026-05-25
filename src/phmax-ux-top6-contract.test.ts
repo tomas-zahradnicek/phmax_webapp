@@ -126,9 +126,15 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("ZsModuleGate");
     expect(src).toMatch(/PageTableOfContents|tocSections=/);
     expect(src).toContain("ux-expert-only");
-    for (const moduleId of ["psych", "health", "minority", "gym", "mixed", "extras", "pha", "php"]) {
+    for (const moduleId of ["psych", "health", "minority", "gym", "mixed", "extras"]) {
       expect(src).toContain(`sectionId="${moduleId}"`);
     }
+    expect(readSource("src/zs/ZsPhaTabPanel.tsx")).toContain('sectionId="pha"');
+    expect(readSource("src/zs/ZsPhpTabPanel.tsx")).toContain('sectionId="php"');
+    expect(src).toContain("ZsPhaTabPanel");
+    expect(src).toContain("ZsPhpTabPanel");
+    expect(src).toContain("ZsPhmaxBasicSection");
+    expect(readSource("src/zs/ZsPhmaxBasicSection.tsx")).toContain('data-section="basic"');
     expect(src).toContain("ZsBasicWizard");
     expect(src).toContain("ZsPhaPhpBasicGuide");
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__mobile-fold");

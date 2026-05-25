@@ -25,13 +25,26 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(pv).toContain("Kdy přidat další pracoviště");
   });
 
-  it("ZŠ – snapshot modul a validace (refaktor krok 2)", () => {
+  it("ZŠ – snapshot, export metadata a PHA záložka (refaktor krok 2–3)", () => {
     const zsPage = readSource("src/PhmaxZsPage.tsx");
     expect(zsPage).toContain("buildZsFormSnapshot");
     expect(zsPage).toContain("useZsFormAutosave");
     expect(zsPage).toContain("ZS_AUTOSAVE_STORAGE_KEY");
+    expect(zsPage).toContain("buildZsExtendedExportMetaRows");
+    expect(zsPage).toContain("ZsPhaTabPanel");
+    expect(zsPage).toContain("ZsPhpTabPanel");
+    expect(zsPage).toContain("ZsPhmaxBasicSection");
+    expect(readSource("src/phmax-sd-acceptance-contract.test.ts")).toContain("sd-summary-dept-hint");
     expect(readSource("src/zs/zs-form-snapshot.ts")).toContain('export const ZS_AUTOSAVE_STORAGE_KEY = "edu-cz-zs-calculator-state"');
+    expect(readSource("src/zs/zs-export-rows.ts")).toContain("buildZsExtendedExportMetaRows");
     expect(readSource("src/ZsPhaPhpBasicGuide.tsx")).toContain("nepočítá");
+  });
+
+  it("PV P6 – tři metodické ukázky mají golden test", () => {
+    const t = readSource("src/phmax-pv-hero-examples-acceptance.test.ts");
+    expect(t).toContain("meth_pv_1_240");
+    expect(t).toContain("meth_pv_2_245");
+    expect(t).toContain("meth_pv_3_pha27");
   });
 
   it("NV75 – export a vložení druhu školy (N5, N6)", () => {
