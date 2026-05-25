@@ -1,4 +1,11 @@
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useMatchMedia } from "./useMatchMedia";
+
+const TOC_DESKTOP_QUERY = "(min-width: 1200px)";
+
+function readDefaultTocOpen(): boolean {
+  return typeof window !== "undefined" && window.matchMedia(TOC_DESKTOP_QUERY).matches;
+}
 
 export type PageTocSection = {
   id: string;
@@ -29,8 +36,9 @@ function scrollToSection(sectionId: string, scrollOffset: number) {
  * mobilní panel s klávesnicí (Escape zavře, Tab cyklí uvnitř).
  */
 export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOfContentsProps) {
+  const isDesktopToc = useMatchMedia(TOC_DESKTOP_QUERY);
   const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [tocOpen, setTocOpen] = useState(readDefaultTocOpen);
   const mobileNavId = useId().replace(/:/g, "");
   const triggerRef = useRef<HTMLButtonElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -71,29 +79,29 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
   }, [sections, activeId]);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!tocOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        setMobileOpen(false);
+        setTocOpen(false);
         triggerRef.current?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [mobileOpen]);
+  }, [tocOpen]);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!tocOpen || isDesktopToc) return;
     const id = window.requestAnimationFrame(() => {
       const first = navRef.current?.querySelector<HTMLElement>(".page-toc__link");
       first?.focus();
     });
     return () => window.cancelAnimationFrame(id);
-  }, [mobileOpen]);
+  }, [tocOpen, isDesktopToc]);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!tocOpen) return;
     const nav = navRef.current;
     if (!nav) return;
     const selector = 'button, [href], [tabindex]:not([tabindex="-1"])';
@@ -117,13 +125,23 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
     };
     nav.addEventListener("keydown", onKeyDown);
     return () => nav.removeEventListener("keydown", onKeyDown);
-  }, [mobileOpen]);
+  }, [tocOpen]);
 
   if (sections.length === 0) return null;
 
+  const closeToc = () => {
+    setTocOpen(false);
+    triggerRef.current?.focus();
+  };
+
   const navBody = (
     <>
-      <p className="page-toc__heading">Obsah</p>
+      <div className="page-toc__heading-row">
+        <p className="page-toc__heading">Obsah</p>
+        <button type="button" className="page-toc__toggle" onClick={closeToc}>
+          Skrýt
+        </button>
+      </div>
       <hr className="page-toc__rule" aria-hidden="true" />
       <ul className="page-toc__list">
         {sections.map((s) => (
@@ -134,8 +152,10 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
               aria-current={activeId === s.id ? "location" : undefined}
               onClick={() => {
                 scrollToSection(s.id, scrollOffset);
-                setMobileOpen(false);
-                triggerRef.current?.focus();
+                if (!isDesktopToc) {
+                  setTocOpen(false);
+                  triggerRef.current?.focus();
+                }
               }}
             >
               {s.label}
@@ -154,26 +174,27 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
   );
 
   return (
-    <>
+    <div className={`page-toc-shell${tocOpen ? "" : " page-toc-shell--collapsed"}`}>
       <button
         ref={triggerRef}
         type="button"
         className="page-toc-mobile-trigger"
-        aria-expanded={mobileOpen}
+        aria-expanded={tocOpen}
         aria-controls={mobileNavId}
-        aria-label={mobileOpen ? "Skrýt obsah stránky" : "Zobrazit obsah stránky"}
-        onClick={() => setMobileOpen((o) => !o)}
+        aria-label={tocOpen ? "Skrýt obsah stránky" : "Zobrazit obsah stránky"}
+        onClick={() => setTocOpen((o) => !o)}
       >
-        {mobileOpen ? "Skrýt" : "Obsah"}
+        {tocOpen ? "Skrýt" : "Obsah"}
       </button>
       <nav
         ref={navRef}
         id={mobileNavId}
-        className={`page-toc page-toc--rail${mobileOpen ? " page-toc--mobile-open" : ""}`}
+        className={`page-toc page-toc--rail${tocOpen ? " page-toc--open" : ""}`}
         aria-label="Obsah stránky"
+        aria-hidden={!tocOpen}
       >
         {navBody}
       </nav>
-    </>
+    </div>
   );
 }

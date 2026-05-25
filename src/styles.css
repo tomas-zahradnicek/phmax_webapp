@@ -7561,7 +7561,7 @@ select:focus {
     transform: translateY(6px);
   }
 
-  body:has(.calculator-mobile-scroll-results) .page-toc--rail.page-toc--mobile-open {
+  body:has(.calculator-mobile-scroll-results) .page-toc--rail.page-toc--open {
     transform: translateY(0);
   }
 
@@ -7903,13 +7903,74 @@ select:focus {
   border: 1px solid rgba(148, 163, 184, 0.28);
 }
 
+.page-toc__heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .page-toc__heading {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #0f172a;
+}
+
+.page-toc__toggle {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #f8fafc;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.page-toc__toggle:hover,
+.page-toc__toggle:focus-visible {
+  background: var(--primary-soft);
+  outline: none;
+}
+
+@media (min-width: 1200px) {
+  .page-toc-shell--collapsed .page-toc-mobile-trigger {
+    display: block;
+    position: fixed;
+    right: 12px;
+    top: 72px;
+    z-index: 46;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    background: #fff;
+    box-shadow: var(--shadow-md);
+    font-weight: 700;
+    font-size: 0.86rem;
+    cursor: pointer;
+  }
+
+  .page-toc-shell:not(.page-toc-shell--collapsed) .page-toc-mobile-trigger {
+    display: none;
+  }
+
+  .page-toc--rail:not(.page-toc--open) {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(12px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .page-toc--rail.page-toc--open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
 }
 
 .page-toc__rule {
@@ -7986,10 +8047,14 @@ select:focus {
     transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
-  .page-toc--rail.page-toc--mobile-open {
+  .page-toc--rail.page-toc--open {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
+  }
+
+  .page-toc__toggle {
+    display: none;
   }
 }
 
