@@ -101,6 +101,10 @@ import { ZsPhmaxSec16Section } from "./zs/ZsPhmaxSec16Section";
 import { ZsPhmaxSpecialSection } from "./zs/ZsPhmaxSpecialSection";
 import { ZsPhmaxPsychSection } from "./zs/ZsPhmaxPsychSection";
 import { ZsPhmaxHealthSection } from "./zs/ZsPhmaxHealthSection";
+import { ZsPhmaxMinoritySection } from "./zs/ZsPhmaxMinoritySection";
+import { ZsPhmaxGymSection } from "./zs/ZsPhmaxGymSection";
+import { ZsPhmaxMixedSection } from "./zs/ZsPhmaxMixedSection";
+import { ZsPhmaxExtrasSection } from "./zs/ZsPhmaxExtrasSection";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
@@ -2916,296 +2920,117 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               )}
 
               {hasSection("minority_first") && (
-                <ZsModuleGate sectionId="minority" title="ZŠ s jazykem národnostní menšiny" viewMode={viewMode}>
-                <section className="card section-card section-card--module section-card--module-minority" data-section="minority" data-wizard-step="3" data-phmax-pane="exceptions">
-                  <h2>ZŠ s jazykem národnostní menšiny</h2>
-                  <select value={minorityType} onChange={(e) => setMinorityType(e.target.value as keyof typeof B17_B21)}>
-                    <option value="minority1">1 třída 1. stupně</option>
-                    <option value="minority2">2 třídy 1. stupně</option>
-                    <option value="minority3">3 a více tříd 1. stupně</option>
-                    <option value="minorityFull1">Ročníky 1. i 2. stupně</option>
-                  </select>
-                  <div className="grid two">
-                    <div className="subcard">
-                      <h3>1. stupeň</h3>
-                      <div className="grid two">
-                        <NumberField label="Počet tříd" value={minority1Classes} onChange={setMinority1Classes} />
-                        <NumberField label="Počet žáků" value={minority1Pupils} onChange={setMinority1Pupils} />
-                        <ResultCard label="Průměrný počet žáků ve třídě" value={round2(minority1Avg)} tone="primary" />
-                        <ResultCard label="Pásmo a PHmax na 1 třídu" value={`${minority1Band.label} / ${minority1Band.value}`} tone="primary" />
-                        <ResultCard label="Výsledek PHmax – 1. stupeň" value={minority1Phmax} tone="success" />
-                        <ResultCard label="Počet tříd × PHmax" value={`${minority1Classes} × ${minority1Band.value}`} tone="success" />
-                      </div>
-                    </div>
-                    {minorityType === "minorityFull1" && hasSection("minority_second") && (
-                      <div className="subcard">
-                        <h3>2. stupeň</h3>
-                        <div className="grid two">
-                          <NumberField label="Počet tříd" value={minority2Classes} onChange={setMinority2Classes} />
-                          <NumberField label="Počet žáků" value={minority2Pupils} onChange={setMinority2Pupils} />
-                          <ResultCard label="Průměrný počet žáků ve třídě" value={round2(minority2Avg)} tone="primary" />
-                          <ResultCard label="Pásmo a PHmax na 1 třídu" value={`${minority2Band.label} / ${minority2Band.value}`} tone="primary" />
-                          <ResultCard label="Výsledek PHmax – 2. stupeň" value={minority2Phmax} tone="success" />
-                          <ResultCard label="Počet tříd × PHmax" value={`${minority2Classes} × ${minority2Band.value}`} tone="success" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="grid three section-results-strip">
-                    <ResultCard label="PHmax – jazyk menšiny 1. stupeň" value={minority1Phmax} tone="success" />
-                    {minorityType === "minorityFull1" && hasSection("minority_second") ? <ResultCard label="PHmax – jazyk menšiny 2. stupeň" value={minority2Phmax} tone="success" /> : <ResultCard label="PHmax – jazyk menšiny 2. stupeň" value="–" tone="primary" />}
-                    <ResultCard label="PHmax – jazyk menšiny celkem" value={minorityPhmax} tone="success" />
-                  </div>
-                </section>
-                </ZsModuleGate>
+                <ZsPhmaxMinoritySection
+                  viewMode={viewMode}
+                  minorityType={minorityType}
+                  onMinorityTypeChange={setMinorityType}
+                  showSecondStage={hasSection("minority_second")}
+                  minority1Classes={minority1Classes}
+                  minority1Pupils={minority1Pupils}
+                  minority2Classes={minority2Classes}
+                  minority2Pupils={minority2Pupils}
+                  onMinority1ClassesChange={setMinority1Classes}
+                  onMinority1PupilsChange={setMinority1Pupils}
+                  onMinority2ClassesChange={setMinority2Classes}
+                  onMinority2PupilsChange={setMinority2Pupils}
+                  minority1Avg={minority1Avg}
+                  minority2Avg={minority2Avg}
+                  minority1Band={minority1Band}
+                  minority2Band={minority2Band}
+                  minority1Phmax={minority1Phmax}
+                  minority2Phmax={minority2Phmax}
+                  minorityPhmax={minorityPhmax}
+                />
               )}
             </div>
 
             <div className="grid two">
               {hasSection("gym_groups") && (
-                <ZsModuleGate sectionId="gym" title="Nižší ročníky víceletých gymnázií" viewMode={viewMode}>
-                <section className="card section-card section-card--module section-card--module-gym" data-section="gym" data-wizard-step="3" data-phmax-pane="exceptions">
-                  <h2>Nižší ročníky víceletých gymnázií</h2>
-                  <p className="muted-text gym-module__lead">
-                    Každý řádek je jeden typ nižšího ročníku gymnázia. Zadejte třídy a žáci; průměr, pásmo a PHmax se dopočítají. Tabulka používá celou šířku karty – na velmi úzkém displeji se může zobrazit posuvník.
-                  </p>
-                  <ScrollGrabRegion className="gym-table-scroll">
-                    <p className="table-outer__hint table-outer__hint--inset">{TABLE_SCROLL_HINT}</p>
-                    <table className="table table--gym">
-                      <thead>
-                        <tr>
-                          <th scope="col">Typ gymnázia</th>
-                          <th scope="col">Třídy</th>
-                          <th scope="col">Žáci</th>
-                          <th scope="col">Průměr</th>
-                          <th scope="col">Pásmo</th>
-                          <th scope="col">PHmax / třída</th>
-                          <th scope="col">Mezisoučet</th>
-                          <th scope="col"><span className="gym-table__sr-head">Smazat</span></th>
-                        </tr>
-                      </thead>
-                    <tbody>
-                      {gymComputedRows.length === 0 ? (
-                        <tr>
-                          <td colSpan={8} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
-                        </tr>
-                      ) : gymComputedRows.map((row) => (
-                        <tr key={row.id}>
-                          <td>
-                            <select value={row.kind} onChange={(e) => updateGym(row.id, "kind", e.target.value)}>
-                              <option value="gym6">Gymnázium šestileté</option>
-                              <option value="gym8">Gymnázium osmileté</option>
-                              <option value="sport8">Gymnázium sportovní 8leté</option>
-                              <option value="sport6">Gymnázium sportovní 6leté</option>
-                            </select>
-                          </td>
-                          <td><IntegerInput value={row.classes} onChange={(v) => updateGym(row.id, "classes", v)} /></td>
-                          <td><IntegerInput value={row.pupils} onChange={(v) => updateGym(row.id, "pupils", v)} /></td>
-                          <td>{row.avg}</td>
-                          <td>{row.bandLabel}</td>
-                          <td>{row.perClass}</td>
-                          <td>{row.subtotal}</td>
-                          <td><button className="icon-btn" onClick={() => removeGym(row.id)}>✕</button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    </table>
-                  </ScrollGrabRegion>
-                  <button type="button" className="btn ghost gym-module__add" onClick={addGym}>Přidat třídu / řádek</button>
-                </section>
-                </ZsModuleGate>
+                <ZsPhmaxGymSection
+                  viewMode={viewMode}
+                  rows={gymComputedRows}
+                  onAdd={addGym}
+                  onUpdate={updateGym}
+                  onRemove={removeGym}
+                />
               )}
 
               {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
-                <ZsModuleGate sectionId="mixed" title="Smíšené třídy a ZŠ speciální" viewMode={viewMode}>
-                <section className="card section-card section-card--module section-card--module-mixed mixed-module" data-section="mixed" data-wizard-step="3" data-phmax-pane="exceptions">
-                  <h2>
-                    Smíšené třídy <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" /> a ZŠ speciální{" "}
-                    <HelpHint text="Podle metodiky se tyto třídy posuzují samostatně podle převažujícího oboru vzdělání. Pokud ve třídě převažuje obor 79-01-C/01, použijí se řádky B9 až B10. Pokud převažuje 79-01-B/01 nebo je počet žáků shodný, použijí se řádky B26 až B28." />
-                  </h2>
-                  <p className="muted-text mixed-module__lead">
-                    Přehled v tabulkách: každý řádek je jeden obor (C/01 běžná ZŠ, B/01 ZŠ speciální). Sloupce vedou od vstupů přes průměr a pásmo až po dílčí PHmax; dole je součet za stupeň.
-                  </p>
-
-                  <div className="mixed-module__tables">
-                    <MixedStageTable
-                      stageTitle="1. stupeň"
-                      methodNote="Metodika: řádky B9 (obor 79-01-C/01) a B26 (obor 79-01-B/01), 1. stupeň."
-                      zsPupils={mixedMethodFirstZsPupils}
-                      zsClasses={mixedMethodFirstZsClasses}
-                      zsAvg={mixedMethodFirstZsAvg}
-                      zsBand={mixedMethodFirstZsBand}
-                      zsResult={mixedMethodFirstZsResult}
-                      specPupils={mixedMethodFirstSpecialPupils}
-                      specClasses={mixedMethodFirstSpecialClasses}
-                      specAvg={mixedMethodFirstSpecialAvg}
-                      specBand={mixedMethodFirstSpecialBand}
-                      specResult={mixedMethodFirstSpecialResult}
-                      stageTotal={mixedMethodFirstTotal}
-                      setZsPupils={setMixedMethodFirstZsPupils}
-                      setZsClasses={setMixedMethodFirstZsClasses}
-                      setSpecPupils={setMixedMethodFirstSpecialPupils}
-                      setSpecClasses={setMixedMethodFirstSpecialClasses}
-                      emphasizeEmpty={validationHighlight}
-                    />
-                    <MixedStageTable
-                      stageTitle="2. stupeň"
-                      methodNote="Metodika: řádky B10 (obor 79-01-C/01) a B27 (obor 79-01-B/01), 2. stupeň."
-                      zsPupils={mixedMethodSecondZsPupils}
-                      zsClasses={mixedMethodSecondZsClasses}
-                      zsAvg={mixedMethodSecondZsAvg}
-                      zsBand={mixedMethodSecondZsBand}
-                      zsResult={mixedMethodSecondZsResult}
-                      specPupils={mixedMethodSecondSpecialPupils}
-                      specClasses={mixedMethodSecondSpecialClasses}
-                      specAvg={mixedMethodSecondSpecialAvg}
-                      specBand={mixedMethodSecondSpecialBand}
-                      specResult={mixedMethodSecondSpecialResult}
-                      stageTotal={mixedMethodSecondTotal}
-                      setZsPupils={setMixedMethodSecondZsPupils}
-                      setZsClasses={setMixedMethodSecondZsClasses}
-                      setSpecPupils={setMixedMethodSecondSpecialPupils}
-                      setSpecClasses={setMixedMethodSecondSpecialClasses}
-                      emphasizeEmpty={validationHighlight}
-                    />
-                  </div>
-
-                  <div className="mixed-totals-bar" role="group" aria-label="Souhrn PHmax – smíšené třídy">
-                    <div className="mixed-totals-bar__cell">
-                      <span className="mixed-totals-bar__label">1. stupeň</span>
-                      <span className="mixed-totals-bar__value">{mixedMethodFirstTotal}</span>
-                    </div>
-                    <div className="mixed-totals-bar__cell">
-                      <span className="mixed-totals-bar__label">2. stupeň</span>
-                      <span className="mixed-totals-bar__value">{mixedMethodSecondTotal}</span>
-                    </div>
-                    <div className="mixed-totals-bar__cell mixed-totals-bar__cell--grand">
-                      <span className="mixed-totals-bar__label">Celkem – smíšené třídy</span>
-                      <span className="mixed-totals-bar__value">{mixedMethodTotal}</span>
-                    </div>
-                  </div>
-                </section>
-                </ZsModuleGate>
+                <ZsPhmaxMixedSection
+                  viewMode={viewMode}
+                  validationHighlight={validationHighlight}
+                  mixedMethodFirstZsPupils={mixedMethodFirstZsPupils}
+                  mixedMethodFirstZsClasses={mixedMethodFirstZsClasses}
+                  mixedMethodFirstSpecialPupils={mixedMethodFirstSpecialPupils}
+                  mixedMethodFirstSpecialClasses={mixedMethodFirstSpecialClasses}
+                  mixedMethodSecondZsPupils={mixedMethodSecondZsPupils}
+                  mixedMethodSecondZsClasses={mixedMethodSecondZsClasses}
+                  mixedMethodSecondSpecialPupils={mixedMethodSecondSpecialPupils}
+                  mixedMethodSecondSpecialClasses={mixedMethodSecondSpecialClasses}
+                  mixedMethodFirstZsAvg={mixedMethodFirstZsAvg}
+                  mixedMethodSecondZsAvg={mixedMethodSecondZsAvg}
+                  mixedMethodFirstSpecialAvg={mixedMethodFirstSpecialAvg}
+                  mixedMethodSecondSpecialAvg={mixedMethodSecondSpecialAvg}
+                  mixedMethodFirstZsBand={mixedMethodFirstZsBand}
+                  mixedMethodSecondZsBand={mixedMethodSecondZsBand}
+                  mixedMethodFirstSpecialBand={mixedMethodFirstSpecialBand}
+                  mixedMethodSecondSpecialBand={mixedMethodSecondSpecialBand}
+                  mixedMethodFirstZsResult={mixedMethodFirstZsResult}
+                  mixedMethodSecondZsResult={mixedMethodSecondZsResult}
+                  mixedMethodFirstSpecialResult={mixedMethodFirstSpecialResult}
+                  mixedMethodSecondSpecialResult={mixedMethodSecondSpecialResult}
+                  mixedMethodFirstTotal={mixedMethodFirstTotal}
+                  mixedMethodSecondTotal={mixedMethodSecondTotal}
+                  mixedMethodTotal={mixedMethodTotal}
+                  onMixedMethodFirstZsPupilsChange={setMixedMethodFirstZsPupils}
+                  onMixedMethodFirstZsClassesChange={setMixedMethodFirstZsClasses}
+                  onMixedMethodFirstSpecialPupilsChange={setMixedMethodFirstSpecialPupils}
+                  onMixedMethodFirstSpecialClassesChange={setMixedMethodFirstSpecialClasses}
+                  onMixedMethodSecondZsPupilsChange={setMixedMethodSecondZsPupils}
+                  onMixedMethodSecondZsClassesChange={setMixedMethodSecondZsClasses}
+                  onMixedMethodSecondSpecialPupilsChange={setMixedMethodSecondSpecialPupils}
+                  onMixedMethodSecondSpecialClassesChange={setMixedMethodSecondSpecialClasses}
+                />
               )}
             </div>
 
             {(hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) && (
-              <ZsModuleGate
-                sectionId="extras"
-                title={
+              <ZsPhmaxExtrasSection
+                viewMode={viewMode}
+                gateTitle={
                   hasSection("prep_class") || hasSection("prep_special")
                     ? "Samostatné položky PHmax"
                     : "§ 38 a § 41 (navýšení PHmax)"
                 }
-                viewMode={viewMode}
-              >
-              <section className="card section-card section-card--module section-card--module-extras" data-section="extras" data-wizard-step="3" data-phmax-pane="exceptions">
-                <h2>
-                  {hasSection("prep_class") || hasSection("prep_special") ? (
-                    "Samostatné položky PHmax"
-                  ) : (
-                    <>
-                      <ZsLegisRef citeId="zs-par38" label="§ 38" /> a <ZsLegisRef citeId="zs-par41" label="§ 41" /> školského
-                      zákona (navýšení PHmax)
-                    </>
-                  )}{" "}
-                  <HelpHint text="Za žáka podle § 38 nebo § 41 se celkové PHmax školy navyšuje o 0,25 h (1. stupeň) nebo 0,5 h (2. stupeň) na žáka; tito žáci se nezapočítávají do průměru třídy pro tabulky B1–B28. Aplikace neřeší rozvržení hodin do týdnů – k přímé pedagogické činnosti a úvazku viz výklad MŠMT: https://www.msmt.cz/dokumenty/pravni-vyklad-k-23-zakona-opedagogickych-pracovnicich" />
-                </h2>
-                <div className="grid four">
-                  {hasSection("prep_class") && (
-                    <>
-                      <NumberField label="Přípravné třídy – počet tříd" value={prepClasses} onChange={setPrepClasses} />
-                      <NumberField label="Přípravné třídy – počet dětí" value={prepChildren} onChange={setPrepChildren} />
-                      <ResultCard label="Přípravná třída – pásmo a PHmax na 1 třídu" value={`${prepAvg < 10 ? "méně než 10 dětí" : "10 a více dětí"} / ${prepPh}`} tone="primary" />
-                      <ResultCard label="Výsledek – přípravná třída" value={round2(prepClasses * prepPh)} tone="success" />
-                    </>
-                  )}
-
-                  {hasSection("prep_special") && (
-                    <>
-                      <NumberField label="Přípravný stupeň ZŠS – počet tříd" value={prepSpecialClasses} onChange={setPrepSpecialClasses} />
-                      <NumberField label="Přípravný stupeň ZŠS – počet dětí" value={prepSpecialChildren} onChange={setPrepSpecialChildren} />
-                      <ResultCard label="Přípravný stupeň – pásmo a PHmax na 1 třídu" value={`${prepSpecialAvg < 4 ? "méně než 4 žáci" : "4 a více žáků"} / ${prepSpecialPh}`} tone="primary" />
-                      <ResultCard label="Výsledek – přípravný stupeň ZŠS" value={round2(prepSpecialClasses * prepSpecialPh)} tone="success" />
-                    </>
-                  )}
-
-                  {hasSection("par38") && (
-                    <>
-                      <NumberField
-                        label={
-                          <>
-                            <ZsLegisRef citeId="zs-par38" label="§ 38" /> – 1. stupeň
-                          </>
-                        }
-                        value={p38First}
-                        onChange={setP38First}
-                      />
-                      <NumberField
-                        label={
-                          <>
-                            <ZsLegisRef citeId="zs-par38" label="§ 38" /> – 2. stupeň
-                          </>
-                        }
-                        value={p38Second}
-                        onChange={setP38Second}
-                      />
-                    </>
-                  )}
-
-                  {hasSection("par41") && (
-                    <>
-                      <NumberField
-                        label={
-                          <>
-                            <ZsLegisRef citeId="zs-par41" label="§ 41" /> – 1. stupeň
-                          </>
-                        }
-                        value={p41First}
-                        onChange={setP41First}
-                      />
-                      <NumberField
-                        label={
-                          <>
-                            <ZsLegisRef citeId="zs-par41" label="§ 41" /> – 2. stupeň
-                          </>
-                        }
-                        value={p41Second}
-                        onChange={setP41Second}
-                      />
-                    </>
-                  )}
-                </div>
-                <div className="grid four section-results-strip">
-                  {hasSection("prep_class") ? <ResultCard label="PHmax – přípravná třída" value={prepClassPhmax} tone="success" /> : null}
-                  {hasSection("prep_special") ? <ResultCard label="PHmax – přípravný stupeň ZŠS" value={prepSpecialPhmax} tone="success" /> : null}
-                  {hasSection("par38") ? (
-                    <ResultCard
-                      methodStepLabel="PHmax – § 38"
-                      label={
-                        <>
-                          PHmax – <ZsLegisRef citeId="zs-par38" label="§ 38" />
-                        </>
-                      }
-                      value={par38Phmax}
-                      tone="success"
-                    />
-                  ) : null}
-                  {hasSection("par41") ? (
-                    <ResultCard
-                      methodStepLabel="PHmax – § 41"
-                      label={
-                        <>
-                          PHmax – <ZsLegisRef citeId="zs-par41" label="§ 41" />
-                        </>
-                      }
-                      value={par41Phmax}
-                      tone="success"
-                    />
-                  ) : null}
-                </div>
-              </section>
-              </ZsModuleGate>
+                showPrepClass={hasSection("prep_class")}
+                showPrepSpecial={hasSection("prep_special")}
+                showPar38={hasSection("par38")}
+                showPar41={hasSection("par41")}
+                prepClasses={prepClasses}
+                prepChildren={prepChildren}
+                prepSpecialClasses={prepSpecialClasses}
+                prepSpecialChildren={prepSpecialChildren}
+                p38First={p38First}
+                p38Second={p38Second}
+                p41First={p41First}
+                p41Second={p41Second}
+                onPrepClassesChange={setPrepClasses}
+                onPrepChildrenChange={setPrepChildren}
+                onPrepSpecialClassesChange={setPrepSpecialClasses}
+                onPrepSpecialChildrenChange={setPrepSpecialChildren}
+                onP38FirstChange={setP38First}
+                onP38SecondChange={setP38Second}
+                onP41FirstChange={setP41First}
+                onP41SecondChange={setP41Second}
+                prepAvg={prepAvg}
+                prepPh={prepPh}
+                prepSpecialAvg={prepSpecialAvg}
+                prepSpecialPh={prepSpecialPh}
+                prepClassPhmax={prepClassPhmax}
+                prepSpecialPhmax={prepSpecialPhmax}
+                par38Phmax={par38Phmax}
+                par41Phmax={par41Phmax}
+              />
             )}
 
             <div className="toolbar">

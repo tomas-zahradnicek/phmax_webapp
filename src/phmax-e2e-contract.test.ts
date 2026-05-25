@@ -11,11 +11,13 @@ function readSource(relPath: string) {
 describe("E2E smoke contract", () => {
   it("Playwright mobilní smoke je v repozitáři (PV, ŠD, ZŠ, NV75)", () => {
     expect(fs.existsSync(path.resolve(repoRoot, "playwright.config.ts"))).toBe(true);
+    expect(readSource("playwright.config.ts")).toContain("desktop-chrome");
     for (const specFile of [
       "e2e/pv-mobile-smoke.spec.ts",
       "e2e/sd-mobile-smoke.spec.ts",
       "e2e/zs-mobile-smoke.spec.ts",
       "e2e/nv75-mobile-smoke.spec.ts",
+      "e2e/desktop-toc-smoke.spec.ts",
     ]) {
       expect(fs.existsSync(path.resolve(repoRoot, specFile))).toBe(true);
     }
@@ -24,6 +26,7 @@ describe("E2E smoke contract", () => {
     expect(pvSpec).toContain("calculator-mobile-summary-chip");
     expect(readSource("package.json")).toContain('"test:e2e"');
     expect(readSource(".github/workflows/ci.yml")).toContain("npm run test:e2e");
+    expect(readSource(".github/workflows/ci.yml")).toContain("npm run lint");
     expect(fs.existsSync(path.resolve(repoRoot, "docs/acceptance-pv-zs-nv75.md"))).toBe(true);
   });
 

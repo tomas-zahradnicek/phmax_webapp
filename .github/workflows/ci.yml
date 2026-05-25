@@ -23,5 +23,6 @@ jobs:
       - run: npm run check:golden-manifest
       - run: npm run test:golden
       - run: npm test
+      - run: npm run lint
       - run: npm run test:e2e:install
       - run: npm run test:e2e

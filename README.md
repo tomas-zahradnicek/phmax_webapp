@@ -14,9 +14,10 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 ## Verze 0.2.4 (UX)
 
 - **Mobil:** dynamická výška plovoucího souhrnu; tlačítko Skrýt/Zobrazit souhrn; záložka Obsah sedí podle skutečné výšky panelu.
-- **Vstupy:** jednotný banner nahoře s „Přejít k chybě“ (PV, ŠD, ZŠ, SŠ, NV75); u ZŠ sloučeno s původní Kontrolou vstupů, banner je sticky.
-- **Dashboard:** stavy „Ještě nevyplněno“ / „Vstupy v pořádku“; průvodce doplněn o mobilní tip (souhrn dole + Obsah).
-- **Texty:** bez technického žargonu (localStorage, cesty ke zdrojům).
+- **Desktop:** panel Obsah lze skrýt tlačítkem Skrýt a znovu otevřít záložkou Obsah (E2E `desktop-toc-smoke`).
+- **ZŠ:** refaktor PHmax panelů (basic, PHA, PHP, §16, speciální, psych, zdrav., menšina, gym, smíšené, extras).
+- **Dashboard:** klikatelné KPI dlaždice; stavy „Ještě nevyplněno“ / „Vstupy v pořádku“.
+- **CI:** ESLint v pipeline; acceptance contract pro SŠ (`phmax-ss-acceptance-contract.test.ts`).
 
 ## Verze 0.2.3 (UX)
 

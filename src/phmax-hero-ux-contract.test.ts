@@ -49,8 +49,8 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
     expect(src).toContain('data-section="zs-phmax-exceptions"');
     expect(src).toContain("PhmaxZsPhmaxSubNav");
     expect(readSource("src/zs/ZsPhmaxBasicSection.tsx")).toContain('data-phmax-pane="classes"');
-    expect(src).toContain('data-phmax-pane="exceptions"');
-    expect(src).toContain('data-phmax-pane="summary"');
+    expect(readSource("src/zs/ZsPhmaxMinoritySection.tsx")).toContain('data-phmax-pane="exceptions"');
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain('data-phmax-pane="summary"');
     expect(src).toContain('ref={heroHeaderRef}');
     expect(src).toContain("hero__title--zs");
     expect(src).toContain("hero-zone-actions--toolbar");

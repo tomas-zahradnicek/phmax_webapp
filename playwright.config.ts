@@ -21,6 +21,7 @@ export default defineConfig({
   projects: [
     {
       name: "mobile-chrome",
+      testIgnore: /desktop-toc-smoke\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 390, height: 844 },
@@ -28,6 +29,14 @@ export default defineConfig({
         hasTouch: true,
         userAgent:
           "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+      },
+    },
+    {
+      name: "desktop-chrome",
+      testMatch: /desktop-toc-smoke\.spec\.ts/,
+      use: {
+        browserName: "chromium",
+        viewport: { width: 1280, height: 800 },
       },
     },
   ],

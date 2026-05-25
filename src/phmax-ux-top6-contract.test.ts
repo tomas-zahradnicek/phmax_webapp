@@ -127,9 +127,14 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("ZsModuleGate");
     expect(src).toMatch(/PageTableOfContents|tocSections=/);
     expect(src).toContain("ux-expert-only");
-    for (const moduleId of ["minority", "gym", "mixed", "extras"]) {
-      expect(src).toContain(`sectionId="${moduleId}"`);
-    }
+    expect(readSource("src/zs/ZsPhmaxMinoritySection.tsx")).toContain('sectionId="minority"');
+    expect(readSource("src/zs/ZsPhmaxGymSection.tsx")).toContain('sectionId="gym"');
+    expect(readSource("src/zs/ZsPhmaxMixedSection.tsx")).toContain('sectionId="mixed"');
+    expect(readSource("src/zs/ZsPhmaxExtrasSection.tsx")).toContain('sectionId="extras"');
+    expect(src).toContain("ZsPhmaxMinoritySection");
+    expect(src).toContain("ZsPhmaxGymSection");
+    expect(src).toContain("ZsPhmaxMixedSection");
+    expect(src).toContain("ZsPhmaxExtrasSection");
     expect(readSource("src/zs/ZsPhmaxSec16Section.tsx")).toContain('sectionId="sec16"');
     expect(readSource("src/zs/ZsPhmaxSpecialSection.tsx")).toContain('sectionId="special"');
     expect(readSource("src/zs/ZsPhmaxPsychSection.tsx")).toContain('sectionId="psych"');

@@ -62,7 +62,7 @@ import type { CompareProductVariantsResult } from "./phmax-product-compare";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
-import { ResultAnchorCard, type ResultAnchorTone } from "./ResultAnchorCard";
+import type { ResultAnchorTone } from "./ResultAnchorCard";
 import { IntegerInput } from "./IntegerInput";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorProductShell } from "./CalculatorProductShell";

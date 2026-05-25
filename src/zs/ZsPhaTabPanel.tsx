@@ -3,7 +3,6 @@ import type { CalculatorViewMode } from "../calculator-view-mode";
 import { sectionNeedsAttentionClass } from "../calculator-section-focus";
 import { IntegerInput } from "../IntegerInput";
 import { InputOutputLegend, ResultCard } from "../phmax-zs-ui";
-import { ScrollGrabRegion } from "../ScrollGrabRegion";
 import { TableOuter } from "../TableOuter";
 import type { PhaRow } from "../phmax-zs-logic";
 import { ZsLegisRef } from "../PhmaxProductLegisUi";

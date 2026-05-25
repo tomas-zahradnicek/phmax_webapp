@@ -2,7 +2,7 @@ import React from "react";
 import { sectionNeedsAttentionClass } from "../calculator-section-focus";
 import { INLINE_VALIDATION_MSG_POSITIVE_INTEGER } from "../calculator-ui-constants";
 import { FieldWhyPhmaxDetails } from "../FieldWhyPhmax";
-import { InputOutputLegend, NumberField, ResultCard } from "../phmax-zs-ui";
+import { NumberField, ResultCard } from "../phmax-zs-ui";
 import type { BasicType } from "../phmax-zs-logic";
 import { round2 } from "../phmax-zs-logic";
 

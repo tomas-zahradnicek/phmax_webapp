@@ -56,7 +56,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | # | Kontrola | OK |
 |---|----------|-----|
 | S1 | E2E smoke (`sd-mobile-smoke.spec.ts`) projde | E2E |
-| S2 | Souhrnný režim – věta o počtu oddělení | contract |
+| S2 | Souhrnný režim – věta o počtu oddělení | E2E + contract |
 | S3 | Porovnání variant A/B s pojmenovanou zálohou | contract |
 
 ---

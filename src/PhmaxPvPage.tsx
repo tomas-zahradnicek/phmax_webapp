@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ADVANCED_AUDIT_GROUP_LABEL,
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
@@ -16,7 +15,6 @@ import {
   LAY_USER_QUICK_START_PV,
   LAY_USER_QUICK_START_MOBILE_UX,
   EXPORT_ORIENTACNI_NOTE,
-  formatPvLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
   NAMED_BACKUPS_DELETE_LABEL,
@@ -58,7 +56,6 @@ import {
   IconSpinner,
 } from "./HeroActionIconButton";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { HeroStat } from "./HeroStat";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorProductShell } from "./CalculatorProductShell";
@@ -121,13 +118,6 @@ function pvDurationBandTableNo(provoz: PvProvozKind): string {
   if (provoz === "celodenni") return "2";
   if (provoz === "internat") return "3";
   return "";
-}
-
-function defaultAvgHoursForProvoz(p: PvProvozKind): number {
-  if (p === "celodenni") return 10;
-  if (p === "polodenni") return 5;
-  if (p === "internat") return 21;
-  return 0;
 }
 
 function pvAvgHoursField(provoz: PvProvozKind): { min: number; max: number; step: number; hint: string } {

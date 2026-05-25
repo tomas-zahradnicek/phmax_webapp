@@ -30,14 +30,6 @@ const DASH_START_MODULES: ReadonlyArray<{
   { id: "ss", lead: "Střední škola – evidence tříd a řádkový PHmax." },
 ];
 
-const DASH_START_EXAMPLE_IDS: Record<Exclude<ProductView, "dash">, string> = {
-  pv: "pv-hero-example-select",
-  sd: "sd-hero-example-select",
-  zs: "zs-hero-example-select",
-  ss: "ss-hero-example-select",
-  nv75: "nv75-hero-example-select",
-};
-
 const DASH_CALC_LABEL: Record<Exclude<ProductView, "dash">, string> = {
   pv: "PV",
   sd: "ŠD",

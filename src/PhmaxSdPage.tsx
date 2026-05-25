@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ADVANCED_AUDIT_GROUP_LABEL,
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
@@ -15,7 +14,6 @@ import {
   LAY_USER_QUICK_START_SD,
   LAY_USER_QUICK_START_MOBILE_UX,
   EXPORT_ORIENTACNI_NOTE,
-  formatSdLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
   NAMED_BACKUPS_DELETE_LABEL,
@@ -62,7 +60,6 @@ import { HeroStatusBar } from "./HeroStatusBar";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
-import { HeroStat } from "./HeroStat";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
@@ -82,7 +79,6 @@ import {
   SD_BASIC_WIZARD_LS_KEY,
   SD_HERO_EXAMPLE_SELECT_ID,
   SD_BASIC_WIZARD_STEPS,
-  type SdBasicWizardStep,
 } from "./sd-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
@@ -567,49 +563,6 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       separateVedoucihoDleT72,
     });
   }, [pupils, detailedResult, basePhmax, reduction.adjusted, effectiveDepts, vychovatelPpcHours, separateVedoucihoDleT72]);
-
-  const stickySummary = useMemo(() => {
-    if (detailedResult != null) {
-      const departmentsCount = detailedResult.totalDepartments;
-      const phmax = detailedResult.finalPhmax;
-      const phamax = detailedResult.specialDepartments > 0 ? detailedResult.finalPhaMax : null;
-      let coefficientLabel = "Koef. krácení";
-      let coefficientValue = "1,0000";
-
-      if (detailedResult.regularDepartments > 0 && detailedResult.specialDepartments === 0) {
-        coefficientLabel = "Koef. krácení (běžná)";
-        coefficientValue = formatSdFactor(detailedResult.regularReductionFactor);
-      } else if (detailedResult.regularDepartments === 0 && detailedResult.specialDepartments > 0) {
-        coefficientLabel = "Koef. krácení (spec.)";
-        coefficientValue = formatSdFactor(detailedResult.specialReductionFactor);
-      } else if (detailedResult.regularDepartments > 0 && detailedResult.specialDepartments > 0) {
-        coefficientLabel = "Koef. krácení (běž./spec.)";
-        coefficientValue = `${formatSdFactor(detailedResult.regularReductionFactor)} / ${formatSdFactor(
-          detailedResult.specialReductionFactor,
-        )}`;
-      }
-
-      return {
-        departmentsCount,
-        phmax,
-        phamax,
-        coefficientLabel,
-        coefficientValue,
-      };
-    }
-
-    if (basePhmax != null) {
-      return {
-        departmentsCount: effectiveDepts,
-        phmax: reduction.adjusted,
-        phamax: null,
-        coefficientLabel: "Koef. krácení",
-        coefficientValue: formatSdFactor(reduction.factor),
-      };
-    }
-
-    return null;
-  }, [detailedResult, basePhmax, effectiveDepts, reduction.adjusted, reduction.factor]);
 
   const sdVerdict = useMemo(() => {
     const activeDeptCount = inputMode === "detail" ? detailDepartments.length : effectiveDepts;
