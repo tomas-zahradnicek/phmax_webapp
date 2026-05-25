@@ -1379,6 +1379,18 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                   </div>
                 ) : null}
 
+                {row.provoz !== "zdravotnicke" && row.classCount > 0 ? (
+                  <div className="pv-row-method-hint ux-semantic--info" role="note">
+                    <p style={{ margin: 0, lineHeight: 1.45 }}>
+                      <strong>Krácení PHmax (</strong>
+                      <PvLegisRef citeId="pv-1d3" label="§ 1d odst. 3 vyhl. 14/2005 Sb." />
+                      <strong>):</strong> při nesplnění nejnižšího počtu dětí může krajský úřad určit nižší PHmax.
+                      Aplikace toto krácení <strong>automaticky nepočítá</strong> – ověřte podle plného znění vyhlášky a
+                      rozhodnutí úřadu.
+                    </p>
+                  </div>
+                ) : null}
+
                 <FieldWhyPhmaxDetails>
                   <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
                     <li>

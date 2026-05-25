@@ -11,8 +11,9 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Mobilní souhrn – dynamická výška podle obsahu, tlačítko Skrýt/Zobrazit souhrn a záložka Obsah nad panelem.",
-    "Neúplné vstupy – jednotný banner nahoře s odkazem Přejít k chybě (PV, ŠD, ZŠ, SŠ, NV75); u ZŠ bez duplicitní sekce Kontrola vstupů.",
-    "Dashboard – stavy Ještě nevyplněno / Vstupy v pořádku; průvodce doplněn o mobilní tip (souhrn dole + Obsah).",
+    "Verdikty – stejný text v banneru, docku a sticky liště; na posledním kroku průvodce tlačítko Přejít k chybě.",
+    "Dashboard – detail verdiktu v horním KPI stripu; mobilní chip souhrnu vlevo, Obsah vpravo.",
+    "PV – u pracoviště metodický box k § 1d odst. 3 (bez automatického krácení); checklist přijetí v docs/acceptance-pv-zs-nv75.md.",
+    "E2E smoke – Playwright pro PV, ŠD, ZŠ a NV75 v CI; ESLint (react-hooks) pro src a e2e.",
   ],
 };

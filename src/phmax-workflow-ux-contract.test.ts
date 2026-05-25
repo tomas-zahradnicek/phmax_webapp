@@ -32,12 +32,14 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
   it("ZŠ drží zsWorkflow a předává kroky do CalculatorWorkflowDock", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
 
-    expect(src).toContain("const zsWorkflow = (() => {");
+    expect(src).toContain("buildZsWorkflow");
     expect(src).toContain("incompleteSections > 0");
     expect(src).toContain("warnings.length > 0");
     expect(src).toContain("workflowSteps={zsBasicWizardActive ? [] : zsWorkflow.steps}");
     expect(src).toContain("CalculatorWorkflowDock");
-    expect(src).toContain('{ label: "Vyplnit povinné vstupy v aktivních modulech", state: "active" as const }');
+    expect(readSource("src/zs/zs-form-validation.ts")).toContain(
+      '{ label: "Vyplnit povinné vstupy v aktivních modulech", state: "active" }',
+    );
   });
 
   it("NV75 drží nv75Workflow a předává kroky do CalculatorWorkflowDock", () => {

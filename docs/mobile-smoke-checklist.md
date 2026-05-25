@@ -2,7 +2,9 @@
 
 Rychlá kontrola po UX změnách 0.2.4. Otevřete na telefonu nebo v prohlížeči s šířkou **&lt; 1100 px** (DevTools → responsive, např. iPhone 12).
 
-Spuštění lokálně: `npm run preview` → `http://localhost:4173/?view=pv` (nebo `ss`, `zs`).
+Spuštění lokálně: `npm run preview` → `http://localhost:4173/?view=pv` (nebo `sd`, `zs`, `nv75`).
+
+Automaticky: `npm run test:e2e` (4× mobilní smoke). Ruční checklist PV/ZŠ/NV75: [acceptance-pv-zs-nv75.md](./acceptance-pv-zs-nv75.md).
 
 ## 1. Plovoucí souhrn (PV nebo SŠ)
 
@@ -10,7 +12,7 @@ Spuštění lokálně: `npm run preview` → `http://localhost:4173/?view=pv` (n
 2. **Klepněte na souhrn** – stránka posune k docku nahoře.
 3. Ověřte, že **pod formulářem není velká prázdná mezera** (výška rezervy odpovídá panelu, ne max. 46vh).
 4. Klepněte **Skrýt souhrn** – zůstane chip **Zobrazit souhrn** vpravo dole; formulář má víc místa.
-5. Chip **Zobrazit souhrn** panel znovu otevře.
+5. Chip **Zobrazit souhrn** (vlevo dole) panel znovu otevře; focus zůstane na chipu po Skrýt.
 
 ## 2. Záložka Obsah
 

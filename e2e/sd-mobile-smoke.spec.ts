@@ -1,22 +1,22 @@
 import { test, expect } from "@playwright/test";
-import { gotoProductView } from "./smoke-helpers";
+import { clearLocalStorageKeys, gotoProductView } from "./smoke-helpers";
 
-test.describe("PV mobilní smoke", () => {
+test.describe("ŠD mobilní smoke", () => {
   test.beforeEach(async ({ page }) => {
-    await gotoProductView(page, "pv");
+    await clearLocalStorageKeys(page, ["phmax-sd-basic-wizard-step", "edu-cz-sd-calculator-state"]);
+    await gotoProductView(page, "sd");
   });
 
   test("banner neúplných vstupů a Přejít k chybě", async ({ page }) => {
     const issueBanner = page.locator(".calculator-input-issue-banner");
     await expect(issueBanner).toBeVisible();
-    await expect(issueBanner).toContainText(/PHmax|pracovišt/i);
+    await expect(issueBanner).toContainText(/účastník|oddělení|vstup/i);
     await expect(page.getByRole("button", { name: "Přejít k chybě" }).first()).toBeVisible();
   });
 
   test("plovoucí souhrn a Skrýt/Zobrazit chip", async ({ page }) => {
     const floatingSummary = page.locator(".calculator-mobile-scroll-results");
     await expect(floatingSummary).toBeVisible();
-    await expect(page.getByRole("button", { name: /Skrýt souhrn/i })).toBeVisible();
 
     await page.locator(".calculator-mobile-scroll-results__dismiss").evaluate((node) => {
       (node as HTMLButtonElement).click();
@@ -36,6 +36,6 @@ test.describe("PV mobilní smoke", () => {
   test("průvodce krok Vstupy a Přejít k chybě", async ({ page }) => {
     await page.getByRole("button", { name: "2 Vstupy" }).click({ force: true });
     await page.getByRole("button", { name: "Přejít k chybě" }).first().click();
-    await expect(page.locator('[data-section="pv-vstupy"]')).toBeInViewport();
+    await expect(page.locator('[data-section="sd-vstupy"]')).toBeInViewport();
   });
 });

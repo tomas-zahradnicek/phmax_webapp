@@ -9,13 +9,22 @@ function readSource(relPath: string) {
 }
 
 describe("E2E smoke contract", () => {
-  it("Playwright PV mobilní smoke je v repozitáři", () => {
+  it("Playwright mobilní smoke je v repozitáři (PV, ŠD, ZŠ, NV75)", () => {
     expect(fs.existsSync(path.resolve(repoRoot, "playwright.config.ts"))).toBe(true);
-    expect(fs.existsSync(path.resolve(repoRoot, "e2e/pv-mobile-smoke.spec.ts"))).toBe(true);
-    const spec = readSource("e2e/pv-mobile-smoke.spec.ts");
-    expect(spec).toContain("calculator-mobile-scroll-results");
-    expect(spec).toContain("calculator-mobile-summary-chip");
+    for (const specFile of [
+      "e2e/pv-mobile-smoke.spec.ts",
+      "e2e/sd-mobile-smoke.spec.ts",
+      "e2e/zs-mobile-smoke.spec.ts",
+      "e2e/nv75-mobile-smoke.spec.ts",
+    ]) {
+      expect(fs.existsSync(path.resolve(repoRoot, specFile))).toBe(true);
+    }
+    const pvSpec = readSource("e2e/pv-mobile-smoke.spec.ts");
+    expect(pvSpec).toContain("calculator-mobile-scroll-results");
+    expect(pvSpec).toContain("calculator-mobile-summary-chip");
     expect(readSource("package.json")).toContain('"test:e2e"');
+    expect(readSource(".github/workflows/ci.yml")).toContain("npm run test:e2e");
+    expect(fs.existsSync(path.resolve(repoRoot, "docs/acceptance-pv-zs-nv75.md"))).toBe(true);
   });
 
   it("Dashboard KPI strip zobrazuje stav modulu", () => {

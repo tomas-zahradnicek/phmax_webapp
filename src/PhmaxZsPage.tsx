@@ -82,6 +82,11 @@ import { CollapsibleSection } from "./CollapsibleSection";
 import { PageTableOfContents, type PageTocSection } from "./PageTableOfContents";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
+import {
+  buildZsValidationIssues,
+  buildZsVerdict,
+  buildZsWorkflow,
+} from "./zs/zs-form-validation";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
@@ -1510,106 +1515,67 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     win.print();
   };
 
-  const validationIssues = (() => {
-    const issues: { section: string; label: string }[] = [];
-    if (tab === "phmax") {
-      if (
-        basic1Classes === 0 &&
-        basic2Classes === 0 &&
-        incl1Classes === 0 &&
-        incl2Classes === 0 &&
-        psychRows.length === 0 &&
-        healthRows.length === 0 &&
-        minority1Classes === 0 &&
-        gymRows.length === 0 &&
-        mixedRows.length === 0 &&
-        special1Classes === 0 &&
-        special2Classes === 0 &&
-        specialIIClasses === 0 &&
-        prepClasses === 0 &&
-        prepSpecialClasses === 0
-      ) {
-        issues.push({ section: "basic", label: "Vyplňte alespoň jednu relevantní sekci v PHmax." });
-      }
-      if (basic1Classes > 0 && basic1Pupils === 0) {
-        issues.push({ section: "basic", label: "PHmax: na 1. stupni je vyplněn počet tříd, ale chybí počet žáků." });
-      }
-      if (basic2Classes > 0 && basic2Pupils === 0) {
-        issues.push({ section: "basic", label: "PHmax: na 2. stupni je vyplněn počet tříd, ale chybí počet žáků." });
-      }
-    }
-    if (tab === "pha" && phaRows.length === 0) {
-      issues.push({ section: "pha", label: "Přidejte alespoň jeden řádek do PHAmax." });
-    }
-    if (tab === "php") {
-      if (phpYear1 === 0 && phpYear2 === 0 && phpYear3 === 0) {
-        issues.push({ section: "php", label: "Zadejte počty žáků pro PHPmax." });
-      }
-      if (phpMethodMode === "three_year_avg" && (phpYear1 === 0 || phpYear2 === 0 || phpYear3 === 0)) {
-        issues.push({ section: "php", label: "PHPmax (3 roky): doplňte všechny 3 roky, nebo přepněte na kratší období." });
-      }
-    }
-    return issues;
-  })();
+  const validationIssues = useMemo(
+    () =>
+      buildZsValidationIssues({
+        tab,
+        basic1Classes,
+        basic1Pupils,
+        basic2Classes,
+        basic2Pupils,
+        incl1Classes,
+        incl2Classes,
+        psychRowCount: psychRows.length,
+        healthRowCount: healthRows.length,
+        minority1Classes,
+        gymRowCount: gymRows.length,
+        mixedRowCount: mixedRows.length,
+        special1Classes,
+        special2Classes,
+        specialIIClasses,
+        prepClasses,
+        prepSpecialClasses,
+        phaRowCount: phaRows.length,
+        phpYear1,
+        phpYear2,
+        phpYear3,
+        phpMethodMode,
+      }),
+    [
+      tab,
+      basic1Classes,
+      basic1Pupils,
+      basic2Classes,
+      basic2Pupils,
+      incl1Classes,
+      incl2Classes,
+      psychRows.length,
+      healthRows.length,
+      minority1Classes,
+      gymRows.length,
+      mixedRows.length,
+      special1Classes,
+      special2Classes,
+      specialIIClasses,
+      prepClasses,
+      prepSpecialClasses,
+      phaRows.length,
+      phpYear1,
+      phpYear2,
+      phpYear3,
+      phpMethodMode,
+    ],
+  );
 
   const incompleteSections = new Set(validationIssues.map((item) => item.section)).size;
-  const zsVerdict = (() => {
-    if (incompleteSections > 0) {
-      return {
-        tone: "warning" as const,
-        label: "Na hraně: zadání ještě není kompletní",
-        detail:
-          incompleteSections === 1
-            ? "Doplňte poslední nevyplněnou část a znovu zkontrolujte souhrn."
-            : `Doplňte ${incompleteSections} nevyplněné části (tlačítko „Přejít na první nevyplněnou část“ vás navede).`,
-      };
-    }
-    if (warnings.length > 0) {
-      return {
-        tone: "warning" as const,
-        label: "Pozor na hraniční pravidla",
-        detail: "Výpočet proběhl, ale obsahuje upozornění k výjimkám nebo ruční kontrole podle metodiky.",
-      };
-    }
-    return {
-      tone: "ok" as const,
-      label: "Vstupy jsou kompletní",
-      detail: "Souhrn PHmax/PHAmax/PHPmax je připravený pro export, uložení varianty nebo porovnání scénářů.",
-    };
-  })();
-  const zsWorkflow = (() => {
-    if (incompleteSections > 0) {
-      return {
-        recommendedStep:
-          incompleteSections === 1
-            ? "Doplňte poslední nevyplněnou část."
-            : `Doplňte ${incompleteSections} nevyplněné části.`,
-        steps: [
-          { label: "Vyplnit povinné vstupy v aktivních modulech", state: "active" as const },
-          { label: "Zkontrolovat upozornění a hraniční pravidla", state: "todo" as const },
-          { label: "Uložit, exportovat nebo porovnat variantu", state: "todo" as const },
-        ],
-      };
-    }
-    if (warnings.length > 0) {
-      return {
-        recommendedStep: "Projděte upozornění a potvrďte, že odpovídají metodice školy.",
-        steps: [
-          { label: "Vyplnit povinné vstupy v aktivních modulech", state: "done" as const },
-          { label: "Zkontrolovat upozornění a hraniční pravidla", state: "active" as const },
-          { label: "Uložit, exportovat nebo porovnat variantu", state: "todo" as const },
-        ],
-      };
-    }
-    return {
-      recommendedStep: "Souhrn je připravený k uložení, exportu nebo porovnání variant.",
-      steps: [
-        { label: "Vyplnit povinné vstupy v aktivních modulech", state: "done" as const },
-        { label: "Zkontrolovat upozornění a hraniční pravidla", state: "done" as const },
-        { label: "Uložit, exportovat nebo porovnat variantu", state: "active" as const },
-      ],
-    };
-  })();
+  const zsVerdict = useMemo(
+    () => buildZsVerdict(incompleteSections, warnings.length),
+    [incompleteSections, warnings.length],
+  );
+  const zsWorkflow = useMemo(
+    () => buildZsWorkflow(incompleteSections, warnings.length),
+    [incompleteSections, warnings.length],
+  );
   const firstIssueSection = validationIssues[0]?.section ?? "";
   const hasIssue = (sectionId: string) => validationIssues.some((item) => item.section === sectionId);
 

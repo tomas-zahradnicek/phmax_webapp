@@ -8247,6 +8247,13 @@ select:focus {
   margin-top: 4px;
 }
 
+.pv-row-method-hint {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+}
+
 .zs-pha-php-basic-guide__inactive {
   margin: 0 0 10px;
   padding: 10px 12px;
