@@ -1,0 +1,44 @@
+import fs from "node:fs";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+
+const repoRoot = path.resolve(__dirname, "..");
+
+function readSource(relPath: string) {
+  return fs.readFileSync(path.resolve(repoRoot, relPath), "utf8");
+}
+
+describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
+  it("checklist dokument má vyplněné OK sloupce a záznam běhu", () => {
+    const doc = readSource("docs/acceptance-pv-zs-nv75.md");
+    expect(doc).toContain("Metodický box u pracoviště");
+    expect(doc).toContain("| 2026-05-21 |");
+    for (const id of ["P1", "P2", "P3", "P4", "P5", "P6", "Z1", "Z2", "Z3", "Z4", "Z5", "N1", "N2", "N3", "N4", "N5", "N6", "S1"]) {
+      expect(doc).toMatch(new RegExp(`\\| ${id} \\|[\\s\\S]*?\\| (E2E|contract|ručně)`));
+    }
+  });
+
+  it("PV § 1d – metodický box u řádku (P5)", () => {
+    const pv = readSource("src/PhmaxPvPage.tsx");
+    expect(pv).toContain("pv-row-method-hint");
+    expect(pv).toContain("automaticky nepočítá");
+    expect(pv).toContain("Kdy přidat další pracoviště");
+  });
+
+  it("ZŠ – snapshot modul a validace (refaktor krok 2)", () => {
+    const zsPage = readSource("src/PhmaxZsPage.tsx");
+    expect(zsPage).toContain("buildZsFormSnapshot");
+    expect(zsPage).toContain("useZsFormAutosave");
+    expect(zsPage).toContain("ZS_AUTOSAVE_STORAGE_KEY");
+    expect(readSource("src/zs/zs-form-snapshot.ts")).toContain('export const ZS_AUTOSAVE_STORAGE_KEY = "edu-cz-zs-calculator-state"');
+    expect(readSource("src/ZsPhaPhpBasicGuide.tsx")).toContain("nepočítá");
+  });
+
+  it("NV75 – export a vložení druhu školy (N5, N6)", () => {
+    const nv75 = readSource("src/PhmaxNv75DeputyPage.tsx");
+    expect(nv75).toContain("Vložit druh školy/zařízení");
+    expect(nv75).toContain("calculatorInputIssueBannerFromVerdict");
+    expect(nv75).toContain("Verze release notes");
+    expect(nv75).toContain("archivní razítko");
+  });
+});

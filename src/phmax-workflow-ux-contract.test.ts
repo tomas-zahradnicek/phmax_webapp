@@ -32,6 +32,8 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
   it("ZŠ drží zsWorkflow a předává kroky do CalculatorWorkflowDock", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
 
+    expect(src).toContain("buildZsFormSnapshot");
+    expect(src).toContain("useZsFormAutosave");
     expect(src).toContain("buildZsWorkflow");
     expect(src).toContain("incompleteSections > 0");
     expect(src).toContain("warnings.length > 0");

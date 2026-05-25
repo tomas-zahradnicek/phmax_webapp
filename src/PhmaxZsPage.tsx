@@ -87,6 +87,13 @@ import {
   buildZsVerdict,
   buildZsWorkflow,
 } from "./zs/zs-form-validation";
+import {
+  applyZsFormSnapshot,
+  buildZsFormSnapshot,
+  ZS_AUTOSAVE_STORAGE_KEY,
+  type ZsFormSnapshotSetters,
+} from "./zs/zs-form-snapshot";
+import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
@@ -522,7 +529,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const glossaryTriggerRef = useRef<HTMLButtonElement>(null);
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
-  const [lastSavedAt, setLastSavedAt] = useState<string>("");
   const [uiNotice, setUiNotice] = useUiNotice();
   useFocusExampleOnMount("zs-hero-example-select");
   const [exportLabel, setExportLabel] = useState("");
@@ -1292,7 +1298,215 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   };
 
 
-  const buildSnapshot = () => ({
+  const zsSnapshotSetters = useMemo<ZsFormSnapshotSetters>(
+    () => ({
+      setTab,
+      setMode,
+      setBasicType,
+      setBasic1Classes,
+      setBasic1Pupils,
+      setBasic2Classes,
+      setBasic2Pupils,
+      setIncl1Classes,
+      setIncl1Pupils,
+      setIncl2Classes,
+      setIncl2Pupils,
+      setPsychRows,
+      setHealthRows,
+      setExportLabel,
+      setMinorityType,
+      setMinority1Classes,
+      setMinority1Pupils,
+      setMinority2Classes,
+      setMinority2Pupils,
+      setGymRows,
+      setMixedRows,
+      setSpecial1Classes,
+      setSpecial1Pupils,
+      setSpecial2Classes,
+      setSpecial2Pupils,
+      setSpecialIIClasses,
+      setSpecialIIPupils,
+      setPrepClasses,
+      setPrepChildren,
+      setPrepSpecialClasses,
+      setPrepSpecialChildren,
+      setP38First,
+      setP38Second,
+      setP41First,
+      setP41Second,
+      setPhaRows,
+      setPhpYear1,
+      setPhpYear2,
+      setPhpYear3,
+      setPhpWizardStep,
+      setPhpMethodMode,
+      setPhpExcludedAbroad,
+      setPhpExcludedForeignSchoolCz,
+      setPhpExcludedIndividual,
+      setPhpExcludedSchool,
+      setSelectedExample,
+      setWizardChoice,
+      setZsWizardStep,
+      setDataMode,
+      setNv75Role,
+      setNv75School,
+      setNv75TeacherMin,
+      setNv75TeacherMax,
+      setMixedMethodFirstZsPupils,
+      setMixedMethodFirstZsClasses,
+      setMixedMethodFirstSpecialPupils,
+      setMixedMethodFirstSpecialClasses,
+      setMixedMethodSecondZsPupils,
+      setMixedMethodSecondZsClasses,
+      setMixedMethodSecondSpecialPupils,
+      setMixedMethodSecondSpecialClasses,
+    }),
+    [],
+  );
+
+  const buildSnapshot = useCallback(
+    () =>
+      buildZsFormSnapshot({
+        tab,
+        mode,
+        basicType,
+        basic1Classes,
+        basic1Pupils,
+        basic2Classes,
+        basic2Pupils,
+        incl1Classes,
+        incl1Pupils,
+        incl2Classes,
+        incl2Pupils,
+        psychRows,
+        healthRows,
+        exportLabel,
+        minorityType,
+        minority1Classes,
+        minority1Pupils,
+        minority2Classes,
+        minority2Pupils,
+        gymRows,
+        mixedRows,
+        special1Classes,
+        special1Pupils,
+        special2Classes,
+        special2Pupils,
+        specialIIClasses,
+        specialIIPupils,
+        prepClasses,
+        prepChildren,
+        prepSpecialClasses,
+        prepSpecialChildren,
+        p38First,
+        p38Second,
+        p41First,
+        p41Second,
+        phaRows,
+        phpYear1,
+        phpYear2,
+        phpYear3,
+        phpWizardStep,
+        phpMethodMode,
+        phpExcludedAbroad,
+        phpExcludedForeignSchoolCz,
+        phpExcludedIndividual,
+        phpExcludedSchool,
+        selectedExample,
+        wizardChoice,
+        zsWizardStep,
+        dataMode,
+        nv75Role,
+        nv75School,
+        nv75TeacherMin,
+        nv75TeacherMax,
+        mixedMethodFirstZsPupils,
+        mixedMethodFirstZsClasses,
+        mixedMethodFirstSpecialPupils,
+        mixedMethodFirstSpecialClasses,
+        mixedMethodSecondZsPupils,
+        mixedMethodSecondZsClasses,
+        mixedMethodSecondSpecialPupils,
+        mixedMethodSecondSpecialClasses,
+        auditTotals: { totalPhmax, totalPha, totalPhp, tab },
+      }),
+    [
+      tab,
+      mode,
+      basicType,
+      basic1Classes,
+      basic1Pupils,
+      basic2Classes,
+      basic2Pupils,
+      incl1Classes,
+      incl1Pupils,
+      incl2Classes,
+      incl2Pupils,
+      psychRows,
+      healthRows,
+      exportLabel,
+      minorityType,
+      minority1Classes,
+      minority1Pupils,
+      minority2Classes,
+      minority2Pupils,
+      gymRows,
+      mixedRows,
+      special1Classes,
+      special1Pupils,
+      special2Classes,
+      special2Pupils,
+      specialIIClasses,
+      specialIIPupils,
+      prepClasses,
+      prepChildren,
+      prepSpecialClasses,
+      prepSpecialChildren,
+      p38First,
+      p38Second,
+      p41First,
+      p41Second,
+      phaRows,
+      phpYear1,
+      phpYear2,
+      phpYear3,
+      phpWizardStep,
+      phpMethodMode,
+      phpExcludedAbroad,
+      phpExcludedForeignSchoolCz,
+      phpExcludedIndividual,
+      phpExcludedSchool,
+      selectedExample,
+      wizardChoice,
+      zsWizardStep,
+      dataMode,
+      nv75Role,
+      nv75School,
+      nv75TeacherMin,
+      nv75TeacherMax,
+      mixedMethodFirstZsPupils,
+      mixedMethodFirstZsClasses,
+      mixedMethodFirstSpecialPupils,
+      mixedMethodFirstSpecialClasses,
+      mixedMethodSecondZsPupils,
+      mixedMethodSecondZsClasses,
+      mixedMethodSecondSpecialPupils,
+      mixedMethodSecondSpecialClasses,
+      totalPhmax,
+      totalPha,
+      totalPhp,
+    ],
+  );
+
+  const applySnapshotPayload = useCallback(
+    (s: Record<string, unknown>, notice: string) => {
+      applyZsFormSnapshot(s, zsSnapshotSetters, notice, setUiNotice);
+    },
+    [zsSnapshotSetters, setUiNotice],
+  );
+
+  const { lastSavedAt, setLastSavedAt, persistSnapshot } = useZsFormAutosave(buildSnapshot, [
     tab,
     mode,
     basicType,
@@ -1354,80 +1568,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     mixedMethodSecondZsClasses,
     mixedMethodSecondSpecialPupils,
     mixedMethodSecondSpecialClasses,
-    _phmaxAuditTotals: {
-      totalPhmax,
-      totalPha,
-      totalPhp,
-      tab,
-    },
-  });
-
-  const applySnapshotPayload = (s: Record<string, unknown>, notice: string) => {
-    if (s.tab) setTab(s.tab as TabKey);
-    if (s.mode) setMode(s.mode as CalculatorMode);
-    if (s.basicType) setBasicType(s.basicType as BasicType);
-    setBasic1Classes((s.basic1Classes as number) ?? 0);
-    setBasic1Pupils((s.basic1Pupils as number) ?? 0);
-    setBasic2Classes((s.basic2Classes as number) ?? 0);
-    setBasic2Pupils((s.basic2Pupils as number) ?? 0);
-    setIncl1Classes((s.incl1Classes as number) ?? 0);
-    setIncl1Pupils((s.incl1Pupils as number) ?? 0);
-    setIncl2Classes((s.incl2Classes as number) ?? 0);
-    setIncl2Pupils((s.incl2Pupils as number) ?? 0);
-    setPsychRows((s.psychRows as PsychRow[]) ?? []);
-    setHealthRows((s.healthRows as HealthRow[]) ?? []);
-    setExportLabel(typeof s.exportLabel === "string" ? s.exportLabel : "");
-    if (s.minorityType) setMinorityType(s.minorityType as keyof typeof B17_B21);
-    setMinority1Classes((s.minority1Classes as number) ?? 0);
-    setMinority1Pupils((s.minority1Pupils as number) ?? 0);
-    setMinority2Classes((s.minority2Classes as number) ?? 0);
-    setMinority2Pupils((s.minority2Pupils as number) ?? 0);
-    setGymRows((s.gymRows as GymRow[]) ?? []);
-    setMixedRows((s.mixedRows as MixedRow[]) ?? []);
-    setSpecial1Classes((s.special1Classes as number) ?? 0);
-    setSpecial1Pupils((s.special1Pupils as number) ?? 0);
-    setSpecial2Classes((s.special2Classes as number) ?? 0);
-    setSpecial2Pupils((s.special2Pupils as number) ?? 0);
-    setSpecialIIClasses((s.specialIIClasses as number) ?? 0);
-    setSpecialIIPupils((s.specialIIPupils as number) ?? 0);
-    setPrepClasses((s.prepClasses as number) ?? 0);
-    setPrepChildren((s.prepChildren as number) ?? 0);
-    setPrepSpecialClasses((s.prepSpecialClasses as number) ?? 0);
-    setPrepSpecialChildren((s.prepSpecialChildren as number) ?? 0);
-    setP38First((s.p38First as number) ?? 0);
-    setP38Second((s.p38Second as number) ?? 0);
-    setP41First((s.p41First as number) ?? 0);
-    setP41Second((s.p41Second as number) ?? 0);
-    setPhaRows((s.phaRows as PhaRow[]) ?? []);
-    setPhpYear1((s.phpYear1 as number) ?? 0);
-    setPhpYear2((s.phpYear2 as number) ?? 0);
-    setPhpYear3((s.phpYear3 as number) ?? 0);
-    if (s.phpWizardStep) setPhpWizardStep(s.phpWizardStep as PhpWizardStep);
-    if (s.phpMethodMode) setPhpMethodMode(s.phpMethodMode as PhpMethodMode);
-    setPhpExcludedAbroad((s.phpExcludedAbroad as number) ?? 0);
-    setPhpExcludedForeignSchoolCz((s.phpExcludedForeignSchoolCz as number) ?? 0);
-    setPhpExcludedIndividual((s.phpExcludedIndividual as number) ?? 0);
-    setPhpExcludedSchool(Boolean(s.phpExcludedSchool));
-    setSelectedExample((s.selectedExample as ExampleKey) ?? "");
-    setWizardChoice((s.wizardChoice as WizardChoice) ?? "");
-    if (typeof s.zsWizardStep === "number") {
-      setZsWizardStep(clampZsBasicWizardStep(s.zsWizardStep));
-    }
-    setDataMode((s.dataMode as DataMode) ?? "own");
-    setNv75Role(s.nv75Role === "reditel" ? "reditel" : "ucitel");
-    setNv75School(s.nv75School === "plavecka_skola" ? "plavecka_skola" : "plavecka_skola");
-    setNv75TeacherMin(typeof s.nv75TeacherMin === "number" ? s.nv75TeacherMin : 22);
-    setNv75TeacherMax(typeof s.nv75TeacherMax === "number" ? s.nv75TeacherMax : 30);
-    setMixedMethodFirstZsPupils((s.mixedMethodFirstZsPupils as number) ?? 0);
-    setMixedMethodFirstZsClasses((s.mixedMethodFirstZsClasses as number) ?? 0);
-    setMixedMethodFirstSpecialPupils((s.mixedMethodFirstSpecialPupils as number) ?? 0);
-    setMixedMethodFirstSpecialClasses((s.mixedMethodFirstSpecialClasses as number) ?? 0);
-    setMixedMethodSecondZsPupils((s.mixedMethodSecondZsPupils as number) ?? 0);
-    setMixedMethodSecondZsClasses((s.mixedMethodSecondZsClasses as number) ?? 0);
-    setMixedMethodSecondSpecialPupils((s.mixedMethodSecondSpecialPupils as number) ?? 0);
-    setMixedMethodSecondSpecialClasses((s.mixedMethodSecondSpecialClasses as number) ?? 0);
-    setUiNotice(notice);
-  };
+    totalPhmax,
+    totalPha,
+    totalPhp,
+  ]);
 
   const {
     namedSnapshots,
@@ -1442,7 +1586,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const restoreSnapshot = () => {
     try {
-      const raw = localStorage.getItem("edu-cz-zs-calculator-state");
+      const raw = localStorage.getItem(ZS_AUTOSAVE_STORAGE_KEY);
       if (!raw) {
         setUiNotice(MSG_NO_LOCAL_AUTOSAVE_DATA);
         return;
@@ -1457,14 +1601,13 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const clearStoredSnapshot = () => {
     if (!confirmDestructive(MSG_CONFIRM_CLEAR_BROWSER_STORAGE)) return;
-    localStorage.removeItem("edu-cz-zs-calculator-state");
+    localStorage.removeItem(ZS_AUTOSAVE_STORAGE_KEY);
     setLastSavedAt("");
     setUiNotice("Uložená data byla vymazána.");
   };
 
   const saveSnapshotManually = () => {
-    localStorage.setItem("edu-cz-zs-calculator-state", JSON.stringify(buildSnapshot()));
-    setLastSavedAt(new Date().toLocaleString("cs-CZ"));
+    persistSnapshot();
     setUiNotice("Rozpracované údaje byly uloženy.");
   };
 
@@ -1710,28 +1853,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     [validationIssues, warnings],
   );
   const showZsInputBanner = zsInputBannerItems.length > 0;
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("edu-cz-zs-calculator-state", JSON.stringify(buildSnapshot()));
-      setLastSavedAt(new Date().toLocaleString("cs-CZ"));
-    } catch (error) {
-      console.error("Nepodařilo se uložit průběžná data.", error);
-    }
-  }, [
-    tab, mode, basicType, basic1Classes, basic1Pupils, basic2Classes, basic2Pupils,
-    incl1Classes, incl1Pupils, incl2Classes, incl2Pupils, psychRows, healthRows, exportLabel, minorityType,
-    minority1Classes, minority1Pupils, minority2Classes, minority2Pupils, gymRows, mixedRows,
-    special1Classes, special1Pupils, special2Classes, special2Pupils, specialIIClasses,
-    specialIIPupils, prepClasses, prepChildren, prepSpecialClasses, prepSpecialChildren,
-    p38First, p38Second, p41First, p41Second, phaRows, phpYear1, phpYear2, phpYear3,
-    phpWizardStep, phpMethodMode, phpExcludedAbroad, phpExcludedForeignSchoolCz,
-    phpExcludedIndividual, phpExcludedSchool, selectedExample, wizardChoice, dataMode,
-    nv75Role, nv75School, nv75TeacherMin, nv75TeacherMax,
-    mixedMethodFirstZsPupils, mixedMethodFirstZsClasses, mixedMethodFirstSpecialPupils,
-    mixedMethodFirstSpecialClasses, mixedMethodSecondZsPupils, mixedMethodSecondZsClasses,
-    mixedMethodSecondSpecialPupils, mixedMethodSecondSpecialClasses,
-  ]);
 
   const summaryRows: readonly (readonly [string, string | number])[] = [
     ["Běžné třídy ZŠ – 1. stupeň", basic1Phmax],

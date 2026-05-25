@@ -1,6 +1,6 @@
 # Acceptance checklist – PV, ZŠ, NV75 (bez SŠ)
 
-Orientační kontrola před předáním nebo release. Automatizovaný smoke: `npm run test:e2e` (Playwright, mobilní viewport).
+Orientační kontrola před předáním nebo release. Automatizovaný smoke: `npm run test:e2e` (Playwright, mobilní viewport). Stav sloupce **OK**: `E2E` = pokryto mobilním smoke, `contract` = unit test na zdrojový kód, `ručně` = vyžaduje lidské ověření.
 
 ## Rozhodnutí: PV § 1d odst. 3 (krácení PHmax)
 
@@ -17,12 +17,12 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 
 | # | Kontrola | OK |
 |---|----------|-----|
-| P1 | Mobilní souhrn: scroll dolů → panel → Skrýt → chip vlevo → Zobrazit | |
-| P2 | Banner + **Přejít k chybě** (prázdné pracoviště / neúplný řádek) | |
-| P3 | Průvodce krok **2 Vstupy** → **Přejít k chybě** → sekce vstupů | |
-| P4 | Checklist „Kdy přidat další pracoviště“ u prázdné tabulky | |
-| P5 | § 1d odst. 3 – box u řádku + text u souhrnu (bez výpočtu krácení) | |
-| P6 | 3 ukázky z comboboxu – PHmax/PHAmax sedí s očekáváním | |
+| P1 | Mobilní souhrn: scroll dolů → panel → Skrýt → chip vlevo → Zobrazit | E2E |
+| P2 | Banner + **Přejít k chybě** (prázdné pracoviště / neúplný řádek) | E2E |
+| P3 | Průvodce krok **2 Vstupy** → **Přejít k chybě** → sekce vstupů | E2E |
+| P4 | Checklist „Kdy přidat další pracoviště“ u prázdné tabulky | contract |
+| P5 | § 1d odst. 3 – box u řádku + text u souhrnu (bez výpočtu krácení) | contract |
+| P6 | 3 ukázky z comboboxu – PHmax/PHAmax sedí s očekáváním | ručně |
 
 ---
 
@@ -30,11 +30,11 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 
 | # | Kontrola | OK |
 |---|----------|-----|
-| Z1 | Mobilní souhrn + chip (jako PV) | |
-| Z2 | Banner bez duplicity „Kontrola vstupů“; stejný verdikt v docku | |
-| Z3 | Průvodce PHmax – krok 2 Třídy → **Přejít k chybě** (prázdný formulář) | |
-| Z4 | PHAmax/PHPmax v basic – věta „pro tento typ školy se nepočítá“ u neplatného režimu | |
-| Z5 | Export CSV/XLSX – metadata a orientační disclaimer | |
+| Z1 | Mobilní souhrn + chip (jako PV) | E2E |
+| Z2 | Banner bez duplicity „Kontrola vstupů“; stejný verdikt v docku | E2E |
+| Z3 | Průvodce PHmax – krok 2 Třídy → **Přejít k chybě** (prázdný formulář) | E2E |
+| Z4 | PHAmax/PHPmax v basic – věta „pro tento typ školy se nepočítá“ u neplatného režimu | contract |
+| Z5 | Export CSV/XLSX – metadata a orientační disclaimer | ručně |
 
 ---
 
@@ -42,12 +42,12 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 
 | # | Kontrola | OK |
 |---|----------|-----|
-| N1 | Mobilní souhrn + chip | |
-| N2 | Banner při chybějícím §4b / varování u řádků | |
-| N3 | Průvodce **2 Vstupy** → **Přejít k chybě** | |
-| N4 | Ukázka A z comboboxu – banka a §4b v audit sloupci | |
-| N5 | Export CSV/XLSX – archivní razítko, release notes verze | |
-| N6 | Tlačítko **Vložit druh školy/zařízení** pod tabulkou | |
+| N1 | Mobilní souhrn + chip | E2E |
+| N2 | Banner při chybějícím §4b / varování u řádků | E2E |
+| N3 | Průvodce **2 Vstupy** → **Přejít k chybě** | E2E |
+| N4 | Ukázka A z comboboxu – banka a §4b v audit sloupci | ručně |
+| N5 | Export CSV/XLSX – archivní razítko, release notes verze | contract |
+| N6 | Tlačítko **Vložit druh školy/zařízení** pod tabulkou | contract |
 
 ---
 
@@ -55,9 +55,9 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 
 | # | Kontrola | OK |
 |---|----------|-----|
-| S1 | E2E smoke (`sd-mobile-smoke.spec.ts`) projde | |
-| S2 | Souhrnný režim – věta o počtu oddělení | |
-| S3 | Porovnání variant A/B s pojmenovanou zálohou | |
+| S1 | E2E smoke (`sd-mobile-smoke.spec.ts`) projde | E2E |
+| S2 | Souhrnný režim – věta o počtu oddělení | ručně |
+| S3 | Porovnání variant A/B s pojmenovanou zálohou | ručně |
 
 ---
 
@@ -79,4 +79,4 @@ npm run test:e2e
 
 | Datum | Tester | PV | ZŠ | NV75 | Poznámka |
 |-------|--------|----|----|------|----------|
-|       |        |    |    |      |          |
+| 2026-05-21 | CI + contract (`phmax-acceptance-pv-zs-nv75-contract`) | E2E+contract | E2E+contract+snapshot refaktor | E2E+contract | 12 E2E mobilní smoke; Z5/N4/S2/S3 ručně před release |
