@@ -21,6 +21,7 @@ describe("E2E smoke contract", () => {
   it("Dashboard KPI strip zobrazuje stav modulu", () => {
     const dash = readSource("src/PhmaxDashboardPage.tsx");
     expect(dash).toContain("dash-kpi-tile__status");
+    expect(dash).toContain("dash-kpi-tile__detail");
     expect(dash).toContain("Začít u ukázky");
     expect(readSource("src/styles.css")).toContain(".dash-kpi-tile__status--ok");
   });

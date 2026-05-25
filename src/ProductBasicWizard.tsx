@@ -7,11 +7,17 @@ import {
   type ProductBasicWizardStepMeta,
 } from "./product-basic-wizard";
 
+type ProductBasicWizardInputIssueFix = {
+  onFix: () => void;
+  fixLabel?: string;
+};
+
 type ProductBasicWizardProps = {
   productLabel: string;
   steps: readonly ProductBasicWizardStepMeta[];
   step: ProductBasicWizardStep;
   heroExampleSelectId?: string;
+  inputIssueFix?: ProductBasicWizardInputIssueFix;
   onStepChange: (step: ProductBasicWizardStep) => void;
   onBack: () => void;
   onNext: () => void;
@@ -22,6 +28,7 @@ export function ProductBasicWizard({
   steps,
   step,
   heroExampleSelectId,
+  inputIssueFix,
   onStepChange,
   onBack,
   onNext,
@@ -95,6 +102,11 @@ export function ProductBasicWizard({
           <button type="button" className="btn ghost" onClick={onBack} disabled={isFirst}>
             Zpět
           </button>
+          {isLast && inputIssueFix ? (
+            <button type="button" className="btn ghost" onClick={inputIssueFix.onFix}>
+              {inputIssueFix.fixLabel ?? "Přejít k chybě"}
+            </button>
+          ) : null}
           <button type="button" className="btn primary" onClick={onNext}>
             {isLast ? "Přejít na výsledek" : "Další krok"}
           </button>

@@ -741,6 +741,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 <strong className="dash-kpi-tile__value">{row.primaryKpi.value}</strong>
                 <span className="dash-kpi-tile__hint">{row.primaryKpi.label}</span>
                 <span className={`dash-kpi-tile__status ${dashboardKpiStatusClass(row)}`}>{row.status}</span>
+                {row.hasData && row.verdict?.detail ? (
+                  <span className="dash-kpi-tile__detail">{row.verdict.detail}</span>
+                ) : null}
               </article>
             ))}
           </div>

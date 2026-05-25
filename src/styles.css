@@ -7449,7 +7449,8 @@ select:focus {
   .calculator-mobile-summary-chip {
     position: fixed;
     bottom: calc(env(safe-area-inset-bottom, 0px) + max(12px, 3vh));
-    right: max(10px, env(safe-area-inset-right, 0px));
+    left: max(10px, env(safe-area-inset-left, 0px));
+    right: auto;
     z-index: 55;
     padding: 8px 12px;
     border-radius: 999px;
@@ -8223,6 +8224,38 @@ select:focus {
 
 .dash-kpi-tile__status--warning {
   color: #92400e;
+}
+
+.dash-kpi-tile__detail {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+.result-anchor-card__issue-summaries {
+  margin: 6px 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.result-anchor-card__issue-summaries li + li {
+  margin-top: 4px;
+}
+
+.zs-pha-php-basic-guide__inactive {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(255, 251, 235, 0.9);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #78350f;
 }
 
 .dash-card__actions {

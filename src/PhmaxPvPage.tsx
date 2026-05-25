@@ -86,6 +86,7 @@ import {
 } from "./pv-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -475,6 +476,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   }, [rowComputations]);
 
   const pvVerdict = useMemo(() => {
+    if (rows.length === 0) {
+      return {
+        tone: "warning" as const,
+        label: "Pro smysluplný součet PHmax doplňte pracoviště",
+        detail: "Přidejte alespoň jedno pracoviště (kód provozu, počet tříd, průměrná denní doba).",
+      };
+    }
     const invalidRows = rowComputations.filter((c) => c.computed.totalPhmax == null).length;
     if (invalidRows > 0) {
       return {
@@ -488,7 +496,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       label: "Vstupy jsou kompletní",
       detail: "Součet PHmax je vypočítaný pro všechna zadaná pracoviště. Pokračujte uložením scénáře nebo exportem.",
     };
-  }, [rowComputations]);
+  }, [rowComputations, rows.length]);
 
   const pvWorkflow = useMemo(() => {
     const invalidRows = rowComputations.filter((c) => c.computed.totalPhmax == null).length;
@@ -782,9 +790,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     { id: "pv-vstupy", label: "Vstupy (pracoviště)" },
   ] as const;
 
-  const pvStatusBadge = aggregate.incomplete ? "Zkontrolujte vstupy" : "Vstupy kompletní";
   const pvBasicWizardActive = viewMode === "basic";
-  const pvHasInputIssue = aggregate.incomplete;
+  const pvHasInputIssue = pvVerdict.tone !== "ok";
+  const pvScrollToInputs = useCallback(() => scrollToFirstNeedsAttentionSection(["pv-vstupy"]), []);
   const { step: pvWizardStep, goToStep: goToPvWizardStep, handleBack: handlePvWizardBack, handleNext: handlePvWizardNext } =
     useProductBasicWizard({
       lsKey: PV_BASIC_WIZARD_LS_KEY,
@@ -846,7 +854,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             },
             { label: "PHAmax", value: aggregate.phaSum > 0 ? aggregate.phaSum : "–" },
             { label: "Pracoviště", value: rows.length },
-            { label: "Stav", value: pvStatusBadge },
+            { label: "Stav", value: pvVerdict.label },
           ]}
         />
 
@@ -1082,6 +1090,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           steps={PV_BASIC_WIZARD_STEPS}
           step={pvWizardStep}
           heroExampleSelectId={PV_HERO_EXAMPLE_SELECT_ID}
+          inputIssueFix={pvHasInputIssue ? { onFix: pvScrollToInputs } : undefined}
           onStepChange={goToPvWizardStep}
           onBack={handlePvWizardBack}
           onNext={handlePvWizardNext}
@@ -1090,9 +1099,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
       {pvHasInputIssue ? (
         <CalculatorInputIssueBanner
-          label="Pro smysluplný součet PHmax doplňte pracoviště"
-          detail="Některá pracoviště nemají vyplněnou průměrnou denní dobu nebo další povinné údaje."
-          onFix={() => scrollToFirstNeedsAttentionSection(["pv-vstupy"])}
+          {...calculatorInputIssueBannerFromVerdict(pvVerdict, pvScrollToInputs)}
         />
       ) : null}
 
@@ -1101,7 +1108,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           anchorRef: heroHeaderRef,
           primaryLabel: "PHmax celkem",
           primaryValue: aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum,
-          statusText: pvStatusBadge,
+          statusText: pvVerdict.label,
           tone: pvVerdict.tone,
           onSave: savePvSnapshotManually,
           onExport: handleExportCsv,
@@ -1113,7 +1120,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             tone={pvVerdict.tone}
             primaryLabel="PHmax celkem"
             primaryValue={aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}
-            statusBadge={pvStatusBadge}
+            statusBadge={pvVerdict.label}
             stats={[
               { label: "PHAmax celkem", value: aggregate.phaSum > 0 ? aggregate.phaSum : "–" },
               { label: "Pracoviště ve výpočtu", value: rows.length },
@@ -1205,6 +1212,20 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         <p className="section-lead muted-text print-hide" style={{ marginTop: 0 }}>
           Export a tisk najdete v horní liště u nadpisu stránky.
         </p>
+
+        {rows.length === 0 ? (
+          <div className="card card--warning pv-empty-workplace-hint" style={{ marginBottom: 14, padding: 12 }}>
+            <p style={{ margin: "0 0 8px", fontWeight: 700 }}>Kdy přidat další pracoviště</p>
+            <ul style={{ margin: 0, paddingLeft: "1.25rem", lineHeight: 1.5 }}>
+              <li>odloučené místo školy (jiná adresa nebo provoz);</li>
+              <li>jiný druh provozu na stejném místě (celodenní / polodenní / internátní);</li>
+              <li>samostatná situace, kterou potřebujete vykázat zvlášť v souhrnu.</li>
+            </ul>
+            <p className="muted-text" style={{ margin: "10px 0 0", fontSize: "0.86rem" }}>
+              Začněte tlačítkem <strong>Přidat pracoviště</strong> níže – každá kombinace místa a druhu provozu je jeden řádek.
+            </p>
+          </div>
+        ) : null}
 
         <FieldWhyPhmaxDetails summary="Proč se PHmax počítá po pracovištích?">
           <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>

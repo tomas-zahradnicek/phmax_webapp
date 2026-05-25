@@ -81,6 +81,7 @@ import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { PageTableOfContents, type PageTocSection } from "./PageTableOfContents";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
+import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
@@ -1720,7 +1721,18 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     });
   }, [tab]);
 
-  const validationHighlight = validationIssues.length > 0;
+  const zsNeedsInputBanner = zsVerdict.tone !== "ok";
+  const zsScrollToInputs = useCallback(() => {
+    if (firstIssueSection) goToSection(firstIssueSection);
+  }, [firstIssueSection, goToSection]);
+  const zsDockIssueSummaries = useMemo(
+    () =>
+      warnings.length > 0
+        ? warnings.slice(0, 4).map((w) => (w.length > 80 ? `${w.slice(0, 77)}…` : w))
+        : [],
+    [warnings],
+  );
+  const validationHighlight = zsNeedsInputBanner;
   const zsInputBannerItems = useMemo(
     () => [
       ...validationIssues.map((item) => ({
@@ -2457,6 +2469,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             hasExceptionModules={zsWizardHasExceptions}
             wizardChoice={wizardChoice}
             wizardOptions={zsWizardChoiceOptions}
+            inputIssueFix={showZsInputBanner ? { onFix: zsScrollToInputs } : undefined}
             onWizardChoice={(value) => applyWizardChoice(value as WizardChoice)}
             onStepChange={goToZsWizardStep}
             onBack={handleZsWizardBack}
@@ -2466,6 +2479,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <ZsPhaPhpBasicGuide
             tab="pha"
             totalValue={totalPha}
+            moduleApplies={visibleSections.some(
+              (s) => s.startsWith("pha_rvp") || s === "pha_disability_flags",
+            )}
             onOpenPhmaxWizard={() => {
               setTab("phmax");
               goToZsWizardStep(1);
@@ -2475,6 +2491,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           <ZsPhaPhpBasicGuide
             tab="php"
             totalValue={totalPhp}
+            moduleApplies={hasSection("php_years") || hasSection("php_options")}
             onOpenPhmaxWizard={() => {
               setTab("phmax");
               goToZsWizardStep(1);
@@ -2588,9 +2605,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
         {showZsInputBanner ? (
           <CalculatorInputIssueBanner
-            label="Pro smysluplný výpočet doplňte chybějící údaje"
-            items={zsInputBannerItems}
-            onFix={firstIssueSection ? () => goToSection(firstIssueSection) : undefined}
+            {...calculatorInputIssueBannerFromVerdict(zsVerdict, zsScrollToInputs)}
+            items={zsInputBannerItems.length > 1 ? zsInputBannerItems : undefined}
           />
         ) : null}
 
@@ -2599,7 +2615,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             anchorRef: heroHeaderRef,
             primaryLabel: zsTabPrimaryLabel,
             primaryValue: zsTabPrimaryValue,
-            statusText: incompleteSections > 0 ? `Nevyplněné: ${incompleteSections}` : "Vstupy kompletní",
+            statusText: zsVerdict.label,
             tone: zsVerdict.tone,
             onSave: saveSnapshotManually,
             onExport: handleExportCsv,
@@ -2624,7 +2640,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               tone={zsVerdict.tone}
               primaryLabel={zsTabPrimaryLabel}
               primaryValue={zsTabPrimaryValue}
-              statusBadge={incompleteSections > 0 ? `Nevyplněné části: ${incompleteSections}` : "Vstupy kompletní"}
+              statusBadge={zsVerdict.label}
               stats={[
                 { label: "PHmax", value: totalPhmax },
                 { label: "PHAmax", value: totalPha },
@@ -2632,7 +2648,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                 { label: "Režim", value: formatModeRežimStatValue(MODE_CONFIG[mode].label) },
               ]}
               verdictLabel={zsVerdict.label}
-              verdictDetail={zsVerdict.detail}
+              verdictDetail={zsDockIssueSummaries.length > 0 ? "" : zsVerdict.detail}
+              issueSummaries={zsDockIssueSummaries}
               workflowSteps={zsBasicWizardActive ? [] : zsWorkflow.steps}
               viewMode={viewMode}
               actions={[

@@ -63,6 +63,7 @@ import {
 } from "./ss-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
@@ -518,8 +519,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
     { id: "ss-metodika", label: "Metodika (pokročilé)" },
   ] as const;
 
-  const ssHasInputIssue = ssErrorRows > 0;
   const ssNeedsInputBanner = ssVerdict.tone !== "ok";
+  const ssScrollToInputs = useCallback(() => scrollToFirstNeedsAttentionSection(["ss-vstupy"]), []);
   const ssBasicWizardActive = viewMode === "basic";
   const { step: ssWizardStep, goToStep: goToSsWizardStep, handleBack: handleSsWizardBack, handleNext: handleSsWizardNext } =
     useProductBasicWizard({
@@ -532,7 +533,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
 
   return (
     <div
-      className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${ssBasicWizardActive ? ` product-basic-wizard-active ss-wizard-step-${ssWizardStep}` : ""}${ssHasInputIssue ? " app-shell--validation-hint" : ""}`}
+      className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${ssBasicWizardActive ? ` product-basic-wizard-active ss-wizard-step-${ssWizardStep}` : ""}${ssNeedsInputBanner ? " app-shell--validation-hint" : ""}`}
     >
       <header className="hero hero--feature" ref={heroHeaderRef}>
         <div className="hero__orb hero__orb--one" />
@@ -1271,11 +1272,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       </FieldWhyPhmaxDetails>
 
       {ssNeedsInputBanner ? (
-        <CalculatorInputIssueBanner
-          label="Pro smysluplný výpočet doplňte nebo opravte vstupy"
-          detail={ssVerdict.detail}
-          onFix={() => scrollToFirstNeedsAttentionSection(["ss-vstupy"])}
-        />
+        <CalculatorInputIssueBanner {...calculatorInputIssueBannerFromVerdict(ssVerdict, ssScrollToInputs)} />
       ) : null}
 
       <CalculatorProductShell
@@ -1328,7 +1325,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               ) : null
             }
             actions={[
-              ...(ssHasInputIssue
+              ...(ssNeedsInputBanner
                 ? [
                     {
                       label: "Přejít k chybě",
@@ -1354,7 +1351,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       />
 
       <section
-        className={`card section-card section-card--ss${sectionNeedsAttentionClass(ssHasInputIssue)}`}
+        className={`card section-card section-card--ss${sectionNeedsAttentionClass(ssNeedsInputBanner)}`}
         data-section="ss-vstupy"
         data-wizard-step="2"
       >

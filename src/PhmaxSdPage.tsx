@@ -86,6 +86,7 @@ import {
 } from "./sd-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import { useUiNotice } from "./useUiNotice";
@@ -1068,6 +1069,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
   const sdBasicWizardActive = viewMode === "basic";
   const sdHasInputIssue = sdVerdict.tone !== "ok";
+  const sdScrollToInputs = useCallback(() => scrollToFirstNeedsAttentionSection(["sd-vstupy"]), []);
   const { step: sdWizardStep, goToStep: goToSdWizardStep, handleBack: handleSdWizardBack, handleNext: handleSdWizardNext } =
     useProductBasicWizard({
       lsKey: SD_BASIC_WIZARD_LS_KEY,
@@ -1345,6 +1347,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       {sdBasicWizardActive ? (
         <SdBasicWizard
           step={sdWizardStep}
+          inputIssueFix={sdHasInputIssue ? { onFix: sdScrollToInputs } : undefined}
           onStepChange={goToSdWizardStep}
           onBack={handleSdWizardBack}
           onNext={handleSdWizardNext}
@@ -1352,11 +1355,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       ) : null}
 
       {sdHasInputIssue ? (
-        <CalculatorInputIssueBanner
-          label="Pro smysluplný výpočet PHmax zkontrolujte vstupy"
-          detail={sdVerdict.detail}
-          onFix={() => scrollToFirstNeedsAttentionSection(["sd-vstupy"])}
-        />
+        <CalculatorInputIssueBanner {...calculatorInputIssueBannerFromVerdict(sdVerdict, sdScrollToInputs)} />
       ) : null}
 
       <CalculatorProductShell
@@ -1477,6 +1476,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
             <h3>Oddělení</h3>
             {inputMode === "summary" ? (
               <>
+                <p className="muted-text sd-summary-dept-hint" style={{ margin: "0 0 10px", lineHeight: 1.45 }}>
+                  V souhrnném režimu zadáváte, <strong>pro kolik běžných oddělení</strong> školní družiny počítáte PHmax
+                  (automaticky z účastníků ÷ 27, nebo ručně zaškrtnutím níže).
+                </p>
                 <label className="checks" style={{ marginTop: 0 }}>
                   <span>
                     <input

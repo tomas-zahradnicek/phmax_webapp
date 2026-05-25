@@ -62,6 +62,8 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".hero-toolbar-dropdown-portal-root");
     expect(css).toContain(".hero-expert-strip");
     expect(css).toContain(".dash-kpi-strip");
+    expect(css).toContain(".dash-kpi-tile__detail");
+    expect(css).toContain(".result-anchor-card__issue-summaries");
     expect(css).toContain("--calculator-dock-min");
   });
 

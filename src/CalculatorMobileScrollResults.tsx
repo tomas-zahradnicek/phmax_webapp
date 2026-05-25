@@ -114,6 +114,7 @@ export function CalculatorMobileScrollResults({
     (event: React.MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation();
       onDismissToggle?.();
+      requestAnimationFrame(() => chipRef.current?.focus());
     },
     [onDismissToggle],
   );
@@ -127,6 +128,12 @@ export function CalculatorMobileScrollResults({
     dismissed,
     dismissed ? chipRef : panelRef,
   [primaryLabel, primaryValue, statusBadge, stats.length, compact, pinned, tone]);
+
+  useEffect(() => {
+    if (!visible || !dismissed) return;
+    const id = requestAnimationFrame(() => chipRef.current?.focus());
+    return () => cancelAnimationFrame(id);
+  }, [visible, dismissed]);
 
   if (!visible || typeof document === "undefined") return null;
 

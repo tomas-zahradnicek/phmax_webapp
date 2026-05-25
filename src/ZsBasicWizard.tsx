@@ -12,12 +12,18 @@ type WizardChoiceOption = {
   title?: string;
 };
 
+type ZsBasicWizardInputIssueFix = {
+  onFix: () => void;
+  fixLabel?: string;
+};
+
 type ZsBasicWizardProps = {
   step: ZsBasicWizardStep;
   modeLabel: string;
   hasExceptionModules: boolean;
   wizardChoice: string;
   wizardOptions: readonly WizardChoiceOption[];
+  inputIssueFix?: ZsBasicWizardInputIssueFix;
   onWizardChoice: (value: string) => void;
   onStepChange: (step: ZsBasicWizardStep) => void;
   onBack: () => void;
@@ -30,6 +36,7 @@ export function ZsBasicWizard({
   hasExceptionModules,
   wizardChoice,
   wizardOptions,
+  inputIssueFix,
   onWizardChoice,
   onStepChange,
   onBack,
@@ -114,6 +121,11 @@ export function ZsBasicWizard({
           <button type="button" className="btn ghost" onClick={onBack} disabled={isFirst}>
             Zpět
           </button>
+          {isLast && inputIssueFix ? (
+            <button type="button" className="btn ghost" onClick={inputIssueFix.onFix}>
+              {inputIssueFix.fixLabel ?? "Přejít k chybě"}
+            </button>
+          ) : null}
           <button type="button" className="btn primary" onClick={onNext}>
             {isLast ? "Dokončit průvodce" : "Další krok"}
           </button>

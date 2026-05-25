@@ -29,6 +29,8 @@ type CalculatorWorkflowDockProps = {
   statusBadge?: string;
   verdictLabel: string;
   verdictDetail: string;
+  /** Zkrácený seznam varování (např. u ZŠ), bez opakování celého banneru. */
+  issueSummaries?: readonly string[];
   workflowSteps?: readonly WorkflowDockStep[];
   actions?: readonly WorkflowDockAction[];
   viewMode?: CalculatorViewMode;
@@ -63,6 +65,7 @@ export function CalculatorWorkflowDock({
   statusBadge,
   verdictLabel,
   verdictDetail,
+  issueSummaries = [],
   workflowSteps = [],
   actions = [],
   viewMode = "basic",
@@ -121,6 +124,7 @@ export function CalculatorWorkflowDock({
         statusBadge={statusBadge}
         verdictLabel={verdictLabel}
         verdictDetail={verdictDetail}
+        issueSummaries={issueSummaries}
         omitVerdictLabelWhenSameAsStatus
       />
       {workflowSteps.length > 0 ? (

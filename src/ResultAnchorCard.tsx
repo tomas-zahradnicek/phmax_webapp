@@ -17,6 +17,7 @@ type ResultAnchorCardProps = {
   stats?: readonly ResultAnchorStat[];
   verdictLabel: string;
   verdictDetail: string;
+  issueSummaries?: readonly string[];
   /** Skryje nadpis verdiktu, pokud je stejný jako statusBadge. */
   omitVerdictLabelWhenSameAsStatus?: boolean;
 };
@@ -32,6 +33,7 @@ export function ResultAnchorCard({
   stats = [],
   verdictLabel,
   verdictDetail,
+  issueSummaries = [],
   omitVerdictLabelWhenSameAsStatus = false,
 }: ResultAnchorCardProps) {
   const showVerdictLabel =
@@ -57,10 +59,18 @@ export function ResultAnchorCard({
           ))}
         </dl>
       ) : null}
-      {verdictDetail.trim() || showVerdictLabel ? (
+      {verdictDetail.trim() || showVerdictLabel || issueSummaries.length > 0 ? (
         <div className="result-anchor-card__verdict">
           {showVerdictLabel ? <p className="result-anchor-card__verdict-label">{verdictLabel}</p> : null}
-          {verdictDetail.trim() ? <p className="result-anchor-card__verdict-detail">{verdictDetail}</p> : null}
+          {issueSummaries.length > 0 ? (
+            <ul className="result-anchor-card__issue-summaries" aria-label="Upozornění">
+              {issueSummaries.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          ) : verdictDetail.trim() ? (
+            <p className="result-anchor-card__verdict-detail">{verdictDetail}</p>
+          ) : null}
         </div>
       ) : null}
     </aside>

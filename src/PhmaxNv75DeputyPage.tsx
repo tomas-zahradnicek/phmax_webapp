@@ -55,6 +55,7 @@ import {
 } from "./nv75-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import type { CompareProductVariantsResult } from "./phmax-product-compare";
@@ -1102,8 +1103,8 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     win.print();
   }, [summaryText]);
 
-  const nv75HasInputIssue = nv75InputWarnings.length > 0;
   const nv75NeedsInputBanner = nv75Verdict.tone !== "ok";
+  const nv75ScrollToInputs = useCallback(() => scrollToFirstNeedsAttentionSection(["nv75-vstupy"]), []);
   const nv75BasicWizardActive = viewMode === "basic";
   const { step: nv75WizardStep, goToStep: goToNv75WizardStep, handleBack: handleNv75WizardBack, handleNext: handleNv75WizardNext } =
     useProductBasicWizard({
@@ -1115,7 +1116,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   useFocusExampleOnMount(NV75_HERO_EXAMPLE_SELECT_ID);
 
   return (
-    <div className={`app-shell app-shell--gradient calculator-shell--nv75 ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${nv75BasicWizardActive ? ` product-basic-wizard-active nv75-wizard-step-${nv75WizardStep}` : ""}${nv75HasInputIssue ? " app-shell--validation-hint" : ""}`}>
+    <div className={`app-shell app-shell--gradient calculator-shell--nv75 ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${nv75BasicWizardActive ? ` product-basic-wizard-active nv75-wizard-step-${nv75WizardStep}` : ""}${nv75NeedsInputBanner ? " app-shell--validation-hint" : ""}`}>
       <div className="container container--app">
         <header className="hero hero--feature" ref={heroHeaderRef}>
           <div className="hero__pills-row">
@@ -1306,6 +1307,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             steps={NV75_BASIC_WIZARD_STEPS}
             step={nv75WizardStep}
             heroExampleSelectId={NV75_HERO_EXAMPLE_SELECT_ID}
+            inputIssueFix={nv75NeedsInputBanner ? { onFix: nv75ScrollToInputs } : undefined}
             onStepChange={goToNv75WizardStep}
             onBack={handleNv75WizardBack}
             onNext={handleNv75WizardNext}
@@ -1313,11 +1315,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
         ) : null}
 
         {nv75NeedsInputBanner ? (
-          <CalculatorInputIssueBanner
-            label="Pro smysluplný výpočet banky odpočtů doplňte vstupy"
-            detail={nv75Verdict.detail}
-            onFix={() => scrollToFirstNeedsAttentionSection(["nv75-vstupy"])}
-          />
+          <CalculatorInputIssueBanner {...calculatorInputIssueBannerFromVerdict(nv75Verdict, nv75ScrollToInputs)} />
         ) : null}
 
         <CalculatorProductShell
@@ -1358,7 +1356,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                 ) : null
               }
               actions={[
-                ...(nv75HasInputIssue
+                ...(nv75NeedsInputBanner
                   ? [
                       {
                         label: "Přejít k chybě",
@@ -1376,7 +1374,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             <>
 
         <section
-          className={`card muted section-card${sectionNeedsAttentionClass(nv75HasInputIssue)}`}
+          className={`card muted section-card${sectionNeedsAttentionClass(nv75NeedsInputBanner)}`}
           data-section="nv75-vstupy"
           data-wizard-step="2"
         >

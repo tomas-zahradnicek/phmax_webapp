@@ -5,6 +5,8 @@ type ZsPhaPhpTab = "pha" | "php";
 type ZsPhaPhpBasicGuideProps = {
   tab: ZsPhaPhpTab;
   totalValue: number;
+  /** Zda metodika pro zvolený režim školy tento modul vůbec počítá. */
+  moduleApplies?: boolean;
   onOpenPhmaxWizard: () => void;
 };
 
@@ -53,7 +55,12 @@ const COPY: Record<
 };
 
 /** Základní režim na záložkách PHAmax / PHPmax – bez 5krokového průvodce PHmax. */
-export function ZsPhaPhpBasicGuide({ tab, totalValue, onOpenPhmaxWizard }: ZsPhaPhpBasicGuideProps) {
+export function ZsPhaPhpBasicGuide({
+  tab,
+  totalValue,
+  moduleApplies = true,
+  onOpenPhmaxWizard,
+}: ZsPhaPhpBasicGuideProps) {
   const copy = COPY[tab];
   const moduleLabel = tab === "pha" ? "PHAmax" : "PHPmax";
 
@@ -65,6 +72,12 @@ export function ZsPhaPhpBasicGuide({ tab, totalValue, onOpenPhmaxWizard }: ZsPha
       <div className="zs-pha-php-basic-guide__intro">
         <div className="pill pill--step">Základní režim · {moduleLabel}</div>
         <h2 className="section-title">{copy.title}</h2>
+        {!moduleApplies ? (
+          <p className="zs-pha-php-basic-guide__inactive" role="status">
+            Pro zvolený typ školy se <strong>{moduleLabel}</strong> v tomto modelu metodiky nepočítá – přepněte režim v
+            průvodci na záložce PHmax, nebo použijte jiný modul výpočtu.
+          </p>
+        ) : null}
         <p className="muted-text">{copy.lead}</p>
         <p className="zs-pha-php-basic-guide__phmax-hint">
           Potřebujete průvodce krok za krokem pro běžné třídy a výjimky PHmax?{" "}
