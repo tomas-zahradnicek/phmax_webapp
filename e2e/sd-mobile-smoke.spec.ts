@@ -40,6 +40,8 @@ test.describe("ŠD mobilní smoke", () => {
   });
 
   test("souhrnný režim – hint o počtu oddělení (S2)", async ({ page }) => {
+    await page.getByRole("button", { name: "2 Vstupy" }).click({ force: true });
+    await expect(page.locator('[data-section="sd-vstupy"]')).toBeInViewport();
     await expect(page.locator(".sd-summary-dept-hint")).toBeVisible();
     await expect(page.locator(".sd-summary-dept-hint")).toContainText(/běžných oddělení/i);
   });
