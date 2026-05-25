@@ -16,11 +16,15 @@ describe("UX contract: FieldWhyPhmax + dashboard user-first blok", () => {
   });
 
   it("PV, ŠD, ZŠ, SŠ, NV75 importují a vykreslují FieldWhyPhmaxDetails", () => {
-    const files = ["PhmaxPvPage", "PhmaxSdPage", "PhmaxZsPage", "PhmaxSsPage", "PhmaxNv75DeputyPage"];
     const tagRe = /<FieldWhyPhmaxDetails[\s>/]/;
-    for (const name of files) {
+    for (const name of ["PhmaxPvPage", "PhmaxSdPage", "PhmaxSsPage", "PhmaxNv75DeputyPage"]) {
       const s = readSource(`src/${name}.tsx`);
       expect(s).toContain('from "./FieldWhyPhmax"');
+      expect(tagRe.test(s)).toBe(true);
+    }
+    for (const zsFile of ["src/zs/ZsPhmaxBasicSection.tsx", "src/zs/ZsPhmaxSec16Section.tsx"]) {
+      const s = readSource(zsFile);
+      expect(s).toContain('FieldWhyPhmax');
       expect(tagRe.test(s)).toBe(true);
     }
   });
@@ -42,8 +46,8 @@ describe("UX contract: FieldWhyPhmax + dashboard user-first blok", () => {
     expect(pv).toContain("Proč se PHmax počítá po pracovištích");
     expect(pv.match(/FieldWhyPhmaxDetails/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
 
-    const zs = readSource("src/PhmaxZsPage.tsx");
-    expect(zs).toContain("Proč má § 16/9 vlastní vstupy a výsledek");
-    expect(zs).toContain('data-section="sec16"');
+    const sec16 = readSource("src/zs/ZsPhmaxSec16Section.tsx");
+    expect(sec16).toContain("Proč má § 16/9 vlastní vstupy a výsledek");
+    expect(sec16).toContain('sectionId="sec16"');
   });
 });

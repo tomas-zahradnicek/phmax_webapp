@@ -595,6 +595,17 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     [setProductView],
   );
 
+  const openDashboardKpiModule = useCallback(
+    (row: (typeof rows)[number]) => {
+      if (row.hasData) {
+        setProductView(row.id);
+        return;
+      }
+      openModuleWithExampleHint(row.id);
+    },
+    [openModuleWithExampleHint, setProductView],
+  );
+
   return (
     <div className="app-shell app-shell--gradient">
       <div className="container container--app">
@@ -735,7 +746,19 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             {rows.map((row) => (
               <article
                 key={row.id}
-                className={["dash-kpi-tile", row.hasData ? "" : "dash-kpi-tile--empty"].filter(Boolean).join(" ")}
+                className={["dash-kpi-tile", "dash-kpi-tile--clickable", row.hasData ? "" : "dash-kpi-tile--empty"]
+                  .filter(Boolean)
+                  .join(" ")}
+                role="button"
+                tabIndex={0}
+                aria-label={`Otevřít ${DASH_CALC_LABEL[row.id]}${row.hasData ? "" : " – začít u ukázky"}`}
+                onClick={() => openDashboardKpiModule(row)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openDashboardKpiModule(row);
+                  }
+                }}
               >
                 <span className="dash-kpi-tile__module">{DASH_CALC_LABEL[row.id]}</span>
                 <strong className="dash-kpi-tile__value">{row.primaryKpi.value}</strong>

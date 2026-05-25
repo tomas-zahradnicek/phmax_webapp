@@ -11,9 +11,9 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
+    "Acceptance checklist kompletní (E2E + contract pro PV, ZŠ, NV75, ŠD); refaktor ZŠ panelů (basic, PHA, PHP, §16, speciální, psych, zdrav.).",
+    "Dashboard – klik na KPI dlaždici otevře modul (bez dat → Začít u ukázky); mobilní chip souhrnu vlevo, Obsah vpravo.",
     "Verdikty – stejný text v banneru, docku a sticky liště; na posledním kroku průvodce tlačítko Přejít k chybě.",
-    "Dashboard – detail verdiktu v horním KPI stripu; mobilní chip souhrnu vlevo, Obsah vpravo.",
-    "PV – u pracoviště metodický box k § 1d odst. 3 (bez automatického krácení); checklist přijetí v docs/acceptance-pv-zs-nv75.md.",
-    "E2E smoke – Playwright pro PV, ŠD, ZŠ a NV75 v CI; ESLint (react-hooks) pro src a e2e.",
+    "E2E smoke – Playwright pro PV, ŠD, ZŠ a NV75 v CI; ESLint rozšířen na dashboard a hlavní kalkulačky.",
   ],
 };

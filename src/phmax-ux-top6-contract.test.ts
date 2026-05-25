@@ -63,6 +63,7 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".hero-expert-strip");
     expect(css).toContain(".dash-kpi-strip");
     expect(css).toContain(".dash-kpi-tile__detail");
+    expect(css).toContain(".dash-kpi-tile--clickable");
     expect(css).toContain(".result-anchor-card__issue-summaries");
     expect(css).toContain("--calculator-dock-min");
   });
@@ -126,11 +127,19 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("ZsModuleGate");
     expect(src).toMatch(/PageTableOfContents|tocSections=/);
     expect(src).toContain("ux-expert-only");
-    for (const moduleId of ["psych", "health", "minority", "gym", "mixed", "extras"]) {
+    for (const moduleId of ["minority", "gym", "mixed", "extras"]) {
       expect(src).toContain(`sectionId="${moduleId}"`);
     }
+    expect(readSource("src/zs/ZsPhmaxSec16Section.tsx")).toContain('sectionId="sec16"');
+    expect(readSource("src/zs/ZsPhmaxSpecialSection.tsx")).toContain('sectionId="special"');
+    expect(readSource("src/zs/ZsPhmaxPsychSection.tsx")).toContain('sectionId="psych"');
+    expect(readSource("src/zs/ZsPhmaxHealthSection.tsx")).toContain('sectionId="health"');
     expect(readSource("src/zs/ZsPhaTabPanel.tsx")).toContain('sectionId="pha"');
     expect(readSource("src/zs/ZsPhpTabPanel.tsx")).toContain('sectionId="php"');
+    expect(src).toContain("ZsPhmaxSec16Section");
+    expect(src).toContain("ZsPhmaxSpecialSection");
+    expect(src).toContain("ZsPhmaxPsychSection");
+    expect(src).toContain("ZsPhmaxHealthSection");
     expect(src).toContain("ZsPhaTabPanel");
     expect(src).toContain("ZsPhpTabPanel");
     expect(src).toContain("ZsPhmaxBasicSection");

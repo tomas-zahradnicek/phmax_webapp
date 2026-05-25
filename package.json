@@ -17,7 +17,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install chromium",
-    "lint": "eslint src/zs e2e eslint.config.js",
+    "lint": "eslint src/zs src/PhmaxDashboardPage.tsx src/PhmaxPvPage.tsx src/PhmaxSdPage.tsx src/PhmaxNv75DeputyPage.tsx src/CalculatorWorkflowDock.tsx e2e eslint.config.js",
     "extract:ss-metodika": "node scripts/extract-ss-metodika-docx.mjs",
     "docs:concat-md": "node scripts/concat-zdroje-md.mjs",
     "docs:concat-ts": "node scripts/concat-zdroje-ts.mjs",

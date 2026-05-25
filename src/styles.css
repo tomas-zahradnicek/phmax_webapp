@@ -8180,6 +8180,18 @@ select:focus {
   opacity: 0.85;
 }
 
+.dash-kpi-tile--clickable {
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dash-kpi-tile--clickable:hover,
+.dash-kpi-tile--clickable:focus-visible {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  outline: none;
+}
+
 .dash-kpi-tile__module {
   display: block;
   font-size: 0.72rem;

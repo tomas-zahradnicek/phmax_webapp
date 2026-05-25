@@ -47,7 +47,6 @@ import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { sectionNeedsAttentionClass } from "./calculator-section-focus";
-import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
@@ -98,6 +97,10 @@ import { buildZsExtendedExportMetaRows, ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } fro
 import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
 import { ZsPhpTabPanel } from "./zs/ZsPhpTabPanel";
 import { ZsPhmaxBasicSection } from "./zs/ZsPhmaxBasicSection";
+import { ZsPhmaxSec16Section } from "./zs/ZsPhmaxSec16Section";
+import { ZsPhmaxSpecialSection } from "./zs/ZsPhmaxSpecialSection";
+import { ZsPhmaxPsychSection } from "./zs/ZsPhmaxPsychSection";
+import { ZsPhmaxHealthSection } from "./zs/ZsPhmaxHealthSection";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
@@ -2841,225 +2844,75 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             />
 
             <div className="grid two" data-section="zs-phmax-exceptions">
-              {(hasSection("sec16_first") || hasSection("sec16_second")) && (
-                <ZsModuleGate sectionId="sec16" title="Třídy podle § 16 odst. 9" viewMode={viewMode}>
-                <section className="card section-card section-card--module section-card--module-support" data-section="sec16" data-wizard-step="3" data-phmax-pane="exceptions">
-                  <h2>
-                    Třídy podle <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" />
-                  </h2>
-                  <FieldWhyPhmaxDetails summary="Proč má § 16/9 vlastní vstupy a výsledek?">
-                    <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
-                      <li>
-                        Třídy podle <strong>§ 16 odst. 9 školského zákona</strong> se v metodice ZV vyhodnocují <strong>odděleně od běžných tříd</strong> – mají vlastní tabulku pásma podle průměru žáků a vlastní PHmax za stupeň.
-                      </li>
-                      <li>
-                        Počty tříd a žáků zde určí pásmo stejným principem jako u běžných stupňů – výsledek se pak přičítá k celkovému PHmax modulu spolu s ostatními sekcemi režimu.
-                      </li>
-                      <li>
-                        Pokud sekci v režimu školy nepotřebujete, ponechte nuly – blok se do součtu nepromítne; při vyplnění jedné strany stupně doplňte oba údaje (třídy i žáky).
-                      </li>
-                    </ul>
-                  </FieldWhyPhmaxDetails>
-                  <div className="grid two">
-                    {hasSection("sec16_first") && (
-                      <>
-                        <NumberField label="1. stupeň – třídy" value={sec16FirstClasses} onChange={setSec16FirstClasses} />
-                        <NumberField label="1. stupeň – žáci" value={sec16FirstPupils} onChange={setSec16FirstPupils} />
-                        <ResultCard label="1. stupeň – průměrný počet žáků" value={round2(incl1Avg)} tone="primary" />
-                        <ResultCard label="1. stupeň – pásmo a PHmax na 1 třídu" value={`${sec16FirstBand.label} / ${sec16FirstBand.value}`} tone="primary" />
-                        <ResultCard label="1. stupeň – výsledek PHmax" value={incl1Phmax} tone="success" />
-                        <ResultCard label="1. stupeň – počet tříd × PHmax" value={`${incl1Classes} × ${incl1Band.value}`} tone="success" />
-                      </>
-                    )}
-
-                    {hasSection("sec16_second") && (
-                      <>
-                        <NumberField label="2. stupeň – třídy" value={sec16SecondClasses} onChange={setSec16SecondClasses} />
-                        <NumberField label="2. stupeň – žáci" value={sec16SecondPupils} onChange={setSec16SecondPupils} />
-                        <ResultCard label="2. stupeň – průměrný počet žáků" value={round2(incl2Avg)} tone="primary" />
-                        <ResultCard label="2. stupeň – pásmo a PHmax na 1 třídu" value={`${sec16SecondBand.label} / ${sec16SecondBand.value}`} tone="primary" />
-                        <ResultCard label="2. stupeň – výsledek PHmax" value={incl2Phmax} tone="success" />
-                        <ResultCard label="2. stupeň – počet tříd × PHmax" value={`${incl2Classes} × ${incl2Band.value}`} tone="success" />
-                      </>
-                    )}
-                  </div>
-                  {(hasSection("sec16_first") && (sec16FirstClasses <= 0 || sec16FirstPupils <= 0)) ||
-                  (hasSection("sec16_second") && (sec16SecondClasses <= 0 || sec16SecondPupils <= 0)) ? (
-                    <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
-                      {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} Pro výpočet tříd podle § 16/9 vyplňte třídy i žáky v aktivní části.
-                    </p>
-                  ) : null}
-                  <div className="grid three section-results-strip">
-                    {hasSection("sec16_first") ? (
-                      <ResultCard
-                        methodStepLabel="PHmax § 16/9 – 1. stupeň"
-                        label={
-                          <>
-                            PHmax <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> – 1. stupeň
-                          </>
-                        }
-                        value={incl1Phmax}
-                        tone="success"
-                      />
-                    ) : null}
-                    {hasSection("sec16_second") ? (
-                      <ResultCard
-                        methodStepLabel="PHmax § 16/9 – 2. stupeň"
-                        label={
-                          <>
-                            PHmax <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> – 2. stupeň
-                          </>
-                        }
-                        value={incl2Phmax}
-                        tone="success"
-                      />
-                    ) : null}
-                    <ResultCard
-                      methodStepLabel="PHmax § 16/9 – celkem"
-                      label={
-                        <>
-                          PHmax <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> – celkem
-                        </>
-                      }
-                      value={inclPhmax}
-                      tone="success"
-                    />
-                  </div>
-                </section>
-                </ZsModuleGate>
-              )}
+              <ZsPhmaxSec16Section
+                viewMode={viewMode}
+                showFirst={hasSection("sec16_first")}
+                showSecond={hasSection("sec16_second")}
+                firstClasses={sec16FirstClasses}
+                firstPupils={sec16FirstPupils}
+                secondClasses={sec16SecondClasses}
+                secondPupils={sec16SecondPupils}
+                onFirstClassesChange={setSec16FirstClasses}
+                onFirstPupilsChange={setSec16FirstPupils}
+                onSecondClassesChange={setSec16SecondClasses}
+                onSecondPupilsChange={setSec16SecondPupils}
+                firstAvg={incl1Avg}
+                secondAvg={incl2Avg}
+                firstBand={sec16FirstBand}
+                secondBand={sec16SecondBand}
+                firstPhmax={incl1Phmax}
+                secondPhmax={incl2Phmax}
+                totalPhmax={inclPhmax}
+              />
 
               {(hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) && (
-                <ZsModuleGate sectionId="special" title="ZŠ speciální" viewMode={viewMode}>
-              <section className="card section-card section-card--module section-card--module-special" data-section="special" data-wizard-step="3" data-phmax-pane="exceptions">
-                <h2>ZŠ speciální</h2>
-                <div className="grid two">
-                  <NumberField label="I. díl 1. stupeň – třídy" value={special1Classes} onChange={setSpecial1Classes} />
-                  <NumberField label="I. díl 1. stupeň – žáci" value={special1Pupils} onChange={setSpecial1Pupils} />
-                  <ResultCard label="I. díl 1. stupeň – průměrný počet žáků" value={round2(special1Avg)} tone="primary" />
-                  <ResultCard label="I. díl 1. stupeň – pásmo a PHmax na 1 třídu" value={`${special1Band.label} / ${special1Band.value}`} tone="primary" />
-                  <NumberField label="I. díl 2. stupeň – třídy" value={special2Classes} onChange={setSpecial2Classes} />
-                  <NumberField label="I. díl 2. stupeň – žáci" value={special2Pupils} onChange={setSpecial2Pupils} />
-                  <ResultCard label="I. díl 2. stupeň – průměrný počet žáků" value={round2(special2Avg)} tone="primary" />
-                  <ResultCard label="I. díl 2. stupeň – pásmo a PHmax na 1 třídu" value={`${special2Band.label} / ${special2Band.value}`} tone="primary" />
-                  <NumberField label="II. díl – třídy" value={specialIIClasses} onChange={setSpecialIIClasses} />
-                  <NumberField label="II. díl – žáci" value={specialIIPupils} onChange={setSpecialIIPupils} />
-                  <ResultCard label="II. díl – průměrný počet žáků" value={round2(specialIIAvg)} tone="primary" />
-                  <ResultCard label="II. díl – pásmo a PHmax na 1 třídu" value={`${specialIIBand.label} / ${specialIIBand.value}`} tone="primary" />
-                </div>
-                <div className="grid four section-results-strip">
-                  <ResultCard label="PHmax ZŠ speciální – I. díl 1. stupeň" value={special1PhmaxPart} tone="success" />
-                  <ResultCard label="PHmax ZŠ speciální – I. díl 2. stupeň" value={special2PhmaxPart} tone="success" />
-                  <ResultCard label="PHmax ZŠ speciální – II. díl" value={specialIIPhmaxPart} tone="success" />
-                  <ResultCard label="PHmax ZŠ speciální – celkem" value={specialPhmax} tone="success" />
-                </div>
-              </section>
-                </ZsModuleGate>
+                <ZsPhmaxSpecialSection
+                  viewMode={viewMode}
+                  special1Classes={special1Classes}
+                  special1Pupils={special1Pupils}
+                  special2Classes={special2Classes}
+                  special2Pupils={special2Pupils}
+                  specialIIClasses={specialIIClasses}
+                  specialIIPupils={specialIIPupils}
+                  onSpecial1ClassesChange={setSpecial1Classes}
+                  onSpecial1PupilsChange={setSpecial1Pupils}
+                  onSpecial2ClassesChange={setSpecial2Classes}
+                  onSpecial2PupilsChange={setSpecial2Pupils}
+                  onSpecialIIClassesChange={setSpecialIIClasses}
+                  onSpecialIIPupilsChange={setSpecialIIPupils}
+                  special1Avg={special1Avg}
+                  special2Avg={special2Avg}
+                  specialIIAvg={specialIIAvg}
+                  special1Band={special1Band}
+                  special2Band={special2Band}
+                  specialIIBand={specialIIBand}
+                  special1PhmaxPart={special1PhmaxPart}
+                  special2PhmaxPart={special2PhmaxPart}
+                  specialIIPhmaxPart={specialIIPhmaxPart}
+                  specialPhmax={specialPhmax}
+                />
               )}
             </div>
 
             <div className="grid two">
               {hasSection("psych_groups") && (
-                <ZsModuleGate sectionId="psych" title="Škola při psychiatrické nemocnici" viewMode={viewMode}>
-                <section className="card section-card section-card--module section-card--module-psych" data-section="psych" data-wizard-step="3" data-phmax-pane="exceptions">
-                  <h2>Škola při psychiatrické nemocnici <HelpHint text="U této části se pracuje s aktuálním údajem nebo s vyšší hodnotou z aktuálního a předchozího údaje podle zvoleného režimu. Výsledek se pak určí podle příslušného pásma pro 1. stupeň, 2. stupeň nebo společnou výuku." /></h2>
-                  <p className="muted-text">Najeďte na ikonu „i“ u nadpisu pro stručnou metodickou nápovědu.</p>
-                  <TableOuter aria-label="Tabulka školy při psychiatrické nemocnici">
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th>Typ</th><th>Zdroj</th><th>Akt. žáci</th><th>Akt. třídy</th><th>Před. žáci</th><th>Před. třídy</th><th>Průměr</th><th>Výsledek</th><th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {psychComputedRows.length === 0 ? (
-                          <tr>
-                            <td colSpan={9} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
-                          </tr>
-                        ) : psychComputedRows.map((row) => (
-                          <tr key={row.id}>
-                            <td>
-                              <select value={row.kind} onChange={(e) => updatePsych(row.id, "kind", e.target.value)}>
-                                <option value="psych1">1. stupeň</option>
-                                <option value="psych2">2. stupeň</option>
-                                <option value="psychMix">1. a 2. stupeň společně</option>
-                              </select>
-                            </td>
-                            <td>
-                              <select value={row.mode} onChange={(e) => updatePsych(row.id, "mode", e.target.value)}>
-                                <option value="higher_of_two">Vyšší z obou údajů</option>
-                                <option value="current_only">Jen aktuální rok</option>
-                              </select>
-                            </td>
-                            <td><IntegerInput value={row.currentPupils} onChange={(v) => updatePsych(row.id, "currentPupils", v)} /></td>
-                            <td><IntegerInput value={row.currentClasses} onChange={(v) => updatePsych(row.id, "currentClasses", v)} /></td>
-                            <td><IntegerInput value={row.prevPupils} onChange={(v) => updatePsych(row.id, "prevPupils", v)} /></td>
-                            <td><IntegerInput value={row.prevClasses} onChange={(v) => updatePsych(row.id, "prevClasses", v)} /></td>
-                            <td>{row.usedAvg}</td>
-                            <td>{row.bandLabel} / {row.perClass}</td>
-                            <td><button className="icon-btn" onClick={() => removePsych(row.id)}>✕</button></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </TableOuter>
-                  <button className="btn ghost" onClick={addPsych}>Přidat třídu / řádek</button>
-                </section>
-                </ZsModuleGate>
+                <ZsPhmaxPsychSection
+                  viewMode={viewMode}
+                  rows={psychComputedRows}
+                  onAdd={addPsych}
+                  onUpdate={(id, key, value) => updatePsych(id, key as keyof PsychRow, value)}
+                  onRemove={removePsych}
+                />
               )}
 
               {hasSection("health_groups") && (
-                <ZsModuleGate sectionId="health" title="ZŠ při zdravotnickém zařízení" viewMode={viewMode}>
-                <section className="card section-card section-card--module section-card--module-psych" data-section="health" data-wizard-step="3" data-phmax-pane="exceptions">
-                  <h2>
-                    ZŠ při zdravotnickém zařízení (mimo psychiatrii){" "}
-                    <HelpHint text="Řádky B11–B13 dle metodiky ZV v5. Průměr žáků ve třídě se stanoví jako vyšší z průměru za předchozí školní rok a z údaje k aktuálnímu sběru (stejná logika jako u psychiatrické školy). B11 = 1. stupeň, B12 = 2. stupeň, B13 = společná výuka 1. a 2. stupně." />
-                  </h2>
-                  <p className="muted-text">Nezahrnuje školy při psychiatrické nemocnici – ty mají samostatný režim (B14–B16).</p>
-                  <TableOuter aria-label="Tabulka ZŠ při zdravotnickém zařízení">
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th>Typ</th><th>Zdroj</th><th>Akt. žáci</th><th>Akt. třídy</th><th>Před. žáci</th><th>Před. třídy</th><th>Průměr</th><th>Výsledek</th><th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {healthComputedRows.length === 0 ? (
-                          <tr>
-                            <td colSpan={9} className="muted-text">Zatím nemáte zadané žádné údaje. Klikněte na „Přidat třídu / řádek“.</td>
-                          </tr>
-                        ) : healthComputedRows.map((row) => (
-                          <tr key={row.id}>
-                            <td>
-                              <select value={row.kind} onChange={(e) => updateHealth(row.id, "kind", e.target.value)}>
-                                <option value="health1">1. stupeň (ř. B11)</option>
-                                <option value="health2">2. stupeň (ř. B12)</option>
-                                <option value="healthMix">1. a 2. stupeň společně (ř. B13)</option>
-                              </select>
-                            </td>
-                            <td>
-                              <select value={row.mode} onChange={(e) => updateHealth(row.id, "mode", e.target.value)}>
-                                <option value="higher_of_two">Vyšší z obou údajů</option>
-                                <option value="current_only">Jen aktuální rok</option>
-                              </select>
-                            </td>
-                            <td><IntegerInput value={row.currentPupils} onChange={(v) => updateHealth(row.id, "currentPupils", v)} /></td>
-                            <td><IntegerInput value={row.currentClasses} onChange={(v) => updateHealth(row.id, "currentClasses", v)} /></td>
-                            <td><IntegerInput value={row.prevPupils} onChange={(v) => updateHealth(row.id, "prevPupils", v)} /></td>
-                            <td><IntegerInput value={row.prevClasses} onChange={(v) => updateHealth(row.id, "prevClasses", v)} /></td>
-                            <td>{row.usedAvg}</td>
-                            <td>{row.bandLabel} / {row.perClass}</td>
-                            <td><button type="button" className="icon-btn" onClick={() => removeHealth(row.id)}>✕</button></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </TableOuter>
-                  <button type="button" className="btn ghost" onClick={addHealth}>
-                    Přidat třídu / řádek
-                  </button>
-                </section>
-                </ZsModuleGate>
+                <ZsPhmaxHealthSection
+                  viewMode={viewMode}
+                  rows={healthComputedRows}
+                  onAdd={addHealth}
+                  onUpdate={(id, key, value) => updateHealth(id, key as keyof HealthRow, value)}
+                  onRemove={removeHealth}
+                />
               )}
 
               {hasSection("minority_first") && (

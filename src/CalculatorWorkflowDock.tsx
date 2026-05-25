@@ -76,8 +76,7 @@ export function CalculatorWorkflowDock({
   const mobileFoldSummaryRef = useRef<HTMLElement>(null);
   const [mobileBodyOpen, setMobileBodyOpen] = useState(false);
   const [mobileSummaryDismissed, setMobileSummaryDismissed] = useState(readMobileSummaryDismissed);
-  const [mobileScrollPinnedUntil, setMobileScrollPinnedUntil] = useState(0);
-  const mobileScrollPinned = mobileScrollPinnedUntil > Date.now();
+  const [mobileScrollPinned, setMobileScrollPinned] = useState(false);
   const showMobileScrollResults = !isWideDock;
   const pinTimerRef = useRef<number | null>(null);
   const stepsOpen = viewMode === "basic" && workflowSteps.length > 0;
@@ -88,22 +87,22 @@ export function CalculatorWorkflowDock({
     if (isWideDock) setMobileBodyOpen(true);
   }, [isWideDock]);
 
-  useEffect(() => {
-    if (mobileScrollPinnedUntil <= Date.now()) return;
-    const remaining = mobileScrollPinnedUntil - Date.now();
-    pinTimerRef.current = window.setTimeout(() => {
-      setMobileScrollPinnedUntil(0);
-      pinTimerRef.current = null;
-    }, remaining);
-    return () => {
+  useEffect(
+    () => () => {
       if (pinTimerRef.current != null) window.clearTimeout(pinTimerRef.current);
-    };
-  }, [mobileScrollPinnedUntil]);
+    },
+    [],
+  );
 
   const handleMobileScrollActivate = () => {
     scrollToWorkflowDock();
     setMobileBodyOpen(true);
-    setMobileScrollPinnedUntil(Date.now() + MOBILE_SCROLL_PIN_MS);
+    if (pinTimerRef.current != null) window.clearTimeout(pinTimerRef.current);
+    setMobileScrollPinned(true);
+    pinTimerRef.current = window.setTimeout(() => {
+      setMobileScrollPinned(false);
+      pinTimerRef.current = null;
+    }, MOBILE_SCROLL_PIN_MS);
   };
 
   const toggleMobileSummaryDismissed = () => {

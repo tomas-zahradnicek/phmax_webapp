@@ -45,7 +45,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | N1 | Mobilní souhrn + chip | E2E |
 | N2 | Banner při chybějícím §4b / varování u řádků | E2E |
 | N3 | Průvodce **2 Vstupy** → **Přejít k chybě** | E2E |
-| N4 | Ukázka A z comboboxu – banka a §4b v audit sloupci | ručně |
+| N4 | Ukázka A z comboboxu – banka a §4b v audit sloupci | contract |
 | N5 | Export CSV/XLSX – archivní razítko, release notes verze | contract |
 | N6 | Tlačítko **Vložit druh školy/zařízení** pod tabulkou | contract |
 

@@ -38,4 +38,9 @@ test.describe("ŠD mobilní smoke", () => {
     await page.getByRole("button", { name: "Přejít k chybě" }).first().click();
     await expect(page.locator('[data-section="sd-vstupy"]')).toBeInViewport();
   });
+
+  test("souhrnný režim – hint o počtu oddělení (S2)", async ({ page }) => {
+    await expect(page.locator(".sd-summary-dept-hint")).toBeVisible();
+    await expect(page.locator(".sd-summary-dept-hint")).toContainText(/běžných oddělení/i);
+  });
 });
