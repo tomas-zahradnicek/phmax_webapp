@@ -102,6 +102,14 @@ import {
   applyZsResetPha,
   applyZsResetPhp,
 } from "./zs/zs-form-reset";
+import {
+  findZsModeBySections,
+  getZsInitialPhaMode,
+  getZsInitialPreferredMode,
+  loadZsDemoData,
+  loadZsHeroExample,
+  ZS_WIZARD_CHOICE_TO_EXAMPLE,
+} from "./zs/zs-hero-example-load";
 import { buildZsExtendedExportMetaRows, ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
 import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
 import { ZsPhpTabPanel } from "./zs/ZsPhpTabPanel";
@@ -235,23 +243,6 @@ function clampNonNegative(value: number) {
 function sumNumbers(values: number[]) {
   return values.reduce((acc, value) => acc + value, 0);
 }
-
-function getInitialPreferredMode(): CalculatorMode {
-  const preferred = Object.values(MODE_CONFIG).find(
-    (item) =>
-      item.group === "phmax" &&
-      item.label.toLowerCase().includes("úplná zš") &&
-      !item.label.includes("§ 16")
-  );
-
-  return (preferred?.id ?? DEFAULT_MODE) as CalculatorMode;
-}
-
-function getInitialPhaMode(): CalculatorMode {
-  const preferred = Object.values(MODE_CONFIG).find((item) => item.group === "phamax");
-  return (preferred?.id ?? DEFAULT_MODE) as CalculatorMode;
-}
-
 
 function getNv75Reference(role: Nv75Role, school: Nv75School) {
   if (school === "plavecka_skola" && role === "ucitel") {
@@ -417,7 +408,7 @@ export type PhmaxZsPageProps = {
 
 export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [tab, setTab] = useState<TabKey>("phmax");
-  const [mode, setMode] = useState<CalculatorMode>(getInitialPreferredMode());
+  const [mode, setMode] = useState<CalculatorMode>(getZsInitialPreferredMode());
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
   const [focusMode, setFocusMode] = useCalculatorFocusMode();
   const heroHeaderRef = useRef<HTMLElement>(null);
@@ -465,14 +456,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const visibleSections = useMemo(() => getVisibleSections(mode), [mode]);
   const hasSection = (section: FormSection) => visibleSections.includes(section);
-
-  const findModeBySections = (...sections: FormSection[]): CalculatorMode => {
-    const candidate = Object.values(MODE_CONFIG).find((item) =>
-      item.group === "phmax" && sections.every((section) => getVisibleSections(item.id).includes(section))
-    );
-    return (candidate?.id ?? DEFAULT_MODE) as CalculatorMode;
-  };
-
 
   const [basicType, setBasicType] = useState<BasicType>("full_more_than_2");
   const [basic1Classes, setBasic1Classes] = useState(0);
@@ -1051,266 +1034,25 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     applyZsResetAll(zsSnapshotSetters);
   };
 
-  const loadDemoData = () => {
-    setMode(getInitialPreferredMode());
-    setTab("phmax");
-
-    setBasicType("full_more_than_2");
-    setBasic1Classes(10);
-    setBasic1Pupils(250);
-    setBasic2Classes(8);
-    setBasic2Pupils(225);
-
-    setIncl1Classes(0);
-    setIncl1Pupils(0);
-    setIncl2Classes(0);
-    setIncl2Pupils(0);
-
-    setPsychRows([
-      { id: 1, kind: "psych1", mode: "higher_of_two", currentPupils: 7, currentClasses: 1, prevPupils: 6, prevClasses: 1 },
-    ]);
-
-    setMinorityType("minority1");
-    setMinority1Classes(0);
-    setMinority1Pupils(0);
-    setMinority2Classes(0);
-    setMinority2Pupils(0);
-
-    setGymRows([createEmptyGymRow(1)]);
-    setMixedRows([createEmptyMixedRow(1)]);
-
-    setSpecial1Classes(0);
-    setSpecial1Pupils(0);
-    setSpecial2Classes(0);
-    setSpecial2Pupils(0);
-    setSpecialIIClasses(0);
-    setSpecialIIPupils(0);
-
-    setPrepClasses(0);
-    setPrepChildren(0);
-    setPrepSpecialClasses(0);
-    setPrepSpecialChildren(0);
-    setP38First(0);
-    setP38Second(0);
-    setP41First(0);
-    setP41Second(0);
-
-    setPhaRows([createEmptyPhaRow(1)]);
-
-    setPhpWizardStep("a");
-    setPhpMethodMode("three_year_avg");
-    setPhpYear1(260);
-    setPhpYear2(272);
-    setPhpYear3(281);
-    setPhpExcludedAbroad(0);
-    setPhpExcludedForeignSchoolCz(0);
-    setPhpExcludedIndividual(0);
-    setPhpExcludedSchool(false);
-
-    resetNv75();
+  const zsHeroExampleCtx = {
+    setters: zsSnapshotSetters,
+    createEmptyGymRow,
+    createEmptyMixedRow,
+    createEmptyPhaRow,
+    applyResetPhmax,
+    applyResetPha,
+    applyResetPhp,
+    resetNv75,
   };
 
+  const loadDemoData = () => loadZsDemoData(zsHeroExampleCtx);
 
-  const loadExample = (example: ExampleKey) => {
-    if (!example) {
-      setSelectedExample("");
-      setDataMode("own");
-      return;
-    }
-
-    applyResetPhmax();
-    applyResetPha();
-    applyResetPhp();
-    resetNv75();
-    setWizardChoice("");
-    setDataMode("example");
-    setSelectedExample(example);
-    setTab("phmax");
-
-    if (example === "priloha_uplna_zs_sec16") {
-      setMode(
-        findModeBySections("basic_first", "basic_second", "sec16_first", "sec16_second")
-      );
-      setBasicType("full_more_than_2");
-      setBasic1Classes(10);
-      setBasic1Pupils(250);
-      setBasic2Classes(8);
-      setBasic2Pupils(225);
-      setIncl1Classes(5);
-      setIncl1Pupils(40);
-      setIncl2Classes(4);
-      setIncl2Pupils(32);
-      return;
-    }
-
-    if (example === "priloha_zs_1st_sec16") {
-      setMode(findModeBySections("school_variant_first_stage_only", "sec16_first"));
-      setBasicType("first_only_3");
-      setBasic1Classes(3);
-      setBasic1Pupils(30);
-      setIncl1Classes(1);
-      setIncl1Pupils(6);
-      return;
-    }
-
-    if (example === "phmax_bezna_zs") {
-      setMode(getInitialPreferredMode());
-      setBasicType("full_more_than_2");
-      setBasic1Classes(10);
-      setBasic1Pupils(250);
-      setBasic2Classes(8);
-      setBasic2Pupils(225);
-      return;
-    }
-
-    if (example === "priloha_phamax_uplna_zs_sec16_zss") {
-      setMode(getInitialPhaMode());
-      setTab("pha");
-      setPhaRows([
-        { id: 1, kind: "zs1", classes: 2, pupils: 15 },
-        { id: 2, kind: "zs1Heavy", classes: 1, pupils: 7 },
-        { id: 3, kind: "zs2", classes: 3, pupils: 21 },
-        { id: 4, kind: "zss1Heavy", classes: 1, pupils: 6 },
-        { id: 5, kind: "zss2Heavy", classes: 2, pupils: 11 },
-        { id: 6, kind: "zssII", classes: 1, pupils: 6 },
-      ]);
-      return;
-    }
-
-    if (example === "phpmax_tri_roky") {
-      setMode(getInitialPreferredMode());
-      setTab("php");
-      setPhpWizardStep("a");
-      setPhpMethodMode("three_year_avg");
-      setPhpYear1(260);
-      setPhpYear2(272);
-      setPhpYear3(281);
-      setPhpExcludedAbroad(5);
-      setPhpExcludedForeignSchoolCz(3);
-      setPhpExcludedIndividual(2);
-      return;
-    }
-
-    if (example === "psychiatricka_nemocnice") {
-      setMode(findModeBySections("psych_groups"));
-      setPsychRows([
-        { id: 1, kind: "psych1", mode: "higher_of_two", currentPupils: 7, currentClasses: 1, prevPupils: 6, prevClasses: 1 },
-      ]);
-      return;
-    }
-
-    if (example === "zdravotnicke_zs") {
-      setMode(findModeBySections("health_groups"));
-      setHealthRows([
-        { id: 1, kind: "health1", mode: "higher_of_two", currentPupils: 8, currentClasses: 1, prevPupils: 7, prevClasses: 1 },
-      ]);
-      return;
-    }
-
-    if (example === "smisene_tridy") {
-      setMode(findModeBySections("dominant_c_first"));
-      setMixedMethodFirstZsPupils(47);
-      setMixedMethodFirstZsClasses(4);
-      setMixedMethodFirstSpecialPupils(26);
-      setMixedMethodFirstSpecialClasses(3);
-      setMixedMethodSecondZsPupils(38);
-      setMixedMethodSecondZsClasses(3);
-      setMixedMethodSecondSpecialPupils(31);
-      setMixedMethodSecondSpecialClasses(4);
-      return;
-    }
-
-    if (example === "mala_skola_pod_limitem") {
-      setMode(getInitialPreferredMode());
-      setTab("php");
-      setPhpWizardStep("a");
-      setPhpMethodMode("three_year_avg");
-      setPhpYear1(120);
-      setPhpYear2(130);
-      setPhpYear3(125);
-      setPhpExcludedAbroad(0);
-      setPhpExcludedForeignSchoolCz(0);
-      setPhpExcludedIndividual(0);
-      return;
-    }
-
-    if (example === "skola_s_odecty_phpmax") {
-      setMode(DEFAULT_MODE);
-      setTab("php");
-      setPhpWizardStep("a");
-      setPhpMethodMode("three_year_avg");
-      setPhpYear1(300);
-      setPhpYear2(310);
-      setPhpYear3(305);
-      setPhpExcludedAbroad(15);
-      setPhpExcludedForeignSchoolCz(10);
-      setPhpExcludedIndividual(5);
-      return;
-    }
-
-    if (example === "inkluzivni_skola") {
-      setMode(findModeBySections("basic_first", "sec16_first"));
-      setBasic1Classes(6);
-      setBasic1Pupils(120);
-      setBasic2Classes(5);
-      setBasic2Pupils(110);
-
-      setIncl1Classes(2);
-      setIncl1Pupils(20);
-      setIncl2Classes(1);
-      setIncl2Pupils(10);
-      return;
-    }
-
-    if (example === "pripravna_trida") {
-      setMode(findModeBySections("prep_class"));
-      setPrepClasses(1);
-      setPrepChildren(12);
-      setPrepSpecialClasses(1);
-      setPrepSpecialChildren(4);
-      return;
-    }
-  };
-
+  const loadExample = (example: ExampleKey) => loadZsHeroExample(example, zsHeroExampleCtx);
 
   const applyWizardChoice = (choice: WizardChoice) => {
     setWizardChoice(choice);
     if (!choice) return;
-
-    if (choice === "php_small") {
-      loadExample("mala_skola_pod_limitem");
-      return;
-    }
-
-    if (choice === "php_deductions") {
-      loadExample("skola_s_odecty_phpmax");
-      return;
-    }
-
-    if (choice === "ph_inclusion") {
-      loadExample("inkluzivni_skola");
-      return;
-    }
-
-    if (choice === "ph_psych") {
-      loadExample("psychiatricka_nemocnice");
-      return;
-    }
-
-    if (choice === "ph_health") {
-      loadExample("zdravotnicke_zs");
-      return;
-    }
-
-    if (choice === "ph_mixed") {
-      loadExample("smisene_tridy");
-      return;
-    }
-
-    if (choice === "ph_prep") {
-      loadExample("pripravna_trida");
-      return;
-    }
+    loadExample(ZS_WIZARD_CHOICE_TO_EXAMPLE[choice]);
   };
 
 

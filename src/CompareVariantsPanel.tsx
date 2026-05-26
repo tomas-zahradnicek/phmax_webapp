@@ -95,6 +95,26 @@ function winnerLabel(left: { variantLabel: string; variantId: string; totalPrima
 }
 
 export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: CompareVariantsPanelProps) {
+  const [swapped, setSwapped] = React.useState(false);
+  const [showMoreDiffs, setShowMoreDiffs] = React.useState(false);
+  const [copyNotice, setCopyNotice] = React.useState("");
+  const generatedAt = React.useMemo(
+    () => (result ? new Date().toLocaleString("cs-CZ") : ""),
+    [result],
+  );
+
+  React.useEffect(() => {
+    if (!copyNotice) return;
+    const timer = window.setTimeout(() => setCopyNotice(""), 2600);
+    return () => window.clearTimeout(timer);
+  }, [copyNotice]);
+
+  React.useEffect(() => {
+    setSwapped(false);
+    setShowMoreDiffs(false);
+    setCopyNotice("");
+  }, [result]);
+
   if (!result || result.metrics.length < 2) {
     return (
       <div className="compare-panel compare-panel--empty" role="status" aria-live="polite">
@@ -103,14 +123,10 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
     );
   }
 
-  const [swapped, setSwapped] = React.useState(false);
-  const [showMoreDiffs, setShowMoreDiffs] = React.useState(false);
   const baseLeft = result.metrics[0];
   const baseRight = result.metrics[1];
   const left = swapped ? baseRight : baseLeft;
   const right = swapped ? baseLeft : baseRight;
-  const [copyNotice, setCopyNotice] = React.useState("");
-  const generatedAt = React.useMemo(() => new Date().toLocaleString("cs-CZ"), [result]);
   const verdict = compareVerdict(result);
   const phmaxDelta = deltaText(left.totalPrimary, right.totalPrimary, " h");
   const secondaryDelta = deltaText(left.totalSecondary, right.totalSecondary);
@@ -124,17 +140,6 @@ export function CompareVariantsPanel({ title, result, emptyHint, exportSlug }: C
   const validationBadge = `Validace: A ${left.validationOk === false ? "chyby" : "OK"} / B ${right.validationOk === false ? "chyby" : "OK"}`;
   const visibleDiffCount = showMoreDiffs ? 6 : 3;
 
-  React.useEffect(() => {
-    if (!copyNotice) return;
-    const timer = window.setTimeout(() => setCopyNotice(""), 2600);
-    return () => window.clearTimeout(timer);
-  }, [copyNotice]);
-
-  React.useEffect(() => {
-    setSwapped(false);
-    setShowMoreDiffs(false);
-    setCopyNotice("");
-  }, [result]);
   const exportCompareJson = () => {
     downloadTextFile(
       exportFilenameStamped(`phmax-${exportSlug}-compare-preview`, "json"),

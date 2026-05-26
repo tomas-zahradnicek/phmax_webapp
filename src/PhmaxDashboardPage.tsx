@@ -622,9 +622,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     [openDashboardModule],
   );
 
-  const attentionRows = rows.filter(
-    (row) =>
-      dashboardRowSupportsInputFocus(row.id) && row.hasData && dashboardVerdictNeedsAttention(row.verdict),
+  const attentionRows = sortByDashboardAttention(
+    rows.filter(
+      (row) =>
+        dashboardRowSupportsInputFocus(row.id) && row.hasData && dashboardVerdictNeedsAttention(row.verdict),
+    ),
   );
 
   return (
