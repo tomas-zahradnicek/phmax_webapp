@@ -665,8 +665,12 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             </div>
             <p className="dash-card__meta">{continueRow.status}</p>
             <div className="dash-card__actions">
-              <button type="button" className="btn primary" onClick={() => setProductView(continueRow.id)}>
-                Pokračovat v {DASH_CALC_LABEL[continueRow.id]}
+              <button
+                type="button"
+                className="btn primary"
+                onClick={() => (continueRow.hasData ? setProductView(continueRow.id) : openModuleWithExampleHint(continueRow.id))}
+              >
+                {continueRow.hasData ? `Pokračovat v ${DASH_CALC_LABEL[continueRow.id]}` : `Otevřít ${DASH_CALC_LABEL[continueRow.id]} a ukázku`}
               </button>
               {!continueRow.hasData ? (
                 <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(continueRow.id)}>

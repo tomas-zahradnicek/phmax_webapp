@@ -406,6 +406,13 @@ export type PhmaxZsPageProps = {
   setProductView: (v: ProductView) => void;
 };
 
+function appendGeneratedRow<TRow extends { id: number }>(
+  setRows: React.Dispatch<React.SetStateAction<TRow[]>>,
+  createRow: (id: number) => TRow,
+) {
+  setRows((prev) => [...prev, createRow(Date.now())]);
+}
+
 export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [tab, setTab] = useState<TabKey>("phmax");
   const [mode, setMode] = useState<CalculatorMode>(getInitialPreferredMode());
@@ -924,27 +931,26 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   if (phpExcludedSchool) warnings.push("Škola je označena jako vyloučená z PHPmax – metodický výpočet, proto je výsledek 0.");
   if (minorityType !== "minorityFull1" && minority2Classes > 0) warnings.push("U menšinové školy zadané jen pro 1. stupeň se 2. stupeň nezapočítá.");
 
-  const addMixed = () => setMixedRows((prev) => [...prev, createEmptyMixedRow(Date.now())]);
+  const addMixed = () => appendGeneratedRow(setMixedRows, createEmptyMixedRow);
   const updateMixed = (id: number, key: keyof MixedRow, value: string | number) => setMixedRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removeMixed = (id: number) => setMixedRows((prev) => prev.filter((r) => r.id !== id));
 
-  const addPha = () => setPhaRows((prev) => [...prev, createEmptyPhaRow(Date.now())]);
+  const addPha = () => appendGeneratedRow(setPhaRows, createEmptyPhaRow);
   const updatePha = (id: number, key: keyof PhaRow, value: string | number) => setPhaRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removePha = (id: number) => setPhaRows((prev) => prev.filter((r) => r.id !== id));
 
-  const addPsych = () => setPsychRows((prev) => [...prev, createEmptyPsychRow(Date.now())]);
+  const addPsych = () => appendGeneratedRow(setPsychRows, createEmptyPsychRow);
   const updatePsych = (id: number, key: keyof PsychRow, value: string | number) => setPsychRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removePsych = (id: number) => setPsychRows((prev) => prev.filter((r) => r.id !== id));
 
-  const addHealth = () => setHealthRows((prev) => [...prev, createEmptyHealthRow(Date.now())]);
+  const addHealth = () => appendGeneratedRow(setHealthRows, createEmptyHealthRow);
   const updateHealth = (id: number, key: keyof HealthRow, value: string | number) =>
     setHealthRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removeHealth = (id: number) => setHealthRows((prev) => prev.filter((r) => r.id !== id));
 
-  const addGym = () => setGymRows((prev) => [...prev, createEmptyGymRow(Date.now())]);
+  const addGym = () => appendGeneratedRow(setGymRows, createEmptyGymRow);
   const updateGym = (id: number, key: keyof GymRow, value: string | number) => setGymRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
   const removeGym = (id: number) => setGymRows((prev) => prev.filter((r) => r.id !== id));
-
 
   const applyResetPhmax = () => {
     setBasicType("full_more_than_2");
