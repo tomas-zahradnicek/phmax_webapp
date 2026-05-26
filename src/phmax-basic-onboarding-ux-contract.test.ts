@@ -75,6 +75,7 @@ describe("UX contract: basic onboarding steps + CTA", () => {
     expect(dash).toContain("dash-attention-card");
     expect(dash).toContain("requestFocusModuleInputs");
     expect(dash).toContain("openDashboardModule");
+    expect(dash).toContain("sortByDashboardAttention");
     expect(readSource("src/useFocusInputsOnMount.ts")).toContain("consumeFocusModuleInputs");
   });
 

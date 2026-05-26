@@ -18,6 +18,7 @@ import { clearAllPhmaxLocalStorage } from "./phmax-local-storage-clear";
 import { PHMAX_DASHBOARD_MAIN_ID } from "./phmax-main-landmarks";
 import { requestFocusExampleSelect } from "./phmax-focus-example-hint";
 import { requestFocusModuleInputs } from "./phmax-focus-inputs-hint";
+import { sortByDashboardAttention } from "./phmax-dashboard-sort";
 import { useUiNotice } from "./useUiNotice";
 
 const DASH_QUICK_IDS: Exclude<ProductView, "dash">[] = ["pv", "sd", "zs", "ss", "nv75"];
@@ -312,6 +313,7 @@ function dashboardFillStatusClass(hasData: boolean, verdict: DashboardVerdict | 
 function dashboardKpiStatusClass(row: DashboardRow): string {
   if (!row.hasData) return "dash-kpi-tile__status--empty";
   if (row.verdict?.tone === "ok") return "dash-kpi-tile__status--ok";
+  if (row.verdict?.tone === "danger") return "dash-kpi-tile__status--danger";
   return "dash-kpi-tile__status--warning";
 }
 
@@ -585,7 +587,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  const rows = buildDashboardRows();
+  const rows = sortByDashboardAttention(buildDashboardRows());
   const modulesWithData = rows.filter((r) => r.hasData).length;
   const lastActive = readLastActiveProduct();
   const continueRow = lastActive ? rows.find((row) => row.id === lastActive) ?? null : null;

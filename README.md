@@ -16,7 +16,7 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 - **Mobil:** dynamická výška plovoucího souhrnu; tlačítko Skrýt/Zobrazit souhrn; záložka Obsah sedí podle skutečné výšky panelu.
 - **Desktop:** panel Obsah lze skrýt tlačítkem Skrýt a znovu otevřít záložkou Obsah; stav se drží i po reloadu (`localStorage`, E2E `desktop-toc-smoke`).
 - **ZŠ:** refaktor PHmax panelů (basic, PHA, PHP, §16, speciální, psych, zdrav., menšina, gym, smíšené, extras).
-- **Dashboard:** klikatelné KPI dlaždice; stavy „Ještě nevyplněno“ / „Vstupy v pořádku“.
+- **Dashboard:** klikatelné KPI dlaždice (řazení dle závažnosti); sekce Vyžaduje pozornost; deep-link na chyby vstupů u PV/ŠD/ZŠ/NV75.
 - **CI:** ESLint v pipeline; acceptance contract pro SŠ (`phmax-ss-acceptance-contract.test.ts`), včetně §16 scénáře E.
 - **E2E:** smoke suite nově zahrnuje i SŠ (`e2e/ss-mobile-smoke.spec.ts`).
 

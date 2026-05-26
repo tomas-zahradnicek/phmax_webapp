@@ -8326,6 +8326,10 @@ select:focus {
   color: #166534;
 }
 
+.dash-kpi-tile__status--danger {
+  color: #b91c1c;
+}
+
 .dash-kpi-tile__status--warning {
   color: #92400e;
 }

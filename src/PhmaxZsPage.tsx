@@ -95,6 +95,13 @@ import {
 } from "./zs/zs-form-snapshot";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { appendGeneratedRow, removeRowById, updateRowById } from "./zs/zs-dynamic-rows";
+import {
+  applyZsResetAll,
+  applyZsResetNv75,
+  applyZsResetPhmax,
+  applyZsResetPha,
+  applyZsResetPhp,
+} from "./zs/zs-form-reset";
 import { buildZsExtendedExportMetaRows, ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
 import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
 import { ZsPhpTabPanel } from "./zs/ZsPhpTabPanel";
@@ -548,6 +555,73 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const { guideOpen: zsGuideOpen, dismissGuide: dismissZsGuide, toggleGuide: toggleZsGuideFromHero, helpButtonRef: zsHelpButtonRef } =
     useQuickOnboarding(PHMAX_ZS_ONBOARDING_LS_KEY, { scrollAnchorId: "zs-quick-guide" });
 
+  const zsSnapshotSetters = useMemo<ZsFormSnapshotSetters>(
+    () => ({
+      setTab,
+      setMode,
+      setBasicType,
+      setBasic1Classes,
+      setBasic1Pupils,
+      setBasic2Classes,
+      setBasic2Pupils,
+      setIncl1Classes,
+      setIncl1Pupils,
+      setIncl2Classes,
+      setIncl2Pupils,
+      setPsychRows,
+      setHealthRows,
+      setExportLabel,
+      setMinorityType,
+      setMinority1Classes,
+      setMinority1Pupils,
+      setMinority2Classes,
+      setMinority2Pupils,
+      setGymRows,
+      setMixedRows,
+      setSpecial1Classes,
+      setSpecial1Pupils,
+      setSpecial2Classes,
+      setSpecial2Pupils,
+      setSpecialIIClasses,
+      setSpecialIIPupils,
+      setPrepClasses,
+      setPrepChildren,
+      setPrepSpecialClasses,
+      setPrepSpecialChildren,
+      setP38First,
+      setP38Second,
+      setP41First,
+      setP41Second,
+      setPhaRows,
+      setPhpYear1,
+      setPhpYear2,
+      setPhpYear3,
+      setPhpWizardStep,
+      setPhpMethodMode,
+      setPhpExcludedAbroad,
+      setPhpExcludedForeignSchoolCz,
+      setPhpExcludedIndividual,
+      setPhpExcludedSchool,
+      setSelectedExample,
+      setWizardChoice,
+      setZsWizardStep,
+      setDataMode,
+      setNv75Role,
+      setNv75School,
+      setNv75TeacherMin,
+      setNv75TeacherMax,
+      setMixedMethodFirstZsPupils,
+      setMixedMethodFirstZsClasses,
+      setMixedMethodFirstSpecialPupils,
+      setMixedMethodFirstSpecialClasses,
+      setMixedMethodSecondZsPupils,
+      setMixedMethodSecondZsClasses,
+      setMixedMethodSecondSpecialPupils,
+      setMixedMethodSecondSpecialClasses,
+    }),
+    [],
+  );
+
   const isFull = basicType === "full_more_than_2" || basicType === "full_max_2";
 
   const basic1Avg = basic1Classes > 0 ? basic1Pupils / basic1Classes : 0;
@@ -949,104 +1023,32 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const updateGym = (id: number, key: keyof GymRow, value: string | number) => updateRowById(setGymRows, id, key, value);
   const removeGym = (id: number) => removeRowById(setGymRows, id);
 
-  const applyResetPhmax = () => {
-    setBasicType("full_more_than_2");
-    setBasic1Classes(0);
-    setBasic1Pupils(0);
-    setBasic2Classes(0);
-    setBasic2Pupils(0);
-
-    setIncl1Classes(0);
-    setIncl1Pupils(0);
-    setIncl2Classes(0);
-    setIncl2Pupils(0);
-
-    setPsychRows([]);
-    setHealthRows([]);
-    setMinorityType("minority1");
-    setMinority1Classes(0);
-    setMinority1Pupils(0);
-    setMinority2Classes(0);
-    setMinority2Pupils(0);
-
-    setGymRows([]);
-    setMixedRows([]);
-
-    setSpecial1Classes(0);
-    setMixedMethodFirstZsPupils(0);
-    setMixedMethodFirstZsClasses(0);
-    setMixedMethodFirstSpecialPupils(0);
-    setMixedMethodFirstSpecialClasses(0);
-    setMixedMethodSecondZsPupils(0);
-    setMixedMethodSecondZsClasses(0);
-    setMixedMethodSecondSpecialPupils(0);
-    setMixedMethodSecondSpecialClasses(0);
-
-    setSpecial1Pupils(0);
-    setSpecial2Classes(0);
-    setSpecial2Pupils(0);
-    setSpecialIIClasses(0);
-    setSpecialIIPupils(0);
-
-    setPrepClasses(0);
-    setPrepChildren(0);
-    setPrepSpecialClasses(0);
-    setPrepSpecialChildren(0);
-    setP38First(0);
-    setP38Second(0);
-    setP41First(0);
-    setP41Second(0);
-  };
+  const applyResetPhmax = () => applyZsResetPhmax(zsSnapshotSetters);
 
   const resetPhmax = () => {
     if (!confirmDestructive(MSG_CONFIRM_ZS_RESET_PHMAX)) return;
     applyResetPhmax();
   };
 
-  const applyResetPha = () => {
-    setPhaRows([]);
-  };
+  const applyResetPha = () => applyZsResetPha(zsSnapshotSetters);
 
   const resetPha = () => {
     if (!confirmDestructive(MSG_CONFIRM_ZS_RESET_PHA)) return;
     applyResetPha();
   };
 
-  const applyResetPhp = () => {
-    setPhpWizardStep("a");
-    setPhpMethodMode("three_year_avg");
-    setPhpYear1(0);
-    setPhpYear2(0);
-    setPhpYear3(0);
-    setPhpExcludedAbroad(0);
-    setPhpExcludedForeignSchoolCz(0);
-    setPhpExcludedIndividual(0);
-    setPhpExcludedSchool(false);
-  };
+  const applyResetPhp = () => applyZsResetPhp(zsSnapshotSetters);
 
   const resetPhp = () => {
     if (!confirmDestructive(MSG_CONFIRM_ZS_RESET_PHP)) return;
     applyResetPhp();
   };
 
-  const resetNv75 = () => {
-    setNv75Role("ucitel");
-    setNv75School("plavecka_skola");
-    setNv75TeacherMin(22);
-    setNv75TeacherMax(30);
-  };
+  const resetNv75 = () => applyZsResetNv75(zsSnapshotSetters);
 
   const resetAll = () => {
     if (!confirmDestructive(MSG_CONFIRM_ZS_RESET_ALL)) return;
-    applyResetPhmax();
-    applyResetPha();
-    applyResetPhp();
-    resetNv75();
-    setSelectedExample("");
-    setWizardChoice("");
-    setDataMode("own");
-    setExportLabel("");
-    setTab("phmax");
+    applyZsResetAll(zsSnapshotSetters);
   };
 
   const loadDemoData = () => {
@@ -1311,73 +1313,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     }
   };
 
-
-  const zsSnapshotSetters = useMemo<ZsFormSnapshotSetters>(
-    () => ({
-      setTab,
-      setMode,
-      setBasicType,
-      setBasic1Classes,
-      setBasic1Pupils,
-      setBasic2Classes,
-      setBasic2Pupils,
-      setIncl1Classes,
-      setIncl1Pupils,
-      setIncl2Classes,
-      setIncl2Pupils,
-      setPsychRows,
-      setHealthRows,
-      setExportLabel,
-      setMinorityType,
-      setMinority1Classes,
-      setMinority1Pupils,
-      setMinority2Classes,
-      setMinority2Pupils,
-      setGymRows,
-      setMixedRows,
-      setSpecial1Classes,
-      setSpecial1Pupils,
-      setSpecial2Classes,
-      setSpecial2Pupils,
-      setSpecialIIClasses,
-      setSpecialIIPupils,
-      setPrepClasses,
-      setPrepChildren,
-      setPrepSpecialClasses,
-      setPrepSpecialChildren,
-      setP38First,
-      setP38Second,
-      setP41First,
-      setP41Second,
-      setPhaRows,
-      setPhpYear1,
-      setPhpYear2,
-      setPhpYear3,
-      setPhpWizardStep,
-      setPhpMethodMode,
-      setPhpExcludedAbroad,
-      setPhpExcludedForeignSchoolCz,
-      setPhpExcludedIndividual,
-      setPhpExcludedSchool,
-      setSelectedExample,
-      setWizardChoice,
-      setZsWizardStep,
-      setDataMode,
-      setNv75Role,
-      setNv75School,
-      setNv75TeacherMin,
-      setNv75TeacherMax,
-      setMixedMethodFirstZsPupils,
-      setMixedMethodFirstZsClasses,
-      setMixedMethodFirstSpecialPupils,
-      setMixedMethodFirstSpecialClasses,
-      setMixedMethodSecondZsPupils,
-      setMixedMethodSecondZsClasses,
-      setMixedMethodSecondSpecialPupils,
-      setMixedMethodSecondSpecialClasses,
-    }),
-    [],
-  );
 
   const buildSnapshot = useCallback(
     () =>
