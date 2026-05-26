@@ -46,6 +46,7 @@ import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
+import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import { sectionNeedsAttentionClass } from "./calculator-section-focus";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroStat } from "./HeroStat";
@@ -93,6 +94,7 @@ import {
   type ZsFormSnapshotSetters,
 } from "./zs/zs-form-snapshot";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
+import { appendGeneratedRow, removeRowById, updateRowById } from "./zs/zs-dynamic-rows";
 import { buildZsExtendedExportMetaRows, ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
 import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
 import { ZsPhpTabPanel } from "./zs/ZsPhpTabPanel";
@@ -405,13 +407,6 @@ export type PhmaxZsPageProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
 };
-
-function appendGeneratedRow<TRow extends { id: number }>(
-  setRows: React.Dispatch<React.SetStateAction<TRow[]>>,
-  createRow: (id: number) => TRow,
-) {
-  setRows((prev) => [...prev, createRow(Date.now())]);
-}
 
 export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [tab, setTab] = useState<TabKey>("phmax");
@@ -932,25 +927,27 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   if (minorityType !== "minorityFull1" && minority2Classes > 0) warnings.push("U menšinové školy zadané jen pro 1. stupeň se 2. stupeň nezapočítá.");
 
   const addMixed = () => appendGeneratedRow(setMixedRows, createEmptyMixedRow);
-  const updateMixed = (id: number, key: keyof MixedRow, value: string | number) => setMixedRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
-  const removeMixed = (id: number) => setMixedRows((prev) => prev.filter((r) => r.id !== id));
+  const updateMixed = (id: number, key: keyof MixedRow, value: string | number) =>
+    updateRowById(setMixedRows, id, key, value);
+  const removeMixed = (id: number) => removeRowById(setMixedRows, id);
 
   const addPha = () => appendGeneratedRow(setPhaRows, createEmptyPhaRow);
-  const updatePha = (id: number, key: keyof PhaRow, value: string | number) => setPhaRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
-  const removePha = (id: number) => setPhaRows((prev) => prev.filter((r) => r.id !== id));
+  const updatePha = (id: number, key: keyof PhaRow, value: string | number) => updateRowById(setPhaRows, id, key, value);
+  const removePha = (id: number) => removeRowById(setPhaRows, id);
 
   const addPsych = () => appendGeneratedRow(setPsychRows, createEmptyPsychRow);
-  const updatePsych = (id: number, key: keyof PsychRow, value: string | number) => setPsychRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
-  const removePsych = (id: number) => setPsychRows((prev) => prev.filter((r) => r.id !== id));
+  const updatePsych = (id: number, key: keyof PsychRow, value: string | number) =>
+    updateRowById(setPsychRows, id, key, value);
+  const removePsych = (id: number) => removeRowById(setPsychRows, id);
 
   const addHealth = () => appendGeneratedRow(setHealthRows, createEmptyHealthRow);
   const updateHealth = (id: number, key: keyof HealthRow, value: string | number) =>
-    setHealthRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
-  const removeHealth = (id: number) => setHealthRows((prev) => prev.filter((r) => r.id !== id));
+    updateRowById(setHealthRows, id, key, value);
+  const removeHealth = (id: number) => removeRowById(setHealthRows, id);
 
   const addGym = () => appendGeneratedRow(setGymRows, createEmptyGymRow);
-  const updateGym = (id: number, key: keyof GymRow, value: string | number) => setGymRows((prev) => prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)));
-  const removeGym = (id: number) => setGymRows((prev) => prev.filter((r) => r.id !== id));
+  const updateGym = (id: number, key: keyof GymRow, value: string | number) => updateRowById(setGymRows, id, key, value);
+  const removeGym = (id: number) => removeRowById(setGymRows, id);
 
   const applyResetPhmax = () => {
     setBasicType("full_more_than_2");
@@ -2290,6 +2287,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const zsTabPrimaryLabel = tab === "phmax" ? "PHmax celkem" : tab === "pha" ? "PHAmax celkem" : "PHPmax celkem";
   const zsTabPrimaryValue = tab === "phmax" ? totalPhmax : tab === "pha" ? totalPha : totalPhp;
+
+  useFocusInputsOnMount(zsScrollToInputs);
 
   return (
     <div

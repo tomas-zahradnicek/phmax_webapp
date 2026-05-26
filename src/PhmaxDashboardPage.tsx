@@ -17,9 +17,13 @@ import { formatDashboardProductVisit, readLastActiveProduct } from "./phmax-dash
 import { clearAllPhmaxLocalStorage } from "./phmax-local-storage-clear";
 import { PHMAX_DASHBOARD_MAIN_ID } from "./phmax-main-landmarks";
 import { requestFocusExampleSelect } from "./phmax-focus-example-hint";
+import { requestFocusModuleInputs } from "./phmax-focus-inputs-hint";
 import { useUiNotice } from "./useUiNotice";
 
 const DASH_QUICK_IDS: Exclude<ProductView, "dash">[] = ["pv", "sd", "zs", "ss", "nv75"];
+
+/** Moduly pro dashboard deep-link na vstupy (bez SŠ). */
+const DASH_INPUT_FOCUS_IDS = ["pv", "sd", "zs", "nv75"] as const satisfies readonly Exclude<ProductView, "dash">[];
 
 const DASH_START_MODULES: ReadonlyArray<{
   id: Exclude<ProductView, "dash">;
@@ -311,6 +315,14 @@ function dashboardKpiStatusClass(row: DashboardRow): string {
   return "dash-kpi-tile__status--warning";
 }
 
+function dashboardVerdictNeedsAttention(verdict: DashboardVerdict | null): boolean {
+  return verdict?.tone === "warning" || verdict?.tone === "danger";
+}
+
+function dashboardRowSupportsInputFocus(id: Exclude<ProductView, "dash">): boolean {
+  return (DASH_INPUT_FOCUS_IDS as readonly string[]).includes(id);
+}
+
 function deriveSsDashboardVerdict(): DashboardVerdict | null {
   const raw = typeof localStorage === "undefined" ? null : localStorage.getItem(PHMAX_SS_UNITS_STORAGE_KEY);
   const rows = parseSsDraftRows(raw);
@@ -587,15 +599,30 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     [setProductView],
   );
 
-  const openDashboardKpiModule = useCallback(
-    (row: (typeof rows)[number]) => {
-      if (row.hasData) {
-        setProductView(row.id);
+  const openDashboardModule = useCallback(
+    (row: DashboardRow) => {
+      if (!row.hasData) {
+        openModuleWithExampleHint(row.id);
         return;
       }
-      openModuleWithExampleHint(row.id);
+      if (dashboardRowSupportsInputFocus(row.id) && dashboardVerdictNeedsAttention(row.verdict)) {
+        requestFocusModuleInputs();
+      }
+      setProductView(row.id);
     },
     [openModuleWithExampleHint, setProductView],
+  );
+
+  const openDashboardKpiModule = useCallback(
+    (row: DashboardRow) => {
+      openDashboardModule(row);
+    },
+    [openDashboardModule],
+  );
+
+  const attentionRows = rows.filter(
+    (row) =>
+      dashboardRowSupportsInputFocus(row.id) && row.hasData && dashboardVerdictNeedsAttention(row.verdict),
   );
 
   return (
@@ -668,7 +695,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               <button
                 type="button"
                 className="btn primary"
-                onClick={() => (continueRow.hasData ? setProductView(continueRow.id) : openModuleWithExampleHint(continueRow.id))}
+                onClick={() => openDashboardModule(continueRow)}
               >
                 {continueRow.hasData ? `Pokračovat v ${DASH_CALC_LABEL[continueRow.id]}` : `Otevřít ${DASH_CALC_LABEL[continueRow.id]} a ukázku`}
               </button>
@@ -677,6 +704,38 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   Začít u ukázkového příkladu
                 </button>
               ) : null}
+            </div>
+          </section>
+        ) : null}
+
+        {attentionRows.length > 0 ? (
+          <section className="card section-card dash-attention-card" aria-labelledby="dash-attention-heading">
+            <h2 id="dash-attention-heading" className="section-title">
+              Vyžaduje pozornost
+            </h2>
+            <p className="muted-text" style={{ marginBottom: 12 }}>
+              Moduly s varováním nebo chybou vstupů – po otevření se posunete k první problematické sekci.
+            </p>
+            <div className="dash-attention-card__list">
+              {attentionRows.map((row) => (
+                <article
+                  key={row.id}
+                  className={`dash-attention-card__item dash-attention-card__item--${row.verdict?.tone ?? "warning"}`}
+                >
+                  <div>
+                    <strong>{DASH_CALC_LABEL[row.id]}</strong>
+                    <span className="muted-text"> – {row.verdict?.label}</span>
+                    {row.verdict?.detail ? (
+                      <p className="muted-text" style={{ margin: "4px 0 0" }}>
+                        {row.verdict.detail}
+                      </p>
+                    ) : null}
+                  </div>
+                  <button type="button" className="btn primary" onClick={() => openDashboardModule(row)}>
+                    Otevřít a přejít k chybě
+                  </button>
+                </article>
+              ))}
             </div>
           </section>
         ) : null}
@@ -789,7 +848,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 <p className="dash-card__meta">Naposledy otevřeno: {row.lastVisit}</p>
                 <p className="dash-card__meta">Pojmenované zálohy: {row.namedBackups}</p>
                 <div className="dash-card__actions">
-                  <button type="button" className="btn primary" onClick={() => setProductView(row.id)}>
+                  <button type="button" className="btn primary" onClick={() => openDashboardModule(row)}>
                     Otevřít
                   </button>
                   {!row.hasData ? (

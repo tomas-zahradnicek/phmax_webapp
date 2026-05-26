@@ -84,6 +84,7 @@ import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
+import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import { useUiNotice } from "./useUiNotice";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
@@ -1036,6 +1037,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     });
 
   useFocusExampleOnMount(SD_HERO_EXAMPLE_SELECT_ID);
+  useFocusInputsOnMount(sdScrollToInputs);
 
   const sdTocSections = [
     { id: "sd-vysledek", label: "Výsledek PHmax" },

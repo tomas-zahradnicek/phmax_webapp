@@ -57,6 +57,7 @@ import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
+import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import type { CompareProductVariantsResult } from "./phmax-product-compare";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
@@ -1113,6 +1114,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     });
 
   useFocusExampleOnMount(NV75_HERO_EXAMPLE_SELECT_ID);
+  useFocusInputsOnMount(nv75ScrollToInputs);
 
   return (
     <div className={`app-shell app-shell--gradient calculator-shell--nv75 ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${nv75BasicWizardActive ? ` product-basic-wizard-active nv75-wizard-step-${nv75WizardStep}` : ""}${nv75NeedsInputBanner ? " app-shell--validation-hint" : ""}`}>

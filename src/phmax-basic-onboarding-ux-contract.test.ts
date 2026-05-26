@@ -70,6 +70,14 @@ describe("UX contract: basic onboarding steps + CTA", () => {
     expect(dash).not.toContain("Modal");
   });
 
+  it("dashboard u modulů s varováním posune na vstupy po otevření", () => {
+    const dash = readSource("src/PhmaxDashboardPage.tsx");
+    expect(dash).toContain("dash-attention-card");
+    expect(dash).toContain("requestFocusModuleInputs");
+    expect(dash).toContain("openDashboardModule");
+    expect(readSource("src/useFocusInputsOnMount.ts")).toContain("consumeFocusModuleInputs");
+  });
+
   it("SŠ §16 má srozumitelnou větu u řádků", () => {
     expect(readSource("src/ss/phmax-ss-par16.ts")).toContain("PHMAX_SS_PAR16_ROW_SUMMARY");
     expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain("PHMAX_SS_PAR16_ROW_SUMMARY");

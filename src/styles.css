@@ -6957,6 +6957,33 @@ select:focus {
   font-size: 0.86rem;
 }
 
+.dash-attention-card__list {
+  display: grid;
+  gap: 10px;
+}
+
+.dash-attention-card__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
+  background: #fff;
+}
+
+.dash-attention-card__item--warning {
+  border-color: color-mix(in srgb, #f59e0b 35%, var(--line));
+  background: color-mix(in srgb, #fffbeb 55%, #fff);
+}
+
+.dash-attention-card__item--danger {
+  border-color: color-mix(in srgb, #ef4444 35%, var(--line));
+  background: color-mix(in srgb, #fef2f2 55%, #fff);
+}
+
 .zs-basic-wizard {
   margin-bottom: 16px;
 }

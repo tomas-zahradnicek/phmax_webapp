@@ -85,6 +85,7 @@ import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
+import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
@@ -796,6 +797,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     });
 
   useFocusExampleOnMount(PV_HERO_EXAMPLE_SELECT_ID);
+  useFocusInputsOnMount(pvScrollToInputs);
 
   return (
     <div
