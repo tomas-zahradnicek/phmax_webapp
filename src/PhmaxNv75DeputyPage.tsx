@@ -597,6 +597,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const [selectedExample, setSelectedExample] = useState<Nv75ExampleKey>("");
   const [lastSavedAt, setLastSavedAt] = useState("");
   const [uiNotice, setUiNotice] = useUiNotice();
+  const setUiNoticeRef = useRef(setUiNotice);
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [namedSnapshots, setNamedSnapshots] = useState<Nv75NamedSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");
@@ -615,6 +616,10 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const { guideOpen, dismissGuide, toggleGuide, helpButtonRef } = useQuickOnboarding(PHMAX_NV75_ONBOARDING_LS_KEY, {
     scrollAnchorId: "nv75-quick-onboarding",
   });
+
+  useEffect(() => {
+    setUiNoticeRef.current = setUiNotice;
+  }, [setUiNotice]);
   const selectedExampleDetails = useMemo(() => NV75_EXAMPLES.find((x) => x.id === selectedExample), [selectedExample]);
   const nv75HeroExampleGroups = useMemo(
     () => [
@@ -773,7 +778,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     setOvGroupsSchool(0);
     setOvGroupsInstructor(0);
     setSelectedExample("");
-    setUiNotice("NV75 banka byla resetována.");
+    setUiNoticeRef.current("NV75 banka byla resetována.");
   }, []);
   const applyExample = useCallback((id: Nv75ExampleKey) => {
     setSelectedExample(id);
@@ -785,7 +790,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     setPracticalSec16(ex.practicalSec16);
     setOvGroupsSchool(ex.ovGroupsSchool);
     setOvGroupsInstructor(ex.ovGroupsInstructor);
-    setUiNotice("Načten metodický příklad NV75.");
+    setUiNoticeRef.current("Načten metodický příklad NV75.");
   }, []);
 
   const exportRows = useMemo(
@@ -821,7 +826,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       ...exportRows,
     ];
     downloadTextFile(exportFilenameStamped("nv75-banka-odpoctu", "csv"), exportCsvLocalized(rowsCsv), "text/csv;charset=utf-8");
-    setUiNotice("Exportováno do CSV.");
+    setUiNoticeRef.current("Exportováno do CSV.");
   }, [exportRows]);
 
   const handleExportXlsx = useCallback(async () => {
@@ -839,9 +844,9 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
         valueRows: exportRows,
         filename: exportFilenameStamped("nv75-banka-odpoctu", "xlsx"),
       });
-      setUiNotice("Stažen soubor Excel (XLSX).");
+      setUiNoticeRef.current("Stažen soubor Excel (XLSX).");
     } catch {
-      setUiNotice("Export do Excelu se nepodařil.");
+      setUiNoticeRef.current("Export do Excelu se nepodařil.");
     } finally {
       setXlsxExportBusy(false);
     }
@@ -861,13 +866,13 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(`Pojmenovaná záloha „${name}“ uložena.`);
+    setUiNoticeRef.current(`Pojmenovaná záloha „${name}“ uložena.`);
   }, [buildSnapshot, namedSaveName]);
 
   const compareWithNamedSnapshot = useCallback(() => {
     const named = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!named) {
-      setUiNotice("Nejprve vyberte uloženou zálohu pro porovnání.");
+      setUiNoticeRef.current("Nejprve vyberte uloženou zálohu pro porovnání.");
       return;
     }
     const current = calculateNv75DeputyBank({
@@ -903,7 +908,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       JSON.stringify(diff, null, 2),
       "application/json;charset=utf-8",
     );
-    setUiNotice(`Staženo porovnání: aktuální stav vs „${named.name}“ (JSON).`);
+    setUiNoticeRef.current(`Staženo porovnání: aktuální stav vs „${named.name}“ (JSON).`);
   }, [
     namedSnapshots,
     selectedNamedId,
@@ -918,7 +923,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const restoreNamedSnapshot = useCallback(() => {
     const named = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!named) {
-      setUiNotice("Nejprve vyberte uloženou zálohu.");
+      setUiNoticeRef.current("Nejprve vyberte uloženou zálohu.");
       return;
     }
     setRows(named.snapshot.rows.map(normalizeNv75UiRow));
@@ -927,7 +932,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     setPracticalSec16(named.snapshot.practicalSec16);
     setOvGroupsSchool(named.snapshot.ovGroupsSchool);
     setOvGroupsInstructor(named.snapshot.ovGroupsInstructor);
-    setUiNotice(`Obnovena záloha „${named.name}“.`);
+    setUiNoticeRef.current(`Obnovena záloha „${named.name}“.`);
   }, [namedSnapshots, selectedNamedId]);
 
   const nv75ComparePreview = useMemo((): CompareProductVariantsResult | null => {
@@ -970,12 +975,6 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
     namedSnapshots,
     nv75InputWarnings.length,
     selectedNamedId,
-    rows,
-    practicalGeneralNonOv,
-    practicalOvEhl0,
-    practicalSec16,
-    ovGroupsSchool,
-    ovGroupsInstructor,
   ]);
 
   const summaryText = useMemo(() => {
@@ -1000,9 +999,9 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const copySummary = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(summaryText);
-      setUiNotice("Shrnutí zkopírováno.");
+      setUiNoticeRef.current("Shrnutí zkopírováno.");
     } catch {
-      setUiNotice("Kopírování shrnutí se nepodařilo.");
+      setUiNoticeRef.current("Kopírování shrnutí se nepodařilo.");
     }
   }, [summaryText]);
   const ruleExplanation = useMemo(() => {

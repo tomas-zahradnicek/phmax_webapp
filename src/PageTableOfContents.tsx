@@ -2,9 +2,14 @@ import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useMatchMedia } from "./useMatchMedia";
 
 const TOC_DESKTOP_QUERY = "(min-width: 1200px)";
+const TOC_OPEN_LS_KEY = "phmax-toc-open";
 
 function readDefaultTocOpen(): boolean {
-  return typeof window !== "undefined" && window.matchMedia(TOC_DESKTOP_QUERY).matches;
+  if (typeof window === "undefined") return false;
+  const stored = window.localStorage.getItem(TOC_OPEN_LS_KEY);
+  if (stored === "0") return false;
+  if (stored === "1") return true;
+  return window.matchMedia(TOC_DESKTOP_QUERY).matches;
 }
 
 export type PageTocSection = {
@@ -89,6 +94,11 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, [tocOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(TOC_OPEN_LS_KEY, tocOpen ? "1" : "0");
   }, [tocOpen]);
 
   useEffect(() => {

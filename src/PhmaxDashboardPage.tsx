@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { CALCULATOR_LIMITS_NOTE, PRODUCT_CALCULATOR_TITLES } from "./calculator-ui-constants";
 import { HeroStatusBar } from "./HeroStatusBar";
@@ -573,7 +573,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  const rows = useMemo(() => buildDashboardRows(), [refreshAt]);
+  const rows = buildDashboardRows();
   const modulesWithData = rows.filter((r) => r.hasData).length;
   const lastActive = readLastActiveProduct();
   const continueRow = lastActive ? rows.find((row) => row.id === lastActive) ?? null : null;

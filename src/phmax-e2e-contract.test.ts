@@ -9,13 +9,14 @@ function readSource(relPath: string) {
 }
 
 describe("E2E smoke contract", () => {
-  it("Playwright mobilní smoke je v repozitáři (PV, ŠD, ZŠ, NV75)", () => {
+  it("Playwright smoke je v repozitáři (PV, ŠD, ZŠ, SŠ, NV75 + desktop TOC)", () => {
     expect(fs.existsSync(path.resolve(repoRoot, "playwright.config.ts"))).toBe(true);
     expect(readSource("playwright.config.ts")).toContain("desktop-chrome");
     for (const specFile of [
       "e2e/pv-mobile-smoke.spec.ts",
       "e2e/sd-mobile-smoke.spec.ts",
       "e2e/zs-mobile-smoke.spec.ts",
+      "e2e/ss-mobile-smoke.spec.ts",
       "e2e/nv75-mobile-smoke.spec.ts",
       "e2e/desktop-toc-smoke.spec.ts",
     ]) {

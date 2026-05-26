@@ -361,12 +361,17 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState("");
   const [uiNotice, setUiNotice] = useUiNotice();
+  const setUiNoticeRef = useRef(setUiNotice);
   const [namedSnapshots, setNamedSnapshots] = useState<NamedSdSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
   const { guideOpen, dismissGuide, toggleGuide, helpButtonRef } = useQuickOnboarding(PHMAX_SD_ONBOARDING_LS_KEY, {
     scrollAnchorId: "sd-quick-onboarding",
   });
+
+  useEffect(() => {
+    setUiNoticeRef.current = setUiNotice;
+  }, [setUiNotice]);
   const [selectedSdHeroExample, setSelectedSdHeroExample] = useState<SdHeroExampleKey>("");
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
   const [focusMode, setFocusMode] = useCalculatorFocusMode();
@@ -672,10 +677,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         valueRows: exportRows,
         filename: exportFilenameStamped("phmax-sd", "xlsx"),
       });
-      setUiNotice("Byl stažen soubor Excel (XLSX).");
+      setUiNoticeRef.current("Byl stažen soubor Excel (XLSX).");
     } catch (e) {
       console.error(e);
-      setUiNotice(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     } finally {
       setXlsxExportBusy(false);
     }
@@ -735,9 +740,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       if (next) {
         setSelectedSdHeroExample("");
         applySdPersisted(next);
-        setUiNotice("Data byla obnovena.");
+        setUiNoticeRef.current("Data byla obnovena.");
       } else {
-        setUiNotice(MSG_DATA_UNEXPECTED_SHAPE);
+        setUiNoticeRef.current(MSG_DATA_UNEXPECTED_SHAPE);
       }
     },
     [applySdPersisted],
@@ -748,7 +753,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       setSelectedSdHeroExample(key);
       if (!key) return;
       applySdPersisted(sdHeroExampleSnapshot(key) as SdPersistedSnapshot);
-      setUiNotice("Načten ukázkový příklad z metodiky.");
+      setUiNoticeRef.current("Načten ukázkový příklad z metodiky.");
     },
     [applySdPersisted],
   );
@@ -757,9 +762,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     try {
       localStorage.setItem(SD_STORAGE_KEY, JSON.stringify(buildSdSnapshot()));
       setLastSavedAt(new Date().toLocaleString("cs-CZ"));
-      setUiNotice("Rozpracované údaje byly uloženy.");
+      setUiNoticeRef.current("Rozpracované údaje byly uloženy.");
     } catch {
-      setUiNotice(`Uložení se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Uložení se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [buildSdSnapshot]);
 
@@ -767,12 +772,12 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     try {
       const raw = localStorage.getItem(SD_STORAGE_KEY);
       if (!raw) {
-        setUiNotice(MSG_NO_LOCAL_AUTOSAVE_DATA);
+        setUiNoticeRef.current(MSG_NO_LOCAL_AUTOSAVE_DATA);
         return;
       }
       applySdSnapshot(JSON.parse(raw));
     } catch {
-      setUiNotice(`Obnovení uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Obnovení uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [applySdSnapshot]);
 
@@ -786,22 +791,22 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(namedBackupSavedNotice(name, SD_MAX_NAMED_SNAPSHOTS));
+    setUiNoticeRef.current(namedBackupSavedNotice(name, SD_MAX_NAMED_SNAPSHOTS));
   }, [buildSdSnapshot, namedSaveName]);
 
   const restoreNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice(MSG_NAMED_BACKUP_PICK_FIRST);
+      setUiNoticeRef.current(MSG_NAMED_BACKUP_PICK_FIRST);
       return;
     }
     applySdSnapshot(item.snapshot);
-    setUiNotice(`Obnovena záloha „${item.name}“.`);
+    setUiNoticeRef.current(`Obnovena záloha „${item.name}“.`);
   }, [applySdSnapshot, namedSnapshots, selectedNamedId]);
 
   const deleteNamedSnapshot = useCallback(() => {
     if (!selectedNamedId) {
-      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_DELETE);
+      setUiNoticeRef.current(MSG_NAMED_BACKUP_PICK_TO_DELETE);
       return;
     }
     const toDelete = namedSnapshots.find((x) => x.id === selectedNamedId);
@@ -813,7 +818,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       return next;
     });
     setSelectedNamedId("");
-    setUiNotice("Pojmenovaná záloha byla smazána.");
+    setUiNoticeRef.current("Pojmenovaná záloha byla smazána.");
   }, [namedSnapshots, selectedNamedId]);
 
   const clearSdStoredSnapshot = useCallback(() => {
@@ -821,9 +826,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     try {
       localStorage.removeItem(SD_STORAGE_KEY);
       setLastSavedAt("");
-      setUiNotice("Uložená data v prohlížeči byla vymazána.");
+      setUiNoticeRef.current("Uložená data v prohlížeči byla vymazána.");
     } catch {
-      setUiNotice(`Vymazání uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Vymazání uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, []);
 
@@ -842,7 +847,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     setSelectedSdHeroExample("");
     setVychovatelPpcHours(28);
     setSeparateVedoucihoDleT72(true);
-    setUiNotice("Všechna vstupní data kalkulačky byla vymazána.");
+    setUiNoticeRef.current("Všechna vstupní data kalkulačky byla vymazána.");
   }, []);
 
   const buildSdSummaryText = useCallback(() => {
@@ -928,9 +933,9 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const copySdSummary = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(buildSdSummaryText());
-      setUiNotice("Shrnutí bylo zkopírováno do schránky.");
+      setUiNoticeRef.current("Shrnutí bylo zkopírováno do schránky.");
     } catch {
-      setUiNotice(`Kopírování do schránky se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Kopírování do schránky se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [buildSdSummaryText]);
 
@@ -961,13 +966,13 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
   const handleExportAuditJson = useCallback(() => {
     downloadPhmaxProductAuditJson(buildSdAuditProtocol(), "sd");
-    setUiNotice("Stažen auditní protokol (JSON).");
+    setUiNoticeRef.current("Stažen auditní protokol (JSON).");
   }, [buildSdAuditProtocol]);
 
   const handleCompareWithNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
+      setUiNoticeRef.current(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
       return;
     }
     const protocolNamed = createSdProductAuditProtocol({
@@ -980,7 +985,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       { id: "named", label: item.name, protocol: protocolNamed },
     ]);
     downloadPhmaxProductCompareJson(cmp, "sd");
-    setUiNotice(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
+    setUiNoticeRef.current(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
   }, [namedSnapshots, selectedNamedId, buildSdAuditProtocol]);
 
   const sdComparePreview = useMemo(() => {

@@ -357,6 +357,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState("");
   const [uiNotice, setUiNotice] = useUiNotice();
+  const setUiNoticeRef = useRef(setUiNotice);
   const [namedSnapshots, setNamedSnapshots] = useState<NamedPvSnapshot[]>([]);
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
@@ -377,6 +378,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const { guideOpen, dismissGuide, toggleGuide, helpButtonRef } = useQuickOnboarding(PHMAX_PV_ONBOARDING_LS_KEY, {
     scrollAnchorId: "pv-quick-onboarding",
   });
+
+  useEffect(() => {
+    setUiNoticeRef.current = setUiNotice;
+  }, [setUiNotice]);
   const selectedPvHeroExampleMeta =
     selectedPvHeroExample && selectedPvHeroExample in PV_HERO_EXAMPLE_META
       ? PV_HERO_EXAMPLE_META[selectedPvHeroExample as Exclude<PvHeroExampleKey, "">]
@@ -559,10 +564,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         valueRows: exportRows,
         filename: exportFilenameStamped("phmax-pv", "xlsx"),
       });
-      setUiNotice("Byl stažen soubor Excel (XLSX).");
+      setUiNoticeRef.current("Byl stažen soubor Excel (XLSX).");
     } catch (e) {
       console.error(e);
-      setUiNotice(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     } finally {
       setXlsxExportBusy(false);
     }
@@ -575,9 +580,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     if (next) {
       setSelectedPvHeroExample("");
       setRows(next);
-      setUiNotice("Data byla obnovena.");
+      setUiNoticeRef.current("Data byla obnovena.");
     } else {
-      setUiNotice(MSG_DATA_UNEXPECTED_SHAPE);
+      setUiNoticeRef.current(MSG_DATA_UNEXPECTED_SHAPE);
     }
   }, []);
 
@@ -585,9 +590,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     try {
       localStorage.setItem(PV_STORAGE_KEY, JSON.stringify(buildPvSnapshot()));
       setLastSavedAt(new Date().toLocaleString("cs-CZ"));
-      setUiNotice("Rozpracované údaje byly uloženy.");
+      setUiNoticeRef.current("Rozpracované údaje byly uloženy.");
     } catch {
-      setUiNotice(`Uložení se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Uložení se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [buildPvSnapshot]);
 
@@ -595,12 +600,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     try {
       const raw = localStorage.getItem(PV_STORAGE_KEY);
       if (!raw) {
-        setUiNotice(MSG_NO_LOCAL_AUTOSAVE_DATA);
+        setUiNoticeRef.current(MSG_NO_LOCAL_AUTOSAVE_DATA);
         return;
       }
       applyPvSnapshot(JSON.parse(raw));
     } catch {
-      setUiNotice(`Obnovení uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Obnovení uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [applyPvSnapshot]);
 
@@ -614,22 +619,22 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(namedBackupSavedNotice(name, PV_MAX_NAMED_SNAPSHOTS));
+    setUiNoticeRef.current(namedBackupSavedNotice(name, PV_MAX_NAMED_SNAPSHOTS));
   }, [buildPvSnapshot, namedSaveName]);
 
   const restoreNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice(MSG_NAMED_BACKUP_PICK_FIRST);
+      setUiNoticeRef.current(MSG_NAMED_BACKUP_PICK_FIRST);
       return;
     }
     applyPvSnapshot(item.snapshot);
-    setUiNotice(`Obnovena záloha „${item.name}“.`);
+    setUiNoticeRef.current(`Obnovena záloha „${item.name}“.`);
   }, [applyPvSnapshot, namedSnapshots, selectedNamedId]);
 
   const deleteNamedSnapshot = useCallback(() => {
     if (!selectedNamedId) {
-      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_DELETE);
+      setUiNoticeRef.current(MSG_NAMED_BACKUP_PICK_TO_DELETE);
       return;
     }
     const toDelete = namedSnapshots.find((x) => x.id === selectedNamedId);
@@ -641,7 +646,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       return next;
     });
     setSelectedNamedId("");
-    setUiNotice("Pojmenovaná záloha byla smazána.");
+    setUiNoticeRef.current("Pojmenovaná záloha byla smazána.");
   }, [namedSnapshots, selectedNamedId]);
 
   const clearPvStoredSnapshot = useCallback(() => {
@@ -649,9 +654,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     try {
       localStorage.removeItem(PV_STORAGE_KEY);
       setLastSavedAt("");
-      setUiNotice("Uložená data v prohlížeči byla vymazána.");
+      setUiNoticeRef.current("Uložená data v prohlížeči byla vymazána.");
     } catch {
-      setUiNotice(`Vymazání uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Vymazání uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, []);
 
@@ -659,7 +664,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     if (!confirmDestructive(MSG_CONFIRM_RESET_FORM_ALL)) return;
     setSelectedPvHeroExample("");
     setRows([createInitialPvRow()]);
-    setUiNotice("Všechna vstupní data kalkulačky byla vymazána.");
+    setUiNoticeRef.current("Všechna vstupní data kalkulačky byla vymazána.");
   }, []);
 
   const buildPvSummaryText = useCallback(() => {
@@ -682,9 +687,9 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const copyPvSummary = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(buildPvSummaryText());
-      setUiNotice("Shrnutí bylo zkopírováno do schránky.");
+      setUiNoticeRef.current("Shrnutí bylo zkopírováno do schránky.");
     } catch {
-      setUiNotice(`Kopírování do schránky se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Kopírování do schránky se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [buildPvSummaryText]);
 
@@ -720,13 +725,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
   const handleExportAuditJson = useCallback(() => {
     downloadPhmaxProductAuditJson(buildPvAuditProtocol(), "pv");
-    setUiNotice("Stažen auditní protokol (JSON).");
+    setUiNoticeRef.current("Stažen auditní protokol (JSON).");
   }, [buildPvAuditProtocol]);
 
   const handleCompareWithNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
+      setUiNoticeRef.current(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
       return;
     }
     const protocolNamed = createPvProductAuditProtocol(
@@ -744,7 +749,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       { id: "named", label: item.name, protocol: protocolNamed },
     ]);
     downloadPhmaxProductCompareJson(cmp, "pv");
-    setUiNotice(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
+    setUiNoticeRef.current(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
   }, [namedSnapshots, selectedNamedId, buildPvAuditProtocol]);
 
   const pvComparePreview = useMemo(() => {

@@ -13,6 +13,9 @@ test.describe("Desktop Obsah (TOC)", () => {
 
     await page.locator(".page-toc__toggle").click();
     await expect(nav).toHaveAttribute("aria-hidden", "true");
+    await expect.poll(() => page.evaluate(() => localStorage.getItem("phmax-toc-open"))).toBe("0");
+    await page.reload();
+    await expect(nav).toHaveAttribute("aria-hidden", "true");
 
     const reopen = page.locator(".page-toc-mobile-trigger");
     await expect(reopen).toBeVisible();

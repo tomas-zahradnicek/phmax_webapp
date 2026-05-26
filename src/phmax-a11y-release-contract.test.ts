@@ -44,6 +44,7 @@ describe("UX contract: release notes + přístupnost", () => {
     expect(readSource("src/PageTableOfContents.tsx")).toContain('e.key === "Escape"');
     expect(readSource("src/PageTableOfContents.tsx")).toContain("aria-controls");
     expect(readSource("src/PageTableOfContents.tsx")).toContain("page-toc__toggle");
+    expect(readSource("src/PageTableOfContents.tsx")).toContain("phmax-toc-open");
     expect(readSource("src/styles.css")).toContain(".page-toc-shell--collapsed");
     expect(readSource("src/calculator-section-focus.ts")).toContain("scrollToFirstNeedsAttentionSection");
     expect(readSource("src/PhmaxPvPage.tsx")).toContain("Přejít k chybě");

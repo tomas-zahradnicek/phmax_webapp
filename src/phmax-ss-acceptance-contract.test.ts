@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { calculatePhmaxRow } from "./ss/phmax-ss-service";
 import { phmaxSsDataset } from "./ss/phmax-ss-dataset";
+import { resolveIsPar16Class } from "./ss/phmax-ss-par16";
 
 const repoRoot = path.resolve(__dirname, "..");
 
@@ -44,5 +45,11 @@ describe("SŠ acceptance contract", () => {
     expect(ss).toContain("78-62-C/01");
     expect(ss).toContain("78-62-C/02");
     expect(readSource("src/ss/phmax-ss-practical-phamax.ts")).toContain("78-62-C/01");
+  });
+
+  it("§16 scénář E – heuristika i explicitní přepínač", () => {
+    expect(resolveIsPar16Class({ isPar16Class: false, classType: "Třída zřízená podle § 16 odst. 9" })).toBe(true);
+    expect(resolveIsPar16Class({ isPar16Class: true, classType: "" })).toBe(true);
+    expect(resolveIsPar16Class({ isPar16Class: false, classType: "Běžná třída" })).toBe(false);
   });
 });
