@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useUiNotice } from "../useUiNotice";
 import {
   MSG_CONFIRM_CLEAR_BROWSER_STORAGE,
@@ -12,7 +12,6 @@ import { createSsProductAuditProtocol } from "../phmax-product-audit";
 import { comparePhmaxProductVariants } from "../phmax-product-compare";
 import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "../phmax-product-audit-download";
 import {
-  APP_AUTHOR_DISPLAY_NAME,
   BROWSER_ERROR_NEXT_STEP_HINT,
   MSG_DATA_UNEXPECTED_SHAPE,
   MSG_SS_AUDIT_NEEDS_VALID_ROW,
@@ -170,6 +169,11 @@ export function usePhmaxSsUnits(
   const [exportLabel, setExportLabel] = useState("");
   const [uiNotice, setUiNotice] = useUiNotice();
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
+  const setUiNoticeRef = useRef(setUiNotice);
+
+  useEffect(() => {
+    setUiNoticeRef.current = setUiNotice;
+  }, [setUiNotice]);
 
   useEffect(() => {
     setNamedSnapshots(readNamedSsSnapshotsFromLs());
@@ -244,9 +248,9 @@ export function usePhmaxSsUnits(
     const next = parseSsNamedRowsPayload(data);
     if (next) {
       setRows(next);
-      setUiNotice("Data byla obnovena.");
+      setUiNoticeRef.current("Data byla obnovena.");
     } else {
-      setUiNotice(MSG_DATA_UNEXPECTED_SHAPE);
+      setUiNoticeRef.current(MSG_DATA_UNEXPECTED_SHAPE);
     }
   }, []);
 
@@ -265,22 +269,22 @@ export function usePhmaxSsUnits(
       return next;
     });
     setNamedSaveName("");
-    setUiNotice(namedBackupSavedNotice(name, PHMAX_SS_MAX_NAMED_SNAPSHOTS));
+    setUiNoticeRef.current(namedBackupSavedNotice(name, PHMAX_SS_MAX_NAMED_SNAPSHOTS));
   }, [buildSsRowsSnapshot, namedSaveName]);
 
   const restoreNamedSsSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice(MSG_NAMED_BACKUP_PICK_FIRST);
+      setUiNoticeRef.current(MSG_NAMED_BACKUP_PICK_FIRST);
       return;
     }
     applySsRowsSnapshot(item.snapshot);
-    setUiNotice(`Obnovena záloha „${item.name}“.`);
+    setUiNoticeRef.current(`Obnovena záloha „${item.name}“.`);
   }, [applySsRowsSnapshot, namedSnapshots, selectedNamedId]);
 
   const deleteNamedSsSnapshot = useCallback(() => {
     if (!selectedNamedId) {
-      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_DELETE);
+      setUiNoticeRef.current(MSG_NAMED_BACKUP_PICK_TO_DELETE);
       return;
     }
     const toDelete = namedSnapshots.find((x) => x.id === selectedNamedId);
@@ -292,32 +296,32 @@ export function usePhmaxSsUnits(
       return next;
     });
     setSelectedNamedId("");
-    setUiNotice("Pojmenovaná záloha byla smazána.");
+    setUiNoticeRef.current("Pojmenovaná záloha byla smazána.");
   }, [namedSnapshots, selectedNamedId]);
 
   const handleExportSsAuditJson = useCallback(() => {
     if (!auditProtocolInput) {
-      setUiNotice(MSG_SS_AUDIT_NEEDS_VALID_ROW);
+      setUiNoticeRef.current(MSG_SS_AUDIT_NEEDS_VALID_ROW);
       return;
     }
     downloadPhmaxProductAuditJson(createSsProductAuditProtocol(phmaxSsDataset, auditProtocolInput), "ss");
-    setUiNotice("Stažen auditní protokol (JSON).");
+    setUiNoticeRef.current("Stažen auditní protokol (JSON).");
   }, [auditProtocolInput]);
 
   const handleCompareSsWithNamedSnapshot = useCallback(() => {
     const item = namedSnapshots.find((x) => x.id === selectedNamedId);
     if (!item) {
-      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
+      setUiNoticeRef.current(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
       return;
     }
     const inputCurrent = auditProtocolInput;
     const inputNamed = buildSsAuditProtocolInput(item.snapshot.rows);
     if (!inputCurrent) {
-      setUiNotice(MSG_SS_COMPARE_CURRENT_INVALID);
+      setUiNoticeRef.current(MSG_SS_COMPARE_CURRENT_INVALID);
       return;
     }
     if (!inputNamed) {
-      setUiNotice(MSG_SS_COMPARE_NAMED_INVALID);
+      setUiNoticeRef.current(MSG_SS_COMPARE_NAMED_INVALID);
       return;
     }
     const cmp = comparePhmaxProductVariants([
@@ -333,21 +337,21 @@ export function usePhmaxSsUnits(
       },
     ]);
     downloadPhmaxProductCompareJson(cmp, "ss");
-    setUiNotice(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
+    setUiNoticeRef.current(`Staženo srovnání: aktuální stav vs „${item.name}“ (JSON).`);
   }, [auditProtocolInput, namedSnapshots, selectedNamedId]);
 
   const saveSnapshotManually = useCallback(() => {
     try {
       localStorage.setItem(PHMAX_SS_UNITS_STORAGE_KEY, JSON.stringify(rows));
-      setUiNotice("Rozpracované údaje byly uloženy do prohlížeče.");
+      setUiNoticeRef.current("Rozpracované údaje byly uloženy do prohlížeče.");
     } catch {
-      setUiNotice(`Uložení se nepodařilo (úložiště prohlížeče). ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Uložení se nepodařilo (úložiště prohlížeče). ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [rows]);
 
   const restoreSnapshot = useCallback(() => {
     setRows(parseStoredRows(localStorage.getItem(PHMAX_SS_UNITS_STORAGE_KEY)));
-    setUiNotice("Obnoveno z automatického úložiště prohlížeče.");
+    setUiNoticeRef.current("Obnoveno z automatického úložiště prohlížeče.");
   }, []);
 
   const clearStoredSnapshot = useCallback(() => {
@@ -357,13 +361,13 @@ export function usePhmaxSsUnits(
     } catch {
       /* ignore */
     }
-    setUiNotice("Uložená data evidence SŠ v tomto prohlížeči byla smazána.");
+    setUiNoticeRef.current("Uložená data evidence SŠ v tomto prohlížeči byla smazána.");
   }, []);
 
   const resetAll = useCallback(() => {
     if (!confirmDestructive(MSG_CONFIRM_RESET_FORM_ALL)) return;
     setRows([createEmptyPhmaxSsUnitRow(1)]);
-    setUiNotice("Formulář byl vyčištěn.");
+    setUiNoticeRef.current("Formulář byl vyčištěn.");
   }, []);
 
   const exportValueRows = useMemo(
@@ -374,7 +378,7 @@ export function usePhmaxSsUnits(
   const handleExportCsv = useCallback(() => {
     const rowsCsv = [...buildExportCsvPreamble("ss"), ...exportValueRows];
     downloadTextFile(exportFilenameStamped("phmax-ss", "csv"), exportCsvLocalized(rowsCsv), "text/csv;charset=utf-8");
-    setUiNotice("Export CSV byl stažen.");
+    setUiNoticeRef.current("Export CSV byl stažen.");
   }, [exportValueRows]);
 
   const handleExportXlsx = useCallback(async () => {
@@ -390,10 +394,10 @@ export function usePhmaxSsUnits(
         valueRows: exportValueRows,
         filename: exportFilenameStamped("phmax-ss", "xlsx"),
       });
-      setUiNotice("Byl stažen soubor Excel (XLSX).");
+      setUiNoticeRef.current("Byl stažen soubor Excel (XLSX).");
     } catch (e) {
       console.error(e);
-      setUiNotice(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     } finally {
       setXlsxExportBusy(false);
     }
@@ -408,9 +412,9 @@ export function usePhmaxSsUnits(
     });
     try {
       await navigator.clipboard.writeText(text);
-      setUiNotice("Shrnutí bylo zkopírováno do schránky.");
+      setUiNoticeRef.current("Shrnutí bylo zkopírováno do schránky.");
     } catch {
-      setUiNotice(`Kopírování do schránky se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
+      setUiNoticeRef.current(`Kopírování do schránky se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [exportLabel, roundedTotal, rows.length, phamaxPracticalTotal]);
 

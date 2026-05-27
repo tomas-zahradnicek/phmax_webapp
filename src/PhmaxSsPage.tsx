@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import {
-  ADVANCED_AUDIT_GROUP_LABEL,
   CALCULATOR_LIMITS_NOTE,
   LAY_USER_QUICK_START_SS,
   LAY_USER_QUICK_START_MOBILE_UX,
   EXPORT_ORIENTACNI_NOTE,
-  formatSsLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
   NAMED_BACKUPS_DELETE_LABEL,
@@ -37,7 +35,6 @@ import {
   IconRestoreQuick,
   IconSpinner,
 } from "./HeroActionIconButton";
-import { HeroStat } from "./HeroStat";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
