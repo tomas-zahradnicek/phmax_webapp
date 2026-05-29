@@ -15,6 +15,17 @@ export default defineConfig({
   optimizeDeps: {
     include: ["exceljs"],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules/exceljs")) {
+            return "exceljs";
+          }
+        },
+      },
+    },
+  },
   test: {
     environment: "node",
     include: ["src/**/*.test.ts"],

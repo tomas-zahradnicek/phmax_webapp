@@ -124,7 +124,6 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("CalculatorProductShell");
     expect(src).toContain("dockSticky");
     expect(src).toContain("CalculatorWorkflowDock");
-    expect(src).toContain("ZsModuleGate");
     expect(src).toMatch(/PageTableOfContents|tocSections=/);
     expect(src).toContain("ux-expert-only");
     expect(readSource("src/zs/ZsPhmaxMinoritySection.tsx")).toContain('sectionId="minority"');

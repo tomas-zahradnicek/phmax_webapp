@@ -29,8 +29,7 @@ describe("Snapshot/restore contract", () => {
     if (originalLocalStorage) {
       globalThis.localStorage = originalLocalStorage;
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (globalThis as any).localStorage;
+      delete (globalThis as { localStorage?: typeof localStorage }).localStorage;
     }
   });
 

@@ -27,9 +27,7 @@ import {
   PsychRow,
   GymRow,
 } from "./phmax-zs-logic";
-import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
-import { IntegerInput } from "./IntegerInput";
-import { FieldHintButton } from "./FieldHintButton";
+import { InputOutputLegend, ResultCard } from "./phmax-zs-ui";
 import { HeroExampleSelect } from "./HeroExampleSelect";
 import { ZS_HERO_EXAMPLE_GROUPS, type ZsHeroExampleKey } from "./zs-hero-example-groups";
 import type { CalculatorMode, FormSection } from "./config/calculator-config";
@@ -47,9 +45,7 @@ import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
-import { sectionNeedsAttentionClass } from "./calculator-section-focus";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
-import { HeroStat } from "./HeroStat";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import {
@@ -71,15 +67,11 @@ import {
 } from "./HeroActionIconButton";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
-import { TableOuter } from "./TableOuter";
-import { MixedStageTable } from "./MixedStageTable";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
-import { CalculatorStickyContextBar } from "./CalculatorStickyContextBar";
 import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
-import { CollapsibleSection } from "./CollapsibleSection";
-import { PageTableOfContents, type PageTocSection } from "./PageTableOfContents";
+import type { PageTocSection } from "./PageTableOfContents";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import {
@@ -103,13 +95,11 @@ import {
   applyZsResetPhp,
 } from "./zs/zs-form-reset";
 import {
-  findZsModeBySections,
-  getZsInitialPhaMode,
   getZsInitialPreferredMode,
-  loadZsDemoData,
   loadZsHeroExample,
   ZS_WIZARD_CHOICE_TO_EXAMPLE,
 } from "./zs/zs-hero-example-load";
+import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsExtendedExportMetaRows, ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
 import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
 import { ZsPhpTabPanel } from "./zs/ZsPhpTabPanel";
@@ -128,7 +118,6 @@ import { HeroExpertStrip } from "./HeroExpertStrip";
 import { DisplayDensityToggle } from "./DisplayDensityToggle";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
-import { ZsModuleGate } from "./ZsModuleGate";
 import { ZsBasicWizard } from "./ZsBasicWizard";
 import { ZsPhaPhpBasicGuide } from "./ZsPhaPhpBasicGuide";
 import {
@@ -146,14 +135,11 @@ import {
 } from "./zs-basic-wizard";
 import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import {
-  ADVANCED_AUDIT_GROUP_LABEL,
-  APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   APP_AUTHOR_EXPORT_ROWS,
   BROWSER_ERROR_NEXT_STEP_HINT,
   CALCULATOR_LIMITS_NOTE,
-  INLINE_VALIDATION_MSG_POSITIVE_INTEGER,
   LAY_USER_QUICK_START_ZS,
   LAY_USER_QUICK_START_MOBILE_UX,
   MSG_NAMED_BACKUP_PICK_TO_COMPARE,
@@ -172,7 +158,6 @@ import {
   CALCULATOR_WORKSPACE_DOCK_LABEL,
   PHMAX_ZS_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
-  TABLE_SCROLL_HINT,
   namedBackupsMicrocopy,
 } from "./calculator-ui-constants";
 import { APP_VERSION } from "./app-version";
@@ -242,26 +227,6 @@ function clampNonNegative(value: number) {
 
 function sumNumbers(values: number[]) {
   return values.reduce((acc, value) => acc + value, 0);
-}
-
-function getNv75Reference(role: Nv75Role, school: Nv75School) {
-  if (school === "plavecka_skola" && role === "ucitel") {
-    return {
-      label: "Učitel plavecké školy",
-      value: "22 až 30 hodin týdně",
-      note: "Rozpětí pro učitele plavecké školy.",
-    };
-  }
-
-  return {
-    label: "Ředitel plavecké školy",
-    value: "nejméně 3 hodiny týdně",
-    note: "Minimum pro ředitele plavecké školy.",
-  };
-}
-
-function HelpHint({ text }: { text: string }) {
-  return <FieldHintButton text={text} />;
 }
 
 function SectionLead({ children }: { children: React.ReactNode }) {
@@ -369,38 +334,6 @@ const GLOSSARY_TERMS = [
   },
 ];
 
-function buildShareText(data: {
-  modeLabel: string;
-  tab: string;
-  totalPhmax: number;
-  totalPha: number;
-  totalPhp: number;
-  warnings: string[];
-  inputMode: DataMode;
-  exportLabel?: string;
-}) {
-  const rows = [
-    "Shrnutí kalkulačky ZŠ",
-    "",
-    ...(data.exportLabel?.trim()
-      ? [`Označení / škola: ${data.exportLabel.trim()}`, ""]
-      : []),
-    `Režim: ${data.modeLabel}`,
-    `Aktivní modul: ${data.tab}`,
-    `Práce s údaji: ${data.inputMode === "example" ? "ukázkový příklad" : "vlastní škola"}`,
-    "",
-    `Výsledek PHmax: ${data.totalPhmax}`,
-    `Výsledek PHAmax: ${data.totalPha}`,
-    `Výsledek PHPmax: ${data.totalPhp}`,
-  ];
-  if (data.warnings.length) {
-    rows.push("", "Upozornění:");
-    data.warnings.forEach((item) => rows.push(`- ${item}`));
-  }
-  rows.push("", APP_AUTHOR_CREDIT_LINE);
-  return rows.join("\n");
-}
-
 export type PhmaxZsPageProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
@@ -455,7 +388,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   }, [zsWizardStep]);
 
   const visibleSections = useMemo(() => getVisibleSections(mode), [mode]);
-  const hasSection = (section: FormSection) => visibleSections.includes(section);
+  const hasSection = useCallback(
+    (section: FormSection) => visibleSections.includes(section),
+    [visibleSections],
+  );
 
   const [basicType, setBasicType] = useState<BasicType>("full_more_than_2");
   const [basic1Classes, setBasic1Classes] = useState(0);
@@ -928,7 +864,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       phpBandLabel: phpExcludedSchool ? null : phpBand.label,
     };
   }, [
-    mode,
     visibleSections,
     basicType,
     basic1Classes,
@@ -970,23 +905,41 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     p38Second,
     p41First,
     p41Second,
+    hasSection,
   ]);
 
-  const nv75Reference = getNv75Reference(nv75Role, nv75School);
-  const nv75TeacherRangeValid = nv75TeacherMin <= nv75TeacherMax;
-
-  const warnings: string[] = [];
-  if (basicType === "full_max_2" && basic1Classes > 0 && basic1Classes < 5) warnings.push("U úplné ZŠ s nejvýše 2 třídami v každém ročníku bývá obvykle na 1. stupni nejméně 5 běžných tříd.");
-  if (basicType.startsWith("first_only_") && basic2Classes > 0) warnings.push("U neúplné ZŠ tvořené jen 1. stupněm se 2. stupeň do výpočtu běžných tříd nezadává.");
-  if (phpExcludedTotal > phpBaseValue && !phpExcludedSchool) warnings.push("Součet nezapočítávaných žáků je vyšší než rozhodná hodnota pro PHPmax – metodický výpočet.");
-  if (phpAdjustedValue > 0 && phpAdjustedValue < 180 && !phpExcludedSchool) warnings.push("PHPmax – metodický výpočet vychází 0, protože očištěný rozhodný počet žáků je pod hranicí 180.");
-  if (phpExcludedSchool) warnings.push("Škola je označena jako vyloučená z PHPmax – metodický výpočet, proto je výsledek 0.");
-  if (minorityType !== "minorityFull1" && minority2Classes > 0) warnings.push("U menšinové školy zadané jen pro 1. stupeň se 2. stupeň nezapočítá.");
-
-  const addMixed = () => appendGeneratedRow(setMixedRows, createEmptyMixedRow);
-  const updateMixed = (id: number, key: keyof MixedRow, value: string | number) =>
-    updateRowById(setMixedRows, id, key, value);
-  const removeMixed = (id: number) => removeRowById(setMixedRows, id);
+  const warnings = useMemo(() => {
+    const items: string[] = [];
+    if (basicType === "full_max_2" && basic1Classes > 0 && basic1Classes < 5) {
+      items.push("U úplné ZŠ s nejvýše 2 třídami v každém ročníku bývá obvykle na 1. stupni nejméně 5 běžných tříd.");
+    }
+    if (basicType.startsWith("first_only_") && basic2Classes > 0) {
+      items.push("U neúplné ZŠ tvořené jen 1. stupněm se 2. stupeň do výpočtu běžných tříd nezadává.");
+    }
+    if (phpExcludedTotal > phpBaseValue && !phpExcludedSchool) {
+      items.push("Součet nezapočítávaných žáků je vyšší než rozhodná hodnota pro PHPmax – metodický výpočet.");
+    }
+    if (phpAdjustedValue > 0 && phpAdjustedValue < 180 && !phpExcludedSchool) {
+      items.push("PHPmax – metodický výpočet vychází 0, protože očištěný rozhodný počet žáků je pod hranicí 180.");
+    }
+    if (phpExcludedSchool) {
+      items.push("Škola je označena jako vyloučená z PHPmax – metodický výpočet, proto je výsledek 0.");
+    }
+    if (minorityType !== "minorityFull1" && minority2Classes > 0) {
+      items.push("U menšinové školy zadané jen pro 1. stupeň se 2. stupeň nezapočítá.");
+    }
+    return items;
+  }, [
+    basicType,
+    basic1Classes,
+    basic2Classes,
+    phpExcludedTotal,
+    phpBaseValue,
+    phpExcludedSchool,
+    phpAdjustedValue,
+    minorityType,
+    minority2Classes,
+  ]);
 
   const addPha = () => appendGeneratedRow(setPhaRows, createEmptyPhaRow);
   const updatePha = (id: number, key: keyof PhaRow, value: string | number) => updateRowById(setPhaRows, id, key, value);
@@ -1044,8 +997,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     applyResetPhp,
     resetNv75,
   };
-
-  const loadDemoData = () => loadZsDemoData(zsHeroExampleCtx);
 
   const loadExample = (example: ExampleKey) => loadZsHeroExample(example, zsHeroExampleCtx);
 
@@ -1303,7 +1254,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   };
 
   const copySummaryToClipboard = async () => {
-    const text = buildShareText({
+    const text = buildZsShareText({
       modeLabel: MODE_CONFIG[mode].label,
       tab: tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax",
       totalPhmax,
@@ -1322,7 +1273,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const printSummaryWindow = () => {
     const plain = stripAppAuthorCreditFromPlainSummary(
-      buildShareText({
+      buildZsShareText({
         modeLabel: MODE_CONFIG[mode].label,
         tab: tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax",
         totalPhmax,
@@ -1414,7 +1365,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const hasIssue = (sectionId: string) => validationIssues.some((item) => item.section === sectionId);
 
   const workspaceStickyRef = useRef<HTMLDivElement>(null);
-  const [activeScrollSection, setActiveScrollSection] = useState("");
   const tabChangeSkipRef = useRef(true);
 
   const goToSection = useCallback((sectionId: string) => {
@@ -1424,81 +1374,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     const offset = dock?.offsetHeight ?? 100;
     const top = element.getBoundingClientRect().top + window.scrollY - offset - 12;
     window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-  }, []);
-
-  const phmaxJumpSections = useMemo(() => {
-    const items: { id: string; label: React.ReactNode }[] = [
-      { id: "guide", label: "Rozcestník" },
-      { id: "setup", label: "Režim" },
-    ];
-    if (hasSection("basic_first") || hasSection("basic_second") || hasSection("school_variant_first_stage_only")) {
-      items.push({ id: "basic", label: "Běžné třídy" });
-    }
-    if (hasSection("sec16_first") || hasSection("sec16_second")) {
-      items.push({ id: "sec16", label: <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> });
-    }
-    if (hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) {
-      items.push({ id: "special", label: "ZŠ speciální" });
-    }
-    if (hasSection("psych_groups")) items.push({ id: "psych", label: "Psychiatrie" });
-    if (hasSection("health_groups")) items.push({ id: "health", label: "Zdravotnické zařízení" });
-    if (hasSection("minority_first")) items.push({ id: "minority", label: "Menšina" });
-    if (hasSection("gym_groups")) items.push({ id: "gym", label: "Gymnázia" });
-    if (hasSection("dominant_c_first") || hasSection("dominant_b_first")) items.push({ id: "mixed", label: "Smíšené" });
-    if (hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) {
-      items.push({ id: "extras", label: "Samostatné" });
-    }
-    items.push({ id: "phmax-summary", label: "Souhrn PHmax" });
-    return items;
-  }, [mode, visibleSections]);
-
-  const jumpSections = useMemo(() => {
-    if (tab === "pha") return [{ id: "pha", label: "PHAmax" }];
-    if (tab === "php") return [{ id: "php", label: "PHPmax" }];
-    return phmaxJumpSections;
-  }, [tab, phmaxJumpSections]);
-
-  useEffect(() => {
-    const updateActiveFromScroll = () => {
-      const dock = workspaceStickyRef.current;
-      const anchorY = (dock?.getBoundingClientRect().bottom ?? 100) + 6;
-      const candidates = Array.from(document.querySelectorAll<HTMLElement>("[data-section]"));
-      let best = "";
-      let bestScore = Infinity;
-      for (const el of candidates) {
-        const id = el.dataset.section;
-        if (!id) continue;
-        const r = el.getBoundingClientRect();
-        if (r.bottom < anchorY + 20) continue;
-        const score = Math.abs(r.top - anchorY);
-        if (score < bestScore) {
-          bestScore = score;
-          best = id;
-        }
-      }
-      if (best) setActiveScrollSection((prev) => (prev === best ? prev : best));
-    };
-
-    updateActiveFromScroll();
-    window.addEventListener("scroll", updateActiveFromScroll, { passive: true });
-    window.addEventListener("resize", updateActiveFromScroll);
-    return () => {
-      window.removeEventListener("scroll", updateActiveFromScroll);
-      window.removeEventListener("resize", updateActiveFromScroll);
-    };
-  }, [tab, mode, visibleSections]);
-
-  useEffect(() => {
-    const onFocusIn = (e: Event) => {
-      const t = e.target;
-      if (!(t instanceof HTMLElement)) return;
-      const sec = t.closest("[data-section]");
-      if (sec instanceof HTMLElement && sec.dataset.section) {
-        setActiveScrollSection(sec.dataset.section);
-      }
-    };
-    document.addEventListener("focusin", onFocusIn);
-    return () => document.removeEventListener("focusin", onFocusIn);
   }, []);
 
   useEffect(() => {
@@ -1541,7 +1416,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       })),
       ...warnings.map((w) => ({ label: w })),
     ],
-    [validationIssues, warnings],
+    [validationIssues, warnings, goToSection],
   );
   const showZsInputBanner = zsInputBannerItems.length > 0;
 
@@ -1848,10 +1723,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     ]);
   }, [buildSnapshot, namedSnapshots, selectedNamedId, totalPhmax, totalPha, totalPhp, warnings]);
 
-  const scrollToWorkspaceDock = () => {
-    workspaceStickyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const zsBasicWizardActive = viewMode === "basic" && tab === "phmax";
   const effectivePhmaxPane: PhmaxZsPhmaxPane =
     zsBasicWizardActive && zsWizardStep >= 2 ? phmaxPaneFromWizardStep(zsWizardStep) : phmaxSubTab;
@@ -1876,7 +1747,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       ids.push("extras");
     }
     return ids;
-  }, [mode, visibleSections]);
+  }, [hasSection]);
 
   const zsWizardHasExceptions = zsWizardVisibleExceptionIds.length > 0;
 
