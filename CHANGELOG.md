@@ -9,7 +9,10 @@
 - Verdikty sjednocené v banneru, docku a sticky liště; tlačítko **Přejít k chybě** v průvodci.
 
 ### Kvalita a refaktor
-- ESLint v CI na celém `src/` (s limitem varování).
+- ESLint v CI na celém `src/` (s limitem varování, postupně snižován na 20).
 - E2E smoke: PV, ŠD, ZŠ, NV75, SŠ; acceptance contract §16 scénář E (SŠ).
 - ZŠ: refaktor panelů, dynamické řádky, reset formuláře, načítání ukázek z `zs-hero-example-load.ts`.
+- ZŠ: extrakce `buildZsShareText` a `buildZsWarnings` mimo `PhmaxZsPage`.
+- SŠ: ESLint cleanup hooků.
+- Vite: samostatný chunk pro `exceljs`.
 - Oprava hooků v `CompareVariantsPanel` (rules-of-hooks).

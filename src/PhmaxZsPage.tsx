@@ -100,6 +100,7 @@ import {
   ZS_WIZARD_CHOICE_TO_EXAMPLE,
 } from "./zs/zs-hero-example-load";
 import { buildZsShareText } from "./zs/zs-share-text";
+import { buildZsWarnings } from "./zs/zs-warnings";
 import { buildZsExtendedExportMetaRows, ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
 import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
 import { ZsPhpTabPanel } from "./zs/ZsPhpTabPanel";
@@ -908,38 +909,31 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     hasSection,
   ]);
 
-  const warnings = useMemo(() => {
-    const items: string[] = [];
-    if (basicType === "full_max_2" && basic1Classes > 0 && basic1Classes < 5) {
-      items.push("U úplné ZŠ s nejvýše 2 třídami v každém ročníku bývá obvykle na 1. stupni nejméně 5 běžných tříd.");
-    }
-    if (basicType.startsWith("first_only_") && basic2Classes > 0) {
-      items.push("U neúplné ZŠ tvořené jen 1. stupněm se 2. stupeň do výpočtu běžných tříd nezadává.");
-    }
-    if (phpExcludedTotal > phpBaseValue && !phpExcludedSchool) {
-      items.push("Součet nezapočítávaných žáků je vyšší než rozhodná hodnota pro PHPmax – metodický výpočet.");
-    }
-    if (phpAdjustedValue > 0 && phpAdjustedValue < 180 && !phpExcludedSchool) {
-      items.push("PHPmax – metodický výpočet vychází 0, protože očištěný rozhodný počet žáků je pod hranicí 180.");
-    }
-    if (phpExcludedSchool) {
-      items.push("Škola je označena jako vyloučená z PHPmax – metodický výpočet, proto je výsledek 0.");
-    }
-    if (minorityType !== "minorityFull1" && minority2Classes > 0) {
-      items.push("U menšinové školy zadané jen pro 1. stupeň se 2. stupeň nezapočítá.");
-    }
-    return items;
-  }, [
-    basicType,
-    basic1Classes,
-    basic2Classes,
-    phpExcludedTotal,
-    phpBaseValue,
-    phpExcludedSchool,
-    phpAdjustedValue,
-    minorityType,
-    minority2Classes,
-  ]);
+  const warnings = useMemo(
+    () =>
+      buildZsWarnings({
+        basicType,
+        basic1Classes,
+        basic2Classes,
+        phpExcludedTotal,
+        phpBaseValue,
+        phpExcludedSchool,
+        phpAdjustedValue,
+        minorityType,
+        minority2Classes,
+      }),
+    [
+      basicType,
+      basic1Classes,
+      basic2Classes,
+      phpExcludedTotal,
+      phpBaseValue,
+      phpExcludedSchool,
+      phpAdjustedValue,
+      minorityType,
+      minority2Classes,
+    ],
+  );
 
   const addPha = () => appendGeneratedRow(setPhaRows, createEmptyPhaRow);
   const updatePha = (id: number, key: keyof PhaRow, value: string | number) => updateRowById(setPhaRows, id, key, value);
