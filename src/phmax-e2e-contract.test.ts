@@ -19,12 +19,16 @@ describe("E2E smoke contract", () => {
       "e2e/ss-mobile-smoke.spec.ts",
       "e2e/nv75-mobile-smoke.spec.ts",
       "e2e/desktop-toc-smoke.spec.ts",
+      "e2e/dashboard-deep-link-smoke.spec.ts",
     ]) {
       expect(fs.existsSync(path.resolve(repoRoot, specFile))).toBe(true);
     }
     const pvSpec = readSource("e2e/pv-mobile-smoke.spec.ts");
     expect(pvSpec).toContain("calculator-mobile-scroll-results");
     expect(pvSpec).toContain("calculator-mobile-summary-chip");
+    expect(readSource("e2e/smoke-helpers.ts")).toContain("openDashboardAttentionModule");
+    expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain("data-pv-row-id");
+    expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain('[data-section="basic"]');
     expect(readSource("package.json")).toContain('"test:e2e"');
     expect(readSource(".github/workflows/ci.yml")).toContain("npm run test:e2e");
     expect(readSource(".github/workflows/ci.yml")).toContain("npm run lint");
