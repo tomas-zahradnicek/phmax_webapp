@@ -74,6 +74,10 @@ export const PHMAX_SS_UNITS_SECTION = {
   colPar16Class: "Třída podle § 16 odst. 9",
   par16CheckboxHint:
     "Zapněte u tříd zřízených podle § 16 odst. 9 školského zákona. PHmax se počítá podle pásem metodiky (6–10 → 17–20, >10–14 → více než 20–24, <6 → 70 % pásma 17–20).",
+  colLegacyMultiobor: "Přechodná víceoborová třída",
+  colLegacyMaxOborCount: "Max. oborů ke dni novely",
+  legacyMultioborHint:
+    "Zapněte u víceoborové třídy pod přechodným ustanovením. Volitelně uveďte max. počet oborů ke dni účinnosti novely – při vyšším počtu oborů kontrola pravidel hlásí chybu.",
   colNote: "Poznámka",
   addRow: "Přidat řádek",
   /** Lišta nad formulářem – odstraní poslední řádek (stejná logika jako u jediného řádku). */

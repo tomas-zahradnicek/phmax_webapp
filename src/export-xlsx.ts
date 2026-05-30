@@ -1,11 +1,12 @@
-import ExcelJS from "exceljs";
-
 export type ExportKeyValueRow = readonly [string, string | number];
 
 const HEADER_FILL = "FFE8EEF7";
 const AUTHOR_FOOTER_LABEL = "Vytvořil:";
 
-function styleAuthorFooterRows(sheet: ExcelJS.Worksheet) {
+type ExcelWorksheet = import("exceljs").Worksheet;
+type ExcelWorkbook = import("exceljs").Workbook;
+
+function styleAuthorFooterRows(sheet: ExcelWorksheet) {
   sheet.eachRow((row) => {
     const label = String(row.getCell(1).value ?? "");
     if (label !== AUTHOR_FOOTER_LABEL) return;
@@ -15,7 +16,7 @@ function styleAuthorFooterRows(sheet: ExcelJS.Worksheet) {
   });
 }
 
-function addKeyValueSheet(workbook: ExcelJS.Workbook, name: string, rows: readonly ExportKeyValueRow[]) {
+function addKeyValueSheet(workbook: ExcelWorkbook, name: string, rows: readonly ExportKeyValueRow[]) {
   const sheet = workbook.addWorksheet(name, {
     views: [{ state: "frozen", ySplit: 1 }],
   });
@@ -50,6 +51,7 @@ export async function downloadCalculatorXlsx(opts: {
   valueRows: readonly ExportKeyValueRow[];
   filename: string;
 }): Promise<void> {
+  const ExcelJS = (await import("exceljs")).default;
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "Kalkulačka ZŠ (PHmax / PHAmax / PHPmax)";
   workbook.created = new Date();

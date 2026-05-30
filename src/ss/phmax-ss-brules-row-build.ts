@@ -63,8 +63,13 @@ export function buildBusinessRuleOboryForRow(row: PhmaxSsUnitRow): BusinessRuleO
 export function buildBusinessRulesInputForRow(row: PhmaxSsUnitRow): BusinessRulesInput | null {
   const obory = buildBusinessRuleOboryForRow(row);
   if (!obory) return null;
+  const legacyRaw = row.legacyMaxOborCount.trim().replace(",", ".");
+  const legacyMaxOborCount =
+    legacyRaw !== "" && Number.isFinite(Number(legacyRaw)) ? Math.max(0, Number(legacyRaw)) : undefined;
   return {
     obory,
     isPar16Class: resolveIsPar16Class(row),
+    isLegacyMultioborClass: row.isLegacyMultioborClass,
+    legacyMaxOborCount,
   };
 }

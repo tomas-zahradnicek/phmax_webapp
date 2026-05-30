@@ -22,6 +22,10 @@ export type PhmaxSsUnitRow = {
   classType: string;
   /** Třída zřízená podle § 16 odst. 9 školského zákona (kontrola pravidel; plný výpočet zatím ne). */
   isPar16Class: boolean;
+  /** Přechodná víceoborová třída (limity § 2a–2c se neuplatní). */
+  isLegacyMultioborClass: boolean;
+  /** Max. počet oborů ke dni účinnosti novely (volitelné, pro přechodné ustanovení). */
+  legacyMaxOborCount: string;
   note: string;
   /** Průměrný počet žáků (řetězec z inputu). */
   averageStudents: string;
@@ -42,6 +46,8 @@ export function createEmptyPhmaxSsUnitRow(id: number): PhmaxSsUnitRow {
     isArt82TalentClass: false,
     classType: "",
     isPar16Class: false,
+    isLegacyMultioborClass: false,
+    legacyMaxOborCount: "",
     note: "",
     averageStudents: "",
     classCount: "1",
@@ -93,6 +99,8 @@ export function revivePhmaxSsUnitRow(o: Record<string, unknown>, fallbackId: num
       typeof o.isPar16Class === "boolean"
         ? o.isPar16Class
         : inferPar16FromClassType(String(o.classType ?? "")),
+    isLegacyMultioborClass: Boolean(o.isLegacyMultioborClass),
+    legacyMaxOborCount: String(o.legacyMaxOborCount ?? ""),
     note: String(o.note ?? ""),
     averageStudents: String(o.averageStudents ?? ""),
     classCount: String(o.classCount ?? "1"),

@@ -244,7 +244,7 @@ function PhmaxSsUnitsFormView({
           <caption className="app-data-table__caption">{sec.tableCaption}</caption>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.id}>
+              <tr key={row.id} data-ss-row-id={row.id}>
                 <td className="ss-units-block-cell">
                   {/** První vlna inline validací pro nejčastější povinná pole řádku. */}
                   {(() => {
@@ -431,6 +431,40 @@ function PhmaxSsUnitsFormView({
                         >
                           {sec.par16CheckboxHint}
                         </p>
+                      ) : null}
+                    </div>
+
+                    <div className="ss-units-legacy-row" style={{ marginTop: 10 }}>
+                      <label className="ss-units-checkbox-wrap">
+                        <input
+                          type="checkbox"
+                          checked={row.isLegacyMultioborClass}
+                          onChange={(e) => updateRow(row.id, { isLegacyMultioborClass: e.target.checked })}
+                          aria-label={`${sec.colLegacyMultiobor}, řádek ${row.id}`}
+                        />
+                        <span>{sec.colLegacyMultiobor}</span>
+                      </label>
+                      {row.isLegacyMultioborClass ? (
+                        <>
+                          <p
+                            className="muted-text"
+                            style={{ margin: "8px 0 0", fontSize: "0.85rem", lineHeight: 1.45, maxWidth: "42rem" }}
+                          >
+                            {sec.legacyMultioborHint}
+                          </p>
+                          <label className="field" style={{ marginTop: 8, maxWidth: "16rem" }}>
+                            <span className="field__label">{sec.colLegacyMaxOborCount}</span>
+                            <input
+                              type="text"
+                              className="input"
+                              inputMode="numeric"
+                              value={row.legacyMaxOborCount}
+                              onChange={(e) => updateRow(row.id, { legacyMaxOborCount: e.target.value })}
+                              aria-label={`${sec.colLegacyMaxOborCount}, řádek ${row.id}`}
+                              placeholder="např. 2"
+                            />
+                          </label>
+                        </>
                       ) : null}
                     </div>
 

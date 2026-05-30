@@ -36,7 +36,6 @@ import { getVisibleSections } from "./config/field-visibility";
 import { DEFAULT_MODE } from "./config/default-form-state";
 import { GlossaryDialog } from "./GlossaryDialog";
 import { GlossaryIconButton } from "./GlossaryIconButton";
-import { exportCsvLocalized, downloadTextFile } from "./export-utils";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, ZsLegisRef } from "./PhmaxProductLegisUi";
 import { ZS_LEGIS_PARAGRAPH_TOOLTIPS } from "./phmax-zs-legislativa";
@@ -101,7 +100,9 @@ import {
 } from "./zs/zs-hero-example-load";
 import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsWarnings } from "./zs/zs-warnings";
-import { buildZsExtendedExportMetaRows, ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
+import { runZsExportCsv, runZsExportXlsx } from "./zs/zs-export-actions";
+import type { ZsExportBuildInput } from "./zs/zs-export-build";
+import { ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
 import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
 import { ZsPhpTabPanel } from "./zs/ZsPhpTabPanel";
 import { ZsPhmaxBasicSection } from "./zs/ZsPhmaxBasicSection";
@@ -136,9 +137,6 @@ import {
 } from "./zs-basic-wizard";
 import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import {
-  APP_AUTHOR_DISPLAY_NAME,
-  APP_AUTHOR_EMAIL,
-  APP_AUTHOR_EXPORT_ROWS,
   BROWSER_ERROR_NEXT_STEP_HINT,
   CALCULATOR_LIMITS_NOTE,
   LAY_USER_QUICK_START_ZS,
@@ -161,7 +159,6 @@ import {
   PRODUCT_CALCULATOR_TITLES,
   namedBackupsMicrocopy,
 } from "./calculator-ui-constants";
-import { APP_VERSION } from "./app-version";
 import {
   confirmDestructive,
   MSG_CONFIRM_CLEAR_BROWSER_STORAGE,
@@ -1414,7 +1411,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   );
   const showZsInputBanner = zsInputBannerItems.length > 0;
 
-  const summaryRows: readonly (readonly [string, string | number])[] = [
+  const summaryRows = useMemo(
+    (): readonly (readonly [string, string | number])[] => [
     ["Běžné třídy ZŠ – 1. stupeň", basic1Phmax],
     ["Běžné třídy ZŠ – 2. stupeň", basic2Phmax],
     ["Běžné třídy ZŠ – celkem", basicPhmax],
@@ -1445,183 +1443,181 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     ["PHPmax – nezapočítávaní žáci", phpExcludedTotal],
     ["PHPmax – očištěná hodnota", phpAdjustedValue],
     ["Výsledek PHPmax", totalPhp],
-  ];
+    ],
+    [
+      basic1Phmax,
+      basic2Phmax,
+      basicPhmax,
+      incl1Phmax,
+      incl2Phmax,
+      inclPhmax,
+      psychPhmax,
+      healthPhmax,
+      minority1Phmax,
+      minority2Phmax,
+      minorityPhmax,
+      gymPhmax,
+      mixedMethodFirstTotal,
+      mixedMethodSecondTotal,
+      mixedMethodTotal,
+      mixedRows,
+      mixedPhmax,
+      special1PhmaxPart,
+      special2PhmaxPart,
+      specialIIPhmaxPart,
+      specialPhmax,
+      prepClassPhmax,
+      prepSpecialPhmax,
+      par38Phmax,
+      par41Phmax,
+      extrasPhmax,
+      totalPhmax,
+      totalPha,
+      phpBaseValue,
+      phpExcludedTotal,
+      phpAdjustedValue,
+      totalPhp,
+    ],
+  );
 
-  const buildXlsxContextRows = (): [string, string | number][] => {
-    const tabLabel = tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax";
-    return [
-      ["Verze aplikace", APP_VERSION],
-      ["Název exportu", "Kalkulačka ZŠ – souhrn (XLSX)"],
-      ["Datum a čas exportu (ISO)", new Date().toISOString()],
-      ["Datum a čas exportu (místní)", new Date().toLocaleString("cs-CZ")],
-      ["Metodický podklad (orientačně)", METHODIKA_VERSION_LABEL],
-      ["Režim výpočtu (typ školy)", MODE_CONFIG[mode].label],
-      ["Aktivní záložka při exportu", tabLabel],
-      ["Označení exportu / škola", exportLabel.trim() || "–"],
-      ["Průvodce (volba scénáře)", wizardChoice || "–"],
-      ["Práce s údaji", dataMode === "example" ? "ukázkový příklad" : "vlastní škola"],
-      ["Identifikátor ukázkového příkladu", selectedExample || "–"],
-      ["", ""],
-      ["Varování", warnings.length ? warnings.join(" | ") : "–"],
-      ["", ""],
-      [
-        "Poznámka",
-        "Úplný dvousloupcový výpis (vstupy, výstupy, detaily PHAmax / psych / gym / smíšené) je na listu „Hodnoty“.",
-      ],
-      ["Vytvořil:", `${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`],
-    ];
-  };
-
-  const buildExtendedCsvRows = (): readonly (readonly [string, string | number])[] => {
-    const tabLabel = tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax";
-    const exportNow = new Date();
-    const head: [string, string | number][] = [
-      ...buildZsExtendedExportMetaRows({
-        appVersion: APP_VERSION,
-        methodikaLabel: METHODIKA_VERSION_LABEL,
-        modeLabel: MODE_CONFIG[mode].label,
-        tabLabel,
-        exportLabel,
-        wizardChoice,
-        dataMode,
-        selectedExample,
-        exportIso: exportNow.toISOString(),
-        exportLocal: exportNow.toLocaleString("cs-CZ"),
-      }),
-      ["=== PHmax – vstupy (agregované) ===", ""],
-      ["basicType (kód)", basicType],
-      ["Běžné třídy – 1. st. počet tříd", basic1Classes],
-      ["Běžné třídy – 1. st. počet žáků", basic1Pupils],
-      ["Běžné třídy – 2. st. počet tříd", basic2Classes],
-      ["Běžné třídy – 2. st. počet žáků", basic2Pupils],
-      ["§ 16/9 – 1. st. třídy", incl1Classes],
-      ["§ 16/9 – 1. st. žáci", incl1Pupils],
-      ["§ 16/9 – 2. st. třídy", incl2Classes],
-      ["§ 16/9 – 2. st. žáci", incl2Pupils],
-      ["Psychiatrická škola – počet řádků", psychRows.length],
-      ["ZŠ při zdrav. zař. (B11–B13) – počet řádků", healthRows.length],
-      ["Menšina – variant (kód)", minorityType],
-      ["Menšina – 1. st. třídy / žáci", `${minority1Classes} / ${minority1Pupils}`],
-      ["Menšina – 2. st. třídy / žáci", `${minority2Classes} / ${minority2Pupils}`],
-      ["Gymnázia – počet řádků", gymRows.length],
-      ["Smíšené (zjednodušený seznam řádků) – počet", mixedRows.length],
-      ["Smíšené tab. – 1. st. C/01 žáci / třídy", `${mixedMethodFirstZsPupils} / ${mixedMethodFirstZsClasses}`],
-      ["Smíšené tab. – 1. st. B/01 žáci / třídy", `${mixedMethodFirstSpecialPupils} / ${mixedMethodFirstSpecialClasses}`],
-      ["Smíšené tab. – 2. st. C/01 žáci / třídy", `${mixedMethodSecondZsPupils} / ${mixedMethodSecondZsClasses}`],
-      ["Smíšené tab. – 2. st. B/01 žáci / třídy", `${mixedMethodSecondSpecialPupils} / ${mixedMethodSecondSpecialClasses}`],
-      ["ZŠ speciální I. díl – 1. st. třídy / žáci", `${special1Classes} / ${special1Pupils}`],
-      ["ZŠ speciální I. díl – 2. st. třídy / žáci", `${special2Classes} / ${special2Pupils}`],
-      ["ZŠ speciální II. díl třídy / žáci", `${specialIIClasses} / ${specialIIPupils}`],
-      ["Přípravná třída třídy / děti", `${prepClasses} / ${prepChildren}`],
-      ["Přípravný stupeň ZŠS třídy / děti", `${prepSpecialClasses} / ${prepSpecialChildren}`],
-      ["§ 38 žáci 1. st. / 2. st.", `${p38First} / ${p38Second}`],
-      ["§ 41 žáci 1. st. / 2. st.", `${p41First} / ${p41Second}`],
-      ["", ""],
-      ["=== PHPmax – vstupy ===", ""],
-      ["PHP metoda", phpMethodMode === "three_year_avg" ? "tříletý průměr" : "kratší období"],
-      ["PHP rok 1 / 2 / 3 žáci", `${phpYear1} / ${phpYear2} / ${phpYear3}`],
-      ["PHP nezapoč. zahraničí / ZŠ v ČR / individuální", `${phpExcludedAbroad} / ${phpExcludedForeignSchoolCz} / ${phpExcludedIndividual}`],
-      ["PHP škola vyloučena z výpočtu", phpExcludedSchool ? "ano" : "ne"],
-      ["", ""],
-      ["=== Varování ===", warnings.length ? warnings.join(" | ") : "–"],
-      ["", ""],
-      ["=== Souhrnné výstupy ===", ""],
-    ];
-    const out: [string, string | number][] = [...head, ...summaryRows.map((r) => [r[0], r[1]] as [string, string | number])];
-    if (phaRows.length > 0) {
-      out.push(["", ""]);
-      out.push(["=== PHAmax – jednotlivé řádky ===", ""]);
-      phaRows.forEach((r, i) => {
-        out.push([`PHA ${i + 1} – typ (kód)`, r.kind]);
-        out.push([`PHA ${i + 1} – třídy`, r.classes]);
-        out.push([`PHA ${i + 1} – žáci`, r.pupils]);
-      });
-    }
-    if (psychRows.length > 0) {
-      out.push(["", ""]);
-      out.push(["=== Psychiatrická škola – jednotlivé řádky ===", ""]);
-      psychComputedRows.forEach((r, i) => {
-        out.push([`Psych ${i + 1} – typ (kód)`, r.kind]);
-        out.push([`Psych ${i + 1} – režim průměru`, r.mode === "current_only" ? "jen aktuální" : "vyšší ze dvou"]);
-        out.push([`Psych ${i + 1} – aktuální žáci / třídy`, `${r.currentPupils} / ${r.currentClasses}`]);
-        out.push([`Psych ${i + 1} – předchozí žáci / třídy`, `${r.prevPupils} / ${r.prevClasses}`]);
-        out.push([`Psych ${i + 1} – použitý průměr žáků/třídu`, r.usedAvg]);
-        out.push([`Psych ${i + 1} – pásmo / PHmax na 1 třídu`, `${r.bandLabel} / ${r.perClass}`]);
-        out.push([`Psych ${i + 1} – řádkový výsledek PHmax`, r.subtotal]);
-      });
-    }
-    if (healthRows.length > 0) {
-      out.push(["", ""]);
-      out.push(["=== ZŠ při zdravotnickém zařízení (B11–B13) – řádky ===", ""]);
-      healthComputedRows.forEach((r, i) => {
-        out.push([`ZdrZař ${i + 1} – typ (kód)`, r.kind]);
-        out.push([`ZdrZař ${i + 1} – režim průměru`, r.mode === "current_only" ? "jen aktuální" : "vyšší ze dvou"]);
-        out.push([`ZdrZař ${i + 1} – aktuální žáci / třídy`, `${r.currentPupils} / ${r.currentClasses}`]);
-        out.push([`ZdrZař ${i + 1} – předchozí žáci / třídy`, `${r.prevPupils} / ${r.prevClasses}`]);
-        out.push([`ZdrZař ${i + 1} – použitý průměr žáků/třídu`, r.usedAvg]);
-        out.push([`ZdrZař ${i + 1} – pásmo / PHmax na 1 třídu`, `${r.bandLabel} / ${r.perClass}`]);
-        out.push([`ZdrZař ${i + 1} – řádkový výsledek PHmax`, r.subtotal]);
-      });
-    }
-    if (gymRows.length > 0) {
-      out.push(["", ""]);
-      out.push(["=== Nižší ročníky gymnázií – jednotlivé řádky ===", ""]);
-      gymComputedRows.forEach((r, i) => {
-        out.push([`Gym ${i + 1} – typ (kód)`, r.kind]);
-        out.push([`Gym ${i + 1} – třídy / žáci`, `${r.classes} / ${r.pupils}`]);
-        out.push([`Gym ${i + 1} – průměr žáků/třídu`, r.avg]);
-        out.push([`Gym ${i + 1} – pásmo / PHmax na 1 třídu`, `${r.bandLabel} / ${r.perClass}`]);
-        out.push([`Gym ${i + 1} – řádkový výsledek PHmax`, r.subtotal]);
-      });
-    }
-    if (mixedRows.length > 0) {
-      out.push(["", ""]);
-      out.push(["=== Smíšené třídy (zjednodušený seznam řádků) ===", ""]);
-      mixedRows.forEach((row, i) => {
-        const avg = row.classes > 0 ? row.pupils / row.classes : 0;
-        const band =
-          row.majority === "zs"
-            ? pickBand(avg, row.stage === "first" ? B9_B10.first : B9_B10.second)
-            : pickBand(avg, row.stage === "first" ? B26_B28.special1 : B26_B28.special2);
-        const linePhmax = round2(row.classes * band.value);
-        out.push([`Smíšené ${i + 1} – stupeň (kód)`, row.stage]);
-        out.push([`Smíšené ${i + 1} – převažující obor (kód)`, row.majority]);
-        out.push([`Smíšené ${i + 1} – třídy / žáci`, `${row.classes} / ${row.pupils}`]);
-        out.push([`Smíšené ${i + 1} – průměr žáků/třídu`, round2(avg)]);
-        out.push([`Smíšené ${i + 1} – pásmo / PHmax na 1 třídu`, `${band.label} / ${band.value}`]);
-        out.push([`Smíšené ${i + 1} – řádkový výsledek PHmax`, linePhmax]);
-      });
-    }
-    for (const row of APP_AUTHOR_EXPORT_ROWS) {
-      out.push([row[0], row[1]]);
-    }
-    return out;
-  };
+  const zsExportBuildInput = useMemo(
+    (): ZsExportBuildInput => ({
+      tab,
+      modeLabel: MODE_CONFIG[mode].label,
+      exportLabel,
+      wizardChoice,
+      dataMode,
+      selectedExample,
+      warnings,
+      basicType,
+      basic1Classes,
+      basic1Pupils,
+      basic2Classes,
+      basic2Pupils,
+      incl1Classes,
+      incl1Pupils,
+      incl2Classes,
+      incl2Pupils,
+      psychRows,
+      healthRows,
+      minorityType,
+      minority1Classes,
+      minority1Pupils,
+      minority2Classes,
+      minority2Pupils,
+      gymRows,
+      mixedRows,
+      mixedMethodFirstZsPupils,
+      mixedMethodFirstZsClasses,
+      mixedMethodFirstSpecialPupils,
+      mixedMethodFirstSpecialClasses,
+      mixedMethodSecondZsPupils,
+      mixedMethodSecondZsClasses,
+      mixedMethodSecondSpecialPupils,
+      mixedMethodSecondSpecialClasses,
+      special1Classes,
+      special1Pupils,
+      special2Classes,
+      special2Pupils,
+      specialIIClasses,
+      specialIIPupils,
+      prepClasses,
+      prepChildren,
+      prepSpecialClasses,
+      prepSpecialChildren,
+      p38First,
+      p38Second,
+      p41First,
+      p41Second,
+      phpMethodMode,
+      phpYear1,
+      phpYear2,
+      phpYear3,
+      phpExcludedAbroad,
+      phpExcludedForeignSchoolCz,
+      phpExcludedIndividual,
+      phpExcludedSchool,
+      phaRows,
+      psychComputedRows,
+      healthComputedRows,
+      gymComputedRows,
+      summaryRows,
+      methodikaLabel: METHODIKA_VERSION_LABEL,
+    }),
+    [
+      tab,
+      mode,
+      exportLabel,
+      wizardChoice,
+      dataMode,
+      selectedExample,
+      warnings,
+      basicType,
+      basic1Classes,
+      basic1Pupils,
+      basic2Classes,
+      basic2Pupils,
+      incl1Classes,
+      incl1Pupils,
+      incl2Classes,
+      incl2Pupils,
+      psychRows,
+      healthRows,
+      minorityType,
+      minority1Classes,
+      minority1Pupils,
+      minority2Classes,
+      minority2Pupils,
+      gymRows,
+      mixedRows,
+      mixedMethodFirstZsPupils,
+      mixedMethodFirstZsClasses,
+      mixedMethodFirstSpecialPupils,
+      mixedMethodFirstSpecialClasses,
+      mixedMethodSecondZsPupils,
+      mixedMethodSecondZsClasses,
+      mixedMethodSecondSpecialPupils,
+      mixedMethodSecondSpecialClasses,
+      special1Classes,
+      special1Pupils,
+      special2Classes,
+      special2Pupils,
+      specialIIClasses,
+      specialIIPupils,
+      prepClasses,
+      prepChildren,
+      prepSpecialClasses,
+      prepSpecialChildren,
+      p38First,
+      p38Second,
+      p41First,
+      p41Second,
+      phpMethodMode,
+      phpYear1,
+      phpYear2,
+      phpYear3,
+      phpExcludedAbroad,
+      phpExcludedForeignSchoolCz,
+      phpExcludedIndividual,
+      phpExcludedSchool,
+      phaRows,
+      psychComputedRows,
+      healthComputedRows,
+      gymComputedRows,
+      summaryRows,
+    ],
+  );
 
   const handleExportCsv = () => {
-    downloadTextFile("kalkulacka-zs-souhrn.csv", exportCsvLocalized(buildExtendedCsvRows()), "text/csv;charset=utf-8");
-    setUiNotice("Rozšířený souhrn byl exportován do CSV (vstupy, výstupy, PHAmax a podrobné řádky dle potřeby).");
+    void runZsExportCsv(zsExportBuildInput, setUiNotice);
   };
 
   const handleExportXlsx = async () => {
-    if (xlsxExportBusy) return;
-    setXlsxExportBusy(true);
-    try {
-      const { downloadCalculatorXlsx } = await import("./export-xlsx");
-      const d = new Date();
-      const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      await downloadCalculatorXlsx({
-        contextRows: buildXlsxContextRows(),
-        valueRows: buildExtendedCsvRows(),
-        filename: `kalkulacka-zs-souhrn-${stamp}.xlsx`,
-      });
-      setUiNotice("Byl stažen soubor Excel (XLSX): list „Kontext“ a list „Hodnoty“.");
-    } catch (error) {
-      console.error(error);
-      setUiNotice(`Export do Excelu se nepodařil. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
-    } finally {
-      setXlsxExportBusy(false);
-    }
+    await runZsExportXlsx(zsExportBuildInput, {
+      busy: xlsxExportBusy,
+      setBusy: setXlsxExportBusy,
+      onNotice: setUiNotice,
+    });
   };
 
   const handleExportZsAuditJson = () => {

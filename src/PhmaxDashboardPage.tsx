@@ -10,6 +10,7 @@ import { eligibleAdditionalWorkplacesForRow, normalizeNv75UiRow, type Nv75Deputy
 import { readNamedSnapshotsFromLs } from "./zs-named-snapshots";
 import { PHMAX_SS_UNITS_STORAGE_KEY } from "./ss/phmax-ss-constants";
 import { deriveSsUnitsPreview } from "./ss/phmax-ss-units-derive";
+import { findFirstSsDashboardFocusRowId } from "./ss/phmax-ss-dashboard-focus";
 import { countPar16MarkedRows, PHMAX_SS_PAR16_DOCK_HINT } from "./ss/phmax-ss-par16";
 import { revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
@@ -23,8 +24,8 @@ import { useUiNotice } from "./useUiNotice";
 
 const DASH_QUICK_IDS: Exclude<ProductView, "dash">[] = ["pv", "sd", "zs", "ss", "nv75"];
 
-/** Moduly pro dashboard deep-link na vstupy (bez SŠ). */
-const DASH_INPUT_FOCUS_IDS = ["pv", "sd", "zs", "nv75"] as const satisfies readonly Exclude<ProductView, "dash">[];
+/** Moduly pro dashboard deep-link na vstupy. */
+const DASH_INPUT_FOCUS_IDS = ["pv", "sd", "zs", "ss", "nv75"] as const satisfies readonly Exclude<ProductView, "dash">[];
 
 const DASH_START_MODULES: ReadonlyArray<{
   id: Exclude<ProductView, "dash">;
@@ -608,7 +609,15 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         return;
       }
       if (dashboardRowSupportsInputFocus(row.id) && dashboardVerdictNeedsAttention(row.verdict)) {
-        requestFocusModuleInputs();
+        if (row.id === "ss") {
+          const ssRows = parseSsDraftRows(
+            typeof localStorage === "undefined" ? null : localStorage.getItem(PHMAX_SS_UNITS_STORAGE_KEY),
+          );
+          const rowId = findFirstSsDashboardFocusRowId(ssRows);
+          requestFocusModuleInputs(rowId != null ? { rowId } : undefined);
+        } else {
+          requestFocusModuleInputs();
+        }
       }
       setProductView(row.id);
     },
