@@ -1,7 +1,7 @@
 {
   "name": "phmax-zs-webapp",
   "private": true,
-  "version": "0.2.4",
+  "version": "0.2.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,7 +18,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install chromium",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" e2e eslint.config.js --max-warnings 10",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" e2e eslint.config.js --max-warnings 5",
     "extract:ss-metodika": "node scripts/extract-ss-metodika-docx.mjs",
     "docs:concat-md": "node scripts/concat-zdroje-md.mjs",
     "docs:concat-ts": "node scripts/concat-zdroje-ts.mjs",

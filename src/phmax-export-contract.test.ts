@@ -9,6 +9,14 @@ import { phmaxSsDataset } from "./ss/phmax-ss-dataset";
 import { buildSsAuditProtocolInput } from "./ss/phmax-ss-units-derive";
 import { ssHeroExampleSnapshot } from "./ss/phmax-ss-hero-examples";
 import { revivePhmaxSsUnitRow } from "./ss/phmax-ss-types";
+import fs from "node:fs";
+import path from "node:path";
+
+const repoRoot = path.resolve(import.meta.dirname, "..");
+
+function readSource(relPath: string): string {
+  return fs.readFileSync(path.resolve(repoRoot, relPath), "utf8");
+}
 
 describe("Export contract", () => {
   it("PV multi export drží klíčové contract hlavičky a součet", () => {
@@ -98,6 +106,12 @@ describe("Export contract", () => {
     if (protocol.calculation.ok) {
       expect(protocol.calculation.totalPrimary).toBe(628);
     }
+  });
+
+  it("exceljs zůstává lazy import mimo synchronní bundle", () => {
+    const src = readSource("src/export-xlsx.ts");
+    expect(src).toMatch(/await import\("exceljs"\)/);
+    expect(readSource("vite.config.ts")).toMatch(/exceljs/);
   });
 
   it("SŠ audit export drží contract pole a orientační výsledek", () => {

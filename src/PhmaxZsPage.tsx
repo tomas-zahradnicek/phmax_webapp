@@ -44,6 +44,7 @@ import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
+import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
@@ -85,7 +86,12 @@ import {
   type ZsFormSnapshotSetters,
 } from "./zs/zs-form-snapshot";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
-import { appendGeneratedRow, removeRowById, updateRowById } from "./zs/zs-dynamic-rows";
+import { createZsRowHandlers } from "./zs/zs-row-handlers";
+import {
+  buildZsComparePreview,
+  compareZsWithNamedSnapshot,
+  exportZsAuditJson,
+} from "./zs/zs-audit-actions";
 import {
   applyZsResetAll,
   applyZsResetNv75,
@@ -174,10 +180,6 @@ import {
 } from "./app-author-print";
 import { useZsNamedSnapshots } from "./useZsNamedSnapshots";
 import { MAX_NAMED_SNAPSHOTS } from "./zs-named-snapshots";
-import { createZsProductAuditProtocol, parseZsSnapshotAuditTotals } from "./phmax-product-audit";
-import { comparePhmaxProductVariants } from "./phmax-product-compare";
-import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "./phmax-product-audit-download";
-
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
 const ZS_VIEW_MODE_LS_KEY = "phmax-zs-view-mode";
@@ -932,23 +934,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     ],
   );
 
-  const addPha = () => appendGeneratedRow(setPhaRows, createEmptyPhaRow);
-  const updatePha = (id: number, key: keyof PhaRow, value: string | number) => updateRowById(setPhaRows, id, key, value);
-  const removePha = (id: number) => removeRowById(setPhaRows, id);
-
-  const addPsych = () => appendGeneratedRow(setPsychRows, createEmptyPsychRow);
-  const updatePsych = (id: number, key: keyof PsychRow, value: string | number) =>
-    updateRowById(setPsychRows, id, key, value);
-  const removePsych = (id: number) => removeRowById(setPsychRows, id);
-
-  const addHealth = () => appendGeneratedRow(setHealthRows, createEmptyHealthRow);
-  const updateHealth = (id: number, key: keyof HealthRow, value: string | number) =>
-    updateRowById(setHealthRows, id, key, value);
-  const removeHealth = (id: number) => removeRowById(setHealthRows, id);
-
-  const addGym = () => appendGeneratedRow(setGymRows, createEmptyGymRow);
-  const updateGym = (id: number, key: keyof GymRow, value: string | number) => updateRowById(setGymRows, id, key, value);
-  const removeGym = (id: number) => removeRowById(setGymRows, id);
+  const { add: addPha, update: updatePha, remove: removePha } = createZsRowHandlers(setPhaRows, createEmptyPhaRow);
+  const { add: addPsych, update: updatePsych, remove: removePsych } = createZsRowHandlers(setPsychRows, createEmptyPsychRow);
+  const { add: addHealth, update: updateHealth, remove: removeHealth } = createZsRowHandlers(setHealthRows, createEmptyHealthRow);
+  const { add: addGym, update: updateGym, remove: removeGym } = createZsRowHandlers(setGymRows, createEmptyGymRow);
 
   const applyResetPhmax = () => applyZsResetPhmax(zsSnapshotSetters);
 
@@ -1388,9 +1377,13 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   }, [tab]);
 
   const zsNeedsInputBanner = zsVerdict.tone !== "ok";
-  const zsScrollToInputs = useCallback(() => {
-    if (firstIssueSection) goToSection(firstIssueSection);
-  }, [firstIssueSection, goToSection]);
+  const zsScrollToInputs = useCallback(
+    (hint?: ModuleInputsFocusHint) => {
+      const sectionId = hint?.sectionId ?? firstIssueSection;
+      if (sectionId) goToSection(sectionId);
+    },
+    [firstIssueSection, goToSection],
+  );
   const zsDockIssueSummaries = useMemo(
     () =>
       warnings.length > 0
@@ -1621,97 +1614,50 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   };
 
   const handleExportZsAuditJson = () => {
-    downloadPhmaxProductAuditJson(
-      createZsProductAuditProtocol({
-        formSnapshot: buildSnapshot() as Record<string, unknown>,
-        totals: {
-          totalPhmax,
-          breakdown: { totalPha, totalPhp },
-        },
-        validationIssues: [
-          ...warnings.map((w) => ({ severity: "warning" as const, message: w })),
-          ...validationIssues.map((v) => ({
-            severity: "info" as const,
-            code: v.section,
-            message: v.label,
-          })),
-        ],
-        narrative: `${tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax"} – ${MODE_CONFIG[mode].label}${
-          exportLabel ? `; export: ${exportLabel}` : ""
-        }`,
-      }),
-      "zs",
-    );
+    exportZsAuditJson({
+      buildSnapshot,
+      totalPhmax,
+      totalPha,
+      totalPhp,
+      tab,
+      mode,
+      exportLabel,
+      warnings,
+      validationIssues,
+    });
     setUiNotice("Stažen auditní protokol (JSON).");
   };
 
   const handleCompareZsWithNamedSnapshot = () => {
-    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
-    if (!item) {
-      setUiNotice(MSG_NAMED_BACKUP_PICK_TO_COMPARE);
+    const result = compareZsWithNamedSnapshot({
+      buildSnapshot,
+      totalPhmax,
+      totalPha,
+      totalPhp,
+      warnings,
+      namedSnapshots,
+      selectedNamedId,
+    });
+    if (!result.ok) {
+      setUiNotice(result.message === "pick-named" ? MSG_NAMED_BACKUP_PICK_TO_COMPARE : MSG_ZS_NAMED_BACKUP_NO_AUDIT_TOTALS);
       return;
     }
-    const stored = parseZsSnapshotAuditTotals(item.snapshot);
-    if (!stored) {
-      setUiNotice(MSG_ZS_NAMED_BACKUP_NO_AUDIT_TOTALS);
-      return;
-    }
-    const currentProtocol = createZsProductAuditProtocol({
-      formSnapshot: buildSnapshot() as Record<string, unknown>,
-      totals: { totalPhmax, breakdown: { totalPha, totalPhp } },
-      validationIssues: warnings.map((w) => ({ severity: "warning" as const, message: w })),
-      narrative: "Aktuální stav",
-    });
-    const namedProtocol = createZsProductAuditProtocol({
-      formSnapshot: {
-        namedBackup: item.name,
-        exportLabel: typeof item.snapshot.exportLabel === "string" ? item.snapshot.exportLabel : "",
-        tabAtSave: stored.tab,
-      },
-      totals: {
-        totalPhmax: stored.totalPhmax,
-        breakdown: { totalPha: stored.totalPha, totalPhp: stored.totalPhp },
-      },
-      narrative: item.name,
-    });
-    const cmp = comparePhmaxProductVariants([
-      { id: "current", label: "Aktuální stav", protocol: currentProtocol },
-      { id: "named", label: item.name, protocol: namedProtocol },
-    ]);
-    downloadPhmaxProductCompareJson(cmp, "zs");
-    setUiNotice(
-      `Staženo srovnání: aktuální stav vs „${item.name}“ (JSON). Krátké doporučení: ${cmp.recommendation}`,
-    );
+    setUiNotice(result.message);
   };
 
-  const zsComparePreview = useMemo(() => {
-    const item = namedSnapshots.find((x) => x.id === selectedNamedId);
-    if (!item) return null;
-    const stored = parseZsSnapshotAuditTotals(item.snapshot);
-    if (!stored) return null;
-    const currentProtocol = createZsProductAuditProtocol({
-      formSnapshot: buildSnapshot() as Record<string, unknown>,
-      totals: { totalPhmax, breakdown: { totalPha, totalPhp } },
-      validationIssues: warnings.map((w) => ({ severity: "warning" as const, message: w })),
-      narrative: "Aktuální stav",
-    });
-    const namedProtocol = createZsProductAuditProtocol({
-      formSnapshot: {
-        namedBackup: item.name,
-        exportLabel: typeof item.snapshot.exportLabel === "string" ? item.snapshot.exportLabel : "",
-        tabAtSave: stored.tab,
-      },
-      totals: {
-        totalPhmax: stored.totalPhmax,
-        breakdown: { totalPha: stored.totalPha, totalPhp: stored.totalPhp },
-      },
-      narrative: item.name,
-    });
-    return comparePhmaxProductVariants([
-      { id: "current", label: "Aktuální stav", protocol: currentProtocol },
-      { id: "named", label: item.name, protocol: namedProtocol },
-    ]);
-  }, [buildSnapshot, namedSnapshots, selectedNamedId, totalPhmax, totalPha, totalPhp, warnings]);
+  const zsComparePreview = useMemo(
+    () =>
+      buildZsComparePreview({
+        buildSnapshot,
+        totalPhmax,
+        totalPha,
+        totalPhp,
+        warnings,
+        namedSnapshots,
+        selectedNamedId,
+      }),
+    [buildSnapshot, namedSnapshots, selectedNamedId, totalPhmax, totalPha, totalPhp, warnings],
+  );
 
   const zsBasicWizardActive = viewMode === "basic" && tab === "phmax";
   const effectivePhmaxPane: PhmaxZsPhmaxPane =

@@ -10,7 +10,9 @@ import { eligibleAdditionalWorkplacesForRow, normalizeNv75UiRow, type Nv75Deputy
 import { readNamedSnapshotsFromLs } from "./zs-named-snapshots";
 import { PHMAX_SS_UNITS_STORAGE_KEY } from "./ss/phmax-ss-constants";
 import { deriveSsUnitsPreview } from "./ss/phmax-ss-units-derive";
+import { findFirstPvDashboardFocusRowKey } from "./phmax-pv-dashboard-focus";
 import { findFirstSsDashboardFocusRowId } from "./ss/phmax-ss-dashboard-focus";
+import { findFirstZsDashboardFocusSection } from "./zs/phmax-zs-dashboard-focus";
 import { countPar16MarkedRows, PHMAX_SS_PAR16_DOCK_HINT } from "./ss/phmax-ss-par16";
 import { revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
@@ -615,6 +617,16 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           );
           const rowId = findFirstSsDashboardFocusRowId(ssRows);
           requestFocusModuleInputs(rowId != null ? { rowId } : undefined);
+        } else if (row.id === "pv") {
+          const rowKey = findFirstPvDashboardFocusRowKey(
+            typeof localStorage === "undefined" ? null : localStorage.getItem(LS_PV),
+          );
+          requestFocusModuleInputs(rowKey != null ? { rowKey } : undefined);
+        } else if (row.id === "zs") {
+          const sectionId = findFirstZsDashboardFocusSection(
+            typeof localStorage === "undefined" ? null : localStorage.getItem(LS_ZS),
+          );
+          requestFocusModuleInputs(sectionId ? { sectionId } : undefined);
         } else {
           requestFocusModuleInputs();
         }

@@ -11,6 +11,12 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.2.5 (UX)
+
+- **Dashboard:** deep-link na konkrétní řádek PV a sekci ZŠ (kromě SŠ); E2E `dashboard-deep-link-smoke`.
+- **ZŠ:** refaktor audit/srovnání do `zs-audit-actions.ts`, dynamické řádky přes `createZsRowHandlers`.
+- **CI:** ESLint limit varování **5**; lazy `exceljs` v samostatném Vite chunku.
+
 ## Verze 0.2.4 (UX)
 
 - **Mobil:** dynamická výška plovoucího souhrnu; tlačítko Skrýt/Zobrazit souhrn; záložka Obsah sedí podle skutečné výšky panelu.

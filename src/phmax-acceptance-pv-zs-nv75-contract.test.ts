@@ -39,6 +39,8 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/zs/zs-form-snapshot.ts")).toContain('export const ZS_AUTOSAVE_STORAGE_KEY = "edu-cz-zs-calculator-state"');
     expect(readSource("src/zs/zs-export-rows.ts")).toContain("buildZsExtendedExportMetaRows");
     expect(readSource("src/zs/zs-export-build.ts")).toContain("buildZsExtendedCsvRows");
+    expect(readSource("src/zs/zs-audit-actions.ts")).toContain("exportZsAuditJson");
+    expect(readSource("src/zs/zs-row-handlers.ts")).toContain("createZsRowHandlers");
     expect(readSource("src/ZsPhaPhpBasicGuide.tsx")).toContain("nepočítá");
   });
 

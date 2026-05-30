@@ -82,7 +82,8 @@ import {
   PV_HERO_EXAMPLE_SELECT_ID,
 } from "./pv-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { sectionNeedsAttentionClass, scrollToDataSection, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
@@ -788,7 +789,21 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
   const pvBasicWizardActive = viewMode === "basic";
   const pvHasInputIssue = pvVerdict.tone !== "ok";
-  const pvScrollToInputs = useCallback(() => scrollToFirstNeedsAttentionSection(["pv-vstupy"]), []);
+  const pvScrollToInputs = useCallback((hint?: ModuleInputsFocusHint) => {
+    if (hint?.rowKey) {
+      const rowEl = document.querySelector(`[data-pv-row-id="${hint.rowKey}"]`);
+      if (rowEl instanceof HTMLElement) {
+        scrollToDataSection("pv-vstupy");
+        window.requestAnimationFrame(() => {
+          rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          const focusable = rowEl.querySelector<HTMLElement>("input, select, textarea, button");
+          focusable?.focus({ preventScroll: true });
+        });
+        return;
+      }
+    }
+    scrollToFirstNeedsAttentionSection(["pv-vstupy"]);
+  }, []);
   const { step: pvWizardStep, goToStep: goToPvWizardStep, handleBack: handlePvWizardBack, handleNext: handlePvWizardNext } =
     useProductBasicWizard({
       lsKey: PV_BASIC_WIZARD_LS_KEY,
@@ -1245,7 +1260,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
             const hoursForPha = row.provoz === "zdravotnicke" ? 8 : row.avgHours;
 
             return (
-              <div key={row.id} className="pv-workplace-row">
+              <div key={row.id} className="pv-workplace-row" data-pv-row-id={row.id}>
                 <div
                   className="pv-workplace-row-header"
                   style={{

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.5 (2026-05-28)
+
+### UX a dashboard
+- Dashboard deep-link na konkrétní **řádek PV** (`data-pv-row-id`) a **sekci ZŠ** (hint `sectionId`).
+- SŠ deep-link z dashboardu rozšířen o E2E `dashboard-deep-link-smoke`.
+
+### Kvalita a refaktor
+- ZŠ: extrakce `createZsRowHandlers`, `zs-audit-actions` (audit JSON, srovnání, preview).
+- ESLint limit varování snížen na **5**; `exceljs` zůstává lazy import v samostatném chunku.
+- Unit testy: `phmax-pv-dashboard-focus`, `phmax-zs-dashboard-focus`.
+
 ## 0.2.4 (2026-05-26)
 
 ### UX a dashboard
