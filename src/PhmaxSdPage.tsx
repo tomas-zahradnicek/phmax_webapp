@@ -81,7 +81,8 @@ import {
   SD_BASIC_WIZARD_STEPS,
 } from "./sd-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { sectionNeedsAttentionClass, scrollToDataSection, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
@@ -1028,7 +1029,21 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
   const sdBasicWizardActive = viewMode === "basic";
   const sdHasInputIssue = sdVerdict.tone !== "ok";
-  const sdScrollToInputs = useCallback(() => scrollToFirstNeedsAttentionSection(["sd-vstupy"]), []);
+  const sdScrollToInputs = useCallback((hint?: ModuleInputsFocusHint) => {
+    if (hint?.rowId != null) {
+      const rowEl = document.querySelector(`[data-sd-dept-id="${hint.rowId}"]`);
+      if (rowEl instanceof HTMLElement) {
+        scrollToDataSection("sd-vstupy");
+        window.requestAnimationFrame(() => {
+          rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          const focusable = rowEl.querySelector<HTMLElement>("input, select, textarea, button");
+          focusable?.focus({ preventScroll: true });
+        });
+        return;
+      }
+    }
+    scrollToFirstNeedsAttentionSection(["sd-vstupy"]);
+  }, []);
   const { step: sdWizardStep, goToStep: goToSdWizardStep, handleBack: handleSdWizardBack, handleNext: handleSdWizardNext } =
     useProductBasicWizard({
       lsKey: SD_BASIC_WIZARD_LS_KEY,
@@ -1693,7 +1708,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
                 </thead>
                 <tbody>
                   {detailDepartments.map((row, i) => (
-                    <tr key={i}>
+                    <tr key={i} data-sd-dept-id={i}>
                       <td>{i + 1}</td>
                       <td>
                         <select

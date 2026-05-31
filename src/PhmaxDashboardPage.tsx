@@ -11,6 +11,12 @@ import { readNamedSnapshotsFromLs } from "./zs-named-snapshots";
 import { PHMAX_SS_UNITS_STORAGE_KEY } from "./ss/phmax-ss-constants";
 import { deriveSsUnitsPreview } from "./ss/phmax-ss-units-derive";
 import { findFirstPvDashboardFocusRowKey } from "./phmax-pv-dashboard-focus";
+import { findFirstNv75DashboardFocusRowId, nv75DashboardVerdictFromLs } from "./phmax-nv75-dashboard-focus";
+import {
+  findFirstSdDashboardFocusHint,
+  parseSdDashboardSnapshot,
+  sdDashboardVerdictFromSnapshot,
+} from "./phmax-sd-dashboard-focus";
 import { findFirstSsDashboardFocusRowId } from "./ss/phmax-ss-dashboard-focus";
 import { findFirstZsDashboardFocusSection } from "./zs/phmax-zs-dashboard-focus";
 import { countPar16MarkedRows, PHMAX_SS_PAR16_DOCK_HINT } from "./ss/phmax-ss-par16";
@@ -141,16 +147,21 @@ function summarizePvFromLs(): {
 }
 
 function readSdBrief(): { present: boolean; pupils: number; departments: number; inputMode: "summary" | "detail" } | null {
-  const raw = typeof localStorage === "undefined" ? null : localStorage.getItem(LS_SD);
-  const data = safeJsonParse(raw);
-  if (!data || typeof data !== "object") return null;
-  const o = data as Record<string, unknown>;
-  const pupils = o.pupils;
-  const departments = o.departments;
-  if (typeof pupils !== "number" || !Number.isFinite(pupils)) return null;
-  if (typeof departments !== "number" || !Number.isFinite(departments) || departments < 1) return null;
-  const inputMode = o.inputMode === "detail" ? "detail" : "summary";
-  return { present: true, pupils, departments, inputMode };
+  const snap = parseSdDashboardSnapshot(typeof localStorage === "undefined" ? null : localStorage.getItem(LS_SD));
+  if (!snap) return null;
+  return { present: true, pupils: snap.pupils, departments: snap.departments, inputMode: snap.inputMode };
+}
+
+function deriveSdDashboardVerdict(sd: NonNullable<ReturnType<typeof readSdBrief>>): DashboardVerdict {
+  const snap = parseSdDashboardSnapshot(typeof localStorage === "undefined" ? null : localStorage.getItem(LS_SD));
+  if (snap) return sdDashboardVerdictFromSnapshot(snap);
+  return {
+    tone: "ok",
+    label: "Vstupy uloženy – ověřte PHmax v modulu",
+    detail: `Účastníci ${sd.pupils}, oddělení ${sd.departments}, režim ${
+      sd.inputMode === "detail" ? "detailní" : "souhrnný"
+    }. Stejný stav jako v docku ŠD po otevření modulu.`,
+  };
 }
 
 type ZsAuditTotals = { totalPhmax: number; totalPha: number; totalPhp: number; tab?: string };
@@ -364,15 +375,6 @@ function deriveSsDashboardVerdict(): DashboardVerdict | null {
   };
 }
 
-function deriveSdDashboardVerdict(sd: NonNullable<ReturnType<typeof readSdBrief>>): DashboardVerdict {
-  return {
-    tone: "ok",
-    label: "Vstupy uloženy – ověřte PHmax v modulu",
-    detail: `Účastníci ${sd.pupils}, oddělení ${sd.departments}, režim ${
-      sd.inputMode === "detail" ? "detailní" : "souhrnný"
-    }. Stejný stav jako v docku ŠD po otevření modulu.`,
-  };
-}
 
 function derivePvDashboardVerdict(pv: ReturnType<typeof summarizePvFromLs>): DashboardVerdict | null {
   if (!pv.present) return null;
@@ -391,19 +393,8 @@ function derivePvDashboardVerdict(pv: ReturnType<typeof summarizePvFromLs>): Das
 }
 
 function deriveNv75DashboardVerdict(nv: ReturnType<typeof readNv75State>): DashboardVerdict | null {
-  if (nv.rowCount === 0 && nv.bankTotal == null) return null;
-  if (nv.bankTotal == null) {
-    return {
-      tone: "warning",
-      label: "Banka nelze spočítat",
-      detail: "Zkontrolujte řádky a praktickou složku v modulu NV75.",
-    };
-  }
-  return {
-    tone: "ok",
-    label: nv.rule ? `Pravidlo ${nv.rule}` : "Banka odpočtů",
-    detail: `Banka odpočtů celkem ${nv.bankTotal} h/týden (náhled z uloženého stavu).`,
-  };
+  const raw = typeof localStorage === "undefined" ? null : localStorage.getItem(LS_NV75);
+  return nv75DashboardVerdictFromLs(raw, nv.bankTotal, nv.rule);
 }
 
 function buildDashboardRows(): DashboardRow[] {
@@ -627,6 +618,16 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             typeof localStorage === "undefined" ? null : localStorage.getItem(LS_ZS),
           );
           requestFocusModuleInputs(sectionId ? { sectionId } : undefined);
+        } else if (row.id === "sd") {
+          const hint = findFirstSdDashboardFocusHint(
+            typeof localStorage === "undefined" ? null : localStorage.getItem(LS_SD),
+          );
+          requestFocusModuleInputs(hint);
+        } else if (row.id === "nv75") {
+          const rowId = findFirstNv75DashboardFocusRowId(
+            typeof localStorage === "undefined" ? null : localStorage.getItem(LS_NV75),
+          );
+          requestFocusModuleInputs(rowId != null ? { rowId } : undefined);
         } else {
           requestFocusModuleInputs();
         }

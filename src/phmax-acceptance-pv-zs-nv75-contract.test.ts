@@ -30,7 +30,7 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(zsPage).toContain("buildZsFormSnapshot");
     expect(zsPage).toContain("useZsFormAutosave");
     expect(zsPage).toContain("ZS_AUTOSAVE_STORAGE_KEY");
-    expect(zsPage).toContain("runZsExportCsv");
+    expect(zsPage).toContain("createZsPageHandlers");
     expect(zsPage).toContain("zsExportBuildInput");
     expect(zsPage).toContain("ZsPhaTabPanel");
     expect(zsPage).toContain("ZsPhpTabPanel");
@@ -41,6 +41,8 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/zs/zs-export-build.ts")).toContain("buildZsExtendedCsvRows");
     expect(readSource("src/zs/zs-audit-actions.ts")).toContain("exportZsAuditJson");
     expect(readSource("src/zs/zs-row-handlers.ts")).toContain("createZsRowHandlers");
+    expect(readSource("src/zs/zs-page-handlers.ts")).toContain("createZsPageHandlers");
+    expect(readSource("src/zs/zs-export-actions.ts")).toContain("runZsExportCsv");
     expect(readSource("src/ZsPhaPhpBasicGuide.tsx")).toContain("nepočítá");
   });
 

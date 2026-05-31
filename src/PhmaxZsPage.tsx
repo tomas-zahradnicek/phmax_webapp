@@ -87,11 +87,7 @@ import {
 } from "./zs/zs-form-snapshot";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
-import {
-  buildZsComparePreview,
-  compareZsWithNamedSnapshot,
-  exportZsAuditJson,
-} from "./zs/zs-audit-actions";
+import { buildZsPageComparePreview, createZsPageHandlers } from "./zs/zs-page-handlers";
 import {
   applyZsResetAll,
   applyZsResetNv75,
@@ -106,7 +102,6 @@ import {
 } from "./zs/zs-hero-example-load";
 import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsWarnings } from "./zs/zs-warnings";
-import { runZsExportCsv, runZsExportXlsx } from "./zs/zs-export-actions";
 import type { ZsExportBuildInput } from "./zs/zs-export-build";
 import { ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
 import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
@@ -147,9 +142,7 @@ import {
   CALCULATOR_LIMITS_NOTE,
   LAY_USER_QUICK_START_ZS,
   LAY_USER_QUICK_START_MOBILE_UX,
-  MSG_NAMED_BACKUP_PICK_TO_COMPARE,
   MSG_NO_LOCAL_AUTOSAVE_DATA,
-  MSG_ZS_NAMED_BACKUP_NO_AUDIT_TOTALS,
   EXPORT_ORIENTACNI_NOTE,
   formatZsLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
@@ -1601,20 +1594,33 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     ],
   );
 
-  const handleExportCsv = () => {
-    void runZsExportCsv(zsExportBuildInput, setUiNotice);
-  };
-
-  const handleExportXlsx = async () => {
-    await runZsExportXlsx(zsExportBuildInput, {
-      busy: xlsxExportBusy,
-      setBusy: setXlsxExportBusy,
-      onNotice: setUiNotice,
-    });
-  };
-
-  const handleExportZsAuditJson = () => {
-    exportZsAuditJson({
+  const {
+    handleExportCsv,
+    handleExportXlsx,
+    handleExportZsAuditJson,
+    handleCompareZsWithNamedSnapshot,
+  } = useMemo(
+    () =>
+      createZsPageHandlers({
+        zsExportBuildInput,
+        setUiNotice,
+        xlsxExportBusy,
+        setXlsxExportBusy,
+        buildSnapshot,
+        totalPhmax,
+        totalPha,
+        totalPhp,
+        tab,
+        mode,
+        exportLabel,
+        warnings,
+        validationIssues,
+        namedSnapshots,
+        selectedNamedId,
+      }),
+    [
+      zsExportBuildInput,
+      xlsxExportBusy,
       buildSnapshot,
       totalPhmax,
       totalPha,
@@ -1624,30 +1630,15 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       exportLabel,
       warnings,
       validationIssues,
-    });
-    setUiNotice("Stažen auditní protokol (JSON).");
-  };
-
-  const handleCompareZsWithNamedSnapshot = () => {
-    const result = compareZsWithNamedSnapshot({
-      buildSnapshot,
-      totalPhmax,
-      totalPha,
-      totalPhp,
-      warnings,
       namedSnapshots,
       selectedNamedId,
-    });
-    if (!result.ok) {
-      setUiNotice(result.message === "pick-named" ? MSG_NAMED_BACKUP_PICK_TO_COMPARE : MSG_ZS_NAMED_BACKUP_NO_AUDIT_TOTALS);
-      return;
-    }
-    setUiNotice(result.message);
-  };
+      setUiNotice,
+    ],
+  );
 
   const zsComparePreview = useMemo(
     () =>
-      buildZsComparePreview({
+      buildZsPageComparePreview({
         buildSnapshot,
         totalPhmax,
         totalPha,

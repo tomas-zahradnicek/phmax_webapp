@@ -11,6 +11,12 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.2.6 (UX)
+
+- **Dashboard:** deep-link ŠD (oddělení) a NV75 (řádek); E2E pokrývá PV, ZŠ, SŠ, ŠD, NV75.
+- **ZŠ:** export/audit handlery v `zs-page-handlers.ts`.
+- **CI:** ESLint limit **0** varování.
+
 ## Verze 0.2.5 (UX)
 
 - **Dashboard:** deep-link na konkrétní řádek PV a sekci ZŠ (kromě SŠ); E2E `dashboard-deep-link-smoke`.

@@ -7,6 +7,10 @@ const PV_STORAGE_KEY = "edu-cz-pv-calculator-state";
 const PV_WIZARD_KEY = "phmax-pv-basic-wizard-step";
 const ZS_STORAGE_KEY = "edu-cz-zs-calculator-state";
 const ZS_WIZARD_KEY = "phmax-zs-basic-wizard-step";
+const SD_STORAGE_KEY = "edu-cz-sd-calculator-state";
+const SD_WIZARD_KEY = "phmax-sd-basic-wizard-step";
+const NV75_STORAGE_KEY = "edu-cz-nv75-deputy-bank-state";
+const NV75_WIZARD_KEY = "phmax-nv75-basic-wizard-step";
 
 test.describe("Dashboard deep-link", () => {
   test("SŠ – problematický řádek", async ({ page }) => {
@@ -110,5 +114,53 @@ test.describe("Dashboard deep-link", () => {
     const section = page.locator('[data-section="basic"]');
     await expect(section).toBeVisible({ timeout: 8000 });
     await expect(section).toBeInViewport({ timeout: 8000 });
+  });
+
+  test("ŠD – chybějící účastníci", async ({ page }) => {
+    await page.addInitScript(
+      ({ storageKey, wizardKey }) => {
+        localStorage.setItem(wizardKey, "2");
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            pupils: 0,
+            manualDepts: false,
+            departments: 1,
+            inputMode: "summary",
+          }),
+        );
+      },
+      { storageKey: SD_STORAGE_KEY, wizardKey: SD_WIZARD_KEY },
+    );
+
+    await openDashboardAttentionModule(page, "ŠD");
+
+    await expect(page.locator('[data-section="sd-vstupy"]')).toBeInViewport({ timeout: 8000 });
+  });
+
+  test("NV75 – řádek bez jednotek", async ({ page }) => {
+    await page.addInitScript(
+      ({ storageKey, wizardKey, rowId }) => {
+        localStorage.setItem(wizardKey, "2");
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            rows: [{ id: rowId, kind: "ms", units: 0 }],
+            practicalGeneralNonOv: 0,
+            practicalOvEhl0: 0,
+            practicalSec16: 0,
+            ovGroupsSchool: 0,
+            ovGroupsInstructor: 0,
+          }),
+        );
+      },
+      { storageKey: NV75_STORAGE_KEY, wizardKey: NV75_WIZARD_KEY, rowId: 88 },
+    );
+
+    await openDashboardAttentionModule(page, "NV75");
+
+    const row = page.locator('[data-nv75-row-id="88"]');
+    await expect(row).toBeVisible({ timeout: 8000 });
+    await expect(row).toBeInViewport({ timeout: 8000 });
   });
 });

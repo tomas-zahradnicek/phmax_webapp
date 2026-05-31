@@ -29,6 +29,8 @@ describe("E2E smoke contract", () => {
     expect(readSource("e2e/smoke-helpers.ts")).toContain("openDashboardAttentionModule");
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain("data-pv-row-id");
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain('[data-section="basic"]');
+    expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain("data-nv75-row-id");
+    expect(readSource("src/phmax-sd-dashboard-focus.ts")).toContain("findFirstSdDashboardFocusHint");
     expect(readSource("package.json")).toContain('"test:e2e"');
     expect(readSource(".github/workflows/ci.yml")).toContain("npm run test:e2e");
     expect(readSource(".github/workflows/ci.yml")).toContain("npm run lint");

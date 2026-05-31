@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.6 (2026-05-28)
+
+### UX a dashboard
+- Dashboard deep-link pro **ŠD** (sekce / detailní oddělení `data-sd-dept-id`) a **NV75** (`data-nv75-row-id`).
+- Verdikt ŠD na dashboardu reflektuje neúplné vstupy (0 účastníků, prázdná oddělení).
+
+### Kvalita a refaktor
+- E2E `dashboard-deep-link-smoke` rozšířen na PV, ZŠ, SŠ, ŠD, NV75.
+- ZŠ: `createZsPageHandlers` – export, audit a srovnání mimo `PhmaxZsPage`.
+- ESLint limit varování snížen na **0**.
+
 ## 0.2.5 (2026-05-28)
 
 ### UX a dashboard

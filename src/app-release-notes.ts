@@ -11,11 +11,9 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Acceptance checklist kompletní (E2E + contract pro PV, ZŠ, NV75, ŠD); refaktor ZŠ panelů (basic, PHA, PHP, §16, speciální, psych, zdrav.).",
-    "Desktop Obsah: stav Skrýt/Zobrazit se po reloadu zachová (localStorage), E2E krytí je v desktop smoke testu.",
-    "Dashboard – klik na KPI dlaždici otevře modul (bez dat → ukázka); sekce Vyžaduje pozornost a řazení KPI dle závažnosti; deep-link na chyby vstupů u PV/ŠD/ZŠ/NV75.",
-    "Verdikty – stejný text v banneru, docku a sticky liště; na posledním kroku průvodce tlačítko Přejít k chybě.",
-    "E2E smoke – Playwright pro PV, ŠD, ZŠ, NV75 i SŠ v CI; doplněn §16 acceptance contract scénář E.",
-    "ESLint – dočištěné hook deps warningy v hlavních kalkulačkách (PV/ŠD/NV75) a dashboardu.",
+    "Dashboard – deep-link ze sekce Vyžaduje pozornost na konkrétní řádek nebo sekci u PV, ZŠ, SŠ, ŠD i NV75; E2E smoke pro všech pět modulů.",
+    "ŠD – dashboard varuje u neúplných vstupů; po otevření modulu scroll na problematické oddělení v detailním režimu.",
+    "ZŠ – export CSV/XLSX, audit JSON a srovnání pojmenovaných záloh extrahováno do `zs-page-handlers.ts`.",
+    "CI – ESLint běží s limitem 0 varování na celém `src/` a E2E.",
   ],
 };

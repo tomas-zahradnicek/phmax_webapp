@@ -54,7 +54,8 @@ import {
   NV75_HERO_EXAMPLE_SELECT_ID,
 } from "./nv75-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { sectionNeedsAttentionClass, scrollToDataSection, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
@@ -1104,7 +1105,21 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   }, [summaryText]);
 
   const nv75NeedsInputBanner = nv75Verdict.tone !== "ok";
-  const nv75ScrollToInputs = useCallback(() => scrollToFirstNeedsAttentionSection(["nv75-vstupy"]), []);
+  const nv75ScrollToInputs = useCallback((hint?: ModuleInputsFocusHint) => {
+    if (hint?.rowId != null) {
+      const rowEl = document.querySelector(`[data-nv75-row-id="${hint.rowId}"]`);
+      if (rowEl instanceof HTMLElement) {
+        scrollToDataSection("nv75-vstupy");
+        window.requestAnimationFrame(() => {
+          rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          const focusable = rowEl.querySelector<HTMLElement>("input, select, textarea, button");
+          focusable?.focus({ preventScroll: true });
+        });
+        return;
+      }
+    }
+    scrollToFirstNeedsAttentionSection(["nv75-vstupy"]);
+  }, []);
   const nv75BasicWizardActive = viewMode === "basic";
   const { step: nv75WizardStep, goToStep: goToNv75WizardStep, handleBack: handleNv75WizardBack, handleNext: handleNv75WizardNext } =
     useProductBasicWizard({
@@ -1489,7 +1504,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
               </thead>
               <tbody>
                 {rows.map((row, idx) => (
-                  <tr key={row.id}>
+                  <tr key={row.id} data-nv75-row-id={row.id}>
                     <td>
                       <select className="input" value={row.kind} onChange={(e) => updateRow(row.id, { kind: e.target.value as Nv75DeputyKind })}>
                         {NV75_DEPUTY_KIND_OPTIONS.map((opt) => (
