@@ -11,6 +11,12 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.2.8 (UX)
+
+- **ZŠ:** PHmax záložka, setup a celkový přehled v `ZsPhmaxTabPanel`, `ZsSetupSection`, `ZsOverviewSection`.
+- **SŠ:** `createSsScrollToInputs` – scroll z dashboardu na řádek nebo sekci evidence.
+- **E2E:** ok KPI ZŠ/SŠ/NV75, wizard scroll krok 2→3.
+
 ## Verze 0.2.7 (UX)
 
 - **Dashboard:** deep-link i z KPI dlaždic (modul ve stavu ok → scroll na výchozí vstupy); sjednocené hinty přes `phmax-dashboard-focus.ts`.

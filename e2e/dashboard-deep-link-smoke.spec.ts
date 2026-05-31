@@ -243,6 +243,89 @@ test.describe("Dashboard deep-link", () => {
     await expect(row).toBeInViewport({ timeout: 8000 });
   });
 
+  test("ZŠ – ok stav z KPI dlaždice", async ({ page }) => {
+    await page.addInitScript(({ storageKey, wizardKey }) => {
+      localStorage.setItem(wizardKey, "2");
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          tab: "phmax",
+          basic1Classes: 2,
+          basic1Pupils: 40,
+          basic2Classes: 0,
+          basic2Pupils: 0,
+        }),
+      );
+    }, { storageKey: ZS_STORAGE_KEY, wizardKey: ZS_WIZARD_KEY });
+
+    await openDashboardKpiModule(page, "ZŠ");
+
+    const section = page.locator('[data-section="basic"]');
+    await expect(section).toBeVisible({ timeout: 8000 });
+    await section.scrollIntoViewIfNeeded();
+    await expect(section).toBeInViewport({ timeout: 8000 });
+  });
+
+  test("SŠ – ok stav z KPI dlaždice", async ({ page }) => {
+    await page.addInitScript(({ storageKey, wizardKey, rowId }) => {
+      localStorage.setItem(wizardKey, "2");
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify([
+          {
+            id: rowId,
+            label: "",
+            educationField: "39-41-L/01",
+            studyForm: "denni",
+            phmaxMode: "",
+            oborCountInClass: "1",
+            additionalOborCodes: "",
+            oborStudentCountsRaw: "",
+            isArt82TalentClass: false,
+            classType: "",
+            isPar16Class: false,
+            isLegacyMultioborClass: false,
+            legacyMaxOborCount: "",
+            note: "",
+            averageStudents: "17",
+            classCount: "1",
+          },
+        ]),
+      );
+    }, { storageKey: SS_DRAFT_KEY, wizardKey: SS_WIZARD_KEY, rowId: 77 });
+
+    await openDashboardKpiModule(page, "SŠ");
+
+    const row = page.locator('[data-ss-row-id="77"]');
+    await expect(row).toBeVisible({ timeout: 8000 });
+    await row.scrollIntoViewIfNeeded();
+    await expect(row).toBeInViewport({ timeout: 8000 });
+  });
+
+  test("NV75 – ok stav z KPI dlaždice", async ({ page }) => {
+    await page.addInitScript(({ storageKey, wizardKey, rowId }) => {
+      localStorage.setItem(wizardKey, "2");
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          rows: [{ id: rowId, kind: "ms", units: 2 }],
+          practicalGeneralNonOv: 0,
+          practicalOvEhl0: 0,
+          practicalSec16: 0,
+          ovGroupsSchool: 0,
+          ovGroupsInstructor: 0,
+        }),
+      );
+    }, { storageKey: NV75_STORAGE_KEY, wizardKey: NV75_WIZARD_KEY, rowId: 5 });
+
+    await openDashboardKpiModule(page, "NV75");
+
+    const row = page.locator('[data-nv75-row-id="5"]');
+    await expect(row).toBeVisible({ timeout: 8000 });
+    await row.scrollIntoViewIfNeeded();
+    await expect(row).toBeInViewport({ timeout: 8000 });
+  });
+
   test("ok modul není ve Vyžaduje pozornost", async ({ page }) => {
     await page.addInitScript(({ sdKey, zsKey, sdWizard, zsWizard }) => {
       localStorage.setItem(sdWizard, "2");
@@ -297,5 +380,29 @@ test.describe("ZŠ hero – pojmenované zálohy", () => {
     await page.getByRole("button", { name: /Akce, tisk, uložení a export/ }).click();
     await page.getByRole("dialog", { name: "Akce a export" }).getByText("Scénáře a zálohy").click();
     await expect(page.getByLabel("Název pojmenované zálohy")).toBeVisible({ timeout: 8000 });
+  });
+});
+
+test.describe("ZŠ wizard scroll", () => {
+  test("krok 2 → 3 posune na první modul výjimek", async ({ page }) => {
+    await page.addInitScript(({ storageKey, wizardKey }) => {
+      localStorage.setItem(wizardKey, "2");
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          tab: "phmax",
+          basic1Classes: 2,
+          basic1Pupils: 40,
+        }),
+      );
+    }, { storageKey: ZS_STORAGE_KEY, wizardKey: ZS_WIZARD_KEY });
+
+    await gotoProductView(page, "zs");
+    await page.getByRole("button", { name: "3 Výjimky" }).click({ force: true });
+
+    await expect(page.locator(".phmax-zs-pane-active-exceptions")).toBeVisible({ timeout: 8000 });
+    const target = page.locator('[data-section="zs-phmax-exceptions"]');
+    await target.scrollIntoViewIfNeeded();
+    await expect(target).toBeInViewport({ timeout: 8000 });
   });
 });

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.8 (2026-05-28)
+
+### UX a dashboard
+- E2E ok KPI deep-link pro **ZŠ**, **SŠ** a **NV75**; smoke scroll průvodce ZŠ (krok 2→3).
+
+### Kvalita a refaktor
+- ZŠ: `ZsPhmaxTabPanel`, `ZsSetupSection`, `ZsOverviewSection` a builder props – menší `PhmaxZsPage`.
+- SŠ: `createSsScrollToInputs` – parita scrollu z dashboardu/banneru s ostatními moduly.
+
 ## 0.2.7 (2026-05-28)
 
 ### UX a dashboard

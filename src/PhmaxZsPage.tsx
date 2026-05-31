@@ -27,7 +27,6 @@ import {
   PsychRow,
   GymRow,
 } from "./phmax-zs-logic";
-import { InputOutputLegend, ResultCard } from "./phmax-zs-ui";
 import { HeroExampleSelect } from "./HeroExampleSelect";
 import { ZS_HERO_EXAMPLE_GROUPS, type ZsHeroExampleKey } from "./zs-hero-example-groups";
 import type { CalculatorMode, FormSection } from "./config/calculator-config";
@@ -47,7 +46,6 @@ import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import {
-  PhmaxZsMethodologyReferenceTables,
   type PhmaxZsMethodologyHighlights,
 } from "./phmax-zs-methodology-tables";
 import { buildZsConnectedBlocks } from "./phmax-zs-connected-blocks";
@@ -87,9 +85,11 @@ import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
 import { buildZsPageComparePreview, createZsPageHandlers } from "./zs/zs-page-handlers";
 import { ZsNamedSnapshotsHeroPanel } from "./zs/ZsNamedSnapshotsHeroPanel";
-import { ZsPhmaxBreakdownTable } from "./zs/ZsPhmaxBreakdownTable";
-import { ZsPhmaxSummarySection } from "./zs/ZsPhmaxSummarySection";
 import { ZsExpertWizardGuideSection } from "./zs/ZsExpertWizardGuideSection";
+import { ZsOverviewSection } from "./zs/ZsOverviewSection";
+import { buildZsPhmaxTabPanelProps } from "./zs/build-zs-phmax-tab-panel-props";
+import { ZsPhmaxTabPanel } from "./zs/ZsPhmaxTabPanel";
+import { ZsSetupSection } from "./zs/ZsSetupSection";
 import { useZsSectionScroll } from "./zs/use-zs-section-scroll";
 import { useZsWizardNavigation } from "./zs/use-zs-wizard-navigation";
 import { buildZsSummaryRows } from "./zs/zs-summary-rows";
@@ -111,15 +111,6 @@ import type { ZsExportBuildInput } from "./zs/zs-export-build";
 import { ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
 import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
 import { ZsPhpTabPanel } from "./zs/ZsPhpTabPanel";
-import { ZsPhmaxBasicSection } from "./zs/ZsPhmaxBasicSection";
-import { ZsPhmaxSec16Section } from "./zs/ZsPhmaxSec16Section";
-import { ZsPhmaxSpecialSection } from "./zs/ZsPhmaxSpecialSection";
-import { ZsPhmaxPsychSection } from "./zs/ZsPhmaxPsychSection";
-import { ZsPhmaxHealthSection } from "./zs/ZsPhmaxHealthSection";
-import { ZsPhmaxMinoritySection } from "./zs/ZsPhmaxMinoritySection";
-import { ZsPhmaxGymSection } from "./zs/ZsPhmaxGymSection";
-import { ZsPhmaxMixedSection } from "./zs/ZsPhmaxMixedSection";
-import { ZsPhmaxExtrasSection } from "./zs/ZsPhmaxExtrasSection";
 import { CalculatorProductShell } from "./CalculatorProductShell";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
@@ -128,10 +119,7 @@ import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
 import { ZsBasicWizard } from "./ZsBasicWizard";
 import { ZsPhaPhpBasicGuide } from "./ZsPhaPhpBasicGuide";
-import {
-  PhmaxZsPhmaxSubNav,
-  type PhmaxZsPhmaxPane,
-} from "./PhmaxZsPhmaxSubNav";
+import type { PhmaxZsPhmaxPane } from "./PhmaxZsPhmaxSubNav";
 import {
   readZsBasicWizardStep,
   ZS_BASIC_WIZARD_LS_KEY,
@@ -1653,6 +1641,166 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   useFocusInputsOnMount(zsScrollToInputs);
 
+  const zsPhmaxTabPanelProps = buildZsPhmaxTabPanelProps({
+    viewMode,
+    mode,
+    hasSection,
+    hasIssue,
+    showPhmaxSubNav,
+    effectivePhmaxPane,
+    handlePhmaxSubTabChange,
+    zsBasicWizardActive,
+    zsWizardStep,
+    zsWizardHasExceptions,
+    validationHighlight,
+    resetPhmax,
+    zsMethodologyHighlights,
+    basicType,
+    setBasicType,
+    basic1Classes,
+    basic1Pupils,
+    basic2Classes,
+    basic2Pupils,
+    setBasic1Classes,
+    setBasic1Pupils,
+    setBasic2Classes,
+    setBasic2Pupils,
+    basic1Avg,
+    basic2Avg,
+    basicFirstBand,
+    basicSecondBand,
+    basic1Phmax,
+    basic2Phmax,
+    basicPhmax,
+    prepClassPhmax,
+    prepSpecialPhmax,
+    par38Phmax,
+    par41Phmax,
+    sec16FirstClasses,
+    sec16FirstPupils,
+    sec16SecondClasses,
+    sec16SecondPupils,
+    setSec16FirstClasses,
+    setSec16FirstPupils,
+    setSec16SecondClasses,
+    setSec16SecondPupils,
+    incl1Avg,
+    incl2Avg,
+    sec16FirstBand,
+    sec16SecondBand,
+    incl1Phmax,
+    incl2Phmax,
+    inclPhmax,
+    special1Classes,
+    special1Pupils,
+    special2Classes,
+    special2Pupils,
+    specialIIClasses,
+    specialIIPupils,
+    setSpecial1Classes,
+    setSpecial1Pupils,
+    setSpecial2Classes,
+    setSpecial2Pupils,
+    setSpecialIIClasses,
+    setSpecialIIPupils,
+    special1Avg,
+    special2Avg,
+    specialIIAvg,
+    special1Band,
+    special2Band,
+    specialIIBand,
+    special1PhmaxPart,
+    special2PhmaxPart,
+    specialIIPhmaxPart,
+    specialPhmax,
+    psychComputedRows,
+    addPsych,
+    updatePsych,
+    removePsych,
+    healthComputedRows,
+    addHealth,
+    updateHealth,
+    removeHealth,
+    minorityType,
+    setMinorityType,
+    minority1Classes,
+    minority1Pupils,
+    minority2Classes,
+    minority2Pupils,
+    setMinority1Classes,
+    setMinority1Pupils,
+    setMinority2Classes,
+    setMinority2Pupils,
+    minority1Avg,
+    minority2Avg,
+    minority1Band,
+    minority2Band,
+    minority1Phmax,
+    minority2Phmax,
+    minorityPhmax,
+    gymComputedRows,
+    addGym,
+    updateGym,
+    removeGym,
+    mixedMethodFirstZsPupils,
+    mixedMethodFirstZsClasses,
+    mixedMethodFirstSpecialPupils,
+    mixedMethodFirstSpecialClasses,
+    mixedMethodSecondZsPupils,
+    mixedMethodSecondZsClasses,
+    mixedMethodSecondSpecialPupils,
+    mixedMethodSecondSpecialClasses,
+    mixedMethodFirstZsAvg,
+    mixedMethodSecondZsAvg,
+    mixedMethodFirstSpecialAvg,
+    mixedMethodSecondSpecialAvg,
+    mixedMethodFirstZsBand,
+    mixedMethodSecondZsBand,
+    mixedMethodFirstSpecialBand,
+    mixedMethodSecondSpecialBand,
+    mixedMethodFirstZsResult,
+    mixedMethodSecondZsResult,
+    mixedMethodFirstSpecialResult,
+    mixedMethodSecondSpecialResult,
+    mixedMethodFirstTotal,
+    mixedMethodSecondTotal,
+    mixedMethodTotal,
+    setMixedMethodFirstZsPupils,
+    setMixedMethodFirstZsClasses,
+    setMixedMethodFirstSpecialPupils,
+    setMixedMethodFirstSpecialClasses,
+    setMixedMethodSecondZsPupils,
+    setMixedMethodSecondZsClasses,
+    setMixedMethodSecondSpecialPupils,
+    setMixedMethodSecondSpecialClasses,
+    prepClasses,
+    prepChildren,
+    prepSpecialClasses,
+    prepSpecialChildren,
+    p38First,
+    p38Second,
+    p41First,
+    p41Second,
+    setPrepClasses,
+    setPrepChildren,
+    setPrepSpecialClasses,
+    setPrepSpecialChildren,
+    setP38First,
+    setP38Second,
+    setP41First,
+    setP41Second,
+    prepAvg,
+    prepPh,
+    prepSpecialAvg,
+    prepSpecialPh,
+    psychPhmax,
+    healthPhmax,
+    gymPhmax,
+    mixedForTotal,
+    extrasPhmax,
+    totalPhmax,
+  });
+
   return (
     <div
       className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${phmaxPaneShellClass}`}
@@ -2043,315 +2191,14 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           main={
             <>
 
-        <section className="card card--elevated section-card section-card--setup" data-section="setup" data-wizard-step="1">
-          <h2 className="section-title">Typ školy a režim výpočtu</h2>
-          <SectionLead>
-            Tady vyberete, jaký typ výpočtu chcete zobrazit. Rozcestník výše vám může s výběrem pomoci.
-          </SectionLead>
-          <InputOutputLegend />
-          <div className="grid two">
-            <div className="field">
-              <span id="zs-mode-select-label">Vyberte režim</span>
-              <select
-                id="zs-mode-select"
-                aria-labelledby="zs-mode-select-label"
-                aria-describedby="zs-mode-select-legend"
-                title="Režim určuje viditelné části kalkulačky. U každé položky v seznamu je po najetí myší stručný popis; detail aktivního režimu je vpravo."
-                value={mode}
-                onChange={(e) => setMode(e.target.value as CalculatorMode)}
-              >
-                {modeOptions.map((item) => (
-                  <option key={item.id} value={item.id} title={item.description}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-              <p id="zs-mode-select-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", lineHeight: 1.5 }}>
-                Každá položka seznamu má vlastní nápovědu (najetí na řádek). U předpisů lze použít i záložku „Legislativa a
-                výklad (ZŠ)“.
-              </p>
-            </div>
+        <ZsSetupSection
+          mode={mode}
+          modeOptions={modeOptions}
+          onModeChange={setMode}
+          SectionLead={SectionLead}
+        />
 
-            <div className="subcard">
-              <h3>{MODE_CONFIG[mode].label}</h3>
-              <p className="muted-text">{MODE_CONFIG[mode].description}</p>
-            </div>
-          </div>
-        </section>
-
-
-        {tab === "phmax" && (
-          <div className="stack">
-            {showPhmaxSubNav ? (
-              <PhmaxZsPhmaxSubNav active={effectivePhmaxPane} onChange={handlePhmaxSubTabChange} />
-            ) : null}
-            {zsBasicWizardActive && zsWizardStep === 3 && !zsWizardHasExceptions ? (
-              <section className="card muted section-card" data-wizard-step="3" data-section="wizard-exceptions-empty">
-                <h2 className="section-title">Výjimky</h2>
-                <p className="muted-text" style={{ margin: 0 }}>
-                  Pro zvolený režim „{MODE_CONFIG[mode].label}“ nejsou v metodice viditelné doplňkové moduly (§ 16/9, ZŠ
-                  speciální, psychiatrie…). Pokračujte na souhrn nebo změňte režim v kroku 1.
-                </p>
-              </section>
-            ) : null}
-            <ZsPhmaxBasicSection
-              hasBasicIssue={hasIssue("basic")}
-              showBasicFirst={hasSection("basic_first")}
-              showBasicSecond={hasSection("basic_second")}
-              showSchoolVariantFirstOnly={hasSection("school_variant_first_stage_only")}
-              showPrepClass={hasSection("prep_class")}
-              showPrepSpecial={hasSection("prep_special")}
-              showPar38={hasSection("par38")}
-              showPar41={hasSection("par41")}
-              basicType={basicType}
-              onBasicTypeChange={setBasicType}
-              basic1Classes={basic1Classes}
-              basic1Pupils={basic1Pupils}
-              basic2Classes={basic2Classes}
-              basic2Pupils={basic2Pupils}
-              onBasic1ClassesChange={setBasic1Classes}
-              onBasic1PupilsChange={setBasic1Pupils}
-              onBasic2ClassesChange={setBasic2Classes}
-              onBasic2PupilsChange={setBasic2Pupils}
-              basic1Avg={basic1Avg}
-              basic2Avg={basic2Avg}
-              basicFirstBand={basicFirstBand}
-              basicSecondBand={basicSecondBand}
-              basic1Phmax={basic1Phmax}
-              basic2Phmax={basic2Phmax}
-              basicPhmax={basicPhmax}
-              prepClassPhmax={prepClassPhmax}
-              prepSpecialPhmax={prepSpecialPhmax}
-              par38Phmax={par38Phmax}
-              par41Phmax={par41Phmax}
-            />
-
-            <div className="grid two" data-section="zs-phmax-exceptions">
-              <ZsPhmaxSec16Section
-                viewMode={viewMode}
-                showFirst={hasSection("sec16_first")}
-                showSecond={hasSection("sec16_second")}
-                firstClasses={sec16FirstClasses}
-                firstPupils={sec16FirstPupils}
-                secondClasses={sec16SecondClasses}
-                secondPupils={sec16SecondPupils}
-                onFirstClassesChange={setSec16FirstClasses}
-                onFirstPupilsChange={setSec16FirstPupils}
-                onSecondClassesChange={setSec16SecondClasses}
-                onSecondPupilsChange={setSec16SecondPupils}
-                firstAvg={incl1Avg}
-                secondAvg={incl2Avg}
-                firstBand={sec16FirstBand}
-                secondBand={sec16SecondBand}
-                firstPhmax={incl1Phmax}
-                secondPhmax={incl2Phmax}
-                totalPhmax={inclPhmax}
-              />
-
-              {(hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) && (
-                <ZsPhmaxSpecialSection
-                  viewMode={viewMode}
-                  special1Classes={special1Classes}
-                  special1Pupils={special1Pupils}
-                  special2Classes={special2Classes}
-                  special2Pupils={special2Pupils}
-                  specialIIClasses={specialIIClasses}
-                  specialIIPupils={specialIIPupils}
-                  onSpecial1ClassesChange={setSpecial1Classes}
-                  onSpecial1PupilsChange={setSpecial1Pupils}
-                  onSpecial2ClassesChange={setSpecial2Classes}
-                  onSpecial2PupilsChange={setSpecial2Pupils}
-                  onSpecialIIClassesChange={setSpecialIIClasses}
-                  onSpecialIIPupilsChange={setSpecialIIPupils}
-                  special1Avg={special1Avg}
-                  special2Avg={special2Avg}
-                  specialIIAvg={specialIIAvg}
-                  special1Band={special1Band}
-                  special2Band={special2Band}
-                  specialIIBand={specialIIBand}
-                  special1PhmaxPart={special1PhmaxPart}
-                  special2PhmaxPart={special2PhmaxPart}
-                  specialIIPhmaxPart={specialIIPhmaxPart}
-                  specialPhmax={specialPhmax}
-                />
-              )}
-            </div>
-
-            <div className="grid two">
-              {hasSection("psych_groups") && (
-                <ZsPhmaxPsychSection
-                  viewMode={viewMode}
-                  rows={psychComputedRows}
-                  onAdd={addPsych}
-                  onUpdate={(id, key, value) => updatePsych(id, key as keyof PsychRow, value)}
-                  onRemove={removePsych}
-                />
-              )}
-
-              {hasSection("health_groups") && (
-                <ZsPhmaxHealthSection
-                  viewMode={viewMode}
-                  rows={healthComputedRows}
-                  onAdd={addHealth}
-                  onUpdate={(id, key, value) => updateHealth(id, key as keyof HealthRow, value)}
-                  onRemove={removeHealth}
-                />
-              )}
-
-              {hasSection("minority_first") && (
-                <ZsPhmaxMinoritySection
-                  viewMode={viewMode}
-                  minorityType={minorityType}
-                  onMinorityTypeChange={setMinorityType}
-                  showSecondStage={hasSection("minority_second")}
-                  minority1Classes={minority1Classes}
-                  minority1Pupils={minority1Pupils}
-                  minority2Classes={minority2Classes}
-                  minority2Pupils={minority2Pupils}
-                  onMinority1ClassesChange={setMinority1Classes}
-                  onMinority1PupilsChange={setMinority1Pupils}
-                  onMinority2ClassesChange={setMinority2Classes}
-                  onMinority2PupilsChange={setMinority2Pupils}
-                  minority1Avg={minority1Avg}
-                  minority2Avg={minority2Avg}
-                  minority1Band={minority1Band}
-                  minority2Band={minority2Band}
-                  minority1Phmax={minority1Phmax}
-                  minority2Phmax={minority2Phmax}
-                  minorityPhmax={minorityPhmax}
-                />
-              )}
-            </div>
-
-            <div className="grid two">
-              {hasSection("gym_groups") && (
-                <ZsPhmaxGymSection
-                  viewMode={viewMode}
-                  rows={gymComputedRows}
-                  onAdd={addGym}
-                  onUpdate={updateGym}
-                  onRemove={removeGym}
-                />
-              )}
-
-              {(hasSection("dominant_c_first") || hasSection("dominant_b_first")) && (
-                <ZsPhmaxMixedSection
-                  viewMode={viewMode}
-                  validationHighlight={validationHighlight}
-                  mixedMethodFirstZsPupils={mixedMethodFirstZsPupils}
-                  mixedMethodFirstZsClasses={mixedMethodFirstZsClasses}
-                  mixedMethodFirstSpecialPupils={mixedMethodFirstSpecialPupils}
-                  mixedMethodFirstSpecialClasses={mixedMethodFirstSpecialClasses}
-                  mixedMethodSecondZsPupils={mixedMethodSecondZsPupils}
-                  mixedMethodSecondZsClasses={mixedMethodSecondZsClasses}
-                  mixedMethodSecondSpecialPupils={mixedMethodSecondSpecialPupils}
-                  mixedMethodSecondSpecialClasses={mixedMethodSecondSpecialClasses}
-                  mixedMethodFirstZsAvg={mixedMethodFirstZsAvg}
-                  mixedMethodSecondZsAvg={mixedMethodSecondZsAvg}
-                  mixedMethodFirstSpecialAvg={mixedMethodFirstSpecialAvg}
-                  mixedMethodSecondSpecialAvg={mixedMethodSecondSpecialAvg}
-                  mixedMethodFirstZsBand={mixedMethodFirstZsBand}
-                  mixedMethodSecondZsBand={mixedMethodSecondZsBand}
-                  mixedMethodFirstSpecialBand={mixedMethodFirstSpecialBand}
-                  mixedMethodSecondSpecialBand={mixedMethodSecondSpecialBand}
-                  mixedMethodFirstZsResult={mixedMethodFirstZsResult}
-                  mixedMethodSecondZsResult={mixedMethodSecondZsResult}
-                  mixedMethodFirstSpecialResult={mixedMethodFirstSpecialResult}
-                  mixedMethodSecondSpecialResult={mixedMethodSecondSpecialResult}
-                  mixedMethodFirstTotal={mixedMethodFirstTotal}
-                  mixedMethodSecondTotal={mixedMethodSecondTotal}
-                  mixedMethodTotal={mixedMethodTotal}
-                  onMixedMethodFirstZsPupilsChange={setMixedMethodFirstZsPupils}
-                  onMixedMethodFirstZsClassesChange={setMixedMethodFirstZsClasses}
-                  onMixedMethodFirstSpecialPupilsChange={setMixedMethodFirstSpecialPupils}
-                  onMixedMethodFirstSpecialClassesChange={setMixedMethodFirstSpecialClasses}
-                  onMixedMethodSecondZsPupilsChange={setMixedMethodSecondZsPupils}
-                  onMixedMethodSecondZsClassesChange={setMixedMethodSecondZsClasses}
-                  onMixedMethodSecondSpecialPupilsChange={setMixedMethodSecondSpecialPupils}
-                  onMixedMethodSecondSpecialClassesChange={setMixedMethodSecondSpecialClasses}
-                />
-              )}
-            </div>
-
-            {(hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) && (
-              <ZsPhmaxExtrasSection
-                viewMode={viewMode}
-                gateTitle={
-                  hasSection("prep_class") || hasSection("prep_special")
-                    ? "Samostatné položky PHmax"
-                    : "§ 38 a § 41 (navýšení PHmax)"
-                }
-                showPrepClass={hasSection("prep_class")}
-                showPrepSpecial={hasSection("prep_special")}
-                showPar38={hasSection("par38")}
-                showPar41={hasSection("par41")}
-                prepClasses={prepClasses}
-                prepChildren={prepChildren}
-                prepSpecialClasses={prepSpecialClasses}
-                prepSpecialChildren={prepSpecialChildren}
-                p38First={p38First}
-                p38Second={p38Second}
-                p41First={p41First}
-                p41Second={p41Second}
-                onPrepClassesChange={setPrepClasses}
-                onPrepChildrenChange={setPrepChildren}
-                onPrepSpecialClassesChange={setPrepSpecialClasses}
-                onPrepSpecialChildrenChange={setPrepSpecialChildren}
-                onP38FirstChange={setP38First}
-                onP38SecondChange={setP38Second}
-                onP41FirstChange={setP41First}
-                onP41SecondChange={setP41Second}
-                prepAvg={prepAvg}
-                prepPh={prepPh}
-                prepSpecialAvg={prepSpecialAvg}
-                prepSpecialPh={prepSpecialPh}
-                prepClassPhmax={prepClassPhmax}
-                prepSpecialPhmax={prepSpecialPhmax}
-                par38Phmax={par38Phmax}
-                par41Phmax={par41Phmax}
-              />
-            )}
-
-            <div className="toolbar">
-              <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax</button>
-            </div>
-
-            <ZsPhmaxSummarySection
-              basicPhmax={basicPhmax}
-              inclPhmax={inclPhmax}
-              psychPhmax={psychPhmax}
-              healthPhmax={healthPhmax}
-              minorityPhmax={minorityPhmax}
-              gymPhmax={gymPhmax}
-              mixedForTotal={mixedForTotal}
-              specialPhmax={specialPhmax}
-              prepClassPhmax={prepClassPhmax}
-              prepSpecialPhmax={prepSpecialPhmax}
-              par38Phmax={par38Phmax}
-              par41Phmax={par41Phmax}
-              extrasPhmax={extrasPhmax}
-              totalPhmax={totalPhmax}
-            />
-
-            <ZsPhmaxBreakdownTable
-              basicPhmax={basicPhmax}
-              inclPhmax={inclPhmax}
-              psychPhmax={psychPhmax}
-              healthPhmax={healthPhmax}
-              minorityPhmax={minorityPhmax}
-              gymPhmax={gymPhmax}
-              mixedForTotal={mixedForTotal}
-              specialPhmax={specialPhmax}
-              prepClassPhmax={prepClassPhmax}
-              prepSpecialPhmax={prepSpecialPhmax}
-              par38Phmax={par38Phmax}
-              par41Phmax={par41Phmax}
-              totalPhmax={totalPhmax}
-            />
-
-            {viewMode === "expert" ? <PhmaxZsMethodologyReferenceTables highlights={zsMethodologyHighlights} /> : null}
-          </div>
-        )}
+        {tab === "phmax" ? <ZsPhmaxTabPanel {...zsPhmaxTabPanelProps} /> : null}
 
         {tab === "pha" && (
           <ZsPhaTabPanel
@@ -2397,17 +2244,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           />
         )}
 
-        <section className="card muted card--summary section-card section-card--overview" data-section="overview" data-wizard-step="5" data-phmax-pane="summary">
-          <h2 className="section-title">Celkový přehled</h2>
-          <p className="muted-text">Výsledky PHmax, PHAmax a PHPmax se stanovují samostatně. Součet níže slouží jen pro orientaci.</p>
-          <p className="muted-text">PHmax, PHAmax – asistenti pedagoga a PHPmax – metodický výpočet se stanovují odděleně. Součet níže je přehledový.</p>
-          <div className="grid four">
-            <ResultCard label="PHmax" value={totalPhmax} />
-            <ResultCard label="PHAmax – asistenti pedagoga" value={totalPha} />
-            <ResultCard label="PHPmax – metodický výpočet" value={totalPhp} />
-            <ResultCard label="Přehledový součet" tone="success" value={round2(totalPhmax + totalPha + totalPhp)} />
-          </div>
-        </section>
+        <ZsOverviewSection totalPhmax={totalPhmax} totalPha={totalPha} totalPhp={totalPhp} />
 
             </>
           }

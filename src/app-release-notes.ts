@@ -11,9 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Dashboard – deep-link i z KPI dlaždic u modulů ve stavu ok (scroll na výchozí vstupy); sjednocené hinty přes `getDashboardFocusHint`.",
-    "ZŠ – exportní souhrnné řádky, karty PHmax a expert rozcestník extrahovány do samostatných modulů pod `src/zs/`.",
-    "PV, ŠD, NV75 – scroll na vstupy z dashboardu přes `create*ScrollToInputs`; ZŠ scroll sdílí `useCalculatorSectionScroll`.",
-    "E2E – ok modul z KPI, negativní scénář bez Vyžaduje pozornost a smoke pojmenovaných záloh ZŠ.",
+    "ZŠ – PHmax záložka, setup a celkový přehled extrahovány do `ZsPhmaxTabPanel`, `ZsSetupSection` a `ZsOverviewSection`.",
+    "SŠ – scroll z dashboardu a banneru přes `createSsScrollToInputs` (parita s PV/ŠD/NV75).",
+    "E2E – ok KPI deep-link pro ZŠ, SŠ a NV75; smoke scroll průvodce ZŠ (krok 2→3).",
   ],
 };

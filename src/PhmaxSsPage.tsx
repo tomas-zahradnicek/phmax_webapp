@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import {
   CALCULATOR_LIMITS_NOTE,
@@ -59,9 +59,9 @@ import {
   SS_HERO_EXAMPLE_SELECT_ID,
 } from "./ss-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass, scrollToDataSection, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { createSsScrollToInputs } from "./ss/create-ss-scroll-to-inputs";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
-import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
@@ -519,21 +519,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
   ] as const;
 
   const ssNeedsInputBanner = ssVerdict.tone !== "ok";
-  const ssScrollToInputs = useCallback((hint?: ModuleInputsFocusHint) => {
-    if (hint?.rowId != null) {
-      const rowEl = document.querySelector(`[data-ss-row-id="${hint.rowId}"]`);
-      if (rowEl instanceof HTMLElement) {
-        scrollToDataSection("ss-vstupy");
-        window.requestAnimationFrame(() => {
-          rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
-          const focusable = rowEl.querySelector<HTMLElement>("input, select, textarea, button");
-          focusable?.focus({ preventScroll: true });
-        });
-        return;
-      }
-    }
-    scrollToFirstNeedsAttentionSection(["ss-vstupy"]);
-  }, []);
+  const ssScrollToInputs = useMemo(() => createSsScrollToInputs(), []);
   useFocusInputsOnMount(ssScrollToInputs);
   const ssBasicWizardActive = viewMode === "basic";
   const { step: ssWizardStep, goToStep: goToSsWizardStep, handleBack: handleSsWizardBack, handleNext: handleSsWizardNext } =

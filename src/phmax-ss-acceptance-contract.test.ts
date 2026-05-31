@@ -25,6 +25,8 @@ describe("SŠ acceptance contract", () => {
     expect(ss).toContain("CalculatorProductShell");
     expect(ss).toContain("CalculatorWorkflowDock");
     expect(ss).toContain("SsHumanSummary");
+    expect(ss).toContain("createSsScrollToInputs");
+    expect(readSource("src/ss/create-ss-scroll-to-inputs.ts")).toContain("createSsScrollToInputs");
     expect(readSource("src/ss/phmax-ss-par16.ts")).toContain("§ 16");
   });
 

@@ -11,7 +11,7 @@ const requiredSnippets = [
   "npm run check:ci-guards-manifest",
   "SŠ acceptance checklist",
   "docs/ss-acceptance-checklist.md",
-  "Verze 0.2.7 (UX)",
+  "Verze 0.2.8 (UX)",
   "docs/mobile-smoke-checklist.md",
   "skip link",
 ];

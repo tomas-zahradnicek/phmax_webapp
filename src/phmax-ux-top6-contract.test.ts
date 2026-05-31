@@ -121,6 +121,7 @@ describe("UX TOP 6 contract", () => {
 
   it("ZŠ má CalculatorProductShell (MASTER), CalculatorWorkflowDock a PageTableOfContents", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
+    const phmaxTab = readSource("src/zs/ZsPhmaxTabPanel.tsx");
     expect(src).toContain("CalculatorProductShell");
     expect(src).toContain("dockSticky");
     expect(src).toContain("CalculatorWorkflowDock");
@@ -130,24 +131,29 @@ describe("UX TOP 6 contract", () => {
     expect(readSource("src/zs/ZsPhmaxGymSection.tsx")).toContain('sectionId="gym"');
     expect(readSource("src/zs/ZsPhmaxMixedSection.tsx")).toContain('sectionId="mixed"');
     expect(readSource("src/zs/ZsPhmaxExtrasSection.tsx")).toContain('sectionId="extras"');
-    expect(src).toContain("ZsPhmaxMinoritySection");
-    expect(src).toContain("ZsPhmaxGymSection");
-    expect(src).toContain("ZsPhmaxMixedSection");
-    expect(src).toContain("ZsPhmaxExtrasSection");
+    expect(phmaxTab).toContain("ZsPhmaxMinoritySection");
+    expect(phmaxTab).toContain("ZsPhmaxGymSection");
+    expect(phmaxTab).toContain("ZsPhmaxMixedSection");
+    expect(phmaxTab).toContain("ZsPhmaxExtrasSection");
     expect(readSource("src/zs/ZsPhmaxSec16Section.tsx")).toContain('sectionId="sec16"');
     expect(readSource("src/zs/ZsPhmaxSpecialSection.tsx")).toContain('sectionId="special"');
     expect(readSource("src/zs/ZsPhmaxPsychSection.tsx")).toContain('sectionId="psych"');
     expect(readSource("src/zs/ZsPhmaxHealthSection.tsx")).toContain('sectionId="health"');
     expect(readSource("src/zs/ZsPhaTabPanel.tsx")).toContain('sectionId="pha"');
     expect(readSource("src/zs/ZsPhpTabPanel.tsx")).toContain('sectionId="php"');
-    expect(src).toContain("ZsPhmaxSec16Section");
-    expect(src).toContain("ZsPhmaxSpecialSection");
-    expect(src).toContain("ZsPhmaxPsychSection");
-    expect(src).toContain("ZsPhmaxHealthSection");
+    expect(phmaxTab).toContain("ZsPhmaxSec16Section");
+    expect(phmaxTab).toContain("ZsPhmaxSpecialSection");
+    expect(phmaxTab).toContain("ZsPhmaxPsychSection");
+    expect(phmaxTab).toContain("ZsPhmaxHealthSection");
     expect(src).toContain("ZsPhaTabPanel");
     expect(src).toContain("ZsPhpTabPanel");
-    expect(src).toContain("ZsPhmaxBasicSection");
+    expect(phmaxTab).toContain("ZsPhmaxBasicSection");
     expect(readSource("src/zs/ZsPhmaxBasicSection.tsx")).toContain('data-section="basic"');
+    expect(src).toContain("ZsPhmaxTabPanel");
+    expect(src).toContain("ZsSetupSection");
+    expect(src).toContain("ZsOverviewSection");
+    expect(readSource("src/zs/ZsSetupSection.tsx")).toContain('data-section="setup"');
+    expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain('data-wizard-step="5"');
     expect(src).toContain("ZsBasicWizard");
     expect(src).toContain("ZsPhaPhpBasicGuide");
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__mobile-fold");
@@ -157,9 +163,8 @@ describe("UX TOP 6 contract", () => {
     expect(readSource("src/CalculatorProductShell.tsx")).toContain("calculator-shell__supplement--before");
     expect(readSource("src/App.tsx")).toContain("recordDashboardProductVisit");
     expect(src).toContain("zs-basic-wizard-active");
-    expect(src).toContain('data-wizard-step="1"');
+    expect(readSource("src/zs/ZsSetupSection.tsx")).toContain('data-wizard-step="1"');
     expect(readSource("src/zs/ZsPhmaxSummarySection.tsx")).toContain('data-wizard-step="4"');
-    expect(src).toContain('data-wizard-step="5"');
     expect(readSource("src/zs-basic-wizard.ts")).toContain("ZS_BASIC_WIZARD_STEP_COUNT = 5");
   });
 
@@ -219,7 +224,8 @@ describe("UX TOP 6 contract", () => {
 
   it("ZŠ TOC obsahuje panely wizardu PHmax", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
+    const phmaxTab = readSource("src/zs/ZsPhmaxTabPanel.tsx");
     expect(src).toContain('id: "zs-phmax-exceptions"');
-    expect(src).toContain('data-section="zs-phmax-exceptions"');
+    expect(phmaxTab).toContain('data-section="zs-phmax-exceptions"');
   });
 });

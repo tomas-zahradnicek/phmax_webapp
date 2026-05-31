@@ -31,11 +31,12 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(zsPage).toContain("useZsFormAutosave");
     expect(zsPage).toContain("ZS_AUTOSAVE_STORAGE_KEY");
     expect(zsPage).toContain("createZsPageHandlers");
-    expect(zsPage).toContain("buildZsSummaryRows");
-    expect(zsPage).toContain("ZsPhmaxSummarySection");
+    expect(zsPage).toContain("ZsPhmaxTabPanel");
+    expect(zsPage).toContain("ZsSetupSection");
+    expect(zsPage).toContain("ZsOverviewSection");
     expect(zsPage).toContain("ZsPhaTabPanel");
     expect(zsPage).toContain("ZsPhpTabPanel");
-    expect(zsPage).toContain("ZsPhmaxBasicSection");
+    expect(readSource("src/zs/ZsPhmaxTabPanel.tsx")).toContain("ZsPhmaxBasicSection");
     expect(readSource("src/phmax-sd-acceptance-contract.test.ts")).toContain("sd-summary-dept-hint");
     expect(readSource("src/zs/zs-form-snapshot.ts")).toContain('export const ZS_AUTOSAVE_STORAGE_KEY = "edu-cz-zs-calculator-state"');
     expect(readSource("src/zs/zs-export-rows.ts")).toContain("buildZsExtendedExportMetaRows");
@@ -48,7 +49,10 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/zs/ZsNamedSnapshotsHeroPanel.tsx")).toContain("ZsNamedSnapshotsHeroPanel");
     expect(readSource("src/zs/zs-summary-rows.ts")).toContain("buildZsSummaryRows");
     expect(readSource("src/zs/ZsPhmaxSummarySection.tsx")).toContain("ZsPhmaxSummarySection");
-    expect(readSource("src/pv/create-pv-scroll-to-inputs.ts")).toContain("createPvScrollToInputs");
+    expect(readSource("src/zs/ZsPhmaxTabPanel.tsx")).toContain("ZsPhmaxTabPanel");
+    expect(readSource("src/zs/ZsSetupSection.tsx")).toContain("ZsSetupSection");
+    expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain("ZsOverviewSection");
+    expect(readSource("src/ss/create-ss-scroll-to-inputs.ts")).toContain("createSsScrollToInputs");
     expect(readSource("src/phmax-dashboard-focus.ts")).toContain("getDashboardFocusHint");
     expect(readSource("src/zs/zs-export-actions.ts")).toContain("runZsExportCsv");
     expect(readSource("src/ZsPhaPhpBasicGuide.tsx")).toContain("nepočítá");

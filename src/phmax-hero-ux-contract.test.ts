@@ -44,13 +44,14 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
 
   it("ZŠ TOC zahrnuje wizard panely PHmax", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
+    const phmaxTab = readSource("src/zs/ZsPhmaxTabPanel.tsx");
     expect(src).toContain("zsShowPhmaxExceptionsToc");
     expect(src).toContain('id: "zs-phmax-exceptions"');
-    expect(src).toContain('data-section="zs-phmax-exceptions"');
-    expect(src).toContain("PhmaxZsPhmaxSubNav");
+    expect(phmaxTab).toContain('data-section="zs-phmax-exceptions"');
+    expect(phmaxTab).toContain("PhmaxZsPhmaxSubNav");
     expect(readSource("src/zs/ZsPhmaxBasicSection.tsx")).toContain('data-phmax-pane="classes"');
     expect(readSource("src/zs/ZsPhmaxMinoritySection.tsx")).toContain('data-phmax-pane="exceptions"');
-    expect(readSource("src/PhmaxZsPage.tsx")).toContain('data-phmax-pane="summary"');
+    expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain('data-phmax-pane="summary"');
     expect(src).toContain('ref={heroHeaderRef}');
     expect(src).toContain("hero__title--zs");
     expect(src).toContain("hero-zone-actions--toolbar");
