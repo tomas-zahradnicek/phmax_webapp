@@ -35,7 +35,9 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(zsPage).toContain("ZsSetupSection");
     expect(zsPage).toContain("ZsPhaPhpTabPanels");
     expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsOverviewSection");
-    expect(zsPage).toContain("ZsHeroToolbar");
+    expect(zsPage).toContain("ZsHeroHeader");
+    expect(zsPage).toContain("ZsQuickOnboardingGuide");
+    expect(readSource("src/zs/ZsHeroHeader.tsx")).toContain("ZsHeroToolbar");
     expect(zsPage).toContain("ZsWizardShell");
     expect(zsPage).toContain("ZsPhaPhpTabPanels");
     expect(zsPage).toContain("ZsPhaPhpTabPanels");
@@ -58,6 +60,9 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/zs/ZsSetupSection.tsx")).toContain("ZsSetupSection");
     expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain("ZsOverviewSection");
     expect(readSource("src/ss/create-ss-scroll-to-inputs.ts")).toContain("createSsScrollToInputs");
+    expect(readSource("src/pv/create-pv-scroll-to-inputs.ts")).toContain("createPvScrollToInputs");
+    expect(readSource("src/sd/create-sd-scroll-to-inputs.ts")).toContain("createSdScrollToInputs");
+    expect(readSource("src/nv75/create-nv75-scroll-to-inputs.ts")).toContain("createNv75ScrollToInputs");
     expect(readSource("src/phmax-dashboard-focus.ts")).toContain("getDashboardFocusHint");
     expect(readSource("src/zs/zs-export-actions.ts")).toContain("runZsExportCsv");
     expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("zdravotnicke_zs");

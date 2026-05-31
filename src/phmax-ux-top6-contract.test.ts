@@ -109,9 +109,10 @@ describe("UX TOP 6 contract", () => {
     ]) {
       const src = readSource(page);
       const toolbarSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroToolbar.tsx") : src;
+      const heroSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroHeader.tsx") : src;
       expect(toolbarSrc).toContain("HeroCompactToolbar");
-      expect(src).toContain("DisplayDensityToggle");
-      expect(src).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
+      expect(heroSrc).toContain("DisplayDensityToggle");
+      expect(heroSrc).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
     }
     expect(readSource("src/PhmaxSdPage.tsx")).toContain('data-section="sd-vysledek"');
     expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain('data-section="ss-vysledek"');
@@ -155,7 +156,8 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("ZsSetupSection");
     expect(src).toContain("ZsPhaPhpTabPanels");
     expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsOverviewSection");
-    expect(src).toContain("ZsHeroToolbar");
+    expect(src).toContain("ZsHeroHeader");
+    expect(readSource("src/zs/ZsHeroHeader.tsx")).toContain("ZsHeroToolbar");
     expect(readSource("src/zs/ZsWizardShell.tsx")).toContain("ZsBasicWizard");
     expect(readSource("src/zs/ZsSetupSection.tsx")).toContain('data-section="setup"');
     expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain('data-wizard-step="5"');
@@ -194,9 +196,12 @@ describe("UX TOP 6 contract", () => {
       "src/PhmaxNv75DeputyPage.tsx",
     ]) {
       const src = readSource(page);
+      const heroSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroHeader.tsx") : src;
+      const onboardingSrc =
+        page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsQuickOnboardingGuide.tsx") : src;
       expect(src).toContain("useQuickOnboarding");
-      expect(src).toContain("QuickOnboardingHeroButton");
-      expect(src).toContain("QuickOnboarding");
+      expect(heroSrc).toContain("QuickOnboardingHeroButton");
+      expect(onboardingSrc).toContain("QuickOnboarding");
     }
     expect(readSource("src/calculator-ui-constants.ts")).toContain("PHMAX_PV_ONBOARDING_LS_KEY");
     expect(readSource("src/calculator-ui-constants.ts")).toContain("PHMAX_SS_ONBOARDING_LS_KEY");

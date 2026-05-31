@@ -25,5 +25,9 @@ export async function openDashboardAttentionModule(page: Page, moduleLabel: stri
 /** Dashboard – otevře modul přes KPI dlaždici (včetně ok stavu). */
 export async function openDashboardKpiModule(page: Page, moduleLabel: string): Promise<void> {
   await gotoProductView(page, "dash");
-  await page.getByRole("button", { name: new RegExp(`Otevřít ${moduleLabel}`) }).first().click();
+  const tile = page.locator(".dash-kpi-tile").filter({
+    has: page.locator(".dash-kpi-tile__module", { hasText: moduleLabel }),
+  });
+  await expect(tile).toBeVisible();
+  await tile.click();
 }

@@ -13,6 +13,7 @@ import {
   NAMED_BACKUPS_SELECT_PLACEHOLDER,
   CALCULATOR_LIMITS_NOTE,
   CALCULATOR_WORKSPACE_DOCK_LABEL,
+  HERO_ACTIONS_ICON_LEGEND,
   LAY_USER_QUICK_START_NV75,
   LAY_USER_QUICK_START_MOBILE_UX,
   PHMAX_NV75_ONBOARDING_LS_KEY,
@@ -1302,6 +1303,11 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           </p>
           <p>{LAY_USER_QUICK_START_NV75}</p>
           <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
+          <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
+          <p>
+            Ukázka <strong>A</strong> v comboboxu Příkladové výpočty předvyplní typickou situaci banky odpočtů – po načtení ověřte §4b a bonusy §4c/§4d
+            v pravém docku <strong>Kontext výpočtu</strong>.
+          </p>
         </QuickOnboarding>
         {nv75BasicWizardActive ? (
           <ProductBasicWizard

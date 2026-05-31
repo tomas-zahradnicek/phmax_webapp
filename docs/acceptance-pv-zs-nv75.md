@@ -1,6 +1,6 @@
 # Acceptance checklist – PV, ZŠ, NV75 (bez SŠ)
 
-Orientační kontrola před předáním nebo release. Automatizovaný smoke: `npm run test:e2e` (Playwright, mobilní viewport). Stav sloupce **OK**: `E2E` = pokryto mobilním smoke, `contract` = unit test na zdrojový kód, `ručně` = vyžaduje lidské ověření.
+Orientační kontrola před předáním nebo release. Automatizovaný smoke: `npm run test:e2e` (Playwright – mobilní viewport + desktop projekt `desktop-chrome`: dashboard deep-link, TOC a modulový smoke). Stav sloupce **OK**: `E2E` = pokryto mobilním nebo desktop smoke, `contract` = unit test na zdrojový kód, `ručně` = vyžaduje lidské ověření.
 
 ## Rozhodnutí: PV § 1d odst. 3 (krácení PHmax)
 
@@ -19,6 +19,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 |---|----------|-----|
 | P1 | Mobilní souhrn: scroll dolů → panel → Skrýt → chip vlevo → Zobrazit | E2E |
 | P2 | Banner + **Přejít k chybě** (prázdné pracoviště / neúplný řádek) | E2E |
+| P2d | Desktop – combobox Příkladové výpočty + workflow dock | E2E desktop |
 | P3 | Průvodce krok **2 Vstupy** → **Přejít k chybě** → sekce vstupů | E2E |
 | P4 | Checklist „Kdy přidat další pracoviště“ u prázdné tabulky | contract |
 | P5 | § 1d odst. 3 – box u řádku + text u souhrnu (bez výpočtu krácení) | contract |
@@ -32,6 +33,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 |---|----------|-----|
 | Z1 | Mobilní souhrn + chip (jako PV) | E2E |
 | Z2 | Banner bez duplicity „Kontrola vstupů“; stejný verdikt v docku | E2E |
+| Z2d | Desktop – combobox + workflow dock | E2E desktop |
 | Z3 | Průvodce PHmax – krok 2 Třídy → **Přejít k chybě** (prázdný formulář) | E2E |
 | Z4 | PHAmax/PHPmax v basic – věta „pro tento typ školy se nepočítá“ u neplatného režimu | contract |
 | Z5 | Export CSV/XLSX – metadata a orientační disclaimer | contract |
@@ -44,6 +46,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 |---|----------|-----|
 | N1 | Mobilní souhrn + chip | E2E |
 | N2 | Banner při chybějícím §4b / varování u řádků | E2E |
+| N2d | Desktop – combobox + workflow dock; legenda ikon v nápovědě | E2E desktop |
 | N3 | Průvodce **2 Vstupy** → **Přejít k chybě** | E2E |
 | N4 | Ukázka A z comboboxu – banka a §4b v audit sloupci | contract |
 | N5 | Export CSV/XLSX – archivní razítko, release notes verze | contract |

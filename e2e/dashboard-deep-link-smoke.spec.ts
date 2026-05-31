@@ -377,8 +377,13 @@ test.describe("ZŠ hero – pojmenované zálohy", () => {
     }, { storageKey: ZS_STORAGE_KEY, wizardKey: ZS_WIZARD_KEY });
 
     await gotoProductView(page, "zs");
-    await page.getByRole("button", { name: /Akce, tisk, uložení a export/ }).click();
-    await page.getByRole("dialog", { name: "Akce a export" }).getByText("Scénáře a zálohy").click();
+    const drawerTrigger = page.getByRole("button", { name: /Akce, tisk, uložení a export/ });
+    if (await drawerTrigger.isVisible()) {
+      await drawerTrigger.click();
+      await page.getByRole("dialog", { name: "Akce a export" }).getByText("Scénáře a zálohy").click();
+    } else {
+      await page.getByRole("button", { name: "Scénáře a zálohy" }).click();
+    }
     await expect(page.getByLabel("Název pojmenované zálohy")).toBeVisible({ timeout: 8000 });
   });
 });

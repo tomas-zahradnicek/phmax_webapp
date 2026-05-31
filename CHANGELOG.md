@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 (2026-05-31)
+
+### UX a dashboard
+- ZŠ: `ZsHeroHeader`, `ZsQuickOnboardingGuide` – další zmenšení `PhmaxZsPage`.
+- Dashboard Σ: vysvětlení rozsahu, PV/NV75 v průvodci nového uživatele, sjednocený text k ukázkám a nápovědě.
+- NV75: onboarding doplněn o legendu ikon a ukázku A.
+
+### Kvalita
+- E2E **desktop-chrome**: `desktop-module-smoke` pro PV/ŠD/ZŠ/SŠ/NV75; opravy KPI deep-link a ZŠ záloh na desktopu.
+- Unit testy scroll handlerů PV, ŠD a NV75 (`create*ScrollToInputs`).
+
 ## 0.2.9 (2026-05-31)
 
 ### UX a refaktor ZŠ

@@ -36,9 +36,11 @@ const DASH_START_MODULES: ReadonlyArray<{
   id: Exclude<ProductView, "dash">;
   lead: string;
 }> = [
+  { id: "pv", lead: "Předškolní vzdělávání – pracoviště a druhy provozu, ukázka v horní liště." },
   { id: "sd", lead: "Nejkratší vstup – školní družina, ukázka v horní liště." },
   { id: "zs", lead: "PHmax / PHAmax / PHPmax pro základní školu." },
   { id: "ss", lead: "Střední škola – evidence tříd a řádkový PHmax." },
+  { id: "nv75", lead: "Banka odpočtů zástupců – ukázka A v comboboxu Příkladové výpočty." },
 ];
 
 const DASH_CALC_LABEL: Record<Exclude<ProductView, "dash">, string> = {
@@ -643,6 +645,10 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               <h1 className="hero__title">{PRODUCT_CALCULATOR_TITLES.dash}</h1>
               <p className="hero__text">{CALCULATOR_LIMITS_NOTE}</p>
               <p className="muted-text" style={{ marginTop: 8 }}>
+                Souhrnný přehled (Σ) čte uložený stav z prohlížeče u každého modulu zvlášť – nepočítá napříč PV, ŠD, ZŠ a NV75.
+                Pro první orientaci v modulu vždy začněte ukázkou v comboboxu <strong>Příkladové výpočty</strong> v horní liště vybrané kalkulačky.
+              </p>
+              <p className="muted-text" style={{ marginTop: 8 }}>
                 URL:{" "}
                 <code className="methodology-strip__code">
                   {typeof window !== "undefined" ? window.location.origin : ""}?view=dash
@@ -765,8 +771,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           <h2 id="dash-user-first-heading" className="section-title">
             Začněte uživatelsky nejdříve tady
           </h2>
-          <p className="muted-text" style={{ marginBottom: 12 }}>
-            V každé kalkulačce nejdřív v horní oblasti stránky vyberte <strong>Příkladové výpočty</strong> – získáte předvyplněnou situaci k orientaci ve vstupech. U ZŠ může navíc pomoci ukázka v horní liště či rozcestník v expertním režimu. V tabulkách PHmax používejte rozbalení{" "}
+            <p className="muted-text" style={{ marginBottom: 12 }}>
+              V každé kalkulačce nejdřív v horní oblasti stránky vyberte <strong>Příkladové výpočty</strong> – získáte předvyplněnou situaci k orientaci ve vstupech. Tlačítko <strong>Nápověda</strong> v hero liště průvodce znovu zobrazí; u ZŠ může navíc pomoci rozcestník v expertním režimu. V tabulkách PHmax používejte rozbalení{" "}
             <strong>„Proč tyto vstupy ovlivní PHmax?“</strong> (viz PV, ŠD, ZŠ, NV75) – u <strong>SŠ</strong> doplňuje stejný smysl tlačítko „Proč?“ u každého řádku přehledu.
           </p>
           <p className="muted-text" style={{ marginBottom: 12 }}>

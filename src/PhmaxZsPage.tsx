@@ -33,16 +33,14 @@ import { MODE_CONFIG, formatModeRežimStatValue } from "./config/calculator-conf
 import { getVisibleSections } from "./config/field-visibility";
 import { DEFAULT_MODE } from "./config/default-form-state";
 import { GlossaryDialog } from "./GlossaryDialog";
-import { GlossaryIconButton } from "./GlossaryIconButton";
 import { MethodologyStrip } from "./MethodologyStrip";
-import { ProductLegisContextPanel, ZsLegisRef } from "./PhmaxProductLegisUi";
-import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
+import { ProductLegisContextPanel } from "./PhmaxProductLegisUi";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
-import { ProductViewPills, type ProductView } from "./ProductViewPills";
+import type { ProductView } from "./ProductViewPills";
 import {
   type PhmaxZsMethodologyHighlights,
 } from "./phmax-zs-methodology-tables";
@@ -51,7 +49,6 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
-import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import type { PageTocSection } from "./PageTableOfContents";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
@@ -74,7 +71,8 @@ import { ZsExpertWizardGuideSection } from "./zs/ZsExpertWizardGuideSection";
 import { buildZsPhmaxTabPanelProps } from "./zs/build-zs-phmax-tab-panel-props";
 import { ZsPhmaxTabPanel } from "./zs/ZsPhmaxTabPanel";
 import { ZsSetupSection } from "./zs/ZsSetupSection";
-import { ZsHeroToolbar } from "./zs/ZsHeroToolbar";
+import { ZsHeroHeader } from "./zs/ZsHeroHeader";
+import { ZsQuickOnboardingGuide } from "./zs/ZsQuickOnboardingGuide";
 import { ZsWizardShell } from "./zs/ZsWizardShell";
 import { ZsPhaPhpTabPanels } from "./zs/ZsPhaPhpTabPanels";
 import { ZsExpertOnboardingCard } from "./zs/ZsExpertOnboardingCard";
@@ -96,10 +94,7 @@ import {
 import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsWarnings } from "./zs/zs-warnings";
 import type { ZsExportBuildInput } from "./zs/zs-export-build";
-import { ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
 import { CalculatorProductShell } from "./CalculatorProductShell";
-import { HeroExpertStrip } from "./HeroExpertStrip";
-import { DisplayDensityToggle } from "./DisplayDensityToggle";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
 import type { PhmaxZsPhmaxPane } from "./PhmaxZsPhmaxSubNav";
@@ -110,14 +105,8 @@ import {
 } from "./zs-basic-wizard";
 import {
   BROWSER_ERROR_NEXT_STEP_HINT,
-  CALCULATOR_LIMITS_NOTE,
-  LAY_USER_QUICK_START_ZS,
-  LAY_USER_QUICK_START_MOBILE_UX,
   MSG_NO_LOCAL_AUTOSAVE_DATA,
-  EXPORT_ORIENTACNI_NOTE,
   formatZsLayContextLine,
-  HERO_ACTIONS_ICON_LEGEND,
-  HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA,
   CALCULATOR_WORKSPACE_DOCK_LABEL,
   PHMAX_ZS_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
@@ -136,7 +125,6 @@ import {
   stripAppAuthorCreditFromPlainSummary,
 } from "./app-author-print";
 import { useZsNamedSnapshots } from "./useZsNamedSnapshots";
-import { MAX_NAMED_SNAPSHOTS } from "./zs-named-snapshots";
 /** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
 const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
 const ZS_VIEW_MODE_LS_KEY = "phmax-zs-view-mode";
@@ -1787,139 +1775,58 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${phmaxPaneShellClass}`}
     >
       <div className="container container--app">
-        <header className="hero hero--feature" ref={heroHeaderRef}>
-          <div className="hero__orb hero__orb--one" />
-          <div className="hero__orb hero__orb--two" />
-
-          <div className="hero__pills-row">
-            <ProductViewPills productView={productView} setProductView={setProductView} />
-            <div className="hero__pills-row-trailing">
-              <div className="checks" role="group" aria-label="Režim zobrazení ZŠ">
-                <label>
-                  <input
-                    type="radio"
-                    name="zs-view-mode"
-                    checked={viewMode === "basic"}
-                    onChange={() => setViewMode("basic")}
-                  />
-                  Základní
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="zs-view-mode"
-                    checked={viewMode === "expert"}
-                    onChange={() => setViewMode("expert")}
-                  />
-                  Expertní
-                </label>
-              </div>
-              <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="zs-display-density" />
-              <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
-              <GlossaryIconButton
-                ref={glossaryTriggerRef}
-                className="glossary-icon-btn--hero"
-                expanded={glossaryOpen}
-                onClick={() => setGlossaryOpen(true)}
-              />
-              <QuickOnboardingHeroButton guideOpen={zsGuideOpen} onToggle={toggleZsGuideFromHero} buttonRef={zsHelpButtonRef} />
-            </div>
-          </div>
-
-          <HeroExpertStrip
-            title="PHmax, PHAmax a PHPmax – základní škola"
-            kpis={[
-              { label: zsTabPrimaryLabel.replace(" celkem", ""), value: zsTabPrimaryValue },
-              { label: "PHmax", value: totalPhmax },
-              { label: "Režim", value: MODE_CONFIG[mode].label },
-              {
-                label: "Stav",
-                value: incompleteSections > 0 ? `${incompleteSections} nevyplněno` : "Vstupy kompletní",
-              },
-            ]}
-          />
-
-          <div className="grid two hero__grid hero__grid--context">
-            <div>
-              <p className="hero-zone-label">A. Kontext výpočtu</p>
-              <h1 className="hero__title hero__title--zs">PHmax, PHAmax a PHPmax – základní škola</h1>
-              <p className="hero__text hero__text--zs">
-                Orientační výpočet podle metodiky PHmax, PHAmax a PHPmax pro ZŠ (verze 5 / 2026) a souvisejících
-                předpisů. Ukázkové situace a zálohy scénářů jsou v horní liště; podrobnosti k modulům najdete v nápovědě.
-              </p>
-            </div>
-          </div>
-
-          <ZsHeroToolbar
-            selectedExample={selectedExample}
-            exampleLegend={ZS_GUIDE_NATIVE_TOOLTIP_LEGEND}
-            onExampleChange={(key) => loadExample(key as ExampleKey)}
-            onSaveSnapshot={saveSnapshotManually}
-            onExportCsv={handleExportCsv}
-            onExportXlsx={handleExportXlsx}
-            xlsxExportBusy={xlsxExportBusy}
-            onPrintSummary={printSummaryWindow}
-            onRestoreSnapshot={restoreSnapshot}
-            exportLabel={exportLabel}
-            setExportLabel={setExportLabel}
-            namedSaveName={namedSaveName}
-            setNamedSaveName={setNamedSaveName}
-            namedSnapshots={namedSnapshots}
-            selectedNamedId={selectedNamedId}
-            setSelectedNamedId={setSelectedNamedId}
-            onSaveNamedSnapshot={saveNamedSnapshot}
-            onRestoreNamedSnapshot={restoreNamedSnapshot}
-            onDeleteNamedSnapshot={deleteNamedSnapshot}
-            onCompareWithNamedSnapshot={handleCompareZsWithNamedSnapshot}
-            onExportAuditJson={handleExportZsAuditJson}
-            comparePreview={zsComparePreview}
-            onCopySummary={copySummaryToClipboard}
-            onClearStored={clearStoredSnapshot}
-            onResetAll={resetAll}
-          />
-        </header>
+        <ZsHeroHeader
+          heroHeaderRef={heroHeaderRef}
+          productView={productView}
+          setProductView={setProductView}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          displayDensity={displayDensity}
+          setDisplayDensity={setDisplayDensity}
+          focusMode={focusMode}
+          setFocusMode={setFocusMode}
+          glossaryTriggerRef={glossaryTriggerRef}
+          glossaryOpen={glossaryOpen}
+          setGlossaryOpen={setGlossaryOpen}
+          zsGuideOpen={zsGuideOpen}
+          toggleZsGuideFromHero={toggleZsGuideFromHero}
+          zsHelpButtonRef={zsHelpButtonRef}
+          zsTabPrimaryLabel={zsTabPrimaryLabel}
+          zsTabPrimaryValue={zsTabPrimaryValue}
+          totalPhmax={totalPhmax}
+          mode={mode}
+          incompleteSections={incompleteSections}
+          toolbar={{
+            selectedExample,
+            exampleLegend: ZS_GUIDE_NATIVE_TOOLTIP_LEGEND,
+            onExampleChange: (key) => loadExample(key as ExampleKey),
+            onSaveSnapshot: saveSnapshotManually,
+            onExportCsv: handleExportCsv,
+            onExportXlsx: handleExportXlsx,
+            xlsxExportBusy,
+            onPrintSummary: printSummaryWindow,
+            onRestoreSnapshot: restoreSnapshot,
+            exportLabel,
+            setExportLabel,
+            namedSaveName,
+            setNamedSaveName,
+            namedSnapshots,
+            selectedNamedId,
+            setSelectedNamedId,
+            onSaveNamedSnapshot: saveNamedSnapshot,
+            onRestoreNamedSnapshot: restoreNamedSnapshot,
+            onDeleteNamedSnapshot: deleteNamedSnapshot,
+            onCompareWithNamedSnapshot: handleCompareZsWithNamedSnapshot,
+            onExportAuditJson: handleExportZsAuditJson,
+            comparePreview: zsComparePreview,
+            onCopySummary: copySummaryToClipboard,
+            onClearStored: clearStoredSnapshot,
+            onResetAll: resetAll,
+          }}
+        />
 
         <ErrorBoundary title="Obsah kalkulačky pro základní školy se nepodařilo zobrazit">
-        <QuickOnboarding
-          title="Stručné pokyny"
-          open={zsGuideOpen}
-          onDismiss={dismissZsGuide}
-          anchorId="zs-quick-guide"
-          returnFocusRef={zsHelpButtonRef}
-        >
-          <p>
-            <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
-          </p>
-          <p>{LAY_USER_QUICK_START_ZS}</p>
-          <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
-          <p>
-            <strong>PHmax</strong> zadejte podle typu školy v rozbalovacím režimu; u specialit (psychiatrie, zdravotnické zařízení,
-            menšina, gymnázia…) přepněte na odpovídající položku. <strong>PHAmax</strong> a <strong>PHPmax</strong> mají vlastní záložky.
-            Žáky podle <strong>§ 38</strong> a <strong>§ 41</strong> školského zákona (navýšení PHmax o 0,25 / 0,5 h podle stupně) zadejte v sekci{" "}
-            <strong>Samostatné položky PHmax</strong> – u většiny režimů ZŠ je přímo pod hlavními tabulkami; přípravné třídy a přípravný stupeň ZŠS
-            jsou navíc v režimu „PHmax – přípravné třídy, přípravný stupeň, § 38 a § 41“.
-          </p>
-          <p>
-            Průměry u škol při zdravotnickém zařízení a psychiatrii počítá aplikace jako vyšší z minulého roku a aktuálního sběru – doplňte oba sloupce, pokud je znáte.
-            Pojmenované zálohy (max. {MAX_NAMED_SNAPSHOTS}) drží celý stav včetně záložky a pole „Označení pro export“.
-            Srovnání aktuálního stavu se zálohou (JSON) používá uložené součty PHmax / PHAmax / PHPmax – u starších záloh z předchozí verze aplikace tuto položku znovu uložte.
-          </p>
-          <p>{EXPORT_ORIENTACNI_NOTE}</p>
-          <p className="onboarding-hero-legend">
-            {HERO_ACTIONS_ICON_LEGEND}
-            {HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA}
-          </p>
-          <p>
-            V první skupině ukázek jsou čísla z modelových postupů PHmax v metodické příloze (včetně smíšených tříd 570 h).
-            Model <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> a ZŠ speciální (AD1/AD2, řádky B35–B43) je v metodice v5 jako PHAmax – v rozbalovači ukázka „PHAmax“; po načtení se otevře záložka PHAmax.
-            Ostatní ukázky doplňují typické situace; údaje můžete po načtení upravit.
-          </p>
-          <p>
-            <strong>Právní a metodický podklad:</strong> metodika PHmax, PHAmax a PHPmax pro ZV (typicky verze 5 / 2026),{" "}
-            <ZsLegisRef citeId="nv123-1" label="NV č. 123/2018 Sb." />, <ZsLegisRef citeId="vyhl48" label="vyhl. č. 48/2005 Sb." />.
-            {ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER}
-          </p>
-        </QuickOnboarding>
+        <ZsQuickOnboardingGuide open={zsGuideOpen} onDismiss={dismissZsGuide} returnFocusRef={zsHelpButtonRef} />
         <ZsWizardShell
           zsBasicWizardActive={zsBasicWizardActive}
           zsWizardStep={zsWizardStep}

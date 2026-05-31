@@ -21,11 +21,12 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
     for (const page of PRODUCT_PAGES) {
       const src = readSource(page);
       const toolbarSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroToolbar.tsx") : src;
+      const heroSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroHeader.tsx") : src;
       expect(src, page).toMatch(/CalculatorProductShell|CalculatorWorkspaceLayout/);
       expect(src, page).toMatch(/calculator-workspace-dock|CalculatorWorkflowDock/);
       expect(toolbarSrc, page).toContain("HeroCompactToolbar");
-      expect(src, page).toContain("useDisplayDensity");
-      expect(src, page).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
+      expect(heroSrc, page).toContain("useDisplayDensity");
+      expect(heroSrc, page).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
       expect(src, page).toContain("CalculatorWorkflowDock");
     }
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__block--steps");
@@ -45,6 +46,7 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
 
   it("ZŠ TOC zahrnuje wizard panely PHmax", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
+    const heroHeader = readSource("src/zs/ZsHeroHeader.tsx");
     const phmaxTab = readSource("src/zs/ZsPhmaxTabPanel.tsx");
     expect(src).toContain("zsShowPhmaxExceptionsToc");
     expect(src).toContain('id: "zs-phmax-exceptions"');
@@ -53,8 +55,8 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
     expect(readSource("src/zs/ZsPhmaxBasicSection.tsx")).toContain('data-phmax-pane="classes"');
     expect(readSource("src/zs/ZsPhmaxMinoritySection.tsx")).toContain('data-phmax-pane="exceptions"');
     expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain('data-phmax-pane="summary"');
-    expect(src).toContain('ref={heroHeaderRef}');
-    expect(src).toContain("hero__title--zs");
-    expect(src).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
+    expect(heroHeader).toContain("ref={heroHeaderRef}");
+    expect(heroHeader).toContain("hero__title--zs");
+    expect(heroHeader).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
   });
 });
