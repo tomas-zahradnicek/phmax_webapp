@@ -1,4 +1,6 @@
 import { computePvPhmaxTotal, type PvProvozKind } from "./phmax-pv-logic";
+import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
+import type { DashboardFocusOptions } from "./phmax-dashboard-focus";
 
 const PV_PROVOZ: readonly PvProvozKind[] = ["polodenni", "celodenni", "internat", "zdravotnicke"];
 
@@ -23,29 +25,47 @@ function normalizePvRowLoose(item: unknown): {
   return { id, provoz: provoz as PvProvozKind, classCount, avgHours, sec16Count, languageGroups };
 }
 
-/** První pracoviště PV k fokusu z dashboardu – neúplný výpočet PHmax. */
-export function findFirstPvDashboardFocusRowKey(raw: string | null): string | undefined {
+function parsePvRows(raw: string | null) {
   let parsed: unknown;
   try {
     parsed = raw ? JSON.parse(raw) : null;
   } catch {
+    return [];
+  }
+  if (!parsed || typeof parsed !== "object") return [];
+  const rowsRaw = (parsed as { rows?: unknown }).rows;
+  if (!Array.isArray(rowsRaw)) return [];
+  return rowsRaw.map(normalizePvRowLoose).filter((row): row is NonNullable<typeof row> => row != null);
+}
+
+/** Hint PV pro dashboard – neúplné pracoviště nebo výchozí vstupy. */
+export function findPvDashboardFocusHint(
+  raw: string | null,
+  options: DashboardFocusOptions = {},
+): ModuleInputsFocusHint | undefined {
+  const preferIssue = options.preferIssue !== false;
+  const rows = parsePvRows(raw);
+  if (rows.length === 0) return preferIssue ? undefined : { sectionId: "pv-vstupy" };
+
+  if (preferIssue) {
+    for (const nr of rows) {
+      const computed = computePvPhmaxTotal({
+        provoz: nr.provoz,
+        classCount: nr.classCount,
+        avgHoursPerDay: nr.avgHours,
+        sec16ClassCount: nr.sec16Count,
+        languageGroupCount: nr.languageGroups,
+      });
+      if (computed.totalPhmax == null && nr.id) return { rowKey: nr.id, sectionId: "pv-vstupy" };
+    }
     return undefined;
   }
-  if (!parsed || typeof parsed !== "object") return undefined;
-  const rowsRaw = (parsed as { rows?: unknown }).rows;
-  if (!Array.isArray(rowsRaw)) return undefined;
 
-  for (const item of rowsRaw) {
-    const nr = normalizePvRowLoose(item);
-    if (!nr) continue;
-    const computed = computePvPhmaxTotal({
-      provoz: nr.provoz,
-      classCount: nr.classCount,
-      avgHoursPerDay: nr.avgHours,
-      sec16ClassCount: nr.sec16Count,
-      languageGroupCount: nr.languageGroups,
-    });
-    if (computed.totalPhmax == null && nr.id) return nr.id;
-  }
-  return undefined;
+  const first = rows.find((row) => row.id);
+  return first?.id ? { rowKey: first.id, sectionId: "pv-vstupy" } : { sectionId: "pv-vstupy" };
+}
+
+/** První pracoviště PV k fokusu z dashboardu – neúplný výpočet PHmax. */
+export function findFirstPvDashboardFocusRowKey(raw: string | null): string | undefined {
+  return findPvDashboardFocusHint(raw, { preferIssue: true })?.rowKey;
 }

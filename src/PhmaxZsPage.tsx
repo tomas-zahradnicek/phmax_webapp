@@ -46,7 +46,6 @@ import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { HeroActionsDrawer } from "./HeroActionsDrawer";
-import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import {
   PhmaxZsMethodologyReferenceTables,
   type PhmaxZsMethodologyHighlights,
@@ -88,9 +87,12 @@ import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
 import { buildZsPageComparePreview, createZsPageHandlers } from "./zs/zs-page-handlers";
 import { ZsNamedSnapshotsHeroPanel } from "./zs/ZsNamedSnapshotsHeroPanel";
+import { ZsPhmaxBreakdownTable } from "./zs/ZsPhmaxBreakdownTable";
+import { ZsPhmaxSummarySection } from "./zs/ZsPhmaxSummarySection";
+import { ZsExpertWizardGuideSection } from "./zs/ZsExpertWizardGuideSection";
 import { useZsSectionScroll } from "./zs/use-zs-section-scroll";
 import { useZsWizardNavigation } from "./zs/use-zs-wizard-navigation";
-import { ZS_WIZARD_CHOICE_TITLES } from "./zs/zs-wizard-choices";
+import { buildZsSummaryRows } from "./zs/zs-summary-rows";
 import {
   applyZsResetAll,
   applyZsResetNv75,
@@ -1346,38 +1348,41 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const showZsInputBanner = zsInputBannerItems.length > 0;
 
   const summaryRows = useMemo(
-    (): readonly (readonly [string, string | number])[] => [
-    ["Běžné třídy ZŠ – 1. stupeň", basic1Phmax],
-    ["Běžné třídy ZŠ – 2. stupeň", basic2Phmax],
-    ["Běžné třídy ZŠ – celkem", basicPhmax],
-    ["Třídy podle § 16 odst. 9 – 1. stupeň", incl1Phmax],
-    ["Třídy podle § 16 odst. 9 – 2. stupeň", incl2Phmax],
-    ["Třídy podle § 16 odst. 9 – celkem", inclPhmax],
-    ["Škola při psychiatrické nemocnici", psychPhmax],
-    ["ZŠ při zdravotnickém zařízení (mimo psychiatrii), ř. B11–B13", healthPhmax],
-    ["ZŠ s jazykem národnostní menšiny – 1. stupeň", minority1Phmax],
-    ["ZŠ s jazykem národnostní menšiny – 2. stupeň", minority2Phmax],
-    ["ZŠ s jazykem národnostní menšiny – celkem", minorityPhmax],
-    ["Nižší ročníky víceletých gymnázií", gymPhmax],
-    ["Smíšené třídy § 16 odst. 9 a ZŠ speciální – 1. stupeň", mixedMethodFirstTotal || mixedRows.filter((row) => row.stage === "first").reduce((sum, row) => { const avg = row.classes > 0 ? row.pupils / row.classes : 0; const band = row.majority === "zs" ? pickBand(avg, B9_B10.first) : pickBand(avg, B26_B28.special1); return sum + row.classes * band.value; }, 0)],
-    ["Smíšené třídy § 16 odst. 9 a ZŠ speciální – 2. stupeň", mixedMethodSecondTotal || mixedRows.filter((row) => row.stage === "second").reduce((sum, row) => { const avg = row.classes > 0 ? row.pupils / row.classes : 0; const band = row.majority === "zs" ? pickBand(avg, B9_B10.second) : pickBand(avg, B26_B28.special2); return sum + row.classes * band.value; }, 0)],
-    ["Smíšené třídy § 16 odst. 9 a ZŠ speciální – celkem", mixedMethodTotal || mixedPhmax],
-    ["ZŠ speciální – I. díl 1. stupeň", special1PhmaxPart],
-    ["ZŠ speciální – I. díl 2. stupeň", special2PhmaxPart],
-    ["ZŠ speciální – II. díl", specialIIPhmaxPart],
-    ["ZŠ speciální – celkem", specialPhmax],
-    ["Samostatné položky – přípravná třída", prepClassPhmax],
-    ["Samostatné položky – přípravný stupeň ZŠS", prepSpecialPhmax],
-    ["Samostatné položky – § 38", par38Phmax],
-    ["Samostatné položky – § 41", par41Phmax],
-    ["Samostatné položky PHmax – celkem", extrasPhmax],
-    ["Výsledek PHmax", totalPhmax],
-    ["Výsledek PHAmax", totalPha],
-    ["PHPmax – rozhodná hodnota", phpBaseValue],
-    ["PHPmax – nezapočítávaní žáci", phpExcludedTotal],
-    ["PHPmax – očištěná hodnota", phpAdjustedValue],
-    ["Výsledek PHPmax", totalPhp],
-    ],
+    () =>
+      buildZsSummaryRows({
+        basic1Phmax,
+        basic2Phmax,
+        basicPhmax,
+        incl1Phmax,
+        incl2Phmax,
+        inclPhmax,
+        psychPhmax,
+        healthPhmax,
+        minority1Phmax,
+        minority2Phmax,
+        minorityPhmax,
+        gymPhmax,
+        mixedRows,
+        mixedMethodFirstTotal,
+        mixedMethodSecondTotal,
+        mixedMethodTotal,
+        mixedPhmax,
+        special1PhmaxPart,
+        special2PhmaxPart,
+        specialIIPhmaxPart,
+        specialPhmax,
+        prepClassPhmax,
+        prepSpecialPhmax,
+        par38Phmax,
+        par41Phmax,
+        extrasPhmax,
+        totalPhmax,
+        totalPha,
+        phpBaseValue,
+        phpExcludedTotal,
+        phpAdjustedValue,
+        totalPhp,
+      }),
     [
       basic1Phmax,
       basic2Phmax,
@@ -1391,10 +1396,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       minority2Phmax,
       minorityPhmax,
       gymPhmax,
+      mixedRows,
       mixedMethodFirstTotal,
       mixedMethodSecondTotal,
       mixedMethodTotal,
-      mixedRows,
       mixedPhmax,
       special1PhmaxPart,
       special2PhmaxPart,
@@ -1968,58 +1973,12 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
 
         {viewMode === "expert" ? (
-        <section className="card card--accent section-card section-card--guide" data-section="guide">
-          <h2 className="section-title">Rychlý rozcestník</h2>
-          <SectionLead>
-            Nejste si jistí, kde začít? Vyberte situaci, která se nejvíc blíží vaší škole. Aplikace vás přesměruje na správnou část kalkulačky a vyplní odpovídající ukázkový příklad.
-          </SectionLead>
-<div className="grid two">
-            <div className="field">
-              <span id="zs-wizard-choice-label">Jakou situaci chcete řešit?</span>
-              <select
-                id="zs-wizard-choice-select"
-                aria-labelledby="zs-wizard-choice-label"
-                aria-describedby="zs-wizard-choice-legend"
-                title="Rychlý rozcestník: po výběru se načte ukázka a přepne se záložka. Najeďte na řádek pro stručný popis situace."
-                value={wizardChoice}
-                onChange={(e) => applyWizardChoice(e.target.value as WizardChoice)}
-              >
-                <option value="">Vyberte situaci…</option>
-                <option value="php_small" title={ZS_WIZARD_CHOICE_TITLES.php_small}>
-                  Máme menší školu a chceme zjistit PHPmax
-                </option>
-                <option value="php_deductions" title={ZS_WIZARD_CHOICE_TITLES.php_deductions}>
-                  Máme žáky, kteří se do PHPmax nezapočítávají
-                </option>
-                <option value="ph_inclusion" title={ZS_WIZARD_CHOICE_TITLES.ph_inclusion}>
-                  Jsme škola s inkluzí a třídami podle § 16
-                </option>
-                <option value="ph_psych" title={ZS_WIZARD_CHOICE_TITLES.ph_psych}>
-                  Jsme škola při psychiatrické nemocnici
-                </option>
-                <option value="ph_health" title={ZS_WIZARD_CHOICE_TITLES.ph_health}>
-                  Jsme ZŠ při zdravotnickém zařízení (ne psychiatrie)
-                </option>
-                <option value="ph_mixed" title={ZS_WIZARD_CHOICE_TITLES.ph_mixed}>
-                  Máme smíšené třídy
-                </option>
-                <option value="ph_prep" title={ZS_WIZARD_CHOICE_TITLES.ph_prep}>
-                  Máme přípravnou třídu nebo přípravný stupeň ZŠS
-                </option>
-              </select>
-              <p id="zs-wizard-choice-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", lineHeight: 1.5 }}>
-                {ZS_GUIDE_NATIVE_TOOLTIP_LEGEND}
-              </p>
-            </div>
-
-            <div className="subcard">
-              <h3>Co rozcestník udělá</h3>
-              <p className="muted-text">
-                Vybere vhodnou záložku a načte příklad, který odpovídá zvolené situaci. Potom můžete všechna data ručně upravit podle vlastní školy.
-              </p>
-            </div>
-          </div>
-        </section>
+          <ZsExpertWizardGuideSection
+            wizardChoice={wizardChoice}
+            onWizardChoiceChange={applyWizardChoice}
+            guideTooltipLegend={ZS_GUIDE_NATIVE_TOOLTIP_LEGEND}
+            SectionLead={SectionLead}
+          />
         ) : null}
 
         {showZsInputBanner ? (
@@ -2357,190 +2316,38 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
               <button className="btn ghost" onClick={resetPhmax}>Vymazat údaje PHmax</button>
             </div>
 
-            <section className="card muted card--summary section-card section-card--summary-phmax" data-section="phmax-summary" data-wizard-step="4" data-phmax-pane="summary">
-              <h2 className="section-title">Souhrn výsledků PHmax</h2>
-              <div className="grid four">
-                <ResultCard label="Běžné třídy" value={basicPhmax} />
-                <ResultCard
-                  methodStepLabel="§ 16 odst. 9"
-                  label={<ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" />}
-                  value={inclPhmax}
-                />
-                <ResultCard label="Škola při psychiatrické nemocnici" value={psychPhmax} />
-                <ResultCard label="ZŠ při zdrav. zař. (B11–B13)" value={healthPhmax} />
-                <ResultCard label="Jazyk menšiny" value={minorityPhmax} />
-                <ResultCard label="Víceletá gymnázia" value={gymPhmax} />
-                <ResultCard label="Smíšené třídy" value={mixedForTotal} />
-                <ResultCard label="ZŠ speciální" value={specialPhmax} />
-                {(() => {
-                  const extraDetailRows: { key: string; label: string; value: number }[] = [];
-                  if (prepClassPhmax > 0) {
-                    extraDetailRows.push({ key: "prep", label: "Samostatné – přípravná třída", value: prepClassPhmax });
-                  }
-                  if (prepSpecialPhmax > 0) {
-                    extraDetailRows.push({
-                      key: "prepSp",
-                      label: "Samostatné – přípravný stupeň ZŠS",
-                      value: prepSpecialPhmax,
-                    });
-                  }
-                  if (par38Phmax > 0) {
-                    extraDetailRows.push({ key: "p38", label: "Samostatné – § 38", value: par38Phmax });
-                  }
-                  if (par41Phmax > 0) {
-                    extraDetailRows.push({ key: "p41", label: "Samostatné – § 41", value: par41Phmax });
-                  }
-                  if (extraDetailRows.length === 0) {
-                    return <ResultCard label="Samostatné položky" value={extrasPhmax} />;
-                  }
-                  return (
-                    <>
-                      {extraDetailRows.map((r) =>
-                        r.key === "p38" ? (
-                          <ResultCard
-                            key={r.key}
-                            methodStepLabel={r.label}
-                            label={
-                              <>
-                                Samostatné – <ZsLegisRef citeId="zs-par38" label="§ 38" />
-                              </>
-                            }
-                            value={r.value}
-                          />
-                        ) : r.key === "p41" ? (
-                          <ResultCard
-                            key={r.key}
-                            methodStepLabel={r.label}
-                            label={
-                              <>
-                                Samostatné – <ZsLegisRef citeId="zs-par41" label="§ 41" />
-                              </>
-                            }
-                            value={r.value}
-                          />
-                        ) : (
-                          <ResultCard key={r.key} label={r.label} value={r.value} />
-                        ),
-                      )}
-                      {extraDetailRows.length > 1 ? (
-                        <ResultCard label="Samostatné položky celkem" value={extrasPhmax} />
-                      ) : null}
-                    </>
-                  );
-                })()}
-                <ResultCard label="Výsledek PHmax" tone="success" value={totalPhmax} />
-              </div>
-            </section>
+            <ZsPhmaxSummarySection
+              basicPhmax={basicPhmax}
+              inclPhmax={inclPhmax}
+              psychPhmax={psychPhmax}
+              healthPhmax={healthPhmax}
+              minorityPhmax={minorityPhmax}
+              gymPhmax={gymPhmax}
+              mixedForTotal={mixedForTotal}
+              specialPhmax={specialPhmax}
+              prepClassPhmax={prepClassPhmax}
+              prepSpecialPhmax={prepSpecialPhmax}
+              par38Phmax={par38Phmax}
+              par41Phmax={par41Phmax}
+              extrasPhmax={extrasPhmax}
+              totalPhmax={totalPhmax}
+            />
 
-            <details className="subcard sd-phmax-breakdown-wrap" style={{ marginTop: 18 }}>
-              <summary className="section-title" style={{ fontSize: "1.02rem", cursor: "pointer" }}>
-                Rozpad / ověřovací tabulka PHmax
-              </summary>
-              <p className="muted-text" style={{ marginTop: 10, marginBottom: 12, fontSize: "0.86rem", lineHeight: 1.5 }}>
-                Dílčí částky odpovídají kartám v souhrnu výše; součet řádků (včetně nul) má dát stejný výsledek jako
-                „Výsledek PHmax“. Užitečné pro kontrolu výkazu a metodiky.
-              </p>
-              <ScrollGrabRegion className="sd-phmax-breakdown-scroll sd-phmax-breakdown-scroll--compact">
-                <table className="sd-phmax-breakdown">
-                  <thead>
-                    <tr>
-                      <th scope="col">Položka</th>
-                      <th scope="col" className="sd-phmax-breakdown__head-num">
-                        Hodnota (h/týd.)
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row" className="sd-phmax-breakdown__label">
-                        Běžné třídy
-                      </th>
-                      <td className="sd-phmax-breakdown__num">{basicPhmax}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="sd-phmax-breakdown__label">
-                        <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" />
-                      </th>
-                      <td className="sd-phmax-breakdown__num">{inclPhmax}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="sd-phmax-breakdown__label">
-                        Škola při psychiatrické nemocnici
-                      </th>
-                      <td className="sd-phmax-breakdown__num">{psychPhmax}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="sd-phmax-breakdown__label">
-                        ZŠ při zdrav. zař. (B11–B13)
-                      </th>
-                      <td className="sd-phmax-breakdown__num">{healthPhmax}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="sd-phmax-breakdown__label">
-                        Jazyk menšiny
-                      </th>
-                      <td className="sd-phmax-breakdown__num">{minorityPhmax}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="sd-phmax-breakdown__label">
-                        Víceletá gymnázia
-                      </th>
-                      <td className="sd-phmax-breakdown__num">{gymPhmax}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="sd-phmax-breakdown__label">
-                        Smíšené třídy
-                      </th>
-                      <td className="sd-phmax-breakdown__num">{mixedForTotal}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="sd-phmax-breakdown__label">
-                        ZŠ speciální
-                      </th>
-                      <td className="sd-phmax-breakdown__num">{specialPhmax}</td>
-                    </tr>
-                    {prepClassPhmax > 0 ? (
-                      <tr>
-                        <th scope="row" className="sd-phmax-breakdown__label">
-                          Samostatné – přípravná třída
-                        </th>
-                        <td className="sd-phmax-breakdown__num">{prepClassPhmax}</td>
-                      </tr>
-                    ) : null}
-                    {prepSpecialPhmax > 0 ? (
-                      <tr>
-                        <th scope="row" className="sd-phmax-breakdown__label">
-                          Samostatné – přípravný stupeň ZŠS
-                        </th>
-                        <td className="sd-phmax-breakdown__num">{prepSpecialPhmax}</td>
-                      </tr>
-                    ) : null}
-                    {par38Phmax > 0 ? (
-                      <tr>
-                        <th scope="row" className="sd-phmax-breakdown__label">
-                          Samostatné – <ZsLegisRef citeId="zs-par38" label="§ 38" />
-                        </th>
-                        <td className="sd-phmax-breakdown__num">{par38Phmax}</td>
-                      </tr>
-                    ) : null}
-                    {par41Phmax > 0 ? (
-                      <tr>
-                        <th scope="row" className="sd-phmax-breakdown__label">
-                          Samostatné – <ZsLegisRef citeId="zs-par41" label="§ 41" />
-                        </th>
-                        <td className="sd-phmax-breakdown__num">{par41Phmax}</td>
-                      </tr>
-                    ) : null}
-                  </tbody>
-                  <tfoot>
-                    <tr className="sd-phmax-breakdown__total">
-                      <th scope="row">Výsledek PHmax (součet modulu)</th>
-                      <td className="sd-phmax-breakdown__num">{totalPhmax}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </ScrollGrabRegion>
-            </details>
+            <ZsPhmaxBreakdownTable
+              basicPhmax={basicPhmax}
+              inclPhmax={inclPhmax}
+              psychPhmax={psychPhmax}
+              healthPhmax={healthPhmax}
+              minorityPhmax={minorityPhmax}
+              gymPhmax={gymPhmax}
+              mixedForTotal={mixedForTotal}
+              specialPhmax={specialPhmax}
+              prepClassPhmax={prepClassPhmax}
+              prepSpecialPhmax={prepSpecialPhmax}
+              par38Phmax={par38Phmax}
+              par41Phmax={par41Phmax}
+              totalPhmax={totalPhmax}
+            />
 
             {viewMode === "expert" ? <PhmaxZsMethodologyReferenceTables highlights={zsMethodologyHighlights} /> : null}
           </div>

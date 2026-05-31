@@ -1,5 +1,7 @@
 import { buildZsValidationIssues } from "./zs-form-validation";
 import type { ZsTabKey } from "./zs-form-snapshot";
+import type { ModuleInputsFocusHint } from "../phmax-focus-inputs-hint";
+import type { DashboardFocusOptions } from "../phmax-dashboard-focus";
 
 function num(v: unknown): number {
   return typeof v === "number" && Number.isFinite(v) ? v : 0;
@@ -13,18 +15,8 @@ function tabFromSnapshot(s: Record<string, unknown>): ZsTabKey {
   return s.tab === "pha" || s.tab === "php" ? s.tab : "phmax";
 }
 
-/** První sekce ZŠ k fokusu z dashboardu – z uloženého autosave stavu. */
-export function findFirstZsDashboardFocusSection(raw: string | null): string | undefined {
-  let parsed: unknown;
-  try {
-    parsed = raw ? JSON.parse(raw) : null;
-  } catch {
-    return undefined;
-  }
-  if (!parsed || typeof parsed !== "object") return undefined;
-  const s = parsed as Record<string, unknown>;
-
-  const issues = buildZsValidationIssues({
+function buildSnapshotValidationInput(s: Record<string, unknown>) {
+  return {
     tab: tabFromSnapshot(s),
     basic1Classes: num(s.basic1Classes),
     basic1Pupils: num(s.basic1Pupils),
@@ -47,8 +39,35 @@ export function findFirstZsDashboardFocusSection(raw: string | null): string | u
     phpYear2: num(s.phpYear2),
     phpYear3: num(s.phpYear3),
     phpMethodMode: typeof s.phpMethodMode === "string" ? s.phpMethodMode : "three_year_avg",
-  });
+  };
+}
 
-  if (issues[0]?.section) return issues[0].section;
-  return "guide";
+/** Hint ZŠ pro dashboard – první problematická sekce nebo výchozí záložka. */
+export function findZsDashboardFocusHint(
+  raw: string | null,
+  options: DashboardFocusOptions = {},
+): ModuleInputsFocusHint | undefined {
+  const preferIssue = options.preferIssue !== false;
+  let parsed: unknown;
+  try {
+    parsed = raw ? JSON.parse(raw) : null;
+  } catch {
+    return preferIssue ? undefined : { sectionId: "basic" };
+  }
+  if (!parsed || typeof parsed !== "object") return preferIssue ? undefined : { sectionId: "basic" };
+  const s = parsed as Record<string, unknown>;
+  const tab = tabFromSnapshot(s);
+
+  if (!preferIssue) {
+    return { sectionId: tab === "phmax" ? "basic" : tab };
+  }
+
+  const issues = buildZsValidationIssues(buildSnapshotValidationInput(s));
+  if (issues[0]?.section) return { sectionId: issues[0].section };
+  return { sectionId: "guide" };
+}
+
+/** První sekce ZŠ k fokusu z dashboardu – z uloženého autosave stavu. */
+export function findFirstZsDashboardFocusSection(raw: string | null): string | undefined {
+  return findZsDashboardFocusHint(raw, { preferIssue: true })?.sectionId;
 }

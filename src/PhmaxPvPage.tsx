@@ -82,8 +82,8 @@ import {
   PV_HERO_EXAMPLE_SELECT_ID,
 } from "./pv-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass, scrollToDataSection, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
-import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
+import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { createPvScrollToInputs } from "./pv/create-pv-scroll-to-inputs";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
@@ -789,21 +789,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
 
   const pvBasicWizardActive = viewMode === "basic";
   const pvHasInputIssue = pvVerdict.tone !== "ok";
-  const pvScrollToInputs = useCallback((hint?: ModuleInputsFocusHint) => {
-    if (hint?.rowKey) {
-      const rowEl = document.querySelector(`[data-pv-row-id="${hint.rowKey}"]`);
-      if (rowEl instanceof HTMLElement) {
-        scrollToDataSection("pv-vstupy");
-        window.requestAnimationFrame(() => {
-          rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
-          const focusable = rowEl.querySelector<HTMLElement>("input, select, textarea, button");
-          focusable?.focus({ preventScroll: true });
-        });
-        return;
-      }
-    }
-    scrollToFirstNeedsAttentionSection(["pv-vstupy"]);
-  }, []);
+  const pvScrollToInputs = useMemo(() => createPvScrollToInputs(), []);
   const { step: pvWizardStep, goToStep: goToPvWizardStep, handleBack: handlePvWizardBack, handleNext: handlePvWizardNext } =
     useProductBasicWizard({
       lsKey: PV_BASIC_WIZARD_LS_KEY,

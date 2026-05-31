@@ -1,4 +1,5 @@
 import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
+import type { DashboardFocusOptions } from "./phmax-dashboard-focus";
 
 type SdDeptRow = { kind: "regular" | "special"; participants: number };
 
@@ -37,15 +38,26 @@ export function parseSdDashboardSnapshot(raw: string | null): SdDashboardSnapsho
   return { pupils, departments, inputMode, detailDepartments };
 }
 
-/** První fokus ŠD z dashboardu – sekce vstupů, případně řádek detailního oddělení. */
-export function findFirstSdDashboardFocusHint(raw: string | null): ModuleInputsFocusHint | undefined {
+/** Hint ŠD pro dashboard – sekce vstupů, případně řádek detailního oddělení. */
+export function findSdDashboardFocusHint(
+  raw: string | null,
+  options: DashboardFocusOptions = {},
+): ModuleInputsFocusHint | undefined {
+  const preferIssue = options.preferIssue !== false;
   const snap = parseSdDashboardSnapshot(raw);
   if (!snap) return undefined;
+  if (!preferIssue) return { sectionId: "sd-vstupy" };
+  if (snap.pupils <= 0) return { sectionId: "sd-vstupy" };
   if (snap.inputMode === "detail") {
     const idx = snap.detailDepartments.findIndex((d) => d.participants <= 0);
     if (idx >= 0) return { sectionId: "sd-vstupy", rowId: idx };
   }
-  return { sectionId: "sd-vstupy" };
+  return undefined;
+}
+
+/** První fokus ŠD z dashboardu – sekce vstupů, případně řádek detailního oddělení. */
+export function findFirstSdDashboardFocusHint(raw: string | null): ModuleInputsFocusHint | undefined {
+  return findSdDashboardFocusHint(raw, { preferIssue: true });
 }
 
 export function sdDashboardNeedsAttention(snap: SdDashboardSnapshot): boolean {

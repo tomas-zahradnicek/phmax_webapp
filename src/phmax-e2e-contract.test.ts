@@ -27,6 +27,8 @@ describe("E2E smoke contract", () => {
     expect(pvSpec).toContain("calculator-mobile-scroll-results");
     expect(pvSpec).toContain("calculator-mobile-summary-chip");
     expect(readSource("e2e/smoke-helpers.ts")).toContain("openDashboardAttentionModule");
+    expect(readSource("e2e/smoke-helpers.ts")).toContain("openDashboardKpiModule");
+    expect(readSource("src/phmax-dashboard-focus.ts")).toContain("getDashboardFocusHint");
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain("data-pv-row-id");
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain('[data-section="basic"]');
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain("data-nv75-row-id");

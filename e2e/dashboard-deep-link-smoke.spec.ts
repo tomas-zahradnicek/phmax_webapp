@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openDashboardAttentionModule } from "./smoke-helpers";
+import { openDashboardAttentionModule, openDashboardKpiModule, gotoProductView } from "./smoke-helpers";
 
 const SS_DRAFT_KEY = "phmax-ss-units-draft";
 const SS_WIZARD_KEY = "phmax-ss-basic-wizard-step";
@@ -190,5 +190,112 @@ test.describe("Dashboard deep-link", () => {
     const row = page.locator('[data-nv75-row-id="88"]');
     await expect(row).toBeVisible({ timeout: 8000 });
     await expect(row).toBeInViewport({ timeout: 8000 });
+  });
+
+  test("ŠD – ok stav z KPI dlaždice", async ({ page }) => {
+    await page.addInitScript(({ storageKey, wizardKey }) => {
+      localStorage.setItem(wizardKey, "2");
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          pupils: 40,
+          manualDepts: false,
+          departments: 2,
+          inputMode: "summary",
+        }),
+      );
+    }, { storageKey: SD_STORAGE_KEY, wizardKey: SD_WIZARD_KEY });
+
+    await openDashboardKpiModule(page, "ŠD");
+
+    const section = page.locator('[data-section="sd-vstupy"]');
+    await expect(section).toBeVisible({ timeout: 8000 });
+    await section.scrollIntoViewIfNeeded();
+    await expect(section).toBeInViewport({ timeout: 8000 });
+  });
+
+  test("PV – ok stav z KPI dlaždice", async ({ page }) => {
+    await page.addInitScript(({ storageKey, wizardKey, rowKey }) => {
+      localStorage.setItem(wizardKey, "2");
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          rows: [
+            {
+              id: rowKey,
+              label: "",
+              provoz: "zdravotnicke",
+              classCount: 2,
+              avgHours: 0,
+              sec16Count: 0,
+              languageGroups: 0,
+            },
+          ],
+        }),
+      );
+    }, { storageKey: PV_STORAGE_KEY, wizardKey: PV_WIZARD_KEY, rowKey: "pv-ok-e2e" });
+
+    await openDashboardKpiModule(page, "PV");
+
+    const row = page.locator('[data-pv-row-id="pv-ok-e2e"]');
+    await expect(row).toBeVisible({ timeout: 8000 });
+    await row.scrollIntoViewIfNeeded();
+    await expect(row).toBeInViewport({ timeout: 8000 });
+  });
+
+  test("ok modul není ve Vyžaduje pozornost", async ({ page }) => {
+    await page.addInitScript(({ sdKey, zsKey, sdWizard, zsWizard }) => {
+      localStorage.setItem(sdWizard, "2");
+      localStorage.setItem(
+        sdKey,
+        JSON.stringify({
+          pupils: 30,
+          manualDepts: false,
+          departments: 1,
+          inputMode: "summary",
+        }),
+      );
+      localStorage.setItem(zsWizard, "2");
+      localStorage.setItem(
+        zsKey,
+        JSON.stringify({
+          tab: "phmax",
+          basic1Classes: 0,
+          basic2Classes: 0,
+        }),
+      );
+    }, {
+      sdKey: SD_STORAGE_KEY,
+      zsKey: ZS_STORAGE_KEY,
+      sdWizard: SD_WIZARD_KEY,
+      zsWizard: ZS_WIZARD_KEY,
+    });
+
+    await gotoProductView(page, "dash");
+    await expect(page.getByRole("heading", { name: "Vyžaduje pozornost" })).toBeVisible();
+    await expect(page.locator(".dash-attention-card__item").filter({ hasText: "ŠD" })).toHaveCount(0);
+    await expect(page.locator(".dash-attention-card__item").filter({ hasText: "ZŠ" })).toHaveCount(1);
+  });
+});
+
+test.describe("ZŠ hero – pojmenované zálohy", () => {
+  test("panel pojmenovaných záloh je viditelný", async ({ page }) => {
+    await page.addInitScript(({ storageKey, wizardKey }) => {
+      localStorage.setItem(wizardKey, "2");
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          tab: "phmax",
+          basic1Classes: 2,
+          basic1Pupils: 40,
+          _phmaxAuditTotals: { totalPhmax: 100, totalPha: 0, totalPhp: 0, tab: "phmax" },
+        }),
+      );
+    }, { storageKey: ZS_STORAGE_KEY, wizardKey: ZS_WIZARD_KEY });
+
+    await gotoProductView(page, "zs");
+    await page.getByRole("button", { name: /Akce, tisk, uložení a export/ }).click();
+    await page.getByRole("dialog", { name: "Akce a export" }).getByText("Scénáře a zálohy").click();
+    await expect(page.getByLabel("Název pojmenované zálohy")).toBeVisible({ timeout: 8000 });
   });
 });

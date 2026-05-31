@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.7 (2026-05-28)
+
+### UX a dashboard
+- Dashboard deep-link i pro moduly ve stavu **ok** (KPI dlaždice posunou na výchozí vstupy).
+- Sjednocený hint API: `phmax-dashboard-focus.ts` → `getDashboardFocusHint`.
+
+### Kvalita a refaktor
+- ZŠ: `buildZsSummaryRows`, souhrn/rozpad PHmax a expert rozcestník v samostatných komponentách.
+- PV, ŠD, NV75: extrakce scroll handlerů (`create*ScrollToInputs`), sdílený `useCalculatorSectionScroll`.
+- E2E: ok modul z KPI, negativní deep-link, smoke pojmenovaných záloh ZŠ.
+
 ## 0.2.6 (2026-05-28)
 
 ### UX a dashboard

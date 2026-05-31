@@ -54,8 +54,8 @@ import {
   NV75_HERO_EXAMPLE_SELECT_ID,
 } from "./nv75-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass, scrollToDataSection, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
-import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
+import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { createNv75ScrollToInputs } from "./nv75/create-nv75-scroll-to-inputs";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
@@ -1105,21 +1105,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   }, [summaryText]);
 
   const nv75NeedsInputBanner = nv75Verdict.tone !== "ok";
-  const nv75ScrollToInputs = useCallback((hint?: ModuleInputsFocusHint) => {
-    if (hint?.rowId != null) {
-      const rowEl = document.querySelector(`[data-nv75-row-id="${hint.rowId}"]`);
-      if (rowEl instanceof HTMLElement) {
-        scrollToDataSection("nv75-vstupy");
-        window.requestAnimationFrame(() => {
-          rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
-          const focusable = rowEl.querySelector<HTMLElement>("input, select, textarea, button");
-          focusable?.focus({ preventScroll: true });
-        });
-        return;
-      }
-    }
-    scrollToFirstNeedsAttentionSection(["nv75-vstupy"]);
-  }, []);
+  const nv75ScrollToInputs = useMemo(() => createNv75ScrollToInputs(), []);
   const nv75BasicWizardActive = viewMode === "basic";
   const { step: nv75WizardStep, goToStep: goToNv75WizardStep, handleBack: handleNv75WizardBack, handleNext: handleNv75WizardNext } =
     useProductBasicWizard({

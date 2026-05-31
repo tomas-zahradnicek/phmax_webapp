@@ -158,7 +158,7 @@ describe("UX TOP 6 contract", () => {
     expect(readSource("src/App.tsx")).toContain("recordDashboardProductVisit");
     expect(src).toContain("zs-basic-wizard-active");
     expect(src).toContain('data-wizard-step="1"');
-    expect(src).toContain('data-wizard-step="4"');
+    expect(readSource("src/zs/ZsPhmaxSummarySection.tsx")).toContain('data-wizard-step="4"');
     expect(src).toContain('data-wizard-step="5"');
     expect(readSource("src/zs-basic-wizard.ts")).toContain("ZS_BASIC_WIZARD_STEP_COUNT = 5");
   });

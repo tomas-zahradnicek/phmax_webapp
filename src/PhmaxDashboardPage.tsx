@@ -10,15 +10,12 @@ import { eligibleAdditionalWorkplacesForRow, normalizeNv75UiRow, type Nv75Deputy
 import { readNamedSnapshotsFromLs } from "./zs-named-snapshots";
 import { PHMAX_SS_UNITS_STORAGE_KEY } from "./ss/phmax-ss-constants";
 import { deriveSsUnitsPreview } from "./ss/phmax-ss-units-derive";
-import { findFirstPvDashboardFocusRowKey } from "./phmax-pv-dashboard-focus";
-import { findFirstNv75DashboardFocusRowId, nv75DashboardVerdictFromLs } from "./phmax-nv75-dashboard-focus";
+import { getDashboardFocusHint } from "./phmax-dashboard-focus";
+import { nv75DashboardVerdictFromLs } from "./phmax-nv75-dashboard-focus";
 import {
-  findFirstSdDashboardFocusHint,
   parseSdDashboardSnapshot,
   sdDashboardVerdictFromSnapshot,
 } from "./phmax-sd-dashboard-focus";
-import { findFirstSsDashboardFocusRowId } from "./ss/phmax-ss-dashboard-focus";
-import { findFirstZsDashboardFocusSection } from "./zs/phmax-zs-dashboard-focus";
 import { countPar16MarkedRows, PHMAX_SS_PAR16_DOCK_HINT } from "./ss/phmax-ss-par16";
 import { revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
@@ -601,36 +598,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         openModuleWithExampleHint(row.id);
         return;
       }
-      if (dashboardRowSupportsInputFocus(row.id) && dashboardVerdictNeedsAttention(row.verdict)) {
-        if (row.id === "ss") {
-          const ssRows = parseSsDraftRows(
-            typeof localStorage === "undefined" ? null : localStorage.getItem(PHMAX_SS_UNITS_STORAGE_KEY),
-          );
-          const rowId = findFirstSsDashboardFocusRowId(ssRows);
-          requestFocusModuleInputs(rowId != null ? { rowId } : undefined);
-        } else if (row.id === "pv") {
-          const rowKey = findFirstPvDashboardFocusRowKey(
-            typeof localStorage === "undefined" ? null : localStorage.getItem(LS_PV),
-          );
-          requestFocusModuleInputs(rowKey != null ? { rowKey } : undefined);
-        } else if (row.id === "zs") {
-          const sectionId = findFirstZsDashboardFocusSection(
-            typeof localStorage === "undefined" ? null : localStorage.getItem(LS_ZS),
-          );
-          requestFocusModuleInputs(sectionId ? { sectionId } : undefined);
-        } else if (row.id === "sd") {
-          const hint = findFirstSdDashboardFocusHint(
-            typeof localStorage === "undefined" ? null : localStorage.getItem(LS_SD),
-          );
-          requestFocusModuleInputs(hint);
-        } else if (row.id === "nv75") {
-          const rowId = findFirstNv75DashboardFocusRowId(
-            typeof localStorage === "undefined" ? null : localStorage.getItem(LS_NV75),
-          );
-          requestFocusModuleInputs(rowId != null ? { rowId } : undefined);
-        } else {
-          requestFocusModuleInputs();
-        }
+      if (dashboardRowSupportsInputFocus(row.id)) {
+        const hint = getDashboardFocusHint(row.id, {
+          preferIssue: dashboardVerdictNeedsAttention(row.verdict),
+        });
+        if (hint) requestFocusModuleInputs(hint);
       }
       setProductView(row.id);
     },

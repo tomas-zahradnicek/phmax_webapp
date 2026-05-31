@@ -21,3 +21,9 @@ export async function openDashboardAttentionModule(page: Page, moduleLabel: stri
   });
   await item.getByRole("button", { name: "Otevřít a přejít k chybě" }).click();
 }
+
+/** Dashboard – otevře modul přes KPI dlaždici (včetně ok stavu). */
+export async function openDashboardKpiModule(page: Page, moduleLabel: string): Promise<void> {
+  await gotoProductView(page, "dash");
+  await page.getByRole("button", { name: new RegExp(`Otevřít ${moduleLabel}`) }).first().click();
+}

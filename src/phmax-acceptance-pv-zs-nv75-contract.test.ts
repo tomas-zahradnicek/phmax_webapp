@@ -31,7 +31,8 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(zsPage).toContain("useZsFormAutosave");
     expect(zsPage).toContain("ZS_AUTOSAVE_STORAGE_KEY");
     expect(zsPage).toContain("createZsPageHandlers");
-    expect(zsPage).toContain("zsExportBuildInput");
+    expect(zsPage).toContain("buildZsSummaryRows");
+    expect(zsPage).toContain("ZsPhmaxSummarySection");
     expect(zsPage).toContain("ZsPhaTabPanel");
     expect(zsPage).toContain("ZsPhpTabPanel");
     expect(zsPage).toContain("ZsPhmaxBasicSection");
@@ -45,6 +46,10 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/zs/use-zs-section-scroll.ts")).toContain("useZsSectionScroll");
     expect(readSource("src/zs/use-zs-wizard-navigation.ts")).toContain("useZsWizardNavigation");
     expect(readSource("src/zs/ZsNamedSnapshotsHeroPanel.tsx")).toContain("ZsNamedSnapshotsHeroPanel");
+    expect(readSource("src/zs/zs-summary-rows.ts")).toContain("buildZsSummaryRows");
+    expect(readSource("src/zs/ZsPhmaxSummarySection.tsx")).toContain("ZsPhmaxSummarySection");
+    expect(readSource("src/pv/create-pv-scroll-to-inputs.ts")).toContain("createPvScrollToInputs");
+    expect(readSource("src/phmax-dashboard-focus.ts")).toContain("getDashboardFocusHint");
     expect(readSource("src/zs/zs-export-actions.ts")).toContain("runZsExportCsv");
     expect(readSource("src/ZsPhaPhpBasicGuide.tsx")).toContain("nepočítá");
   });

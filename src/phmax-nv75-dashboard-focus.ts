@@ -1,4 +1,6 @@
 import type { Nv75DeputyKind } from "./nv75-deputy-bank";
+import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
+import type { DashboardFocusOptions } from "./phmax-dashboard-focus";
 
 type Nv75LsRow = {
   id: number;
@@ -33,12 +35,28 @@ function parseNv75Rows(raw: string | null): Nv75LsRow[] {
   return out;
 }
 
+/** Hint NV75 pro dashboard – chybějící jednotky nebo první řádek. */
+export function findNv75DashboardFocusHint(
+  raw: string | null,
+  options: DashboardFocusOptions = {},
+): ModuleInputsFocusHint | undefined {
+  const preferIssue = options.preferIssue !== false;
+  const rows = parseNv75Rows(raw);
+  if (rows.length === 0) return preferIssue ? undefined : { sectionId: "nv75-vstupy" };
+
+  if (preferIssue) {
+    const missingUnits = rows.find((row) => kindUsesUnits(row.kind) && row.units <= 0);
+    if (missingUnits) return { rowId: missingUnits.id, sectionId: "nv75-vstupy" };
+    return undefined;
+  }
+
+  const first = rows[0];
+  return first ? { rowId: first.id, sectionId: "nv75-vstupy" } : { sectionId: "nv75-vstupy" };
+}
+
 /** První řádek NV75 k fokusu z dashboardu – chybějící jednotky u druhu, který je vyžaduje. */
 export function findFirstNv75DashboardFocusRowId(raw: string | null): number | undefined {
-  const rows = parseNv75Rows(raw);
-  const missingUnits = rows.find((row) => kindUsesUnits(row.kind) && row.units <= 0);
-  if (missingUnits) return missingUnits.id;
-  return rows[0]?.id;
+  return findNv75DashboardFocusHint(raw, { preferIssue: true })?.rowId;
 }
 
 export function nv75DashboardNeedsAttention(raw: string | null, bankTotal: number | null): boolean {
