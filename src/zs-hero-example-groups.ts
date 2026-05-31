@@ -14,6 +14,7 @@ export type ZsHeroExampleKey =
   | "skola_s_odecty_phpmax"
   | "inkluzivni_skola"
   | "priloha_phamax_uplna_zs_sec16_zss"
+  | "pha_zss_prep_b45"
   | "zdravotnicke_zs";
 
 const ZS_HERO_EXAMPLE_OPTION_TITLES: Partial<Record<Exclude<ZsHeroExampleKey, "">, string>> = {
@@ -30,6 +31,8 @@ const ZS_HERO_EXAMPLE_OPTION_TITLES: Partial<Record<Exclude<ZsHeroExampleKey, ""
   pripravna_trida:
     "Přípravná třída ZŠ a přípravný stupeň ZŠ speciální – PHmax se stanovuje samostatně (mimo součet běžných řádků B1–B28).",
   priloha_phamax_uplna_zs_sec16_zss: `${ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"]} ${ZS_LEGIS_PARAGRAPH_TOOLTIPS["phamax-nv123"]}`,
+  pha_zss_prep_b45:
+    "PHAmax – přípravný stupeň ZŠ speciální (řádek B45). Minimálně 4 žáci ve třídě pro nenulové pásmo; jinak 0 h.",
   phpmax_tri_roky:
     "PHPmax – průměrný počet žáků za tři školní roky (nebo kratší období); část žáků lze z výpočtu vyloučit dle metodiky.",
   mala_skola_pod_limitem: "Menší škola pod limitem pro PHPmax – v metodice ZV jiná pravidla pro určení PHPmax.",
@@ -95,6 +98,11 @@ export const ZS_HERO_EXAMPLE_GROUPS: HeroExampleSelectGroup[] = [
         value: "priloha_phamax_uplna_zs_sec16_zss",
         label: "Úplná ZŠ § 16/9 + ZŠ speciální, rozlišení AD1/AD2 (474 h, ř. B35–B44 dle metodiky v5)",
         title: ZS_HERO_EXAMPLE_OPTION_TITLES.priloha_phamax_uplna_zs_sec16_zss,
+      },
+      {
+        value: "pha_zss_prep_b45",
+        label: "Přípravný stupeň ZŠ speciální – řádek B45 (4 žáci, 20 h/třída)",
+        title: ZS_HERO_EXAMPLE_OPTION_TITLES.pha_zss_prep_b45,
       },
     ],
   },

@@ -108,9 +108,10 @@ describe("UX TOP 6 contract", () => {
       "src/PhmaxZsPage.tsx",
     ]) {
       const src = readSource(page);
-      expect(src).toContain("HeroCompactToolbar");
+      const toolbarSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroToolbar.tsx") : src;
+      expect(toolbarSrc).toContain("HeroCompactToolbar");
       expect(src).toContain("DisplayDensityToggle");
-      expect(src).toContain("hero-zone-actions--toolbar");
+      expect(src).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
     }
     expect(readSource("src/PhmaxSdPage.tsx")).toContain('data-section="sd-vysledek"');
     expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain('data-section="ss-vysledek"');
@@ -126,7 +127,7 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("dockSticky");
     expect(src).toContain("CalculatorWorkflowDock");
     expect(src).toMatch(/PageTableOfContents|tocSections=/);
-    expect(src).toContain("ux-expert-only");
+    expect(readSource("src/zs/ZsHeroToolbar.tsx")).toContain("ux-expert-only");
     expect(readSource("src/zs/ZsPhmaxMinoritySection.tsx")).toContain('sectionId="minority"');
     expect(readSource("src/zs/ZsPhmaxGymSection.tsx")).toContain('sectionId="gym"');
     expect(readSource("src/zs/ZsPhmaxMixedSection.tsx")).toContain('sectionId="mixed"');
@@ -145,17 +146,22 @@ describe("UX TOP 6 contract", () => {
     expect(phmaxTab).toContain("ZsPhmaxSpecialSection");
     expect(phmaxTab).toContain("ZsPhmaxPsychSection");
     expect(phmaxTab).toContain("ZsPhmaxHealthSection");
-    expect(src).toContain("ZsPhaTabPanel");
-    expect(src).toContain("ZsPhpTabPanel");
+    expect(src).toContain("ZsPhaPhpTabPanels");
+    expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsPhaTabPanel");
+    expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsPhpTabPanel");
     expect(phmaxTab).toContain("ZsPhmaxBasicSection");
     expect(readSource("src/zs/ZsPhmaxBasicSection.tsx")).toContain('data-section="basic"');
     expect(src).toContain("ZsPhmaxTabPanel");
     expect(src).toContain("ZsSetupSection");
-    expect(src).toContain("ZsOverviewSection");
+    expect(src).toContain("ZsPhaPhpTabPanels");
+    expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsOverviewSection");
+    expect(src).toContain("ZsHeroToolbar");
+    expect(readSource("src/zs/ZsWizardShell.tsx")).toContain("ZsBasicWizard");
     expect(readSource("src/zs/ZsSetupSection.tsx")).toContain('data-section="setup"');
     expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain('data-wizard-step="5"');
-    expect(src).toContain("ZsBasicWizard");
-    expect(src).toContain("ZsPhaPhpBasicGuide");
+    expect(src).toContain("ZsWizardShell");
+    expect(readSource("src/zs/ZsWizardShell.tsx")).toContain("ZsBasicWizard");
+    expect(readSource("src/zs/ZsWizardShell.tsx")).toContain("ZsPhaPhpBasicGuide");
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__mobile-fold");
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("CalculatorMobileScrollResults");
     expect(readSource("src/CalculatorMobileScrollResults.tsx")).toContain("publishMobileResultsHeight");

@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "ZŠ – PHmax záložka, setup a celkový přehled extrahovány do `ZsPhmaxTabPanel`, `ZsSetupSection` a `ZsOverviewSection`.",
-    "SŠ – scroll z dashboardu a banneru přes `createSsScrollToInputs` (parita s PV/ŠD/NV75).",
-    "E2E – ok KPI deep-link pro ZŠ, SŠ a NV75; smoke scroll průvodce ZŠ (krok 2→3).",
+    "ZŠ – hero lišta, průvodce a PHA/PHP panely extrahovány do `ZsHeroToolbar`, `ZsWizardShell` a `ZsPhaPhpTabPanels`.",
+    "Metodika – hero ukázka PHA B45 (`pha_zss_prep_b45`); golden testy B11–B13 a B45.",
+    "E2E desktop pro dashboard deep-link; unit testy `createZsPageHandlers` a `createSsScrollToInputs`.",
   ],
 };

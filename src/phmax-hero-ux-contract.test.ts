@@ -20,11 +20,12 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
   it("všechny produktové stránky mají sticky workspace dock a workflow panel", () => {
     for (const page of PRODUCT_PAGES) {
       const src = readSource(page);
+      const toolbarSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroToolbar.tsx") : src;
       expect(src, page).toMatch(/CalculatorProductShell|CalculatorWorkspaceLayout/);
       expect(src, page).toMatch(/calculator-workspace-dock|CalculatorWorkflowDock/);
-      expect(src, page).toContain("HeroCompactToolbar");
+      expect(toolbarSrc, page).toContain("HeroCompactToolbar");
       expect(src, page).toContain("useDisplayDensity");
-      expect(src, page).toContain("hero-zone-actions--toolbar");
+      expect(src, page).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
       expect(src, page).toContain("CalculatorWorkflowDock");
     }
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__block--steps");
@@ -54,6 +55,6 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
     expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain('data-phmax-pane="summary"');
     expect(src).toContain('ref={heroHeaderRef}');
     expect(src).toContain("hero__title--zs");
-    expect(src).toContain("hero-zone-actions--toolbar");
+    expect(src).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
   });
 });

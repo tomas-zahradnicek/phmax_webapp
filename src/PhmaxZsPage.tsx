@@ -27,8 +27,7 @@ import {
   PsychRow,
   GymRow,
 } from "./phmax-zs-logic";
-import { HeroExampleSelect } from "./HeroExampleSelect";
-import { ZS_HERO_EXAMPLE_GROUPS, type ZsHeroExampleKey } from "./zs-hero-example-groups";
+import type { ZsHeroExampleKey } from "./zs-hero-example-groups";
 import type { CalculatorMode, FormSection } from "./config/calculator-config";
 import { MODE_CONFIG, formatModeRežimStatValue } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
@@ -44,23 +43,10 @@ import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
-import { HeroActionsDrawer } from "./HeroActionsDrawer";
 import {
   type PhmaxZsMethodologyHighlights,
 } from "./phmax-zs-methodology-tables";
 import { buildZsConnectedBlocks } from "./phmax-zs-connected-blocks";
-import {
-  HeroIconActionButton,
-  IconClearStored,
-  IconCopy,
-  IconCsv,
-  IconExcel,
-  IconPrint,
-  IconPrintSummary,
-  IconResetAll,
-  IconRestoreQuick,
-  IconSpinner,
-} from "./HeroActionIconButton";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { HeroStatusBar } from "./HeroStatusBar";
@@ -84,12 +70,14 @@ import {
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
 import { buildZsPageComparePreview, createZsPageHandlers } from "./zs/zs-page-handlers";
-import { ZsNamedSnapshotsHeroPanel } from "./zs/ZsNamedSnapshotsHeroPanel";
 import { ZsExpertWizardGuideSection } from "./zs/ZsExpertWizardGuideSection";
-import { ZsOverviewSection } from "./zs/ZsOverviewSection";
 import { buildZsPhmaxTabPanelProps } from "./zs/build-zs-phmax-tab-panel-props";
 import { ZsPhmaxTabPanel } from "./zs/ZsPhmaxTabPanel";
 import { ZsSetupSection } from "./zs/ZsSetupSection";
+import { ZsHeroToolbar } from "./zs/ZsHeroToolbar";
+import { ZsWizardShell } from "./zs/ZsWizardShell";
+import { ZsPhaPhpTabPanels } from "./zs/ZsPhaPhpTabPanels";
+import { ZsExpertOnboardingCard } from "./zs/ZsExpertOnboardingCard";
 import { useZsSectionScroll } from "./zs/use-zs-section-scroll";
 import { useZsWizardNavigation } from "./zs/use-zs-wizard-navigation";
 import { buildZsSummaryRows } from "./zs/zs-summary-rows";
@@ -109,23 +97,17 @@ import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsWarnings } from "./zs/zs-warnings";
 import type { ZsExportBuildInput } from "./zs/zs-export-build";
 import { ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER } from "./zs/zs-export-rows";
-import { ZsPhaTabPanel } from "./zs/ZsPhaTabPanel";
-import { ZsPhpTabPanel } from "./zs/ZsPhpTabPanel";
 import { CalculatorProductShell } from "./CalculatorProductShell";
-import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
 import { HeroExpertStrip } from "./HeroExpertStrip";
 import { DisplayDensityToggle } from "./DisplayDensityToggle";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
-import { ZsBasicWizard } from "./ZsBasicWizard";
-import { ZsPhaPhpBasicGuide } from "./ZsPhaPhpBasicGuide";
 import type { PhmaxZsPhmaxPane } from "./PhmaxZsPhmaxSubNav";
 import {
   readZsBasicWizardStep,
   ZS_BASIC_WIZARD_LS_KEY,
   type ZsBasicWizardStep,
 } from "./zs-basic-wizard";
-import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import {
   BROWSER_ERROR_NEXT_STEP_HINT,
   CALCULATOR_LIMITS_NOTE,
@@ -136,7 +118,6 @@ import {
   formatZsLayContextLine,
   HERO_ACTIONS_ICON_LEGEND,
   HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA,
-  NAMED_BACKUPS_COMPARE_JSON_LABEL,
   CALCULATOR_WORKSPACE_DOCK_LABEL,
   PHMAX_ZS_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
@@ -1869,128 +1850,33 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             </div>
           </div>
 
-          <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
-            <div className="hero-zone-actions__toolbar-row">
-            <div className="field field--hero-select hero-actions__example hero-zs-example-select">
-              <span className="field__label field__label--hero" id="zs-hero-example-label">
-                Ukázkový příklad
-              </span>
-              <HeroExampleSelect
-                id="zs-hero-example-select"
-                aria-labelledby="zs-hero-example-label"
-                aria-describedby="zs-hero-example-legend"
-                title="Ukázkové příklady z metodiky ZŠ. Najeďte na konkrétní řádek v seznamu pro stručný výklad situace a předpisů."
-                value={selectedExample}
-                groups={ZS_HERO_EXAMPLE_GROUPS}
-                onChange={(key) => loadExample(key as ExampleKey)}
-              />
-              <p id="zs-hero-example-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "44rem", lineHeight: 1.5 }}>
-                {ZS_GUIDE_NATIVE_TOOLTIP_LEGEND}
-              </p>
-            </div>
-            <HeroActionsDrawer>
-              <HeroCompactToolbar
-                primary={
-                  <>
-                    <HeroToolbarSaveButton onClick={saveSnapshotManually} />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn btn--light"
-                      label="Tisk stránky"
-                      icon={<IconPrint />}
-                      onClick={() => window.print()}
-                    />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost"
-                      label="Export CSV"
-                      icon={<IconCsv />}
-                      onClick={handleExportCsv}
-                    />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost"
-                      label={xlsxExportBusy ? "Připravuji Excel…" : "Export Excel"}
-                      icon={xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
-                      disabled={xlsxExportBusy}
-                      aria-busy={xlsxExportBusy}
-                      onClick={() => void handleExportXlsx()}
-                    />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn btn--light"
-                      label="Tisk shrnutí"
-                      icon={<IconPrintSummary />}
-                      onClick={printSummaryWindow}
-                    />
-                  </>
-                }
-                backups={
-                  <>
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost"
-                      label="Obnovit uložený průběh"
-                      icon={<IconRestoreQuick />}
-                      onClick={restoreSnapshot}
-                    />
-                    <ZsNamedSnapshotsHeroPanel
-                      exportLabel={exportLabel}
-                      setExportLabel={setExportLabel}
-                      namedSaveName={namedSaveName}
-                      setNamedSaveName={setNamedSaveName}
-                      namedSnapshots={namedSnapshots}
-                      selectedNamedId={selectedNamedId}
-                      setSelectedNamedId={setSelectedNamedId}
-                      onSave={saveNamedSnapshot}
-                      onRestore={restoreNamedSnapshot}
-                      onDelete={deleteNamedSnapshot}
-                    />
-                  </>
-                }
-                technical={
-                  <>
-                    <button type="button" className="btn ghost btn--hero-named ux-expert-only" onClick={handleCompareZsWithNamedSnapshot}>
-                      {NAMED_BACKUPS_COMPARE_JSON_LABEL}
-                    </button>
-                    <button type="button" className="btn ghost btn--hero-named ux-expert-only" onClick={handleExportZsAuditJson}>
-                      Stáhnout audit (JSON)
-                    </button>
-                    <div className="ux-expert-only hero-actions-tiered__compare">
-                      <CompareVariantsPanel
-                        title="Porovnání 2 variant (náhled)"
-                        result={zsComparePreview}
-                        emptyHint="Vyberte pojmenovanou zálohu se součty auditního exportu pro porovnání s aktuálním stavem."
-                        exportSlug="zs"
-                      />
-                    </div>
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost"
-                      label="Kopírovat shrnutí"
-                      icon={<IconCopy />}
-                      onClick={copySummaryToClipboard}
-                    />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost"
-                      label="Vymazat uložená data"
-                      icon={<IconClearStored />}
-                      onClick={clearStoredSnapshot}
-                    />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost"
-                      label="Vymazat formulář"
-                      icon={<IconResetAll />}
-                      onClick={resetAll}
-                    />
-                  </>
-                }
-              />
-            </HeroActionsDrawer>
-            </div>
-          </section>
+          <ZsHeroToolbar
+            selectedExample={selectedExample}
+            exampleLegend={ZS_GUIDE_NATIVE_TOOLTIP_LEGEND}
+            onExampleChange={(key) => loadExample(key as ExampleKey)}
+            onSaveSnapshot={saveSnapshotManually}
+            onExportCsv={handleExportCsv}
+            onExportXlsx={handleExportXlsx}
+            xlsxExportBusy={xlsxExportBusy}
+            onPrintSummary={printSummaryWindow}
+            onRestoreSnapshot={restoreSnapshot}
+            exportLabel={exportLabel}
+            setExportLabel={setExportLabel}
+            namedSaveName={namedSaveName}
+            setNamedSaveName={setNamedSaveName}
+            namedSnapshots={namedSnapshots}
+            selectedNamedId={selectedNamedId}
+            setSelectedNamedId={setSelectedNamedId}
+            onSaveNamedSnapshot={saveNamedSnapshot}
+            onRestoreNamedSnapshot={restoreNamedSnapshot}
+            onDeleteNamedSnapshot={deleteNamedSnapshot}
+            onCompareWithNamedSnapshot={handleCompareZsWithNamedSnapshot}
+            onExportAuditJson={handleExportZsAuditJson}
+            comparePreview={zsComparePreview}
+            onCopySummary={copySummaryToClipboard}
+            onClearStored={clearStoredSnapshot}
+            onResetAll={resetAll}
+          />
         </header>
 
         <ErrorBoundary title="Obsah kalkulačky pro základní školy se nepodařilo zobrazit">
@@ -2034,90 +1920,32 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             {ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER}
           </p>
         </QuickOnboarding>
-        {zsBasicWizardActive ? (
-          <ZsBasicWizard
-            step={zsWizardStep}
-            modeLabel={MODE_CONFIG[mode].label}
-            hasExceptionModules={zsWizardHasExceptions}
-            wizardChoice={wizardChoice}
-            wizardOptions={zsWizardChoiceOptions}
-            inputIssueFix={showZsInputBanner ? { onFix: zsScrollToInputs } : undefined}
-            onWizardChoice={(value) => applyWizardChoice(value as WizardChoice)}
-            onStepChange={goToZsWizardStep}
-            onBack={handleZsWizardBack}
-            onNext={handleZsWizardNext}
-          />
-        ) : viewMode === "basic" && tab === "pha" ? (
-          <ZsPhaPhpBasicGuide
-            tab="pha"
-            totalValue={totalPha}
-            moduleApplies={visibleSections.some(
-              (s) => s.startsWith("pha_rvp") || s === "pha_disability_flags",
-            )}
-            onOpenPhmaxWizard={() => {
-              setTab("phmax");
-              goToZsWizardStep(1);
-            }}
-          />
-        ) : viewMode === "basic" && tab === "php" ? (
-          <ZsPhaPhpBasicGuide
-            tab="php"
-            totalValue={totalPhp}
-            moduleApplies={hasSection("php_years") || hasSection("php_options")}
-            onOpenPhmaxWizard={() => {
-              setTab("phmax");
-              goToZsWizardStep(1);
-            }}
-          />
-        ) : null}
+        <ZsWizardShell
+          zsBasicWizardActive={zsBasicWizardActive}
+          zsWizardStep={zsWizardStep}
+          mode={mode}
+          zsWizardHasExceptions={zsWizardHasExceptions}
+          wizardChoice={wizardChoice}
+          wizardOptions={zsWizardChoiceOptions}
+          showInputIssueFix={showZsInputBanner}
+          onScrollToIssue={zsScrollToInputs}
+          onWizardChoice={applyWizardChoice}
+          onStepChange={goToZsWizardStep}
+          onBack={handleZsWizardBack}
+          onNext={handleZsWizardNext}
+          viewMode={viewMode}
+          tab={tab}
+          totalPha={totalPha}
+          totalPhp={totalPhp}
+          visibleSections={visibleSections}
+          hasSection={hasSection}
+          onOpenPhmaxWizard={() => {
+            setTab("phmax");
+            goToZsWizardStep(1);
+          }}
+        />
 
-        {viewMode === "expert" ? (
-        <section className="card card--onboarding section-card section-card--onboarding">
-          <div className="onboarding">
-            <div className="onboarding__intro">
-              <div className="pill pill--step">Začněte tady</div>
-              <h2 className="section-title">Jak postupovat krok za krokem</h2>
-              <p className="muted-text">
-                Pokud aplikaci otevíráte poprvé, držte se tohoto pořadí. V každém kroku můžete použít ukázkový příklad nebo zadat vlastní údaje.
-              </p>
-            </div>
-
-            <div className="onboarding__steps">
-              <div className="onboarding-step">
-                <div className="onboarding-step__number">1</div>
-                <div className="onboarding-step__body">
-                  <div className="onboarding-step__title">Vyberte situaci školy</div>
-                  <div className="onboarding-step__text">Použijte rychlý rozcestník nebo ukázkový příklad v horní liště.</div>
-                </div>
-              </div>
-
-              <div className="onboarding-step">
-                <div className="onboarding-step__number">2</div>
-                <div className="onboarding-step__body">
-                  <div className="onboarding-step__title">Zvolte režim a modul</div>
-                  <div className="onboarding-step__text">Vyberte typ školy a potom přepněte na PHmax, PHAmax nebo PHPmax.</div>
-                </div>
-              </div>
-
-              <div className="onboarding-step">
-                <div className="onboarding-step__number">3</div>
-                <div className="onboarding-step__body">
-                  <div className="onboarding-step__title">Vyplňte údaje v kartách</div>
-                  <div className="onboarding-step__text">Zadávejte počty tříd a žáků v příslušných sekcích. Nápovědu najdete pod ikonou „i“.</div>
-                </div>
-              </div>
-
-              <div className="onboarding-step">
-                <div className="onboarding-step__number">4</div>
-                <div className="onboarding-step__body">
-                  <div className="onboarding-step__title">Zkontrolujte průběžný a závěrečný výsledek</div>
-                  <div className="onboarding-step__text">Sledujte „Aktuální přehled výsledků“, souhrn modulu a celkový přehled dole na stránce.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        ) : null}
+        {viewMode === "expert" ? <ZsExpertOnboardingCard /> : null}
 
 
         {viewMode === "expert" ? (
@@ -2200,51 +2028,58 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
         {tab === "phmax" ? <ZsPhmaxTabPanel {...zsPhmaxTabPanelProps} /> : null}
 
-        {tab === "pha" && (
-          <ZsPhaTabPanel
-            viewMode={viewMode}
-            hasPhaIssue={hasIssue("pha")}
-            phaComputedRows={phaComputedRows}
-            totalPha={totalPha}
-            onAdd={addPha}
-            onReset={resetPha}
-            onUpdate={updatePha}
-            onRemove={removePha}
-          />
-        )}
-
-        {tab === "php" && (
-          <ZsPhpTabPanel
-            viewMode={viewMode}
-            hasPhpIssue={hasIssue("php")}
-            phpWizardStep={phpWizardStep}
-            phpMethodMode={phpMethodMode}
-            phpYear1={phpYear1}
-            phpYear2={phpYear2}
-            phpYear3={phpYear3}
-            phpExcludedAbroad={phpExcludedAbroad}
-            phpExcludedForeignSchoolCz={phpExcludedForeignSchoolCz}
-            phpExcludedIndividual={phpExcludedIndividual}
-            phpExcludedSchool={phpExcludedSchool}
-            phpBaseValue={phpBaseValue}
-            phpExcludedTotal={phpExcludedTotal}
-            phpAdjustedValue={phpAdjustedValue}
-            phpBand={phpBand}
-            totalPhp={totalPhp}
-            onWizardStepChange={setPhpWizardStep}
-            onMethodModeChange={setPhpMethodMode}
-            onYear1Change={setPhpYear1}
-            onYear2Change={setPhpYear2}
-            onYear3Change={setPhpYear3}
-            onExcludedAbroadChange={setPhpExcludedAbroad}
-            onExcludedForeignSchoolCzChange={setPhpExcludedForeignSchoolCz}
-            onExcludedIndividualChange={setPhpExcludedIndividual}
-            onExcludedSchoolChange={setPhpExcludedSchool}
-            onReset={resetPhp}
-          />
-        )}
-
-        <ZsOverviewSection totalPhmax={totalPhmax} totalPha={totalPha} totalPhp={totalPhp} />
+        <ZsPhaPhpTabPanels
+          tab={tab}
+          pha={
+            tab === "pha"
+              ? {
+                  viewMode,
+                  hasPhaIssue: hasIssue("pha"),
+                  phaComputedRows,
+                  totalPha,
+                  onAdd: addPha,
+                  onReset: resetPha,
+                  onUpdate: updatePha,
+                  onRemove: removePha,
+                }
+              : null
+          }
+          php={
+            tab === "php"
+              ? {
+                  viewMode,
+                  hasPhpIssue: hasIssue("php"),
+                  phpWizardStep,
+                  phpMethodMode,
+                  phpYear1,
+                  phpYear2,
+                  phpYear3,
+                  phpExcludedAbroad,
+                  phpExcludedForeignSchoolCz,
+                  phpExcludedIndividual,
+                  phpExcludedSchool,
+                  phpBaseValue,
+                  phpExcludedTotal,
+                  phpAdjustedValue,
+                  phpBand,
+                  totalPhp,
+                  onWizardStepChange: setPhpWizardStep,
+                  onMethodModeChange: setPhpMethodMode,
+                  onYear1Change: setPhpYear1,
+                  onYear2Change: setPhpYear2,
+                  onYear3Change: setPhpYear3,
+                  onExcludedAbroadChange: setPhpExcludedAbroad,
+                  onExcludedForeignSchoolCzChange: setPhpExcludedForeignSchoolCz,
+                  onExcludedIndividualChange: setPhpExcludedIndividual,
+                  onExcludedSchoolChange: setPhpExcludedSchool,
+                  onReset: resetPhp,
+                }
+              : null
+          }
+          totalPhmax={totalPhmax}
+          totalPha={totalPha}
+          totalPhp={totalPhp}
+        />
 
             </>
           }

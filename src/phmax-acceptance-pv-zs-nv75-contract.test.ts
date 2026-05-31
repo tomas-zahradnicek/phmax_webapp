@@ -33,9 +33,14 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(zsPage).toContain("createZsPageHandlers");
     expect(zsPage).toContain("ZsPhmaxTabPanel");
     expect(zsPage).toContain("ZsSetupSection");
-    expect(zsPage).toContain("ZsOverviewSection");
-    expect(zsPage).toContain("ZsPhaTabPanel");
-    expect(zsPage).toContain("ZsPhpTabPanel");
+    expect(zsPage).toContain("ZsPhaPhpTabPanels");
+    expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsOverviewSection");
+    expect(zsPage).toContain("ZsHeroToolbar");
+    expect(zsPage).toContain("ZsWizardShell");
+    expect(zsPage).toContain("ZsPhaPhpTabPanels");
+    expect(zsPage).toContain("ZsPhaPhpTabPanels");
+    expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsPhaTabPanel");
+    expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsPhpTabPanel");
     expect(readSource("src/zs/ZsPhmaxTabPanel.tsx")).toContain("ZsPhmaxBasicSection");
     expect(readSource("src/phmax-sd-acceptance-contract.test.ts")).toContain("sd-summary-dept-hint");
     expect(readSource("src/zs/zs-form-snapshot.ts")).toContain('export const ZS_AUTOSAVE_STORAGE_KEY = "edu-cz-zs-calculator-state"');
@@ -55,7 +60,9 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/ss/create-ss-scroll-to-inputs.ts")).toContain("createSsScrollToInputs");
     expect(readSource("src/phmax-dashboard-focus.ts")).toContain("getDashboardFocusHint");
     expect(readSource("src/zs/zs-export-actions.ts")).toContain("runZsExportCsv");
-    expect(readSource("src/ZsPhaPhpBasicGuide.tsx")).toContain("nepočítá");
+    expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("zdravotnicke_zs");
+    expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("pha_zss_prep_b45");
+    expect(readSource("src/zs/ZsPhmaxHealthSection.tsx")).toContain("B11");
   });
 
   it("PV P6 – tři metodické ukázky mají golden test", () => {

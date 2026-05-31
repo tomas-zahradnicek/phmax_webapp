@@ -33,7 +33,7 @@ export default defineConfig({
     },
     {
       name: "desktop-chrome",
-      testMatch: /desktop-toc-smoke\.spec\.ts/,
+      testMatch: /desktop-toc-smoke\.spec\.ts|dashboard-deep-link-smoke\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 1280, height: 800 },

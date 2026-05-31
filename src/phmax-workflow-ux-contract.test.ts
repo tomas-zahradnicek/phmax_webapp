@@ -34,8 +34,9 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
 
     expect(src).toContain("buildZsFormSnapshot");
     expect(src).toContain("useZsFormAutosave");
-    expect(src).toContain("ZsPhaTabPanel");
-    expect(src).toContain("ZsPhpTabPanel");
+    expect(src).toContain("ZsPhaPhpTabPanels");
+    expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsPhaTabPanel");
+    expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsPhpTabPanel");
     expect(src).toContain("ZsPhmaxTabPanel");
     expect(readSource("src/zs/ZsPhmaxTabPanel.tsx")).toContain("ZsPhmaxBasicSection");
     expect(src).toContain("buildZsWorkflow");

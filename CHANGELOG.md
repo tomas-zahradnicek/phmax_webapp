@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.9 (2026-05-31)
+
+### UX a refaktor ZŠ
+- `ZsHeroToolbar`, `ZsWizardShell`, `ZsPhaPhpTabPanels`, `ZsExpertOnboardingCard` – menší `PhmaxZsPage`.
+- Hero ukázka **PHA B45** (`pha_zss_prep_b45`); golden testy B11–B13 a B45.
+
+### Kvalita
+- E2E **desktop-chrome** pro `dashboard-deep-link-smoke`.
+- Unit testy: `createZsPageHandlers`, `createSsScrollToInputs`.
+
 ## 0.2.8 (2026-05-28)
 
 ### UX a dashboard

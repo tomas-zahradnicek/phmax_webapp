@@ -174,6 +174,13 @@ export function loadZsHeroExample(example: ZsHeroExampleKey | "", ctx: ZsHeroExa
     return;
   }
 
+  if (example === "pha_zss_prep_b45") {
+    s.setMode(getZsInitialPhaMode());
+    s.setTab("pha");
+    s.setPhaRows([{ id: 1, kind: "zssPrep", classes: 1, pupils: 4 }]);
+    return;
+  }
+
   if (example === "phpmax_tri_roky") {
     s.setMode(getZsInitialPreferredMode());
     s.setTab("php");

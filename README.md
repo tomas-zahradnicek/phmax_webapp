@@ -11,6 +11,12 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.2.9 (UX)
+
+- **ZŠ:** hero lišta, průvodce a PHA/PHP panely v `ZsHeroToolbar`, `ZsWizardShell`, `ZsPhaPhpTabPanels`.
+- **Metodika:** ukázka PHA B45; testy B11–B13 (zdravotnické zařízení).
+- **E2E desktop** pro dashboard deep-link; unit testy handlerů a SŠ scrollu.
+
 ## Verze 0.2.8 (UX)
 
 - **ZŠ:** PHmax záložka, setup a celkový přehled v `ZsPhmaxTabPanel`, `ZsSetupSection`, `ZsOverviewSection`.
