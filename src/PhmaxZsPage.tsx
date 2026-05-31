@@ -38,7 +38,6 @@ import { GlossaryDialog } from "./GlossaryDialog";
 import { GlossaryIconButton } from "./GlossaryIconButton";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, ZsLegisRef } from "./PhmaxProductLegisUi";
-import { ZS_LEGIS_PARAGRAPH_TOOLTIPS } from "./phmax-zs-legislativa";
 import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
@@ -88,6 +87,10 @@ import {
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
 import { buildZsPageComparePreview, createZsPageHandlers } from "./zs/zs-page-handlers";
+import { ZsNamedSnapshotsHeroPanel } from "./zs/ZsNamedSnapshotsHeroPanel";
+import { useZsSectionScroll } from "./zs/use-zs-section-scroll";
+import { useZsWizardNavigation } from "./zs/use-zs-wizard-navigation";
+import { ZS_WIZARD_CHOICE_TITLES } from "./zs/zs-wizard-choices";
 import {
   applyZsResetAll,
   applyZsResetNv75,
@@ -125,14 +128,10 @@ import { ZsBasicWizard } from "./ZsBasicWizard";
 import { ZsPhaPhpBasicGuide } from "./ZsPhaPhpBasicGuide";
 import {
   PhmaxZsPhmaxSubNav,
-  phmaxPaneFromWizardStep,
-  wizardStepFromPhmaxPane,
   type PhmaxZsPhmaxPane,
 } from "./PhmaxZsPhmaxSubNav";
 import {
-  clampZsBasicWizardStep,
   readZsBasicWizardStep,
-  resolveZsWizardScrollSection,
   ZS_BASIC_WIZARD_LS_KEY,
   type ZsBasicWizardStep,
 } from "./zs-basic-wizard";
@@ -148,15 +147,9 @@ import {
   HERO_ACTIONS_ICON_LEGEND,
   HERO_ACTIONS_ICON_LEGEND_ZS_EXTRA,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
-  NAMED_BACKUPS_DELETE_LABEL,
-  NAMED_BACKUPS_NAME_LABEL,
-  NAMED_BACKUPS_RESTORE_LABEL,
-  NAMED_BACKUPS_SAVE_LABEL,
-  NAMED_BACKUPS_SELECT_PLACEHOLDER,
   CALCULATOR_WORKSPACE_DOCK_LABEL,
   PHMAX_ZS_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
-  namedBackupsMicrocopy,
 } from "./calculator-ui-constants";
 import {
   confirmDestructive,
@@ -198,21 +191,6 @@ type DataMode = "own" | "example";
 /** Viditelná legenda + doplněk k nativním tooltipům (`title`) u řádků v seznamech. */
 const ZS_GUIDE_NATIVE_TOOLTIP_LEGEND =
   "U řádků s předpisy najděte myší na položku v seznamu – prohlížeč zobrazí krátký text (atribut title). U tečkovaných citací § v textu stránky použijte stejný postup jako v záložce „Legislativa a výklad (ZŠ)“ (hover nebo Tab).";
-
-const WIZARD_CHOICE_TITLES: Record<Exclude<WizardChoice, "">, string> = {
-  php_small: "Menší škola – PHPmax se určí podle metodiky z průměrného počtu žáků a příslušných pásem.",
-  php_deductions:
-    "Žáci, kteří se do PHPmax nezapočítávají (zahraničí, individuální vzdělávání, školy v zahraničí v ČR apod.) – snížení vypočteného základu dle metodiky.",
-  ph_inclusion: ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"],
-  ph_psych:
-    "Škola při psychiatrické nemocnici – přepne na režim s tabulkami PHmax pro psychiatrickou školu a načte ukázková data.",
-  ph_health:
-    "ZŠ při zdravotnickém zařízení (ne psychiatrie) – řádky B11–B13, průměr žáků jako u psychiatrie dle zvoleného režimu.",
-  ph_mixed:
-    "Smíšené třídy § 16 odst. 9 a ZŠ speciální – tabulky podle převažujícího oboru vzdělání (B9–B10 vs. B26–B28).",
-  ph_prep:
-    "Přípravná třída základní školy nebo přípravný stupeň ZŠ speciální – samostatné položky PHmax v metodice.",
-};
 
 function clampNonNegative(value: number) {
   return Math.max(0, Number.isFinite(value) ? value : 0);
@@ -1337,37 +1315,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const firstIssueSection = validationIssues[0]?.section ?? "";
   const hasIssue = (sectionId: string) => validationIssues.some((item) => item.section === sectionId);
 
-  const workspaceStickyRef = useRef<HTMLDivElement>(null);
-  const tabChangeSkipRef = useRef(true);
-
-  const goToSection = useCallback((sectionId: string) => {
-    const element = document.querySelector(`[data-section="${sectionId}"]`);
-    if (!element || !(element instanceof HTMLElement)) return;
-    const dock = workspaceStickyRef.current;
-    const offset = dock?.offsetHeight ?? 100;
-    const top = element.getBoundingClientRect().top + window.scrollY - offset - 12;
-    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-  }, []);
-
-  useEffect(() => {
-    if (tabChangeSkipRef.current) {
-      tabChangeSkipRef.current = false;
-      return;
-    }
-    const targetId = tab === "phmax" ? "basic" : tab;
-    requestAnimationFrame(() => {
-      const el = (document.querySelector(`[data-section="${targetId}"]`) ??
-        document.querySelector(`[data-section="guide"]`)) as HTMLElement | null;
-      if (!el) return;
-      const dock = workspaceStickyRef.current;
-      const offset = dock?.getBoundingClientRect().height ?? 100;
-      const rect = el.getBoundingClientRect();
-      if (rect.top < offset + 12 || rect.bottom > window.innerHeight - 32) {
-        const top = rect.top + window.scrollY - offset - 12;
-        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-      }
-    });
-  }, [tab]);
+  const { workspaceStickyRef, goToSection } = useZsSectionScroll(tab);
 
   const zsNeedsInputBanner = zsVerdict.tone !== "ok";
   const zsScrollToInputs = useCallback(
@@ -1651,93 +1599,28 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   );
 
   const zsBasicWizardActive = viewMode === "basic" && tab === "phmax";
-  const effectivePhmaxPane: PhmaxZsPhmaxPane =
-    zsBasicWizardActive && zsWizardStep >= 2 ? phmaxPaneFromWizardStep(zsWizardStep) : phmaxSubTab;
-  const showPhmaxSubNav = tab === "phmax" && (!zsBasicWizardActive || zsWizardStep >= 2);
-  const phmaxPaneShellClass =
-    tab === "phmax" && (!zsBasicWizardActive || zsWizardStep >= 2)
-      ? ` phmax-zs-pane-active-${effectivePhmaxPane}`
-      : "";
-
-  const zsWizardVisibleExceptionIds = useMemo(() => {
-    const ids: string[] = [];
-    if (hasSection("sec16_first") || hasSection("sec16_second")) ids.push("sec16");
-    if (hasSection("special_i_first") || hasSection("special_i_second") || hasSection("special_ii")) {
-      ids.push("special");
-    }
-    if (hasSection("psych_groups")) ids.push("psych");
-    if (hasSection("health_groups")) ids.push("health");
-    if (hasSection("minority_first")) ids.push("minority");
-    if (hasSection("gym_groups")) ids.push("gym");
-    if (hasSection("dominant_c_first") || hasSection("dominant_b_first")) ids.push("mixed");
-    if (hasSection("prep_class") || hasSection("prep_special") || hasSection("par38") || hasSection("par41")) {
-      ids.push("extras");
-    }
-    return ids;
-  }, [hasSection]);
-
-  const zsWizardHasExceptions = zsWizardVisibleExceptionIds.length > 0;
-
-  const zsWizardChoiceOptions = useMemo(
-    () =>
-      [
-        { value: "php_small", label: "Menší škola – PHPmax", title: WIZARD_CHOICE_TITLES.php_small },
-        { value: "php_deductions", label: "PHPmax – nezapočítávaní žáci", title: WIZARD_CHOICE_TITLES.php_deductions },
-        { value: "ph_inclusion", label: "Inkluze a § 16/9", title: WIZARD_CHOICE_TITLES.ph_inclusion },
-        { value: "ph_psych", label: "Škola při psychiatrii", title: WIZARD_CHOICE_TITLES.ph_psych },
-        { value: "ph_health", label: "ZŠ při zdravotnickém zařízení", title: WIZARD_CHOICE_TITLES.ph_health },
-        { value: "ph_mixed", label: "Smíšené třídy", title: WIZARD_CHOICE_TITLES.ph_mixed },
-        { value: "ph_prep", label: "Přípravná třída / stupeň ZŠS", title: WIZARD_CHOICE_TITLES.ph_prep },
-      ] as const,
-    [],
-  );
-
-  const goToZsWizardStep = useCallback(
-    (step: ZsBasicWizardStep) => {
-      setZsWizardStep(step);
-      if (step >= 2) {
-        setPhmaxSubTab(phmaxPaneFromWizardStep(step));
-      }
-      window.requestAnimationFrame(() => {
-        goToSection(resolveZsWizardScrollSection(step, zsWizardVisibleExceptionIds));
-      });
-    },
-    [goToSection, zsWizardVisibleExceptionIds],
-  );
-
-  const handlePhmaxSubTabChange = useCallback(
-    (pane: PhmaxZsPhmaxPane) => {
-      setPhmaxSubTab(pane);
-      if (zsBasicWizardActive) {
-        goToZsWizardStep(wizardStepFromPhmaxPane(pane));
-        return;
-      }
-      const target =
-        pane === "classes" ? "basic" : pane === "exceptions" ? zsWizardVisibleExceptionIds[0] ?? "sec16" : "phmax-summary";
-      goToSection(target);
-    },
-    [goToSection, goToZsWizardStep, zsBasicWizardActive, zsWizardVisibleExceptionIds],
-  );
-
-  const handleZsWizardBack = useCallback(() => {
-    goToZsWizardStep(clampZsBasicWizardStep(zsWizardStep - 1));
-  }, [goToZsWizardStep, zsWizardStep]);
-
-  const handleZsWizardNext = useCallback(() => {
-    if (zsWizardStep >= 5) {
-      goToSection("overview");
-      return;
-    }
-    if (zsWizardStep === 3 && !zsWizardHasExceptions) {
-      goToZsWizardStep(4);
-      return;
-    }
-    goToZsWizardStep(clampZsBasicWizardStep(zsWizardStep + 1));
-  }, [goToSection, goToZsWizardStep, zsWizardHasExceptions, zsWizardStep]);
-
-  const zsShowPhmaxExceptionsToc =
-    tab === "phmax" &&
-    (viewMode === "expert" || zsWizardHasExceptions || (zsBasicWizardActive && zsWizardStep >= 3));
+  const {
+    zsWizardHasExceptions,
+    zsWizardChoiceOptions,
+    effectivePhmaxPane,
+    showPhmaxSubNav,
+    phmaxPaneShellClass,
+    zsShowPhmaxExceptionsToc,
+    goToZsWizardStep,
+    handlePhmaxSubTabChange,
+    handleZsWizardBack,
+    handleZsWizardNext,
+  } = useZsWizardNavigation({
+    tab,
+    viewMode,
+    zsBasicWizardActive,
+    zsWizardStep,
+    setZsWizardStep,
+    phmaxSubTab,
+    setPhmaxSubTab,
+    hasSection,
+    goToSection,
+  });
 
   const zsTocSections = useMemo((): readonly PageTocSection[] => {
     const sections: PageTocSection[] = [];
@@ -1898,61 +1781,18 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                       icon={<IconRestoreQuick />}
                       onClick={restoreSnapshot}
                     />
-                    <div className="hero-named-grid hero-actions-tiered__named" aria-label="Pojmenované zálohy">
-                      <p className="hero-actions-tiered__hint">
-                        {namedBackupsMicrocopy(MAX_NAMED_SNAPSHOTS, "kompletní stav ZŠ včetně aktivní záložky a označení pro export")}
-                      </p>
-                      <label className="hero-named-field hero-named-field--export">
-                        <span className="field__label field__label--hero-named">Označení pro export</span>
-                        <input
-                          type="text"
-                          className="input"
-                          placeholder="např. název školy, školní rok…"
-                          value={exportLabel}
-                          onChange={(e) => setExportLabel(e.target.value)}
-                          aria-label="Označení pro export a shrnutí"
-                        />
-                      </label>
-                      <label className="hero-named-field hero-named-field--backup-name">
-                        <span className="field__label field__label--hero-named">{NAMED_BACKUPS_NAME_LABEL}</span>
-                        <input
-                          type="text"
-                          className="input"
-                          placeholder="např. stav 2026/27"
-                          value={namedSaveName}
-                          onChange={(e) => setNamedSaveName(e.target.value)}
-                          aria-label="Název pojmenované zálohy"
-                        />
-                      </label>
-                      <div className="hero-named-field hero-named-field--save">
-                        <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
-                          {NAMED_BACKUPS_SAVE_LABEL}
-                        </button>
-                      </div>
-                      <div className="hero-named-field hero-named-field--select">
-                        <select
-                          className="input"
-                          value={selectedNamedId}
-                          onChange={(e) => setSelectedNamedId(e.target.value)}
-                          aria-label="Vybrat uloženou zálohu"
-                        >
-                          <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
-                          {namedSnapshots.map((n) => (
-                            <option key={n.id} value={n.id}>
-                              {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="hero-named-field hero-named-field--restore-delete">
-                        <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
-                          {NAMED_BACKUPS_RESTORE_LABEL}
-                        </button>
-                        <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
-                          {NAMED_BACKUPS_DELETE_LABEL}
-                        </button>
-                      </div>
-                    </div>
+                    <ZsNamedSnapshotsHeroPanel
+                      exportLabel={exportLabel}
+                      setExportLabel={setExportLabel}
+                      namedSaveName={namedSaveName}
+                      setNamedSaveName={setNamedSaveName}
+                      namedSnapshots={namedSnapshots}
+                      selectedNamedId={selectedNamedId}
+                      setSelectedNamedId={setSelectedNamedId}
+                      onSave={saveNamedSnapshot}
+                      onRestore={restoreNamedSnapshot}
+                      onDelete={deleteNamedSnapshot}
+                    />
                   </>
                 }
                 technical={
@@ -2145,25 +1985,25 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
                 onChange={(e) => applyWizardChoice(e.target.value as WizardChoice)}
               >
                 <option value="">Vyberte situaci…</option>
-                <option value="php_small" title={WIZARD_CHOICE_TITLES.php_small}>
+                <option value="php_small" title={ZS_WIZARD_CHOICE_TITLES.php_small}>
                   Máme menší školu a chceme zjistit PHPmax
                 </option>
-                <option value="php_deductions" title={WIZARD_CHOICE_TITLES.php_deductions}>
+                <option value="php_deductions" title={ZS_WIZARD_CHOICE_TITLES.php_deductions}>
                   Máme žáky, kteří se do PHPmax nezapočítávají
                 </option>
-                <option value="ph_inclusion" title={WIZARD_CHOICE_TITLES.ph_inclusion}>
+                <option value="ph_inclusion" title={ZS_WIZARD_CHOICE_TITLES.ph_inclusion}>
                   Jsme škola s inkluzí a třídami podle § 16
                 </option>
-                <option value="ph_psych" title={WIZARD_CHOICE_TITLES.ph_psych}>
+                <option value="ph_psych" title={ZS_WIZARD_CHOICE_TITLES.ph_psych}>
                   Jsme škola při psychiatrické nemocnici
                 </option>
-                <option value="ph_health" title={WIZARD_CHOICE_TITLES.ph_health}>
+                <option value="ph_health" title={ZS_WIZARD_CHOICE_TITLES.ph_health}>
                   Jsme ZŠ při zdravotnickém zařízení (ne psychiatrie)
                 </option>
-                <option value="ph_mixed" title={WIZARD_CHOICE_TITLES.ph_mixed}>
+                <option value="ph_mixed" title={ZS_WIZARD_CHOICE_TITLES.ph_mixed}>
                   Máme smíšené třídy
                 </option>
-                <option value="ph_prep" title={WIZARD_CHOICE_TITLES.ph_prep}>
+                <option value="ph_prep" title={ZS_WIZARD_CHOICE_TITLES.ph_prep}>
                   Máme přípravnou třídu nebo přípravný stupeň ZŠS
                 </option>
               </select>

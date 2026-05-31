@@ -42,6 +42,9 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/zs/zs-audit-actions.ts")).toContain("exportZsAuditJson");
     expect(readSource("src/zs/zs-row-handlers.ts")).toContain("createZsRowHandlers");
     expect(readSource("src/zs/zs-page-handlers.ts")).toContain("createZsPageHandlers");
+    expect(readSource("src/zs/use-zs-section-scroll.ts")).toContain("useZsSectionScroll");
+    expect(readSource("src/zs/use-zs-wizard-navigation.ts")).toContain("useZsWizardNavigation");
+    expect(readSource("src/zs/ZsNamedSnapshotsHeroPanel.tsx")).toContain("ZsNamedSnapshotsHeroPanel");
     expect(readSource("src/zs/zs-export-actions.ts")).toContain("runZsExportCsv");
     expect(readSource("src/ZsPhaPhpBasicGuide.tsx")).toContain("nepočítá");
   });

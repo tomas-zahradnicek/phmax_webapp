@@ -138,6 +138,34 @@ test.describe("Dashboard deep-link", () => {
     await expect(page.locator('[data-section="sd-vstupy"]')).toBeInViewport({ timeout: 8000 });
   });
 
+  test("ŠD – detailní režim, prázdné oddělení", async ({ page }) => {
+    await page.addInitScript(
+      ({ storageKey, wizardKey }) => {
+        localStorage.setItem(wizardKey, "2");
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            pupils: 40,
+            manualDepts: false,
+            departments: 2,
+            inputMode: "detail",
+            detailDepartments: [
+              { kind: "regular", participants: 20 },
+              { kind: "regular", participants: 0 },
+            ],
+          }),
+        );
+      },
+      { storageKey: SD_STORAGE_KEY, wizardKey: SD_WIZARD_KEY },
+    );
+
+    await openDashboardAttentionModule(page, "ŠD");
+
+    const row = page.locator('[data-sd-dept-id="1"]');
+    await expect(row).toBeVisible({ timeout: 8000 });
+    await expect(row).toBeInViewport({ timeout: 8000 });
+  });
+
   test("NV75 – řádek bez jednotek", async ({ page }) => {
     await page.addInitScript(
       ({ storageKey, wizardKey, rowId }) => {
