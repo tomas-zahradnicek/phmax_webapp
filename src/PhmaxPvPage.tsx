@@ -31,9 +31,7 @@ import { buildExportMetaRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { heroExampleOptionsFromKeys } from "./HeroExampleSelect";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
-import { CalculatorProductShell } from "./CalculatorProductShell";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
@@ -57,8 +55,8 @@ import { createPvScrollToInputs } from "./pv/create-pv-scroll-to-inputs";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
-import { BasicComparePreview } from "./BasicComparePreview";
 import type { ProductView } from "./ProductViewPills";
+import { PvCalculatorShell } from "./pv/PvCalculatorShell";
 import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
 import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
 import { createPvProductAuditProtocol } from "./phmax-product-audit";
@@ -850,7 +848,8 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         />
       ) : null}
 
-      <CalculatorProductShell
+      <PvCalculatorShell
+        workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
         sticky={{
           anchorRef: heroHeaderRef,
           primaryLabel: "PHmax celkem",
@@ -860,46 +859,24 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           onSave: savePvSnapshotManually,
           onExport: handleExportCsv,
         }}
-        workspaceVariant="input-heavy"
-        workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
-        dock={
-          <CalculatorWorkflowDock
-            tone={pvVerdict.tone}
-            primaryLabel="PHmax celkem"
-            primaryValue={aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}
-            statusBadge={pvVerdict.label}
-            stats={[
-              { label: "PHAmax celkem", value: aggregate.phaSum > 0 ? aggregate.phaSum : "–" },
-              { label: "Pracoviště ve výpočtu", value: rows.length },
-            ]}
-            verdictLabel={pvVerdict.label}
-            verdictDetail={pvVerdict.detail}
-            workflowSteps={pvBasicWizardActive ? [] : pvWorkflow.steps}
-            viewMode={viewMode}
-            footer={
-              viewMode === "basic" ? (
-                <BasicComparePreview
-                  result={pvComparePreview}
-                  inactive={!selectedNamedId}
-                  emptyHint="Vyberte pojmenovanou zálohu v horní liště pro rychlé porovnání PHmax."
-                />
-              ) : null
-            }
-            actions={[
-              ...(pvHasInputIssue
-                ? [
-                    {
-                      label: "Přejít k chybě",
-                      onClick: () => scrollToFirstNeedsAttentionSection(["pv-vstupy"]),
-                    },
-                  ]
-                : []),
-              { label: "Uložit scénář", onClick: savePvSnapshotManually },
-              { label: "Export CSV", onClick: handleExportCsv },
-              { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },
-            ]}
-          />
-        }
+        dock={{
+          pvVerdictTone: pvVerdict.tone,
+          phmaxTotalDisplay: aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum,
+          phaSum: aggregate.phaSum,
+          workplaceCount: rows.length,
+          pvVerdictLabel: pvVerdict.label,
+          pvVerdictDetail: pvVerdict.detail,
+          pvBasicWizardActive,
+          pvWorkflowSteps: pvWorkflow.steps,
+          viewMode,
+          pvComparePreview,
+          selectedNamedId,
+          pvHasInputIssue,
+          onGoToIssue: () => scrollToFirstNeedsAttentionSection(["pv-vstupy"]),
+          savePvSnapshotManually,
+          handleExportCsv,
+          handleCompareWithNamedSnapshot,
+        }}
         main={
           <>
 

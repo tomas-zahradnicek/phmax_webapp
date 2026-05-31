@@ -327,7 +327,7 @@ test.describe("Dashboard deep-link", () => {
   });
 
   test("ok modul není ve Vyžaduje pozornost", async ({ page }) => {
-    await page.addInitScript(({ sdKey, zsKey, pvKey, sdWizard, zsWizard, pvWizard, pvRowKey }) => {
+    await page.addInitScript(({ sdKey, zsKey, pvKey, ssKey, sdWizard, zsWizard, pvWizard, ssWizard, pvRowKey, ssRowId }) => {
       localStorage.setItem(sdWizard, "2");
       localStorage.setItem(
         sdKey,
@@ -364,21 +364,115 @@ test.describe("Dashboard deep-link", () => {
           ],
         }),
       );
+      localStorage.setItem(ssWizard, "2");
+      localStorage.setItem(
+        ssKey,
+        JSON.stringify([
+          {
+            id: ssRowId,
+            label: "",
+            educationField: "39-41-L/01",
+            studyForm: "denni",
+            phmaxMode: "",
+            oborCountInClass: "1",
+            additionalOborCodes: "",
+            oborStudentCountsRaw: "",
+            isArt82TalentClass: false,
+            classType: "",
+            isPar16Class: false,
+            isLegacyMultioborClass: false,
+            legacyMaxOborCount: "",
+            note: "",
+            averageStudents: "17",
+            classCount: "2",
+          },
+        ]),
+      );
     }, {
       sdKey: SD_STORAGE_KEY,
       zsKey: ZS_STORAGE_KEY,
       pvKey: PV_STORAGE_KEY,
+      ssKey: SS_DRAFT_KEY,
       sdWizard: SD_WIZARD_KEY,
       zsWizard: ZS_WIZARD_KEY,
       pvWizard: PV_WIZARD_KEY,
+      ssWizard: SS_WIZARD_KEY,
       pvRowKey: "pv-ok-attention-e2e",
+      ssRowId: 88,
     });
 
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: "Vyžaduje pozornost" })).toBeVisible();
     await expect(page.locator(".dash-attention-card__item").filter({ hasText: "ŠD" })).toHaveCount(0);
     await expect(page.locator(".dash-attention-card__item").filter({ hasText: "PV" })).toHaveCount(0);
+    await expect(page.locator(".dash-attention-card__item").filter({ hasText: "SŠ" })).toHaveCount(0);
     await expect(page.locator(".dash-attention-card__item").filter({ hasText: "ZŠ" })).toHaveCount(1);
+  });
+
+  test("orientační součet PHmax napříč moduly", async ({ page }) => {
+    await page.addInitScript(({ sdKey, pvKey, ssKey, sdWizard, pvWizard, ssWizard, pvRowKey, ssRowId }) => {
+      localStorage.setItem(sdWizard, "2");
+      localStorage.setItem(
+        sdKey,
+        JSON.stringify({ pupils: 30, manualDepts: false, departments: 1, inputMode: "summary" }),
+      );
+      localStorage.setItem(pvWizard, "2");
+      localStorage.setItem(
+        pvKey,
+        JSON.stringify({
+          rows: [
+            {
+              id: pvRowKey,
+              label: "",
+              provoz: "celodenni",
+              classCount: 2,
+              avgHours: 8,
+              sec16Count: 0,
+              languageGroups: 0,
+            },
+          ],
+        }),
+      );
+      localStorage.setItem(ssWizard, "2");
+      localStorage.setItem(
+        ssKey,
+        JSON.stringify([
+          {
+            id: ssRowId,
+            label: "",
+            educationField: "39-41-L/01",
+            studyForm: "denni",
+            phmaxMode: "",
+            oborCountInClass: "1",
+            additionalOborCodes: "",
+            oborStudentCountsRaw: "",
+            isArt82TalentClass: false,
+            classType: "",
+            isPar16Class: false,
+            isLegacyMultioborClass: false,
+            legacyMaxOborCount: "",
+            note: "",
+            averageStudents: "17",
+            classCount: "2",
+          },
+        ]),
+      );
+    }, {
+      sdKey: SD_STORAGE_KEY,
+      pvKey: PV_STORAGE_KEY,
+      ssKey: SS_DRAFT_KEY,
+      sdWizard: SD_WIZARD_KEY,
+      pvWizard: PV_WIZARD_KEY,
+      ssWizard: SS_WIZARD_KEY,
+      pvRowKey: "pv-cross-phmax-e2e",
+      ssRowId: 91,
+    });
+
+    await gotoProductView(page, "dash");
+    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.locator(".dash-cross-phmax")).toContainText(/PV:/);
+    await expect(page.locator(".dash-cross-phmax")).toContainText(/ŠD:/);
+    await expect(page.locator(".dash-cross-phmax")).toContainText(/SŠ:/);
   });
 });
 

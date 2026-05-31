@@ -20,7 +20,8 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | P1 | Mobilní souhrn: scroll dolů → panel → Skrýt → chip vlevo → Zobrazit | E2E |
 | P2 | Banner + **Přejít k chybě** (prázdné pracoviště / neúplný řádek) | E2E |
 | P2d | Desktop – combobox Příkladové výpočty + workflow dock | E2E desktop |
-| P2n | Dashboard – ok PV není ve Vyžaduje pozornost | E2E desktop |
+| P2n | Dashboard – ok PV/SŠ není ve Vyžaduje pozornost | E2E desktop |
+| P2x | Dashboard – orientační součet PHmax PV+ŠD+ZŠ+SŠ | E2E desktop |
 | P3 | Průvodce krok **2 Vstupy** → **Přejít k chybě** → sekce vstupů | E2E |
 | P4 | Checklist „Kdy přidat další pracoviště“ u prázdné tabulky | contract |
 | P5 | § 1d odst. 3 – box u řádku + text u souhrnu (bez výpočtu krácení) | contract |
@@ -36,6 +37,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | Z2 | Banner bez duplicity „Kontrola vstupů“; stejný verdikt v docku | E2E |
 | Z2d | Desktop – combobox + workflow dock | E2E desktop |
 | Z3 | Průvodce PHmax – krok 2 Třídy → **Přejít k chybě** (prázdný formulář) | E2E |
+| Z3w | Průvodce – volba gym/menšina načte hero ukázku | contract |
 | Z4 | PHAmax/PHPmax v basic – věta „pro tento typ školy se nepočítá“ u neplatného režimu | contract |
 | Z5 | Export CSV/XLSX – metadata a orientační disclaimer | contract |
 
@@ -61,14 +63,17 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 |---|----------|-----|
 | S1 | E2E smoke (`sd-mobile-smoke.spec.ts`) projde | E2E |
 | S2 | Souhrnný režim – věta o počtu oddělení | E2E + contract |
+| S2d | Desktop – combobox + workflow dock | E2E desktop |
 | S3 | Porovnání variant A/B s pojmenovanou zálohou | contract |
 
 ---
 
 ## Produktová roadmapa (větší scope – neblokuje release)
 
-1. **Propojení modulů** – dashboard dnes čte uložený stav; nepočítá napříč PV/ŠD/ZŠ/NV75.
-2. **Oficiální výstupy** – vykazování do systémů školy / zřizovatele (mimo orientační CSV/XLSX).
+Viz **`docs/product-roadmap.md`**. Stručně:
+
+1. **Propojení modulů** – první krok: orientační součet PHmax na dashboardu (PV+ŠD+ZŠ+SŠ).
+2. **Oficiální výstupy** – mimo orientační CSV/XLSX.
 3. **PV § 1d odst. 3** – volitelný budoucí výpočet po doplnění právních vstupů.
 
 ---

@@ -73,6 +73,14 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/pv/PvHeroHeader.tsx")).toContain("PvHeroToolbar");
     expect(readSource("src/PhmaxSdPage.tsx")).toContain("SdHeroHeader");
     expect(readSource("src/sd/SdHeroHeader.tsx")).toContain("SdHeroToolbar");
+    expect(readSource("src/PhmaxNv75DeputyPage.tsx")).toContain("Nv75HeroHeader");
+    expect(readSource("src/nv75/Nv75HeroHeader.tsx")).toContain("Nv75HeroToolbar");
+    expect(readSource("src/PhmaxSsPage.tsx")).toContain("SsHeroHeader");
+    expect(readSource("src/ss/SsHeroHeader.tsx")).toContain("SsHeroToolbar");
+    expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("ph_gym: \"gymnazium_phmax\"");
+    expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("ph_minority: \"mensina_phmax\"");
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("buildCrossPhmaxSummary");
+    expect(readSource("src/phmax-dashboard-cross-phmax.ts")).toContain("Orientační součet PHmax");
     expect(zsPage).toContain("ZsCalculatorShell");
     expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("CalculatorWorkflowDock");
     expect(readSource("src/zs/ZsPhmaxHealthSection.tsx")).toContain("B11");

@@ -71,8 +71,10 @@ describe("UX TOP 6 contract", () => {
   it("PV/ŠD/SŠ používají CalculatorProductShell, CalculatorWorkflowDock a TOC", () => {
     for (const page of ["src/PhmaxPvPage.tsx", "src/PhmaxSdPage.tsx", "src/PhmaxSsPage.tsx"]) {
       const src = readSource(page);
-      expect(src).toContain("CalculatorProductShell");
-      expect(src).toContain("CalculatorWorkflowDock");
+      expect(src).toMatch(/CalculatorProductShell|PvCalculatorShell|SdCalculatorShell/);
+      expect(src).toMatch(
+        /CalculatorWorkflowDock|PvWorkflowDockPanel|PvCalculatorShell|SdWorkflowDockPanel|SdCalculatorShell/,
+      );
       expect(src).toMatch(/PageTableOfContents|tocSections=/);
       expect(src).toContain("calculatorShellClassName(viewMode, displayDensity, focusMode)");
       expect(src).not.toContain("ProductFloatingNav");
@@ -114,7 +116,11 @@ describe("UX TOP 6 contract", () => {
             ? readSource("src/pv/PvHeroToolbar.tsx")
             : page === "src/PhmaxSdPage.tsx"
               ? readSource("src/sd/SdHeroToolbar.tsx")
-              : readSource(page);
+              : page === "src/PhmaxSsPage.tsx"
+                ? readSource("src/ss/SsHeroToolbar.tsx")
+                : page === "src/PhmaxNv75DeputyPage.tsx"
+                  ? readSource("src/nv75/Nv75HeroToolbar.tsx")
+                  : readSource(page);
       const heroSrc =
         page === "src/PhmaxZsPage.tsx"
           ? readSource("src/zs/ZsHeroHeader.tsx")
@@ -122,14 +128,18 @@ describe("UX TOP 6 contract", () => {
             ? readSource("src/pv/PvHeroHeader.tsx")
             : page === "src/PhmaxSdPage.tsx"
               ? readSource("src/sd/SdHeroHeader.tsx")
-              : readSource(page);
+              : page === "src/PhmaxSsPage.tsx"
+                ? readSource("src/ss/SsHeroHeader.tsx")
+                : page === "src/PhmaxNv75DeputyPage.tsx"
+                  ? readSource("src/nv75/Nv75HeroHeader.tsx")
+                  : readSource(page);
       expect(toolbarSrc).toContain("HeroCompactToolbar");
       expect(heroSrc).toContain("DisplayDensityToggle");
-      expect(heroSrc).toMatch(/hero-zone-actions--toolbar|(Zs|Pv|Sd)HeroToolbar/);
+      expect(heroSrc).toMatch(/hero-zone-actions--toolbar|(Zs|Pv|Sd|Ss|Nv75)HeroToolbar/);
     }
     expect(readSource("src/PhmaxSdPage.tsx")).toContain('data-section="sd-vysledek"');
     expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain('data-section="ss-vysledek"');
-    expect(readSource("src/PhmaxNv75DeputyPage.tsx")).toContain("hero-zone-actions");
+    expect(readSource("src/nv75/Nv75HeroToolbar.tsx")).toContain("hero-zone-actions");
     expect(readSource("src/PhmaxZsPage.tsx")).toContain("ZsCalculatorShell");
     expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("CalculatorWorkflowDock");
   });
@@ -216,7 +226,11 @@ describe("UX TOP 6 contract", () => {
             ? readSource("src/pv/PvHeroHeader.tsx")
             : page === "src/PhmaxSdPage.tsx"
               ? readSource("src/sd/SdHeroHeader.tsx")
-              : readSource(page);
+              : page === "src/PhmaxSsPage.tsx"
+                ? readSource("src/ss/SsHeroHeader.tsx")
+                : page === "src/PhmaxNv75DeputyPage.tsx"
+                  ? readSource("src/nv75/Nv75HeroHeader.tsx")
+                  : readSource(page);
       const onboardingSrc =
         page === "src/PhmaxZsPage.tsx"
           ? readSource("src/zs/ZsQuickOnboardingGuide.tsx")
@@ -224,7 +238,11 @@ describe("UX TOP 6 contract", () => {
             ? readSource("src/pv/PvQuickOnboardingGuide.tsx")
             : page === "src/PhmaxSdPage.tsx"
               ? readSource("src/sd/SdQuickOnboardingGuide.tsx")
-              : readSource(page);
+              : page === "src/PhmaxSsPage.tsx"
+                ? readSource("src/ss/SsQuickOnboardingGuide.tsx")
+                : page === "src/PhmaxNv75DeputyPage.tsx"
+                  ? readSource("src/nv75/Nv75QuickOnboardingGuide.tsx")
+                  : readSource(page);
       expect(src).toContain("useQuickOnboarding");
       expect(heroSrc).toContain("QuickOnboardingHeroButton");
       expect(onboardingSrc).toContain("QuickOnboarding");

@@ -2,43 +2,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { LegisTooltipRef } from "./LegisTooltipRef";
 import {
-  ADVANCED_AUDIT_GROUP_LABEL,
   APP_AUTHOR_CREDIT_LINE,
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   APP_AUTHOR_EXPORT_ROWS,
-  NAMED_BACKUPS_COMPARE_JSON_LABEL,
-  NAMED_BACKUPS_NAME_LABEL,
-  NAMED_BACKUPS_SAVE_LABEL,
-  NAMED_BACKUPS_SELECT_PLACEHOLDER,
-  CALCULATOR_LIMITS_NOTE,
   CALCULATOR_WORKSPACE_DOCK_LABEL,
-  HERO_ACTIONS_ICON_LEGEND,
-  LAY_USER_QUICK_START_NV75,
-  LAY_USER_QUICK_START_MOBILE_UX,
   PHMAX_NV75_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { HeroExampleSelect } from "./HeroExampleSelect";
-import { HeroActionsDrawer } from "./HeroActionsDrawer";
-import { HeroCompactToolbar } from "./HeroCompactToolbar";
-import { HeroExpertStrip } from "./HeroExpertStrip";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
-import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
-import { DisplayDensityToggle } from "./DisplayDensityToggle";
 import { useDisplayDensity } from "./useDisplayDensity";
-import {
-  HeroIconActionButton,
-  IconAddTableRow,
-  IconCopy,
-  IconCsv,
-  IconExcel,
-  IconPrint,
-  IconPrintSummary,
-  IconResetAll,
-  IconSpinner,
-} from "./HeroActionIconButton";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { buildExportMetaRows, buildOfficialArchiveRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import {
@@ -47,7 +22,7 @@ import {
   stripAppAuthorCreditFromPlainSummary,
 } from "./app-author-print";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { ProductViewPills, type ProductView } from "./ProductViewPills";
+import { type ProductView } from "./ProductViewPills";
 import { ProductBasicWizard } from "./ProductBasicWizard";
 import {
   NV75_BASIC_WIZARD_LS_KEY,
@@ -62,8 +37,9 @@ import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import type { CompareProductVariantsResult } from "./phmax-product-compare";
-import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
+import { Nv75HeroHeader } from "./nv75/Nv75HeroHeader";
+import { Nv75QuickOnboardingGuide } from "./nv75/Nv75QuickOnboardingGuide";
 import { useUiNotice } from "./useUiNotice";
 import type { ResultAnchorTone } from "./ResultAnchorCard";
 import { IntegerInput } from "./IntegerInput";
@@ -1121,194 +1097,44 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   return (
     <div className={`app-shell app-shell--gradient calculator-shell--nv75 ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${nv75BasicWizardActive ? ` product-basic-wizard-active nv75-wizard-step-${nv75WizardStep}` : ""}${nv75NeedsInputBanner ? " app-shell--validation-hint" : ""}`}>
       <div className="container container--app">
-        <header className="hero hero--feature" ref={heroHeaderRef}>
-          <div className="hero__pills-row">
-            <ProductViewPills productView={productView} setProductView={setProductView} />
-            <div className="hero__pills-row-trailing">
-              <div className="checks" role="group" aria-label="Režim zobrazení NV75">
-                <label>
-                  <input
-                    type="radio"
-                    name="nv75-view-mode"
-                    checked={viewMode === "basic"}
-                    onChange={() => setViewMode("basic")}
-                  />
-                  Základní
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="nv75-view-mode"
-                    checked={viewMode === "expert"}
-                    onChange={() => setViewMode("expert")}
-                  />
-                  Expertní
-                </label>
-              </div>
-              <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="nv75-display-density" />
-              <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
-              <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} buttonRef={helpButtonRef} />
-            </div>
-          </div>
+        <Nv75HeroHeader
+          heroHeaderRef={heroHeaderRef}
+          productView={productView}
+          setProductView={setProductView}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          displayDensity={displayDensity}
+          setDisplayDensity={setDisplayDensity}
+          focusMode={focusMode}
+          setFocusMode={setFocusMode}
+          guideOpen={guideOpen}
+          toggleGuide={toggleGuide}
+          helpButtonRef={helpButtonRef}
+          bankHoursTotal={bank.bankHoursTotal}
+          rowCount={rows.length}
+          appliedRule={bank.appliedRule}
+          verdictLabel={nv75Verdict.label}
+          toolbar={{
+            onAddRow: addRow,
+            onExportCsv: handleExportCsv,
+            onExportXlsx: handleExportXlsx,
+            xlsxExportBusy,
+            onPrintSummary: printSummary,
+            lastSavedAt,
+            namedSaveName,
+            setNamedSaveName,
+            namedSnapshots,
+            selectedNamedId,
+            setSelectedNamedId,
+            onSaveNamedSnapshot: saveNamedSnapshot,
+            onRestoreNamedSnapshot: restoreNamedSnapshot,
+            onCompareWithNamedSnapshot: compareWithNamedSnapshot,
+            onCopySummary: copySummary,
+            onResetAll: resetAll,
+          }}
+        />
 
-          <HeroExpertStrip
-            title="Banka odpočtů – NV č. 75/2016 Sb. (§4b–§4d)"
-            kpis={[
-              { label: "Banka celkem", value: `${bank.bankHoursTotal} h/týd` },
-              { label: "Řádky", value: rows.length },
-              { label: "§4b", value: bank.appliedRule ?? "–" },
-              { label: "Stav", value: nv75Verdict.label },
-            ]}
-          />
-
-          <div className="grid two hero__grid hero__grid--context">
-            <div>
-              <p className="hero-zone-label">A. Kontext výpočtu</p>
-              <h1 className="hero__title">Banka odpočtů zástupců ředitele</h1>
-              <p className="hero__text">
-                Orientační výpočet banky hodin podle <strong>§4b–§4d NV č. 75/2016 Sb.</strong> V expertním režimu zůstává
-                kompaktní lišta akcí; podrobný audit a tabulky jsou níže ve formuláři.
-              </p>
-            </div>
-          </div>
-
-          <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu NV75">
-            <div className="hero-zone-actions__toolbar-row">
-            <HeroActionsDrawer>
-              <HeroCompactToolbar
-                primary={
-                  <>
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost hero-actions-tiered__cta"
-                      label="Přidat řádek"
-                      icon={<IconAddTableRow />}
-                      onClick={addRow}
-                    />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost"
-                      label="Export CSV"
-                      icon={<IconCsv />}
-                      onClick={handleExportCsv}
-                    />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost"
-                      label={xlsxExportBusy ? "Připravuji Excel…" : "Export Excel"}
-                      icon={xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
-                      disabled={xlsxExportBusy}
-                      aria-busy={xlsxExportBusy}
-                      onClick={() => void handleExportXlsx()}
-                    />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn btn--light"
-                      label="Tisk stránky"
-                      icon={<IconPrint />}
-                      onClick={() => window.print()}
-                    />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn btn--light"
-                      label="Tisk shrnutí"
-                      icon={<IconPrintSummary />}
-                      onClick={printSummary}
-                    />
-                  </>
-                }
-                backups={
-                  <>
-                    <p className="hero-actions-tiered__hint">
-                      Průběh se ukládá automaticky v prohlížeči
-                      {lastSavedAt ? ` (naposledy ${lastSavedAt})` : ""}. Pojmenované scénáře pro porovnání variant:
-                    </p>
-                    <div className="hero-named-grid hero-named-grid--simple hero-actions-tiered__named" aria-label="Pojmenované scénáře">
-                      <label className="hero-named-field hero-named-field--backup-name">
-                        <span className="field__label field__label--hero-named">{NAMED_BACKUPS_NAME_LABEL}</span>
-                        <input
-                          type="text"
-                          className="input"
-                          placeholder="např. varianta 2026/27"
-                          value={namedSaveName}
-                          onChange={(e) => setNamedSaveName(e.target.value)}
-                          aria-label="Název pojmenované zálohy"
-                        />
-                      </label>
-                      <div className="hero-named-field hero-named-field--save">
-                        <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
-                          {NAMED_BACKUPS_SAVE_LABEL}
-                        </button>
-                      </div>
-                      <div className="hero-named-field hero-named-field--select">
-                        <select
-                          className="input"
-                          value={selectedNamedId}
-                          onChange={(e) => setSelectedNamedId(e.target.value)}
-                          aria-label="Vybrat uloženou zálohu"
-                        >
-                          <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
-                          {namedSnapshots.map((snap) => (
-                            <option key={snap.id} value={snap.id}>
-                              {snap.name} ({new Date(snap.savedAt).toLocaleString("cs-CZ")})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="hero-named-field hero-named-field--restore-delete">
-                        <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
-                          Obnovit scénář
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                }
-                technical={
-                  <>
-                    <button type="button" className="btn ghost btn--hero-named ux-expert-only" onClick={compareWithNamedSnapshot}>
-                      {NAMED_BACKUPS_COMPARE_JSON_LABEL}
-                    </button>
-                    <p className="hero-actions-tiered__hint ux-expert-only">{ADVANCED_AUDIT_GROUP_LABEL}</p>
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost"
-                      label="Kopírovat shrnutí"
-                      icon={<IconCopy />}
-                      onClick={() => void copySummary()}
-                    />
-                    <HeroIconActionButton
-                      showLabel
-                      className="btn ghost"
-                      label="Vymazat formulář"
-                      icon={<IconResetAll />}
-                      onClick={resetAll}
-                    />
-                  </>
-                }
-              />
-            </HeroActionsDrawer>
-            </div>
-          </section>
-        </header>
-
-        <QuickOnboarding
-          title="Nápověda – NV75 banka odpočtů"
-          open={guideOpen}
-          onDismiss={dismissGuide}
-          anchorId="nv75-quick-onboarding"
-          returnFocusRef={helpButtonRef}
-        >
-          <p>
-            <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
-          </p>
-          <p>{LAY_USER_QUICK_START_NV75}</p>
-          <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
-          <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
-          <p>
-            Ukázka <strong>A</strong> v comboboxu Příkladové výpočty předvyplní typickou situaci banky odpočtů – po načtení ověřte §4b a bonusy §4c/§4d
-            v pravém docku <strong>Kontext výpočtu</strong>.
-          </p>
-        </QuickOnboarding>
+        <Nv75QuickOnboardingGuide open={guideOpen} onDismiss={dismissGuide} returnFocusRef={helpButtonRef} />
         {nv75BasicWizardActive ? (
           <ProductBasicWizard
             productLabel="NV75"

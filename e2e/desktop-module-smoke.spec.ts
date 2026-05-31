@@ -60,6 +60,14 @@ test.describe("Desktop modulový smoke", () => {
     await expect(page.locator('[data-section="sd-vstupy"]')).toBeInViewport();
   });
 
+  test("SŠ – průvodce krok Vstupy a Přejít k chybě", async ({ page }) => {
+    await clearLocalStorageKeys(page, ["phmax-ss-basic-wizard-step", "phmax-ss-units-draft"]);
+    await gotoProductView(page, "ss");
+    await page.getByRole("button", { name: "2 Vstupy" }).click({ force: true });
+    await page.getByRole("button", { name: "Přejít k chybě" }).first().click();
+    await expect(page.locator('[data-section="ss-vstupy"]')).toBeInViewport();
+  });
+
   test("NV75 – průvodce krok Vstupy a Přejít k chybě", async ({ page }) => {
     await gotoProductView(page, "nv75");
     await page.getByRole("button", { name: "2 Vstupy" }).click({ force: true });

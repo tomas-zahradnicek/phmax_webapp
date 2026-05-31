@@ -318,4 +318,6 @@ export const ZS_WIZARD_CHOICE_TO_EXAMPLE: Record<Exclude<ZsWizardChoice, "">, Zs
   ph_health: "zdravotnicke_zs",
   ph_mixed: "smisene_tridy",
   ph_prep: "pripravna_trida",
+  ph_gym: "gymnazium_phmax",
+  ph_minority: "mensina_phmax",
 };

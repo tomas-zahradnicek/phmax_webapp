@@ -24,7 +24,9 @@ export type ZsWizardChoice =
   | "ph_psych"
   | "ph_health"
   | "ph_mixed"
-  | "ph_prep";
+  | "ph_prep"
+  | "ph_gym"
+  | "ph_minority";
 export type ZsDataMode = "own" | "example";
 
 export type ZsFormSnapshotState = {

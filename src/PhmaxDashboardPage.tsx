@@ -25,6 +25,7 @@ import { PHMAX_DASHBOARD_MAIN_ID } from "./phmax-main-landmarks";
 import { requestFocusExampleSelect } from "./phmax-focus-example-hint";
 import { requestFocusModuleInputs } from "./phmax-focus-inputs-hint";
 import { sortByDashboardAttention } from "./phmax-dashboard-sort";
+import { buildCrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
 import { useUiNotice } from "./useUiNotice";
 
 const DASH_QUICK_IDS: Exclude<ProductView, "dash">[] = ["pv", "sd", "zs", "ss", "nv75"];
@@ -625,6 +626,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     ),
   );
 
+  const crossPhmax = buildCrossPhmaxSummary(rows, DASH_CALC_LABEL);
+
   return (
     <div className="app-shell app-shell--gradient">
       <div className="container container--app">
@@ -645,7 +648,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               <h1 className="hero__title">{PRODUCT_CALCULATOR_TITLES.dash}</h1>
               <p className="hero__text">{CALCULATOR_LIMITS_NOTE}</p>
               <p className="muted-text" style={{ marginTop: 8 }}>
-                Souhrnný přehled (Σ) čte uložený stav z prohlížeče u každého modulu zvlášť – nepočítá napříč PV, ŠD, ZŠ a NV75.
+                Souhrnný přehled (Σ) čte uložený stav z prohlížeče u každého modulu zvlášť. Orientační součet PHmax napříč PV, ŠD, ZŠ a SŠ je níže – NV75 (banka odpočtů) se nezapočítává.
                 Pro první orientaci v modulu vždy začněte ukázkou v comboboxu <strong>Příkladové výpočty</strong> v horní liště vybrané kalkulačky.
               </p>
               <p className="muted-text" style={{ marginTop: 8 }}>
@@ -709,6 +712,33 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 </button>
               ) : null}
             </div>
+          </section>
+        ) : null}
+
+        {crossPhmax.modulesWithPhmax >= 2 ? (
+          <section className="card section-card dash-cross-phmax" aria-labelledby="dash-cross-phmax-heading">
+            <h2 id="dash-cross-phmax-heading" className="section-title">
+              Orientační součet PHmax (PV + ŠD + ZŠ + SŠ)
+            </h2>
+            <p className="muted-text" style={{ marginTop: 0 }}>
+              Sloučení autosave z modulů v tomto prohlížeči – neoficiální souhrn pro kontrolu. NV75 (banka odpočtů) a budoucí výpočet krácení PV § 1d odst. 3 zde nejsou.
+            </p>
+            <p className="dash-cross-phmax__total" style={{ marginTop: 12, fontSize: "1.35rem" }}>
+              Celkem PHmax: <strong>{crossPhmax.totalPhmax != null ? crossPhmax.totalPhmax : "–"}</strong> h/týden
+              {crossPhmax.hasIncomplete ? (
+                <span className="muted-text" style={{ display: "block", fontSize: "0.88rem", marginTop: 6 }}>
+                  Některé moduly mají neúplný výpočet – součet může být podhodnocený.
+                </span>
+              ) : null}
+            </p>
+            <ul className="dash-cross-phmax__list muted-text" style={{ marginTop: 10, paddingLeft: "1.25rem" }}>
+              {crossPhmax.slices.map((slice) => (
+                <li key={slice.id}>
+                  {slice.label}: {slice.phmax != null ? `${slice.phmax} h/týden` : "–"}
+                  {slice.incomplete ? " (neúplný)" : ""}
+                </li>
+              ))}
+            </ul>
           </section>
         ) : null}
 

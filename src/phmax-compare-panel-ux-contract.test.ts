@@ -45,7 +45,7 @@ describe("UX contract: compare panel side-by-side pattern", () => {
 
   it("all products render compare preview panel in named snapshots section", () => {
     const zs = readSource("src/zs/ZsHeroToolbar.tsx");
-    const ss = readSource("src/PhmaxSsPage.tsx");
+    const ss = readSource("src/ss/SsHeroToolbar.tsx");
     const pv = readSource("src/pv/PvHeroToolbar.tsx");
     const sd = readSource("src/sd/SdHeroToolbar.tsx");
 

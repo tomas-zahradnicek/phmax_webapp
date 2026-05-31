@@ -32,10 +32,8 @@ import { heroExampleOptionsFromKeys } from "./HeroExampleSelect";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
-import { CalculatorProductShell } from "./CalculatorProductShell";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
@@ -57,8 +55,8 @@ import { createSdScrollToInputs } from "./sd/create-sd-scroll-to-inputs";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
-import { BasicComparePreview } from "./BasicComparePreview";
 import { useUiNotice } from "./useUiNotice";
+import { SdCalculatorShell } from "./sd/SdCalculatorShell";
 import type { ProductView } from "./ProductViewPills";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
@@ -1082,7 +1080,8 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         <CalculatorInputIssueBanner {...calculatorInputIssueBannerFromVerdict(sdVerdict, sdScrollToInputs)} />
       ) : null}
 
-      <CalculatorProductShell
+      <SdCalculatorShell
+        workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
         sticky={{
           anchorRef: heroHeaderRef,
           primaryLabel: "PHmax",
@@ -1092,54 +1091,28 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           onSave: saveSdSnapshotManually,
           onExport: handleExportCsv,
         }}
-        workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
-        dock={
-          <CalculatorWorkflowDock
-            tone={sdVerdict.tone}
-            primaryLabel="PHmax"
-            primaryValue={sdPhmaxDisplay}
-            stats={[
-              { label: "Účastníci (1. st.)", value: pupils },
-              {
-                label: "Oddělení",
-                value: inputMode === "detail" ? detailDepartments.length : effectiveDepts,
-              },
-              {
-                label: "Krácení § 10 odst. 2",
-                value: reduction.applied
-                  ? `ano (${(Math.round(reduction.factor * 1000) / 10).toLocaleString("cs-CZ")} %)`
-                  : "ne",
-              },
-            ]}
-            statusBadge={sdVerdict.label}
-            verdictLabel={sdVerdict.label}
-            verdictDetail={sdVerdict.detail}
-            workflowSteps={sdBasicWizardActive ? [] : sdWorkflow.steps}
-            viewMode={viewMode}
-            footer={
-              viewMode === "basic" ? (
-                <BasicComparePreview
-                  result={sdComparePreview}
-                  inactive={!selectedNamedId}
-                  emptyHint="Vyberte pojmenovanou zálohu v horní liště pro rychlé porovnání PHmax."
-                />
-              ) : null
-            }
-            actions={[
-              ...(sdHasInputIssue
-                ? [
-                    {
-                      label: "Přejít k chybě",
-                      onClick: () => scrollToFirstNeedsAttentionSection(["sd-vstupy"]),
-                    },
-                  ]
-                : []),
-              { label: "Uložit scénář", onClick: saveSdSnapshotManually },
-              { label: "Export CSV", onClick: handleExportCsv },
-              { label: "Porovnat se zálohou", onClick: handleCompareWithNamedSnapshot },
-            ]}
-          />
-        }
+        dock={{
+          sdVerdictTone: sdVerdict.tone,
+          sdPhmaxDisplay,
+          pupils,
+          inputMode,
+          detailDepartments,
+          effectiveDepts,
+          reductionApplied: reduction.applied,
+          reductionFactor: reduction.factor,
+          sdVerdictLabel: sdVerdict.label,
+          sdVerdictDetail: sdVerdict.detail,
+          sdBasicWizardActive,
+          sdWorkflowSteps: sdWorkflow.steps,
+          viewMode,
+          sdComparePreview,
+          selectedNamedId,
+          sdHasInputIssue,
+          onGoToIssue: () => scrollToFirstNeedsAttentionSection(["sd-vstupy"]),
+          saveSdSnapshotManually,
+          handleExportCsv,
+          handleCompareWithNamedSnapshot,
+        }}
         main={
           <>
 

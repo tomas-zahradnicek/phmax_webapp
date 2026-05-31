@@ -47,7 +47,8 @@ describe("UX contract: release notes + přístupnost", () => {
     expect(readSource("src/PageTableOfContents.tsx")).toContain("phmax-toc-open");
     expect(readSource("src/styles.css")).toContain(".page-toc-shell--collapsed");
     expect(readSource("src/calculator-section-focus.ts")).toContain("scrollToFirstNeedsAttentionSection");
-    expect(readSource("src/PhmaxPvPage.tsx")).toContain("Přejít k chybě");
+    expect(readSource("src/PhmaxPvPage.tsx")).toMatch(/Přejít k chybě|PvWorkflowDockPanel|PvCalculatorShell/);
+    expect(readSource("src/PhmaxSdPage.tsx")).toMatch(/Přejít k chybě|SdWorkflowDockPanel|SdCalculatorShell/);
     expect(readSource("src/PhmaxZsPage.tsx")).not.toContain("Kontrola vstupů");
     expect(readSource("src/styles.css")).toContain(".app-shell--validation-hint .calculator-input-issue-banner");
     expect(fs.existsSync(path.resolve(repoRoot, "docs/mobile-smoke-checklist.md"))).toBe(true);

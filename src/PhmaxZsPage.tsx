@@ -134,15 +134,9 @@ type PhpMethodMode = "three_year_avg" | "short_period";
 type Nv75Role = "ucitel" | "reditel";
 type Nv75School = "plavecka_skola";
 type ExampleKey = ZsHeroExampleKey;
-type WizardChoice =
-  | ""
-  | "php_small"
-  | "php_deductions"
-  | "ph_inclusion"
-  | "ph_psych"
-  | "ph_health"
-  | "ph_mixed"
-  | "ph_prep";
+import type { ZsWizardChoice } from "./zs/zs-form-snapshot";
+
+type WizardChoice = ZsWizardChoice;
 type DataMode = "own" | "example";
 
 /** Viditelná legenda + doplněk k nativním tooltipům (`title`) u řádků v seznamech. */
@@ -910,7 +904,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const applyWizardChoice = (choice: WizardChoice) => {
     setWizardChoice(choice);
-    if (!choice) return;
+    if (choice === "") return;
     loadExample(ZS_WIZARD_CHOICE_TO_EXAMPLE[choice]);
   };
 

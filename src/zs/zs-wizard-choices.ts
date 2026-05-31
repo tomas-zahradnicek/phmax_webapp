@@ -8,7 +8,9 @@ export type ZsWizardChoiceKey =
   | "ph_psych"
   | "ph_health"
   | "ph_mixed"
-  | "ph_prep";
+  | "ph_prep"
+  | "ph_gym"
+  | "ph_minority";
 
 export const ZS_WIZARD_CHOICE_TITLES: Record<ZsWizardChoiceKey, string> = {
   php_small: "Menší škola – PHPmax se určí podle metodiky z průměrného počtu žáků a příslušných pásem.",
@@ -23,6 +25,10 @@ export const ZS_WIZARD_CHOICE_TITLES: Record<ZsWizardChoiceKey, string> = {
     "Smíšené třídy § 16 odst. 9 a ZŠ speciální – tabulky podle převažujícího oboru vzdělání (B9–B10 vs. B26–B28).",
   ph_prep:
     "Přípravná třída základní školy nebo přípravný stupeň ZŠ speciální – samostatné položky PHmax v metodice.",
+  ph_gym:
+    "Gymnázium – osmileté a čtyřleté obory (B23); načte ukázková data s gym_rows.",
+  ph_minority:
+    "Menšinová škola – samostatná tabulka PHmax (B17); načte ukázková data s režimem minority.",
 };
 
 export const ZS_WIZARD_CHOICE_OPTIONS = [
@@ -33,6 +39,8 @@ export const ZS_WIZARD_CHOICE_OPTIONS = [
   { value: "ph_health", label: "ZŠ při zdravotnickém zařízení", title: ZS_WIZARD_CHOICE_TITLES.ph_health },
   { value: "ph_mixed", label: "Smíšené třídy", title: ZS_WIZARD_CHOICE_TITLES.ph_mixed },
   { value: "ph_prep", label: "Přípravná třída / stupeň ZŠS", title: ZS_WIZARD_CHOICE_TITLES.ph_prep },
+  { value: "ph_gym", label: "Gymnázium (B23)", title: ZS_WIZARD_CHOICE_TITLES.ph_gym },
+  { value: "ph_minority", label: "Menšinová škola (B17)", title: ZS_WIZARD_CHOICE_TITLES.ph_minority },
 ] as const;
 
 /** Viditelné výjimkové moduly PHmax pro průvodce (krok Výjimky). */

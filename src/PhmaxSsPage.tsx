@@ -1,56 +1,24 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import {
-  CALCULATOR_LIMITS_NOTE,
-  LAY_USER_QUICK_START_SS,
-  LAY_USER_QUICK_START_MOBILE_UX,
-  EXPORT_ORIENTACNI_NOTE,
-  HERO_ACTIONS_ICON_LEGEND,
-  NAMED_BACKUPS_COMPARE_JSON_LABEL,
-  NAMED_BACKUPS_DELETE_LABEL,
-  NAMED_BACKUPS_NAME_LABEL,
-  NAMED_BACKUPS_RESTORE_LABEL,
-  NAMED_BACKUPS_SAVE_LABEL,
-  NAMED_BACKUPS_SELECT_PLACEHOLDER,
-  namedBackupsMicrocopy,
   CALCULATOR_WORKSPACE_DOCK_LABEL,
   PHMAX_SS_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
-import { GlossaryIconButton } from "./GlossaryIconButton";
-import { HeroExampleSelect, heroExampleOptionsFromKeys } from "./HeroExampleSelect";
-import { HeroActionsDrawer } from "./HeroActionsDrawer";
-import {
-  HeroIconActionButton,
-  IconAddTableRow,
-  IconClearStored,
-  IconCopy,
-  IconCsv,
-  IconExcel,
-  IconPrint,
-  IconPrintSummary,
-  IconRemoveTableRow,
-  IconResetAll,
-  IconRestoreQuick,
-  IconSpinner,
-} from "./HeroActionIconButton";
+import { heroExampleOptionsFromKeys } from "./HeroExampleSelect";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { CalculatorProductShell } from "./CalculatorProductShell";
-import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { SsHumanSummary } from "./SsHumanSummary";
-import { CompareVariantsPanel } from "./CompareVariantsPanel";
 import { MethodologyStrip } from "./MethodologyStrip";
-import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
-import { HeroExpertStrip } from "./HeroExpertStrip";
-import { DisplayDensityToggle } from "./DisplayDensityToggle";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
-import { ProductViewPills, type ProductView } from "./ProductViewPills";
-import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
+import { type ProductView } from "./ProductViewPills";
+import { SsHeroHeader } from "./ss/SsHeroHeader";
+import { SsQuickOnboardingGuide } from "./ss/SsQuickOnboardingGuide";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { ProductBasicWizard } from "./ProductBasicWizard";
 import {
@@ -71,9 +39,7 @@ import {
   PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY,
   PHMAX_SS_UNITS_SECTION,
   PHMAX_SS_MAX_NAMED_SNAPSHOTS,
-  PHMAX_SS_METHODOLOGY_LABEL,
   PHMAX_SS_MSMT_PAGE_URL,
-  PHMAX_SS_RIZENI_SKOLY_URL,
 } from "./ss/phmax-ss-constants";
 import {
   PHMAX_SS_CALCULATION_BRANCH_GUIDE,
@@ -535,282 +501,67 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
     <div
       className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${ssBasicWizardActive ? ` product-basic-wizard-active ss-wizard-step-${ssWizardStep}` : ""}${ssNeedsInputBanner ? " app-shell--validation-hint" : ""}`}
     >
-      <header className="hero hero--feature" ref={heroHeaderRef}>
-        <div className="hero__orb hero__orb--one" />
-        <div className="hero__orb hero__orb--two" />
-
-        <div className="hero__pills-row">
-          <ProductViewPills productView={productView} setProductView={setProductView} />
-          <div className="hero__pills-row-trailing">
-            <div className="checks" role="group" aria-label="Režim zobrazení SŠ">
-              <label>
-                <input
-                  type="radio"
-                  name="ss-view-mode"
-                  checked={viewMode === "basic"}
-                  onChange={() => setViewMode("basic")}
-                />
-                Základní
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="ss-view-mode"
-                  checked={viewMode === "expert"}
-                  onChange={() => setViewMode("expert")}
-                />
-                Expertní
-              </label>
-            </div>
-            <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="ss-display-density" />
-            <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
-            <GlossaryIconButton
-              ref={glossaryTriggerRef}
-              className="glossary-icon-btn--hero"
-              expanded={glossaryOpen}
-              onClick={() => setGlossaryOpen(true)}
-            />
-            <QuickOnboardingHeroButton guideOpen={ssGuideOpen} onToggle={toggleSsGuideFromHero} buttonRef={ssHelpButtonRef} />
-          </div>
-        </div>
-
-        <HeroExpertStrip
-          title="PHmax a PHAmax – střední školy"
-          kpis={[
-            { label: "PHmax", value: phmaxHeroValue },
-            { label: "PHAmax PrŠ", value: phamaxHeroValue },
-            { label: "Řádky", value: ssMetrics.rowCount },
-            { label: "Stav", value: ssVerdict.label },
-          ]}
-        />
-
-        <div className="grid two hero__grid hero__grid--context">
-          <div>
-            <p className="hero-zone-label">A. Kontext výpočtu</p>
-            <h1 className="hero__title">PHmax a PHAmax – střední školy</h1>
-            <p className="hero__text">
-              Přehledná kalkulačka pro <strong>střední vzdělávání</strong> podle{" "}
-              <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
-                {PHMAX_SS_METHODOLOGY_LABEL}
-              </a>
-              . Doplňující souvislosti:{" "}
-              <a href={PHMAX_SS_RIZENI_SKOLY_URL} target="_blank" rel="noopener noreferrer" className="status-link">
-                metodické doporučení (ŘŠ)
-              </a>
-              .
-            </p>
-          </div>
-        </div>
-
-        {viewMode === "expert" ? (
-          <p className="hero__note" style={{ marginTop: 10 }}>
-            PHAmax mimo PrŠ (78-62-C/01, 78-62-C/02) dopočítejte plným postupem metodiky MŠMT – navazující kroky a tabulky jsou na{" "}
-            <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
-              stránce metodiky pro SŠ
-            </a>
-            .
-          </p>
-        ) : null}
-
-        <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
-          <div className="hero-zone-actions__toolbar-row">
-          <div className="field field--hero-select hero-actions__example hero-ss-example-select">
-            <span className="field__label field__label--hero" id="ss-hero-example-label">
-              Ukázkový příklad
-            </span>
-            <HeroExampleSelect
-              id="ss-hero-example-select"
-              aria-labelledby="ss-hero-example-label"
-              aria-describedby="ss-hero-example-legend"
-              title="Ukázkový orientační příklad pro SŠ. Po načtení upravte vstupy podle reálné evidence tříd školy."
-              value={selectedSsHeroExample}
-              groups={ssHeroExampleGroups}
-              onChange={(key) =>
-                applySsHeroExampleSelection(key as SsHeroExampleKey, {
-                  setSelected: setSelectedSsHeroExample,
-                  applySnapshot: ss.applySsRowsSnapshot,
-                  setNotice: ss.setUiNotice,
-                })
-              }
-            />
-            <p
-              id="ss-hero-example-legend"
-              className="muted-text"
-              style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "44rem", lineHeight: 1.5 }}
-            >
-              {SS_HERO_EXAMPLE_SELECT_LEGEND}
-            </p>
-            {selectedSsHeroExampleMeta ? (
-              <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "44rem", lineHeight: 1.5 }}>
-                <strong>Tento příklad ilustruje:</strong> {selectedSsHeroExampleMeta.title}
-              </p>
-            ) : null}
-          </div>
-
-          <HeroActionsDrawer>
-            <HeroCompactToolbar
-              primary={
-                <>
-                  <HeroToolbarSaveButton onClick={ss.saveSnapshotManually} />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label={ssUnitsUi.addRow}
-                    title="Přidá nový řádek na konec tabulky evidence dílčích jednotek níže."
-                    icon={<IconAddTableRow />}
-                    onClick={ss.addRow}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label="Export CSV"
-                    icon={<IconCsv />}
-                    onClick={ss.handleExportCsv}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label={ss.xlsxExportBusy ? "Připravuji Excel…" : "Export Excel"}
-                    icon={ss.xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
-                    disabled={ss.xlsxExportBusy}
-                    aria-busy={ss.xlsxExportBusy}
-                    onClick={() => void ss.handleExportXlsx()}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn btn--light"
-                    label="Tisk stránky"
-                    icon={<IconPrint />}
-                    onClick={() => window.print()}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn btn--light"
-                    label="Tisk shrnutí"
-                    icon={<IconPrintSummary />}
-                    onClick={ss.printSummaryWindow}
-                  />
-                </>
-              }
-              backups={
-                <>
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label="Obnovit uložený průběh"
-                    icon={<IconRestoreQuick />}
-                    onClick={ss.restoreSnapshot}
-                  />
-                  <div className="hero-named-grid hero-actions-tiered__named" aria-label="Pojmenované zálohy">
-                    <p className="hero-actions-tiered__hint">
-                      {namedBackupsMicrocopy(PHMAX_SS_MAX_NAMED_SNAPSHOTS, "kompletní stav řádkové evidence SŠ a označení pro export")}
-                    </p>
-                    <label className="hero-named-field hero-named-field--export">
-                      <span className="field__label field__label--hero-named">Označení pro export</span>
-                      <input
-                        type="text"
-                        className="input"
-                        placeholder="např. název školy, školní rok…"
-                        value={ss.exportLabel}
-                        onChange={(e) => ss.setExportLabel(e.target.value)}
-                        aria-label="Označení pro export a shrnutí"
-                      />
-                    </label>
-                    <label className="hero-named-field hero-named-field--backup-name">
-                      <span className="field__label field__label--hero-named">{NAMED_BACKUPS_NAME_LABEL}</span>
-                      <input
-                        type="text"
-                        className="input"
-                        placeholder="např. stav 2026/27"
-                        value={ss.namedSaveName}
-                        onChange={(e) => ss.setNamedSaveName(e.target.value)}
-                        aria-label="Název pojmenované zálohy"
-                      />
-                    </label>
-                    <div className="hero-named-field hero-named-field--save">
-                      <button type="button" className="btn ghost btn--hero-named" onClick={ss.saveNamedSsSnapshot}>
-                        {NAMED_BACKUPS_SAVE_LABEL}
-                      </button>
-                    </div>
-                    <div className="hero-named-field hero-named-field--select">
-                      <select
-                        className="input"
-                        value={ss.selectedNamedId}
-                        onChange={(e) => ss.setSelectedNamedId(e.target.value)}
-                        aria-label="Vybrat uloženou zálohu"
-                      >
-                        <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
-                        {ss.namedSnapshots.map((n: SsNamedSnapshot) => (
-                          <option key={n.id} value={n.id}>
-                            {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="hero-named-field hero-named-field--restore-delete">
-                      <button type="button" className="btn ghost btn--hero-named" onClick={ss.restoreNamedSsSnapshot}>
-                        {NAMED_BACKUPS_RESTORE_LABEL}
-                      </button>
-                      <button type="button" className="btn ghost btn--hero-named" onClick={ss.deleteNamedSsSnapshot}>
-                        {NAMED_BACKUPS_DELETE_LABEL}
-                      </button>
-                    </div>
-                  </div>
-                </>
-              }
-              technical={
-                <>
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label={ssUnitsUi.removeLastRowHeroLabel}
-                    title={ssUnitsUi.removeLastRowHeroTitle}
-                    icon={<IconRemoveTableRow />}
-                    onClick={ss.removeLastRow}
-                  />
-                  <button type="button" className="btn ghost btn--hero-named ux-expert-only" onClick={ss.handleCompareSsWithNamedSnapshot}>
-                    {NAMED_BACKUPS_COMPARE_JSON_LABEL}
-                  </button>
-                  <button type="button" className="btn ghost btn--hero-named ux-expert-only" onClick={ss.handleExportSsAuditJson}>
-                    Stáhnout audit (JSON)
-                  </button>
-                  <div className="ux-expert-only hero-actions-tiered__compare">
-                    <CompareVariantsPanel
-                      title="Porovnání 2 variant (náhled)"
-                      result={ssComparePreview}
-                      emptyHint="Vyberte pojmenovanou zálohu s validními řádky pro porovnání s aktuálním stavem."
-                      exportSlug="ss"
-                    />
-                  </div>
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label="Kopírovat shrnutí"
-                    icon={<IconCopy />}
-                    onClick={() => void ss.copySummaryToClipboard()}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label="Vymazat uložená data"
-                    icon={<IconClearStored />}
-                    onClick={ss.clearStoredSnapshot}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label="Vymazat formulář"
-                    icon={<IconResetAll />}
-                    onClick={ss.resetAll}
-                  />
-                </>
-              }
-            />
-          </HeroActionsDrawer>
-
-          </div>
-        </section>
-      </header>
+      <SsHeroHeader
+        heroHeaderRef={heroHeaderRef}
+        productView={productView}
+        setProductView={setProductView}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        displayDensity={displayDensity}
+        setDisplayDensity={setDisplayDensity}
+        focusMode={focusMode}
+        setFocusMode={setFocusMode}
+        glossaryTriggerRef={glossaryTriggerRef}
+        glossaryOpen={glossaryOpen}
+        setGlossaryOpen={setGlossaryOpen}
+        guideOpen={ssGuideOpen}
+        toggleGuide={toggleSsGuideFromHero}
+        helpButtonRef={ssHelpButtonRef}
+        phmaxHeroValue={phmaxHeroValue}
+        phamaxHeroValue={phamaxHeroValue}
+        rowCount={ssMetrics.rowCount}
+        verdictLabel={ssVerdict.label}
+        toolbar={{
+          selectedExample: selectedSsHeroExample,
+          exampleGroups: ssHeroExampleGroups,
+          exampleLegend: SS_HERO_EXAMPLE_SELECT_LEGEND,
+          selectedExampleMetaTitle: selectedSsHeroExampleMeta?.title ?? null,
+          onExampleChange: (key) =>
+            applySsHeroExampleSelection(key, {
+              setSelected: setSelectedSsHeroExample,
+              applySnapshot: ss.applySsRowsSnapshot,
+              setNotice: ss.setUiNotice,
+            }),
+          maxNamedSnapshots: PHMAX_SS_MAX_NAMED_SNAPSHOTS,
+          addRowLabel: ssUnitsUi.addRow,
+          removeLastRowLabel: ssUnitsUi.removeLastRowHeroLabel,
+          removeLastRowTitle: ssUnitsUi.removeLastRowHeroTitle,
+          onSaveSnapshot: ss.saveSnapshotManually,
+          onAddRow: ss.addRow,
+          onRemoveLastRow: ss.removeLastRow,
+          onExportCsv: ss.handleExportCsv,
+          onExportXlsx: ss.handleExportXlsx,
+          xlsxExportBusy: ss.xlsxExportBusy,
+          onPrintSummary: ss.printSummaryWindow,
+          onRestoreSnapshot: ss.restoreSnapshot,
+          exportLabel: ss.exportLabel,
+          setExportLabel: ss.setExportLabel,
+          namedSaveName: ss.namedSaveName,
+          setNamedSaveName: ss.setNamedSaveName,
+          namedSnapshots: ss.namedSnapshots,
+          selectedNamedId: ss.selectedNamedId,
+          setSelectedNamedId: ss.setSelectedNamedId,
+          onSaveNamedSnapshot: ss.saveNamedSsSnapshot,
+          onRestoreNamedSnapshot: ss.restoreNamedSsSnapshot,
+          onDeleteNamedSnapshot: ss.deleteNamedSsSnapshot,
+          onCompareWithNamedSnapshot: ss.handleCompareSsWithNamedSnapshot,
+          onExportAuditJson: ss.handleExportSsAuditJson,
+          comparePreview: ssComparePreview,
+          onCopySummary: ss.copySummaryToClipboard,
+          onClearStored: ss.clearStoredSnapshot,
+          onResetAll: ss.resetAll,
+        }}
+      />
 
       <GlossaryDialog
         open={glossaryOpen}
@@ -820,60 +571,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         scopeHint="SŠ – pojmy podle metodiky stanovení PHmax a PHAmax pro střední vzdělávání (kontrola znění oproti oficiálnímu dokumentu)."
       />
 
-      <QuickOnboarding
-        title="Nápověda – střední školy (PHmax / PHAmax)"
-        open={ssGuideOpen}
-        onDismiss={dismissSsGuide}
-        anchorId="ss-quick-onboarding"
-        returnFocusRef={ssHelpButtonRef}
-      >
-        <p>
-          <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
-        </p>
-        <p>{LAY_USER_QUICK_START_SS}</p>
-        <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
-        <p>
-          Kalkulačka je orientační; výsledky ověřte vůči aktuální{" "}
-          <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
-            metodice MŠMT pro SŠ
-          </a>{" "}
-          a výkazům školy. Vedle tlačítka <strong>Nápověda</strong> je <strong>Slovníček</strong> s definicemi pojmů (PHmax,
-          typ třídy, víceobor…).
-        </p>
-        <p>
-          <strong>1. fáze – rámec vstupů a výstupů.</strong> Shrnuje, co metodika očekává jako vstupy školy a co dopočítá
-          aplikace. Můžete si vést <strong>volitelné poznámky</strong> (ukládají se jen v tomto prohlížeči, odděleně od
-          evidence řádků).
-        </p>
-        <p>
-          <strong>2. fáze – evidence tříd a skupin.</strong> Každý <strong>řádek</strong> = jedna dílčí jednotka: přesný{" "}
-          <strong>kód oboru z RVP</strong>, průměr žáků, počet tříd, forma studia, typ třídy. Sloupec <strong>Režim PHmax</strong>{" "}
-          nechte na <em>Automaticky</em> (podle počtu oborů ve třídě a příznaku talentové 82) nebo režim ručně vynuťte. U
-          více oborů ve stejné třídě vyplňte <strong>Další obory</strong> a volitelně <strong>Žáci / obor</strong> – níže
-          proběhne kontrola pravidel. U každého řádku můžete řádek také <strong>Odstranit</strong> (konkrétní řádek).
-        </p>
-        <p>
-          <strong>PHAmax v aplikaci.</strong> V horním přehledu se PHAmax dopočítává jen pro{" "}
-          <strong>Praktickou školu</strong> (kódy <code className="methodology-strip__code">78-62-C/01</code>,{" "}
-          <code className="methodology-strip__code">78-62-C/02</code>) v <strong>denní</strong> formě podle tabulky z
-          metodiky. U ostatních oborů použijte plný postup MŠMT – PHAmax neinterpretujte z této verze jako úplný.
-        </p>
-        <p>
-          <strong>Horní nástrojová lišta (pod ukázkovým příkladem).</strong> Zleva doprava typicky: <strong>tisk</strong>{" "}
-          stránky, <strong>Přidat řádek</strong> a <strong>Odstranit poslední řádek</strong> (evidence v tabulce níže;
-          vždy zůstane alespoň jeden řádek), rychlé <strong>uložení / obnovení</strong> průběhu v prohlížeči,{" "}
-          <strong>vymazání uložených dat</strong> nebo <strong>vyčištění formuláře</strong>, pojmenované zálohy (max.{" "}
-          {PHMAX_SS_MAX_NAMED_SNAPSHOTS}), export <strong>CSV</strong> a <strong>Excel</strong>, kopie a tisk textového
-          shrnutí,           <strong>auditní JSON</strong>. Řádky evidence se ukládají automaticky v tomto prohlížeči.
-        </p>
-        <p>{EXPORT_ORIENTACNI_NOTE}</p>
-        <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
-        <p>
-          Po vyplnění sledujte sekci <strong>Orientační výpočet PHmax</strong> (řádek po řádku) a blok{" "}
-          <strong>Kontrola pravidel</strong> u víceoborových tříd. U řádku lze rozbalit vysvětlení výpočtu („proč takto
-          PHmax“) a vyhodnocení pravidel.
-        </p>
-      </QuickOnboarding>
+      <SsQuickOnboardingGuide open={ssGuideOpen} onDismiss={dismissSsGuide} returnFocusRef={ssHelpButtonRef} />
       {ssBasicWizardActive ? (
         <ProductBasicWizard
           productLabel="SŠ"

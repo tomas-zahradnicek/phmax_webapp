@@ -52,7 +52,7 @@ describe("UX contract: basic onboarding steps + CTA", () => {
     expect(readSource("src/ProductBasicWizard.tsx")).toContain("document.getElementById");
 
     expect(ss).toContain("SS_HERO_EXAMPLE_SELECT_ID");
-    expect(ss).toContain('id="ss-hero-example-select"');
+    expect(readSource("src/ss/SsHeroToolbar.tsx")).toContain('id="ss-hero-example-select"');
     expect(readSource("src/ss-basic-wizard.ts")).toContain('SS_HERO_EXAMPLE_SELECT_ID = "ss-hero-example-select"');
 
     expect(nv75).toContain("NV75_HERO_EXAMPLE_SELECT_ID");

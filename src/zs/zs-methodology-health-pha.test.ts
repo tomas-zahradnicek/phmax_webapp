@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { B11_B13, B17_B21, B22_B25, PHA_TABLE, pickBand, round2 } from "../phmax-zs-logic";
-import { findZsModeBySections, loadZsHeroExample } from "./zs-hero-example-load";
+import { findZsModeBySections, loadZsHeroExample, ZS_WIZARD_CHOICE_TO_EXAMPLE } from "./zs-hero-example-load";
 import type { ZsFormSnapshotSetters } from "./zs-form-snapshot";
 
 function mockSetters(): ZsFormSnapshotSetters {
@@ -148,5 +148,10 @@ describe("ZŠ metodika B11–B13 a B45", () => {
     const band = pickBand(10, B22_B25.gym8);
     expect(band.value).toBe(21);
     expect(round2(2 * band.value)).toBe(42);
+  });
+
+  it("ZS_WIZARD_CHOICE_TO_EXAMPLE mapuje gym a menšinu", () => {
+    expect(ZS_WIZARD_CHOICE_TO_EXAMPLE.ph_gym).toBe("gymnazium_phmax");
+    expect(ZS_WIZARD_CHOICE_TO_EXAMPLE.ph_minority).toBe("mensina_phmax");
   });
 });

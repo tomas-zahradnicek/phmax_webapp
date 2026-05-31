@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "ZŠ – shell a workflow dock v `ZsCalculatorShell` / `ZsWorkflowDockPanel`; menší hlavní stránka.",
-    "PV a ŠD – hero header, toolbar a quick onboarding jako u ZŠ.",
-    "Metodika – hero ukázky gymnázium a menšina; E2E wizard scroll ŠD/NV75 a dashboard PV ok smoke.",
+    "PV/ŠD – calculator shell a workflow dock; SŠ/NV75 hero parita s ostatními moduly.",
+    "Dashboard Σ – orientační součet PHmax z autosave (PV + ŠD + ZŠ + SŠ).",
+    "ZŠ průvodce – volby gymnázium a menšina; E2E wizard scroll SŠ a dashboard cross-PHmax.",
   ],
 };

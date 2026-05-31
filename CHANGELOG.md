@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.2 (2026-05-31)
+
+### UX a refaktor
+- PV/ŠD: `PvCalculatorShell`, `SdCalculatorShell` a workflow dock panely – menší hlavní stránky.
+- SŠ a NV75: hero header, toolbar a quick onboarding – parita s ostatními moduly.
+
+### Dashboard a roadmapa
+- Orientační **součet PHmax** (PV + ŠD + ZŠ + SŠ) z autosave; `docs/product-roadmap.md`.
+
+### Metodika
+- ZŠ průvodce: volby **gymnázium** a **menšina** načtou hero ukázky.
+
+### Kvalita
+- E2E desktop: wizard scroll SŠ; dashboard smoke pro ok PV/SŠ a cross-PHmax.
+
 ## 0.3.1 (2026-05-31)
 
 ### UX a refaktor

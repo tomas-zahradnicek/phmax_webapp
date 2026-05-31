@@ -11,6 +11,12 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.3.2 (UX)
+
+- **PV/ŠD:** calculator shell a workflow dock panely.
+- **SŠ/NV75:** hero header, toolbar a quick onboarding.
+- **Dashboard Σ:** orientační součet PHmax; roadmapa v `docs/product-roadmap.md`.
+
 ## Verze 0.3.1 (UX)
 
 - **ZŠ:** `ZsCalculatorShell`, `ZsWorkflowDockPanel` – shell a dock mimo hlavní stránku.

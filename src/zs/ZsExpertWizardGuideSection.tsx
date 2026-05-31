@@ -1,15 +1,8 @@
 import React from "react";
 import { ZS_WIZARD_CHOICE_TITLES } from "./zs-wizard-choices";
+import type { ZsWizardChoice } from "./zs-form-snapshot";
 
-type WizardChoice =
-  | ""
-  | "php_small"
-  | "php_deductions"
-  | "ph_inclusion"
-  | "ph_psych"
-  | "ph_health"
-  | "ph_mixed"
-  | "ph_prep";
+type WizardChoice = ZsWizardChoice;
 
 type ZsExpertWizardGuideSectionProps = {
   wizardChoice: WizardChoice;
