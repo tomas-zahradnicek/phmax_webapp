@@ -39,15 +39,14 @@ describe("UX contract: basic onboarding steps + CTA", () => {
 
   it("CTA cíl míří na existující hero example select id", () => {
     const pv = readSource("src/PhmaxPvPage.tsx");
-    const sd = readSource("src/PhmaxSdPage.tsx");
     const ss = readSource("src/PhmaxSsPage.tsx");
     const nv75 = readSource("src/PhmaxNv75DeputyPage.tsx");
 
     expect(pv).toContain('heroExampleSelectId={PV_HERO_EXAMPLE_SELECT_ID}');
     expect(readSource("src/pv-basic-wizard.ts")).toContain('PV_HERO_EXAMPLE_SELECT_ID = "pv-hero-example-select"');
-    expect(pv).toContain('id="pv-hero-example-select"');
+    expect(readSource("src/pv/PvHeroToolbar.tsx")).toContain('id="pv-hero-example-select"');
 
-    expect(sd).toContain('id="sd-hero-example-select"');
+    expect(readSource("src/sd/SdHeroToolbar.tsx")).toContain('id="sd-hero-example-select"');
     expect(readSource("src/sd-basic-wizard.ts")).toContain('SD_HERO_EXAMPLE_SELECT_ID = "sd-hero-example-select"');
     expect(readSource("src/SdBasicWizard.tsx")).toContain("SD_HERO_EXAMPLE_SELECT_ID");
     expect(readSource("src/ProductBasicWizard.tsx")).toContain("document.getElementById");

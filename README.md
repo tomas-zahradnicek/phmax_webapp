@@ -11,6 +11,12 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.3.1 (UX)
+
+- **ZŠ:** `ZsCalculatorShell`, `ZsWorkflowDockPanel` – shell a dock mimo hlavní stránku.
+- **PV/ŠD:** hero header, toolbar a quick onboarding – parita se ZŠ.
+- **Metodika:** hero ukázky gymnázium a menšina; E2E wizard scroll ŠD/NV75.
+
 ## Verze 0.3.0 (UX)
 
 - **ZŠ:** `ZsHeroHeader`, `ZsQuickOnboardingGuide` – další refaktor hlavní stránky.

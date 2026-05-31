@@ -42,8 +42,9 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
     expect(src).toContain("buildZsWorkflow");
     expect(readSource("src/zs/ZsHeroHeader.tsx")).toContain("incompleteSections > 0");
     expect(src).toContain("warnings.length > 0");
-    expect(src).toContain("workflowSteps={zsBasicWizardActive ? [] : zsWorkflow.steps}");
-    expect(src).toContain("CalculatorWorkflowDock");
+    expect(src).toContain("zsWorkflowSteps: zsWorkflow.steps");
+    expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("workflowSteps={zsBasicWizardActive ? [] : zsWorkflowSteps}");
+    expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("CalculatorWorkflowDock");
     expect(readSource("src/zs/zs-form-validation.ts")).toContain(
       '{ label: "Vyplnit povinné vstupy v aktivních modulech", state: "active" }',
     );

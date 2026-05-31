@@ -46,8 +46,8 @@ describe("UX contract: compare panel side-by-side pattern", () => {
   it("all products render compare preview panel in named snapshots section", () => {
     const zs = readSource("src/zs/ZsHeroToolbar.tsx");
     const ss = readSource("src/PhmaxSsPage.tsx");
-    const pv = readSource("src/PhmaxPvPage.tsx");
-    const sd = readSource("src/PhmaxSdPage.tsx");
+    const pv = readSource("src/pv/PvHeroToolbar.tsx");
+    const sd = readSource("src/sd/SdHeroToolbar.tsx");
 
     for (const src of [zs, ss, pv, sd]) {
       expect(src).toContain("<CompareVariantsPanel");

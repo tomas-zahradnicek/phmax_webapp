@@ -20,6 +20,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | P1 | Mobilní souhrn: scroll dolů → panel → Skrýt → chip vlevo → Zobrazit | E2E |
 | P2 | Banner + **Přejít k chybě** (prázdné pracoviště / neúplný řádek) | E2E |
 | P2d | Desktop – combobox Příkladové výpočty + workflow dock | E2E desktop |
+| P2n | Dashboard – ok PV není ve Vyžaduje pozornost | E2E desktop |
 | P3 | Průvodce krok **2 Vstupy** → **Přejít k chybě** → sekce vstupů | E2E |
 | P4 | Checklist „Kdy přidat další pracoviště“ u prázdné tabulky | contract |
 | P5 | § 1d odst. 3 – box u řádku + text u souhrnu (bez výpočtu krácení) | contract |

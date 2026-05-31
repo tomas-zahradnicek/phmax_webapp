@@ -327,7 +327,7 @@ test.describe("Dashboard deep-link", () => {
   });
 
   test("ok modul není ve Vyžaduje pozornost", async ({ page }) => {
-    await page.addInitScript(({ sdKey, zsKey, sdWizard, zsWizard }) => {
+    await page.addInitScript(({ sdKey, zsKey, pvKey, sdWizard, zsWizard, pvWizard, pvRowKey }) => {
       localStorage.setItem(sdWizard, "2");
       localStorage.setItem(
         sdKey,
@@ -347,16 +347,37 @@ test.describe("Dashboard deep-link", () => {
           basic2Classes: 0,
         }),
       );
+      localStorage.setItem(pvWizard, "2");
+      localStorage.setItem(
+        pvKey,
+        JSON.stringify({
+          rows: [
+            {
+              id: pvRowKey,
+              label: "",
+              provoz: "celodenni",
+              classCount: 2,
+              avgHours: 8,
+              sec16Count: 0,
+              languageGroups: 0,
+            },
+          ],
+        }),
+      );
     }, {
       sdKey: SD_STORAGE_KEY,
       zsKey: ZS_STORAGE_KEY,
+      pvKey: PV_STORAGE_KEY,
       sdWizard: SD_WIZARD_KEY,
       zsWizard: ZS_WIZARD_KEY,
+      pvWizard: PV_WIZARD_KEY,
+      pvRowKey: "pv-ok-attention-e2e",
     });
 
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: "Vyžaduje pozornost" })).toBeVisible();
     await expect(page.locator(".dash-attention-card__item").filter({ hasText: "ŠD" })).toHaveCount(0);
+    await expect(page.locator(".dash-attention-card__item").filter({ hasText: "PV" })).toHaveCount(0);
     await expect(page.locator(".dash-attention-card__item").filter({ hasText: "ZŠ" })).toHaveCount(1);
   });
 });

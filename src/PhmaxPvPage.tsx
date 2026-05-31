@@ -4,7 +4,6 @@ import {
   APP_AUTHOR_DISPLAY_NAME,
   APP_AUTHOR_EMAIL,
   BROWSER_ERROR_NEXT_STEP_HINT,
-  CALCULATOR_LIMITS_NOTE,
   MSG_DATA_UNEXPECTED_SHAPE,
   MSG_NAMED_BACKUP_PICK_FIRST,
   MSG_NAMED_BACKUP_PICK_TO_COMPARE,
@@ -12,17 +11,6 @@ import {
   MSG_NO_LOCAL_AUTOSAVE_DATA,
   INLINE_VALIDATION_MSG_POSITIVE_INTEGER,
   INLINE_VALIDATION_MSG_REQUIRED_FIELD,
-  LAY_USER_QUICK_START_PV,
-  LAY_USER_QUICK_START_MOBILE_UX,
-  EXPORT_ORIENTACNI_NOTE,
-  HERO_ACTIONS_ICON_LEGEND,
-  NAMED_BACKUPS_COMPARE_JSON_LABEL,
-  NAMED_BACKUPS_DELETE_LABEL,
-  NAMED_BACKUPS_NAME_LABEL,
-  NAMED_BACKUPS_RESTORE_LABEL,
-  NAMED_BACKUPS_SAVE_LABEL,
-  NAMED_BACKUPS_SELECT_PLACEHOLDER,
-  namedBackupsMicrocopy,
   namedBackupSavedNotice,
   CALCULATOR_WORKSPACE_DOCK_LABEL,
   PHMAX_PV_ONBOARDING_LS_KEY,
@@ -41,39 +29,21 @@ import {
 } from "./confirm-destructive";
 import { buildExportMetaRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
-import { HeroExampleSelect, heroExampleOptionsFromKeys } from "./HeroExampleSelect";
-import { HeroActionsDrawer } from "./HeroActionsDrawer";
-import {
-  HeroIconActionButton,
-  IconClearStored,
-  IconCopy,
-  IconCsv,
-  IconExcel,
-  IconPrint,
-  IconPrintSummary,
-  IconResetAll,
-  IconRestoreQuick,
-  IconSpinner,
-} from "./HeroActionIconButton";
+import { heroExampleOptionsFromKeys } from "./HeroExampleSelect";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorProductShell } from "./CalculatorProductShell";
-import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
-import { HeroCompactToolbar, HeroToolbarSaveButton } from "./HeroCompactToolbar";
-import { HeroExpertStrip } from "./HeroExpertStrip";
-import { DisplayDensityToggle } from "./DisplayDensityToggle";
 import { useDisplayDensity } from "./useDisplayDensity";
-import { calculatorShellClassName } from "./calculator-view-mode";
+import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
-import { CompareVariantsPanel } from "./CompareVariantsPanel";
-import { GlossaryIconButton } from "./GlossaryIconButton";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, PvLegisRef } from "./PhmaxProductLegisUi";
-import { QuickOnboarding, QuickOnboardingHeroButton } from "./QuickOnboarding";
 import { useQuickOnboarding } from "./useQuickOnboarding";
+import { PvHeroHeader } from "./pv/PvHeroHeader";
+import { PvQuickOnboardingGuide } from "./pv/PvQuickOnboardingGuide";
 import { useUiNotice } from "./useUiNotice";
 import { ProductBasicWizard } from "./ProductBasicWizard";
 import {
@@ -88,7 +58,7 @@ import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
-import { ProductViewPills, type ProductView } from "./ProductViewPills";
+import type { ProductView } from "./ProductViewPills";
 import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
 import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
 import { createPvProductAuditProtocol } from "./phmax-product-audit";
@@ -367,7 +337,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
   const [focusMode, setFocusMode] = useCalculatorFocusMode();
   const heroHeaderRef = useRef<HTMLElement>(null);
-  const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
+  const [viewMode, setViewMode] = useState<CalculatorViewMode>(() => {
     try {
       const stored = localStorage.getItem(PV_VIEW_MODE_LS_KEY);
       return stored === "expert" ? "expert" : "basic";
@@ -804,284 +774,63 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     <div
       className={`${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${pvBasicWizardActive ? ` product-basic-wizard-active pv-wizard-step-${pvWizardStep}` : ""}${pvHasInputIssue ? " app-shell--validation-hint" : ""}`}
     >
-      <header className="hero hero--feature" ref={heroHeaderRef}>
-        <div className="hero__orb hero__orb--one" />
-        <div className="hero__orb hero__orb--two" />
+      <PvHeroHeader
+        heroHeaderRef={heroHeaderRef}
+        productView={productView}
+        setProductView={setProductView}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        displayDensity={displayDensity}
+        setDisplayDensity={setDisplayDensity}
+        focusMode={focusMode}
+        setFocusMode={setFocusMode}
+        glossaryTriggerRef={glossaryTriggerRef}
+        glossaryOpen={glossaryOpen}
+        setGlossaryOpen={setGlossaryOpen}
+        guideOpen={guideOpen}
+        toggleGuide={toggleGuide}
+        helpButtonRef={helpButtonRef}
+        phmaxTotalDisplay={aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}
+        phaMaxDisplay={aggregate.phaSum > 0 ? aggregate.phaSum : "–"}
+        workplaceCount={rows.length}
+        verdictLabel={pvVerdict.label}
+        aggregateIncomplete={aggregate.incomplete}
+        toolbar={{
+          selectedExample: selectedPvHeroExample,
+          exampleGroups: pvHeroExampleGroups,
+          exampleLegend: PV_HERO_EXAMPLE_SELECT_LEGEND,
+          selectedExampleMetaTitle: selectedPvHeroExampleMeta?.title ?? null,
+          onExampleChange: (key) =>
+            applyPvHeroExampleSelection(key, {
+              setSelected: setSelectedPvHeroExample,
+              setRows,
+              setNotice: setUiNotice,
+            }),
+          maxNamedSnapshots: PV_MAX_NAMED_SNAPSHOTS,
+          onSaveSnapshot: savePvSnapshotManually,
+          onExportCsv: handleExportCsv,
+          onExportXlsx: handleExportXlsx,
+          xlsxExportBusy,
+          onPrintSummary: printPvSummary,
+          onRestoreSnapshot: restorePvSnapshot,
+          namedSaveName,
+          setNamedSaveName,
+          namedSnapshots,
+          selectedNamedId,
+          setSelectedNamedId,
+          onSaveNamedSnapshot: saveNamedSnapshot,
+          onRestoreNamedSnapshot: restoreNamedSnapshot,
+          onDeleteNamedSnapshot: deleteNamedSnapshot,
+          onCompareWithNamedSnapshot: handleCompareWithNamedSnapshot,
+          onExportAuditJson: handleExportAuditJson,
+          comparePreview: pvComparePreview,
+          onCopySummary: copyPvSummary,
+          onClearStored: clearPvStoredSnapshot,
+          onResetAll: resetPvAll,
+        }}
+      />
 
-        <div className="hero__pills-row">
-          <ProductViewPills productView={productView} setProductView={setProductView} />
-          <div className="hero__pills-row-trailing">
-            <div className="checks" role="group" aria-label="Režim zobrazení PV">
-              <label>
-                <input
-                  type="radio"
-                  name="pv-view-mode"
-                  checked={viewMode === "basic"}
-                  onChange={() => setViewMode("basic")}
-                />
-                Základní
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="pv-view-mode"
-                  checked={viewMode === "expert"}
-                  onChange={() => setViewMode("expert")}
-                />
-                Expertní
-              </label>
-            </div>
-            <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="pv-display-density" />
-            <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
-            <GlossaryIconButton
-              ref={glossaryTriggerRef}
-              className="glossary-icon-btn--hero"
-              expanded={glossaryOpen}
-              onClick={() => setGlossaryOpen(true)}
-            />
-            <QuickOnboardingHeroButton guideOpen={guideOpen} onToggle={toggleGuide} buttonRef={helpButtonRef} />
-          </div>
-        </div>
-
-        <HeroExpertStrip
-          title="PHmax a PHAmax – předškolní vzdělávání"
-          kpis={[
-            {
-              label: "PHmax celkem",
-              value: aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum,
-            },
-            { label: "PHAmax", value: aggregate.phaSum > 0 ? aggregate.phaSum : "–" },
-            { label: "Pracoviště", value: rows.length },
-            { label: "Stav", value: pvVerdict.label },
-          ]}
-        />
-
-        <div className="grid two hero__grid hero__grid--context">
-          <div>
-            <p className="hero-zone-label">A. Kontext výpočtu</p>
-            <h1 className="hero__title hero__title--sd">PHmax a PHAmax – předškolní vzdělávání</h1>
-            <p className="hero__text hero__text--sd">
-              Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a{" "}
-              <strong>vyhlášky č. 14/2005 Sb.</strong> Podrobnosti k pracovištím, součtům PHmax a výkazům najdete v{" "}
-              <strong>nápovědě</strong>.
-            </p>
-            {aggregate.incomplete ? (
-              <p className="hero__note hero__text--sd" style={{ marginTop: 10 }}>
-                * Součet PHmax nezahrnuje pracoviště s neplatným vstupem – opravte je v tabulce níže.
-              </p>
-            ) : null}
-          </div>
-        </div>
-
-        <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
-          <div className="hero-zone-actions__toolbar-row">
-          <div
-            className="field field--hero-select hero-actions__example hero-pv-example-select"
-           
-          >
-          <span className="field__label field__label--hero" id="pv-hero-example-label">
-            Ukázkový příklad
-          </span>
-          <HeroExampleSelect
-            id="pv-hero-example-select"
-            aria-labelledby="pv-hero-example-label"
-            aria-describedby="pv-hero-example-legend"
-            title="Ukázkové příklady z metodiky a z přílohy k PHmax / PHAmax u předškolního vzdělávání. Najeďte na řádek pro detaily."
-            value={selectedPvHeroExample}
-            groups={pvHeroExampleGroups}
-            onChange={(key) =>
-              applyPvHeroExampleSelection(key as PvHeroExampleKey, {
-                setSelected: setSelectedPvHeroExample,
-                setRows,
-                setNotice: setUiNotice,
-              })
-            }
-          />
-          <p
-            id="pv-hero-example-legend"
-            className="muted-text"
-            style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}
-          >
-            {PV_HERO_EXAMPLE_SELECT_LEGEND}
-          </p>
-            {selectedPvHeroExampleMeta ? (
-              <p className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
-                <strong>Očekávaný výsledek vybrané ukázky:</strong> {selectedPvHeroExampleMeta.title}
-              </p>
-            ) : null}
-          </div>
-
-          <HeroActionsDrawer>
-            <HeroCompactToolbar
-              primary={
-                <>
-                  <HeroToolbarSaveButton onClick={savePvSnapshotManually} />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label="Export CSV"
-                    icon={<IconCsv />}
-                    onClick={handleExportCsv}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label={xlsxExportBusy ? "Připravuji Excel…" : "Export Excel"}
-                    icon={xlsxExportBusy ? <IconSpinner /> : <IconExcel />}
-                    disabled={xlsxExportBusy}
-                    aria-busy={xlsxExportBusy}
-                    onClick={() => void handleExportXlsx()}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn btn--light"
-                    label="Tisk stránky"
-                    icon={<IconPrint />}
-                    onClick={() => window.print()}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn btn--light"
-                    label="Tisk shrnutí"
-                    icon={<IconPrintSummary />}
-                    onClick={printPvSummary}
-                  />
-                </>
-              }
-              backups={
-                <>
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label="Obnovit uložený průběh"
-                    icon={<IconRestoreQuick />}
-                    onClick={restorePvSnapshot}
-                  />
-                  <div className="hero-named-grid hero-named-grid--simple hero-actions-tiered__named" aria-label="Pojmenované zálohy">
-                    <p className="hero-actions-tiered__hint">
-                      {namedBackupsMicrocopy(PV_MAX_NAMED_SNAPSHOTS, "kompletní stav pracovišť předškolního výpočtu")}
-                    </p>
-                    <label className="hero-named-field hero-named-field--backup-name">
-                      <span className="field__label field__label--hero-named">{NAMED_BACKUPS_NAME_LABEL}</span>
-                      <input
-                        type="text"
-                        className="input"
-                        placeholder="např. varianta A"
-                        value={namedSaveName}
-                        onChange={(e) => setNamedSaveName(e.target.value)}
-                        aria-label="Název pojmenované zálohy"
-                      />
-                    </label>
-                    <div className="hero-named-field hero-named-field--save">
-                      <button type="button" className="btn ghost btn--hero-named" onClick={saveNamedSnapshot}>
-                        {NAMED_BACKUPS_SAVE_LABEL}
-                      </button>
-                    </div>
-                    <div className="hero-named-field hero-named-field--select">
-                      <select
-                        className="input"
-                        value={selectedNamedId}
-                        onChange={(e) => setSelectedNamedId(e.target.value)}
-                        aria-label="Vybrat uloženou zálohu"
-                      >
-                        <option value="">{NAMED_BACKUPS_SELECT_PLACEHOLDER}</option>
-                        {namedSnapshots.map((n) => (
-                          <option key={n.id} value={n.id}>
-                            {n.name} ({new Date(n.savedAt).toLocaleString("cs-CZ")})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="hero-named-field hero-named-field--restore-delete">
-                      <button type="button" className="btn ghost btn--hero-named" onClick={restoreNamedSnapshot}>
-                        {NAMED_BACKUPS_RESTORE_LABEL}
-                      </button>
-                      <button type="button" className="btn ghost btn--hero-named" onClick={deleteNamedSnapshot}>
-                        {NAMED_BACKUPS_DELETE_LABEL}
-                      </button>
-                    </div>
-                  </div>
-                </>
-              }
-              technical={
-                <>
-                  <button type="button" className="btn ghost btn--hero-named ux-expert-only" onClick={handleCompareWithNamedSnapshot}>
-                    {NAMED_BACKUPS_COMPARE_JSON_LABEL}
-                  </button>
-                  <button type="button" className="btn ghost btn--hero-named ux-expert-only" onClick={handleExportAuditJson}>
-                    Stáhnout audit (JSON)
-                  </button>
-                  <div className="ux-expert-only hero-actions-tiered__compare">
-                    <CompareVariantsPanel
-                      title="Porovnání 2 variant (náhled)"
-                      result={pvComparePreview}
-                      emptyHint="Vyberte pojmenovanou zálohu pro porovnání s aktuálním stavem."
-                      exportSlug="pv"
-                    />
-                  </div>
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label="Kopírovat shrnutí"
-                    icon={<IconCopy />}
-                    onClick={() => void copyPvSummary()}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label="Vymazat uložená data"
-                    icon={<IconClearStored />}
-                    onClick={clearPvStoredSnapshot}
-                  />
-                  <HeroIconActionButton
-                    showLabel
-                    className="btn ghost"
-                    label="Vymazat formulář"
-                    icon={<IconResetAll />}
-                    onClick={resetPvAll}
-                  />
-                </>
-              }
-            />
-          </HeroActionsDrawer>
-          </div>
-        </section>
-      </header>
-
-      <QuickOnboarding
-        title="Nápověda – předškolní vzdělávání"
-        open={guideOpen}
-        onDismiss={dismissGuide}
-        anchorId="pv-quick-onboarding"
-        returnFocusRef={helpButtonRef}
-      >
-        <p>
-          <strong>Co kalkulačka nedělá:</strong> {CALCULATOR_LIMITS_NOTE}
-        </p>
-        <p>{LAY_USER_QUICK_START_PV}</p>
-        <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
-        <p>
-          Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a vyhlášky č.
-          14/2005 Sb. Každé <strong>číslované pracoviště</strong> ve formuláři (Pracoviště 1, 2…) odpovídá jedné
-          kombinaci <strong>místa (nebo jeho části) a druhu provozu</strong> – stejně jako jeden řádek v tabulkové
-          pomůcce MŠMT. U právnické osoby s více skutečnými pracovišti nebo více druhy provozu přidejte další položku;
-          součet PHmax z pracovišť odpovídá celkovému PHmax (po sečtení dílčích výpočtů dle metodiky). Údaje vycházejí z
-          matrice M 1 (dříve S 1-01); u MŠ při zdravotnickém zařízení z výkazu S 4-01.
-        </p>
-        <p>{EXPORT_ORIENTACNI_NOTE}</p>
-        <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
-        <p>
-          U každého pracoviště zadáváte <strong>druh provozu</strong>, počet tříd, případně navýšení dle vyhlášky a{" "}
-          <strong>průměrnou denní dobu provozu v hodinách</strong> (zařadí se do sloupce tabulky 1–3 přílohy). Máte-li{" "}
-          <strong>odloučená pracoviště</strong> nebo na jednom místě např. celodenní i polodenní provoz, přidejte další
-          pracoviště pro každou kombinaci – v souhrnné tabulce uvidíte dílčí PHmax i <strong>součet</strong>. Krácení PHmax
-          dle § 1d odst. 3 vyhl. 14/2005 zde neřešíme.
-        </p>
-        <p>
-          <strong>Checklist – kdy přidat další pracoviště:</strong> odloučené místo školy; jiný druh provozu na stejném
-          místě (celodenní/polodenní/internátní); nebo oddělená situace, kterou potřebujete vykázat samostatně.
-        </p>
-      </QuickOnboarding>
+      <PvQuickOnboardingGuide open={guideOpen} onDismiss={dismissGuide} returnFocusRef={helpButtonRef} />
       {pvBasicWizardActive ? (
         <ProductBasicWizard
           productLabel="PV"

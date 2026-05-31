@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.1 (2026-05-31)
+
+### UX a refaktor
+- ZŠ: `ZsCalculatorShell`, `ZsWorkflowDockPanel` – shell a workflow dock mimo `PhmaxZsPage`.
+- PV a ŠD: `PvHeroHeader` / `SdHeroHeader`, toolbar a `*QuickOnboardingGuide` – parita s ZŠ.
+
+### Metodika
+- Hero ukázky **gymnázium** a **menšina**; golden testy B17 (menšina) a B23 (gym8).
+
+### Kvalita
+- E2E desktop: wizard scroll ŠD/NV75; dashboard smoke – PV s validními daty není ve Vyžaduje pozornost.
+- Contract testy sladěny s extrahovanými hero/shell komponentami.
+
 ## 0.3.0 (2026-05-31)
 
 ### UX a dashboard

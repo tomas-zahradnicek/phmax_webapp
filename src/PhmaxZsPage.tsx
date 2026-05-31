@@ -29,7 +29,7 @@ import {
 } from "./phmax-zs-logic";
 import type { ZsHeroExampleKey } from "./zs-hero-example-groups";
 import type { CalculatorMode, FormSection } from "./config/calculator-config";
-import { MODE_CONFIG, formatModeRežimStatValue } from "./config/calculator-config";
+import { MODE_CONFIG } from "./config/calculator-config";
 import { getVisibleSections } from "./config/field-visibility";
 import { DEFAULT_MODE } from "./config/default-form-state";
 import { GlossaryDialog } from "./GlossaryDialog";
@@ -48,7 +48,6 @@ import { buildZsConnectedBlocks } from "./phmax-zs-connected-blocks";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import type { PageTocSection } from "./PageTableOfContents";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
@@ -94,7 +93,7 @@ import {
 import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsWarnings } from "./zs/zs-warnings";
 import type { ZsExportBuildInput } from "./zs/zs-export-build";
-import { CalculatorProductShell } from "./CalculatorProductShell";
+import { ZsCalculatorShell } from "./zs/ZsCalculatorShell";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
 import type { PhmaxZsPhmaxPane } from "./PhmaxZsPhmaxSubNav";
@@ -106,7 +105,6 @@ import {
 import {
   BROWSER_ERROR_NEXT_STEP_HINT,
   MSG_NO_LOCAL_AUTOSAVE_DATA,
-  formatZsLayContextLine,
   CALCULATOR_WORKSPACE_DOCK_LABEL,
   PHMAX_ZS_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
@@ -1871,7 +1869,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           />
         ) : null}
 
-        <CalculatorProductShell
+        <ZsCalculatorShell
+          workspaceStickyRef={workspaceStickyRef}
+          workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
           sticky={{
             anchorRef: heroHeaderRef,
             primaryLabel: zsTabPrimaryLabel,
@@ -1881,48 +1881,29 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             onSave: saveSnapshotManually,
             onExport: handleExportCsv,
           }}
-          workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
-          dockSticky
-          dockStickyRef={workspaceStickyRef}
-          dock={
-            <CalculatorWorkflowDock
-              header={
-                <>
-                  <div className="tabs tabs--sticky tabs--sticky-sdlike">
-                    <button type="button" className={tab === "phmax" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("phmax")}>PHmax</button>
-                    <button type="button" className={tab === "pha" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("pha")}>PHAmax</button>
-                    <button type="button" className={tab === "php" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("php")}>PHPmax</button>
-                  </div>
-                  <p className="muted-text workflow-dock__context-line">
-                    {formatZsLayContextLine(MODE_CONFIG[mode].label, tab, incompleteSections)}
-                  </p>
-                </>
-              }
-              tone={zsVerdict.tone}
-              primaryLabel={zsTabPrimaryLabel}
-              primaryValue={zsTabPrimaryValue}
-              statusBadge={zsVerdict.label}
-              stats={[
-                { label: "PHmax", value: totalPhmax },
-                { label: "PHAmax", value: totalPha },
-                { label: "PHPmax", value: totalPhp },
-                { label: "Režim", value: formatModeRežimStatValue(MODE_CONFIG[mode].label) },
-              ]}
-              verdictLabel={zsVerdict.label}
-              verdictDetail={zsDockIssueSummaries.length > 0 ? "" : zsVerdict.detail}
-              issueSummaries={zsDockIssueSummaries}
-              workflowSteps={zsBasicWizardActive ? [] : zsWorkflow.steps}
-              viewMode={viewMode}
-              actions={[
-                ...(firstIssueSection
-                  ? [{ label: "Přejít k chybě", onClick: () => goToSection(firstIssueSection) }]
-                  : []),
-                { label: "Uložit scénář", onClick: saveSnapshotManually },
-                { label: "Export CSV", onClick: handleExportCsv },
-                { label: "Porovnat se zálohou", onClick: handleCompareZsWithNamedSnapshot },
-              ]}
-            />
-          }
+          dock={{
+            tab,
+            setTab,
+            mode,
+            incompleteSections,
+            zsTabPrimaryLabel,
+            zsTabPrimaryValue,
+            totalPhmax,
+            totalPha,
+            totalPhp,
+            zsVerdictTone: zsVerdict.tone,
+            zsVerdictLabel: zsVerdict.label,
+            zsVerdictDetail: zsVerdict.detail,
+            zsDockIssueSummaries,
+            zsBasicWizardActive,
+            zsWorkflowSteps: zsWorkflow.steps,
+            viewMode,
+            firstIssueSection,
+            goToSection,
+            saveSnapshotManually,
+            handleExportCsv,
+            handleCompareZsWithNamedSnapshot,
+          }}
           main={
             <>
 

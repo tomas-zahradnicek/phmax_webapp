@@ -107,26 +107,39 @@ describe("UX TOP 6 contract", () => {
       "src/PhmaxNv75DeputyPage.tsx",
       "src/PhmaxZsPage.tsx",
     ]) {
-      const src = readSource(page);
-      const toolbarSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroToolbar.tsx") : src;
-      const heroSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroHeader.tsx") : src;
+      const toolbarSrc =
+        page === "src/PhmaxZsPage.tsx"
+          ? readSource("src/zs/ZsHeroToolbar.tsx")
+          : page === "src/PhmaxPvPage.tsx"
+            ? readSource("src/pv/PvHeroToolbar.tsx")
+            : page === "src/PhmaxSdPage.tsx"
+              ? readSource("src/sd/SdHeroToolbar.tsx")
+              : readSource(page);
+      const heroSrc =
+        page === "src/PhmaxZsPage.tsx"
+          ? readSource("src/zs/ZsHeroHeader.tsx")
+          : page === "src/PhmaxPvPage.tsx"
+            ? readSource("src/pv/PvHeroHeader.tsx")
+            : page === "src/PhmaxSdPage.tsx"
+              ? readSource("src/sd/SdHeroHeader.tsx")
+              : readSource(page);
       expect(toolbarSrc).toContain("HeroCompactToolbar");
       expect(heroSrc).toContain("DisplayDensityToggle");
-      expect(heroSrc).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
+      expect(heroSrc).toMatch(/hero-zone-actions--toolbar|(Zs|Pv|Sd)HeroToolbar/);
     }
     expect(readSource("src/PhmaxSdPage.tsx")).toContain('data-section="sd-vysledek"');
     expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain('data-section="ss-vysledek"');
     expect(readSource("src/PhmaxNv75DeputyPage.tsx")).toContain("hero-zone-actions");
-    expect(readSource("src/PhmaxZsPage.tsx")).toContain("CalculatorProductShell");
-    expect(readSource("src/PhmaxZsPage.tsx")).toContain("CalculatorWorkflowDock");
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain("ZsCalculatorShell");
+    expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("CalculatorWorkflowDock");
   });
 
   it("ZŠ má CalculatorProductShell (MASTER), CalculatorWorkflowDock a PageTableOfContents", () => {
     const src = readSource("src/PhmaxZsPage.tsx");
     const phmaxTab = readSource("src/zs/ZsPhmaxTabPanel.tsx");
-    expect(src).toContain("CalculatorProductShell");
-    expect(src).toContain("dockSticky");
-    expect(src).toContain("CalculatorWorkflowDock");
+    expect(src).toContain("ZsCalculatorShell");
+    expect(readSource("src/zs/ZsCalculatorShell.tsx")).toContain("dockSticky");
+    expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("CalculatorWorkflowDock");
     expect(src).toMatch(/PageTableOfContents|tocSections=/);
     expect(readSource("src/zs/ZsHeroToolbar.tsx")).toContain("ux-expert-only");
     expect(readSource("src/zs/ZsPhmaxMinoritySection.tsx")).toContain('sectionId="minority"');
@@ -196,9 +209,22 @@ describe("UX TOP 6 contract", () => {
       "src/PhmaxNv75DeputyPage.tsx",
     ]) {
       const src = readSource(page);
-      const heroSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroHeader.tsx") : src;
+      const heroSrc =
+        page === "src/PhmaxZsPage.tsx"
+          ? readSource("src/zs/ZsHeroHeader.tsx")
+          : page === "src/PhmaxPvPage.tsx"
+            ? readSource("src/pv/PvHeroHeader.tsx")
+            : page === "src/PhmaxSdPage.tsx"
+              ? readSource("src/sd/SdHeroHeader.tsx")
+              : readSource(page);
       const onboardingSrc =
-        page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsQuickOnboardingGuide.tsx") : src;
+        page === "src/PhmaxZsPage.tsx"
+          ? readSource("src/zs/ZsQuickOnboardingGuide.tsx")
+          : page === "src/PhmaxPvPage.tsx"
+            ? readSource("src/pv/PvQuickOnboardingGuide.tsx")
+            : page === "src/PhmaxSdPage.tsx"
+              ? readSource("src/sd/SdQuickOnboardingGuide.tsx")
+              : readSource(page);
       expect(src).toContain("useQuickOnboarding");
       expect(heroSrc).toContain("QuickOnboardingHeroButton");
       expect(onboardingSrc).toContain("QuickOnboarding");

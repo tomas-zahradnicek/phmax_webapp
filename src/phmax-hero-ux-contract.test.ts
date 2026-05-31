@@ -16,18 +16,40 @@ const PRODUCT_PAGES = [
   "src/PhmaxZsPage.tsx",
 ] as const;
 
+const HERO_TOOLBAR_BY_PAGE: Partial<Record<(typeof PRODUCT_PAGES)[number], string>> = {
+  "src/PhmaxZsPage.tsx": "src/zs/ZsHeroToolbar.tsx",
+  "src/PhmaxPvPage.tsx": "src/pv/PvHeroToolbar.tsx",
+  "src/PhmaxSdPage.tsx": "src/sd/SdHeroToolbar.tsx",
+};
+
+const HERO_HEADER_BY_PAGE: Partial<Record<(typeof PRODUCT_PAGES)[number], string>> = {
+  "src/PhmaxZsPage.tsx": "src/zs/ZsHeroHeader.tsx",
+  "src/PhmaxPvPage.tsx": "src/pv/PvHeroHeader.tsx",
+  "src/PhmaxSdPage.tsx": "src/sd/SdHeroHeader.tsx",
+};
+
+function heroToolbarSrc(page: (typeof PRODUCT_PAGES)[number]) {
+  const path = HERO_TOOLBAR_BY_PAGE[page];
+  return path ? readSource(path) : readSource(page);
+}
+
+function heroHeaderSrc(page: (typeof PRODUCT_PAGES)[number]) {
+  const path = HERO_HEADER_BY_PAGE[page];
+  return path ? readSource(path) : readSource(page);
+}
+
 describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
   it("všechny produktové stránky mají sticky workspace dock a workflow panel", () => {
     for (const page of PRODUCT_PAGES) {
       const src = readSource(page);
-      const toolbarSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroToolbar.tsx") : src;
-      const heroSrc = page === "src/PhmaxZsPage.tsx" ? readSource("src/zs/ZsHeroHeader.tsx") : src;
-      expect(src, page).toMatch(/CalculatorProductShell|CalculatorWorkspaceLayout/);
-      expect(src, page).toMatch(/calculator-workspace-dock|CalculatorWorkflowDock/);
+      const toolbarSrc = heroToolbarSrc(page);
+      const heroSrc = heroHeaderSrc(page);
+      expect(src, page).toMatch(/CalculatorProductShell|CalculatorWorkspaceLayout|ZsCalculatorShell/);
+      expect(src, page).toMatch(/calculator-workspace-dock|CalculatorWorkflowDock|ZsWorkflowDockPanel|ZsCalculatorShell/);
       expect(toolbarSrc, page).toContain("HeroCompactToolbar");
-      expect(heroSrc, page).toContain("useDisplayDensity");
-      expect(heroSrc, page).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
-      expect(src, page).toContain("CalculatorWorkflowDock");
+      expect(heroSrc, page).toContain("DisplayDensityToggle");
+      expect(heroSrc, page).toMatch(/hero-zone-actions--toolbar|(Zs|Pv|Sd)HeroToolbar/);
+      expect(src, page).toMatch(/CalculatorWorkflowDock|ZsWorkflowDockPanel|ZsCalculatorShell/);
     }
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__block--steps");
     expect(readSource("src/HeroToolbarDropdown.tsx")).toContain("createPortal");
@@ -55,7 +77,7 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
     expect(readSource("src/zs/ZsPhmaxBasicSection.tsx")).toContain('data-phmax-pane="classes"');
     expect(readSource("src/zs/ZsPhmaxMinoritySection.tsx")).toContain('data-phmax-pane="exceptions"');
     expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain('data-phmax-pane="summary"');
-    expect(heroHeader).toContain("ref={heroHeaderRef}");
+    expect(heroHeader).toContain("heroHeaderRef as React.Ref<HTMLElement>");
     expect(heroHeader).toContain("hero__title--zs");
     expect(heroHeader).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
   });

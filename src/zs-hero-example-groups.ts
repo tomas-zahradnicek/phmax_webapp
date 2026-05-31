@@ -15,7 +15,9 @@ export type ZsHeroExampleKey =
   | "inkluzivni_skola"
   | "priloha_phamax_uplna_zs_sec16_zss"
   | "pha_zss_prep_b45"
-  | "zdravotnicke_zs";
+  | "zdravotnicke_zs"
+  | "gymnazium_phmax"
+  | "mensina_phmax";
 
 const ZS_HERO_EXAMPLE_OPTION_TITLES: Partial<Record<Exclude<ZsHeroExampleKey, "">, string>> = {
   priloha_uplna_zs_sec16: ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"],
@@ -28,6 +30,10 @@ const ZS_HERO_EXAMPLE_OPTION_TITLES: Partial<Record<Exclude<ZsHeroExampleKey, ""
     "Škola při psychiatrické nemocnici – samostatné tabulky PHmax pro 1. stupeň, 2. stupeň nebo společnou výuku; průměr často jako vyšší z aktuálního a předchozího sběru (dle zvoleného režimu).",
   zdravotnicke_zs:
     "ZŠ při zdravotnickém zařízení mimo psychiatrii – řádky B11–B13 metodiky ZV, pásma podle průměru žáků ve třídě.",
+  gymnazium_phmax:
+    "Nižší ročníky víceletého gymnázia – řádky B22–B25 metodiky; průměr žáků ve třídě určuje pásmo hodin.",
+  mensina_phmax:
+    "ZŠ s vyučovacím jazykem národnostní menšiny – řádky B17–B21; varianta tabulky dle typu školy.",
   pripravna_trida:
     "Přípravná třída ZŠ a přípravný stupeň ZŠ speciální – PHmax se stanovuje samostatně (mimo součet běžných řádků B1–B28).",
   priloha_phamax_uplna_zs_sec16_zss: `${ZS_LEGIS_PARAGRAPH_TOOLTIPS["zs-16-9"]} ${ZS_LEGIS_PARAGRAPH_TOOLTIPS["phamax-nv123"]}`,
@@ -83,6 +89,16 @@ export const ZS_HERO_EXAMPLE_GROUPS: HeroExampleSelectGroup[] = [
         value: "zdravotnicke_zs",
         label: "ZŠ při zdravotnickém zařízení (mimo psychiatrii, B11–B13)",
         title: ZS_HERO_EXAMPLE_OPTION_TITLES.zdravotnicke_zs,
+      },
+      {
+        value: "gymnazium_phmax",
+        label: "Víceleté gymnázium – nižší ročníky (B22–B25)",
+        title: ZS_HERO_EXAMPLE_OPTION_TITLES.gymnazium_phmax,
+      },
+      {
+        value: "mensina_phmax",
+        label: "ZŠ s jazykem národnostní menšiny (B17–B21)",
+        title: ZS_HERO_EXAMPLE_OPTION_TITLES.mensina_phmax,
       },
       {
         value: "pripravna_trida",

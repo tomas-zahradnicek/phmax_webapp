@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "ZŠ – hero a nápověda v `ZsHeroHeader` a `ZsQuickOnboardingGuide`; menší hlavní stránka.",
-    "Dashboard Σ – PV/NV75 v průvodci, text k ukázkám v horní liště a nápovědě.",
-    "E2E desktop modulový smoke (PV–NV75); unit testy scroll handlerů PV, ŠD a NV75.",
+    "ZŠ – shell a workflow dock v `ZsCalculatorShell` / `ZsWorkflowDockPanel`; menší hlavní stránka.",
+    "PV a ŠD – hero header, toolbar a quick onboarding jako u ZŠ.",
+    "Metodika – hero ukázky gymnázium a menšina; E2E wizard scroll ŠD/NV75 a dashboard PV ok smoke.",
   ],
 };

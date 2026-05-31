@@ -23,7 +23,7 @@ describe("ŠD acceptance contract (S2, S3)", () => {
     const sd = readSource("src/PhmaxSdPage.tsx");
     expect(sd).toContain("edu-cz-sd-named-snapshots-v1");
     expect(sd).toContain("BasicComparePreview");
-    expect(sd).toContain("Porovnání 2 variant");
+    expect(readSource("src/sd/SdHeroToolbar.tsx")).toContain("Porovnání 2 variant");
 
     const a = createSdProductAuditProtocol({
       pupilsFirstGrade: 80,

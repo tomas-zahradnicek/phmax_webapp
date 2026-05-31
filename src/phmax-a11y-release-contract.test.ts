@@ -11,7 +11,7 @@ function readSource(relPath: string) {
 describe("UX contract: release notes + přístupnost", () => {
   it("Co je nového – footer odkaz bez automatického popupu", () => {
     expect(readSource("src/app-release-notes.ts")).toContain("PHMAX_CURRENT_RELEASE_NOTES");
-    expect(readSource("src/app-release-notes.ts")).toMatch(/mobilní chip|Vyžaduje pozornost|deep-link/i);
+    expect(readSource("src/app-release-notes.ts")).toMatch(/ZsHeroHeader|desktop E2E|dashboard/i);
     expect(readSource("src/zs-hero-example-groups.ts")).toContain("ZS_HERO_EXAMPLE_GROUPS");
     expect(readSource("src/FieldHintButton.tsx")).toContain("FieldHintButton");
     expect(readSource("src/AuthorCreditFooter.tsx")).toContain("openWhatsNew");

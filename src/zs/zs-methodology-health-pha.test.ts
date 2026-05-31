@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { B11_B13, PHA_TABLE, pickBand, round2 } from "../phmax-zs-logic";
+import { B11_B13, B17_B21, B22_B25, PHA_TABLE, pickBand, round2 } from "../phmax-zs-logic";
 import { findZsModeBySections, loadZsHeroExample } from "./zs-hero-example-load";
 import type { ZsFormSnapshotSetters } from "./zs-form-snapshot";
 
@@ -117,5 +117,36 @@ describe("ZŠ metodika B11–B13 a B45", () => {
     const band = pickBand(4, PHA_TABLE.zssPrep);
     expect(band.value).toBe(20);
     expect(round2(1 * band.value)).toBe(20);
+  });
+
+  it("loadZsHeroExample gymnazium_phmax nastaví gym_rows", () => {
+    const setters = mockSetters();
+    loadZsHeroExample("gymnazium_phmax", heroCtx(setters));
+    expect(setters.setMode).toHaveBeenCalledWith("phmax_multiyear_gym");
+    expect(setters.setGymRows).toHaveBeenCalledWith([
+      expect.objectContaining({ kind: "gym8", classes: 2, pupils: 20 }),
+      expect.objectContaining({ kind: "sport6", classes: 1, pupils: 12 }),
+    ]);
+  });
+
+  it("loadZsHeroExample mensina_phmax nastaví minority režim", () => {
+    const setters = mockSetters();
+    loadZsHeroExample("mensina_phmax", heroCtx(setters));
+    expect(setters.setMode).toHaveBeenCalledWith("phmax_minority_language");
+    expect(setters.setMinorityType).toHaveBeenCalledWith("minority1");
+    expect(setters.setMinority1Classes).toHaveBeenCalledWith(2);
+    expect(setters.setMinority1Pupils).toHaveBeenCalledWith(14);
+  });
+
+  it("B17 menšina – průměr 7 žáků → 23 h/třída (golden)", () => {
+    const band = pickBand(7, B17_B21.minority1);
+    expect(band.value).toBe(23);
+    expect(round2(2 * band.value)).toBe(46);
+  });
+
+  it("B23 gym8 – průměr 10 žáků → 21 h/třída (golden)", () => {
+    const band = pickBand(10, B22_B25.gym8);
+    expect(band.value).toBe(21);
+    expect(round2(2 * band.value)).toBe(42);
   });
 });

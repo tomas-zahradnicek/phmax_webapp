@@ -227,6 +227,25 @@ export function loadZsHeroExample(example: ZsHeroExampleKey | "", ctx: ZsHeroExa
     return;
   }
 
+  if (example === "gymnazium_phmax") {
+    s.setMode("phmax_multiyear_gym");
+    s.setGymRows([
+      { id: 1, kind: "gym8", classes: 2, pupils: 20 },
+      { id: 2, kind: "sport6", classes: 1, pupils: 12 },
+    ]);
+    return;
+  }
+
+  if (example === "mensina_phmax") {
+    s.setMode("phmax_minority_language");
+    s.setMinorityType("minority1");
+    s.setMinority1Classes(2);
+    s.setMinority1Pupils(14);
+    s.setMinority2Classes(0);
+    s.setMinority2Pupils(0);
+    return;
+  }
+
   if (example === "smisene_tridy") {
     s.setMode(findZsModeBySections("dominant_c_first"));
     s.setMixedMethodFirstZsPupils(47);
