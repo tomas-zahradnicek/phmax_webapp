@@ -2,11 +2,13 @@ import { test, expect } from "@playwright/test";
 import { clearLocalStorageKeys, gotoProductView } from "./smoke-helpers";
 
 const PV_STORAGE_KEY = "edu-cz-pv-calculator-state";
+const PV_WIZARD_KEY = "phmax-pv-basic-wizard-step";
 
 test.describe("PV § 1d odst. 3 – orientační krácení", () => {
   test.beforeEach(async ({ page }) => {
-    await clearLocalStorageKeys(page, ["phmax-pv-basic-wizard-step", PV_STORAGE_KEY]);
-    await page.addInitScript((storageKey) => {
+    await clearLocalStorageKeys(page, [PV_WIZARD_KEY, PV_STORAGE_KEY]);
+    await page.addInitScript(({ storageKey, wizardKey }) => {
+      localStorage.setItem(wizardKey, "2");
       localStorage.setItem(
         storageKey,
         JSON.stringify({
@@ -28,13 +30,18 @@ test.describe("PV § 1d odst. 3 – orientační krácení", () => {
           ],
         }),
       );
-    }, PV_STORAGE_KEY);
+    }, { storageKey: PV_STORAGE_KEY, wizardKey: PV_WIZARD_KEY });
     await gotoProductView(page, "pv");
   });
 
   test("poměrné krácení zobrazí orientační PHmax po krácení", async ({ page }) => {
-    await expect(page.locator(".pv-row-method-hint")).toBeVisible();
-    await expect(page.getByText(/Orientační PHmax po krácení/i)).toBeVisible();
+    await page.getByRole("button", { name: "2 Vstupy" }).click({ force: true });
+    const hint = page.locator(".pv-row-method-hint");
+    await hint.scrollIntoViewIfNeeded();
+    await expect(hint).toBeVisible();
+    const reduced = page.getByText(/Orientační PHmax po krácení/i);
+    await reduced.scrollIntoViewIfNeeded();
+    await expect(reduced).toBeVisible();
     await expect(page.getByText(/Poměrné krácení/i)).toBeVisible();
   });
 });

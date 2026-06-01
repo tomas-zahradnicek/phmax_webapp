@@ -486,9 +486,82 @@ test.describe("Dashboard deep-link", () => {
   });
 
   test("export handoff IS školy stáhne phmax-is-handoff-v1", async ({ page }) => {
+    await page.addInitScript(({ sdKey, zsKey, pvKey, ssKey, sdWizard, zsWizard, pvWizard, ssWizard, pvRowKey, ssRowId }) => {
+      localStorage.setItem(sdWizard, "2");
+      localStorage.setItem(
+        sdKey,
+        JSON.stringify({ pupils: 30, manualDepts: false, departments: 1, inputMode: "summary" }),
+      );
+      localStorage.setItem(zsWizard, "2");
+      localStorage.setItem(
+        zsKey,
+        JSON.stringify({
+          tab: "phmax",
+          basic1Classes: 2,
+          basic1Pupils: 40,
+          _phmaxAuditTotals: { totalPhmax: 200, totalPha: 0, totalPhp: 0, tab: "phmax" },
+        }),
+      );
+      localStorage.setItem(pvWizard, "2");
+      localStorage.setItem(
+        pvKey,
+        JSON.stringify({
+          rows: [
+            {
+              id: pvRowKey,
+              label: "",
+              provoz: "celodenni",
+              classCount: 2,
+              avgHours: 8,
+              sec16Count: 0,
+              languageGroups: 0,
+            },
+          ],
+        }),
+      );
+      localStorage.setItem(ssWizard, "2");
+      localStorage.setItem(
+        ssKey,
+        JSON.stringify([
+          {
+            id: ssRowId,
+            label: "",
+            educationField: "39-41-L/01",
+            studyForm: "denni",
+            phmaxMode: "",
+            oborCountInClass: "1",
+            additionalOborCodes: "",
+            oborStudentCountsRaw: "",
+            isArt82TalentClass: false,
+            classType: "",
+            isPar16Class: false,
+            isLegacyMultioborClass: false,
+            legacyMaxOborCount: "",
+            note: "",
+            averageStudents: "17",
+            classCount: "2",
+          },
+        ]),
+      );
+    }, {
+      sdKey: SD_STORAGE_KEY,
+      zsKey: ZS_STORAGE_KEY,
+      pvKey: PV_STORAGE_KEY,
+      ssKey: SS_DRAFT_KEY,
+      sdWizard: SD_WIZARD_KEY,
+      zsWizard: ZS_WIZARD_KEY,
+      pvWizard: PV_WIZARD_KEY,
+      ssWizard: SS_WIZARD_KEY,
+      pvRowKey: "pv-is-handoff-e2e",
+      ssRowId: 92,
+    });
+
     await gotoProductView(page, "dash");
+    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    const exportBtn = page.getByRole("button", { name: "Export pro IS školy (JSON)" });
+    await exportBtn.scrollIntoViewIfNeeded();
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Export pro IS školy (JSON)" }).click();
+    await exportBtn.click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/phmax-is-handoff.*\.json$/i);
     const path = await download.path();
