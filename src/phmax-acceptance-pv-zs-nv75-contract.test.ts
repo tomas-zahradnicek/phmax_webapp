@@ -80,7 +80,11 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("ph_gym: \"gymnazium_phmax\"");
     expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("ph_minority: \"mensina_phmax\"");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("buildCrossPhmaxSummary");
-    expect(readSource("src/phmax-dashboard-cross-phmax.ts")).toContain("Orientační součet PHmax");
+    expect(readSource("src/phmax-dashboard-cross-phmax.ts")).toContain("buildCrossPhmaxSummary");
+    expect(readSource("src/phmax-dashboard-cross-phmax-export.ts")).toContain("buildCrossPhmaxExportPayload");
+    expect(readSource("src/phmax-school-scenario-export.ts")).toContain("phmax-school-scenario-v1");
+    expect(readSource("src/phmax-pv-1d3-reduction.ts")).toContain("computePv1d3Reduction");
+    expect(readSource("src/zs/zs-export-build.ts")).toContain("buildZsExportBuildInput");
     expect(zsPage).toContain("ZsCalculatorShell");
     expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("CalculatorWorkflowDock");
     expect(readSource("src/zs/ZsPhmaxHealthSection.tsx")).toContain("B11");

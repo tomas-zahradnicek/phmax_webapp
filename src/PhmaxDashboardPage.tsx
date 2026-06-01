@@ -26,6 +26,12 @@ import { requestFocusExampleSelect } from "./phmax-focus-example-hint";
 import { requestFocusModuleInputs } from "./phmax-focus-inputs-hint";
 import { sortByDashboardAttention } from "./phmax-dashboard-sort";
 import { buildCrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
+import {
+  buildCrossPhmaxExportPayload,
+  crossPhmaxAttentionMismatches,
+} from "./phmax-dashboard-cross-phmax-export";
+import { buildSchoolScenarioExportPayload } from "./phmax-school-scenario-export";
+import { downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { useUiNotice } from "./useUiNotice";
 
 const DASH_QUICK_IDS: Exclude<ProductView, "dash">[] = ["pv", "sd", "zs", "ss", "nv75"];
@@ -628,6 +634,30 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
 
   const crossPhmax = buildCrossPhmaxSummary(rows, DASH_CALC_LABEL);
 
+  const attentionModuleLabels = attentionRows.map((r) => DASH_CALC_LABEL[r.id]);
+  const attentionIds = new Set(attentionRows.map((r) => r.id));
+  const crossPhmaxMismatches = crossPhmaxAttentionMismatches(crossPhmax, attentionIds);
+
+  const downloadCrossPhmaxJson = useCallback(() => {
+    const payload = buildCrossPhmaxExportPayload(crossPhmax, attentionModuleLabels);
+    downloadTextFile(
+      exportFilenameStamped("phmax-cross-phmax", "json"),
+      JSON.stringify(payload, null, 2),
+      "application/json;charset=utf-8",
+    );
+    publishNotice("Stažen orientační JSON součtu PHmax.");
+  }, [crossPhmax, attentionModuleLabels, publishNotice]);
+
+  const downloadSchoolScenarioJson = useCallback(() => {
+    const payload = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels);
+    downloadTextFile(
+      exportFilenameStamped("phmax-skola-scenar", "json"),
+      JSON.stringify(payload, null, 2),
+      "application/json;charset=utf-8",
+    );
+    publishNotice("Stažen scénář celá škola (JSON + autosave modulů).");
+  }, [crossPhmax, attentionModuleLabels, publishNotice]);
+
   return (
     <div className="app-shell app-shell--gradient">
       <div className="container container--app">
@@ -730,15 +760,30 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   Některé moduly mají neúplný výpočet – součet může být podhodnocený.
                 </span>
               ) : null}
+              {crossPhmaxMismatches.length > 0 ? (
+                <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.88rem" }}>
+                  <strong>Upozornění:</strong> modul(y) {crossPhmaxMismatches.join(", ")} jsou zároveň ve Vyžaduje
+                  pozornost – opravte vstupy před použitím součtu.
+                </p>
+              ) : null}
             </p>
             <ul className="dash-cross-phmax__list muted-text" style={{ marginTop: 10, paddingLeft: "1.25rem" }}>
               {crossPhmax.slices.map((slice) => (
                 <li key={slice.id}>
                   {slice.label}: {slice.phmax != null ? `${slice.phmax} h/týden` : "–"}
                   {slice.incomplete ? " (neúplný)" : ""}
+                  {attentionIds.has(slice.id) ? " (vyžaduje pozornost)" : ""}
                 </li>
               ))}
             </ul>
+            <div className="dash-card__actions" style={{ marginTop: 12 }}>
+              <button type="button" className="btn ghost" onClick={downloadCrossPhmaxJson}>
+                Stáhnout JSON součtu PHmax
+              </button>
+              <button type="button" className="btn ghost" onClick={downloadSchoolScenarioJson}>
+                Scénář celá škola (JSON)
+              </button>
+            </div>
           </section>
         ) : null}
 

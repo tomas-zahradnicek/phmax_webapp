@@ -331,12 +331,7 @@ test.describe("Dashboard deep-link", () => {
       localStorage.setItem(sdWizard, "2");
       localStorage.setItem(
         sdKey,
-        JSON.stringify({
-          pupils: 30,
-          manualDepts: false,
-          departments: 1,
-          inputMode: "summary",
-        }),
+        JSON.stringify({ pupils: 30, manualDepts: false, departments: 1, inputMode: "summary" }),
       );
       localStorage.setItem(zsWizard, "2");
       localStorage.setItem(
@@ -410,11 +405,21 @@ test.describe("Dashboard deep-link", () => {
   });
 
   test("orientační součet PHmax napříč moduly", async ({ page }) => {
-    await page.addInitScript(({ sdKey, pvKey, ssKey, sdWizard, pvWizard, ssWizard, pvRowKey, ssRowId }) => {
+    await page.addInitScript(({ sdKey, zsKey, pvKey, ssKey, sdWizard, zsWizard, pvWizard, ssWizard, pvRowKey, ssRowId }) => {
       localStorage.setItem(sdWizard, "2");
       localStorage.setItem(
         sdKey,
         JSON.stringify({ pupils: 30, manualDepts: false, departments: 1, inputMode: "summary" }),
+      );
+      localStorage.setItem(zsWizard, "2");
+      localStorage.setItem(
+        zsKey,
+        JSON.stringify({
+          tab: "phmax",
+          basic1Classes: 2,
+          basic1Pupils: 40,
+          _phmaxAuditTotals: { totalPhmax: 200, totalPha: 0, totalPhp: 0, tab: "phmax" },
+        }),
       );
       localStorage.setItem(pvWizard, "2");
       localStorage.setItem(
@@ -459,9 +464,11 @@ test.describe("Dashboard deep-link", () => {
       );
     }, {
       sdKey: SD_STORAGE_KEY,
+      zsKey: ZS_STORAGE_KEY,
       pvKey: PV_STORAGE_KEY,
       ssKey: SS_DRAFT_KEY,
       sdWizard: SD_WIZARD_KEY,
+      zsWizard: ZS_WIZARD_KEY,
       pvWizard: PV_WIZARD_KEY,
       ssWizard: SS_WIZARD_KEY,
       pvRowKey: "pv-cross-phmax-e2e",
@@ -472,7 +479,10 @@ test.describe("Dashboard deep-link", () => {
     await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
     await expect(page.locator(".dash-cross-phmax")).toContainText(/PV:/);
     await expect(page.locator(".dash-cross-phmax")).toContainText(/ŠD:/);
+    await expect(page.locator(".dash-cross-phmax")).toContainText(/ZŠ:/);
     await expect(page.locator(".dash-cross-phmax")).toContainText(/SŠ:/);
+    await expect(page.getByRole("button", { name: "Stáhnout JSON součtu PHmax" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Scénář celá škola (JSON)" })).toBeVisible();
   });
 });
 

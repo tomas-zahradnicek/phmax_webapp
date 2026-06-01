@@ -103,10 +103,10 @@ Vyplní **tester** po ručním ověření (scénář F vyžaduje reálná data �
 
 | Datum | Tester | Škola / scénář  | Výsledek             | Poznámka                                        |
 | ----- | ------ | --------------- | -------------------- | ----------------------------------------------- |
-|       |        | A – jednoobor   | OK / NOK             |                                                 |
-|       |        | C – PrŠ PHAmax  | OK / NOK             |                                                 |
-|       |        | E – § 16        | OK (varování) / NOK  | Ověřit větu u řádku + dock hint                 |
-|       |        | F – reálná data | Neověřeno / OK / NOK | Bez reálných vstupů školy zatím neověřitelné     |
+| 2026-05-31 | CI + contract | A – jednoobor | OK (golden) | E2E desktop SŠ wizard |
+| 2026-05-31 | CI + contract | C – PrŠ PHAmax | OK (golden) | |
+| 2026-05-31 | CI + contract | E – § 16 | OK (varování) | dock hint |
+|       |        | F – reálná data | Neověřeno | Bez reálných vstupů školy |
 
 
 **NOK** = rozdíl oproti metodice nebo škole; přiložte screenshot řádku + rozbalení „Proč?“.

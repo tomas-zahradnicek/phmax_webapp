@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.3 (2026-05-31)
+
+### Dashboard a roadmapa
+- Export JSON orientačního součtu PHmax a scénář **celá škola** (autosave modulů).
+- Varování při modulu ve Vyžaduje pozornost současně v cross-PHmax.
+- `docs/product-roadmap.md`, `docs/export-field-mapping.md`, `docs/release-process.md`.
+
+### Refaktor ZŠ
+- `buildZsExportBuildInput` v `zs-export-build.ts`.
+
+### Větší scope (první krok)
+- Stub `phmax-pv-1d3-reduction.ts` pro budoucí PV § 1d odst. 3.
+
+### Kvalita
+- E2E: cross-PHmax se ZŠ a tlačítka JSON exportu.
+- Acceptance a SŠ checklist doplněny.
+
 ## 0.3.2 (2026-05-31)
 
 ### UX a refaktor

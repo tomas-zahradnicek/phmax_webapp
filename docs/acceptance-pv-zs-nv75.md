@@ -22,6 +22,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | P2d | Desktop – combobox Příkladové výpočty + workflow dock | E2E desktop |
 | P2n | Dashboard – ok PV/SŠ není ve Vyžaduje pozornost | E2E desktop |
 | P2x | Dashboard – orientační součet PHmax PV+ŠD+ZŠ+SŠ | E2E desktop |
+| P2j | Dashboard – export JSON součtu / scénář školy | E2E desktop + contract |
 | P3 | Průvodce krok **2 Vstupy** → **Přejít k chybě** → sekce vstupů | E2E |
 | P4 | Checklist „Kdy přidat další pracoviště“ u prázdné tabulky | contract |
 | P5 | § 1d odst. 3 – box u řádku + text u souhrnu (bez výpočtu krácení) | contract |
@@ -89,3 +90,5 @@ npm run test:e2e
 | Datum | Tester | PV | ZŠ | NV75 | Poznámka |
 |-------|--------|----|----|------|----------|
 | 2026-05-21 | CI + contract | E2E+contract | E2E+contract+Zs panely | E2E+contract | checklist kompletní (contract/E2E) |
+| 2026-05-31 | CI + contract | E2E+contract (0.3.2) | E2E+contract+wizard gym/menšina | E2E+contract | cross-PHmax, shell parita SŠ/NV75 |
+| 2026-05-31 | CI + contract | E2E+contract (0.3.3) | E2E+contract | E2E+contract | JSON scénář školy, export cross-PHmax |

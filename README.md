@@ -11,6 +11,11 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.3.3 (UX)
+
+- **Dashboard Σ:** JSON export cross-PHmax a scénář celá škola; varování u pozornosti.
+- **ZŠ:** `buildZsExportBuildInput`; roadmapa a PV § 1d stub.
+
 ## Verze 0.3.2 (UX)
 
 - **PV/ŠD:** calculator shell a workflow dock panely.

@@ -92,7 +92,7 @@ import {
 } from "./zs/zs-hero-example-load";
 import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsWarnings } from "./zs/zs-warnings";
-import type { ZsExportBuildInput } from "./zs/zs-export-build";
+import { buildZsExportBuildInput } from "./zs/zs-export-build";
 import { ZsCalculatorShell } from "./zs/ZsCalculatorShell";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
@@ -123,8 +123,6 @@ import {
   stripAppAuthorCreditFromPlainSummary,
 } from "./app-author-print";
 import { useZsNamedSnapshots } from "./useZsNamedSnapshots";
-/** Orientační označení souladu s metodikou MŠMT (aplikace nenahrazuje oficiální výpočet). */
-const METHODIKA_VERSION_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
 const ZS_VIEW_MODE_LS_KEY = "phmax-zs-view-mode";
 
 type TabKey = "phmax" | "pha" | "php";
@@ -1369,9 +1367,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   );
 
   const zsExportBuildInput = useMemo(
-    (): ZsExportBuildInput => ({
+    () =>
+      buildZsExportBuildInput({
       tab,
-      modeLabel: MODE_CONFIG[mode].label,
+      mode,
       exportLabel,
       wizardChoice,
       dataMode,
@@ -1430,8 +1429,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       healthComputedRows,
       gymComputedRows,
       summaryRows,
-      methodikaLabel: METHODIKA_VERSION_LABEL,
-    }),
+      }),
     [
       tab,
       mode,

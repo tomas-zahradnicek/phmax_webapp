@@ -10,6 +10,7 @@ import {
   type PhaRow,
   type PsychRow,
 } from "../phmax-zs-logic";
+import { MODE_CONFIG, type CalculatorMode } from "../config/calculator-config";
 import { APP_AUTHOR_DISPLAY_NAME, APP_AUTHOR_EMAIL, APP_AUTHOR_EXPORT_ROWS } from "../calculator-ui-constants";
 import { APP_VERSION } from "../app-version";
 import { buildZsExtendedExportMetaRows } from "./zs-export-rows";
@@ -252,4 +253,19 @@ export function buildZsExtendedCsvRows(input: ZsExportBuildInput): readonly ZsEx
     out.push([row[0], row[1]]);
   }
   return out;
+}
+
+export const ZS_EXPORT_METHODIKA_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
+
+export type ZsExportBuildInputParams = Omit<ZsExportBuildInput, "modeLabel" | "methodikaLabel"> & {
+  mode: CalculatorMode;
+};
+
+export function buildZsExportBuildInput(params: ZsExportBuildInputParams): ZsExportBuildInput {
+  const { mode, ...rest } = params;
+  return {
+    ...rest,
+    modeLabel: MODE_CONFIG[mode].label,
+    methodikaLabel: ZS_EXPORT_METHODIKA_LABEL,
+  };
 }
