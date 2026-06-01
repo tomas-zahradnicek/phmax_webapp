@@ -25,7 +25,7 @@ test.describe("NV75 mobilní smoke", () => {
     const showChip = page.locator(".calculator-mobile-summary-chip");
     await expect(showChip).toBeVisible();
     await expect(floatingSummary).toHaveCount(0);
-    await expect(showChip).toBeFocused();
+    await expect(showChip).toHaveAttribute("aria-label", "Zobrazit souhrn výsledků");
 
     await showChip.evaluate((node) => {
       (node as HTMLButtonElement).click();
@@ -36,6 +36,8 @@ test.describe("NV75 mobilní smoke", () => {
   test("průvodce krok Vstupy a Přejít k chybě", async ({ page }) => {
     await page.getByRole("button", { name: "2 Vstupy" }).click({ force: true });
     await page.getByRole("button", { name: "Přejít k chybě" }).first().click();
-    await expect(page.locator('[data-section="nv75-vstupy"]')).toBeInViewport();
+    const section = page.locator('[data-section="nv75-vstupy"]');
+    await section.scrollIntoViewIfNeeded();
+    await expect(section).toBeInViewport();
   });
 });

@@ -39,7 +39,6 @@ import { useQuickOnboarding } from "./useQuickOnboarding";
 import { useUiNotice } from "./useUiNotice";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
-import type { ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
 import type { ProductView } from "./ProductViewPills";
 import {
   type PhmaxZsMethodologyHighlights,
@@ -53,9 +52,6 @@ import type { PageTocSection } from "./PageTableOfContents";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import {
-  buildZsValidationIssues,
-  buildZsVerdict,
-  buildZsWorkflow,
 } from "./zs/zs-form-validation";
 import {
   applyZsFormSnapshot,
@@ -65,7 +61,7 @@ import {
 } from "./zs/zs-form-snapshot";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
-import { buildZsPageComparePreview, createZsPageHandlers } from "./zs/zs-page-handlers";
+import { createZsPageHandlers } from "./zs/zs-page-handlers";
 import { ZsExpertWizardGuideSection } from "./zs/ZsExpertWizardGuideSection";
 import { buildZsPhmaxTabPanelProps } from "./zs/build-zs-phmax-tab-panel-props";
 import { ZsPhmaxTabPanel } from "./zs/ZsPhmaxTabPanel";
@@ -75,9 +71,8 @@ import { ZsQuickOnboardingGuide } from "./zs/ZsQuickOnboardingGuide";
 import { ZsWizardShell } from "./zs/ZsWizardShell";
 import { ZsPhaPhpTabPanels } from "./zs/ZsPhaPhpTabPanels";
 import { ZsExpertOnboardingCard } from "./zs/ZsExpertOnboardingCard";
-import { useZsSectionScroll } from "./zs/use-zs-section-scroll";
+import { useZsPageDerivedState } from "./zs/use-zs-page-derived-state";
 import { useZsWizardNavigation } from "./zs/use-zs-wizard-navigation";
-import { buildZsSummaryRows } from "./zs/zs-summary-rows";
 import {
   applyZsResetAll,
   applyZsResetNv75,
@@ -92,7 +87,6 @@ import {
 } from "./zs/zs-hero-example-load";
 import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsWarnings } from "./zs/zs-warnings";
-import { buildZsExportBuildInput } from "./zs/zs-export-build";
 import { ZsCalculatorShell } from "./zs/ZsCalculatorShell";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
@@ -1200,32 +1194,31 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     win.print();
   };
 
-  const validationIssues = useMemo(
-    () =>
-      buildZsValidationIssues({
-        tab,
-        basic1Classes,
-        basic1Pupils,
-        basic2Classes,
-        basic2Pupils,
-        incl1Classes,
-        incl2Classes,
-        psychRowCount: psychRows.length,
-        healthRowCount: healthRows.length,
-        minority1Classes,
-        gymRowCount: gymRows.length,
-        mixedRowCount: mixedRows.length,
-        special1Classes,
-        special2Classes,
-        specialIIClasses,
-        prepClasses,
-        prepSpecialClasses,
-        phaRowCount: phaRows.length,
-        phpYear1,
-        phpYear2,
-        phpYear3,
-        phpMethodMode,
-      }),
+  const zsValidationInput = useMemo(
+    () => ({
+      tab,
+      basic1Classes,
+      basic1Pupils,
+      basic2Classes,
+      basic2Pupils,
+      incl1Classes,
+      incl2Classes,
+      psychRowCount: psychRows.length,
+      healthRowCount: healthRows.length,
+      minority1Classes,
+      gymRowCount: gymRows.length,
+      mixedRowCount: mixedRows.length,
+      special1Classes,
+      special2Classes,
+      specialIIClasses,
+      prepClasses,
+      prepSpecialClasses,
+      phaRowCount: phaRows.length,
+      phpYear1,
+      phpYear2,
+      phpYear3,
+      phpMethodMode,
+    }),
     [
       tab,
       basic1Classes,
@@ -1252,51 +1245,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     ],
   );
 
-  const incompleteSections = new Set(validationIssues.map((item) => item.section)).size;
-  const zsVerdict = useMemo(
-    () => buildZsVerdict(incompleteSections, warnings.length),
-    [incompleteSections, warnings.length],
-  );
-  const zsWorkflow = useMemo(
-    () => buildZsWorkflow(incompleteSections, warnings.length),
-    [incompleteSections, warnings.length],
-  );
-  const firstIssueSection = validationIssues[0]?.section ?? "";
-  const hasIssue = (sectionId: string) => validationIssues.some((item) => item.section === sectionId);
-
-  const { workspaceStickyRef, goToSection } = useZsSectionScroll(tab);
-
-  const zsNeedsInputBanner = zsVerdict.tone !== "ok";
-  const zsScrollToInputs = useCallback(
-    (hint?: ModuleInputsFocusHint) => {
-      const sectionId = hint?.sectionId ?? firstIssueSection;
-      if (sectionId) goToSection(sectionId);
-    },
-    [firstIssueSection, goToSection],
-  );
-  const zsDockIssueSummaries = useMemo(
-    () =>
-      warnings.length > 0
-        ? warnings.slice(0, 4).map((w) => (w.length > 80 ? `${w.slice(0, 77)}…` : w))
-        : [],
-    [warnings],
-  );
-  const validationHighlight = zsNeedsInputBanner;
-  const zsInputBannerItems = useMemo(
-    () => [
-      ...validationIssues.map((item) => ({
-        label: item.label,
-        onFix: () => goToSection(item.section),
-      })),
-      ...warnings.map((w) => ({ label: w })),
-    ],
-    [validationIssues, warnings, goToSection],
-  );
-  const showZsInputBanner = zsInputBannerItems.length > 0;
-
-  const summaryRows = useMemo(
-    () =>
-      buildZsSummaryRows({
+  const zsSummaryInput = useMemo(
+    () => ({
         basic1Phmax,
         basic2Phmax,
         basicPhmax,
@@ -1329,7 +1279,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         phpExcludedTotal,
         phpAdjustedValue,
         totalPhp,
-      }),
+    }),
     [
       basic1Phmax,
       basic2Phmax,
@@ -1366,9 +1316,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     ],
   );
 
-  const zsExportBuildInput = useMemo(
-    () =>
-      buildZsExportBuildInput({
+  const zsExportParams = useMemo(
+    () => ({
       tab,
       mode,
       exportLabel,
@@ -1428,8 +1377,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       psychComputedRows,
       healthComputedRows,
       gymComputedRows,
-      summaryRows,
-      }),
+    }),
     [
       tab,
       mode,
@@ -1490,9 +1438,46 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       psychComputedRows,
       healthComputedRows,
       gymComputedRows,
-      summaryRows,
     ],
   );
+
+  const zsCompareInput = useMemo(
+    () => ({
+      buildSnapshot,
+      totalPhmax,
+      totalPha,
+      totalPhp,
+      warnings,
+      namedSnapshots,
+      selectedNamedId,
+    }),
+    [buildSnapshot, namedSnapshots, selectedNamedId, totalPhmax, totalPha, totalPhp, warnings],
+  );
+
+  const {
+    workspaceStickyRef,
+    goToSection,
+    validationIssues,
+    incompleteSections,
+    firstIssueSection,
+    zsVerdict,
+    zsWorkflow,
+    hasIssue,
+    zsScrollToInputs,
+    zsDockIssueSummaries,
+    validationHighlight,
+    zsInputBannerItems,
+    showZsInputBanner,
+    zsExportBuildInput,
+    zsComparePreview,
+  } = useZsPageDerivedState({
+    tab,
+    warnings,
+    validation: zsValidationInput,
+    summary: zsSummaryInput,
+    exportParams: zsExportParams,
+    compare: zsCompareInput,
+  });
 
   const {
     handleExportCsv,
@@ -1534,20 +1519,6 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       selectedNamedId,
       setUiNotice,
     ],
-  );
-
-  const zsComparePreview = useMemo(
-    () =>
-      buildZsPageComparePreview({
-        buildSnapshot,
-        totalPhmax,
-        totalPha,
-        totalPhp,
-        warnings,
-        namedSnapshots,
-        selectedNamedId,
-      }),
-    [buildSnapshot, namedSnapshots, selectedNamedId, totalPhmax, totalPha, totalPhp, warnings],
   );
 
   const zsBasicWizardActive = viewMode === "basic" && tab === "phmax";

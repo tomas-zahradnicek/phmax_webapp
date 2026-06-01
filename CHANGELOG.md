@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.4 (2026-05-31)
+
+### PV § 1d a IS školy
+- Orientační poměrná redukce PHmax (`computePv1d3Reduction`) s volitelným stropem KÚ a potvrzením výjimky.
+- Export handoff JSON pro IS školy (`phmax-is-handoff-v1`); dokumentace `docs/phmax-is-integration.md`.
+
+### Refaktor
+- NV75: panel výsledků v `Nv75ResultsSection`.
+- ZŠ: odvozený stav stránky v `useZsPageDerivedState`.
+
+### Kvalita
+- E2E mobilní smoke: stabilnější chip (bez `toBeFocused`), scroll před `toBeInViewport`; CI retries 2.
+
 ## 0.3.3 (2026-05-31)
 
 ### Dashboard a roadmapa

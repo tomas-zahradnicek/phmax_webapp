@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Dashboard Σ – export JSON součtu PHmax a scénář celá škola; varování u modulů ve Vyžaduje pozornost.",
-    "ZŠ – sestavení exportu přes `buildZsExportBuildInput`.",
-    "Roadmapa a stub PV § 1d odst. 3; dokumentace release procesu a mapování exportů.",
+    "PV § 1d – orientační poměrná redukce PHmax (volitelný strop KÚ, výjimka).",
+    "Dashboard – export JSON handoff pro IS školy (`phmax-is-handoff-v1`).",
+    "NV75 `Nv75ResultsSection`; ZŠ `useZsPageDerivedState`; stabilnější E2E na CI.",
   ],
 };

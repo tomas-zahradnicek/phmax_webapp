@@ -78,6 +78,7 @@ import {
   PV_HERO_EXAMPLE_SELECT_LEGEND,
   pvHeroExampleSnapshot,
 } from "./phmax-pv-hero-examples";
+import { computePv1d3Reduction } from "./phmax-pv-1d3-reduction";
 import { round2 } from "./phmax-zs-logic";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
@@ -231,6 +232,11 @@ type PvWorkplaceRowState = {
   avgHours: number;
   sec16Count: number;
   languageGroups: number;
+  /** § 1d odst. 3 – orientační krácení (volitelné). */
+  pv1dActualChildren: number;
+  pv1dMinimumChildren: number;
+  pv1dKuPhmaxCap: number;
+  pv1dExemption: boolean;
 };
 
 function createInitialPvRow(): PvWorkplaceRowState {
@@ -243,6 +249,10 @@ function createInitialPvRow(): PvWorkplaceRowState {
     avgHours: 0,
     sec16Count: 0,
     languageGroups: 0,
+    pv1dActualChildren: 0,
+    pv1dMinimumChildren: 0,
+    pv1dKuPhmaxCap: 0,
+    pv1dExemption: false,
   };
 }
 
@@ -275,6 +285,17 @@ function normalizePvRow(item: unknown): PvWorkplaceRowState | null {
     sec16Count: typeof r.sec16Count === "number" && Number.isFinite(r.sec16Count) ? Math.max(0, r.sec16Count) : 0,
     languageGroups:
       typeof r.languageGroups === "number" && Number.isFinite(r.languageGroups) ? Math.max(0, r.languageGroups) : 0,
+    pv1dActualChildren:
+      typeof r.pv1dActualChildren === "number" && Number.isFinite(r.pv1dActualChildren)
+        ? Math.max(0, r.pv1dActualChildren)
+        : 0,
+    pv1dMinimumChildren:
+      typeof r.pv1dMinimumChildren === "number" && Number.isFinite(r.pv1dMinimumChildren)
+        ? Math.max(0, r.pv1dMinimumChildren)
+        : 0,
+    pv1dKuPhmaxCap:
+      typeof r.pv1dKuPhmaxCap === "number" && Number.isFinite(r.pv1dKuPhmaxCap) ? Math.max(0, r.pv1dKuPhmaxCap) : 0,
+    pv1dExemption: r.pv1dExemption === true,
   };
 }
 
@@ -407,7 +428,19 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       const hoursForPha = row.provoz === "zdravotnicke" ? 8 : row.avgHours;
       const phaMax = row.sec16Count > 0 ? getPhaMaxPv(row.sec16Count, hoursForPha) : null;
       const provozLabel = PROVOZ_OPTIONS.find((o) => o.value === row.provoz)?.label ?? row.provoz;
-      return { row, computed, phaMax, provozLabel };
+      const basePhmax = computed.totalPhmax;
+      const reduction1d3 =
+        basePhmax != null
+          ? computePv1d3Reduction(basePhmax, {
+              actualChildren: row.pv1dActualChildren > 0 ? row.pv1dActualChildren : undefined,
+              minimumChildren: row.pv1dMinimumChildren > 0 ? row.pv1dMinimumChildren : undefined,
+              kuPhmaxCap: row.pv1dKuPhmaxCap > 0 ? row.pv1dKuPhmaxCap : undefined,
+              exemptionConfirmed: row.pv1dExemption,
+            })
+          : null;
+      const effectivePhmax =
+        reduction1d3?.status === "reduced" ? reduction1d3.phmaxAfter : basePhmax;
+      return { row, computed, phaMax, provozLabel, reduction1d3, effectivePhmax };
     });
   }, [rows]);
 
@@ -429,7 +462,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     let phaSum = 0;
     let incomplete = false;
     for (const c of rowComputations) {
-      if (c.computed.totalPhmax != null) phmaxSum += c.computed.totalPhmax;
+      if (c.effectivePhmax != null) phmaxSum += c.effectivePhmax;
       else incomplete = true;
       if (c.phaMax != null) phaSum += c.phaMax;
     }
@@ -904,7 +937,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                     {c.row.label.trim() || `Pracoviště ${i + 1}`}
                     <span className="muted-text"> – {c.provozLabel}</span>
                   </td>
-                  <td>{c.computed.totalPhmax != null ? c.computed.totalPhmax : "–"}</td>
+                  <td>
+                    {c.effectivePhmax != null
+                      ? c.reduction1d3?.status === "reduced"
+                        ? `${c.effectivePhmax} *`
+                        : c.effectivePhmax
+                      : "–"}
+                  </td>
                   <td>{c.phaMax != null ? c.phaMax : "–"}</td>
                 </tr>
               ))}
@@ -966,7 +1005,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         </FieldWhyPhmaxDetails>
 
         <div className="pv-workplace-rows">
-          {rowComputations.map(({ row, computed, phaMax, provozLabel }, index) => {
+          {rowComputations.map(({ row, computed, phaMax, provozLabel, reduction1d3 }, index) => {
             const maxClasses = getPvMaxClassCount(row.provoz);
             const avgMeta = pvAvgHoursField(row.provoz);
             const hoursForPha = row.provoz === "zdravotnicke" ? 8 : row.avgHours;
@@ -1108,10 +1147,43 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                     <p style={{ margin: 0, lineHeight: 1.45 }}>
                       <strong>Krácení PHmax (</strong>
                       <PvLegisRef citeId="pv-1d3" label="§ 1d odst. 3 vyhl. 14/2005 Sb." />
-                      <strong>):</strong> při nesplnění nejnižšího počtu dětí může krajský úřad určit nižší PHmax.
-                      Aplikace toto krácení <strong>automaticky nepočítá</strong> – ověřte podle plného znění vyhlášky a
-                      rozhodnutí úřadu.
+                      <strong>):</strong> orientační výpočet po doplnění polí níže; závazné je rozhodnutí KÚ.
                     </p>
+                    <div className="grid two" style={{ marginTop: 10 }}>
+                      <NumberField
+                        label="Skutečný počet dětí na pracovišti"
+                        value={row.pv1dActualChildren}
+                        onChange={(v) => patchRow(row.id, { pv1dActualChildren: Math.max(0, Math.round(v)) })}
+                      />
+                      <NumberField
+                        label="Nejnižší počet dětí (vyhláška / KÚ)"
+                        value={row.pv1dMinimumChildren}
+                        onChange={(v) => patchRow(row.id, { pv1dMinimumChildren: Math.max(0, Math.round(v)) })}
+                      />
+                      <NumberField
+                        label="PHmax z rozhodnutí KÚ (h/týden, volitelné)"
+                        value={row.pv1dKuPhmaxCap}
+                        onChange={(v) => patchRow(row.id, { pv1dKuPhmaxCap: Math.max(0, v) })}
+                      />
+                      <label className="checks" style={{ alignSelf: "end" }}>
+                        <input
+                          type="checkbox"
+                          checked={row.pv1dExemption}
+                          onChange={(e) => patchRow(row.id, { pv1dExemption: e.target.checked })}
+                        />
+                        § 1d odst. 3 se na pracoviště nevztahuje
+                      </label>
+                    </div>
+                    {reduction1d3 && reduction1d3.status === "reduced" ? (
+                      <p className="muted-text" style={{ marginTop: 8, marginBottom: 0 }}>
+                        <strong>Orientační PHmax po krácení:</strong> {reduction1d3.phmaxAfter} h/týden (
+                        {reduction1d3.reason})
+                      </p>
+                    ) : reduction1d3 && reduction1d3.status === "no_reduction" ? (
+                      <p className="muted-text" style={{ marginTop: 8, marginBottom: 0 }}>
+                        {reduction1d3.reason}
+                      </p>
+                    ) : null}
                   </div>
                 ) : null}
 

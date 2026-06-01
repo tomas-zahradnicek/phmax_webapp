@@ -487,7 +487,7 @@ test.describe("Dashboard deep-link", () => {
 });
 
 test.describe("ZŠ hero – pojmenované zálohy", () => {
-  test("panel pojmenovaných záloh je viditelný", async ({ page }) => {
+  test("panel pojmenovaných záloh je viditelný", async ({ page }, testInfo) => {
     await page.addInitScript(({ storageKey, wizardKey }) => {
       localStorage.setItem(wizardKey, "2");
       localStorage.setItem(
@@ -502,12 +502,16 @@ test.describe("ZŠ hero – pojmenované zálohy", () => {
     }, { storageKey: ZS_STORAGE_KEY, wizardKey: ZS_WIZARD_KEY });
 
     await gotoProductView(page, "zs");
-    const drawerTrigger = page.getByRole("button", { name: /Akce, tisk, uložení a export/ });
-    if (await drawerTrigger.isVisible()) {
+    const backupsToggle = page.getByText("Scénáře a zálohy", { exact: true });
+    if (testInfo.project.use.isMobile) {
+      const drawerTrigger = page.getByRole("button", { name: /Akce, tisk, uložení a export/ });
+      await expect(drawerTrigger).toBeVisible({ timeout: 15_000 });
       await drawerTrigger.click();
-      await page.getByRole("dialog", { name: "Akce a export" }).getByText("Scénáře a zálohy").click();
+      const dialog = page.getByRole("dialog", { name: "Akce a export" });
+      await expect(dialog).toBeVisible({ timeout: 10_000 });
+      await dialog.getByText("Scénáře a zálohy", { exact: true }).click();
     } else {
-      await page.getByRole("button", { name: "Scénáře a zálohy" }).click();
+      await backupsToggle.click();
     }
     await expect(page.getByLabel("Název pojmenované zálohy")).toBeVisible({ timeout: 8000 });
   });

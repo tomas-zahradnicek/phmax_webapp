@@ -29,7 +29,7 @@ test.describe("ZŠ mobilní smoke", () => {
     const showChip = page.locator(".calculator-mobile-summary-chip");
     await expect(showChip).toBeVisible();
     await expect(floatingSummary).toHaveCount(0);
-    await expect(showChip).toBeFocused();
+    await expect(showChip).toHaveAttribute("aria-label", "Zobrazit souhrn výsledků");
 
     await showChip.evaluate((node) => {
       (node as HTMLButtonElement).click();

@@ -21,7 +21,8 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
   it("PV § 1d – metodický box u řádku (P5)", () => {
     const pv = readSource("src/PhmaxPvPage.tsx");
     expect(pv).toContain("pv-row-method-hint");
-    expect(pv).toContain("automaticky nepočítá");
+    expect(pv).toContain("computePv1d3Reduction");
+    expect(pv).toContain("pv1dActualChildren");
     expect(pv).toContain("Kdy přidat další pracoviště");
   });
 
@@ -74,7 +75,11 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/PhmaxSdPage.tsx")).toContain("SdHeroHeader");
     expect(readSource("src/sd/SdHeroHeader.tsx")).toContain("SdHeroToolbar");
     expect(readSource("src/PhmaxNv75DeputyPage.tsx")).toContain("Nv75HeroHeader");
+    expect(readSource("src/PhmaxNv75DeputyPage.tsx")).toContain("Nv75ResultsSection");
+    expect(readSource("src/nv75/Nv75ResultsSection.tsx")).toContain("Výsledek banky odpočtů");
     expect(readSource("src/nv75/Nv75HeroHeader.tsx")).toContain("Nv75HeroToolbar");
+    expect(readSource("src/phmax-is-export-adapter.ts")).toContain("phmax-is-handoff-v1");
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("buildPhmaxIsHandoffPayload");
     expect(readSource("src/PhmaxSsPage.tsx")).toContain("SsHeroHeader");
     expect(readSource("src/ss/SsHeroHeader.tsx")).toContain("SsHeroToolbar");
     expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("ph_gym: \"gymnazium_phmax\"");
@@ -85,6 +90,7 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/phmax-school-scenario-export.ts")).toContain("phmax-school-scenario-v1");
     expect(readSource("src/phmax-pv-1d3-reduction.ts")).toContain("computePv1d3Reduction");
     expect(readSource("src/zs/zs-export-build.ts")).toContain("buildZsExportBuildInput");
+    expect(readSource("src/zs/use-zs-page-derived-state.ts")).toContain("useZsPageDerivedState");
     expect(zsPage).toContain("ZsCalculatorShell");
     expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("CalculatorWorkflowDock");
     expect(readSource("src/zs/ZsPhmaxHealthSection.tsx")).toContain("B11");

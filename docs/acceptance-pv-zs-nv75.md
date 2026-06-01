@@ -6,7 +6,8 @@ Orientační kontrola před předáním nebo release. Automatizovaný smoke: `np
 
 | Varianta | Stav |
 |----------|------|
-| **Plný výpočet krácení** | Záměrně **mimo scope** – vyžaduje právní parametry (nejnižší počet dětí, rozhodnutí KÚ) a není v metodické tabulce PV jednoznačně algoritmizovatelný. |
+| **Orientační výpočet krácení** | **Zvoleno (0.3.4+)** – poměr dětí nebo PHmax z rozhodnutí KÚ; vždy s upozorněním. |
+| **Plný závazný výpočet bez KÚ** | Mimo scope – finální výsledek vyžaduje rozhodnutí úřadu. |
 | **Metodický box u pracoviště** | **Zvoleno** – u každého vyplněného řádku (mimo MŠ u ZZ) je viditelná informace s odkazem na § 1d odst. 3; aplikace krácení nepočítá. |
 
 Ověření ručně: otevřete PV → základní režim → pracoviště s počtem tříd > 0 → box „Krácení PHmax (§ 1d odst. 3)“ pod vstupy řádku.

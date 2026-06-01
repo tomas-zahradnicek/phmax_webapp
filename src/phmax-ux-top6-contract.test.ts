@@ -272,7 +272,8 @@ describe("UX TOP 6 contract", () => {
     expect(src).toContain("calculatorShellClassName(viewMode, displayDensity, focusMode)");
     expect(src).not.toContain("ProductFloatingNav");
     expect(src).toContain('data-section="nv75-vstupy"');
-    expect(src).toContain('data-section="nv75-vysledek"');
+    expect(src).toContain("Nv75ResultsSection");
+    expect(readSource("src/nv75/Nv75ResultsSection.tsx")).toContain('data-section="nv75-vysledek"');
     expect(src).toContain("CalculatorWorkflowDock");
     expect(src).toContain("const nv75Workflow = useMemo");
   });

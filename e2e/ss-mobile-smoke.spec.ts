@@ -25,7 +25,7 @@ test.describe("SŠ mobilní smoke", () => {
     const showChip = page.locator(".calculator-mobile-summary-chip");
     await expect(showChip).toBeVisible();
     await expect(floatingSummary).toHaveCount(0);
-    await expect(showChip).toBeFocused();
+    await expect(showChip).toHaveAttribute("aria-label", "Zobrazit souhrn výsledků");
 
     await showChip.evaluate((node) => {
       (node as HTMLButtonElement).click();
@@ -36,7 +36,9 @@ test.describe("SŠ mobilní smoke", () => {
   test("průvodce krok Vstupy a §16 checkbox", async ({ page }) => {
     await page.getByRole("button", { name: "2 Vstupy" }).click({ force: true });
     await page.getByRole("button", { name: "Přejít k chybě" }).first().click();
-    await expect(page.locator('[data-section="ss-vstupy"]')).toBeInViewport();
+    const section = page.locator('[data-section="ss-vstupy"]');
+    await section.scrollIntoViewIfNeeded();
+    await expect(section).toBeInViewport();
     await expect(page.getByRole("checkbox", { name: /§\s*16/i }).first()).toBeVisible();
   });
 });

@@ -7,8 +7,10 @@ Orientační plán většího scope mimo patch release. Neblokuje běžné UX vy
 | Stav | Popis |
 |------|--------|
 | **Hotovo (0.3.2+)** | Dashboard Σ zobrazuje orientační **součet PHmax** z autosave PV + ŠD + ZŠ + SŠ (`phmax-dashboard-cross-phmax.ts`). NV75 (banka) se nezapočítává. |
+| **Hotovo (0.3.4)** | PV § 1d orientační redukce; IS handoff JSON; `Nv75ResultsSection`; `useZsPageDerivedState`. |
 | **Hotovo (0.3.3+)** | Export JSON součtu a scénář **celá škola** (`phmax-school-scenario-export.ts`); varování při modulu ve Vyžaduje pozornost. |
-| **Další** | Validace nesouladu mezi moduly (např. duplicitní žáci); jednotný pojmenovaný scénář napříč moduly. |
+| **Hotovo (0.3.4+)** | PV § 1d orientační krácení; handoff JSON pro IS (`phmax-is-export-adapter.ts`). |
+| **Další** | Validace nesouladu mezi moduly; jednotný pojmenovaný scénář napříč moduly. |
 
 ## 2. Oficiální výstupy
 

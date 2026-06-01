@@ -11,6 +11,12 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.3.4 (UX)
+
+- **PV § 1d:** orientační poměrná redukce PHmax; metodický box u řádku.
+- **IS školy:** JSON handoff z dashboardu; `docs/phmax-is-integration.md`.
+- **Refaktor:** `Nv75ResultsSection`, `useZsPageDerivedState`; E2E CI stabilita.
+
 ## Verze 0.3.3 (UX)
 
 - **Dashboard Σ:** JSON export cross-PHmax a scénář celá škola; varování u pozornosti.

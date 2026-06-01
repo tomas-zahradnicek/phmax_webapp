@@ -21,10 +21,11 @@ describe("UX contract: NV75 deputy bank result visibility", () => {
     expect(page).toContain("bank.ovDeputyEntitlementText");
     expect(page).toContain("OV – metodický výstup funkcí");
     expect(page).toContain("OV metodický výstup funkcí");
-    expect(page).toContain("Počet skupin odborného výcviku na školních pracovištích");
-    expect(page).toContain("Počet skupin odborného výcviku u instruktora / ve firmách");
-    expect(page).toContain("Počet skupin odborného výcviku celkem");
-    expect(page).toContain("Výstup dle §13 odst. 7 vyhl. 13/2005");
+    const results = readSource("src/nv75/Nv75ResultsSection.tsx");
+    expect(results).toContain("Počet skupin odborného výcviku na školních pracovištích");
+    expect(results).toContain("Počet skupin odborného výcviku u instruktora / ve firmách");
+    expect(results).toContain("Počet skupin odborného výcviku celkem");
+    expect(results).toContain("Výstup dle §13 odst. 7 vyhl. 13/2005");
   });
 
   it("§4d input is derived from workplace units, not only a manual eligible count", () => {

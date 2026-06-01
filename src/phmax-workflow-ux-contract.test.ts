@@ -39,9 +39,10 @@ describe("UX contract: ZŠ + SŠ workflow panel pattern", () => {
     expect(readSource("src/zs/ZsPhaPhpTabPanels.tsx")).toContain("ZsPhpTabPanel");
     expect(src).toContain("ZsPhmaxTabPanel");
     expect(readSource("src/zs/ZsPhmaxTabPanel.tsx")).toContain("ZsPhmaxBasicSection");
-    expect(src).toContain("buildZsWorkflow");
+    expect(readSource("src/zs/use-zs-page-derived-state.ts")).toContain("buildZsWorkflow");
+    expect(src).toContain("useZsPageDerivedState");
     expect(readSource("src/zs/ZsHeroHeader.tsx")).toContain("incompleteSections > 0");
-    expect(src).toContain("warnings.length > 0");
+    expect(readSource("src/zs/use-zs-page-derived-state.ts")).toContain("warnings.length > 0");
     expect(src).toContain("zsWorkflowSteps: zsWorkflow.steps");
     expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("workflowSteps={zsBasicWizardActive ? [] : zsWorkflowSteps}");
     expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("CalculatorWorkflowDock");

@@ -31,6 +31,7 @@ import {
   crossPhmaxAttentionMismatches,
 } from "./phmax-dashboard-cross-phmax-export";
 import { buildSchoolScenarioExportPayload } from "./phmax-school-scenario-export";
+import { buildPhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import { downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { useUiNotice } from "./useUiNotice";
 
@@ -658,6 +659,17 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     publishNotice("Stažen scénář celá škola (JSON + autosave modulů).");
   }, [crossPhmax, attentionModuleLabels, publishNotice]);
 
+  const downloadIsHandoffJson = useCallback(() => {
+    const scenario = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels);
+    const payload = buildPhmaxIsHandoffPayload(scenario);
+    downloadTextFile(
+      exportFilenameStamped("phmax-is-handoff", "json"),
+      JSON.stringify(payload, null, 2),
+      "application/json;charset=utf-8",
+    );
+    publishNotice("Stažen handoff JSON pro IS školy – viz docs/phmax-is-integration.md.");
+  }, [crossPhmax, attentionModuleLabels, publishNotice]);
+
   return (
     <div className="app-shell app-shell--gradient">
       <div className="container container--app">
@@ -782,6 +794,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               </button>
               <button type="button" className="btn ghost" onClick={downloadSchoolScenarioJson}>
                 Scénář celá škola (JSON)
+              </button>
+              <button type="button" className="btn ghost" onClick={downloadIsHandoffJson}>
+                Export pro IS školy (JSON)
               </button>
             </div>
           </section>
