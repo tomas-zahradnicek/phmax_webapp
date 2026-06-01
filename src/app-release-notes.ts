@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Cross-PHmax – koherence audit vs. Σ, pojmenovaný scénář školy, volitelný POST handoff IS.",
-    "Refaktor výsledkových sekcí PV, SŠ, ŠD; ZŠ TOC v `buildZsTocSections`.",
-    "PV §1d – reference KÚ a stav pending_ku; E2E smoke §1d a IS export.",
+    "Dashboard – E2E POST handoff IS a oprava CI golden testů.",
+    "PV §1d – E2E stav pending_ku; souhrnná tabulka v `PvWorkplacesSummarySection`.",
+    "Refaktor PV bez změny metodiky – menší `PhmaxPvPage`.",
   ],
 };

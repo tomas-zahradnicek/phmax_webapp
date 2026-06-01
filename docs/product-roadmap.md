@@ -10,14 +10,15 @@ Orientační plán většího scope mimo patch release. Neblokuje běžné UX vy
 | **Hotovo (0.3.4)** | PV § 1d orientační redukce; IS handoff JSON; `Nv75ResultsSection`; `useZsPageDerivedState`. |
 | **Hotovo (0.3.3+)** | Export JSON součtu a scénář **celá škola** (`phmax-school-scenario-export.ts`); varování při modulu ve Vyžaduje pozornost. |
 | **Hotovo (0.3.5+)** | Cross-PHmax koherence, pojmenovaný scénář školy, IS POST klient (volitelný endpoint). |
-| **Další** | Validace nesouladu mezi moduly vs. auditní součty v autosave; napojení IS u dodavatele. |
+| **Hotovo (0.3.6+)** | E2E IS POST + PV §1d `pending_ku`; `PvWorkplacesSummarySection`. |
+| **Další** | Hlubší validace nesouladu mezi moduly (ne jen audit vs. Σ); napojení IS u dodavatele. |
 
 ## 2. Oficiální výstupy
 
 | Stav | Popis |
 |------|--------|
 | **Mimo scope** | Vykazování do systémů školy / zřizovatele – vyžaduje právní a integrační specifikaci mimo orientační CSV/XLSX. |
-| **Další** | Mapování polí exportu – viz `docs/export-field-mapping.md`. |
+| **Další** | Mapování polí exportu po schválení šablony zřizovatele – viz `docs/export-field-mapping.md`. |
 
 ## 3. PV § 1d odst. 3 – krácení PHmax
 

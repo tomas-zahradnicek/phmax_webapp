@@ -11,6 +11,8 @@ const SD_STORAGE_KEY = "edu-cz-sd-calculator-state";
 const SD_WIZARD_KEY = "phmax-sd-basic-wizard-step";
 const NV75_STORAGE_KEY = "edu-cz-nv75-deputy-bank-state";
 const NV75_WIZARD_KEY = "phmax-nv75-basic-wizard-step";
+const IS_ENDPOINT_LS_KEY = "phmax-is-handoff-endpoint";
+const E2E_IS_HANDOFF_URL = "https://e2e.phmax.local/is-handoff";
 
 test.describe("Dashboard deep-link", () => {
   test("SŠ – problematický řádek", async ({ page }) => {
@@ -570,6 +572,104 @@ test.describe("Dashboard deep-link", () => {
     const raw = fs.readFileSync(path!, "utf8");
     const json = JSON.parse(raw) as { schema?: string };
     expect(json.schema).toBe("phmax-is-handoff-v1");
+  });
+
+  test("POST handoff na mock endpoint IS", async ({ page }) => {
+    let postedBody: unknown;
+    await page.route(E2E_IS_HANDOFF_URL, async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      postedBody = route.request().postDataJSON();
+      await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+    });
+
+    await page.addInitScript(
+      ({ sdKey, zsKey, pvKey, ssKey, sdWizard, zsWizard, pvWizard, ssWizard, pvRowKey, ssRowId, isUrl, isKey }) => {
+        localStorage.setItem(isKey, isUrl);
+        localStorage.setItem(sdWizard, "2");
+        localStorage.setItem(
+          sdKey,
+          JSON.stringify({ pupils: 30, manualDepts: false, departments: 1, inputMode: "summary" }),
+        );
+        localStorage.setItem(zsWizard, "2");
+        localStorage.setItem(
+          zsKey,
+          JSON.stringify({
+            tab: "phmax",
+            basic1Classes: 2,
+            basic1Pupils: 40,
+            _phmaxAuditTotals: { totalPhmax: 200, totalPha: 0, totalPhp: 0, tab: "phmax" },
+          }),
+        );
+        localStorage.setItem(pvWizard, "2");
+        localStorage.setItem(
+          pvKey,
+          JSON.stringify({
+            rows: [
+              {
+                id: pvRowKey,
+                label: "",
+                provoz: "celodenni",
+                classCount: 2,
+                avgHours: 8,
+                sec16Count: 0,
+                languageGroups: 0,
+              },
+            ],
+          }),
+        );
+        localStorage.setItem(ssWizard, "2");
+        localStorage.setItem(
+          ssKey,
+          JSON.stringify([
+            {
+              id: ssRowId,
+              label: "",
+              educationField: "39-41-L/01",
+              studyForm: "denni",
+              phmaxMode: "",
+              oborCountInClass: "1",
+              additionalOborCodes: "",
+              oborStudentCountsRaw: "",
+              isArt82TalentClass: false,
+              classType: "",
+              isPar16Class: false,
+              isLegacyMultioborClass: false,
+              legacyMaxOborCount: "",
+              note: "",
+              averageStudents: "17",
+              classCount: "2",
+            },
+          ]),
+        );
+      },
+      {
+        sdKey: SD_STORAGE_KEY,
+        zsKey: ZS_STORAGE_KEY,
+        pvKey: PV_STORAGE_KEY,
+        ssKey: SS_DRAFT_KEY,
+        sdWizard: SD_WIZARD_KEY,
+        zsWizard: ZS_WIZARD_KEY,
+        pvWizard: PV_WIZARD_KEY,
+        ssWizard: SS_WIZARD_KEY,
+        pvRowKey: "pv-is-post-e2e",
+        ssRowId: 93,
+        isUrl: E2E_IS_HANDOFF_URL,
+        isKey: IS_ENDPOINT_LS_KEY,
+      },
+    );
+
+    await gotoProductView(page, "dash");
+    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    const postBtn = page.getByRole("button", { name: "Odeslat handoff na IS (POST)" });
+    await postBtn.scrollIntoViewIfNeeded();
+    await postBtn.click();
+    await expect(page.locator(".ui-toast").filter({ hasText: /Handoff odeslán \(HTTP 200\)/i })).toBeVisible({
+      timeout: 8000,
+    });
+    expect(postedBody).toMatchObject({ schema: "phmax-is-handoff-v1" });
   });
 });
 

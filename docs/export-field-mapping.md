@@ -25,6 +25,8 @@ Orientační dokument (bez API integrace). Slouží jako podklad pro budoucí na
 - Přímý upload do ISŠ, EduPage, Excel šablony zřizovatele.
 - Podpis / archivace s právní platností.
 
-## Další krok
+## Další krok (po rozhodnutí zřizovatele / IS)
 
-Po schválení šablony zřizovatele doplnit konkrétní mapování sloupců v `build*ExportRows` funkcích.
+1. Schválit šablonu importu u dodavatele IS (handoff `phmax-is-handoff-v1` je připraven – viz `docs/phmax-is-integration.md`).
+2. Doplnit konkrétní mapování sloupců v `build*ExportRows` a případně volitelný CSV export podle šablony.
+3. Cross-PHmax a audit `_phmaxAuditTotals` používat jen jako kontrolu před odesláním – ne jako závazný výkaz.

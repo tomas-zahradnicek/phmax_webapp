@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.6 (2026-06-01)
+
+### Kvalita
+- E2E: PV §1d `pending_ku`; dashboard POST handoff (mock endpoint).
+- Golden contract: release notes odkazují na dashboard / E2E (CI build).
+
+### Refaktor
+- `PvWorkplacesSummarySection` – detailní souhrn pracovišť pod vstupy PV.
+
 ## 0.3.5 (2026-06-01)
 
 ### Cross-PHmax a IS

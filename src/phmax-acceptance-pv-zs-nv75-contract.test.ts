@@ -20,9 +20,11 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
       "P4",
       "P5a",
       "P5b",
+      "P5d",
       "P5c",
       "P6",
       "P2i",
+      "P2k",
       "Z1",
       "Z2",
       "Z3",
@@ -105,6 +107,8 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/phmax-cross-phmax-coherence.ts")).toContain("crossPhmaxAuditCoherenceWarnings");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("buildPhmaxIsHandoffPayload");
     expect(readSource("src/pv/PvResultsOverviewSection.tsx")).toContain('data-section="pv-vysledek"');
+    expect(readSource("src/pv/PvWorkplacesSummarySection.tsx")).toContain("Souhrn – dílčí PHmax podle pracovišť");
+    expect(readSource("src/PhmaxPvPage.tsx")).toContain("PvWorkplacesSummarySection");
     expect(readSource("src/ss/SsResultsSection.tsx")).toContain('data-section="ss-vysledek"');
     expect(readSource("src/sd/SdResultsSection.tsx")).toContain('data-section="sd-vysledek"');
     expect(readSource("src/zs/zs-toc-sections.ts")).toContain("buildZsTocSections");

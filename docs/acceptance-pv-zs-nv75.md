@@ -30,8 +30,10 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | P4 | Checklist „Kdy přidat další pracoviště“ u prázdné tabulky | contract |
 | P5a | § 1d – metodický box u řádku + vstupy (děti, minimum, KÚ, výjimka) | contract + E2E |
 | P5b | § 1d – orientační poměrné krácení / strop KÚ v souhrnu | contract + E2E |
+| P5d | § 1d – stav `pending_ku` při chybějících údajích o dětech | E2E + contract |
 | P5c | § 1d – plný závazný výsledek bez KÚ | ručně (mimo scope) |
-| P2i | Dashboard – export handoff IS školy (`phmax-is-handoff-v1`) | E2E desktop + contract |
+| P2i | Dashboard – export handoff IS školy (`phmax-is-handoff-v1`) | E2E + contract |
+| P2k | Dashboard – POST handoff na endpoint IS (mock / integrátor) | E2E desktop |
 | P6 | 3 ukázky z comboboxu – PHmax/PHAmax sedí s očekáváním | contract |
 
 ---
@@ -100,3 +102,4 @@ npm run test:e2e
 | 2026-05-31 | CI + contract | E2E+contract (0.3.3) | E2E+contract | E2E+contract | JSON scénář školy, export cross-PHmax |
 | 2026-06-01 | CI + contract | E2E+contract (0.3.4) | E2E+contract | E2E+contract | PV §1d, IS handoff, CI E2E green |
 | 2026-06-01 | CI + contract | E2E P5a/b, P2i (0.3.5) | refaktor hook | refaktor sekce | cross-PHmax koherence |
+| 2026-06-01 | CI + contract | E2E P5d, P2k; `PvWorkplacesSummarySection` (0.3.6) | – | – | golden CI fix, IS POST E2E |
