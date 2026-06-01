@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Dashboard – E2E POST handoff IS a oprava CI golden testů.",
-    "PV §1d – E2E stav pending_ku; souhrnná tabulka v `PvWorkplacesSummarySection`.",
-    "Refaktor PV bez změny metodiky – menší `PhmaxPvPage`.",
+    "PV – řádky pracovišť v `PvWorkplaceRowsSection`; menší hlavní stránka.",
+    "Dashboard E2E – scénář celá škola JSON a varování koherence audit vs. Σ.",
+    "Docs – SŠ checklist 0.3.x; 0.4.0 čeká na formát IS/zřizovatele.",
   ],
 };

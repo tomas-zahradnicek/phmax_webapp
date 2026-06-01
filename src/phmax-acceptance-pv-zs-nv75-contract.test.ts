@@ -25,6 +25,8 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
       "P6",
       "P2i",
       "P2k",
+      "P2j",
+      "P2m",
       "Z1",
       "Z2",
       "Z3",
@@ -43,11 +45,11 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
   });
 
   it("PV § 1d – metodický box u řádku (P5)", () => {
-    const pv = readSource("src/PhmaxPvPage.tsx");
-    expect(pv).toContain("pv-row-method-hint");
-    expect(pv).toContain("computePv1d3Reduction");
-    expect(pv).toContain("pv1dActualChildren");
-    expect(pv).toContain("Kdy přidat další pracoviště");
+    const pvRows = readSource("src/pv/PvWorkplaceRowsSection.tsx");
+    expect(pvRows).toContain("pv-row-method-hint");
+    expect(readSource("src/PhmaxPvPage.tsx")).toContain("computePv1d3Reduction");
+    expect(pvRows).toContain("pv1dActualChildren");
+    expect(readSource("src/PhmaxPvPage.tsx")).toContain("Kdy přidat další pracoviště");
   });
 
   it("ZŠ – snapshot, export metadata a PHA záložka (refaktor krok 2–3)", () => {
@@ -108,7 +110,9 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("buildPhmaxIsHandoffPayload");
     expect(readSource("src/pv/PvResultsOverviewSection.tsx")).toContain('data-section="pv-vysledek"');
     expect(readSource("src/pv/PvWorkplacesSummarySection.tsx")).toContain("Souhrn – dílčí PHmax podle pracovišť");
+    expect(readSource("src/pv/PvWorkplaceRowsSection.tsx")).toContain("pv-workplace-rows");
     expect(readSource("src/PhmaxPvPage.tsx")).toContain("PvWorkplacesSummarySection");
+    expect(readSource("src/PhmaxPvPage.tsx")).toContain("PvWorkplaceRowsSection");
     expect(readSource("src/ss/SsResultsSection.tsx")).toContain('data-section="ss-vysledek"');
     expect(readSource("src/sd/SdResultsSection.tsx")).toContain('data-section="sd-vysledek"');
     expect(readSource("src/zs/zs-toc-sections.ts")).toContain("buildZsTocSections");

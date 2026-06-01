@@ -20,9 +20,9 @@ Orientační dokument (bez API integrace). Slouží jako podklad pro budoucí na
 | Banka NV75 | Hodiny odpočtů zástupce | Jiná jednotka než PHmax |
 | `_phmaxAuditTotals` (ZŠ autosave) | Interní kontrola před exportem | Už v localStorage |
 
-## Co zatím neimplementovat
+## Co zatím neimplementovat (0.4.0)
 
-- Přímý upload do ISŠ, EduPage, Excel šablony zřizovatele.
+- Přímý upload do ISŠ, EduPage, Excel šablony zřizovatele – **až po dodání schválené šablony sloupců**.
 - Podpis / archivace s právní platností.
 
 ## Další krok (po rozhodnutí zřizovatele / IS)

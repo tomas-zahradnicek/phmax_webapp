@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.7 (2026-06-02)
+
+### Refaktor PV
+- `PvWorkplaceRowsSection` + `pv-workplace-shared` – vstupy a detaily pracovišť mimo `PhmaxPvPage`.
+
+### Kvalita a docs
+- E2E: stažení `phmax-school-scenario-v1`, varování koherence audit ZŠ vs. Σ.
+- SŠ acceptance checklist 0.3.x; acceptance P5c/P2j/P2m; roadmapa 0.4.0 blokována na formát IS/zřizovatele.
+
 ## 0.3.6 (2026-06-01)
 
 ### Kvalita

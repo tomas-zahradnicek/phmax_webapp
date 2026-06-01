@@ -14,6 +14,8 @@ Orientační kontrola před předáním nebo release. Automatizovaný smoke: `np
 
 Ověření ručně: otevřete PV → základní režim → pracoviště s počtem tříd > 0 → box „Krácení PHmax (§ 1d odst. 3)“ pod vstupy řádku.
 
+**P5c (2026-06-02):** Bez rozhodnutí KÚ aplikace zobrazí jen orientační výpočet nebo stav `pending_ku` s disclaimerem – závazný výsledek nelze automaticky určit (záměr mimo scope).
+
 ---
 
 ## PV – předškolní vzdělávání
@@ -31,9 +33,11 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | P5a | § 1d – metodický box u řádku + vstupy (děti, minimum, KÚ, výjimka) | contract + E2E |
 | P5b | § 1d – orientační poměrné krácení / strop KÚ v souhrnu | contract + E2E |
 | P5d | § 1d – stav `pending_ku` při chybějících údajích o dětech | E2E + contract |
-| P5c | § 1d – plný závazný výsledek bez KÚ | ručně (mimo scope) |
+| P5c | § 1d – plný závazný výsledek bez KÚ | ručně (mimo scope – UI jen orientačně / `pending_ku`) |
 | P2i | Dashboard – export handoff IS školy (`phmax-is-handoff-v1`) | E2E + contract |
-| P2k | Dashboard – POST handoff na endpoint IS (mock / integrátor) | E2E desktop |
+| P2j | Dashboard – scénář celá škola (`phmax-school-scenario-v1`) | E2E desktop |
+| P2k | Dashboard – POST handoff na endpoint IS (mock / integrátor) | E2E |
+| P2m | Dashboard – varování koherence audit vs. Σ (PV výpočet ≠ audit v autosave) | E2E desktop |
 | P6 | 3 ukázky z comboboxu – PHmax/PHAmax sedí s očekáváním | contract |
 
 ---
@@ -103,3 +107,4 @@ npm run test:e2e
 | 2026-06-01 | CI + contract | E2E+contract (0.3.4) | E2E+contract | E2E+contract | PV §1d, IS handoff, CI E2E green |
 | 2026-06-01 | CI + contract | E2E P5a/b, P2i (0.3.5) | refaktor hook | refaktor sekce | cross-PHmax koherence |
 | 2026-06-01 | CI + contract | E2E P5d, P2k; `PvWorkplacesSummarySection` (0.3.6) | – | – | golden CI fix, IS POST E2E |
+| 2026-06-02 | CI + contract + ručně | E2E P2j/m; P5c UI ověřeno (0.3.7) | SŠ checklist 0.3.x | – | `PvWorkplaceRowsSection`, release uzavřen |

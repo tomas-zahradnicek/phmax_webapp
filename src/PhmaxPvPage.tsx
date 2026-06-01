@@ -9,8 +9,6 @@ import {
   MSG_NAMED_BACKUP_PICK_TO_COMPARE,
   MSG_NAMED_BACKUP_PICK_TO_DELETE,
   MSG_NO_LOCAL_AUTOSAVE_DATA,
-  INLINE_VALIDATION_MSG_POSITIVE_INTEGER,
-  INLINE_VALIDATION_MSG_REQUIRED_FIELD,
   namedBackupSavedNotice,
   CALCULATOR_WORKSPACE_DOCK_LABEL,
   PHMAX_PV_ONBOARDING_LS_KEY,
@@ -57,7 +55,7 @@ import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import type { ProductView } from "./ProductViewPills";
 import { PvCalculatorShell } from "./pv/PvCalculatorShell";
-import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
+import { InputOutputLegend } from "./phmax-zs-ui";
 import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
 import { createPvProductAuditProtocol } from "./phmax-product-audit";
 import { comparePhmaxProductVariants } from "./phmax-product-compare";
@@ -67,7 +65,6 @@ import {
   getPhaMaxPv,
   getPvAppendixBandLabels,
   getPvAppendixMatrixRow,
-  getPvMaxClassCount,
   type PvProvozKind,
 } from "./phmax-pv-logic";
 import {
@@ -81,45 +78,15 @@ import {
 import { computePv1d3Reduction } from "./phmax-pv-1d3-reduction";
 import { PvResultsOverviewSection } from "./pv/PvResultsOverviewSection";
 import { PvWorkplacesSummarySection } from "./pv/PvWorkplacesSummarySection";
+import { PvWorkplaceRowsSection } from "./pv/PvWorkplaceRowsSection";
+import {
+  PV_PROVOZ_OPTIONS,
+  type PvWorkplaceRowState,
+} from "./pv/pv-workplace-shared";
 import { round2 } from "./phmax-zs-logic";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { PhmaxPvMethodologyTables123, type PvMethodologyActiveCell } from "./phmax-pv-methodology-tables";
-
-function pvDurationBandTableNo(provoz: PvProvozKind): string {
-  if (provoz === "polodenni") return "1";
-  if (provoz === "celodenni") return "2";
-  if (provoz === "internat") return "3";
-  return "";
-}
-
-function pvAvgHoursField(provoz: PvProvozKind): { min: number; max: number; step: number; hint: string } {
-  if (provoz === "polodenni") {
-    return {
-      min: 4,
-      max: 6.5,
-      step: 0.25,
-      hint: "Zadejte průměr za den podle reality; tabulka 1 rozpozná sloupec (4 až 6,5 h včetně).",
-    };
-  }
-  if (provoz === "celodenni") {
-    return {
-      min: 6.5,
-      max: 12,
-      step: 0.25,
-      hint: "Tabulka 2: musí být vyšší než 6,5 h až 12 h včetně. Hodnota přesně 6,5 h patří do tabulky 1 (přepněte na polodenní).",
-    };
-  }
-  if (provoz === "internat") {
-    return {
-      min: 20,
-      max: 24,
-      step: 0.25,
-      hint: "Tabulka 3: průměrná denní doba nejméně 20 h (sloupce dle přílohy až 22 h a více).",
-    };
-  }
-  return { min: 0, max: 24, step: 0.25, hint: "" };
-}
 
 type PhmaxPvPageProps = {
   productView: ProductView;
@@ -212,12 +179,7 @@ function writeNamedPvSnapshotsToLs(items: NamedPvSnapshot[]) {
   }
 }
 
-const PROVOZ_OPTIONS: { value: PvProvozKind; label: string }[] = [
-  { value: "polodenni", label: "Polodenní provoz (tabulka 1)" },
-  { value: "celodenni", label: "Celodenní provoz (tabulka 2)" },
-  { value: "internat", label: "Internátní provoz (tabulka 3)" },
-  { value: "zdravotnicke", label: "Mateřská škola při zdravotnickém zařízení (S 4-01)" },
-];
+const PROVOZ_OPTIONS = PV_PROVOZ_OPTIONS;
 
 function newPvRowId(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -225,22 +187,6 @@ function newPvRowId(): string {
   }
   return `pv-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
-
-type PvWorkplaceRowState = {
-  id: string;
-  label: string;
-  provoz: PvProvozKind;
-  classCount: number;
-  avgHours: number;
-  sec16Count: number;
-  languageGroups: number;
-  /** § 1d odst. 3 – orientační krácení (volitelné). */
-  pv1dActualChildren: number;
-  pv1dMinimumChildren: number;
-  pv1dKuPhmaxCap: number;
-  pv1dKuDecisionRef: string;
-  pv1dExemption: boolean;
-};
 
 function createInitialPvRow(): PvWorkplaceRowState {
   const provoz: PvProvozKind = "celodenni";
@@ -960,358 +906,12 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           </ul>
         </FieldWhyPhmaxDetails>
 
-        <div className="pv-workplace-rows">
-          {rowComputations.map(({ row, computed, phaMax, provozLabel, reduction1d3 }, index) => {
-            const maxClasses = getPvMaxClassCount(row.provoz);
-            const avgMeta = pvAvgHoursField(row.provoz);
-            const hoursForPha = row.provoz === "zdravotnicke" ? 8 : row.avgHours;
-
-            return (
-              <div key={row.id} className="pv-workplace-row" data-pv-row-id={row.id}>
-                <div
-                  className="pv-workplace-row-header"
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    alignItems: "flex-end",
-                    justifyContent: "space-between",
-                    gap: 12,
-                    marginBottom: 14,
-                  }}
-                >
-                  <h3 className="section-title" style={{ fontSize: "1.05rem", margin: 0, flex: "1 1 200px" }}>
-                    Pracoviště {index + 1}
-                    {row.label.trim() ? ` – ${row.label.trim()}` : ""}
-                  </h3>
-                  <div
-                    className="pv-workplace-row-header__controls"
-                    style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end", flex: "1 1 280px" }}
-                  >
-                    <label className="field pv-label-field" style={{ flex: "1 1 200px", margin: 0, minWidth: 0 }}>
-                      <span>Označení (volitelně)</span>
-                      <input
-                        type="text"
-                        value={row.label}
-                        onChange={(e) => patchRow(row.id, { label: e.target.value })}
-                        placeholder="např. pracoviště Veřejná"
-                        autoComplete="off"
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className="btn ghost"
-                      disabled={rows.length <= 1}
-                      aria-label={`Odstranit pracoviště ${index + 1}`}
-                      onClick={() => removeRow(row.id)}
-                    >
-                      Odstranit pracoviště
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid two">
-                  <div className="subcard">
-                    <h3>Druh provozu</h3>
-                    <label className="field">
-                      <span>Typ</span>
-                      <select
-                        value={row.provoz}
-                        onChange={(e) => {
-                          const next = e.target.value as PvProvozKind;
-                          patchRow(row.id, {
-                            provoz: next,
-                            avgHours: 0,
-                            classCount: Math.min(Math.max(0, row.classCount), getPvMaxClassCount(next)),
-                          });
-                        }}
-                      >
-                        {PROVOZ_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <NumberField
-                      label={`Počet tříd pracoviště MŠ v tomto druhu provozu (0–${maxClasses}, dle přílohy platí ≥ 1 pro výpočet)`}
-                      value={row.classCount}
-                      onChange={(v) => patchRow(row.id, { classCount: v })}
-                      min={0}
-                      max={maxClasses}
-                    />
-                    {row.classCount <= 0 ? (
-                      <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
-                        {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} Pro toto pole platí rozsah 1 až {maxClasses}; bez počtu tříd
-                        se pracoviště do PHmax nezapočte.
-                      </p>
-                    ) : null}
-                    {row.provoz === "zdravotnicke" ? (
-                      <p className="muted-text" style={{ marginTop: 8, fontSize: "0.88rem" }}>
-                        U MŠ při zdravotnickém zařízení je PHmax <strong>31 hodin/třídu</strong> týdně – tabulky 1–3 se
-                        nepoužívají.
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div className="subcard">
-                    <h3>Navýšení dle vyhlášky</h3>
-                    <NumberField
-                      label="Počet tříd (škol) zřízených podle § 16 odst. 9 školského zákona (+5 h PHmax / třídu)"
-                      value={row.sec16Count}
-                      onChange={(v) => patchRow(row.id, { sec16Count: v })}
-                      min={0}
-                      max={30}
-                    />
-                    <NumberField
-                      label="Počet skupin pro jazykovou přípravu (+1 h PHmax / skupinu, § 1d odst. 11)"
-                      value={row.languageGroups}
-                      onChange={(v) => patchRow(row.id, { languageGroups: v })}
-                      min={0}
-                      max={50}
-                    />
-                  </div>
-                </div>
-
-                {row.provoz !== "zdravotnicke" ? (
-                  <div className="subcard pv-input-duration">
-                    <h3 className="section-title" style={{ fontSize: "1.02rem", marginBottom: 10 }}>
-                      Průměrná doba provozu (tabulka {pvDurationBandTableNo(row.provoz)} přílohy)
-                    </h3>
-                    <NumberField
-                      label="Průměrná doba provozu pracoviště v hodinách za den"
-                      value={row.avgHours}
-                      onChange={(v) => patchRow(row.id, { avgHours: v })}
-                      min={avgMeta.min}
-                      max={avgMeta.max}
-                      step={avgMeta.step}
-                      hint={avgMeta.hint}
-                    />
-                    {row.avgHours <= 0 ? (
-                      <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
-                        {INLINE_VALIDATION_MSG_REQUIRED_FIELD} Zadejte hodnotu v rozsahu {avgMeta.min} až {avgMeta.max} h.
-                      </p>
-                    ) : row.avgHours < avgMeta.min || row.avgHours > avgMeta.max ? (
-                      <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
-                        Hodnota neodpovídá vybranému typu provozu. Povolený rozsah je {avgMeta.min} až {avgMeta.max} h.
-                      </p>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                {row.provoz !== "zdravotnicke" && row.classCount > 0 ? (
-                  <div className="pv-row-method-hint ux-semantic--info" role="note">
-                    <p style={{ margin: 0, lineHeight: 1.45 }}>
-                      <strong>Krácení PHmax (</strong>
-                      <PvLegisRef citeId="pv-1d3" label="§ 1d odst. 3 vyhl. 14/2005 Sb." />
-                      <strong>):</strong> orientační výpočet po doplnění polí níže; závazné je rozhodnutí KÚ.
-                    </p>
-                    <div className="grid two" style={{ marginTop: 10 }}>
-                      <NumberField
-                        label="Skutečný počet dětí na pracovišti"
-                        value={row.pv1dActualChildren}
-                        onChange={(v) => patchRow(row.id, { pv1dActualChildren: Math.max(0, Math.round(v)) })}
-                      />
-                      <NumberField
-                        label="Nejnižší počet dětí (vyhláška / KÚ)"
-                        value={row.pv1dMinimumChildren}
-                        onChange={(v) => patchRow(row.id, { pv1dMinimumChildren: Math.max(0, Math.round(v)) })}
-                      />
-                      <NumberField
-                        label="PHmax z rozhodnutí KÚ (h/týden, volitelné)"
-                        value={row.pv1dKuPhmaxCap}
-                        onChange={(v) => patchRow(row.id, { pv1dKuPhmaxCap: Math.max(0, v) })}
-                      />
-                      <label className="field">
-                        <span className="field__label">Č. jednací / označení rozhodnutí KÚ</span>
-                        <input
-                          type="text"
-                          className="input"
-                          value={row.pv1dKuDecisionRef}
-                          onChange={(e) => patchRow(row.id, { pv1dKuDecisionRef: e.target.value })}
-                          placeholder="volitelné"
-                        />
-                      </label>
-                      <label className="checks" style={{ alignSelf: "end" }}>
-                        <input
-                          type="checkbox"
-                          checked={row.pv1dExemption}
-                          onChange={(e) => patchRow(row.id, { pv1dExemption: e.target.checked })}
-                        />
-                        § 1d odst. 3 se na pracoviště nevztahuje
-                      </label>
-                    </div>
-                    {reduction1d3 && reduction1d3.status === "reduced" ? (
-                      <p className="muted-text" style={{ marginTop: 8, marginBottom: 0 }}>
-                        <strong>Orientační PHmax po krácení:</strong> {reduction1d3.phmaxAfter} h/týden (
-                        {reduction1d3.reason})
-                      </p>
-                    ) : reduction1d3 && reduction1d3.status === "no_reduction" ? (
-                      <p className="muted-text" style={{ marginTop: 8, marginBottom: 0 }}>
-                        {reduction1d3.reason}
-                      </p>
-                    ) : reduction1d3 && reduction1d3.status === "pending_ku" ? (
-                      <p className="muted-text ux-semantic--warning" style={{ marginTop: 8, marginBottom: 0 }}>
-                        {reduction1d3.reason}
-                      </p>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                <FieldWhyPhmaxDetails>
-                  <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
-                    <li>
-                      <strong>Druh provozu a počet tříd</strong> určují základ PHmax za třídu (tabulky 1–3 přílohy; u MŠ při zdravotnickém zařízení platí jednotná sazba 31 h/třídu).
-                    </li>
-                    <li>
-                      <strong>Průměrná denní doba provozu</strong> zařazuje řádek do správného sloupce těchto tabulek – ovlivní to výslednou základní složku PHmax.
-                    </li>
-                    <li>
-                      <strong>§ 16 odst. 9 a jazykové skupiny</strong> přičítají sjednocené navýšení (5 h za třídu / +1 h za skupinu podle aplikovaných položek metodiky).
-                    </li>
-                    <li>
-                      <strong>PHAmax</strong> u řádků § 16 vychází z průměrné doby tohoto pracoviště (viz tabulku v detailu řádku).
-                    </li>
-                  </ul>
-                </FieldWhyPhmaxDetails>
-
-                <details className="pv-row-details">
-                  <summary>
-                    Detail Pracoviště {index + 1} – vstupy a dílčí PHmax
-                  </summary>
-                  <ScrollGrabRegion className="app-table-wrap" role="region" aria-label={`Přehled vstupů pracoviště ${index + 1}`}>
-                    <table className="app-data-table">
-                      <caption className="app-data-table__caption">
-                        Vstupy – pracoviště {index + 1} ({provozLabel}
-                        {row.label.trim() ? `, ${row.label.trim()}` : ""})
-                      </caption>
-                      <thead>
-                        <tr>
-                          <th scope="col">Položka</th>
-                          <th scope="col">Hodnota</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>Druh provozu</td>
-                          <td>{provozLabel}</td>
-                        </tr>
-                        <tr>
-                          <td>Počet tříd v tomto druhu provozu</td>
-                          <td className="app-data-table__num">{row.classCount}</td>
-                        </tr>
-                        <tr>
-                          <td>Průměrná doba provozu (h/den)</td>
-                          <td className="app-data-table__num">
-                            {row.provoz === "zdravotnicke" ? <span className="muted-text">–</span> : row.avgHours}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Sloupec tabulky (pásmo doby)</td>
-                          <td>
-                            {row.provoz === "zdravotnicke" ? (
-                              <span className="muted-text">–</span>
-                            ) : computed.base ? (
-                              computed.base.durationColumnLabel
-                            ) : (
-                              <span className="muted-text">Po opravě doby se zobrazí text ze přílohy</span>
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Třídy zřízené podle § 16 odst. 9 školského zákona (+5 h PHmax / třídu)</td>
-                          <td className="app-data-table__num">{row.sec16Count}</td>
-                        </tr>
-                        <tr>
-                          <td>Skupiny jazykové přípravy (+1 h PHmax / skupinu, § 1d odst. 11 vyhl. 14/2005)</td>
-                          <td className="app-data-table__num">{row.languageGroups}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </ScrollGrabRegion>
-
-                  {computed.issues.map((issue, i) => (
-                    <p key={`${row.id}-${issue.code}-${i}`} className="card card--warning" style={{ marginTop: 14, padding: 12 }}>
-                      <strong>Pracoviště {index + 1}:</strong> {issue.message}
-                    </p>
-                  ))}
-
-                  {computed.base ? (
-                    <ScrollGrabRegion className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHmax pracoviště ${index + 1}`}>
-                      <table className="app-data-table app-data-table--results">
-                        <caption className="app-data-table__caption">
-                          Výpočet PHmax pro pracoviště {index + 1} (hodiny týdně)
-                        </caption>
-                        <thead>
-                          <tr>
-                            <th scope="col">Složka</th>
-                            <th scope="col">Hodnota</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>PHmax ze základní tabulky metodiky (příslušná tabulka 1–3 / MŠ u zdrav. zařízení)</td>
-                            <td className="app-data-table__num">{computed.base.basePhmax}</td>
-                          </tr>
-                          <tr>
-                            <td>Pásmo / sloupec průměrné denní doby provozu</td>
-                            <td>{computed.base.durationColumnLabel}</td>
-                          </tr>
-                          <tr>
-                            <td>Navýšení § 16 odst. 9 školského zákona (5 h × počet tříd)</td>
-                            <td className="app-data-table__num">{computed.sec16Bonus}</td>
-                          </tr>
-                          <tr>
-                            <td>Navýšení jazyková příprava (1 h × počet skupin)</td>
-                            <td className="app-data-table__num">{computed.languageBonus}</td>
-                          </tr>
-                        </tbody>
-                        {computed.totalPhmax != null ? (
-                          <tfoot>
-                            <tr className="app-data-table__total-row">
-                              <th scope="row">PHmax celkem (toto pracoviště)</th>
-                              <td className="app-data-table__num app-data-table__num--emph">{computed.totalPhmax}</td>
-                            </tr>
-                          </tfoot>
-                        ) : null}
-                      </table>
-                    </ScrollGrabRegion>
-                  ) : (
-                    !computed.issues.length && (
-                      <p className="muted-text section-results">Upravte vstupy pracoviště {index + 1} pro výpočet základního PHmax.</p>
-                    )
-                  )}
-
-                  {phaMax != null ? (
-                    <ScrollGrabRegion className="app-table-wrap app-table-wrap--spaced" role="region" aria-label={`PHAmax pracoviště ${index + 1}`}>
-                      <table className="app-data-table app-data-table--pha">
-                        <caption className="app-data-table__caption">PHAmax – pracoviště {index + 1} (asistenti pedagoga, § 16)</caption>
-                        <thead>
-                          <tr>
-                            <th scope="col">Položka</th>
-                            <th scope="col">Hodnota (h/týden)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>
-                              PHAmax dle metodiky v4
-                              <span className="app-data-table__hint">
-                                Použije se průměrná doba tohoto pracoviště ({hoursForPha.toLocaleString("cs-CZ")} h/den); při
-                                provozu pod 8 h/den krácení poměrem doba/8. U MŠ při zdravotnickém zařízení odkaz 8
-                                h/den.
-                              </span>
-                            </td>
-                            <td className="app-data-table__num app-data-table__num--emph">{phaMax}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </ScrollGrabRegion>
-                  ) : null}
-                </details>
-              </div>
-            );
-          })}
-        </div>
+        <PvWorkplaceRowsSection
+          rows={rowComputations}
+          workplaceCount={rows.length}
+          onPatchRow={patchRow}
+          onRemoveRow={removeRow}
+        />
 
         <div style={{ marginTop: 16 }}>
           <button type="button" className="btn btn--pv-add-workplace" onClick={addRow}>

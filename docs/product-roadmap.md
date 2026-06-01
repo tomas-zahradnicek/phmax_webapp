@@ -10,15 +10,17 @@ Orientační plán většího scope mimo patch release. Neblokuje běžné UX vy
 | **Hotovo (0.3.4)** | PV § 1d orientační redukce; IS handoff JSON; `Nv75ResultsSection`; `useZsPageDerivedState`. |
 | **Hotovo (0.3.3+)** | Export JSON součtu a scénář **celá škola** (`phmax-school-scenario-export.ts`); varování při modulu ve Vyžaduje pozornost. |
 | **Hotovo (0.3.5+)** | Cross-PHmax koherence, pojmenovaný scénář školy, IS POST klient (volitelný endpoint). |
-| **Hotovo (0.3.6+)** | E2E IS POST + PV §1d `pending_ku`; `PvWorkplacesSummarySection`. |
+| **Hotovo (0.3.7+)** | `PvWorkplaceRowsSection`; E2E scénář školy a koherence audit vs. Σ. |
 | **Další** | Hlubší validace nesouladu mezi moduly (ne jen audit vs. Σ); napojení IS u dodavatele. |
+| **Blokováno → 0.4.0** | CSV/import podle šablony zřizovatele nebo IS – čeká na schválený formát (viz §2). |
 
 ## 2. Oficiální výstupy
 
 | Stav | Popis |
 |------|--------|
 | **Mimo scope** | Vykazování do systémů školy / zřizovatele – vyžaduje právní a integrační specifikaci mimo orientační CSV/XLSX. |
-| **Další** | Mapování polí exportu po schválení šablony zřizovatele – viz `docs/export-field-mapping.md`. |
+| **Blokováno (0.4.0)** | Mapování a CSV export podle šablony zřizovatele – **čeká na schválený formát** od zřizovatele nebo dodavatele IS. Viz `docs/export-field-mapping.md`. |
+| **Připraveno** | Handoff JSON `phmax-is-handoff-v1`, scénář `phmax-school-scenario-v1`, volitelný POST z dashboardu. |
 
 ## 3. PV § 1d odst. 3 – krácení PHmax
 
