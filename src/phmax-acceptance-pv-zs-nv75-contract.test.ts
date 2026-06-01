@@ -13,7 +13,29 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     const doc = readSource("docs/acceptance-pv-zs-nv75.md");
     expect(doc).toContain("Metodický box u pracoviště");
     expect(doc).toContain("| 2026-05-21 |");
-    for (const id of ["P1", "P2", "P3", "P4", "P5", "P6", "Z1", "Z2", "Z3", "Z4", "Z5", "N1", "N2", "N3", "N4", "N5", "N6", "S1"]) {
+    for (const id of [
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5a",
+      "P5b",
+      "P5c",
+      "P6",
+      "P2i",
+      "Z1",
+      "Z2",
+      "Z3",
+      "Z4",
+      "Z5",
+      "N1",
+      "N2",
+      "N3",
+      "N4",
+      "N5",
+      "N6",
+      "S1",
+    ]) {
       expect(doc).toMatch(new RegExp(`\\| ${id} \\|[\\s\\S]*?\\| (E2E|contract|ručně)`));
     }
   });
@@ -79,7 +101,14 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/nv75/Nv75ResultsSection.tsx")).toContain("Výsledek banky odpočtů");
     expect(readSource("src/nv75/Nv75HeroHeader.tsx")).toContain("Nv75HeroToolbar");
     expect(readSource("src/phmax-is-export-adapter.ts")).toContain("phmax-is-handoff-v1");
+    expect(readSource("src/phmax-is-handoff-client.ts")).toContain("postPhmaxIsHandoff");
+    expect(readSource("src/phmax-cross-phmax-coherence.ts")).toContain("crossPhmaxAuditCoherenceWarnings");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("buildPhmaxIsHandoffPayload");
+    expect(readSource("src/pv/PvResultsOverviewSection.tsx")).toContain('data-section="pv-vysledek"');
+    expect(readSource("src/ss/SsResultsSection.tsx")).toContain('data-section="ss-vysledek"');
+    expect(readSource("src/sd/SdResultsSection.tsx")).toContain('data-section="sd-vysledek"');
+    expect(readSource("src/zs/zs-toc-sections.ts")).toContain("buildZsTocSections");
+    expect(readSource("src/phmax-school-scenario-export.ts")).toContain("scenarioLabel");
     expect(readSource("src/PhmaxSsPage.tsx")).toContain("SsHeroHeader");
     expect(readSource("src/ss/SsHeroHeader.tsx")).toContain("SsHeroToolbar");
     expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("ph_gym: \"gymnazium_phmax\"");

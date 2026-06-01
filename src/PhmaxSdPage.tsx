@@ -43,6 +43,7 @@ import { SD_LEGIS_ZAKONY_URL } from "./phmax-sd-legislativa";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { SdHeroHeader } from "./sd/SdHeroHeader";
 import { SdQuickOnboardingGuide } from "./sd/SdQuickOnboardingGuide";
+import { SdResultsSection } from "./sd/SdResultsSection";
 import { SdBasicWizard } from "./SdBasicWizard";
 import {
   SD_BASIC_WIZARD_LS_KEY,
@@ -59,7 +60,7 @@ import { useUiNotice } from "./useUiNotice";
 import { SdCalculatorShell } from "./sd/SdCalculatorShell";
 import type { ProductView } from "./ProductViewPills";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
-import { InputOutputLegend, NumberField, ResultCard } from "./phmax-zs-ui";
+import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
 import { IntegerInput } from "./IntegerInput";
 import { round2 } from "./phmax-zs-logic";
 import { buildPhmaxSdExportRows } from "./phmax-sd-export-rows";
@@ -1539,87 +1540,15 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
           </div>
         ) : null}
 
-        <div className="grid two section-results" data-section="sd-vysledek" data-wizard-step="3" style={{ marginTop: 18 }}>
-          {detailedResult != null ? (
-            <>
-              <ResultCard label="Oddělení (celkem)" value={detailedResult.totalDepartments} tone="primary" />
-              <ResultCard
-                label="PHmax (základní tabulková hodnota)"
-                hint="Dle přílohy vyhlášky č. 74/2005 Sb. podle celkového počtu oddělení."
-                value={detailedResult.basePhmax}
-                tone="success"
-              />
-              {detailedResult.regularDepartments > 0 ? (
-                <ResultCard
-                  label="PHmax – běžná oddělení (po krácení kvůli výjimce)"
-                  hint="Právní opora: § 10 odst. 2 a 3 vyhlášky č. 74/2005 Sb."
-                  value={detailedResult.regularSharePhmax}
-                  tone="primary"
-                />
-              ) : null}
-              {detailedResult.specialDepartments > 0 ? (
-                <ResultCard
-                  label="PHmax – speciální oddělení (po krácení kvůli výjimce)"
-                  hint="Právní opora: § 10 odst. 7 vyhlášky č. 74/2005 Sb. ve vazbě na § 16 odst. 9 školského zákona."
-                  value={detailedResult.specialSharePhmax}
-                  tone="primary"
-                />
-              ) : null}
-              <ResultCard
-                label={
-                  detailedResult.specialDepartments > 0
-                    ? "PHmax celkem (součet běžných + speciálních oddělení)"
-                    : "PHmax celkem (běžná oddělení)"
-                }
-                methodStepLabel={
-                  detailedResult.specialDepartments > 0 && detailedResult.regularDepartments === 0
-                    ? "Dílčí PHmax"
-                    : undefined
-                }
-                value={detailedResult.finalPhmax}
-                tone={detailedResult.specialDepartments > 0 && detailedResult.regularDepartments === 0 ? "primary" : "success"}
-              />
-              {detailedResult.specialDepartments > 0 ? (
-                <ResultCard
-                  label="PHAmax celkem – speciální oddělení (po krácení kvůli výjimce)"
-                  hint="Právní opora: § 10 odst. 11 vyhlášky č. 74/2005 Sb. a § 16 odst. 9 školského zákona."
-                  methodStepLabel="Výsledek PHAmax"
-                  value={detailedResult.finalPhaMax}
-                  tone="success"
-                />
-              ) : null}
-            </>
-          ) : basePhmax != null ? (
-            <>
-              <ResultCard
-                label="Počet oddělení pro výpočet"
-                value={effectiveDepts}
-                tone="primary"
-              />
-              <ResultCard
-                label="Průměr účastníků na oddělení"
-                value={avgPerDept}
-                tone="primary"
-              />
-              <ResultCard label="PHmax (základ z tabulky)" value={basePhmax} tone="success" />
-              {reduction.applied ? (
-                <ResultCard
-                  label={`PHmax po krácení (koef. ${formatSdFactor(reduction.factor)})`}
-                  value={reduction.adjusted}
-                  tone="success"
-                />
-              ) : (
-                <ResultCard
-                  label="PHmax po krácení"
-                  value="neaplikuje se (průměr ≥ 20 na oddělení nebo nejsou údaje)"
-                  tone="primary"
-                />
-              )}
-            </>
-          ) : (
-            <p className="muted-text">Zadejte platný počet oddělení (1–{SD_MAX_DEPARTMENTS_IN_TABLE}).</p>
-          )}
-        </div>
+        <SdResultsSection
+          detailedResult={detailedResult}
+          basePhmax={basePhmax}
+          effectiveDepts={effectiveDepts}
+          avgPerDept={avgPerDept}
+          reduction={reduction}
+          formatSdFactor={formatSdFactor}
+          maxDepartments={SD_MAX_DEPARTMENTS_IN_TABLE}
+        />
 
         {sdPlainNarrative != null ? (
           <div className="sd-lay-narrative" role="region" aria-label="Slovní souhrn výsledku (orientačně)">

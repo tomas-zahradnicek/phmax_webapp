@@ -137,8 +137,8 @@ describe("UX TOP 6 contract", () => {
       expect(heroSrc).toContain("DisplayDensityToggle");
       expect(heroSrc).toMatch(/hero-zone-actions--toolbar|(Zs|Pv|Sd|Ss|Nv75)HeroToolbar/);
     }
-    expect(readSource("src/PhmaxSdPage.tsx")).toContain('data-section="sd-vysledek"');
-    expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain('data-section="ss-vysledek"');
+    expect(readSource("src/sd/SdResultsSection.tsx")).toContain('data-section="sd-vysledek"');
+    expect(readSource("src/ss/SsResultsSection.tsx")).toContain('data-section="ss-vysledek"');
     expect(readSource("src/nv75/Nv75HeroToolbar.tsx")).toContain("hero-zone-actions");
     expect(readSource("src/PhmaxZsPage.tsx")).toContain("ZsCalculatorShell");
     expect(readSource("src/zs/ZsWorkflowDockPanel.tsx")).toContain("CalculatorWorkflowDock");
@@ -279,9 +279,8 @@ describe("UX TOP 6 contract", () => {
   });
 
   it("ZŠ TOC obsahuje panely wizardu PHmax", () => {
-    const src = readSource("src/PhmaxZsPage.tsx");
     const phmaxTab = readSource("src/zs/ZsPhmaxTabPanel.tsx");
-    expect(src).toContain('id: "zs-phmax-exceptions"');
+    expect(readSource("src/zs/zs-toc-sections.ts")).toContain('id: "zs-phmax-exceptions"');
     expect(phmaxTab).toContain('data-section="zs-phmax-exceptions"');
   });
 });

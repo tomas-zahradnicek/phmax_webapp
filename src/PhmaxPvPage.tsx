@@ -79,6 +79,7 @@ import {
   pvHeroExampleSnapshot,
 } from "./phmax-pv-hero-examples";
 import { computePv1d3Reduction } from "./phmax-pv-1d3-reduction";
+import { PvResultsOverviewSection } from "./pv/PvResultsOverviewSection";
 import { round2 } from "./phmax-zs-logic";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
@@ -236,6 +237,7 @@ type PvWorkplaceRowState = {
   pv1dActualChildren: number;
   pv1dMinimumChildren: number;
   pv1dKuPhmaxCap: number;
+  pv1dKuDecisionRef: string;
   pv1dExemption: boolean;
 };
 
@@ -252,6 +254,7 @@ function createInitialPvRow(): PvWorkplaceRowState {
     pv1dActualChildren: 0,
     pv1dMinimumChildren: 0,
     pv1dKuPhmaxCap: 0,
+    pv1dKuDecisionRef: "",
     pv1dExemption: false,
   };
 }
@@ -295,6 +298,7 @@ function normalizePvRow(item: unknown): PvWorkplaceRowState | null {
         : 0,
     pv1dKuPhmaxCap:
       typeof r.pv1dKuPhmaxCap === "number" && Number.isFinite(r.pv1dKuPhmaxCap) ? Math.max(0, r.pv1dKuPhmaxCap) : 0,
+    pv1dKuDecisionRef: typeof r.pv1dKuDecisionRef === "string" ? r.pv1dKuDecisionRef : "",
     pv1dExemption: r.pv1dExemption === true,
   };
 }
@@ -435,6 +439,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
               actualChildren: row.pv1dActualChildren > 0 ? row.pv1dActualChildren : undefined,
               minimumChildren: row.pv1dMinimumChildren > 0 ? row.pv1dMinimumChildren : undefined,
               kuPhmaxCap: row.pv1dKuPhmaxCap > 0 ? row.pv1dKuPhmaxCap : undefined,
+              kuDecisionRef: row.pv1dKuDecisionRef.trim() || undefined,
               exemptionConfirmed: row.pv1dExemption,
             })
           : null;
@@ -913,57 +918,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         main={
           <>
 
-      <section className="card muted section-card" data-section="pv-vysledek" aria-label="Součtový přehled pracovišť">
-        <h2 className="section-title">Součtový přehled pracovišť</h2>
-        <p className="muted-text" style={{ marginTop: 0 }}>
-          Součty níže odpovídají pouze řádkům zadaným v této kalkulačce. Údaje z jiných pracovišť nebo výpočtů zapište a
-          sečtěte samostatně podle metodiky (jeden dílčí výpočet na kombinaci místa a druhu provozu).
-        </p>
-        <ScrollGrabRegion className="table-scroll">
-          <table className="table">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Označení / provoz</th>
-                <th scope="col">PHmax</th>
-                <th scope="col">PHAmax</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rowComputations.map((c, i) => (
-                <tr key={c.row.id}>
-                  <td>{i + 1}</td>
-                  <td>
-                    {c.row.label.trim() || `Pracoviště ${i + 1}`}
-                    <span className="muted-text"> – {c.provozLabel}</span>
-                  </td>
-                  <td>
-                    {c.effectivePhmax != null
-                      ? c.reduction1d3?.status === "reduced"
-                        ? `${c.effectivePhmax} *`
-                        : c.effectivePhmax
-                      : "–"}
-                  </td>
-                  <td>{c.phaMax != null ? c.phaMax : "–"}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <th scope="row" colSpan={2}>
-                  Celkem (zobrazená pracoviště)
-                </th>
-                <td>
-                  <strong>{aggregate.incomplete ? `${aggregate.phmaxSum} *` : aggregate.phmaxSum}</strong>
-                </td>
-                <td>
-                  <strong>{aggregate.phaSum > 0 ? aggregate.phaSum : "–"}</strong>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </ScrollGrabRegion>
-      </section>
+      <PvResultsOverviewSection rows={rowComputations} aggregate={aggregate} />
 
       <section
         className={`card section-card section-card--pv${sectionNeedsAttentionClass(pvHasInputIssue)}`}
@@ -1165,6 +1120,16 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                         value={row.pv1dKuPhmaxCap}
                         onChange={(v) => patchRow(row.id, { pv1dKuPhmaxCap: Math.max(0, v) })}
                       />
+                      <label className="field">
+                        <span className="field__label">Č. jednací / označení rozhodnutí KÚ</span>
+                        <input
+                          type="text"
+                          className="input"
+                          value={row.pv1dKuDecisionRef}
+                          onChange={(e) => patchRow(row.id, { pv1dKuDecisionRef: e.target.value })}
+                          placeholder="volitelné"
+                        />
+                      </label>
                       <label className="checks" style={{ alignSelf: "end" }}>
                         <input
                           type="checkbox"
@@ -1181,6 +1146,10 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
                       </p>
                     ) : reduction1d3 && reduction1d3.status === "no_reduction" ? (
                       <p className="muted-text" style={{ marginTop: 8, marginBottom: 0 }}>
+                        {reduction1d3.reason}
+                      </p>
+                    ) : reduction1d3 && reduction1d3.status === "pending_ku" ? (
+                      <p className="muted-text ux-semantic--warning" style={{ marginTop: 8, marginBottom: 0 }}>
                         {reduction1d3.reason}
                       </p>
                     ) : null}

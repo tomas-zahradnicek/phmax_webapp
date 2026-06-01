@@ -484,6 +484,20 @@ test.describe("Dashboard deep-link", () => {
     await expect(page.getByRole("button", { name: "Stáhnout JSON součtu PHmax" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Scénář celá škola (JSON)" })).toBeVisible();
   });
+
+  test("export handoff IS školy stáhne phmax-is-handoff-v1", async ({ page }) => {
+    await gotoProductView(page, "dash");
+    const downloadPromise = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Export pro IS školy (JSON)" }).click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/phmax-is-handoff.*\.json$/i);
+    const path = await download.path();
+    expect(path).toBeTruthy();
+    const fs = await import("node:fs");
+    const raw = fs.readFileSync(path!, "utf8");
+    const json = JSON.parse(raw) as { schema?: string };
+    expect(json.schema).toBe("phmax-is-handoff-v1");
+  });
 });
 
 test.describe("ZŠ hero – pojmenované zálohy", () => {

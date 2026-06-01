@@ -23,4 +23,9 @@ describe("computePv1d3Reduction", () => {
   it("exemption vrací not_applicable", () => {
     expect(computePv1d3Reduction(100, { exemptionConfirmed: true }).status).toBe("not_applicable");
   });
+
+  it("bez vstupů pro krácení vrací pending_ku", () => {
+    const result = computePv1d3Reduction(100, {});
+    expect(result.status).toBe("pending_ku");
+  });
 });

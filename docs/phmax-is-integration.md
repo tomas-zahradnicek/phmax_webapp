@@ -16,6 +16,10 @@ Mapování polí (návrh): `docs/export-field-mapping.md`
 2. Transformovat `schoolScenario.moduleSnapshots` do vstupních polí vašeho IS (skript ETL).
 3. PHmax modulů zapisovat jako orientační kapacity – ne jako závazný výkaz.
 
+## Volitelné POST (0.3.5+)
+
+Na dashboardu lze uložit **URL endpoint IS** do `localStorage` (`phmax-is-handoff-endpoint`) a odeslat handoff přes `postPhmaxIsHandoff` (`src/phmax-is-handoff-client.ts`). Vyžaduje CORS a schválený endpoint u dodavatele IS.
+
 ## Další krok (mimo webapp)
 
 - Dohodnout s dodavatelem IS konkrétní endpoint / šablonu importu.

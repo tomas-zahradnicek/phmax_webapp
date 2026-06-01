@@ -14,11 +14,18 @@ export type Pv1d3ReductionInput = {
   kuPhmaxCap?: number;
   /** Uživatel potvrdil, že § 1d odst. 3 se na pracoviště nevztahuje. */
   exemptionConfirmed?: boolean;
+  /** Číslo nebo označení rozhodnutí KÚ (orientačně, pro audit). */
+  kuDecisionRef?: string;
 };
 
 export type Pv1d3ReductionResult =
   | { status: "not_applicable"; reason: string }
   | { status: "no_reduction"; reason: string; phmaxAfter: number }
+  | {
+      status: "pending_ku";
+      reason: string;
+      phmaxAfter: number;
+    }
   | {
       status: "reduced";
       reason: string;
@@ -48,11 +55,16 @@ export function computePv1d3Reduction(basePhmax: number, input: Pv1d3ReductionIn
       ? input.kuPhmaxCap
       : null;
 
+  const kuRef =
+    typeof input.kuDecisionRef === "string" && input.kuDecisionRef.trim().length > 0
+      ? ` (${input.kuDecisionRef.trim()})`
+      : "";
+
   if (kuCap != null && kuCap < basePhmax) {
     const phmaxAfter = round2(kuCap);
     return {
       status: "reduced",
-      reason: `PHmax dle rozhodnutí KÚ (${phmaxAfter} h/týden). ${ORIENTACIONAL_DISCLAIMER}`,
+      reason: `PHmax dle rozhodnutí KÚ${kuRef} (${phmaxAfter} h/týden). ${ORIENTACIONAL_DISCLAIMER}`,
       reductionHours: round2(basePhmax - phmaxAfter),
       phmaxAfter,
       factor: round2(phmaxAfter / basePhmax),
@@ -70,6 +82,13 @@ export function computePv1d3Reduction(basePhmax: number, input: Pv1d3ReductionIn
       : null;
 
   if (actual == null || minimum == null || minimum <= 0) {
+    if (kuCap == null) {
+      return {
+        status: "pending_ku",
+        reason: `Doplňte skutečný a nejnižší počet dětí, nebo PHmax z rozhodnutí KÚ${kuRef}. Závazný výsledek bez KÚ nelze automaticky určit. ${ORIENTACIONAL_DISCLAIMER}`,
+        phmaxAfter: basePhmax,
+      };
+    }
     return {
       status: "no_reduction",
       reason:
@@ -88,9 +107,13 @@ export function computePv1d3Reduction(basePhmax: number, input: Pv1d3ReductionIn
 
   const factor = actual / minimum;
   const phmaxAfter = round2(basePhmax * factor);
+  const kuNote =
+    kuCap == null
+      ? ` Pro závazný výsledek při nedosažení minima doplňte PHmax z rozhodnutí KÚ${kuRef}.`
+      : "";
   return {
     status: "reduced",
-    reason: `Poměrné krácení: ${actual} / ${minimum} × PHmax. ${ORIENTACIONAL_DISCLAIMER}`,
+    reason: `Poměrné krácení: ${actual} / ${minimum} × PHmax.${kuNote} ${ORIENTACIONAL_DISCLAIMER}`,
     reductionHours: round2(basePhmax - phmaxAfter),
     phmaxAfter,
     factor: round2(factor),

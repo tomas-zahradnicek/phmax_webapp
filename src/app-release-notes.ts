@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "PV § 1d – orientační poměrná redukce PHmax (volitelný strop KÚ, výjimka).",
-    "Dashboard – export JSON handoff pro IS školy (`phmax-is-handoff-v1`).",
-    "NV75 `Nv75ResultsSection`; ZŠ `useZsPageDerivedState`; stabilnější E2E na CI.",
+    "Cross-PHmax – koherence audit vs. Σ, pojmenovaný scénář školy, volitelný POST handoff IS.",
+    "Refaktor výsledkových sekcí PV, SŠ, ŠD; ZŠ TOC v `buildZsTocSections`.",
+    "PV §1d – reference KÚ a stav pending_ku; E2E smoke §1d a IS export.",
   ],
 };

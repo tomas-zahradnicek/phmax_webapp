@@ -11,6 +11,12 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.3.5 (UX)
+
+- **Cross-PHmax:** koherence audit vs. Σ; pojmenovaný scénář školy; volitelný POST na IS.
+- **Refaktor:** `PvResultsOverviewSection`, `SsResultsSection`, `SdResultsSection`, `buildZsTocSections`.
+- **PV §1d:** reference KÚ, stav `pending_ku`; E2E smoke §1d a IS handoff.
+
 ## Verze 0.3.4 (UX)
 
 - **PV § 1d:** orientační poměrná redukce PHmax; metodický box u řádku.

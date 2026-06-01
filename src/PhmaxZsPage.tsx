@@ -48,7 +48,6 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
-import type { PageTocSection } from "./PageTableOfContents";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
 import {
@@ -72,6 +71,7 @@ import { ZsWizardShell } from "./zs/ZsWizardShell";
 import { ZsPhaPhpTabPanels } from "./zs/ZsPhaPhpTabPanels";
 import { ZsExpertOnboardingCard } from "./zs/ZsExpertOnboardingCard";
 import { useZsPageDerivedState } from "./zs/use-zs-page-derived-state";
+import { buildZsTocSections } from "./zs/zs-toc-sections";
 import { useZsWizardNavigation } from "./zs/use-zs-wizard-navigation";
 import {
   applyZsResetAll,
@@ -1545,26 +1545,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     goToSection,
   });
 
-  const zsTocSections = useMemo((): readonly PageTocSection[] => {
-    const sections: PageTocSection[] = [];
-    if (viewMode === "expert") {
-      sections.push({ id: "guide", label: "Úvod a nápověda" });
-    }
-    sections.push({ id: "setup", label: "Typ školy a režim" });
-    if (tab === "phmax") {
-      sections.push({ id: "basic", label: "Běžné třídy" });
-      if (zsShowPhmaxExceptionsToc) {
-        sections.push({ id: "zs-phmax-exceptions", label: "Výjimky PHmax" });
-      }
-      sections.push({ id: "phmax-summary", label: "Souhrn PHmax" });
-    } else if (tab === "pha") {
-      sections.push({ id: "pha", label: "PHAmax" });
-    } else {
-      sections.push({ id: "php", label: "PHPmax" });
-    }
-    sections.push({ id: "overview", label: "Celkový přehled" });
-    return sections;
-  }, [tab, viewMode, zsShowPhmaxExceptionsToc]);
+  const zsTocSections = useMemo(
+    () => buildZsTocSections({ viewMode, tab, zsShowPhmaxExceptionsToc }),
+    [tab, viewMode, zsShowPhmaxExceptionsToc],
+  );
 
   const zsTabPrimaryLabel = tab === "phmax" ? "PHmax celkem" : tab === "pha" ? "PHAmax celkem" : "PHPmax celkem";
   const zsTabPrimaryValue = tab === "phmax" ? totalPhmax : tab === "pha" ? totalPha : totalPhp;

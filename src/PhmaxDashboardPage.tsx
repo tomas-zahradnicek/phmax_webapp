@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { CALCULATOR_LIMITS_NOTE, PRODUCT_CALCULATOR_TITLES } from "./calculator-ui-constants";
 import { HeroStatusBar } from "./HeroStatusBar";
@@ -30,8 +30,18 @@ import {
   buildCrossPhmaxExportPayload,
   crossPhmaxAttentionMismatches,
 } from "./phmax-dashboard-cross-phmax-export";
-import { buildSchoolScenarioExportPayload } from "./phmax-school-scenario-export";
+import {
+  buildSchoolScenarioExportPayload,
+  PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
+  readSchoolScenarioLabel,
+} from "./phmax-school-scenario-export";
 import { buildPhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
+import { crossPhmaxAuditCoherenceWarnings } from "./phmax-cross-phmax-coherence";
+import {
+  postPhmaxIsHandoff,
+  readPhmaxIsEndpoint,
+  writePhmaxIsEndpoint,
+} from "./phmax-is-handoff-client";
 import { downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { useUiNotice } from "./useUiNotice";
 
@@ -558,11 +568,20 @@ function buildDashboardRows(): DashboardRow[] {
 export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboardPageProps) {
   const [refreshAt, setRefreshAt] = useState(() => new Date());
   const [notice, publishNotice] = useUiNotice();
+  const [scenarioLabel, setScenarioLabel] = useState(() => readSchoolScenarioLabel());
+  const [isEndpoint, setIsEndpoint] = useState(() => readPhmaxIsEndpoint());
 
   const refresh = useCallback(() => {
     setRefreshAt(new Date());
+    setScenarioLabel(readSchoolScenarioLabel());
+    setIsEndpoint(readPhmaxIsEndpoint());
     publishNotice("Souhrnný přehled byl znovu načten z prohlížeče.");
   }, [publishNotice]);
+
+  useEffect(() => {
+    setScenarioLabel(readSchoolScenarioLabel());
+    setIsEndpoint(readPhmaxIsEndpoint());
+  }, [refreshAt]);
 
   const handleClearLocalData = useCallback(() => {
     const confirmed = window.confirm(
@@ -639,6 +658,20 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   const attentionIds = new Set(attentionRows.map((r) => r.id));
   const crossPhmaxMismatches = crossPhmaxAttentionMismatches(crossPhmax, attentionIds);
 
+  const auditCoherenceWarnings = useMemo(() => {
+    const scenario = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels, scenarioLabel);
+    return crossPhmaxAuditCoherenceWarnings(crossPhmax, scenario.moduleSnapshots);
+  }, [crossPhmax, attentionModuleLabels, scenarioLabel]);
+
+  const persistScenarioLabel = useCallback((label: string) => {
+    const trimmed = label.trim();
+    if (typeof localStorage !== "undefined") {
+      if (trimmed) localStorage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, trimmed);
+      else localStorage.removeItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY);
+    }
+    setScenarioLabel(trimmed);
+  }, []);
+
   const downloadCrossPhmaxJson = useCallback(() => {
     const payload = buildCrossPhmaxExportPayload(crossPhmax, attentionModuleLabels);
     downloadTextFile(
@@ -650,17 +683,17 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   }, [crossPhmax, attentionModuleLabels, publishNotice]);
 
   const downloadSchoolScenarioJson = useCallback(() => {
-    const payload = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels);
+    const payload = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels, scenarioLabel);
     downloadTextFile(
       exportFilenameStamped("phmax-skola-scenar", "json"),
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
     publishNotice("Stažen scénář celá škola (JSON + autosave modulů).");
-  }, [crossPhmax, attentionModuleLabels, publishNotice]);
+  }, [crossPhmax, attentionModuleLabels, scenarioLabel, publishNotice]);
 
   const downloadIsHandoffJson = useCallback(() => {
-    const scenario = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels);
+    const scenario = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels, scenarioLabel);
     const payload = buildPhmaxIsHandoffPayload(scenario);
     downloadTextFile(
       exportFilenameStamped("phmax-is-handoff", "json"),
@@ -668,7 +701,14 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
       "application/json;charset=utf-8",
     );
     publishNotice("Stažen handoff JSON pro IS školy – viz docs/phmax-is-integration.md.");
-  }, [crossPhmax, attentionModuleLabels, publishNotice]);
+  }, [crossPhmax, attentionModuleLabels, scenarioLabel, publishNotice]);
+
+  const sendIsHandoff = useCallback(async () => {
+    const scenario = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels, scenarioLabel);
+    const payload = buildPhmaxIsHandoffPayload(scenario);
+    const result = await postPhmaxIsHandoff(isEndpoint, payload);
+    publishNotice(result.ok ? `Handoff odeslán (HTTP ${result.status}).` : result.message);
+  }, [crossPhmax, attentionModuleLabels, scenarioLabel, isEndpoint, publishNotice]);
 
   return (
     <div className="app-shell app-shell--gradient">
@@ -763,7 +803,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               Orientační součet PHmax (PV + ŠD + ZŠ + SŠ)
             </h2>
             <p className="muted-text" style={{ marginTop: 0 }}>
-              Sloučení autosave z modulů v tomto prohlížeči – neoficiální souhrn pro kontrolu. NV75 (banka odpočtů) a budoucí výpočet krácení PV § 1d odst. 3 zde nejsou.
+              Sloučení autosave z modulů v tomto prohlížeči – neoficiální souhrn pro kontrolu. NV75 (banka odpočtů) a krácení PV § 1d v cross-součtu nejsou.
             </p>
             <p className="dash-cross-phmax__total" style={{ marginTop: 12, fontSize: "1.35rem" }}>
               Celkem PHmax: <strong>{crossPhmax.totalPhmax != null ? crossPhmax.totalPhmax : "–"}</strong> h/týden
@@ -778,7 +818,37 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   pozornost – opravte vstupy před použitím součtu.
                 </p>
               ) : null}
+              {auditCoherenceWarnings.length > 0 ? (
+                <ul className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.88rem", paddingLeft: "1.25rem" }}>
+                  {auditCoherenceWarnings.map((w) => (
+                    <li key={w}>{w}</li>
+                  ))}
+                </ul>
+              ) : null}
             </p>
+            <label className="field" style={{ marginTop: 12, maxWidth: 420 }}>
+              <span className="field__label">Název scénáře školy (JSON export)</span>
+              <input
+                type="text"
+                className="input"
+                value={scenarioLabel}
+                onChange={(e) => persistScenarioLabel(e.target.value)}
+                placeholder="Celá škola (autosave)"
+              />
+            </label>
+            <label className="field" style={{ marginTop: 8, maxWidth: 520 }}>
+              <span className="field__label">URL endpoint IS (volitelné POST)</span>
+              <input
+                type="url"
+                className="input"
+                value={isEndpoint}
+                onChange={(e) => {
+                  setIsEndpoint(e.target.value);
+                  writePhmaxIsEndpoint(e.target.value);
+                }}
+                placeholder="https://…/phmax-handoff"
+              />
+            </label>
             <ul className="dash-cross-phmax__list muted-text" style={{ marginTop: 10, paddingLeft: "1.25rem" }}>
               {crossPhmax.slices.map((slice) => (
                 <li key={slice.id}>
@@ -798,6 +868,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               <button type="button" className="btn ghost" onClick={downloadIsHandoffJson}>
                 Export pro IS školy (JSON)
               </button>
+              {isEndpoint.trim() ? (
+                <button type="button" className="btn ghost" onClick={() => void sendIsHandoff()}>
+                  Odeslat handoff na IS (POST)
+                </button>
+              ) : null}
             </div>
           </section>
         ) : null}

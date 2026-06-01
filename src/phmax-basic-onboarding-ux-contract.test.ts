@@ -80,7 +80,7 @@ describe("UX contract: basic onboarding steps + CTA", () => {
 
   it("SŠ §16 má srozumitelnou větu u řádků", () => {
     expect(readSource("src/ss/phmax-ss-par16.ts")).toContain("PHMAX_SS_PAR16_ROW_SUMMARY");
-    expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain("PHMAX_SS_PAR16_ROW_SUMMARY");
-    expect(readSource("src/ss/PhmaxSsUnitsForm.tsx")).toContain("ss-par16-row-summary");
+    expect(readSource("src/ss/SsResultsSection.tsx")).toContain("PHMAX_SS_PAR16_ROW_SUMMARY");
+    expect(readSource("src/ss/SsResultsSection.tsx")).toContain("ss-par16-row-summary");
   });
 });

@@ -8,7 +8,9 @@ Orientační kontrola před předáním nebo release. Automatizovaný smoke: `np
 |----------|------|
 | **Orientační výpočet krácení** | **Zvoleno (0.3.4+)** – poměr dětí nebo PHmax z rozhodnutí KÚ; vždy s upozorněním. |
 | **Plný závazný výpočet bez KÚ** | Mimo scope – finální výsledek vyžaduje rozhodnutí úřadu. |
-| **Metodický box u pracoviště** | **Zvoleno** – u každého vyplněného řádku (mimo MŠ u ZZ) je viditelná informace s odkazem na § 1d odst. 3; aplikace krácení nepočítá. |
+| **Metodický box u pracoviště** | **Zvoleno** – u každého vyplněného řádku (mimo MŠ u ZZ) je viditelná informace s odkazem na § 1d odst. 3. |
+| **Orientační výpočet** | **Zvoleno (0.3.4+)** – poměr dětí / strop KÚ; vždy s disclaimerem. |
+| **Plný závazný výpočet** | **Mimo scope** – bez rozhodnutí KÚ jen orientačně; stav `pending_ku` upozorní na doplnění. |
 
 Ověření ručně: otevřete PV → základní režim → pracoviště s počtem tříd > 0 → box „Krácení PHmax (§ 1d odst. 3)“ pod vstupy řádku.
 
@@ -26,7 +28,10 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | P2j | Dashboard – export JSON součtu / scénář školy | E2E desktop + contract |
 | P3 | Průvodce krok **2 Vstupy** → **Přejít k chybě** → sekce vstupů | E2E |
 | P4 | Checklist „Kdy přidat další pracoviště“ u prázdné tabulky | contract |
-| P5 | § 1d odst. 3 – box u řádku + text u souhrnu (bez výpočtu krácení) | contract |
+| P5a | § 1d – metodický box u řádku + vstupy (děti, minimum, KÚ, výjimka) | contract + E2E |
+| P5b | § 1d – orientační poměrné krácení / strop KÚ v souhrnu | contract + E2E |
+| P5c | § 1d – plný závazný výsledek bez KÚ | ručně (mimo scope) |
+| P2i | Dashboard – export handoff IS školy (`phmax-is-handoff-v1`) | E2E desktop + contract |
 | P6 | 3 ukázky z comboboxu – PHmax/PHAmax sedí s očekáváním | contract |
 
 ---
@@ -76,7 +81,7 @@ Viz **`docs/product-roadmap.md`**. Stručně:
 
 1. **Propojení modulů** – první krok: orientační součet PHmax na dashboardu (PV+ŠD+ZŠ+SŠ).
 2. **Oficiální výstupy** – mimo orientační CSV/XLSX.
-3. **PV § 1d odst. 3** – volitelný budoucí výpočet po doplnění právních vstupů.
+3. **PV § 1d odst. 3** – orientační výpočet hotov; závazný výsledek po rozhodnutí KÚ ručně.
 
 ---
 
@@ -93,3 +98,5 @@ npm run test:e2e
 | 2026-05-21 | CI + contract | E2E+contract | E2E+contract+Zs panely | E2E+contract | checklist kompletní (contract/E2E) |
 | 2026-05-31 | CI + contract | E2E+contract (0.3.2) | E2E+contract+wizard gym/menšina | E2E+contract | cross-PHmax, shell parita SŠ/NV75 |
 | 2026-05-31 | CI + contract | E2E+contract (0.3.3) | E2E+contract | E2E+contract | JSON scénář školy, export cross-PHmax |
+| 2026-06-01 | CI + contract | E2E+contract (0.3.4) | E2E+contract | E2E+contract | PV §1d, IS handoff, CI E2E green |
+| 2026-06-01 | CI + contract | E2E P5a/b, P2i (0.3.5) | refaktor hook | refaktor sekce | cross-PHmax koherence |

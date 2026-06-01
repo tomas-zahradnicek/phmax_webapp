@@ -10,10 +10,19 @@ const LS_KEYS = {
   ss: "phmax-ss-units-draft",
 } as const;
 
+export const PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY = "phmax-school-scenario-label";
+
 export type SchoolScenarioExportPayload = Omit<CrossPhmaxExportPayload, "schema"> & {
   schema: "phmax-school-scenario-v1";
   moduleSnapshots: Partial<Record<"pv" | "sd" | "zs" | "ss", unknown>>;
+  /** Pojmenování scénáře pro archiv / IS (volitelné). */
+  scenarioLabel: string;
 };
+
+export function readSchoolScenarioLabel(): string {
+  if (typeof localStorage === "undefined") return "";
+  return localStorage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)?.trim() ?? "";
+}
 
 function readLsJson(key: string): unknown {
   if (typeof localStorage === "undefined") return null;
@@ -30,6 +39,7 @@ function readLsJson(key: string): unknown {
 export function buildSchoolScenarioExportPayload(
   summary: CrossPhmaxSummary,
   attentionModuleLabels: readonly string[],
+  scenarioLabel?: string,
 ): SchoolScenarioExportPayload {
   const cross = buildCrossPhmaxExportPayload(summary, attentionModuleLabels);
   const moduleSnapshots: SchoolScenarioExportPayload["moduleSnapshots"] = {};
@@ -37,10 +47,12 @@ export function buildSchoolScenarioExportPayload(
     const data = readLsJson(key);
     if (data != null) moduleSnapshots[id] = data;
   }
+  const label = (scenarioLabel ?? readSchoolScenarioLabel()).trim() || "Celá škola (autosave)";
   return {
     ...cross,
     schema: "phmax-school-scenario-v1",
     appVersion: APP_VERSION,
     moduleSnapshots,
+    scenarioLabel: label,
   };
 }

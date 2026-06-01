@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.5 (2026-06-01)
+
+### Cross-PHmax a IS
+- Koherence auditních součtů autosave vs. dashboard Σ (`crossPhmaxAuditCoherenceWarnings`).
+- Pojmenovaný scénář školy (`scenarioLabel`); volitelný POST handoff na IS (`phmax-is-handoff-client`).
+
+### PV § 1d a refaktor
+- Rozšíření §1d: reference KÚ, stav `pending_ku`.
+- Výsledkové sekce: `PvResultsOverviewSection`, `SsResultsSection`, `SdResultsSection`; ZŠ TOC v `buildZsTocSections`.
+
+### Kvalita
+- E2E: PV §1d smoke, stažení IS handoff JSON z dashboardu.
+
 ## 0.3.4 (2026-05-31)
 
 ### PV § 1d a IS školy
