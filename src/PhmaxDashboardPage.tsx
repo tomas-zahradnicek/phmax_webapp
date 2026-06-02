@@ -21,7 +21,7 @@ import {
   computeSdPhaMaxFromSnapshot,
 } from "./sd/sd-compute-phmax-total-from-snapshot";
 import { countPar16MarkedRows, PHMAX_SS_PAR16_DOCK_HINT } from "./ss/phmax-ss-par16";
-import { revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./ss/phmax-ss-types";
+import { parseSsDraftRowsFromSnapshot } from "./ss/ss-draft-storage";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
 import { formatDashboardProductVisit, readLastActiveProduct } from "./phmax-dashboard-visits";
 import { clearAllPhmaxLocalStorage } from "./phmax-local-storage-clear";
@@ -221,14 +221,8 @@ function readZsTotals(): ZsAuditTotals | null {
   return { totalPhmax, totalPha, totalPhp, tab };
 }
 
-function parseSsDraftRows(raw: string | null): PhmaxSsUnitRow[] {
-  const data = safeJsonParse(raw);
-  if (!Array.isArray(data) || data.length === 0) return [];
-  try {
-    return data.map((item, i) => revivePhmaxSsUnitRow((item ?? {}) as Record<string, unknown>, i + 1));
-  } catch {
-    return [];
-  }
+function parseSsDraftRows(raw: string | null): ReturnType<typeof parseSsDraftRowsFromSnapshot> {
+  return parseSsDraftRowsFromSnapshot(safeJsonParse(raw));
 }
 
 function summarizeSsFromLs(): {

@@ -30,6 +30,8 @@ export type CrossPhmaxSeedOptions = {
   /** Volitelný IS handoff endpoint v localStorage. */
   isHandoffUrl?: string;
   isHandoffLsKey?: string;
+  /** ZŠ bez vyplněných tříd – modul ve Vyžaduje pozornost. */
+  zsAttentionEmpty?: boolean;
 };
 
 /** Spouští se v prohlížeči přes `page.addInitScript`. */
@@ -44,15 +46,22 @@ export function applyCrossPhmaxSeed(opts: CrossPhmaxSeedOptions): void {
     JSON.stringify({ pupils: 30, manualDepts: false, departments: 1, inputMode: "summary" }),
   );
   localStorage.setItem(opts.zsWizard, "2");
-  localStorage.setItem(
-    opts.zsKey,
-    JSON.stringify({
-      tab: "phmax",
-      basic1Classes: 2,
-      basic1Pupils: 40,
-      _phmaxAuditTotals: { totalPhmax: zsAudit, totalPha: 0, totalPhp: 0, tab: "phmax" },
-    }),
-  );
+  if (opts.zsAttentionEmpty) {
+    localStorage.setItem(
+      opts.zsKey,
+      JSON.stringify({ tab: "phmax", basic1Classes: 0, basic2Classes: 0 }),
+    );
+  } else {
+    localStorage.setItem(
+      opts.zsKey,
+      JSON.stringify({
+        tab: "phmax",
+        basic1Classes: 2,
+        basic1Pupils: 40,
+        _phmaxAuditTotals: { totalPhmax: zsAudit, totalPha: 0, totalPhp: 0, tab: "phmax" },
+      }),
+    );
+  }
   const pvPayload: Record<string, unknown> = {
     rows: [
       {

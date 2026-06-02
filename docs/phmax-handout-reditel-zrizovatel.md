@@ -1,6 +1,6 @@
 # PHmax webapp – orientační kalkulačka pro školu
 
-**Verze 0.3.9** · jednostránkový přehled pro ředitele a zřizovatele  
+**Verze 0.3.11** · jednostránkový přehled pro ředitele a zřizovatele  
 *Dokument je informativní; nejedná se o závazný výkaz ani právní posudek.*
 
 ---
@@ -28,16 +28,15 @@ Webová aplikace v prohlížeči pomáhá **spočítat a zkontrolovat orientačn
 
 ---
 
-## Co je hotové k běžnému použití (v0.3.7)
+## Co je hotové k běžnému použití (v0.3.11)
 
 | Oblast | Stav | Poznámka pro vedení školy |
 |--------|------|---------------------------|
-| Výpočty v modulech PV, ZŠ, ŠD, NV75 | **Ano** | wizard, mobilní souhrn, export CSV/XLSX |
-| **PV** § 1d krácení | **Orientačně** | s upozorněním; závazně až po KÚ |
-| **SŠ** běžné řádky + PrŠ PHAmax | **Ano** | kontrolní nástroj; § 16 jen náhled |
-| **Dashboard** – součet PHmax (PV+ŠD+ZŠ+SŠ) | **Ano** | neoficiální kontrola; bez NV75 a bez §1d v součtu |
-| Export **scénář celá škola** (JSON) | **Ano** | archiv stavu modulů v prohlížeči |
-| Export **handoff pro IS** (JSON) | **Ano** | pro integrátora IS; ne automatický import do Bakalářů/EduPage |
+| Výpočty v modulech PV, ZŠ, ŠD, SŠ, NV75 | **Ano** | wizard, mobilní souhrn, export CSV/XLSX |
+| **PV** § 1d krácení | **Orientačně** | v exportu CSV/XLSX; závazně až po KÚ |
+| **Dashboard** – součet PHmax (PV+ŠD+ZŠ+SŠ) | **Ano** | koherence audit vs. přepočet; kontrolní list před exportem |
+| Export **scénář celá škola** (JSON) | **Ano** | včetně `coherenceWarnings` pro IT |
+| Export **handoff pro IS** (JSON / POST) | **Ano** | pro integrátora; ne automatický import |
 | Import do IS / šablona zřizovatele | **Ne (0.4.0)** | čeká na schválený formát |
 
 ---

@@ -14,6 +14,7 @@ Orientační plán většího scope mimo patch release. Neblokuje běžné UX vy
 | **Hotovo (0.3.8+)** | ZŠ přepočet v koherenci; kontrolní list před exportem; handout PDF. |
 | **Hotovo (0.3.9+)** | ŠD PHmax na dashboardu + přepočet/koherence; `coherenceWarnings` ve scénáři; PV §1d v exportu; audit autosave PV/ŠD. |
 | **Hotovo (0.3.10+)** | SŠ přepočet v koherenci; E2E POST handoff + scénář přes sdílený seed; IS docs `coherenceWarnings`. |
+| **Hotovo (0.3.11+)** | SŠ `_phmaxAuditTotals` v autosave; handout 0.3.11; E2E cross-PHmax JSON download. |
 | **Další** | Napojení IS u dodavatele; sjednocení přepočtu ZŠ s `useZsPageDerivedState`. |
 | **Blokováno → 0.4.0** | CSV/import podle šablony zřizovatele nebo IS – čeká na schválený formát (viz §2). |
 

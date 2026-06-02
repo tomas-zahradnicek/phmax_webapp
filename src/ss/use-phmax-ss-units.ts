@@ -38,16 +38,12 @@ import {
   deriveSsUnitsPreview,
 } from "./phmax-ss-units-derive";
 import { createEmptyPhmaxSsUnitRow, revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./phmax-ss-types";
+import { buildSsDraftStoragePayload, parseSsDraftRowsFromLs } from "./ss-draft-storage";
+import { computeSsPhmaxTotalFromSnapshot } from "./ss-compute-phmax-total-from-snapshot";
 
 function parseStoredRows(raw: string | null): PhmaxSsUnitRow[] {
-  if (!raw) return [createEmptyPhmaxSsUnitRow(1)];
-  try {
-    const data = JSON.parse(raw) as unknown;
-    if (!Array.isArray(data) || data.length === 0) return [createEmptyPhmaxSsUnitRow(1)];
-    return data.map((item, i) => revivePhmaxSsUnitRow((item ?? {}) as Record<string, unknown>, i + 1));
-  } catch {
-    return [createEmptyPhmaxSsUnitRow(1)];
-  }
+  const rows = parseSsDraftRowsFromLs(raw);
+  return rows.length > 0 ? rows : [createEmptyPhmaxSsUnitRow(1)];
 }
 
 function nextRowId(rows: PhmaxSsUnitRow[]): number {
@@ -181,7 +177,11 @@ export function usePhmaxSsUnits(
 
   useEffect(() => {
     try {
-      localStorage.setItem(PHMAX_SS_UNITS_STORAGE_KEY, JSON.stringify(rows));
+      const total = computeSsPhmaxTotalFromSnapshot(rows);
+      localStorage.setItem(
+        PHMAX_SS_UNITS_STORAGE_KEY,
+        JSON.stringify(buildSsDraftStoragePayload(rows, total)),
+      );
     } catch {
       /* ignore */
     }

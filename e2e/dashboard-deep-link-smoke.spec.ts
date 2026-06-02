@@ -171,6 +171,7 @@ test.describe("Dashboard deep-link", () => {
 
     const row = page.locator('[data-sd-dept-id="1"]');
     await expect(row).toBeVisible({ timeout: 8000 });
+    await row.scrollIntoViewIfNeeded();
     await expect(row).toBeInViewport({ timeout: 8000 });
   });
 
@@ -335,73 +336,11 @@ test.describe("Dashboard deep-link", () => {
   });
 
   test("ok modul není ve Vyžaduje pozornost", async ({ page }) => {
-    await page.addInitScript(({ sdKey, zsKey, pvKey, ssKey, sdWizard, zsWizard, pvWizard, ssWizard, pvRowKey, ssRowId }) => {
-      localStorage.setItem(sdWizard, "2");
-      localStorage.setItem(
-        sdKey,
-        JSON.stringify({ pupils: 30, manualDepts: false, departments: 1, inputMode: "summary" }),
-      );
-      localStorage.setItem(zsWizard, "2");
-      localStorage.setItem(
-        zsKey,
-        JSON.stringify({
-          tab: "phmax",
-          basic1Classes: 0,
-          basic2Classes: 0,
-        }),
-      );
-      localStorage.setItem(pvWizard, "2");
-      localStorage.setItem(
-        pvKey,
-        JSON.stringify({
-          rows: [
-            {
-              id: pvRowKey,
-              label: "",
-              provoz: "celodenni",
-              classCount: 2,
-              avgHours: 8,
-              sec16Count: 0,
-              languageGroups: 0,
-            },
-          ],
-        }),
-      );
-      localStorage.setItem(ssWizard, "2");
-      localStorage.setItem(
-        ssKey,
-        JSON.stringify([
-          {
-            id: ssRowId,
-            label: "",
-            educationField: "39-41-L/01",
-            studyForm: "denni",
-            phmaxMode: "",
-            oborCountInClass: "1",
-            additionalOborCodes: "",
-            oborStudentCountsRaw: "",
-            isArt82TalentClass: false,
-            classType: "",
-            isPar16Class: false,
-            isLegacyMultioborClass: false,
-            legacyMaxOborCount: "",
-            note: "",
-            averageStudents: "17",
-            classCount: "2",
-          },
-        ]),
-      );
-    }, {
-      sdKey: SD_STORAGE_KEY,
-      zsKey: ZS_STORAGE_KEY,
-      pvKey: PV_STORAGE_KEY,
-      ssKey: SS_DRAFT_KEY,
-      sdWizard: SD_WIZARD_KEY,
-      zsWizard: ZS_WIZARD_KEY,
-      pvWizard: PV_WIZARD_KEY,
-      ssWizard: SS_WIZARD_KEY,
+    await page.addInitScript(applyCrossPhmaxSeed, {
+      ...defaultCrossPhmaxSeedKeys(),
       pvRowKey: "pv-ok-attention-e2e",
       ssRowId: 88,
+      zsAttentionEmpty: true,
     });
 
     await gotoProductView(page, "dash");
@@ -517,6 +456,30 @@ test.describe("Dashboard deep-link", () => {
     const raw = fs.readFileSync((await download.path())!, "utf8");
     const json = JSON.parse(raw) as { schema?: string; coherenceWarnings?: string[] };
     expect(json.schema).toBe("phmax-school-scenario-v1");
+    expect(Array.isArray(json.coherenceWarnings)).toBe(true);
+    expect(json.coherenceWarnings!.some((w) => /ZŠ.*přepočet/i.test(w))).toBe(true);
+  });
+
+  test("stažení JSON součtu PHmax obsahuje coherenceWarnings", async ({ page }) => {
+    await page.addInitScript(applyCrossPhmaxSeed, {
+      ...defaultCrossPhmaxSeedKeys(),
+      pvRowKey: "pv-cross-json-e2e",
+      ssRowId: 98,
+      zsAuditTotalPhmax: 200,
+    });
+
+    await gotoProductView(page, "dash");
+    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await confirmDashboardExportDisclaimer(page);
+    const jsonBtn = page.getByRole("button", { name: "Stáhnout JSON součtu PHmax" });
+    await jsonBtn.scrollIntoViewIfNeeded();
+    const downloadPromise = page.waitForEvent("download");
+    await jsonBtn.click();
+    const download = await downloadPromise;
+    const fs = await import("node:fs");
+    const raw = fs.readFileSync((await download.path())!, "utf8");
+    const json = JSON.parse(raw) as { schema?: string; coherenceWarnings?: string[] };
+    expect(json.schema).toBe("phmax-cross-phmax-v1");
     expect(Array.isArray(json.coherenceWarnings)).toBe(true);
     expect(json.coherenceWarnings!.some((w) => /ZŠ.*přepočet/i.test(w))).toBe(true);
   });

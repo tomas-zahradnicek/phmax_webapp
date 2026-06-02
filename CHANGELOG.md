@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.11 (2026-05-28)
+
+### Moduly a dashboard
+- SŠ autosave: obal `{ rows, _phmaxAuditTotals }` (`ss-draft-storage`) – zpětně kompatibilní s legacy polem.
+- Handout pro ředitele aktualizován na 0.3.11 (koherence, export checklist, IS handoff).
+
+### Kvalita
+- E2E: poslední inline seed → `applyCrossPhmaxSeed`; stažení cross-PHmax JSON assert `coherenceWarnings`.
+- Unit testy: `ss-draft-storage`, `phmax-dashboard-export-checklist`.
+
 ## 0.3.10 (2026-05-28)
 
 ### Koherence a E2E
