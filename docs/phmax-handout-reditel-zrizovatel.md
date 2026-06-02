@@ -1,6 +1,6 @@
 # PHmax webapp – orientační kalkulačka pro školu
 
-**Verze 0.3.11** · jednostránkový přehled pro ředitele a zřizovatele  
+**Verze 0.3.11.1** · jednostránkový přehled pro ředitele a zřizovatele  
 *Dokument je informativní; nejedná se o závazný výkaz ani právní posudek.*
 
 ---

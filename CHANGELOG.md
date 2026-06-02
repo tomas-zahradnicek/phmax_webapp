@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.11.1 (2026-05-28)
+
+### Oprava CI
+- Release notes – golden contract (`dashboard` v `app-release-notes.ts`).
+
 ## 0.3.11 (2026-05-28)
 
 ### Moduly a dashboard
