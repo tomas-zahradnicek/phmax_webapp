@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
-import { openDashboardAttentionModule, openDashboardKpiModule, gotoProductView } from "./smoke-helpers";
+import { applyCrossPhmaxSeed, defaultCrossPhmaxSeedKeys } from "./cross-phmax-seed";
+import {
+  confirmDashboardExportDisclaimer,
+  openDashboardAttentionModule,
+  openDashboardKpiModule,
+  gotoProductView,
+} from "./smoke-helpers";
 
 const SS_DRAFT_KEY = "phmax-ss-units-draft";
 const SS_WIZARD_KEY = "phmax-ss-basic-wizard-step";
@@ -560,6 +566,7 @@ test.describe("Dashboard deep-link", () => {
 
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await confirmDashboardExportDisclaimer(page);
     const exportBtn = page.getByRole("button", { name: "Export pro IS školy (JSON)" });
     await exportBtn.scrollIntoViewIfNeeded();
     const downloadPromise = page.waitForEvent("download");
@@ -745,6 +752,7 @@ test.describe("Dashboard deep-link", () => {
 
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await confirmDashboardExportDisclaimer(page);
     const scenarioBtn = page.getByRole("button", { name: "Scénář celá škola (JSON)" });
     await scenarioBtn.scrollIntoViewIfNeeded();
     const downloadPromise = page.waitForEvent("download");
@@ -832,6 +840,19 @@ test.describe("Dashboard deep-link", () => {
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
     await expect(page.locator(".dash-cross-phmax")).toContainText(/PV.*dashboard Σ.*audit autosave/i);
+  });
+
+  test("varování nesouladu audit ZŠ vs přepočet", async ({ page }) => {
+    await page.addInitScript(applyCrossPhmaxSeed, {
+      ...defaultCrossPhmaxSeedKeys(),
+      pvRowKey: "pv-zs-coherence-e2e",
+      ssRowId: 96,
+      zsAuditTotalPhmax: 200,
+    });
+
+    await gotoProductView(page, "dash");
+    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.locator(".dash-cross-phmax")).toContainText(/ZŠ.*přepočet/i);
   });
 });
 

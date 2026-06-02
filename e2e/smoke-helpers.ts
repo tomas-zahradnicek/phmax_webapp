@@ -31,3 +31,10 @@ export async function openDashboardKpiModule(page: Page, moduleLabel: string): P
   await expect(tile).toBeVisible();
   await tile.click();
 }
+
+/** Dashboard cross-PHmax – potvrzení orientačního exportu před stažením JSON. */
+export async function confirmDashboardExportDisclaimer(page: Page): Promise<void> {
+  const checkbox = page.getByTestId("dash-export-confirm");
+  await expect(checkbox).toBeVisible();
+  await checkbox.check();
+}

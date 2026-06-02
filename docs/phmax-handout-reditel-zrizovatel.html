@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <title>PHmax webapp – handout pro ředitele a zřizovatele</title>
+  <style>
+    @page { size: A4; margin: 12mm; }
+    body { font-family: "Segoe UI", system-ui, sans-serif; font-size: 9.5pt; line-height: 1.35; color: #111; max-width: 190mm; margin: 0 auto; }
+    h1 { font-size: 14pt; margin: 0 0 4px; }
+    .meta { color: #444; font-size: 8.5pt; margin-bottom: 10px; }
+    h2 { font-size: 10pt; margin: 10px 0 4px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+    table { width: 100%; border-collapse: collapse; font-size: 8.5pt; margin: 4px 0 8px; }
+    th, td { border: 1px solid #bbb; padding: 3px 5px; text-align: left; vertical-align: top; }
+    th { background: #f0f4f8; }
+    ul { margin: 4px 0 8px; padding-left: 1.2em; }
+    li { margin: 2px 0; }
+    .warn { background: #fff8e6; border: 1px solid #e6c200; padding: 6px 8px; font-size: 8.5pt; margin: 6px 0; }
+    .footer { margin-top: 10px; font-size: 8pt; color: #555; text-align: center; }
+    @media print { body { max-width: none; } }
+  </style>
+</head>
+<body>
+  <h1>PHmax webapp – orientační kalkulačka pro školu</h1>
+  <p class="meta"><strong>Verze 0.3.8</strong> · jednostránkový přehled pro ředitele a zřizovatele · informativní dokument (ne závazný výkaz)</p>
+
+  <h2>K čemu slouží</h2>
+  <p>Webová aplikace v prohlížeči pomáhá <strong>spočítat a zkontrolovat orientační PHmax</strong> podle metodiky MŠMT. Data zůstávají v prohlížeči (autosave); lze exportovat CSV/XLSX nebo JSON.</p>
+  <table>
+    <tr><th>Modul</th><th>Pro koho</th><th>Co orientačně počítá</th></tr>
+    <tr><td><strong>PV</strong></td><td>MŠ</td><td>PHmax/PHAmax po pracovištích, náhled § 1d odst. 3</td></tr>
+    <tr><td><strong>ZŠ</strong></td><td>základní škola</td><td>PHmax, PHAmax, PHPmax</td></tr>
+    <tr><td><strong>SŠ</strong></td><td>střední škola</td><td>PHmax po řádcích, PHAmax PrŠ (vybrané obory, denní forma)</td></tr>
+    <tr><td><strong>ŠD</strong></td><td>družina</td><td>PHmax podle oddělení / souhrnu</td></tr>
+    <tr><td><strong>NV75</strong></td><td>zástupce</td><td>banka odpočtů (hodiny, ne PHmax)</td></tr>
+    <tr><td><strong>Dashboard</strong></td><td>vedení</td><td>přehled, součet PHmax, export JSON</td></tr>
+  </table>
+
+  <h2>Co aplikace není</h2>
+  <ul>
+    <li>Oficiální výkaz pro zřizovatele ani náhrada IS školy.</li>
+    <li>Závazný výsledek § 1d bez rozhodnutí KÚ.</li>
+    <li>Plný výpočet všech složitých situací (např. agregace SŠ § 4, plný § 16 u SŠ).</li>
+  </ul>
+
+  <h2>Hotové k použití (0.3.7)</h2>
+  <table>
+    <tr><th>Oblast</th><th>Stav</th></tr>
+    <tr><td>PV, ZŠ, ŠD, NV75 – výpočty a export CSV</td><td><strong>Ano</strong></td></tr>
+    <tr><td>PV § 1d krácení</td><td><strong>Orientačně</strong> (+ KÚ)</td></tr>
+    <tr><td>SŠ běžné řádky, PrŠ PHAmax</td><td><strong>Ano</strong> (§ 16 náhled)</td></tr>
+    <tr><td>Dashboard Σ + JSON scénář / IS handoff</td><td><strong>Ano</strong></td></tr>
+    <tr><td>Import do IS / šablona zřizovatele</td><td><strong>Ne</strong> (0.4.0)</td></tr>
+  </table>
+
+  <h2>Postup pro školu (15 min)</h2>
+  <ol style="margin:4px 0 8px;padding-left:1.3em;font-size:8.5pt;">
+    <li>Dashboard → kontrola modulů a „Vyžaduje pozornost“.</li>
+    <li>Modul (PV/ZŠ/SŠ…) → ukázka → vlastní data → souhrn.</li>
+    <li>Export CSV nebo JSON scénář z dashboardu.</li>
+    <li>Na sdíleném PC: Vymazat lokální data.</li>
+  </ol>
+
+  <div class="warn"><strong>Upozornění:</strong> Výstupy jsou orientační, s verzí aplikace a datem. Před úředním použitím ověření odpovědnou osobou školy.</div>
+
+  <p class="footer">PHmax webapp 0.3.7 · docs/phmax-handout-reditel-zrizovatel.md · docs/phmax-is-integration.md</p>
+</body>
+</html>

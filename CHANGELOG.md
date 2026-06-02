@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.8 (2026-05-28)
+
+### Dashboard a koherence
+- ZŠ: přepočet PHmax ze snapshotu (`computeZsPhmaxTotalFromSnapshot`) v `crossPhmaxAuditCoherenceWarnings`.
+- Kontrolní list před exportem JSON (potvrzení orientačního charakteru).
+
+### Kvalita
+- E2E: sdílený seed `e2e/cross-phmax-seed.ts`, regrese PV „Přidat pracoviště“, varování ZŠ audit vs. přepočet.
+- `npm run docs:handout-pdf` (Playwright print z HTML); contract test verze handoutu.
+
 ## 0.3.7 (2026-06-02)
 
 ### Refaktor PV

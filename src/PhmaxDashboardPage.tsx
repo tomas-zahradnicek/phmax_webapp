@@ -37,6 +37,7 @@ import {
 } from "./phmax-school-scenario-export";
 import { buildPhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import { crossPhmaxAuditCoherenceWarnings } from "./phmax-cross-phmax-coherence";
+import { buildDashboardExportChecklist } from "./phmax-dashboard-export-checklist";
 import {
   postPhmaxIsHandoff,
   readPhmaxIsEndpoint,
@@ -570,6 +571,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   const [notice, publishNotice] = useUiNotice();
   const [scenarioLabel, setScenarioLabel] = useState(() => readSchoolScenarioLabel());
   const [isEndpoint, setIsEndpoint] = useState(() => readPhmaxIsEndpoint());
+  const [exportDisclaimerConfirmed, setExportDisclaimerConfirmed] = useState(false);
 
   const refresh = useCallback(() => {
     setRefreshAt(new Date());
@@ -662,6 +664,17 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     const scenario = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels, scenarioLabel);
     return crossPhmaxAuditCoherenceWarnings(crossPhmax, scenario.moduleSnapshots);
   }, [crossPhmax, attentionModuleLabels, scenarioLabel]);
+
+  const exportChecklist = useMemo(
+    () =>
+      buildDashboardExportChecklist({
+        crossPhmax,
+        attentionModuleLabels,
+        auditCoherenceWarnings,
+        exportDisclaimerConfirmed,
+      }),
+    [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, exportDisclaimerConfirmed],
+  );
 
   const persistScenarioLabel = useCallback((label: string) => {
     const trimmed = label.trim();
@@ -858,18 +871,59 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 </li>
               ))}
             </ul>
+            <details className="dash-export-checklist" style={{ marginTop: 12 }} open>
+              <summary className="section-title" style={{ fontSize: "1rem", cursor: "pointer" }}>
+                Kontrolní list před exportem
+              </summary>
+              <ul className="muted-text" style={{ marginTop: 8, paddingLeft: "1.25rem" }}>
+                {exportChecklist.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <label className="field" style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "flex-start" }}>
+                <input
+                  type="checkbox"
+                  data-testid="dash-export-confirm"
+                  checked={exportDisclaimerConfirmed}
+                  onChange={(e) => setExportDisclaimerConfirmed(e.target.checked)}
+                />
+                <span className="muted-text">
+                  Potvrzuji, že export je orientační a neoficiální – použiji ho jen pro interní kontrolu školy.
+                </span>
+              </label>
+            </details>
             <div className="dash-card__actions" style={{ marginTop: 12 }}>
-              <button type="button" className="btn ghost" onClick={downloadCrossPhmaxJson}>
+              <button
+                type="button"
+                className="btn ghost"
+                disabled={!exportDisclaimerConfirmed}
+                onClick={downloadCrossPhmaxJson}
+              >
                 Stáhnout JSON součtu PHmax
               </button>
-              <button type="button" className="btn ghost" onClick={downloadSchoolScenarioJson}>
+              <button
+                type="button"
+                className="btn ghost"
+                disabled={!exportDisclaimerConfirmed}
+                onClick={downloadSchoolScenarioJson}
+              >
                 Scénář celá škola (JSON)
               </button>
-              <button type="button" className="btn ghost" onClick={downloadIsHandoffJson}>
+              <button
+                type="button"
+                className="btn ghost"
+                disabled={!exportDisclaimerConfirmed}
+                onClick={downloadIsHandoffJson}
+              >
                 Export pro IS školy (JSON)
               </button>
               {isEndpoint.trim() ? (
-                <button type="button" className="btn ghost" onClick={() => void sendIsHandoff()}>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  disabled={!exportDisclaimerConfirmed}
+                  onClick={() => void sendIsHandoff()}
+                >
                   Odeslat handoff na IS (POST)
                 </button>
               ) : null}
