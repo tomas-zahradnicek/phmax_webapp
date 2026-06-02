@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.10 (2026-05-28)
+
+### Koherence a E2E
+- SŠ: `computeSsPhmaxTotalFromSnapshot` v cross-PHmax varováních.
+- E2E: POST handoff vyžaduje potvrzení exportu; scénář JSON assert `coherenceWarnings`; sdílený seed u všech cross-PHmax testů.
+
+### Docs
+- `phmax-is-integration.md` – pole `coherenceWarnings` pro integrátory.
+
 ## 0.3.9 (2026-05-28)
 
 ### Dashboard a moduly

@@ -9,6 +9,7 @@ export const CROSS_PHMAX_LS = {
   zsWizard: "phmax-zs-basic-wizard-step",
   sd: "edu-cz-sd-calculator-state",
   sdWizard: "phmax-sd-basic-wizard-step",
+  isEndpoint: "phmax-is-handoff-endpoint",
 } as const;
 
 export type CrossPhmaxSeedOptions = {

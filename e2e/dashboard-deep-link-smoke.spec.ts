@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { applyCrossPhmaxSeed, defaultCrossPhmaxSeedKeys } from "./cross-phmax-seed";
+import { applyCrossPhmaxSeed, CROSS_PHMAX_LS, defaultCrossPhmaxSeedKeys } from "./cross-phmax-seed";
 import {
   confirmDashboardExportDisclaimer,
   openDashboardAttentionModule,
@@ -17,8 +17,8 @@ const SD_STORAGE_KEY = "edu-cz-sd-calculator-state";
 const SD_WIZARD_KEY = "phmax-sd-basic-wizard-step";
 const NV75_STORAGE_KEY = "edu-cz-nv75-deputy-bank-state";
 const NV75_WIZARD_KEY = "phmax-nv75-basic-wizard-step";
-const IS_ENDPOINT_LS_KEY = "phmax-is-handoff-endpoint";
-const E2E_IS_HANDOFF_URL = "https://e2e.phmax.local/is-handoff";
+export const IS_ENDPOINT_LS_KEY = "phmax-is-handoff-endpoint";
+export const E2E_IS_HANDOFF_URL = "https://e2e.phmax.local/is-handoff";
 
 test.describe("Dashboard deep-link", () => {
   test("SŠ – problematický řádek", async ({ page }) => {
@@ -473,84 +473,17 @@ test.describe("Dashboard deep-link", () => {
       await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
     });
 
-    await page.addInitScript(
-      ({ sdKey, zsKey, pvKey, ssKey, sdWizard, zsWizard, pvWizard, ssWizard, pvRowKey, ssRowId, isUrl, isKey }) => {
-        localStorage.setItem(isKey, isUrl);
-        localStorage.setItem(sdWizard, "2");
-        localStorage.setItem(
-          sdKey,
-          JSON.stringify({ pupils: 30, manualDepts: false, departments: 1, inputMode: "summary" }),
-        );
-        localStorage.setItem(zsWizard, "2");
-        localStorage.setItem(
-          zsKey,
-          JSON.stringify({
-            tab: "phmax",
-            basic1Classes: 2,
-            basic1Pupils: 40,
-            _phmaxAuditTotals: { totalPhmax: 200, totalPha: 0, totalPhp: 0, tab: "phmax" },
-          }),
-        );
-        localStorage.setItem(pvWizard, "2");
-        localStorage.setItem(
-          pvKey,
-          JSON.stringify({
-            rows: [
-              {
-                id: pvRowKey,
-                label: "",
-                provoz: "celodenni",
-                classCount: 2,
-                avgHours: 8,
-                sec16Count: 0,
-                languageGroups: 0,
-              },
-            ],
-          }),
-        );
-        localStorage.setItem(ssWizard, "2");
-        localStorage.setItem(
-          ssKey,
-          JSON.stringify([
-            {
-              id: ssRowId,
-              label: "",
-              educationField: "39-41-L/01",
-              studyForm: "denni",
-              phmaxMode: "",
-              oborCountInClass: "1",
-              additionalOborCodes: "",
-              oborStudentCountsRaw: "",
-              isArt82TalentClass: false,
-              classType: "",
-              isPar16Class: false,
-              isLegacyMultioborClass: false,
-              legacyMaxOborCount: "",
-              note: "",
-              averageStudents: "17",
-              classCount: "2",
-            },
-          ]),
-        );
-      },
-      {
-        sdKey: SD_STORAGE_KEY,
-        zsKey: ZS_STORAGE_KEY,
-        pvKey: PV_STORAGE_KEY,
-        ssKey: SS_DRAFT_KEY,
-        sdWizard: SD_WIZARD_KEY,
-        zsWizard: ZS_WIZARD_KEY,
-        pvWizard: PV_WIZARD_KEY,
-        ssWizard: SS_WIZARD_KEY,
-        pvRowKey: "pv-is-post-e2e",
-        ssRowId: 93,
-        isUrl: E2E_IS_HANDOFF_URL,
-        isKey: IS_ENDPOINT_LS_KEY,
-      },
-    );
+    await page.addInitScript(applyCrossPhmaxSeed, {
+      ...defaultCrossPhmaxSeedKeys(),
+      pvRowKey: "pv-is-post-e2e",
+      ssRowId: 93,
+      isHandoffUrl: E2E_IS_HANDOFF_URL,
+      isHandoffLsKey: CROSS_PHMAX_LS.isEndpoint,
+    });
 
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await confirmDashboardExportDisclaimer(page);
     const postBtn = page.getByRole("button", { name: "Odeslat handoff na IS (POST)" });
     await postBtn.scrollIntoViewIfNeeded();
     await postBtn.click();
@@ -558,77 +491,17 @@ test.describe("Dashboard deep-link", () => {
       timeout: 8000,
     });
     expect(postedBody).toMatchObject({ schema: "phmax-is-handoff-v1" });
+    expect(postedBody).toMatchObject({
+      schoolScenario: { coherenceWarnings: expect.any(Array) },
+    });
   });
 
   test("stažení scénáře celá škola phmax-school-scenario-v1", async ({ page }) => {
-    await page.addInitScript(({ sdKey, zsKey, pvKey, ssKey, sdWizard, zsWizard, pvWizard, ssWizard, pvRowKey, ssRowId }) => {
-      localStorage.setItem(sdWizard, "2");
-      localStorage.setItem(
-        sdKey,
-        JSON.stringify({ pupils: 30, manualDepts: false, departments: 1, inputMode: "summary" }),
-      );
-      localStorage.setItem(zsWizard, "2");
-      localStorage.setItem(
-        zsKey,
-        JSON.stringify({
-          tab: "phmax",
-          basic1Classes: 2,
-          basic1Pupils: 40,
-          _phmaxAuditTotals: { totalPhmax: 200, totalPha: 0, totalPhp: 0, tab: "phmax" },
-        }),
-      );
-      localStorage.setItem(pvWizard, "2");
-      localStorage.setItem(
-        pvKey,
-        JSON.stringify({
-          rows: [
-            {
-              id: pvRowKey,
-              label: "",
-              provoz: "celodenni",
-              classCount: 2,
-              avgHours: 8,
-              sec16Count: 0,
-              languageGroups: 0,
-            },
-          ],
-        }),
-      );
-      localStorage.setItem(ssWizard, "2");
-      localStorage.setItem(
-        ssKey,
-        JSON.stringify([
-          {
-            id: ssRowId,
-            label: "",
-            educationField: "39-41-L/01",
-            studyForm: "denni",
-            phmaxMode: "",
-            oborCountInClass: "1",
-            additionalOborCodes: "",
-            oborStudentCountsRaw: "",
-            isArt82TalentClass: false,
-            classType: "",
-            isPar16Class: false,
-            isLegacyMultioborClass: false,
-            legacyMaxOborCount: "",
-            note: "",
-            averageStudents: "17",
-            classCount: "2",
-          },
-        ]),
-      );
-    }, {
-      sdKey: SD_STORAGE_KEY,
-      zsKey: ZS_STORAGE_KEY,
-      pvKey: PV_STORAGE_KEY,
-      ssKey: SS_DRAFT_KEY,
-      sdWizard: SD_WIZARD_KEY,
-      zsWizard: ZS_WIZARD_KEY,
-      pvWizard: PV_WIZARD_KEY,
-      ssWizard: SS_WIZARD_KEY,
+    await page.addInitScript(applyCrossPhmaxSeed, {
+      ...defaultCrossPhmaxSeedKeys(),
       pvRowKey: "pv-scenario-e2e",
       ssRowId: 94,
+      zsAuditTotalPhmax: 200,
     });
 
     await gotoProductView(page, "dash");
@@ -642,80 +515,18 @@ test.describe("Dashboard deep-link", () => {
     expect(download.suggestedFilename()).toMatch(/phmax-skola-scenar.*\.json$/i);
     const fs = await import("node:fs");
     const raw = fs.readFileSync((await download.path())!, "utf8");
-    const json = JSON.parse(raw) as { schema?: string };
+    const json = JSON.parse(raw) as { schema?: string; coherenceWarnings?: string[] };
     expect(json.schema).toBe("phmax-school-scenario-v1");
+    expect(Array.isArray(json.coherenceWarnings)).toBe(true);
+    expect(json.coherenceWarnings!.some((w) => /ZŠ.*přepočet/i.test(w))).toBe(true);
   });
 
   test("varování nesouladu audit PV vs dashboard Σ", async ({ page }) => {
-    await page.addInitScript(({ sdKey, zsKey, pvKey, ssKey, sdWizard, zsWizard, pvWizard, ssWizard, pvRowKey, ssRowId }) => {
-      localStorage.setItem(sdWizard, "2");
-      localStorage.setItem(
-        sdKey,
-        JSON.stringify({ pupils: 30, manualDepts: false, departments: 1, inputMode: "summary" }),
-      );
-      localStorage.setItem(zsWizard, "2");
-      localStorage.setItem(
-        zsKey,
-        JSON.stringify({
-          tab: "phmax",
-          basic1Classes: 2,
-          basic1Pupils: 40,
-          _phmaxAuditTotals: { totalPhmax: 200, totalPha: 0, totalPhp: 0, tab: "phmax" },
-        }),
-      );
-      localStorage.setItem(pvWizard, "2");
-      localStorage.setItem(
-        pvKey,
-        JSON.stringify({
-          _phmaxAuditTotals: { totalPhmax: 1, tab: "phmax" },
-          rows: [
-            {
-              id: pvRowKey,
-              label: "",
-              provoz: "celodenni",
-              classCount: 2,
-              avgHours: 8,
-              sec16Count: 0,
-              languageGroups: 0,
-            },
-          ],
-        }),
-      );
-      localStorage.setItem(ssWizard, "2");
-      localStorage.setItem(
-        ssKey,
-        JSON.stringify([
-          {
-            id: ssRowId,
-            label: "",
-            educationField: "39-41-L/01",
-            studyForm: "denni",
-            phmaxMode: "",
-            oborCountInClass: "1",
-            additionalOborCodes: "",
-            oborStudentCountsRaw: "",
-            isArt82TalentClass: false,
-            classType: "",
-            isPar16Class: false,
-            isLegacyMultioborClass: false,
-            legacyMaxOborCount: "",
-            note: "",
-            averageStudents: "17",
-            classCount: "2",
-          },
-        ]),
-      );
-    }, {
-      sdKey: SD_STORAGE_KEY,
-      zsKey: ZS_STORAGE_KEY,
-      pvKey: PV_STORAGE_KEY,
-      ssKey: SS_DRAFT_KEY,
-      sdWizard: SD_WIZARD_KEY,
-      zsWizard: ZS_WIZARD_KEY,
-      pvWizard: PV_WIZARD_KEY,
-      ssWizard: SS_WIZARD_KEY,
+    await page.addInitScript(applyCrossPhmaxSeed, {
+      ...defaultCrossPhmaxSeedKeys(),
       pvRowKey: "pv-coherence-e2e",
       ssRowId: 95,
+      pvAuditTotalPhmax: 1,
     });
 
     await gotoProductView(page, "dash");
@@ -762,6 +573,7 @@ test.describe("ZŠ hero – pojmenované zálohy", () => {
       await expect(dialog).toBeVisible({ timeout: 10_000 });
       await dialog.getByText("Scénáře a zálohy", { exact: true }).click();
     } else {
+      await backupsToggle.scrollIntoViewIfNeeded();
       await backupsToggle.click();
     }
     await expect(page.getByLabel("Název pojmenované zálohy")).toBeVisible({ timeout: 8000 });

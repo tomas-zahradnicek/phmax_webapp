@@ -5,10 +5,12 @@ Aplikace **neposílá data přímo** do Bakalářů, EduPage ani jiného IS – 
 ## Co je k dispozici (v0.3.4+)
 
 1. **Dashboard Σ** → tlačítko **Scénář celá škola (JSON)** – autosave PV/ŠD/ZŠ/SŠ.
-2. **Handoff pro IS** → tlačítko **Export pro IS školy (JSON)** – obal `phmax-is-handoff-v1` kolem scénáře.
+2. **Handoff pro IS** → tlačítko **Export pro IS školy (JSON)** – obal `phmax-is-handoff-v1` kolem scénáře (včetně `coherenceWarnings` z dashboardu).
 
 Schéma: `src/phmax-is-export-adapter.ts`  
 Mapování polí (návrh): `docs/export-field-mapping.md`
+
+Pole **`coherenceWarnings`** (0.3.9+) obsahuje textová varování z `crossPhmaxAuditCoherenceWarnings` – integrátor může zablokovat import nebo vyžadovat ruční potvrzení.
 
 ## Doporučený postup integrátora
 

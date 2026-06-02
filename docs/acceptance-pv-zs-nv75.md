@@ -82,6 +82,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | S2d | Desktop – combobox + workflow dock | E2E desktop |
 | S3 | Porovnání variant A/B s pojmenovanou zálohou | contract |
 | S4 | Dashboard Σ – PHmax ŠD z přepočtu autosave; koherence audit | contract + E2E |
+| SS1 | Dashboard – koherence SŠ přepočet vs. Σ (bez reálného scénáře školy) | contract |
 
 ---
 
