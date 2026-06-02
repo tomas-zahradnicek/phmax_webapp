@@ -1,8 +1,5 @@
 import React from "react";
-import { CalculatorFocusToggle } from "../CalculatorFocusToggle";
-import { CalculatorGlobalDisplayHint } from "../CalculatorGlobalDisplayHint";
-import { CalculatorViewModeToggle } from "../CalculatorViewModeToggle";
-import { DisplayDensityToggle } from "../DisplayDensityToggle";
+import { CalculatorHeroDisplayControls } from "../CalculatorHeroDisplayControls";
 import { HeroExpertStrip } from "../HeroExpertStrip";
 import { ProductViewPills, type ProductView } from "../ProductViewPills";
 import { QuickOnboardingHeroButton } from "../QuickOnboarding";
@@ -54,24 +51,24 @@ export function Nv75HeroHeader({
     <header className="hero hero--feature" ref={heroHeaderRef as React.Ref<HTMLElement>}>
       <div className="hero__pills-row">
         <ProductViewPills productView={productView} setProductView={setProductView} />
-        <div className="hero__pills-row-trailing">
-          <div className="hero__pills-controls">
-            <CalculatorViewModeToggle
-              name="nv75-view-mode"
-              moduleLabel="NV75"
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-            />
-            <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="nv75-display-density" />
-            <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
+        <CalculatorHeroDisplayControls
+          moduleLabel="NV75"
+          viewModeName="nv75-view-mode"
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          displayDensityName="nv75-display-density"
+          displayDensity={displayDensity}
+          setDisplayDensity={setDisplayDensity}
+          focusMode={focusMode}
+          setFocusMode={setFocusMode}
+          trailing={
             <QuickOnboardingHeroButton
               guideOpen={guideOpen}
               onToggle={toggleGuide}
               buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
             />
-          </div>
-          <CalculatorGlobalDisplayHint />
-        </div>
+          }
+        />
       </div>
 
       <HeroExpertStrip

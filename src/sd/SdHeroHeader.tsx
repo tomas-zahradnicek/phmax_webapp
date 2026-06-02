@@ -1,8 +1,5 @@
 import React from "react";
-import { CalculatorFocusToggle } from "../CalculatorFocusToggle";
-import { CalculatorGlobalDisplayHint } from "../CalculatorGlobalDisplayHint";
-import { CalculatorViewModeToggle } from "../CalculatorViewModeToggle";
-import { DisplayDensityToggle } from "../DisplayDensityToggle";
+import { CalculatorHeroDisplayControls } from "../CalculatorHeroDisplayControls";
 import { GlossaryIconButton } from "../GlossaryIconButton";
 import { HeroExpertStrip } from "../HeroExpertStrip";
 import { ProductViewPills, type ProductView } from "../ProductViewPills";
@@ -64,30 +61,32 @@ export function SdHeroHeader({
 
       <div className="hero__pills-row">
         <ProductViewPills productView={productView} setProductView={setProductView} />
-        <div className="hero__pills-row-trailing">
-          <div className="hero__pills-controls">
-            <CalculatorViewModeToggle
-              name="sd-view-mode"
-              moduleLabel="ŠD"
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-            />
-            <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="sd-display-density" />
-            <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
-            <GlossaryIconButton
-              ref={glossaryTriggerRef as React.Ref<HTMLButtonElement>}
-              className="glossary-icon-btn--hero"
-              expanded={glossaryOpen}
-              onClick={() => setGlossaryOpen(true)}
-            />
-            <QuickOnboardingHeroButton
-              guideOpen={guideOpen}
-              onToggle={toggleGuide}
-              buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
-            />
-          </div>
-          <CalculatorGlobalDisplayHint />
-        </div>
+        <CalculatorHeroDisplayControls
+          moduleLabel="ŠD"
+          viewModeName="sd-view-mode"
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          displayDensityName="sd-display-density"
+          displayDensity={displayDensity}
+          setDisplayDensity={setDisplayDensity}
+          focusMode={focusMode}
+          setFocusMode={setFocusMode}
+          trailing={
+            <>
+              <GlossaryIconButton
+                ref={glossaryTriggerRef as React.Ref<HTMLButtonElement>}
+                className="glossary-icon-btn--hero"
+                expanded={glossaryOpen}
+                onClick={() => setGlossaryOpen(true)}
+              />
+              <QuickOnboardingHeroButton
+                guideOpen={guideOpen}
+                onToggle={toggleGuide}
+                buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
+              />
+            </>
+          }
+        />
       </div>
 
       <HeroExpertStrip

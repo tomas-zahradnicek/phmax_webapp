@@ -55,7 +55,7 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
         /calculator-workspace-dock|CalculatorWorkflowDock|ZsWorkflowDockPanel|ZsCalculatorShell|SdWorkflowDockPanel|SdCalculatorShell|PvWorkflowDockPanel|PvCalculatorShell/,
       );
       expect(toolbarSrc, page).toContain("HeroCompactToolbar");
-      expect(heroSrc, page).toContain("DisplayDensityToggle");
+      expect(heroSrc, page).toContain("CalculatorHeroDisplayControls");
       expect(heroSrc, page).toMatch(/hero-zone-actions--toolbar|(Zs|Pv|Sd|Nv75|Ss)HeroToolbar/);
       expect(src, page).toMatch(
         /CalculatorWorkflowDock|ZsWorkflowDockPanel|ZsCalculatorShell|SdWorkflowDockPanel|SdCalculatorShell|PvWorkflowDockPanel|PvCalculatorShell/,

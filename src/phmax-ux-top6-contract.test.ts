@@ -26,6 +26,7 @@ describe("UX TOP 6 contract", () => {
       "src/hero-toolbar-portal-context.tsx",
       "src/CalculatorWorkflowDock.tsx",
       "src/CalculatorProductShell.tsx",
+      "src/CalculatorHeroDisplayControls.tsx",
       "src/DisplayDensityToggle.tsx",
       "src/display-density.ts",
       "src/CalculatorStickyContextBar.tsx",
@@ -47,6 +48,7 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".calculator-shell--density-compact");
     expect(css).toContain(".workflow-dock");
     expect(css).toContain(".workflow-dock__mobile-fold");
+    expect(css).toContain(".calculator-hero-display-controls__divider");
     expect(css).toContain(".calculator-mobile-scroll-results--pinned");
     expect(css).toContain(".product-basic-wizard-active");
     expect(css).toContain(".basic-compare-preview");
@@ -136,7 +138,7 @@ describe("UX TOP 6 contract", () => {
                   ? readSource("src/nv75/Nv75HeroHeader.tsx")
                   : readSource(page);
       expect(toolbarSrc).toContain("HeroCompactToolbar");
-      expect(heroSrc).toContain("DisplayDensityToggle");
+      expect(heroSrc).toContain("CalculatorHeroDisplayControls");
       expect(heroSrc).toMatch(/hero-zone-actions--toolbar|(Zs|Pv|Sd|Ss|Nv75)HeroToolbar/);
     }
     expect(readSource("src/sd/SdResultsSection.tsx")).toContain('data-section="sd-vysledek"');

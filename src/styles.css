@@ -6392,6 +6392,105 @@ select:focus {
   gap: 8px 12px;
 }
 
+/* Hero: Základní/Expertní + hustota/fokus – dvě skupiny blízko sebe, oddělené rámečkem */
+.calculator-hero-display-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0;
+  max-width: 100%;
+}
+
+.calculator-hero-display-controls__group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  min-width: 0;
+}
+
+.calculator-hero-display-controls__legend {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #64748b;
+}
+
+.hero--feature .calculator-hero-display-controls__group {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.hero--feature .calculator-hero-display-controls__legend {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.calculator-hero-display-controls__divider {
+  flex: 0 0 auto;
+  width: 1px;
+  align-self: stretch;
+  margin: 6px 10px;
+  background: #cbd5e1;
+}
+
+.hero--feature .calculator-hero-display-controls__divider {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.calculator-hero-display-controls__layout-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.calculator-hero-display-controls__layout-hint {
+  max-width: 22rem;
+}
+
+.calculator-hero-display-controls__view-toggle .calculator-view-mode-toggle__hint {
+  max-width: 20rem;
+}
+
+.calculator-hero-display-controls__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-self: center;
+  gap: 8px;
+  margin-left: 4px;
+  padding: 4px 0 4px 6px;
+}
+
+@media (max-width: 900px) {
+  .calculator-hero-display-controls {
+    width: 100%;
+  }
+
+  .calculator-hero-display-controls__divider {
+    width: 100%;
+    height: 1px;
+    margin: 8px 0;
+    align-self: auto;
+  }
+
+  .calculator-hero-display-controls__actions {
+    width: 100%;
+    margin-left: 0;
+    padding-left: 0;
+    border-top: 1px solid rgba(148, 163, 184, 0.35);
+    padding-top: 8px;
+  }
+
+  .hero--feature .calculator-hero-display-controls__actions {
+    border-top-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
 .calculator-view-mode-toggle__hint,
 .calculator-global-display-hint {
   margin: 0;
