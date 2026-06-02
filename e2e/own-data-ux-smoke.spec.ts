@@ -5,7 +5,12 @@ test.describe("UX: vlastní údaje a režimy", () => {
   test("PV – nápověda vlastních údajů a vysvětlení režimu", async ({ page }) => {
     await gotoProductView(page, "pv");
     await expect(page.locator(".own-data-hint--hero").first()).toBeVisible();
-    await expect(page.locator(".calculator-view-mode-toggle__hint")).toContainText(/Základní|Expertní/);
+    await expect(page.locator(".calculator-hero-display-controls--compact")).toBeVisible();
+    await expect(page.getByRole("radio", { name: "Základní" })).toBeVisible();
+    await expect(page.getByRole("radio", { name: "Expertní" })).toBeVisible();
+    const viewHint = page.getByRole("button", { name: "Vysvětlení režimu práce" });
+    await viewHint.click();
+    await expect(page.locator(".calculator-hint-tooltip__bubble").first()).toContainText(/průvodce krok za krokem/i);
     await expect(page.getByRole("button", { name: "Začít od prázdného formuláře" })).toBeVisible();
   });
 
