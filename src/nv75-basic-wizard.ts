@@ -15,7 +15,7 @@ export const NV75_BASIC_WIZARD_STEPS: readonly ProductBasicWizardStepMeta[] = [
   {
     step: 1,
     label: "Ukázka",
-    lead: "Načtěte metodický příklad v horní liště a projděte si strukturu banky hodin.",
+    lead: "Volitelně načtěte metodický příklad v comboboxu Příkladové výpočty, nebo rovnou vyplňte vlastní řádky v kroku Vstupy.",
     scrollSectionId: "nv75-vstupy",
   },
   {

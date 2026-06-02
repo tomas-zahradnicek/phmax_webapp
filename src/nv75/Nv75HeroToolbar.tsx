@@ -12,6 +12,7 @@ import {
   IconSpinner,
 } from "../HeroActionIconButton";
 import { HeroCompactToolbar } from "../HeroCompactToolbar";
+import { OwnDataHint } from "../OwnDataHint";
 import {
   ADVANCED_AUDIT_GROUP_LABEL,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
@@ -59,6 +60,7 @@ export function Nv75HeroToolbar({
 }: Nv75HeroToolbarProps) {
   return (
     <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu NV75">
+      <OwnDataHint variant="hero" />
       <div className="hero-zone-actions__toolbar-row">
         <HeroActionsDrawer>
           <HeroCompactToolbar

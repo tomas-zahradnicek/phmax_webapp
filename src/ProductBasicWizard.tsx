@@ -1,5 +1,6 @@
 import React from "react";
 import { BASIC_QUICK_START_EXAMPLE_CTA_LABEL } from "./basic-quick-start";
+import { BASIC_WIZARD_OWN_DATA_NOTE } from "./calculator-ui-constants";
 import {
   PRODUCT_BASIC_WIZARD_STEP_COUNT,
   basicWizardStepButtonClass,
@@ -56,6 +57,7 @@ export function ProductBasicWizard({
         </div>
         <h2 className="section-title">{meta.label}</h2>
         <p className="muted-text zs-basic-wizard__lead">{meta.lead}</p>
+        {step === 1 ? <p className="muted-text own-data-hint own-data-hint--wizard">{BASIC_WIZARD_OWN_DATA_NOTE}</p> : null}
         {step === 1 && heroExampleSelectId ? (
           <button type="button" className="btn ghost" style={{ marginTop: 10 }} onClick={focusExampleSelect}>
             {BASIC_QUICK_START_EXAMPLE_CTA_LABEL}

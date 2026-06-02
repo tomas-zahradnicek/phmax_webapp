@@ -11,6 +11,8 @@ import {
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { HeroExampleSelect } from "./HeroExampleSelect";
+import { HERO_EXAMPLE_SELECT_PLACEHOLDER } from "./calculator-ui-constants";
+import { OwnDataHint } from "./OwnDataHint";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { useDisplayDensity } from "./useDisplayDensity";
@@ -1171,6 +1173,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           data-wizard-step="2"
         >
           <h2 className="section-title">Vstupy</h2>
+          <OwnDataHint variant="form" />
           <label className="field" style={{ marginTop: 10, maxWidth: 760 }}>
             <span className="field__label" id="nv75-hero-example-label">
               Příkladové výpočty (metodika §4b a SŠ/VOŠ/DM)
@@ -1178,7 +1181,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             <HeroExampleSelect
               id="nv75-hero-example-select"
               aria-labelledby="nv75-hero-example-label"
-              placeholder="Vyberte příklad…"
+              placeholder={HERO_EXAMPLE_SELECT_PLACEHOLDER}
               value={selectedExample}
               groups={nv75HeroExampleGroups}
               onChange={(key) => applyExample(key as Nv75ExampleKey)}

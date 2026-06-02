@@ -61,6 +61,7 @@ import { SdCalculatorShell } from "./sd/SdCalculatorShell";
 import type { ProductView } from "./ProductViewPills";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { InputOutputLegend, NumberField } from "./phmax-zs-ui";
+import { OwnDataHint } from "./OwnDataHint";
 import { IntegerInput } from "./IntegerInput";
 import { round2 } from "./phmax-zs-logic";
 import { buildPhmaxSdExportRows } from "./phmax-sd-export-rows";
@@ -1131,6 +1132,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
 
       <section className={`card section-card section-card--sd${sectionNeedsAttentionClass(sdHasInputIssue)}`} data-section="sd-vstupy" data-wizard-step="2">
         <h2 className="section-title">Vstupy</h2>
+        <OwnDataHint variant="form" />
         <InputOutputLegend />
         <p className="muted-text" style={{ marginTop: 10 }}>
           Postup 1–2–3: <strong>1)</strong> zvolte režim (souhrnný/detailní), <strong>2)</strong> vyplňte vstupy

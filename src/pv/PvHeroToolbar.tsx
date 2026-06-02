@@ -14,6 +14,7 @@ import {
   IconSpinner,
 } from "../HeroActionIconButton";
 import { HeroCompactToolbar, HeroToolbarSaveButton } from "../HeroCompactToolbar";
+import { OwnDataHint } from "../OwnDataHint";
 import { CompareVariantsPanel } from "../CompareVariantsPanel";
 import type { CompareProductVariantsResult } from "../phmax-product-compare";
 import {
@@ -86,6 +87,7 @@ export function PvHeroToolbar({
 }: PvHeroToolbarProps) {
   return (
     <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
+      <OwnDataHint variant="hero" />
       <div className="hero-zone-actions__toolbar-row">
         <div className="field field--hero-select hero-actions__example hero-pv-example-select">
           <span className="field__label field__label--hero" id="pv-hero-example-label">

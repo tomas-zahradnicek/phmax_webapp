@@ -33,6 +33,25 @@ export const HERO_ACTIONS_DRAWER_TITLE = "Akce a export";
 export const HERO_ACTIONS_NARROW_FOOTER =
   "Tisk, uložení, export a kopírování shrnutí otevřete tlačítkem výše – v panelu uvidíte popisky u každé akce.";
 
+/** Placeholder comboboxu ukázkových příkladů – zdůrazní, že ukázka není povinná. */
+export const HERO_EXAMPLE_SELECT_PLACEHOLDER = "Volitelná ukázka – nebo vyplňte vlastní údaje níže";
+
+/** Hero lišta (viditelné i v expertním režimu, kde je select ukázky skrytý). */
+export const HERO_OWN_DATA_HINT =
+  "Formulář je editovatelný: můžete rovnou zadat údaje své školy, upravit načtenou ukázku, nebo začít od prázdného stavu v panelu Akce (Vymazat formulář). Souhrn výsledků se přepočítá podle vašich vstupů.";
+
+/** Úvod u první vstupní sekce pod nadpisem. */
+export const FORM_OWN_DATA_LEAD =
+  "Pole níže můžete libovolně upravovat – nejsou jen pro čtení. Ukázka v horní liště je volitelná; prázdný začátek přes Akce → Vymazat formulář.";
+
+/** Doplněk k průvodci v základním režimu (krok 1). */
+export const BASIC_WIZARD_OWN_DATA_NOTE =
+  "Ukázka není povinná: rovnou přejděte na krok Vstupy a vyplňte vlastní údaje, nebo načtěte příklad a upravte ho.";
+
+/** Pravý dock / mobilní souhrn – výsledek není neměnná ukázka. */
+export const WORKFLOW_DOCK_OWN_DATA_HINT =
+  "Čísla v tomto souhrnu vycházejí z vašich vstupů ve formuláři a mění se při každé úpravě – nejde o neměnnou ukázku.";
+
 /** Upozornění k ukládání v prohlížeči – PV a ŠD (jeden slot). */
 export const BROWSER_STORAGE_HINT_SIMPLE =
   "Údaje se ukládají jen v tomto prohlížeči (jedna rozpracovaná situace). Na sdíleném počítači je po práci smažte nebo použijte anonymní režim.";
@@ -75,7 +94,7 @@ export const LAY_USER_QUICK_START_SS =
   "Rychlý start: (1) Přidejte řádek pro každou třídu nebo skupinu, kterou počítáte zvlášť, (2) vyplňte kód oboru z RVP, průměr žáků, počet tříd a formu studia, (3) u víceoborové třídy doplňte další obory a podívejte se na blok „Kontrola pravidel“ pod tabulkou. PHAmax v horním přehledu jen pro Praktickou školu (78-62-C/01, 78-62-C/02) v denní formě – ostatní dopočtěte dle metodiky MŠMT.";
 
 export const LAY_USER_QUICK_START_NV75 =
-  "Rychlý start: (1) Vyberte druh školy/zařízení u každého řádku právnické osoby, (2) načtěte ukázkový příklad A v horní liště, (3) ověřte banku odpočtů – pravidlo §4b, základ a bonusy §4c/§4d. Výsledek je orientační; u složitých struktur ověřte plné znění NV.";
+  "Rychlý start: (1) Vyberte druh školy/zařízení u každého řádku právnické osoby, (2) volitelně načtěte ukázku A v comboboxu Příkladové výpočty, nebo rovnou vyplňte vlastní řádky, (3) ověřte banku odpočtů – pravidlo §4b, základ a bonusy §4c/§4d. Výsledek je orientační; u složitých struktur ověřte plné znění NV.";
 
 /** Mobilní UX – plovoucí souhrn dole a záložka Obsah (společné pro všechny kalkulačky). */
 export const LAY_USER_QUICK_START_MOBILE_UX =

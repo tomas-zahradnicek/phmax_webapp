@@ -59,11 +59,11 @@ const DASH_START_MODULES: ReadonlyArray<{
   id: Exclude<ProductView, "dash">;
   lead: string;
 }> = [
-  { id: "pv", lead: "Předškolní vzdělávání – pracoviště a druhy provozu, ukázka v horní liště." },
-  { id: "sd", lead: "Nejkratší vstup – školní družina, ukázka v horní liště." },
-  { id: "zs", lead: "PHmax / PHAmax / PHPmax pro základní školu." },
-  { id: "ss", lead: "Střední škola – evidence tříd a řádkový PHmax." },
-  { id: "nv75", lead: "Banka odpočtů zástupců – ukázka A v comboboxu Příkladové výpočty." },
+  { id: "pv", lead: "Předškolní vzdělávání – ukázka volitelná, nebo rovnou vlastní pracoviště." },
+  { id: "sd", lead: "Školní družina – ukázka volitelná, nebo rovnou vlastní údaje." },
+  { id: "zs", lead: "PHmax / PHAmax / PHPmax – vlastní škola nebo ukázka z metodiky." },
+  { id: "ss", lead: "Střední škola – evidence tříd; ukázka volitelná." },
+  { id: "nv75", lead: "Banka odpočtů – ukázka A volitelná, nebo vlastní řádky." },
 ];
 
 const DASH_CALC_LABEL: Record<Exclude<ProductView, "dash">, string> = {
@@ -782,7 +782,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               <p className="muted-text" style={{ marginTop: 8 }}>
                 Souhrnný přehled (Σ) čte uložený stav z prohlížeče u každého modulu zvlášť. Orientační součet PHmax napříč PV, ŠD, ZŠ a SŠ je níže –{" "}
                 <strong>NV75</strong> (banka odpočtů hodin, ne PHmax) a krácení <strong>PV § 1d</strong> v cross-součtu nejsou.
-                Pro první orientaci v modulu vždy začněte ukázkou v comboboxu <strong>Příkladové výpočty</strong> v horní liště vybrané kalkulačky.
+                Pro první orientaci můžete v modulu použít combobox <strong>Příkladové výpočty</strong>, nebo rovnou
+                vyplnit vlastní údaje do formuláře – pole nejsou uzamčená, souhrn se přepočítá podle vašich vstupů.
               </p>
               <p className="muted-text" style={{ marginTop: 8 }}>
                 URL:{" "}
@@ -1007,8 +1008,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               Nejste si jisti? Začněte u jedné kalkulačky
             </h2>
             <p className="muted-text" style={{ marginBottom: 12 }}>
-              Bez automatického modalu – po otevření modulu vás aplikace posune k poli{" "}
-              <strong>Příkladové výpočty</strong> v horní liště. Ukázku pak můžete upravit na vlastní školu.
+              Po otevření modulu vás aplikace může posunout k poli <strong>Příkladové výpočty</strong> – ukázka je
+              volitelná. Můžete rovnou vyplnit vlastní školu; načtenou ukázku lze kdykoli upravit nebo vymazat v Akcích.
             </p>
             <div className="dash-new-user-card__grid">
               {DASH_START_MODULES.map((item) => (
@@ -1029,7 +1030,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             Začněte uživatelsky nejdříve tady
           </h2>
             <p className="muted-text" style={{ marginBottom: 12 }}>
-              V každé kalkulačce nejdřív v horní oblasti stránky vyberte <strong>Příkladové výpočty</strong> – získáte předvyplněnou situaci k orientaci ve vstupech. Tlačítko <strong>Nápověda</strong> v hero liště průvodce znovu zobrazí; u ZŠ může navíc pomoci rozcestník v expertním režimu. V tabulkách PHmax používejte rozbalení{" "}
+              V každé kalkulačce můžete zvolit <strong>Příkladové výpočty</strong> pro orientaci, nebo rovnou vyplnit
+              vlastní údaje – formulář není jen pro čtení. Tlačítko <strong>Nápověda</strong> v hero liště průvodce znovu zobrazí; u ZŠ může navíc pomoci rozcestník v expertním režimu. V tabulkách PHmax používejte rozbalení{" "}
             <strong>„Proč tyto vstupy ovlivní PHmax?“</strong> (viz PV, ŠD, ZŠ, NV75) – u <strong>SŠ</strong> doplňuje stejný smysl tlačítko „Proč?“ u každého řádku přehledu.
           </p>
           <p className="muted-text" style={{ marginBottom: 12 }}>

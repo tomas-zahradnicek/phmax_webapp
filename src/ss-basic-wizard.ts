@@ -15,7 +15,7 @@ export const SS_BASIC_WIZARD_STEPS: readonly ProductBasicWizardStepMeta[] = [
   {
     step: 1,
     label: "Ukázka",
-    lead: "V horní liště vyberte ukázkový příklad a porovnejte očekávaný PHmax s metodikou.",
+    lead: "Volitelně vyberte ukázku v horní liště, nebo přejděte na Vstupy a vyplňte řádky evidence podle své školy.",
     scrollSectionId: "ss-vstupy",
   },
   {

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { CALCULATOR_WORKSPACE_DOCK_LABEL } from "./calculator-ui-constants";
 import { CalculatorMobileScrollResults, CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID, MOBILE_SCROLL_PIN_MS, scrollToWorkflowDock } from "./CalculatorMobileScrollResults";
+import { OwnDataHint } from "./OwnDataHint";
 import { readMobileSummaryDismissed, writeMobileSummaryDismissed } from "./mobile-scroll-results-layout";
 import { ResultAnchorCard, type ResultAnchorStat, type ResultAnchorTone } from "./ResultAnchorCard";
 import type { CalculatorViewMode } from "./calculator-view-mode";
@@ -126,6 +127,7 @@ export function CalculatorWorkflowDock({
         issueSummaries={issueSummaries}
         omitVerdictLabelWhenSameAsStatus
       />
+      <OwnDataHint variant="dock" />
       {workflowSteps.length > 0 ? (
         <details className="workflow-dock__block workflow-dock__block--steps" open={stepsOpen}>
           <summary className="workflow-dock__summary">

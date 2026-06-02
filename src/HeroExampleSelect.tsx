@@ -1,5 +1,6 @@
 import React, { useCallback, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { HERO_EXAMPLE_SELECT_PLACEHOLDER } from "./calculator-ui-constants";
 import { useModalDialogA11y } from "./modal-dialog-a11y";
 import { useMatchMedia } from "./useMatchMedia";
 
@@ -143,7 +144,7 @@ export function HeroExampleSelect({
   value,
   onChange,
   groups,
-  placeholder = "Vyberte ukázkový příklad…",
+  placeholder = HERO_EXAMPLE_SELECT_PLACEHOLDER,
   className,
   selectClassName = "input",
   "aria-labelledby": ariaLabelledBy,

@@ -56,6 +56,7 @@ import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import type { ProductView } from "./ProductViewPills";
 import { PvCalculatorShell } from "./pv/PvCalculatorShell";
 import { InputOutputLegend } from "./phmax-zs-ui";
+import { OwnDataHint } from "./OwnDataHint";
 import { buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
 import { createPvProductAuditProtocol } from "./phmax-product-audit";
 import { comparePhmaxProductVariants } from "./phmax-product-compare";
@@ -887,6 +888,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         data-wizard-step="2"
       >
         <h2 className="section-title">Vstupy (pracoviště)</h2>
+        <OwnDataHint variant="form" />
         <InputOutputLegend />
         <p className="section-lead muted-text print-hide" style={{ marginTop: 0 }}>
           Export a tisk najdete v horní liště u nadpisu stránky.

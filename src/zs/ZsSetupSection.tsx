@@ -2,6 +2,7 @@ import React from "react";
 import type { CalculatorMode } from "../config/calculator-config";
 import { MODE_CONFIG } from "../config/calculator-config";
 import { InputOutputLegend } from "../phmax-zs-ui";
+import { OwnDataHint } from "../OwnDataHint";
 
 type ModeOption = {
   id: CalculatorMode;
@@ -23,6 +24,7 @@ export function ZsSetupSection({ mode, modeOptions, onModeChange, SectionLead }:
       <SectionLead>
         Tady vyberete, jaký typ výpočtu chcete zobrazit. Rozcestník výše vám může s výběrem pomoci.
       </SectionLead>
+      <OwnDataHint variant="form" />
       <InputOutputLegend />
       <div className="grid two">
         <div className="field">

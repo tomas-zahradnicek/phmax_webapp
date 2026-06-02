@@ -9,7 +9,8 @@ export function ZsExpertOnboardingCard() {
           <div className="pill pill--step">Začněte tady</div>
           <h2 className="section-title">Jak postupovat krok za krokem</h2>
           <p className="muted-text">
-            Pokud aplikaci otevíráte poprvé, držte se tohoto pořadí. V každém kroku můžete použít ukázkový příklad nebo zadat vlastní údaje.
+            Pokud aplikaci otevíráte poprvé, držte se tohoto pořadí. Ukázka v horní liště je volitelná – můžete rovnou
+            vyplnit vlastní údaje do tabulek; načtenou ukázku lze kdykoli upravit nebo vymazat v Akcích.
           </p>
         </div>
 

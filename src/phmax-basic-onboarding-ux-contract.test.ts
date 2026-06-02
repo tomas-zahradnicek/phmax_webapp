@@ -83,4 +83,24 @@ describe("UX contract: basic onboarding steps + CTA", () => {
     expect(readSource("src/ss/SsResultsSection.tsx")).toContain("PHMAX_SS_PAR16_ROW_SUMMARY");
     expect(readSource("src/ss/SsResultsSection.tsx")).toContain("ss-par16-row-summary");
   });
+
+  it("vlastní údaje – sdílená nápověda ve všech režimech", () => {
+    expect(readSource("src/calculator-ui-constants.ts")).toContain("HERO_OWN_DATA_HINT");
+    expect(readSource("src/calculator-ui-constants.ts")).toContain("HERO_EXAMPLE_SELECT_PLACEHOLDER");
+    expect(readSource("src/OwnDataHint.tsx")).toContain('variant?: OwnDataHintVariant');
+    expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain('<OwnDataHint variant="dock" />');
+
+    for (const toolbar of [
+      "src/pv/PvHeroToolbar.tsx",
+      "src/zs/ZsHeroToolbar.tsx",
+      "src/sd/SdHeroToolbar.tsx",
+      "src/ss/SsHeroToolbar.tsx",
+      "src/nv75/Nv75HeroToolbar.tsx",
+    ]) {
+      expect(readSource(toolbar)).toContain('<OwnDataHint variant="hero" />');
+    }
+
+    expect(readSource("src/ProductBasicWizard.tsx")).toContain("BASIC_WIZARD_OWN_DATA_NOTE");
+    expect(readSource("src/HeroExampleSelect.tsx")).toContain("HERO_EXAMPLE_SELECT_PLACEHOLDER");
+  });
 });

@@ -15,7 +15,7 @@ export const SD_BASIC_WIZARD_STEPS: ReadonlyArray<{
   {
     step: 1,
     label: "Ukázka",
-    lead: "Načtěte příkladový výpočet v horní liště a seznamte se s očekávaným výsledkem.",
+    lead: "Volitelně načtěte ukázku v horní liště, nebo rovnou vyplňte vlastní údaje v kroku Vstupy.",
     scrollSectionId: "sd-vstupy",
   },
   {

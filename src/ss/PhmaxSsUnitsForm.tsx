@@ -13,6 +13,7 @@ import {
   namedBackupsMicrocopy,
 } from "../calculator-ui-constants";
 import { ScrollGrabRegion } from "../ScrollGrabRegion";
+import { OwnDataHint } from "../OwnDataHint";
 import { FieldHintButton } from "../FieldHintButton";
 import { IconJson } from "../HeroActionIconButton";
 import {
@@ -117,6 +118,7 @@ function PhmaxSsUnitsFormView({
       <h2 id="ss-units-heading" className="section-title">
         {sec.heading}
       </h2>
+      <OwnDataHint variant="form" />
       <div className="ss-units-phase2-head">
         <p className="muted-text ss-framework-compact-note" style={{ marginTop: 0 }}>
           {sec.compactLead}

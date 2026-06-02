@@ -17,7 +17,7 @@ const COPY: Record<
   pha: {
     title: "PHAmax v základním režimu",
     lead:
-      "Průvodce krok za krokem (5 kroků) je na záložce PHmax. Zde vyplňte řádky asistentů pedagoga a sledujte souhrn vpravo.",
+      "Průvodce krok za krokem (5 kroků) je na záložce PHmax. Zde vyplňte řádky asistentů pedagoga a sledujte souhrn vpravo – ukázka nahoře je volitelná.",
     steps: [
       {
         title: "Zkontrolujte typ školy",
@@ -36,7 +36,7 @@ const COPY: Record<
   php: {
     title: "PHPmax v základním režimu",
     lead:
-      "Průvodce krok za krokem (5 kroků) je na záložce PHmax. Zde zadejte průměr žáků za tři roky a případné odečty.",
+      "Průvodce krok za krokem (5 kroků) je na záložce PHmax. Zde zadejte průměr žáků za tři roky a případné odečty – můžete rovnou vyplnit vlastní školu bez ukázky.",
     steps: [
       {
         title: "Průměr za tři školní roky",

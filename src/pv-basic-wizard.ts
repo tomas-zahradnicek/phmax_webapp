@@ -15,7 +15,7 @@ export const PV_BASIC_WIZARD_STEPS: readonly ProductBasicWizardStepMeta[] = [
   {
     step: 1,
     label: "Ukázka",
-    lead: "Načtěte příkladové výpočty v horní liště a seznamte se s předvyplněnými pracovišti.",
+    lead: "Volitelně načtěte ukázku v horní liště, nebo rovnou přejděte na krok Vstupy a zadejte údaje své školy.",
     scrollSectionId: "pv-vstupy",
   },
   {

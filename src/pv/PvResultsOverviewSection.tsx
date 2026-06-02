@@ -1,4 +1,5 @@
 import React from "react";
+import { FORM_OWN_DATA_LEAD } from "../calculator-ui-constants";
 import { ScrollGrabRegion } from "../ScrollGrabRegion";
 import type { Pv1d3ReductionResult } from "../phmax-pv-1d3-reduction";
 
@@ -19,7 +20,10 @@ export function PvResultsOverviewSection({ rows, aggregate }: PvResultsOverviewS
   return (
     <section className="card muted section-card" data-section="pv-vysledek" aria-label="Součtový přehled pracovišť">
       <h2 className="section-title">Součtový přehled pracovišť</h2>
-      <p className="muted-text" style={{ marginTop: 0 }}>
+      <p className="muted-text own-data-hint own-data-hint--form" style={{ marginTop: 0 }} role="note">
+        {FORM_OWN_DATA_LEAD}
+      </p>
+      <p className="muted-text" style={{ marginTop: 8 }}>
         Součty níže odpovídají pouze řádkům zadaným v této kalkulačce. Údaje z jiných pracovišť nebo výpočtů zapište a
         sečtěte samostatně podle metodiky (jeden dílčí výpočet na kombinaci místa a druhu provozu).
       </p>
