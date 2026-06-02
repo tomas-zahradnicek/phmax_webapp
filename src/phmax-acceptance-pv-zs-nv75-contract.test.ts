@@ -122,6 +122,7 @@ describe("Acceptance checklist contract (PV, ZŠ, NV75)", () => {
     expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("ph_gym: \"gymnazium_phmax\"");
     expect(readSource("src/zs/zs-hero-example-load.ts")).toContain("ph_minority: \"mensina_phmax\"");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("buildCrossPhmaxSummary");
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("formatCrossPhmaxSliceLabel");
     expect(readSource("src/phmax-dashboard-cross-phmax.ts")).toContain("buildCrossPhmaxSummary");
     expect(readSource("src/phmax-dashboard-cross-phmax-export.ts")).toContain("buildCrossPhmaxExportPayload");
     expect(readSource("src/phmax-school-scenario-export.ts")).toContain("phmax-school-scenario-v1");

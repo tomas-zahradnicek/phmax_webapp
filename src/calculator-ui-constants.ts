@@ -57,7 +57,7 @@ export const VIEW_MODE_HINT_BASIC =
   "Základní: průvodce krok za krokem a checklist vpravo. Ukázka a vlastní údaje jsou v liště akcí níže.";
 
 export const VIEW_MODE_HINT_EXPERT =
-  "Expertní: metodické panely a kompaktní hero. Ukázku zvolíte po přepnutí na Základní, nebo rovnou vyplňte formulář.";
+  "Expertní: metodické panely a kompaktní hero. Ukázku v comboboxu Příkladové výpočty zvolíte po přepnutí na Základní, nebo rovnou vyplňte formulář – pole nejsou uzamčená.";
 
 export const CALCULATOR_GLOBAL_DISPLAY_HINT =
   "Pohodlné / Kompaktní a Fokus na formulář platí pro všechny kalkulačky v tomto prohlížeči.";

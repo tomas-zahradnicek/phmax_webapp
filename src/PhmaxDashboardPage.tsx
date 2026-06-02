@@ -29,7 +29,13 @@ import { PHMAX_DASHBOARD_MAIN_ID } from "./phmax-main-landmarks";
 import { requestFocusExampleSelect } from "./phmax-focus-example-hint";
 import { requestFocusModuleInputs } from "./phmax-focus-inputs-hint";
 import { sortByDashboardAttention } from "./phmax-dashboard-sort";
-import { buildCrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
+import {
+  buildCrossPhmaxSummary,
+  formatCrossPhmaxSliceLabel,
+  parseDashboardKpiPhmax,
+} from "./phmax-dashboard-cross-phmax";
+import { coherenceWarningModuleId } from "./phmax-cross-phmax-coherence-nav";
+import { offerClearBrowserDataAfterDashboardExport } from "./phmax-dashboard-export-followup";
 import {
   buildCrossPhmaxExportPayload,
   crossPhmaxAttentionMismatches,
@@ -344,8 +350,16 @@ type DashboardRow = {
   verdict: DashboardVerdict | null;
 };
 
-function dashboardModuleFillLabel(hasData: boolean, verdict: DashboardVerdict | null): string {
+function dashboardModuleFillLabel(
+  hasData: boolean,
+  verdict: DashboardVerdict | null,
+  phmaxKpiValue?: string,
+): string {
   if (!hasData) return "Ještě nevyplněno";
+  if (phmaxKpiValue != null && phmaxKpiValue !== "–") {
+    const phmax = parseDashboardKpiPhmax(phmaxKpiValue);
+    if (phmax === 0) return "PHmax = 0 (modul vyplněn)";
+  }
   if (verdict?.tone === "ok") return "Vstupy v pořádku";
   if (verdict) return verdict.label;
   return "Uložený stav – otevřete modul";
@@ -444,7 +458,11 @@ function buildDashboardRows(): DashboardRow[] {
       id: "pv",
       title: PRODUCT_CALCULATOR_TITLES.pv,
       hasData: pv.present,
-      status: dashboardModuleFillLabel(pv.present, derivePvDashboardVerdict(pv)),
+      status: dashboardModuleFillLabel(
+        pv.present,
+        derivePvDashboardVerdict(pv),
+        pv.phmax != null ? String(pv.phmax) : undefined,
+      ),
       primaryKpi: {
         label: "PHmax",
         value: pv.phmax != null ? String(pv.phmax) : "–",
@@ -504,6 +522,7 @@ function buildDashboardRows(): DashboardRow[] {
                 detail: "",
               }
             : null,
+        zsTotals != null ? String(zsTotals.totalPhmax) : undefined,
       ),
       primaryKpi: {
         label: "PHmax",
@@ -539,7 +558,11 @@ function buildDashboardRows(): DashboardRow[] {
       id: "ss",
       title: PRODUCT_CALCULATOR_TITLES.ss,
       hasData: ss.present,
-      status: dashboardModuleFillLabel(ss.present, deriveSsDashboardVerdict()),
+      status: dashboardModuleFillLabel(
+        ss.present,
+        deriveSsDashboardVerdict(),
+        ss.phmax != null ? String(ss.phmax) : undefined,
+      ),
       primaryKpi: {
         label: "PHmax",
         value: ss.phmax != null ? String(ss.phmax) : "–",
@@ -604,11 +627,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     setIsEndpoint(readPhmaxIsEndpoint());
   }, [refreshAt]);
 
-  const handleClearLocalData = useCallback(() => {
-    const confirmed = window.confirm(
-      "Opravdu smazat všechna uložená data kalkulaček v tomto prohlížeči? Tuto akci nelze vrátit.",
-    );
-    if (!confirmed) return;
+  const clearLocalDataNow = useCallback(() => {
     const removed = clearAllPhmaxLocalStorage();
     setRefreshAt(new Date());
     publishNotice(
@@ -617,6 +636,22 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         : "V prohlížeči nebyla nalezena uložená data kalkulaček.",
     );
   }, [publishNotice]);
+
+  const handleClearLocalData = useCallback(() => {
+    const confirmed = window.confirm(
+      "Opravdu smazat všechna uložená data kalkulaček v tomto prohlížeči? Tuto akci nelze vrátit.",
+    );
+    if (!confirmed) return;
+    clearLocalDataNow();
+  }, [clearLocalDataNow]);
+
+  const afterDashboardJsonExport = useCallback(
+    (notice: string) => {
+      publishNotice(notice);
+      offerClearBrowserDataAfterDashboardExport(clearLocalDataNow);
+    },
+    [clearLocalDataNow, publishNotice],
+  );
 
   useEffect(() => {
     const onVisibility = () => {
@@ -722,8 +757,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
-    publishNotice("Stažen orientační JSON součtu PHmax.");
-  }, [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, publishNotice]);
+    afterDashboardJsonExport("Stažen orientační JSON součtu PHmax.");
+  }, [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, afterDashboardJsonExport]);
 
   const downloadSchoolScenarioJson = useCallback(() => {
     const payload = buildSchoolScenarioExportPayload(
@@ -737,8 +772,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
-    publishNotice("Stažen scénář celá škola (JSON + autosave modulů).");
-  }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, publishNotice]);
+    afterDashboardJsonExport("Stažen scénář celá škola (JSON + autosave modulů).");
+  }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, afterDashboardJsonExport]);
 
   const downloadIsHandoffJson = useCallback(() => {
     const scenario = buildSchoolScenarioExportPayload(
@@ -753,8 +788,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
-    publishNotice("Stažen handoff JSON pro IS školy – viz docs/phmax-is-integration.md.");
-  }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, publishNotice]);
+    afterDashboardJsonExport("Stažen handoff JSON pro IS školy – viz docs/phmax-is-integration.md.");
+  }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, afterDashboardJsonExport]);
 
   const sendIsHandoff = useCallback(async () => {
     const scenario = buildSchoolScenarioExportPayload(
@@ -880,9 +915,27 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               ) : null}
               {auditCoherenceWarnings.length > 0 ? (
                 <ul className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.88rem", paddingLeft: "1.25rem" }}>
-                  {auditCoherenceWarnings.map((w) => (
-                    <li key={w}>{w}</li>
-                  ))}
+                  {auditCoherenceWarnings.map((w) => {
+                    const moduleId = coherenceWarningModuleId(w);
+                    return (
+                      <li key={w}>
+                        {w}
+                        {moduleId ? (
+                          <>
+                            {" "}
+                            <button
+                              type="button"
+                              className="btn ghost"
+                              style={{ display: "inline", padding: "0 4px", fontSize: "inherit", verticalAlign: "baseline" }}
+                              onClick={() => openModuleForOwnData(moduleId)}
+                            >
+                              Otevřít {DASH_CALC_LABEL[moduleId]}
+                            </button>
+                          </>
+                        ) : null}
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : null}
             </p>
@@ -912,7 +965,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             <ul className="dash-cross-phmax__list muted-text" style={{ marginTop: 10, paddingLeft: "1.25rem" }}>
               {crossPhmax.slices.map((slice) => (
                 <li key={slice.id}>
-                  {slice.label}: {slice.phmax != null ? `${slice.phmax} h/týden` : "–"}
+                  {formatCrossPhmaxSliceLabel(slice)}
                   {slice.incomplete ? " (neúplný)" : ""}
                   {attentionIds.has(slice.id) ? " (vyžaduje pozornost)" : ""}
                 </li>

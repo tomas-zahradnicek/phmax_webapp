@@ -1,6 +1,7 @@
 import React from "react";
 import { QuickOnboarding } from "../QuickOnboarding";
 import {
+  CALCULATOR_GLOBAL_DISPLAY_HINT,
   CALCULATOR_LIMITS_NOTE,
   EXPORT_ORIENTACNI_NOTE,
   HERO_ACTIONS_ICON_LEGEND,
@@ -28,6 +29,7 @@ export function PvQuickOnboardingGuide({ open, onDismiss, returnFocusRef }: PvQu
       </p>
       <p>{LAY_USER_QUICK_START_PV}</p>
       <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
+      <p>{CALCULATOR_GLOBAL_DISPLAY_HINT}</p>
       <p>
         Orientační výpočet podle metodiky PHmax a PHAmax pro předškolní vzdělávání (verze 4, 2026) a vyhlášky č.
         14/2005 Sb. Každé <strong>číslované pracoviště</strong> ve formuláři (Pracoviště 1, 2…) odpovídá jedné

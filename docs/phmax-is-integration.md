@@ -2,7 +2,11 @@
 
 Aplikace **neposílá data přímo** do Bakalářů, EduPage ani jiného IS – chybí jednotné veřejné API MŠMT.
 
-## Co je k dispozici (v0.3.4+)
+## Co je k dispozici (v0.3.12)
+
+Stejné schéma jako v 0.3.4+ – bez breaking change. Dashboard po stažení JSON může nabídnout vymazání lokálních dat (sdílený počítač).
+
+## Historie (v0.3.4+)
 
 1. **Dashboard Σ** → tlačítko **Scénář celá škola (JSON)** – autosave PV/ŠD/ZŠ/SŠ.
 2. **Handoff pro IS** → tlačítko **Export pro IS školy (JSON)** – obal `phmax-is-handoff-v1` kolem scénáře (včetně `coherenceWarnings` z dashboardu).

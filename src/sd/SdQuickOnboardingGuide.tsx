@@ -1,6 +1,7 @@
 import React from "react";
 import { QuickOnboarding } from "../QuickOnboarding";
 import {
+  CALCULATOR_GLOBAL_DISPLAY_HINT,
   CALCULATOR_LIMITS_NOTE,
   EXPORT_ORIENTACNI_NOTE,
   HERO_ACTIONS_ICON_LEGEND,
@@ -28,6 +29,7 @@ export function SdQuickOnboardingGuide({ open, onDismiss, returnFocusRef }: SdQu
       </p>
       <p>{LAY_USER_QUICK_START_SD}</p>
       <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
+      <p>{CALCULATOR_GLOBAL_DISPLAY_HINT}</p>
       <p>
         Vyplňte počet účastníků a případně počet oddělení (jinak se dopočítá dělením 27). Výsledek vychází z přílohy k
         vyhlášce č. 74/2005 Sb.; u průměru pod 20 na oddělení může aplikovat orientační krácení dle § 10 odst. 2.

@@ -1,6 +1,7 @@
 import React from "react";
 import { QuickOnboarding } from "../QuickOnboarding";
 import {
+  CALCULATOR_GLOBAL_DISPLAY_HINT,
   CALCULATOR_LIMITS_NOTE,
   EXPORT_ORIENTACNI_NOTE,
   HERO_ACTIONS_ICON_LEGEND,
@@ -29,6 +30,7 @@ export function SsQuickOnboardingGuide({ open, onDismiss, returnFocusRef }: SsQu
       </p>
       <p>{LAY_USER_QUICK_START_SS}</p>
       <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
+      <p>{CALCULATOR_GLOBAL_DISPLAY_HINT}</p>
       <p>
         Kalkulačka je orientační; výsledky ověřte vůči aktuální{" "}
         <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">

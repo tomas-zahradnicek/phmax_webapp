@@ -1,6 +1,7 @@
 import React from "react";
 import { QuickOnboarding } from "../QuickOnboarding";
 import {
+  CALCULATOR_GLOBAL_DISPLAY_HINT,
   CALCULATOR_LIMITS_NOTE,
   HERO_ACTIONS_ICON_LEGEND,
   LAY_USER_QUICK_START_MOBILE_UX,
@@ -27,6 +28,7 @@ export function Nv75QuickOnboardingGuide({ open, onDismiss, returnFocusRef }: Nv
       </p>
       <p>{LAY_USER_QUICK_START_NV75}</p>
       <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
+      <p>{CALCULATOR_GLOBAL_DISPLAY_HINT}</p>
       <p className="onboarding-hero-legend">{HERO_ACTIONS_ICON_LEGEND}</p>
       <p>
         Ukázka <strong>A</strong> v comboboxu Příkladové výpočty předvyplní typickou situaci banky odpočtů – po načtení ověřte §4b a bonusy §4c/§4d

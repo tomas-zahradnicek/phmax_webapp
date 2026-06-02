@@ -1,6 +1,6 @@
 # PHmax webapp – orientační kalkulačka pro školu
 
-**Verze 0.3.11.1** · jednostránkový přehled pro ředitele a zřizovatele  
+**Verze 0.3.12** · jednostránkový přehled pro ředitele a zřizovatele  
 *Dokument je informativní; nejedná se o závazný výkaz ani právní posudek.*
 
 ---
@@ -28,13 +28,13 @@ Webová aplikace v prohlížeči pomáhá **spočítat a zkontrolovat orientačn
 
 ---
 
-## Co je hotové k běžnému použití (v0.3.11)
+## Co je hotové k běžnému použití (v0.3.12)
 
 | Oblast | Stav | Poznámka pro vedení školy |
 |--------|------|---------------------------|
-| Výpočty v modulech PV, ZŠ, ŠD, SŠ, NV75 | **Ano** | wizard, mobilní souhrn, export CSV/XLSX |
+| Výpočty v modulech PV, ZŠ, ŠD, SŠ, NV75 | **Ano** | průvodce (vč. PHAmax/PHPmax u ZŠ), mobilní souhrn, export CSV/XLSX |
 | **PV** § 1d krácení | **Orientačně** | v exportu CSV/XLSX; závazně až po KÚ |
-| **Dashboard** – součet PHmax (PV+ŠD+ZŠ+SŠ) | **Ano** | koherence audit vs. přepočet; kontrolní list před exportem |
+| **Dashboard** – součet PHmax (PV+ŠD+ZŠ+SŠ) | **Ano** | nevyplněno vs. PHmax=0; proklik z koherence; kontrolní list; připomínka mazání dat po JSON exportu |
 | Export **scénář celá škola** (JSON) | **Ano** | včetně `coherenceWarnings` pro IT |
 | Export **handoff pro IS** (JSON / POST) | **Ano** | pro integrátora; ne automatický import |
 | Import do IS / šablona zřizovatele | **Ne (0.4.0)** | čeká na schválený formát |
@@ -67,4 +67,4 @@ Všechny exporty obsahují **verzi aplikace a datum** a jsou označeny jako **or
 
 **Technická podpora / další dokumentace:** repozitář projektu – `docs/acceptance-pv-zs-nv75.md`, `docs/ss-acceptance-checklist.md`, `CHANGELOG.md`.
 
-*PHmax webapp 0.3.7 · orientační kalkulačka · neoficiální výstup*
+*PHmax webapp 0.3.12 · orientační kalkulačka · neoficiální výstup*

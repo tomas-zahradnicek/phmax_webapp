@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.12 (2026-05-28)
+
+### Dashboard a ZŠ
+- Dashboard Σ: rozlišení „modul nevyplněn“ vs. „PHmax = 0“; proklik z varování koherence do modulu.
+- Po stažení JSON z dashboardu volitelná připomínka vymazání lokálních dat.
+- ZŠ: 3krokový průvodce PHAmax a PHPmax v základním režimu (`ProductBasicWizard`).
+
+### Dokumentace a UX
+- Nápovědy modulů: `CALCULATOR_GLOBAL_DISPLAY_HINT` (hustota/fokus napříč kalkulačkami).
+- Expertní režim: upřesnění k volitelné ukázce v comboboxu.
+- Handout a roadmap 0.3.12; IS docs beze změny API (0.4.0 stále blokováno).
+
 ## 0.3.11.1 (2026-05-28)
 
 ### Oprava CI

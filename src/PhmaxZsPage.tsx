@@ -96,6 +96,9 @@ import {
   ZS_BASIC_WIZARD_LS_KEY,
   type ZsBasicWizardStep,
 } from "./zs-basic-wizard";
+import { useProductBasicWizard } from "./use-product-basic-wizard";
+import { ZS_PHA_BASIC_WIZARD_LS_KEY, ZS_PHA_BASIC_WIZARD_STEPS } from "./zs/zs-pha-basic-wizard";
+import { ZS_PHP_BASIC_WIZARD_LS_KEY, ZS_PHP_BASIC_WIZARD_STEPS } from "./zs/zs-php-basic-wizard";
 import {
   BROWSER_ERROR_NEXT_STEP_HINT,
   MSG_NO_LOCAL_AUTOSAVE_DATA,
@@ -1522,6 +1525,28 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   );
 
   const zsBasicWizardActive = viewMode === "basic" && tab === "phmax";
+  const zsPhaBasicWizardActive = viewMode === "basic" && tab === "pha";
+  const zsPhpBasicWizardActive = viewMode === "basic" && tab === "php";
+  const {
+    step: phaWizardStep,
+    goToStep: goToPhaWizardStep,
+    handleBack: handlePhaWizardBack,
+    handleNext: handlePhaWizardNext,
+  } = useProductBasicWizard({
+    lsKey: ZS_PHA_BASIC_WIZARD_LS_KEY,
+    steps: ZS_PHA_BASIC_WIZARD_STEPS,
+    active: zsPhaBasicWizardActive,
+  });
+  const {
+    step: phpWizardStepBasic,
+    goToStep: goToPhpWizardStep,
+    handleBack: handlePhpWizardBack,
+    handleNext: handlePhpWizardNext,
+  } = useProductBasicWizard({
+    lsKey: ZS_PHP_BASIC_WIZARD_LS_KEY,
+    steps: ZS_PHP_BASIC_WIZARD_STEPS,
+    active: zsPhpBasicWizardActive,
+  });
   const {
     zsWizardHasExceptions,
     zsWizardChoiceOptions,
@@ -1717,7 +1742,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   return (
     <div
-      className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${phmaxPaneShellClass}`}
+      className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${zsPhaBasicWizardActive || zsPhpBasicWizardActive ? " product-basic-wizard-active" : ""}${phmaxPaneShellClass}`}
     >
       <div className="container container--app">
         <ZsHeroHeader
@@ -1787,14 +1812,16 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           onNext={handleZsWizardNext}
           viewMode={viewMode}
           tab={tab}
-          totalPha={totalPha}
-          totalPhp={totalPhp}
+          phaWizardStep={phaWizardStep}
+          onPhaWizardStepChange={goToPhaWizardStep}
+          onPhaWizardBack={handlePhaWizardBack}
+          onPhaWizardNext={handlePhaWizardNext}
+          phpWizardStep={phpWizardStepBasic}
+          onPhpWizardStepChange={goToPhpWizardStep}
+          onPhpWizardBack={handlePhpWizardBack}
+          onPhpWizardNext={handlePhpWizardNext}
           visibleSections={visibleSections}
           hasSection={hasSection}
-          onOpenPhmaxWizard={() => {
-            setTab("phmax");
-            goToZsWizardStep(1);
-          }}
           onStartEmptyForm={resetAll}
         />
 

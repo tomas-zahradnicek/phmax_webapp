@@ -2,6 +2,7 @@ import React from "react";
 import { QuickOnboarding } from "../QuickOnboarding";
 import { ZsLegisRef } from "../PhmaxProductLegisUi";
 import {
+  CALCULATOR_GLOBAL_DISPLAY_HINT,
   CALCULATOR_LIMITS_NOTE,
   EXPORT_ORIENTACNI_NOTE,
   HERO_ACTIONS_ICON_LEGEND,
@@ -32,6 +33,7 @@ export function ZsQuickOnboardingGuide({ open, onDismiss, returnFocusRef }: ZsQu
       </p>
       <p>{LAY_USER_QUICK_START_ZS}</p>
       <p>{LAY_USER_QUICK_START_MOBILE_UX}</p>
+      <p>{CALCULATOR_GLOBAL_DISPLAY_HINT}</p>
       <p>
         <strong>PHmax</strong> zadejte podle typu školy v rozbalovacím režimu; u specialit (psychiatrie, zdravotnické zařízení,
         menšina, gymnázia…) přepněte na odpovídající položku. <strong>PHAmax</strong> a <strong>PHPmax</strong> mají vlastní záložky.

@@ -17,7 +17,8 @@ describe("UX TOP 6 contract", () => {
       "src/calculator-view-mode.ts",
       "src/ZsModuleGate.tsx",
       "src/ZsBasicWizard.tsx",
-      "src/ZsPhaPhpBasicGuide.tsx",
+      "src/ZsPhaBasicWizard.tsx",
+      "src/ZsPhpBasicWizard.tsx",
       "src/zs-basic-wizard.ts",
       "src/useQuickOnboarding.ts",
       "src/HeroCompactToolbar.tsx",
@@ -50,7 +51,8 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".product-basic-wizard-active");
     expect(css).toContain(".basic-compare-preview");
     expect(css).toContain(".dash-new-user-card");
-    expect(css).toContain(".zs-pha-php-basic-guide");
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain("useProductBasicWizard");
+    expect(readSource("src/zs/zs-pha-basic-wizard.ts")).toContain("ZS_PHA_BASIC_WIZARD_STEPS");
     expect(css).toContain(".calculator-shell__supplement--before");
     expect(css).toContain(".calculator-shell--focus .calculator-shell__supplement--after");
     expect(css).toContain("z-index: 10200");
@@ -186,7 +188,8 @@ describe("UX TOP 6 contract", () => {
     expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain('data-wizard-step="5"');
     expect(src).toContain("ZsWizardShell");
     expect(readSource("src/zs/ZsWizardShell.tsx")).toContain("ZsBasicWizard");
-    expect(readSource("src/zs/ZsWizardShell.tsx")).toContain("ZsPhaPhpBasicGuide");
+    expect(readSource("src/zs/ZsWizardShell.tsx")).toContain("ZsPhaBasicWizard");
+    expect(readSource("src/zs/ZsWizardShell.tsx")).toContain("ZsPhpBasicWizard");
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("workflow-dock__mobile-fold");
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("CalculatorMobileScrollResults");
     expect(readSource("src/CalculatorMobileScrollResults.tsx")).toContain("publishMobileResultsHeight");

@@ -2,8 +2,10 @@ import React from "react";
 import { MODE_CONFIG, type CalculatorMode } from "../config/calculator-config";
 import type { FormSection } from "../config/calculator-config";
 import { ZsBasicWizard } from "../ZsBasicWizard";
-import { ZsPhaPhpBasicGuide } from "../ZsPhaPhpBasicGuide";
+import { ZsPhaBasicWizard } from "../ZsPhaBasicWizard";
+import { ZsPhpBasicWizard } from "../ZsPhpBasicWizard";
 import type { ZsBasicWizardStep } from "../zs-basic-wizard";
+import type { ProductBasicWizardStep } from "../product-basic-wizard";
 import type { ZsWizardChoiceKey } from "./zs-wizard-choices";
 
 export type ZsWizardShellProps = {
@@ -21,11 +23,16 @@ export type ZsWizardShellProps = {
   onNext: () => void;
   viewMode: "basic" | "expert";
   tab: "phmax" | "pha" | "php";
-  totalPha: number;
-  totalPhp: number;
+  phaWizardStep: ProductBasicWizardStep;
+  onPhaWizardStepChange: (step: ProductBasicWizardStep) => void;
+  onPhaWizardBack: () => void;
+  onPhaWizardNext: () => void;
+  phpWizardStep: ProductBasicWizardStep;
+  onPhpWizardStepChange: (step: ProductBasicWizardStep) => void;
+  onPhpWizardBack: () => void;
+  onPhpWizardNext: () => void;
   visibleSections: readonly FormSection[];
   hasSection: (section: FormSection) => boolean;
-  onOpenPhmaxWizard: () => void;
   onStartEmptyForm?: () => void;
 };
 
@@ -44,11 +51,16 @@ export function ZsWizardShell({
   onNext,
   viewMode,
   tab,
-  totalPha,
-  totalPhp,
+  phaWizardStep,
+  onPhaWizardStepChange,
+  onPhaWizardBack,
+  onPhaWizardNext,
+  phpWizardStep,
+  onPhpWizardStepChange,
+  onPhpWizardBack,
+  onPhpWizardNext,
   visibleSections,
   hasSection,
-  onOpenPhmaxWizard,
   onStartEmptyForm,
 }: ZsWizardShellProps) {
   if (zsBasicWizardActive) {
@@ -71,22 +83,26 @@ export function ZsWizardShell({
 
   if (viewMode === "basic" && tab === "pha") {
     return (
-      <ZsPhaPhpBasicGuide
-        tab="pha"
-        totalValue={totalPha}
+      <ZsPhaBasicWizard
+        step={phaWizardStep}
         moduleApplies={visibleSections.some((s) => s.startsWith("pha_rvp") || s === "pha_disability_flags")}
-        onOpenPhmaxWizard={onOpenPhmaxWizard}
+        onStartEmptyForm={onStartEmptyForm}
+        onStepChange={onPhaWizardStepChange}
+        onBack={onPhaWizardBack}
+        onNext={onPhaWizardNext}
       />
     );
   }
 
   if (viewMode === "basic" && tab === "php") {
     return (
-      <ZsPhaPhpBasicGuide
-        tab="php"
-        totalValue={totalPhp}
+      <ZsPhpBasicWizard
+        step={phpWizardStep}
         moduleApplies={hasSection("php_years") || hasSection("php_options")}
-        onOpenPhmaxWizard={onOpenPhmaxWizard}
+        onStartEmptyForm={onStartEmptyForm}
+        onStepChange={onPhpWizardStepChange}
+        onBack={onPhpWizardBack}
+        onNext={onPhpWizardNext}
       />
     );
   }

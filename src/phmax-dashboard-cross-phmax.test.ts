@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
+import { buildCrossPhmaxSummary, formatCrossPhmaxSliceLabel } from "./phmax-dashboard-cross-phmax";
 
 describe("buildCrossPhmaxSummary", () => {
   const labels = { pv: "PV", sd: "ŠD", zs: "ZŠ", ss: "SŠ" } as const;
@@ -67,5 +67,19 @@ describe("buildCrossPhmaxSummary", () => {
 
     expect(summary.hasIncomplete).toBe(true);
     expect(summary.slices.find((s) => s.id === "pv")?.incomplete).toBe(true);
+  });
+
+  it("rozliší nevyplněný modul a PHmax = 0", () => {
+    const summary = buildCrossPhmaxSummary(
+      [
+        { id: "pv", primaryKpi: { label: "PHmax", value: "0" }, hasData: true, verdict: { tone: "ok" } },
+        { id: "sd", primaryKpi: { label: "PHmax", value: "–" }, hasData: false, verdict: null },
+      ],
+      labels,
+    );
+    const pv = summary.slices.find((s) => s.id === "pv")!;
+    const sd = summary.slices.find((s) => s.id === "sd")!;
+    expect(formatCrossPhmaxSliceLabel(pv)).toBe("PV: PHmax = 0 h/týden");
+    expect(formatCrossPhmaxSliceLabel(sd)).toBe("ŠD: modul nevyplněn");
   });
 });

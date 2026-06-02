@@ -20,6 +20,14 @@ Orientační dokument (bez API integrace). Slouží jako podklad pro budoucí na
 | Banka NV75 | Hodiny odpočtů zástupce | Jiná jednotka než PHmax |
 | `_phmaxAuditTotals` (ZŠ autosave) | Interní kontrola před exportem | Už v localStorage |
 
+## Dashboard Σ (0.3.12)
+
+| Stav v UI | Význam pro integrátora |
+|-----------|------------------------|
+| modul nevyplněn | V `moduleSnapshots` chybí nebo je prázdný autosave – nepočítat do součtu |
+| PHmax = 0 | Modul vyplněn, výsledek nula – započítat do cross-součtu jako 0 |
+| `coherenceWarnings` | Nesoulad KPI vs. přepočet – ruční oprava před importem |
+
 ## Co zatím neimplementovat (0.4.0)
 
 - Přímý upload do ISŠ, EduPage, Excel šablony zřizovatele – **až po dodání schválené šablony sloupců**.

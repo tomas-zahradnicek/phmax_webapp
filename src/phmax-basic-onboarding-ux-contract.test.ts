@@ -119,5 +119,14 @@ describe("UX contract: basic onboarding steps + CTA", () => {
     expect(readSource("src/ProductBasicWizard.tsx")).toContain("BASIC_WIZARD_OWN_DATA_NOTE");
     expect(readSource("src/HeroExampleSelect.tsx")).toContain("HERO_EXAMPLE_SELECT_PLACEHOLDER");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("openModuleForOwnData");
+    expect(readSource("src/pv/PvQuickOnboardingGuide.tsx")).toContain("CALCULATOR_GLOBAL_DISPLAY_HINT");
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain("ZS_PHA_BASIC_WIZARD_STEPS");
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain("ZS_PHP_BASIC_WIZARD_STEPS");
+  });
+
+  it("dashboard Σ a koherence (0.3.12)", () => {
+    expect(readSource("src/phmax-dashboard-cross-phmax.ts")).toContain("formatCrossPhmaxSliceLabel");
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("coherenceWarningModuleId");
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("offerClearBrowserDataAfterDashboardExport");
   });
 });
