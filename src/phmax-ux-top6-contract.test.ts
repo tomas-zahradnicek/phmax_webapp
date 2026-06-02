@@ -49,6 +49,7 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".workflow-dock");
     expect(css).toContain(".workflow-dock__mobile-fold");
     expect(css).toContain(".calculator-hero-display-controls__divider");
+    expect(css).toContain(".calculator-hint-tooltip__bubble");
     expect(css).toContain(".calculator-mobile-scroll-results--pinned");
     expect(css).toContain(".product-basic-wizard-active");
     expect(css).toContain(".basic-compare-preview");

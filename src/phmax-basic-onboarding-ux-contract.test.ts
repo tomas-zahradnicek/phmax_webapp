@@ -95,6 +95,8 @@ describe("UX contract: basic onboarding steps + CTA", () => {
     expect(readSource("src/CalculatorViewModeToggle.tsx")).toContain("VIEW_MODE_HINT_BASIC");
 
     expect(readSource("src/CalculatorHeroDisplayControls.tsx")).toContain("calculator-hero-display-controls__divider");
+    expect(readSource("src/CalculatorHeroDisplayControls.tsx")).toContain("CalculatorHintTooltip");
+    expect(readSource("src/CalculatorHeroDisplayControls.tsx")).toContain("calculator-hero-display-controls--compact");
     for (const hero of [
       "src/pv/PvHeroHeader.tsx",
       "src/zs/ZsHeroHeader.tsx",

@@ -62,6 +62,13 @@ export const VIEW_MODE_HINT_EXPERT =
 export const CALCULATOR_GLOBAL_DISPLAY_HINT =
   "Pohodlné / Kompaktní a Fokus na formulář platí pro všechny kalkulačky v tomto prohlížeči.";
 
+/** Tooltip u kompaktních přepínačů v hero – oba režimy najednou. */
+export const CALCULATOR_VIEW_MODE_HINT_TOOLTIP = `${VIEW_MODE_HINT_BASIC}\n\n${VIEW_MODE_HINT_EXPERT}`;
+
+export const CALCULATOR_LAYOUT_HINT_TOOLTIP =
+  "Pohodlné: větší mezery a přehlednější karty. Kompaktní: menší paddingy a hustší tabulky. Fokus na formulář skryje metodické bloky. " +
+  CALCULATOR_GLOBAL_DISPLAY_HINT;
+
 export const WIZARD_START_EMPTY_FORM_BUTTON_LABEL = "Začít od prázdného formuláře";
 
 /** Badge u hlavního čísla v docku – živý přepočet z vstupů. */
