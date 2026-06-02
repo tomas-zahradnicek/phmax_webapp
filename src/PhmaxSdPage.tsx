@@ -1083,6 +1083,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       {sdBasicWizardActive ? (
         <SdBasicWizard
           step={sdWizardStep}
+          onStartEmptyForm={resetSdAll}
           inputIssueFix={sdHasInputIssue ? { onFix: sdScrollToInputs } : undefined}
           onStepChange={goToSdWizardStep}
           onBack={handleSdWizardBack}

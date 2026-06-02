@@ -1,6 +1,6 @@
 import React from "react";
 import { BASIC_QUICK_START_EXAMPLE_CTA_LABEL } from "./basic-quick-start";
-import { BASIC_WIZARD_OWN_DATA_NOTE } from "./calculator-ui-constants";
+import { BASIC_WIZARD_OWN_DATA_NOTE, WIZARD_START_EMPTY_FORM_BUTTON_LABEL } from "./calculator-ui-constants";
 import {
   PRODUCT_BASIC_WIZARD_STEP_COUNT,
   basicWizardStepButtonClass,
@@ -18,6 +18,7 @@ type ProductBasicWizardProps = {
   steps: readonly ProductBasicWizardStepMeta[];
   step: ProductBasicWizardStep;
   heroExampleSelectId?: string;
+  onStartEmptyForm?: () => void;
   inputIssueFix?: ProductBasicWizardInputIssueFix;
   onStepChange: (step: ProductBasicWizardStep) => void;
   onBack: () => void;
@@ -29,6 +30,7 @@ export function ProductBasicWizard({
   steps,
   step,
   heroExampleSelectId,
+  onStartEmptyForm,
   inputIssueFix,
   onStepChange,
   onBack,
@@ -61,6 +63,11 @@ export function ProductBasicWizard({
         {step === 1 && heroExampleSelectId ? (
           <button type="button" className="btn ghost" style={{ marginTop: 10 }} onClick={focusExampleSelect}>
             {BASIC_QUICK_START_EXAMPLE_CTA_LABEL}
+          </button>
+        ) : null}
+        {step === 1 && onStartEmptyForm ? (
+          <button type="button" className="btn ghost" style={{ marginTop: 8 }} onClick={onStartEmptyForm}>
+            {WIZARD_START_EMPTY_FORM_BUTTON_LABEL}
           </button>
         ) : null}
       </div>

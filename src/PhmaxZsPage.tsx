@@ -1795,6 +1795,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             setTab("phmax");
             goToZsWizardStep(1);
           }}
+          onStartEmptyForm={resetAll}
         />
 
         {viewMode === "expert" ? <ZsExpertOnboardingCard /> : null}

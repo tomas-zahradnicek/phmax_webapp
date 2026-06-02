@@ -26,6 +26,7 @@ export type ZsWizardShellProps = {
   visibleSections: readonly FormSection[];
   hasSection: (section: FormSection) => boolean;
   onOpenPhmaxWizard: () => void;
+  onStartEmptyForm?: () => void;
 };
 
 export function ZsWizardShell({
@@ -48,6 +49,7 @@ export function ZsWizardShell({
   visibleSections,
   hasSection,
   onOpenPhmaxWizard,
+  onStartEmptyForm,
 }: ZsWizardShellProps) {
   if (zsBasicWizardActive) {
     return (
@@ -62,6 +64,7 @@ export function ZsWizardShell({
         onStepChange={onStepChange}
         onBack={onBack}
         onNext={onNext}
+        onStartEmptyForm={onStartEmptyForm}
       />
     );
   }

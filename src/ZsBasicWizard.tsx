@@ -4,6 +4,7 @@ import {
   ZS_BASIC_WIZARD_STEPS,
   type ZsBasicWizardStep,
 } from "./zs-basic-wizard";
+import { WIZARD_START_EMPTY_FORM_BUTTON_LABEL } from "./calculator-ui-constants";
 import { basicWizardStepButtonClass } from "./product-basic-wizard";
 
 type WizardChoiceOption = {
@@ -24,6 +25,7 @@ type ZsBasicWizardProps = {
   wizardChoice: string;
   wizardOptions: readonly WizardChoiceOption[];
   inputIssueFix?: ZsBasicWizardInputIssueFix;
+  onStartEmptyForm?: () => void;
   onWizardChoice: (value: string) => void;
   onStepChange: (step: ZsBasicWizardStep) => void;
   onBack: () => void;
@@ -37,6 +39,7 @@ export function ZsBasicWizard({
   wizardChoice,
   wizardOptions,
   inputIssueFix,
+  onStartEmptyForm,
   onWizardChoice,
   onStepChange,
   onBack,
@@ -79,6 +82,11 @@ export function ZsBasicWizard({
               </option>
             ))}
           </select>
+          {onStartEmptyForm ? (
+            <button type="button" className="btn ghost" style={{ marginTop: 10 }} onClick={onStartEmptyForm}>
+              {WIZARD_START_EMPTY_FORM_BUTTON_LABEL}
+            </button>
+          ) : null}
         </div>
       ) : null}
 

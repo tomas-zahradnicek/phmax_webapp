@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
-import { CALCULATOR_LIMITS_NOTE, PRODUCT_CALCULATOR_TITLES } from "./calculator-ui-constants";
+import { CALCULATOR_LIMITS_NOTE, DASH_OPEN_MODULE_OWN_DATA_BUTTON_SUFFIX, DASH_OPEN_MODULE_EXAMPLE_BUTTON_SUFFIX, PRODUCT_CALCULATOR_TITLES } from "./calculator-ui-constants";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { round2 } from "./phmax-zs-logic";
@@ -642,6 +642,14 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     [setProductView],
   );
 
+  const openModuleForOwnData = useCallback(
+    (id: Exclude<ProductView, "dash">) => {
+      requestFocusModuleInputs();
+      setProductView(id);
+    },
+    [setProductView],
+  );
+
   const openDashboardModule = useCallback(
     (row: DashboardRow) => {
       if (!row.hasData) {
@@ -1016,9 +1024,14 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 <article key={item.id} className="dash-new-user-card__tile">
                   <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
                   <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
-                  <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
-                    Otevřít {DASH_CALC_LABEL[item.id]} a ukázku
-                  </button>
+                  <div className="dash-new-user-card__actions" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
+                      Otevřít {DASH_CALC_LABEL[item.id]} ({DASH_OPEN_MODULE_EXAMPLE_BUTTON_SUFFIX})
+                    </button>
+                    <button type="button" className="btn ghost" onClick={() => openModuleForOwnData(item.id)}>
+                      Otevřít {DASH_CALC_LABEL[item.id]} – {DASH_OPEN_MODULE_OWN_DATA_BUTTON_SUFFIX}
+                    </button>
+                  </div>
                 </article>
               ))}
             </div>

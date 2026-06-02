@@ -1101,6 +1101,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
             steps={NV75_BASIC_WIZARD_STEPS}
             step={nv75WizardStep}
             heroExampleSelectId={NV75_HERO_EXAMPLE_SELECT_ID}
+            onStartEmptyForm={resetAll}
             inputIssueFix={nv75NeedsInputBanner ? { onFix: nv75ScrollToInputs } : undefined}
             onStepChange={goToNv75WizardStep}
             onBack={handleNv75WizardBack}

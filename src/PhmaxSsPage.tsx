@@ -578,6 +578,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
           steps={SS_BASIC_WIZARD_STEPS}
           step={ssWizardStep}
           heroExampleSelectId={SS_HERO_EXAMPLE_SELECT_ID}
+          onStartEmptyForm={ss.resetAll}
           onStepChange={goToSsWizardStep}
           onBack={handleSsWizardBack}
           onNext={handleSsWizardNext}

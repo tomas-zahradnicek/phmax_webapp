@@ -1,5 +1,7 @@
 import React from "react";
 import { CalculatorFocusToggle } from "../CalculatorFocusToggle";
+import { CalculatorGlobalDisplayHint } from "../CalculatorGlobalDisplayHint";
+import { CalculatorViewModeToggle } from "../CalculatorViewModeToggle";
 import { DisplayDensityToggle } from "../DisplayDensityToggle";
 import { HeroExpertStrip } from "../HeroExpertStrip";
 import { ProductViewPills, type ProductView } from "../ProductViewPills";
@@ -53,33 +55,22 @@ export function Nv75HeroHeader({
       <div className="hero__pills-row">
         <ProductViewPills productView={productView} setProductView={setProductView} />
         <div className="hero__pills-row-trailing">
-          <div className="checks" role="group" aria-label="Režim zobrazení NV75">
-            <label>
-              <input
-                type="radio"
-                name="nv75-view-mode"
-                checked={viewMode === "basic"}
-                onChange={() => setViewMode("basic")}
-              />
-              Základní
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="nv75-view-mode"
-                checked={viewMode === "expert"}
-                onChange={() => setViewMode("expert")}
-              />
-              Expertní
-            </label>
+          <div className="hero__pills-controls">
+            <CalculatorViewModeToggle
+              name="nv75-view-mode"
+              moduleLabel="NV75"
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+            />
+            <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="nv75-display-density" />
+            <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
+            <QuickOnboardingHeroButton
+              guideOpen={guideOpen}
+              onToggle={toggleGuide}
+              buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
+            />
           </div>
-          <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="nv75-display-density" />
-          <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
-          <QuickOnboardingHeroButton
-            guideOpen={guideOpen}
-            onToggle={toggleGuide}
-            buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
-          />
+          <CalculatorGlobalDisplayHint />
         </div>
       </div>
 

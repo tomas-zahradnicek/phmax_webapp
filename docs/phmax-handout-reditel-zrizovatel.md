@@ -44,7 +44,7 @@ Webová aplikace v prohlížeči pomáhá **spočítat a zkontrolovat orientačn
 ## Doporučený postup pro školu (15 minut)
 
 1. Otevřít **Dashboard** (`?view=dash`) – zkontrolovat dlaždice a případně „Vyžaduje pozornost“.
-2. Otevřít příslušný modul (PV / ZŠ / SŠ …), načíst **ukázkový příklad** a upravit na vlastní data.
+2. Otevřít příslušný modul (PV / ZŠ / SŠ …) – **volitelně** načíst ukázkový příklad, nebo rovnou vyplnit **vlastní údaje** (formulář je editovatelný).
 3. Zkontrolovat **souhrn výsledků** a varování u neúplných vstupů.
 4. **Exportovat** CSV (modul) nebo JSON scénář (dashboard) pro archiv.
 5. Na sdíleném počítači po ukončení použít **Vymazat lokální data**.

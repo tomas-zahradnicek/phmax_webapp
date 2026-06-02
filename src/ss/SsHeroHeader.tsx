@@ -1,5 +1,7 @@
 import React from "react";
 import { CalculatorFocusToggle } from "../CalculatorFocusToggle";
+import { CalculatorGlobalDisplayHint } from "../CalculatorGlobalDisplayHint";
+import { CalculatorViewModeToggle } from "../CalculatorViewModeToggle";
 import { DisplayDensityToggle } from "../DisplayDensityToggle";
 import { GlossaryIconButton } from "../GlossaryIconButton";
 import { HeroExpertStrip } from "../HeroExpertStrip";
@@ -68,39 +70,28 @@ export function SsHeroHeader({
       <div className="hero__pills-row">
         <ProductViewPills productView={productView} setProductView={setProductView} />
         <div className="hero__pills-row-trailing">
-          <div className="checks" role="group" aria-label="Režim zobrazení SŠ">
-            <label>
-              <input
-                type="radio"
-                name="ss-view-mode"
-                checked={viewMode === "basic"}
-                onChange={() => setViewMode("basic")}
-              />
-              Základní
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="ss-view-mode"
-                checked={viewMode === "expert"}
-                onChange={() => setViewMode("expert")}
-              />
-              Expertní
-            </label>
+          <div className="hero__pills-controls">
+            <CalculatorViewModeToggle
+              name="ss-view-mode"
+              moduleLabel="SŠ"
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+            />
+            <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="ss-display-density" />
+            <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
+            <GlossaryIconButton
+              ref={glossaryTriggerRef as React.Ref<HTMLButtonElement>}
+              className="glossary-icon-btn--hero"
+              expanded={glossaryOpen}
+              onClick={() => setGlossaryOpen(true)}
+            />
+            <QuickOnboardingHeroButton
+              guideOpen={guideOpen}
+              onToggle={toggleGuide}
+              buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
+            />
           </div>
-          <DisplayDensityToggle density={displayDensity} onChange={setDisplayDensity} name="ss-display-density" />
-          <CalculatorFocusToggle mode={focusMode} onChange={setFocusMode} />
-          <GlossaryIconButton
-            ref={glossaryTriggerRef as React.Ref<HTMLButtonElement>}
-            className="glossary-icon-btn--hero"
-            expanded={glossaryOpen}
-            onClick={() => setGlossaryOpen(true)}
-          />
-          <QuickOnboardingHeroButton
-            guideOpen={guideOpen}
-            onToggle={toggleGuide}
-            buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
-          />
+          <CalculatorGlobalDisplayHint />
         </div>
       </div>
 

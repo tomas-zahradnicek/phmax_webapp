@@ -835,6 +835,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           steps={PV_BASIC_WIZARD_STEPS}
           step={pvWizardStep}
           heroExampleSelectId={PV_HERO_EXAMPLE_SELECT_ID}
+          onStartEmptyForm={resetPvAll}
           inputIssueFix={pvHasInputIssue ? { onFix: pvScrollToInputs } : undefined}
           onStepChange={goToPvWizardStep}
           onBack={handlePvWizardBack}

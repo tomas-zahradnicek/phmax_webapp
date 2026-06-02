@@ -15,10 +15,8 @@ describe("UX contract: PV + ŠD view mode toggle", () => {
 
     expect(src).toContain('const PV_VIEW_MODE_LS_KEY = "phmax-pv-view-mode";');
     expect(hero).toContain('name="pv-view-mode"');
-    expect(hero).toContain('checked={viewMode === "basic"}');
-    expect(hero).toContain('checked={viewMode === "expert"}');
-    expect(hero).toContain('onChange={() => setViewMode("basic")}');
-    expect(hero).toContain('onChange={() => setViewMode("expert")}');
+    expect(hero).toContain("CalculatorViewModeToggle");
+    expect(hero).toContain("CalculatorGlobalDisplayHint");
     expect(src).toContain('{viewMode === "expert" ? <ProductLegisContextPanel variant="pv" /> : null}');
     expect(src).toContain('{viewMode === "expert" ? <MethodologyStrip /> : null}');
   });
@@ -29,10 +27,8 @@ describe("UX contract: PV + ŠD view mode toggle", () => {
 
     expect(src).toContain('const SD_VIEW_MODE_LS_KEY = "phmax-sd-view-mode";');
     expect(hero).toContain('name="sd-view-mode"');
-    expect(hero).toContain('checked={viewMode === "basic"}');
-    expect(hero).toContain('checked={viewMode === "expert"}');
-    expect(hero).toContain('onChange={() => setViewMode("basic")}');
-    expect(hero).toContain('onChange={() => setViewMode("expert")}');
+    expect(hero).toContain("CalculatorViewModeToggle");
+    expect(hero).toContain("CalculatorGlobalDisplayHint");
     expect(src).toContain('{viewMode === "expert" && detailedResult != null ? (');
     expect(src).toContain(') : viewMode === "expert" && breakdown != null && breakdown.length > 0 && basePhmax != null ? (');
     expect(src).toContain('{viewMode === "expert" && activeMethodikaRow != null ? (');

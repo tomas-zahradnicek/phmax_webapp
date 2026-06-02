@@ -52,6 +52,24 @@ export const BASIC_WIZARD_OWN_DATA_NOTE =
 export const WORKFLOW_DOCK_OWN_DATA_HINT =
   "Čísla v tomto souhrnu vycházejí z vašich vstupů ve formuláři a mění se při každé úpravě – nejde o neměnnou ukázku.";
 
+/** Vysvětlení aktivního režimu zobrazení (pod přepínačem Základní / Expertní). */
+export const VIEW_MODE_HINT_BASIC =
+  "Základní: průvodce krok za krokem a checklist vpravo. Ukázka a vlastní údaje jsou v liště akcí níže.";
+
+export const VIEW_MODE_HINT_EXPERT =
+  "Expertní: metodické panely a kompaktní hero. Ukázku zvolíte po přepnutí na Základní, nebo rovnou vyplňte formulář.";
+
+export const CALCULATOR_GLOBAL_DISPLAY_HINT =
+  "Pohodlné / Kompaktní a Fokus na formulář platí pro všechny kalkulačky v tomto prohlížeči.";
+
+export const WIZARD_START_EMPTY_FORM_BUTTON_LABEL = "Začít od prázdného formuláře";
+
+/** Badge u hlavního čísla v docku – živý přepočet z vstupů. */
+export const RESULT_ANCHOR_INPUT_DRIVEN_BADGE = "Podle vašich vstupů";
+
+export const DASH_OPEN_MODULE_EXAMPLE_BUTTON_SUFFIX = "s ukázkou";
+export const DASH_OPEN_MODULE_OWN_DATA_BUTTON_SUFFIX = "vlastní data";
+
 /** Upozornění k ukládání v prohlížeči – PV a ŠD (jeden slot). */
 export const BROWSER_STORAGE_HINT_SIMPLE =
   "Údaje se ukládají jen v tomto prohlížeči (jedna rozpracovaná situace). Na sdíleném počítači je po práci smažte nebo použijte anonymní režim.";

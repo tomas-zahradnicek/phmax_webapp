@@ -6377,6 +6377,63 @@ select:focus {
   line-height: 1.45;
 }
 
+.hero__pills-row-trailing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.hero__pills-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.calculator-view-mode-toggle__hint,
+.calculator-global-display-hint {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: #475569;
+  max-width: 42rem;
+}
+
+.hero--feature .calculator-view-mode-toggle__hint,
+.hero--feature .calculator-global-display-hint {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-zone-actions .calculator-view-mode-toggle__hint,
+.hero-zone-actions .calculator-global-display-hint {
+  color: #334155;
+}
+
+.result-anchor-card__input-badge {
+  display: inline-block;
+  margin: 4px 0 2px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #0f766e;
+  background: color-mix(in srgb, #14b8a6 18%, transparent);
+  border-radius: 999px;
+}
+
+.result-anchor-card--warning .result-anchor-card__input-badge,
+.result-anchor-card--danger .result-anchor-card__input-badge {
+  color: inherit;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.dash-new-user-card__actions {
+  margin-top: 4px;
+}
+
 .hero-zone-actions__toolbar-row {
   display: flex;
   flex-direction: column;

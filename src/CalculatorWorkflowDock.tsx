@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CALCULATOR_WORKSPACE_DOCK_LABEL } from "./calculator-ui-constants";
+import { CALCULATOR_WORKSPACE_DOCK_LABEL, RESULT_ANCHOR_INPUT_DRIVEN_BADGE } from "./calculator-ui-constants";
 import { CalculatorMobileScrollResults, CALCULATOR_WORKFLOW_DOCK_ANCHOR_ID, MOBILE_SCROLL_PIN_MS, scrollToWorkflowDock } from "./CalculatorMobileScrollResults";
 import { OwnDataHint } from "./OwnDataHint";
 import { readMobileSummaryDismissed, writeMobileSummaryDismissed } from "./mobile-scroll-results-layout";
@@ -120,6 +120,7 @@ export function CalculatorWorkflowDock({
         tone={tone}
         primaryLabel={primaryLabel}
         primaryValue={primaryValue}
+        inputDrivenBadge={RESULT_ANCHOR_INPUT_DRIVEN_BADGE}
         stats={stats}
         statusBadge={statusBadge}
         verdictLabel={verdictLabel}

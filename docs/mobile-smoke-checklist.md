@@ -20,7 +20,13 @@ Automaticky: `npm run test:e2e` (4× mobilní smoke). Ruční checklist PV/ZŠ/N
 2. Klepněte **Obsah** – rozbalí se seznam sekcí; výběr sekce posune formulář.
 3. Po **Skrýt souhrn** sedí Obsah nad chipem (bez překryvu).
 
-## 3. Banner neúplných vstupů
+## 3. Vlastní údaje a režimy
+
+1. V hero liště je text, že **formulář je editovatelný** (`.own-data-hint--hero`).
+2. V základním režimu průvodce: tlačítko **Začít od prázdného formuláře** (krok 1).
+3. Přepněte **Expertní** – pod přepínačem se změní krátká nápověda režimu.
+
+## 4. Banner neúplných vstupů
 
 | Modul | Jak vyvolat | Co ověřit |
 |-------|-------------|-----------|
@@ -28,10 +34,11 @@ Automaticky: `npm run test:e2e` (4× mobilní smoke). Ruční checklist PV/ZŠ/N
 | ZŠ | Smažte počty žáků u vyplněných tříd | Jeden banner se seznamem (bez duplicitní karty Kontrola vstupů); při scrollu zůstává nahoře |
 | SŠ | Neúplný řádek v tabulce | Banner + scroll na sekci vstupů |
 
-## 4. Dashboard
+## 5. Dashboard
 
 1. `?view=dash` – sekce **Pokračovat** ukazuje **Ještě nevyplněno** nebo **Vstupy v pořádku**.
 2. Nadpis přehledu **bez** slova localStorage.
+3. U nového uživatele (bez historie modulu): dvě tlačítka **s ukázkou** a **vlastní data**.
 
 ## Záznam
 

@@ -86,9 +86,24 @@ describe("UX contract: basic onboarding steps + CTA", () => {
 
   it("vlastní údaje – sdílená nápověda ve všech režimech", () => {
     expect(readSource("src/calculator-ui-constants.ts")).toContain("HERO_OWN_DATA_HINT");
+    expect(readSource("src/calculator-ui-constants.ts")).toContain("VIEW_MODE_HINT_BASIC");
+    expect(readSource("src/calculator-ui-constants.ts")).toContain("RESULT_ANCHOR_INPUT_DRIVEN_BADGE");
     expect(readSource("src/calculator-ui-constants.ts")).toContain("HERO_EXAMPLE_SELECT_PLACEHOLDER");
     expect(readSource("src/OwnDataHint.tsx")).toContain('variant?: OwnDataHintVariant');
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain('<OwnDataHint variant="dock" />');
+    expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("RESULT_ANCHOR_INPUT_DRIVEN_BADGE");
+    expect(readSource("src/CalculatorViewModeToggle.tsx")).toContain("VIEW_MODE_HINT_BASIC");
+
+    for (const hero of [
+      "src/pv/PvHeroHeader.tsx",
+      "src/zs/ZsHeroHeader.tsx",
+      "src/sd/SdHeroHeader.tsx",
+      "src/ss/SsHeroHeader.tsx",
+      "src/nv75/Nv75HeroHeader.tsx",
+    ]) {
+      expect(readSource(hero)).toContain("CalculatorViewModeToggle");
+      expect(readSource(hero)).toContain("CalculatorGlobalDisplayHint");
+    }
 
     for (const toolbar of [
       "src/pv/PvHeroToolbar.tsx",
@@ -100,7 +115,9 @@ describe("UX contract: basic onboarding steps + CTA", () => {
       expect(readSource(toolbar)).toContain('<OwnDataHint variant="hero" />');
     }
 
+    expect(readSource("src/ProductBasicWizard.tsx")).toContain("WIZARD_START_EMPTY_FORM_BUTTON_LABEL");
     expect(readSource("src/ProductBasicWizard.tsx")).toContain("BASIC_WIZARD_OWN_DATA_NOTE");
     expect(readSource("src/HeroExampleSelect.tsx")).toContain("HERO_EXAMPLE_SELECT_PLACEHOLDER");
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("openModuleForOwnData");
   });
 });
