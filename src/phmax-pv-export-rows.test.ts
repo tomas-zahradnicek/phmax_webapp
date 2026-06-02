@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { exportCsvLocalized } from "./export-utils";
 import { buildPhmaxPvExportRows, buildPhmaxPvMultiExportRows } from "./phmax-pv-export-rows";
+import { computePv1d3Reduction } from "./phmax-pv-1d3-reduction";
 import { computePvPhmaxTotal, getPhaMaxPv } from "./phmax-pv-logic";
 
 describe("buildPhmaxPvExportRows (smoke / export)", () => {
@@ -34,6 +35,31 @@ describe("buildPhmaxPvExportRows (smoke / export)", () => {
     expect(csv.startsWith("\ufeff")).toBe(true);
     expect(csv).toContain("Položka;Hodnota");
     expect(csv).toContain('"240"');
+  });
+
+  it("exportuje řádky § 1d odst. 3 při krácení", () => {
+    const computed = computePvPhmaxTotal({
+      provoz: "celodenni",
+      classCount: 2,
+      avgHoursPerDay: 8,
+      sec16ClassCount: 0,
+      languageGroupCount: 0,
+    });
+    const base = computed.totalPhmax ?? 0;
+    const reduction1d3 = computePv1d3Reduction(base, { actualChildren: 10, minimumChildren: 20 });
+    const rows = buildPhmaxPvExportRows({
+      provozLabel: "Celodenní",
+      provoz: "celodenni",
+      classCount: 2,
+      avgHoursPerDay: 8,
+      sec16Count: 0,
+      languageGroups: 0,
+      computed,
+      phaMax: null,
+      reduction1d3,
+    });
+    expect(rows.some(([k]) => k.includes("§ 1d"))).toBe(true);
+    expect(rows.some(([k]) => k.includes("PHmax po orientačním krácení"))).toBe(true);
   });
 
   it("při neplatných vstupech exportuje řádky s upozorněním", () => {

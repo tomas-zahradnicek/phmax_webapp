@@ -11,7 +11,9 @@ Orientační plán většího scope mimo patch release. Neblokuje běžné UX vy
 | **Hotovo (0.3.3+)** | Export JSON součtu a scénář **celá škola** (`phmax-school-scenario-export.ts`); varování při modulu ve Vyžaduje pozornost. |
 | **Hotovo (0.3.5+)** | Cross-PHmax koherence, pojmenovaný scénář školy, IS POST klient (volitelný endpoint). |
 | **Hotovo (0.3.7+)** | `PvWorkplaceRowsSection`; E2E scénář školy a koherence audit vs. Σ. |
-| **Další** | Hlubší validace nesouladu mezi moduly (ne jen audit vs. Σ); napojení IS u dodavatele. |
+| **Hotovo (0.3.8+)** | ZŠ přepočet v koherenci; kontrolní list před exportem; handout PDF. |
+| **Hotovo (0.3.9+)** | ŠD PHmax na dashboardu + přepočet/koherence; `coherenceWarnings` ve scénáři; PV §1d v exportu; audit autosave PV/ŠD. |
+| **Další** | Napojení IS u dodavatele; sjednocení přepočtu ZŠ s `useZsPageDerivedState`. |
 | **Blokováno → 0.4.0** | CSV/import podle šablony zřizovatele nebo IS – čeká na schválený formát (viz §2). |
 
 ## 2. Oficiální výstupy

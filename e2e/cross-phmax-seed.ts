@@ -26,10 +26,16 @@ export type CrossPhmaxSeedOptions = {
   zsAuditTotalPhmax?: number;
   /** Pokud je číslo, nastaví _phmaxAuditTotals na PV (nesoulad s přepočtem řádků). */
   pvAuditTotalPhmax?: number;
+  /** Volitelný IS handoff endpoint v localStorage. */
+  isHandoffUrl?: string;
+  isHandoffLsKey?: string;
 };
 
 /** Spouští se v prohlížeči přes `page.addInitScript`. */
 export function applyCrossPhmaxSeed(opts: CrossPhmaxSeedOptions): void {
+  if (opts.isHandoffUrl && opts.isHandoffLsKey) {
+    localStorage.setItem(opts.isHandoffLsKey, opts.isHandoffUrl);
+  }
   const zsAudit = opts.zsAuditTotalPhmax ?? 200;
   localStorage.setItem(opts.sdWizard, "2");
   localStorage.setItem(

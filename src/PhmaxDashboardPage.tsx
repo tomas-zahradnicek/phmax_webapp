@@ -16,6 +16,10 @@ import {
   parseSdDashboardSnapshot,
   sdDashboardVerdictFromSnapshot,
 } from "./phmax-sd-dashboard-focus";
+import {
+  computeSdPhmaxTotalFromSnapshot,
+  computeSdPhaMaxFromSnapshot,
+} from "./sd/sd-compute-phmax-total-from-snapshot";
 import { countPar16MarkedRows, PHMAX_SS_PAR16_DOCK_HINT } from "./ss/phmax-ss-par16";
 import { revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
@@ -164,10 +168,28 @@ function summarizePvFromLs(): {
   };
 }
 
-function readSdBrief(): { present: boolean; pupils: number; departments: number; inputMode: "summary" | "detail" } | null {
-  const snap = parseSdDashboardSnapshot(typeof localStorage === "undefined" ? null : localStorage.getItem(LS_SD));
+function readSdBrief(): {
+  present: boolean;
+  pupils: number;
+  departments: number;
+  inputMode: "summary" | "detail";
+  phmax: number | null;
+  pha: number | null;
+} | null {
+  const raw = typeof localStorage === "undefined" ? null : localStorage.getItem(LS_SD);
+  const snap = parseSdDashboardSnapshot(raw);
   if (!snap) return null;
-  return { present: true, pupils: snap.pupils, departments: snap.departments, inputMode: snap.inputMode };
+  const parsed = safeJsonParse(raw);
+  const phmax = computeSdPhmaxTotalFromSnapshot(parsed);
+  const pha = computeSdPhaMaxFromSnapshot(parsed);
+  return {
+    present: true,
+    pupils: snap.pupils,
+    departments: snap.departments,
+    inputMode: snap.inputMode,
+    phmax,
+    pha: pha != null && pha > 0 ? pha : null,
+  };
 }
 
 function deriveSdDashboardVerdict(sd: NonNullable<ReturnType<typeof readSdBrief>>): DashboardVerdict {
@@ -452,15 +474,18 @@ function buildDashboardRows(): DashboardRow[] {
       hasData: Boolean(sd),
       status: dashboardModuleFillLabel(Boolean(sd), sd ? deriveSdDashboardVerdict(sd) : null),
       primaryKpi: {
-        label: "Oddělení",
-        value: sd ? String(sd.departments) : "–",
+        label: sd?.phmax != null ? "PHmax" : "Oddělení",
+        value: sd?.phmax != null ? String(sd.phmax) : sd ? String(sd.departments) : "–",
       },
       secondaryKpis: [
         { label: "Účastníci", value: sd ? String(sd.pupils) : "–" },
-        { label: "Režim", value: sd ? (sd.inputMode === "detail" ? "detailní" : "souhrnný") : "–" },
+        { label: sd?.phmax != null ? "Oddělení" : "Režim", value: sd ? (sd.phmax != null ? String(sd.departments) : sd.inputMode === "detail" ? "detailní" : "souhrnný") : "–" },
+        ...(sd?.pha != null ? [{ label: "PHAmax", value: String(sd.pha) }] : []),
       ],
       detail: sd
-        ? `Účastníci: ${sd.pupils}, oddělení: ${sd.departments}, režim: ${sd.inputMode === "detail" ? "detailní" : "souhrnný"} · PHmax dopočítejte v modulu ŠD.`
+        ? sd.phmax != null
+          ? `PHmax ${sd.phmax}${sd.pha != null ? `, PHAmax ${sd.pha}` : ""} · účastníci ${sd.pupils}, oddělení ${sd.departments}, režim ${sd.inputMode === "detail" ? "detailní" : "souhrnný"}.`
+          : `Účastníci: ${sd.pupils}, oddělení: ${sd.departments}, režim: ${sd.inputMode === "detail" ? "detailní" : "souhrnný"} · PHmax nelze dopočítat – doplňte vstupy v modulu ŠD.`
         : "Po uložení stavu v ŠD se zde zobrazí základ vstupů.",
       namedBackups: namedCount(LS_SD_NAMED),
       lastVisit: formatDashboardProductVisit("sd"),
@@ -556,8 +581,8 @@ function buildDashboardRows(): DashboardRow[] {
         nv.rowCount > 0
           ? `Řádky: ${nv.rowCount}${nv.rule ? ` · §4b pravidlo: ${nv.rule}` : ""}, banka celkem: ${
               nv.bankTotal ?? "–"
-            }${nv.practicalFilled ? " · §4c kontext doplněn" : ""}`
-          : "Po uložení vstupů v NV75 se zobrazí banka odpočtů a pravidlo §4b.",
+            }${nv.practicalFilled ? " · §4c kontext doplněn" : ""} · NV75 není součástí orientačního PHmax na dashboardu (jiná jednotka – hodiny odpočtů).`
+          : "Po uložení vstupů v NV75 se zobrazí banka odpočtů a pravidlo §4b. Do cross-součtu PHmax se nezapočítává.",
       namedBackups: namedCount(LS_NV75_NAMED),
       lastVisit: formatDashboardProductVisit("nv75"),
       verdict: deriveNv75DashboardVerdict(nv),
@@ -686,27 +711,40 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   }, []);
 
   const downloadCrossPhmaxJson = useCallback(() => {
-    const payload = buildCrossPhmaxExportPayload(crossPhmax, attentionModuleLabels);
+    const payload = {
+      ...buildCrossPhmaxExportPayload(crossPhmax, attentionModuleLabels),
+      coherenceWarnings: auditCoherenceWarnings,
+    };
     downloadTextFile(
       exportFilenameStamped("phmax-cross-phmax", "json"),
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
     publishNotice("Stažen orientační JSON součtu PHmax.");
-  }, [crossPhmax, attentionModuleLabels, publishNotice]);
+  }, [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, publishNotice]);
 
   const downloadSchoolScenarioJson = useCallback(() => {
-    const payload = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels, scenarioLabel);
+    const payload = buildSchoolScenarioExportPayload(
+      crossPhmax,
+      attentionModuleLabels,
+      scenarioLabel,
+      auditCoherenceWarnings,
+    );
     downloadTextFile(
       exportFilenameStamped("phmax-skola-scenar", "json"),
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
     publishNotice("Stažen scénář celá škola (JSON + autosave modulů).");
-  }, [crossPhmax, attentionModuleLabels, scenarioLabel, publishNotice]);
+  }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, publishNotice]);
 
   const downloadIsHandoffJson = useCallback(() => {
-    const scenario = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels, scenarioLabel);
+    const scenario = buildSchoolScenarioExportPayload(
+      crossPhmax,
+      attentionModuleLabels,
+      scenarioLabel,
+      auditCoherenceWarnings,
+    );
     const payload = buildPhmaxIsHandoffPayload(scenario);
     downloadTextFile(
       exportFilenameStamped("phmax-is-handoff", "json"),
@@ -714,14 +752,19 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
       "application/json;charset=utf-8",
     );
     publishNotice("Stažen handoff JSON pro IS školy – viz docs/phmax-is-integration.md.");
-  }, [crossPhmax, attentionModuleLabels, scenarioLabel, publishNotice]);
+  }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, publishNotice]);
 
   const sendIsHandoff = useCallback(async () => {
-    const scenario = buildSchoolScenarioExportPayload(crossPhmax, attentionModuleLabels, scenarioLabel);
+    const scenario = buildSchoolScenarioExportPayload(
+      crossPhmax,
+      attentionModuleLabels,
+      scenarioLabel,
+      auditCoherenceWarnings,
+    );
     const payload = buildPhmaxIsHandoffPayload(scenario);
     const result = await postPhmaxIsHandoff(isEndpoint, payload);
     publishNotice(result.ok ? `Handoff odeslán (HTTP ${result.status}).` : result.message);
-  }, [crossPhmax, attentionModuleLabels, scenarioLabel, isEndpoint, publishNotice]);
+  }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, isEndpoint, publishNotice]);
 
   return (
     <div className="app-shell app-shell--gradient">
@@ -743,7 +786,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               <h1 className="hero__title">{PRODUCT_CALCULATOR_TITLES.dash}</h1>
               <p className="hero__text">{CALCULATOR_LIMITS_NOTE}</p>
               <p className="muted-text" style={{ marginTop: 8 }}>
-                Souhrnný přehled (Σ) čte uložený stav z prohlížeče u každého modulu zvlášť. Orientační součet PHmax napříč PV, ŠD, ZŠ a SŠ je níže – NV75 (banka odpočtů) se nezapočítává.
+                Souhrnný přehled (Σ) čte uložený stav z prohlížeče u každého modulu zvlášť. Orientační součet PHmax napříč PV, ŠD, ZŠ a SŠ je níže –{" "}
+                <strong>NV75</strong> (banka odpočtů hodin, ne PHmax) a krácení <strong>PV § 1d</strong> v cross-součtu nejsou.
                 Pro první orientaci v modulu vždy začněte ukázkou v comboboxu <strong>Příkladové výpočty</strong> v horní liště vybrané kalkulačky.
               </p>
               <p className="muted-text" style={{ marginTop: 8 }}>

@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Dashboard – kontrolní list před exportem JSON; koherence ZŠ audit vs. přepočet vstupů.",
-    "E2E – sdílený cross-PHmax seed, PV přidání pracoviště; handout PDF skript.",
-    "SŠ scénář F – stále bez reálných dat školy (0.4.0 čeká na formát IS/zřizovatele).",
+    "ŠD – PHmax v dashboardu a koherence; scénář JSON obsahuje coherenceWarnings.",
+    "PV – § 1d v exportu; autosave audit PHmax. NV75 zůstává mimo cross-součet.",
+    "SŠ / 0.4.0 – bez reálných dat školy; import IS čeká na schválený formát.",
   ],
 };

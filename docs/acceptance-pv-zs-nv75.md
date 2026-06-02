@@ -38,7 +38,9 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | P2j | Dashboard – scénář celá škola (`phmax-school-scenario-v1`) | E2E desktop |
 | P2k | Dashboard – POST handoff na endpoint IS (mock / integrátor) | E2E |
 | P2m | Dashboard – varování koherence audit vs. Σ (PV výpočet ≠ audit v autosave) | E2E desktop |
+| P2o | Dashboard – kontrolní list + checkbox před exportem JSON | E2E desktop |
 | P6 | 3 ukázky z comboboxu – PHmax/PHAmax sedí s očekáváním | contract |
+| P7 | Export CSV/XLSX – řádky § 1d odst. 3 (stav, PHmax po krácení) | contract |
 
 ---
 
@@ -53,6 +55,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | Z3w | Průvodce – volba gym/menšina načte hero ukázku | contract |
 | Z4 | PHAmax/PHPmax v basic – věta „pro tento typ školy se nepočítá“ u neplatného režimu | contract |
 | Z5 | Export CSV/XLSX – metadata a orientační disclaimer | contract |
+| Z6 | Dashboard – varování koherence ZŠ audit vs. přepočet vstupů | E2E desktop + contract |
 
 ---
 
@@ -78,6 +81,7 @@ Ověření ručně: otevřete PV → základní režim → pracoviště s počte
 | S2 | Souhrnný režim – věta o počtu oddělení | E2E + contract |
 | S2d | Desktop – combobox + workflow dock | E2E desktop |
 | S3 | Porovnání variant A/B s pojmenovanou zálohou | contract |
+| S4 | Dashboard Σ – PHmax ŠD z přepočtu autosave; koherence audit | contract + E2E |
 
 ---
 

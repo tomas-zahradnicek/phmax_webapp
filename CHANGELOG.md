@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.9 (2026-05-28)
+
+### Dashboard a moduly
+- ŠD: PHmax na dashboardu Σ, přepočet ze snapshotu a koherence audit vs. vstupy.
+- Scénář / cross-PHmax JSON: pole `coherenceWarnings`.
+- PV/ŠD autosave: `_phmaxAuditTotals` při uložení; PV export CSV/XLSX – řádky § 1d odst. 3.
+
+### Kvalita
+- E2E: export bez potvrzení zakázán; sdílený seed u handoff; acceptance P2o/P7/Z6/S4.
+
 ## 0.3.8 (2026-05-28)
 
 ### Dashboard a koherence

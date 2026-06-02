@@ -8,6 +8,7 @@ export type CrossPhmaxExportPayload = {
   disclaimer: string;
   summary: CrossPhmaxSummary;
   attentionModuleLabels: readonly string[];
+  coherenceWarnings?: readonly string[];
 };
 
 export function buildCrossPhmaxExportPayload(

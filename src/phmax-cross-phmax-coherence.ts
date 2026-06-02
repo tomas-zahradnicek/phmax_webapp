@@ -1,5 +1,6 @@
 import type { CrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
 import type { SchoolScenarioExportPayload } from "./phmax-school-scenario-export";
+import { computeSdPhmaxTotalFromSnapshot } from "./sd/sd-compute-phmax-total-from-snapshot";
 import { computeZsPhmaxTotalFromSnapshot } from "./zs/zs-compute-phmax-total-from-snapshot";
 import { computePvPhmaxTotal } from "./phmax-pv-logic";
 
@@ -89,7 +90,23 @@ export function crossPhmaxAuditCoherenceWarnings(
     }
   };
 
-  const checkLegacyAudit = (id: "sd" | "ss", label: string) => {
+  const checkSd = () => {
+    const slice = summary.slices.find((s) => s.id === "sd");
+    const snapshot = moduleSnapshots.sd;
+    const computed = computeSdPhmaxTotalFromSnapshot(snapshot);
+    const audit = readAuditTotals(snapshot);
+    if (computed == null) return;
+    if (audit?.totalPhmax != null && audit.tab === "phmax" && Math.abs(audit.totalPhmax - computed) > 0.05) {
+      warnings.push(
+        `ŠD: audit autosave (${audit.totalPhmax}) ≠ přepočet z vstupů (${computed}) – otevřete ŠD a uložte stav.`,
+      );
+    }
+    if (slice?.phmax != null && Math.abs(slice.phmax - computed) > 0.05) {
+      warnings.push(warnMismatch("ŠD", slice.phmax, "přepočet z vstupů", computed));
+    }
+  };
+
+  const checkLegacyAudit = (id: "ss", label: string) => {
     const slice = summary.slices.find((s) => s.id === id);
     if (slice?.phmax == null) return;
     const audit = readAuditTotals(moduleSnapshots[id]);
@@ -101,7 +118,7 @@ export function crossPhmaxAuditCoherenceWarnings(
 
   checkPv();
   checkZs();
-  checkLegacyAudit("sd", "ŠD");
+  checkSd();
   checkLegacyAudit("ss", "SŠ");
 
   return warnings;

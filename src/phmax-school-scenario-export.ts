@@ -17,6 +17,8 @@ export type SchoolScenarioExportPayload = Omit<CrossPhmaxExportPayload, "schema"
   moduleSnapshots: Partial<Record<"pv" | "sd" | "zs" | "ss", unknown>>;
   /** Pojmenování scénáře pro archiv / IS (volitelné). */
   scenarioLabel: string;
+  /** Varování koherence audit / přepočet v době exportu. */
+  coherenceWarnings: readonly string[];
 };
 
 export function readSchoolScenarioLabel(): string {
@@ -40,6 +42,7 @@ export function buildSchoolScenarioExportPayload(
   summary: CrossPhmaxSummary,
   attentionModuleLabels: readonly string[],
   scenarioLabel?: string,
+  coherenceWarnings: readonly string[] = [],
 ): SchoolScenarioExportPayload {
   const cross = buildCrossPhmaxExportPayload(summary, attentionModuleLabels);
   const moduleSnapshots: SchoolScenarioExportPayload["moduleSnapshots"] = {};
@@ -54,5 +57,6 @@ export function buildSchoolScenarioExportPayload(
     appVersion: APP_VERSION,
     moduleSnapshots,
     scenarioLabel: label,
+    coherenceWarnings,
   };
 }

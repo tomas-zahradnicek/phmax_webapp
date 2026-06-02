@@ -1,4 +1,5 @@
 import { APP_AUTHOR_EXPORT_ROWS } from "./calculator-ui-constants";
+import type { Pv1d3ReductionResult } from "./phmax-pv-1d3-reduction";
 import type { PvProvozKind } from "./phmax-pv-logic";
 
 export type PhmaxPvExportRow = readonly [string, string | number];
@@ -16,8 +17,10 @@ export function buildPhmaxPvExportRows(input: {
   languageGroups: number;
   computed: PvExportComputed;
   phaMax: number | null;
+  reduction1d3?: Pv1d3ReductionResult | null;
 }): PhmaxPvExportRow[] {
-  const { provozLabel, provoz, classCount, avgHoursPerDay, sec16Count, languageGroups, computed, phaMax } = input;
+  const { provozLabel, provoz, classCount, avgHoursPerDay, sec16Count, languageGroups, computed, phaMax, reduction1d3 } =
+    input;
 
   const rows: PhmaxPvExportRow[] = [
     ["=== PHmax / PHAmax předškolní vzdělávání – export ===", ""],
@@ -44,6 +47,16 @@ export function buildPhmaxPvExportRows(input: {
   rows.push(["Příplatek jazyková příprava (1 h × skupiny)", computed.languageBonus]);
 
   if (computed.totalPhmax != null) rows.push(["PHmax celkem (h/týden, toto pracoviště)", computed.totalPhmax]);
+  if (reduction1d3) {
+    rows.push(["§ 1d odst. 3 – stav krácení", reduction1d3.status]);
+    rows.push(["§ 1d odst. 3 – poznámka", reduction1d3.reason]);
+    if ("phmaxAfter" in reduction1d3) {
+      rows.push(["PHmax po orientačním krácení § 1d (h/týden)", reduction1d3.phmaxAfter]);
+    }
+    if (reduction1d3.status === "reduced" && "reductionHours" in reduction1d3) {
+      rows.push(["Úspora PHmax § 1d (h/týden)", reduction1d3.reductionHours]);
+    }
+  }
   if (phaMax != null) rows.push(["PHAmax § 16 třídy (h/týden, toto pracoviště)", phaMax]);
 
   return rows;
@@ -60,6 +73,7 @@ export type PvMultiExportItem = {
   languageGroups: number;
   computed: PvExportComputed;
   phaMax: number | null;
+  reduction1d3?: Pv1d3ReductionResult | null;
 };
 
 /** Export více pracovišť výpočtu (kombinace místo / druh provozu) a součty. */
@@ -88,6 +102,7 @@ export function buildPhmaxPvMultiExportRows(
       languageGroups: item.languageGroups,
       computed: item.computed,
       phaMax: item.phaMax,
+      reduction1d3: item.reduction1d3,
     });
     out.push(...block.slice(1));
     out.push(["", ""]);

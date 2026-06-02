@@ -65,6 +65,10 @@ import { IntegerInput } from "./IntegerInput";
 import { round2 } from "./phmax-zs-logic";
 import { buildPhmaxSdExportRows } from "./phmax-sd-export-rows";
 import {
+  computeSdPhmaxTotalFromSnapshot,
+  computeSdPhaMaxFromSnapshot,
+} from "./sd/sd-compute-phmax-total-from-snapshot";
+import {
   PHMAX_SD_BY_DEPARTMENTS,
   SD_MAX_DEPARTMENTS_IN_TABLE,
   calculateSchoolDruzinaPhmaxDetailed,
@@ -657,8 +661,10 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
     }
   }, [exportRows, xlsxExportBusy]);
 
-  const buildSdSnapshot = useCallback(
-    (): SdPersistedSnapshot => ({
+  const buildSdSnapshot = useCallback((): SdPersistedSnapshot & {
+    _phmaxAuditTotals?: { totalPhmax: number; totalPha: number; tab: "phmax" };
+  } => {
+    const core = {
       pupils,
       manualDepts,
       departments,
@@ -670,21 +676,27 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       schoolFirstStageClassCount,
       vychovatelPpcHours,
       separateVedoucihoDleT72,
-    }),
-    [
-      pupils,
-      manualDepts,
-      departments,
-      inputMode,
-      summarySpecialDepartments,
-      regularExceptionGranted,
-      specialExceptionGranted,
-      detailDepartments,
-      schoolFirstStageClassCount,
-      vychovatelPpcHours,
-      separateVedoucihoDleT72,
-    ],
-  );
+    };
+    const totalPhmax = computeSdPhmaxTotalFromSnapshot(core);
+    const totalPha = computeSdPhaMaxFromSnapshot(core);
+    if (totalPhmax == null) return core;
+    return {
+      ...core,
+      _phmaxAuditTotals: { totalPhmax, totalPha: totalPha ?? 0, tab: "phmax" },
+    };
+  }, [
+    pupils,
+    manualDepts,
+    departments,
+    inputMode,
+    summarySpecialDepartments,
+    regularExceptionGranted,
+    specialExceptionGranted,
+    detailDepartments,
+    schoolFirstStageClassCount,
+    vychovatelPpcHours,
+    separateVedoucihoDleT72,
+  ]);
 
   const applySdPersisted = useCallback((next: SdPersistedSnapshot) => {
     setPupils(next.pupils);

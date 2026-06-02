@@ -492,6 +492,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       languageGroups: c.row.languageGroups,
       computed: c.computed,
       phaMax: c.phaMax,
+      reduction1d3: c.reduction1d3,
     }));
     return buildPhmaxPvMultiExportRows(items, aggregate);
   }, [rowComputations, aggregate]);
@@ -528,7 +529,20 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
     }
   }, [exportRows, xlsxExportBusy]);
 
-  const buildPvSnapshot = useCallback(() => ({ rows }), [rows]);
+  const buildPvSnapshot = useCallback(() => {
+    let totalPhmax = 0;
+    let any = false;
+    for (const c of rowComputations) {
+      if (c.computed.totalPhmax != null) {
+        totalPhmax += c.computed.totalPhmax;
+        any = true;
+      }
+    }
+    return {
+      rows,
+      ...(any ? { _phmaxAuditTotals: { totalPhmax: round2(totalPhmax), tab: "phmax" as const } } : {}),
+    };
+  }, [rows, rowComputations]);
 
   const applyPvSnapshot = useCallback((data: unknown) => {
     const next = parsePvSnapshot(data);
