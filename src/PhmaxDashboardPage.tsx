@@ -1,6 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
-import { CALCULATOR_LIMITS_NOTE, DASH_OPEN_MODULE_OWN_DATA_BUTTON_SUFFIX, DASH_OPEN_MODULE_EXAMPLE_BUTTON_SUFFIX, PRODUCT_CALCULATOR_TITLES } from "./calculator-ui-constants";
+import {
+  CALCULATOR_LIMITS_NOTE,
+  DASH_IMPORT_PLACEHOLDER_HINT,
+  DASH_IMPORT_PLACEHOLDER_LABEL,
+  DASH_OPEN_MODULE_OWN_DATA_BUTTON_SUFFIX,
+  DASH_OPEN_MODULE_EXAMPLE_BUTTON_SUFFIX,
+  PRODUCT_CALCULATOR_TITLES,
+} from "./calculator-ui-constants";
+import { FillStatusBadge, dashboardRowFillStatusKind } from "./FillStatusBadge";
+import { APP_VERSION } from "./app-version";
+import {
+  buildSchoolReviewPrintHtml,
+  openSchoolReviewPrintWindow,
+} from "./phmax-dashboard-school-review-print";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { round2 } from "./phmax-zs-logic";
@@ -668,6 +681,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   const lastActive = readLastActiveProduct();
   const continueRow = lastActive ? rows.find((row) => row.id === lastActive) ?? null : null;
   const showNewUserGuide = !lastActive;
+  const zsNamedBackupCount = rows.find((r) => r.id === "zs")?.namedBackups ?? 0;
+
+  const scrollToSchool15Min = useCallback(() => {
+    document.getElementById("dash-school-15min")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const openModuleWithExampleHint = useCallback(
     (id: Exclude<ProductView, "dash">) => {
@@ -737,6 +755,25 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
       }),
     [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, exportDisclaimerConfirmed],
   );
+
+  const printSchoolReview = useCallback(() => {
+    const html = buildSchoolReviewPrintHtml({
+      generatedAt: new Date().toLocaleString("cs-CZ"),
+      appVersion: APP_VERSION,
+      scenarioLabel: scenarioLabel.trim() || "Celá škola (autosave)",
+      crossPhmax,
+      modules: rows.map((row) => ({
+        label: DASH_CALC_LABEL[row.id],
+        status: row.status,
+        phmax: row.primaryKpi.value,
+      })),
+      coherenceWarnings: auditCoherenceWarnings,
+      disclaimer:
+        "Orientační výpočet z autosave v tomto prohlížeči – neoficiální podklad před jednáním. NV75 a PV § 1d v cross-součtu nejsou.",
+    });
+    openSchoolReviewPrintWindow(html);
+    publishNotice("Otevřeno okno pro tisk kontroly před jednáním.");
+  }, [crossPhmax, rows, scenarioLabel, auditCoherenceWarnings, publishNotice]);
 
   const persistScenarioLabel = useCallback((label: string) => {
     const trimmed = label.trim();
@@ -839,6 +876,62 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         </header>
 
         <main id={PHMAX_DASHBOARD_MAIN_ID} tabIndex={-1}>
+        <section className="card section-card dash-role-cards" aria-labelledby="dash-role-heading">
+          <h2 id="dash-role-heading" className="section-title">
+            Kdo jste? Rychlý vstup
+          </h2>
+          <div className="dash-role-cards__grid">
+            <article className="dash-role-cards__tile">
+              <h3 className="dash-role-cards__tile-title">Ředitel / zřizovatel</h3>
+              <p className="muted-text">
+                Souhrn školy, kontrolní list exportu a tisk před jednáním. Handout PDF v dokumentaci projektu.
+              </p>
+              <div className="dash-role-cards__actions">
+                <button type="button" className="btn primary" onClick={scrollToSchool15Min}>
+                  Celá škola za 15 min
+                </button>
+                <button type="button" className="btn ghost" onClick={printSchoolReview}>
+                  Kontrola před jednáním (tisk)
+                </button>
+              </div>
+            </article>
+            <article className="dash-role-cards__tile">
+              <h3 className="dash-role-cards__tile-title">Metodik</h3>
+              <p className="muted-text">Modul po modulu – ukázka volitelná, vlastní data vždy editovatelná.</p>
+              <div className="dash-role-cards__actions">
+                <button type="button" className="btn primary" onClick={() => openModuleForOwnData("zs")}>
+                  Otevřít ZŠ – vlastní data
+                </button>
+                {zsNamedBackupCount > 0 ? (
+                  <button type="button" className="btn ghost" onClick={() => setProductView("zs")}>
+                    Porovnat pojmenované zálohy v ZŠ
+                  </button>
+                ) : null}
+              </div>
+            </article>
+            <article className="dash-role-cards__tile">
+              <h3 className="dash-role-cards__tile-title">IT / správce</h3>
+              <p className="muted-text">
+                Scénář JSON, handoff a varování koherence – viz{" "}
+                <code className="methodology-strip__code">docs/phmax-is-integration.md</code>.
+              </p>
+              <div className="dash-role-cards__actions">
+                <button type="button" className="btn primary" onClick={scrollToSchool15Min}>
+                  Export a scénář školy
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  disabled
+                  title={DASH_IMPORT_PLACEHOLDER_HINT}
+                >
+                  {DASH_IMPORT_PLACEHOLDER_LABEL}
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+
         {continueRow ? (
           <section className="card card--accent section-card dash-continue-card" aria-labelledby="dash-continue-heading">
             <h2 id="dash-continue-heading" className="section-title">
@@ -850,7 +943,10 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             <p
               className={`dash-continue-card__fill-status ${dashboardFillStatusClass(continueRow.hasData, continueRow.verdict)}`}
             >
-              {dashboardModuleFillLabel(continueRow.hasData, continueRow.verdict)}
+              <FillStatusBadge
+                kind={dashboardRowFillStatusKind(continueRow.hasData, continueRow.verdict?.tone)}
+                label={dashboardModuleFillLabel(continueRow.hasData, continueRow.verdict)}
+              />
             </p>
             {continueRow.verdict ? (
               <div
@@ -893,7 +989,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         ) : null}
 
         {crossPhmax.modulesWithPhmax >= 2 ? (
-          <section className="card section-card dash-cross-phmax" aria-labelledby="dash-cross-phmax-heading">
+          <section
+            id="dash-school-15min"
+            className="card section-card dash-cross-phmax"
+            aria-labelledby="dash-cross-phmax-heading"
+          >
             <h2 id="dash-cross-phmax-heading" className="section-title">
               Orientační součet PHmax (PV + ŠD + ZŠ + SŠ)
             </h2>
@@ -992,7 +1092,32 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 </span>
               </label>
             </details>
+            {exportDisclaimerConfirmed ? (
+              <div className="dash-export-wizard muted-text" data-testid="dash-export-wizard">
+                <p className="dash-export-wizard__step dash-export-wizard__step--active">
+                  <strong>Krok 1:</strong> Stáhněte JSON (součet, scénář nebo handoff) – orientační, neoficiální.
+                </p>
+                <p className="dash-export-wizard__step">
+                  <strong>Krok 2:</strong> IT – předejte soubor + verzi aplikace ({APP_VERSION}) a případná varování
+                  koherence níže.
+                </p>
+                <p className="dash-export-wizard__step">
+                  <strong>Krok 3:</strong> Na sdíleném PC po exportu zvažte smazání lokálních dat (nabídne aplikace).
+                </p>
+              </div>
+            ) : null}
             <div className="dash-card__actions" style={{ marginTop: 12 }}>
+              <button type="button" className="btn ghost" onClick={printSchoolReview}>
+                Kontrola před jednáním (tisk)
+              </button>
+              <button
+                type="button"
+                className="btn ghost"
+                disabled
+                title={DASH_IMPORT_PLACEHOLDER_HINT}
+              >
+                {DASH_IMPORT_PLACEHOLDER_LABEL}
+              </button>
               <button
                 type="button"
                 className="btn ghost"
@@ -1072,6 +1197,17 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               Po otevření modulu vás aplikace může posunout k poli <strong>Příkladové výpočty</strong> – ukázka je
               volitelná. Můžete rovnou vyplnit vlastní školu; načtenou ukázku lze kdykoli upravit nebo vymazat v Akcích.
             </p>
+            <ol className="dash-new-user-card__steps muted-text">
+              <li>Vyberte modul (PV, ŠD, ZŠ, SŠ nebo NV75).</li>
+              <li>Vyplňte vlastní data nebo volitelnou ukázku.</li>
+              <li>
+                <strong>Celá škola za 15 min</strong> – souhrn Σ a export JSON pro IT (
+                <button type="button" className="btn ghost" style={{ display: "inline", padding: "0 4px" }} onClick={scrollToSchool15Min}>
+                  přejít na souhrn
+                </button>
+                ).
+              </li>
+            </ol>
             <div className="dash-new-user-card__grid">
               {DASH_START_MODULES.map((item) => (
                 <article key={item.id} className="dash-new-user-card__tile">
@@ -1145,6 +1281,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 }}
               >
                 <span className="dash-kpi-tile__module">{DASH_CALC_LABEL[row.id]}</span>
+                <FillStatusBadge
+                  kind={dashboardRowFillStatusKind(row.hasData, row.verdict?.tone)}
+                  label={row.status}
+                  className="dash-kpi-tile__fill-badge"
+                />
                 <strong className="dash-kpi-tile__value">{row.primaryKpi.value}</strong>
                 <span className="dash-kpi-tile__hint">{row.primaryKpi.label}</span>
                 <span className={`dash-kpi-tile__status ${dashboardKpiStatusClass(row)}`}>{row.status}</span>

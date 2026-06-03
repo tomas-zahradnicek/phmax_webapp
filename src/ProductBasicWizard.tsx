@@ -121,6 +121,12 @@ export function ProductBasicWizard({
           </button>
         </div>
       </div>
+
+      <div className="product-basic-wizard__mobile-next" aria-hidden={false}>
+        <button type="button" className="btn primary product-basic-wizard__mobile-next-btn" onClick={onNext}>
+          {isLast ? "Přejít na výsledek" : "Další krok průvodce"}
+        </button>
+      </div>
     </section>
   );
 }

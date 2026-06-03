@@ -9362,3 +9362,225 @@ select:focus {
     position: static;
   }
 }
+
+/* A/B/C UX wave – akční řádek, stav, dashboard role */
+.calculator-next-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.calculator-next-action--ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.calculator-next-action--warning {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.calculator-next-action--danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.calculator-next-action__message {
+  margin: 0;
+  flex: 1 1 12rem;
+  font-size: 0.92rem;
+}
+
+.fill-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.fill-status-badge__icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.fill-status-badge--empty .fill-status-badge__icon {
+  background: #94a3b8;
+}
+
+.fill-status-badge--ok .fill-status-badge__icon {
+  background: #16a34a;
+}
+
+.fill-status-badge--warning .fill-status-badge__icon {
+  background: #d97706;
+}
+
+.fill-status-badge--danger .fill-status-badge__icon {
+  background: #dc2626;
+}
+
+.calculator-hint-tooltip--coachmark .calculator-hint-tooltip__coachmark-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  margin-right: 4px;
+}
+
+.calculator-hint-tooltip--coachmark .calculator-hint-tooltip__trigger {
+  animation: calculator-hint-pulse 1.4s ease-in-out 3;
+}
+
+@keyframes calculator-hint-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(37, 99, 235, 0);
+  }
+}
+
+.calculator-expert-notice {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  width: 100%;
+}
+
+.calculator-expert-notice__text {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+}
+
+.calculator-expert-notice__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.zs-tab-progress {
+  margin-bottom: 8px;
+}
+
+.zs-tab-progress__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.zs-tab-progress__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+.zs-tab-progress__btn--active {
+  border-color: #2563eb;
+  font-weight: 700;
+}
+
+.zs-tab-progress__btn--done .zs-tab-progress__check {
+  color: #16a34a;
+}
+
+.product-basic-wizard__mobile-next {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .product-basic-wizard__mobile-next {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, transparent, #fff 24%);
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .product-basic-wizard__mobile-next-btn {
+    width: 100%;
+  }
+
+  .product-basic-wizard-active .calculator-workspace-layout {
+    padding-bottom: 72px;
+  }
+}
+
+.dash-role-cards__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.dash-role-cards__tile {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.dash-role-cards__tile-title {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.dash-role-cards__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dash-new-user-card__steps {
+  margin: 0 0 14px;
+  padding-left: 1.25rem;
+}
+
+.dash-export-wizard {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.dash-export-wizard__step {
+  margin: 0 0 6px;
+}
+
+.dash-export-wizard__step--active {
+  color: #1e3a5f;
+}
+
+.dash-kpi-tile__fill-badge {
+  margin-bottom: 4px;
+}
+
+.calculator-quick-tour-highlight {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}

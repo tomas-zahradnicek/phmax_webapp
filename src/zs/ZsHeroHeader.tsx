@@ -8,6 +8,7 @@ import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { DisplayDensity } from "../display-density";
 import type { CalculatorMode } from "../config/calculator-config";
 import { MODE_CONFIG } from "../config/calculator-config";
+import { ZS_PHA_HERO_EXAMPLE_SELECT_ID } from "./zs-pha-basic-wizard";
 import { ZsHeroToolbar, type ZsHeroToolbarProps } from "./ZsHeroToolbar";
 
 export type ZsHeroHeaderProps = {
@@ -74,6 +75,7 @@ export function ZsHeroHeader({
           setDisplayDensity={setDisplayDensity}
           focusMode={focusMode}
           setFocusMode={setFocusMode}
+          expertExampleSelectId={ZS_PHA_HERO_EXAMPLE_SELECT_ID}
           trailing={
             <>
               <GlossaryIconButton

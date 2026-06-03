@@ -1,5 +1,6 @@
 import React from "react";
 import { CalculatorWorkflowDock } from "../CalculatorWorkflowDock";
+import { ZsTabProgressMap } from "./ZsTabProgressMap";
 import type { CalculatorViewMode } from "../calculator-view-mode";
 import { MODE_CONFIG, formatModeRežimStatValue, type CalculatorMode } from "../config/calculator-config";
 import { formatZsLayContextLine } from "../calculator-ui-constants";
@@ -27,6 +28,9 @@ export type ZsWorkflowDockPanelProps = {
   saveSnapshotManually: () => void;
   handleExportCsv: () => void;
   handleCompareZsWithNamedSnapshot: () => void;
+  phmaxTabDone?: boolean;
+  phaTabDone?: boolean;
+  phpTabDone?: boolean;
 };
 
 export function ZsWorkflowDockPanel({
@@ -51,11 +55,21 @@ export function ZsWorkflowDockPanel({
   saveSnapshotManually,
   handleExportCsv,
   handleCompareZsWithNamedSnapshot,
+  phmaxTabDone = false,
+  phaTabDone = false,
+  phpTabDone = false,
 }: ZsWorkflowDockPanelProps) {
   return (
     <CalculatorWorkflowDock
       header={
         <>
+          <ZsTabProgressMap
+            activeTab={tab}
+            phmaxDone={phmaxTabDone}
+            phaDone={phaTabDone}
+            phpDone={phpTabDone}
+            onSelect={setTab}
+          />
           <div className="tabs tabs--sticky tabs--sticky-sdlike">
             <button type="button" className={tab === "phmax" ? "tab active tab--strong" : "tab tab--strong"} onClick={() => setTab("phmax")}>
               PHmax

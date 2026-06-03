@@ -7,6 +7,7 @@ import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
 import type { DisplayDensity } from "../display-density";
+import { PV_HERO_EXAMPLE_SELECT_ID } from "../pv-basic-wizard";
 import { PvHeroToolbar, type PvHeroToolbarProps } from "./PvHeroToolbar";
 
 export type PvHeroHeaderProps = {
@@ -73,6 +74,7 @@ export function PvHeroHeader({
           setDisplayDensity={setDisplayDensity}
           focusMode={focusMode}
           setFocusMode={setFocusMode}
+          expertExampleSelectId={PV_HERO_EXAMPLE_SELECT_ID}
           trailing={
             <>
               <GlossaryIconButton

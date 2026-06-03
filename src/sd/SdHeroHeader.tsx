@@ -7,6 +7,7 @@ import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
 import type { DisplayDensity } from "../display-density";
+import { SD_HERO_EXAMPLE_SELECT_ID } from "../sd-basic-wizard";
 import { SdHeroToolbar, type SdHeroToolbarProps } from "./SdHeroToolbar";
 
 export type SdHeroHeaderProps = {
@@ -71,6 +72,7 @@ export function SdHeroHeader({
           setDisplayDensity={setDisplayDensity}
           focusMode={focusMode}
           setFocusMode={setFocusMode}
+          expertExampleSelectId={SD_HERO_EXAMPLE_SELECT_ID}
           trailing={
             <>
               <GlossaryIconButton

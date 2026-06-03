@@ -13,6 +13,17 @@ import { SS_BASIC_WIZARD_LS_KEY } from "./ss-basic-wizard";
 import { NV75_BASIC_WIZARD_LS_KEY } from "./nv75-basic-wizard";
 import { ZS_BASIC_WIZARD_LS_KEY } from "./zs-basic-wizard";
 import { PHMAX_WHATS_NEW_SEEN_LS_KEY } from "./app-whats-new";
+import {
+  CALCULATOR_EXPERT_FIRST_SWITCH_LS_KEY,
+  CALCULATOR_HINT_FIRST_VISIT_LS_KEY,
+} from "./calculator-ui-constants";
+import {
+  NV75_QUICK_TOUR_LS_KEY,
+  PV_QUICK_TOUR_LS_KEY,
+  SD_QUICK_TOUR_LS_KEY,
+  SS_QUICK_TOUR_LS_KEY,
+} from "./phmax-module-quick-tour";
+import { PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY } from "./phmax-school-scenario-export";
 
 /** Všechna klíče kalkulačky v localStorage (včetně preferencí a návštěv). */
 export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
@@ -45,6 +56,13 @@ export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
   "phmax-calculator-focus",
   "phmax-dash-last-active-product",
   PHMAX_WHATS_NEW_SEEN_LS_KEY,
+  CALCULATOR_HINT_FIRST_VISIT_LS_KEY,
+  CALCULATOR_EXPERT_FIRST_SWITCH_LS_KEY,
+  PV_QUICK_TOUR_LS_KEY,
+  SD_QUICK_TOUR_LS_KEY,
+  SS_QUICK_TOUR_LS_KEY,
+  NV75_QUICK_TOUR_LS_KEY,
+  PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
 ];
 
 const DASH_VISIT_PREFIX = "phmax-dash-last-visit-";

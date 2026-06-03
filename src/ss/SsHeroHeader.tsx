@@ -12,6 +12,7 @@ import {
   PHMAX_SS_MSMT_PAGE_URL,
   PHMAX_SS_RIZENI_SKOLY_URL,
 } from "./phmax-ss-constants";
+import { SS_HERO_EXAMPLE_SELECT_ID } from "../ss-basic-wizard";
 import { SsHeroToolbar, type SsHeroToolbarProps } from "./SsHeroToolbar";
 
 export type SsHeroHeaderProps = {
@@ -76,6 +77,7 @@ export function SsHeroHeader({
           setDisplayDensity={setDisplayDensity}
           focusMode={focusMode}
           setFocusMode={setFocusMode}
+          expertExampleSelectId={SS_HERO_EXAMPLE_SELECT_ID}
           trailing={
             <>
               <GlossaryIconButton

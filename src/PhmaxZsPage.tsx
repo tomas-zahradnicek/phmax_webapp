@@ -49,7 +49,11 @@ import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
+import { buildCalculatorNextAction } from "./calculator-next-action";
+import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
+import { focusCalculatorElementById } from "./calculator-focus-element";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
+import { ZS_PHA_HERO_EXAMPLE_SELECT_ID } from "./zs/zs-pha-basic-wizard";
 import {
 } from "./zs/zs-form-validation";
 import {
@@ -1577,6 +1581,27 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const zsTabPrimaryLabel = tab === "phmax" ? "PHmax celkem" : tab === "pha" ? "PHAmax celkem" : "PHPmax celkem";
   const zsTabPrimaryValue = tab === "phmax" ? totalPhmax : tab === "pha" ? totalPha : totalPhp;
+  const zsHasData = totalPhmax > 0 || totalPha > 0 || totalPhp > 0;
+  const zsNextAction = useMemo(
+    () =>
+      buildCalculatorNextAction({
+        verdict: zsVerdict,
+        hasData: zsHasData,
+        incomplete: incompleteSections > 0,
+        incompleteDetail: `Zbývá doplnit ${incompleteSections} částí PHmax.`,
+        onFix: showZsInputBanner ? zsScrollToInputs : undefined,
+        onExport: zsHasData ? handleExportCsv : undefined,
+        onOpenExamples: () => focusCalculatorElementById(ZS_PHA_HERO_EXAMPLE_SELECT_ID),
+      }),
+    [
+      zsVerdict,
+      zsHasData,
+      incompleteSections,
+      showZsInputBanner,
+      zsScrollToInputs,
+      handleExportCsv,
+    ],
+  );
 
   useFocusInputsOnMount(zsScrollToInputs);
 
@@ -1844,6 +1869,8 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           />
         ) : null}
 
+        <CalculatorNextActionStrip action={zsNextAction} />
+
         <ZsCalculatorShell
           workspaceStickyRef={workspaceStickyRef}
           workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}
@@ -1878,6 +1905,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
             saveSnapshotManually,
             handleExportCsv,
             handleCompareZsWithNamedSnapshot,
+            phmaxTabDone: totalPhmax > 0,
+            phaTabDone: totalPha > 0,
+            phpTabDone: totalPhp > 0,
           }}
           main={
             <>

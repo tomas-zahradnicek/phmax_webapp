@@ -34,7 +34,12 @@ import {
 import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { createNv75ScrollToInputs } from "./nv75/create-nv75-scroll-to-inputs";
+import { buildCalculatorNextAction } from "./calculator-next-action";
+import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
+import { CalculatorModuleQuickTour } from "./CalculatorModuleQuickTour";
+import { focusCalculatorElementById } from "./calculator-focus-element";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
+import { NV75_QUICK_TOUR_LS_KEY, NV75_QUICK_TOUR_STEPS } from "./phmax-module-quick-tour";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
@@ -1044,6 +1049,17 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   const nv75NeedsInputBanner = nv75Verdict.tone !== "ok";
   const nv75ScrollToInputs = useMemo(() => createNv75ScrollToInputs(), []);
   const nv75BasicWizardActive = viewMode === "basic";
+  const nv75NextAction = useMemo(
+    () =>
+      buildCalculatorNextAction({
+        verdict: nv75Verdict,
+        hasData: rows.length > 0,
+        onFix: nv75NeedsInputBanner ? nv75ScrollToInputs : undefined,
+        onExport: rows.length > 0 ? handleExportCsv : undefined,
+        onOpenExamples: () => focusCalculatorElementById(NV75_HERO_EXAMPLE_SELECT_ID),
+      }),
+    [nv75Verdict, rows.length, nv75NeedsInputBanner, nv75ScrollToInputs, handleExportCsv],
+  );
   const { step: nv75WizardStep, goToStep: goToNv75WizardStep, handleBack: handleNv75WizardBack, handleNext: handleNv75WizardNext } =
     useProductBasicWizard({
       lsKey: NV75_BASIC_WIZARD_LS_KEY,
@@ -1112,6 +1128,16 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
         {nv75NeedsInputBanner ? (
           <CalculatorInputIssueBanner {...calculatorInputIssueBannerFromVerdict(nv75Verdict, nv75ScrollToInputs)} />
         ) : null}
+
+        {nv75BasicWizardActive ? (
+          <CalculatorModuleQuickTour
+            moduleLabel="NV75"
+            storageKey={NV75_QUICK_TOUR_LS_KEY}
+            steps={NV75_QUICK_TOUR_STEPS}
+            exampleSelectId={NV75_HERO_EXAMPLE_SELECT_ID}
+          />
+        ) : null}
+        <CalculatorNextActionStrip action={nv75NextAction} />
 
         <CalculatorProductShell
           sticky={{

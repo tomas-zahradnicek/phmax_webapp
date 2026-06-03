@@ -57,7 +57,14 @@ export const VIEW_MODE_HINT_BASIC =
   "Základní: průvodce krok za krokem a checklist vpravo. Ukázka a vlastní údaje jsou v liště akcí níže.";
 
 export const VIEW_MODE_HINT_EXPERT =
-  "Expertní: metodické panely a kompaktní hero. Ukázku v comboboxu Příkladové výpočty zvolíte po přepnutí na Základní, nebo rovnou vyplňte formulář – pole nejsou uzamčená.";
+  "Expertní: až když znáte metodiku a chcete všechny panely a exporty v jedné liště. Ukázku v comboboxu Příkladové výpočty zvolíte v Akcích, nebo rovnou vyplňte formulář – pole nejsou uzamčená.";
+
+export const CALCULATOR_HINT_FIRST_VISIT_LS_KEY = "phmax-calculator-hint-first-visit-v1";
+export const CALCULATOR_EXPERT_FIRST_SWITCH_LS_KEY = "phmax-calculator-expert-first-switch-v1";
+
+export const DASH_IMPORT_PLACEHOLDER_LABEL = "Import ze školy (připravujeme – 0.4.0)";
+export const DASH_IMPORT_PLACEHOLDER_HINT =
+  "Import podle šablony zřizovatele nebo IS bude ve verzi 0.4.0 – čeká na schválený formát (docs/export-field-mapping.md).";
 
 export const CALCULATOR_GLOBAL_DISPLAY_HINT =
   "Pohodlné / Kompaktní a Fokus na formulář platí pro všechny kalkulačky v tomto prohlížeči.";

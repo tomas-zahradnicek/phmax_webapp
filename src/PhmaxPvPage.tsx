@@ -50,7 +50,12 @@ import {
 import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { createPvScrollToInputs } from "./pv/create-pv-scroll-to-inputs";
+import { buildCalculatorNextAction } from "./calculator-next-action";
+import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
+import { CalculatorModuleQuickTour } from "./CalculatorModuleQuickTour";
+import { focusCalculatorElementById } from "./calculator-focus-element";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
+import { PV_QUICK_TOUR_LS_KEY, PV_QUICK_TOUR_STEPS } from "./phmax-module-quick-tour";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import type { ProductView } from "./ProductViewPills";
@@ -758,6 +763,19 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   const pvBasicWizardActive = viewMode === "basic";
   const pvHasInputIssue = pvVerdict.tone !== "ok";
   const pvScrollToInputs = useMemo(() => createPvScrollToInputs(), []);
+  const pvNextAction = useMemo(
+    () =>
+      buildCalculatorNextAction({
+        verdict: pvVerdict,
+        hasData: rows.length > 0,
+        incomplete: aggregate.incomplete,
+        incompleteDetail: "Některá pracoviště nemají vyplněné povinné údaje – součet může být neúplný.",
+        onFix: pvHasInputIssue ? pvScrollToInputs : undefined,
+        onExport: rows.length > 0 ? handleExportCsv : undefined,
+        onOpenExamples: () => focusCalculatorElementById(PV_HERO_EXAMPLE_SELECT_ID),
+      }),
+    [pvVerdict, rows.length, aggregate.incomplete, pvHasInputIssue, pvScrollToInputs, handleExportCsv],
+  );
   const { step: pvWizardStep, goToStep: goToPvWizardStep, handleBack: handlePvWizardBack, handleNext: handlePvWizardNext } =
     useProductBasicWizard({
       lsKey: PV_BASIC_WIZARD_LS_KEY,
@@ -848,6 +866,16 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
           {...calculatorInputIssueBannerFromVerdict(pvVerdict, pvScrollToInputs)}
         />
       ) : null}
+
+      {pvBasicWizardActive ? (
+        <CalculatorModuleQuickTour
+          moduleLabel="PV"
+          storageKey={PV_QUICK_TOUR_LS_KEY}
+          steps={PV_QUICK_TOUR_STEPS}
+          exampleSelectId={PV_HERO_EXAMPLE_SELECT_ID}
+        />
+      ) : null}
+      <CalculatorNextActionStrip action={pvNextAction} />
 
       <PvCalculatorShell
         workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}

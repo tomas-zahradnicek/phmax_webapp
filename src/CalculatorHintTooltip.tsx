@@ -1,15 +1,28 @@
 import React, { useEffect, useId, useRef, useState } from "react";
+import { dismissCalculatorHintCoachmark, shouldShowCalculatorHintCoachmark } from "./calculator-hint-first-visit";
 
 export type CalculatorHintTooltipProps = {
   /** Pro čtečku obrazovky (např. „Vysvětlení režimu práce“). */
   label: string;
   text: string;
   className?: string;
+  /** Jednorázový popisek u první návštěvy (localStorage). */
+  firstVisitCoachmark?: boolean;
+  firstVisitCoachmarkLabel?: string;
 };
 
 /** Krátké vysvětlení u kompaktních přepínačů v hero – hover/focus, na mobilu klepnutí. */
-export function CalculatorHintTooltip({ label, text, className }: CalculatorHintTooltipProps) {
+export function CalculatorHintTooltip({
+  label,
+  text,
+  className,
+  firstVisitCoachmark = false,
+  firstVisitCoachmarkLabel = "Nápověda k režimu",
+}: CalculatorHintTooltipProps) {
   const [open, setOpen] = useState(false);
+  const [coachmark, setCoachmark] = useState(
+    () => firstVisitCoachmark && shouldShowCalculatorHintCoachmark(),
+  );
   const wrapRef = useRef<HTMLSpanElement>(null);
   const bubbleId = useId().replace(/:/g, "");
 
@@ -32,13 +45,26 @@ export function CalculatorHintTooltip({ label, text, className }: CalculatorHint
     };
   }, [open]);
 
+  const dismissCoachmark = () => {
+    dismissCalculatorHintCoachmark();
+    setCoachmark(false);
+  };
+
   return (
     <span
       ref={wrapRef}
-      className={["calculator-hint-tooltip", open ? "calculator-hint-tooltip--open" : "", className]
+      className={[
+        "calculator-hint-tooltip",
+        open ? "calculator-hint-tooltip--open" : "",
+        coachmark ? "calculator-hint-tooltip--coachmark" : "",
+        className,
+      ]
         .filter(Boolean)
         .join(" ")}
     >
+      {coachmark ? (
+        <span className="calculator-hint-tooltip__coachmark-label">{firstVisitCoachmarkLabel}</span>
+      ) : null}
       <button
         type="button"
         className="calculator-hint-tooltip__trigger"
@@ -48,6 +74,7 @@ export function CalculatorHintTooltip({ label, text, className }: CalculatorHint
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (coachmark) dismissCoachmark();
           setOpen((o) => !o);
         }}
       >

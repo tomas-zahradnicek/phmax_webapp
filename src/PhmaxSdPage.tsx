@@ -53,7 +53,12 @@ import {
 import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { createSdScrollToInputs } from "./sd/create-sd-scroll-to-inputs";
+import { buildCalculatorNextAction } from "./calculator-next-action";
+import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
+import { CalculatorModuleQuickTour } from "./CalculatorModuleQuickTour";
+import { focusCalculatorElementById } from "./calculator-focus-element";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
+import { SD_QUICK_TOUR_LS_KEY, SD_QUICK_TOUR_STEPS } from "./phmax-module-quick-tour";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import { useUiNotice } from "./useUiNotice";
@@ -1012,6 +1017,18 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   const sdBasicWizardActive = viewMode === "basic";
   const sdHasInputIssue = sdVerdict.tone !== "ok";
   const sdScrollToInputs = useMemo(() => createSdScrollToInputs(), []);
+  const sdHasData = basePhmax != null;
+  const sdNextAction = useMemo(
+    () =>
+      buildCalculatorNextAction({
+        verdict: sdVerdict,
+        hasData: sdHasData,
+        onFix: sdHasInputIssue ? sdScrollToInputs : undefined,
+        onExport: sdHasData ? handleExportCsv : undefined,
+        onOpenExamples: () => focusCalculatorElementById(SD_HERO_EXAMPLE_SELECT_ID),
+      }),
+    [sdVerdict, sdHasData, sdHasInputIssue, sdScrollToInputs, handleExportCsv],
+  );
   const { step: sdWizardStep, goToStep: goToSdWizardStep, handleBack: handleSdWizardBack, handleNext: handleSdWizardNext } =
     useProductBasicWizard({
       lsKey: SD_BASIC_WIZARD_LS_KEY,
@@ -1094,6 +1111,16 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       {sdHasInputIssue ? (
         <CalculatorInputIssueBanner {...calculatorInputIssueBannerFromVerdict(sdVerdict, sdScrollToInputs)} />
       ) : null}
+
+      {sdBasicWizardActive ? (
+        <CalculatorModuleQuickTour
+          moduleLabel="ŠD"
+          storageKey={SD_QUICK_TOUR_LS_KEY}
+          steps={SD_QUICK_TOUR_STEPS}
+          exampleSelectId={SD_HERO_EXAMPLE_SELECT_ID}
+        />
+      ) : null}
+      <CalculatorNextActionStrip action={sdNextAction} />
 
       <SdCalculatorShell
         workspaceDockLabel={CALCULATOR_WORKSPACE_DOCK_LABEL}

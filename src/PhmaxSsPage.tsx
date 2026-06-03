@@ -30,7 +30,12 @@ import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { createSsScrollToInputs } from "./ss/create-ss-scroll-to-inputs";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
+import { buildCalculatorNextAction } from "./calculator-next-action";
+import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
+import { CalculatorModuleQuickTour } from "./CalculatorModuleQuickTour";
+import { focusCalculatorElementById } from "./calculator-focus-element";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
+import { SS_QUICK_TOUR_LS_KEY, SS_QUICK_TOUR_STEPS } from "./phmax-module-quick-tour";
 import { useFocusExampleOnMount } from "./useFocusExampleOnMount";
 import { BasicComparePreview } from "./BasicComparePreview";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
@@ -486,6 +491,18 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
 
   const ssNeedsInputBanner = ssVerdict.tone !== "ok";
   const ssScrollToInputs = useMemo(() => createSsScrollToInputs(), []);
+  const ssHasData = ss.rows.length > 0;
+  const ssNextAction = useMemo(
+    () =>
+      buildCalculatorNextAction({
+        verdict: ssVerdict,
+        hasData: ssHasData,
+        onFix: ssNeedsInputBanner ? ssScrollToInputs : undefined,
+        onExport: ssHasData ? ss.handleExportCsv : undefined,
+        onOpenExamples: () => focusCalculatorElementById(SS_HERO_EXAMPLE_SELECT_ID),
+      }),
+    [ssVerdict, ssHasData, ssNeedsInputBanner, ssScrollToInputs, ss.handleExportCsv],
+  );
   useFocusInputsOnMount(ssScrollToInputs);
   const ssBasicWizardActive = viewMode === "basic";
   const { step: ssWizardStep, goToStep: goToSsWizardStep, handleBack: handleSsWizardBack, handleNext: handleSsWizardNext } =
@@ -973,6 +990,16 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
       {ssNeedsInputBanner ? (
         <CalculatorInputIssueBanner {...calculatorInputIssueBannerFromVerdict(ssVerdict, ssScrollToInputs)} />
       ) : null}
+
+      {ssBasicWizardActive ? (
+        <CalculatorModuleQuickTour
+          moduleLabel="SŠ"
+          storageKey={SS_QUICK_TOUR_LS_KEY}
+          steps={SS_QUICK_TOUR_STEPS}
+          exampleSelectId={SS_HERO_EXAMPLE_SELECT_ID}
+        />
+      ) : null}
+      <CalculatorNextActionStrip action={ssNextAction} />
 
       <CalculatorProductShell
         sticky={{

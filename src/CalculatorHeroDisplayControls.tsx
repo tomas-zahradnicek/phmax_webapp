@@ -3,6 +3,7 @@ import { CalculatorFocusToggle } from "./CalculatorFocusToggle";
 import { CalculatorHintTooltip } from "./CalculatorHintTooltip";
 import { CalculatorViewModeToggle } from "./CalculatorViewModeToggle";
 import { DisplayDensityToggle } from "./DisplayDensityToggle";
+import { CalculatorExpertModeNotice } from "./CalculatorExpertModeNotice";
 import {
   CALCULATOR_LAYOUT_HINT_TOOLTIP,
   CALCULATOR_VIEW_MODE_HINT_TOOLTIP,
@@ -23,6 +24,8 @@ export type CalculatorHeroDisplayControlsProps = {
   setFocusMode: (mode: CalculatorFocusMode) => void;
   /** Slovník, nápověda – vpravo od skupin přepínačů. */
   trailing?: React.ReactNode;
+  /** Pro jednorázový banner po přepnutí na Expertní (combobox ukázky). */
+  expertExampleSelectId?: string;
 };
 
 /** Základní/Expertní a Pohodlné/Kompaktní+Fokus – kompaktní dvě skupiny, popisy v tooltipu. */
@@ -37,6 +40,7 @@ export function CalculatorHeroDisplayControls({
   focusMode,
   setFocusMode,
   trailing,
+  expertExampleSelectId,
 }: CalculatorHeroDisplayControlsProps) {
   const viewLegendId = useId();
   const layoutLegendId = useId();
@@ -59,7 +63,11 @@ export function CalculatorHeroDisplayControls({
             compact
             className="calculator-hero-display-controls__view-toggle"
           />
-          <CalculatorHintTooltip label="Vysvětlení režimu práce" text={CALCULATOR_VIEW_MODE_HINT_TOOLTIP} />
+          <CalculatorHintTooltip
+            label="Vysvětlení režimu práce"
+            text={CALCULATOR_VIEW_MODE_HINT_TOOLTIP}
+            firstVisitCoachmark
+          />
         </section>
 
         <div className="calculator-hero-display-controls__divider" role="separator" aria-orientation="vertical" />
@@ -84,6 +92,7 @@ export function CalculatorHeroDisplayControls({
 
         {trailing ? <div className="calculator-hero-display-controls__actions">{trailing}</div> : null}
       </div>
+      <CalculatorExpertModeNotice viewMode={viewMode} exampleSelectId={expertExampleSelectId} />
     </div>
   );
 }

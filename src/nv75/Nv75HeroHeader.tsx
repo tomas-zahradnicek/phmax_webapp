@@ -6,6 +6,7 @@ import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
 import type { DisplayDensity } from "../display-density";
+import { NV75_HERO_EXAMPLE_SELECT_ID } from "../nv75-basic-wizard";
 import { Nv75HeroToolbar, type Nv75HeroToolbarProps } from "./Nv75HeroToolbar";
 
 export type Nv75HeroHeaderProps = {
@@ -61,6 +62,7 @@ export function Nv75HeroHeader({
           setDisplayDensity={setDisplayDensity}
           focusMode={focusMode}
           setFocusMode={setFocusMode}
+          expertExampleSelectId={NV75_HERO_EXAMPLE_SELECT_ID}
           trailing={
             <QuickOnboardingHeroButton
               guideOpen={guideOpen}
