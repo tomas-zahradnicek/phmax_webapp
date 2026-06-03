@@ -15,11 +15,7 @@ import {
   PHMAX_SD_ONBOARDING_LS_KEY,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
-import {
-  APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES,
-  getAppAuthorPrintFooterHtml,
-  stripAppAuthorCreditFromPlainSummary,
-} from "./app-author-print";
+import { printPlainSummaryDocument, PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE } from "./app-author-print";
 import {
   confirmDestructive,
   MSG_CONFIRM_CLEAR_BROWSER_STORAGE,
@@ -936,20 +932,16 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
   }, [buildSdSummaryText]);
 
   const printSdSummary = useCallback(() => {
-    const plain = stripAppAuthorCreditFromPlainSummary(buildSdSummaryText());
-    const text = plain.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
-    const win = window.open("", "_blank", "width=900,height=700");
-    if (!win) return;
-    win.document.write(
-      `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí PHmax ŠD</title>` +
-        `<style>${APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES}</style>` +
-        `</head><body class="print-summary-doc"><main class="print-summary-doc__main">` +
-        `<h1 style="font-size:12pt;margin:0 0 8px;font-weight:800">Shrnutí – školní družina</h1><p>${text}</p></main>` +
-        `${getAppAuthorPrintFooterHtml()}</body></html>`,
-    );
-    win.document.close();
-    win.focus();
-    win.print();
+    const result = printPlainSummaryDocument({
+      pageTitle: "Shrnutí PHmax ŠD",
+      heading: "Shrnutí – školní družina",
+      plainSummary: buildSdSummaryText(),
+    });
+    if (!result.ok) {
+      setUiNoticeRef.current(
+        result.reason === "blocked" ? PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE : "Tisk shrnutí se nepodařil otevřít.",
+      );
+    }
   }, [buildSdSummaryText]);
 
   const buildSdAuditProtocol = useCallback(() => {

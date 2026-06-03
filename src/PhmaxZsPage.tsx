@@ -97,7 +97,6 @@ import {
 import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsWarnings } from "./zs/zs-warnings";
 import { buildZsBandUpgradeHints } from "./zs/zs-band-sensitivity";
-import { openPrintHtmlWindow } from "./phmax-open-print-html";
 import { ZsCalculatorShell } from "./zs/ZsCalculatorShell";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
@@ -125,11 +124,7 @@ import {
   MSG_CONFIRM_ZS_RESET_PHMAX,
   MSG_CONFIRM_ZS_RESET_PHP,
 } from "./confirm-destructive";
-import {
-  APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES,
-  getAppAuthorPrintFooterHtml,
-  stripAppAuthorCreditFromPlainSummary,
-} from "./app-author-print";
+import { printPlainSummaryDocument, PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE } from "./app-author-print";
 import { useZsNamedSnapshots } from "./useZsNamedSnapshots";
 const ZS_VIEW_MODE_LS_KEY = "phmax-zs-view-mode";
 
@@ -1277,8 +1272,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   };
 
   const printSummaryWindow = () => {
-    const plain = stripAppAuthorCreditFromPlainSummary(
-      buildZsShareText({
+    const result = printPlainSummaryDocument({
+      pageTitle: "Shrnutí kalkulačky ZŠ",
+      heading: "Shrnutí kalkulačky ZŠ",
+      plainSummary: buildZsShareText({
         modeLabel: MODE_CONFIG[mode].label,
         tab: tab === "phmax" ? "PHmax" : tab === "pha" ? "PHAmax" : "PHPmax",
         totalPhmax,
@@ -1288,21 +1285,11 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
         inputMode: dataMode,
         exportLabel,
       }),
-    );
-    const text = plain.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
-    const html =
-      `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí kalkulačky ZŠ</title>` +
-      `<style>${APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES}` +
-      `h1{font-size:12pt;margin:0 0 8px;font-weight:800}` +
-      `.box{border:1px solid #94a3b8;border-radius:6px;padding:10px 12px;background:#fff}` +
-      `</style></head><body class="print-summary-doc"><main class="print-summary-doc__main">` +
-      `<h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div></main>${getAppAuthorPrintFooterHtml()}</body></html>`;
-    const printResult = openPrintHtmlWindow(html);
-    if (!printResult.ok) {
+      layout: "box",
+    });
+    if (!result.ok) {
       setUiNotice(
-        printResult.reason === "blocked"
-          ? "Tisk se nepodařil – povolte vyskakovací okna pro tuto stránku."
-          : "Tisk shrnutí se nepodařil otevřít.",
+        result.reason === "blocked" ? PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE : "Tisk shrnutí se nepodařil otevřít.",
       );
     }
   };

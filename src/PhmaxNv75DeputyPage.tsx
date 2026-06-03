@@ -19,9 +19,8 @@ import { useDisplayDensity } from "./useDisplayDensity";
 import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { buildExportMetaRows, buildOfficialArchiveRows, EXPORT_CSV_SEPARATOR_ROW } from "./export-metadata";
 import {
-  APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES,
-  getAppAuthorPrintFooterHtml,
-  stripAppAuthorCreditFromPlainSummary,
+  printPlainSummaryDocument,
+  PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE,
 } from "./app-author-print";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { type ProductView } from "./ProductViewPills";
@@ -1030,20 +1029,16 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
   ] as const;
 
   const printSummary = useCallback(() => {
-    const plain = stripAppAuthorCreditFromPlainSummary(summaryText);
-    const text = plain.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
-    const win = window.open("", "_blank", "width=900,height=700");
-    if (!win) return;
-    win.document.write(
-      `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>NV75 banka odpočtů</title>` +
-        `<style>${APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES}</style>` +
-        `</head><body class="print-summary-doc"><main class="print-summary-doc__main">` +
-        `<h1 style="font-size:12pt;margin:0 0 8px;font-weight:800">NV75 – banka odpočtů zástupců</h1><p>${text}</p></main>` +
-        `${getAppAuthorPrintFooterHtml()}</body></html>`,
-    );
-    win.document.close();
-    win.focus();
-    win.print();
+    const result = printPlainSummaryDocument({
+      pageTitle: "NV75 banka odpočtů",
+      heading: "NV75 – banka odpočtů zástupců",
+      plainSummary: summaryText,
+    });
+    if (!result.ok) {
+      setUiNoticeRef.current(
+        result.reason === "blocked" ? PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE : "Tisk shrnutí se nepodařil otevřít.",
+      );
+    }
   }, [summaryText]);
 
   const nv75NeedsInputBanner = nv75Verdict.tone !== "ok";

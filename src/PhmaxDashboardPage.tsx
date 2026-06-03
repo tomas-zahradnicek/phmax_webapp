@@ -21,6 +21,7 @@ import {
   openSchoolReviewPrintWindow,
 } from "./phmax-dashboard-school-review-print";
 import { buildDashboardBandHints } from "./phmax-dashboard-band-hints";
+import { PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE } from "./app-author-print";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
 import { CS_HOURS_PER_WEEK_SHORT, formatCsNumberOrDash } from "./cs-format";
@@ -853,11 +854,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     });
     const printResult = openSchoolReviewPrintWindow(html);
     if (!printResult.ok) {
-      publishNotice(
-        printResult.reason === "blocked"
-          ? "Tisk se nepodařil – prohlížeč zablokoval vyskakovací okno. Povolte okna pro tuto stránku a zkuste znovu."
-          : "Tisk se nepodařil otevřít.",
-      );
+      publishNotice(printResult.reason === "blocked" ? PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE : "Tisk se nepodařil otevřít.");
       return;
     }
     publishNotice("Otevřeno okno pro tisk kontroly před jednáním.");
