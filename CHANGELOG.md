@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.15 (2026-06-03)
+
+### Po 0.3.14
+- Dashboard: rozšířený kontrolní list exportu pro IT (`appVersion`, název scénáře, `coherenceWarnings`, odkazy na docs).
+- ZŠ: kontrakt shody přepočtu PHmax se `_phmaxAuditTotals` v autosave.
+- Kvalita: kontrakt audit autosave PV/ŠD/ZŠ/SŠ; E2E kontrakt desktop specy 0.3.14; smoke checklist v docs.
+
 ## 0.3.14 (2026-06-03)
 
 ### UX po 0.3.13

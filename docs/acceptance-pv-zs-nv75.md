@@ -97,6 +97,16 @@ Viz **`docs/product-roadmap.md`**. Stručně:
 
 ---
 
+## Po 0.3.14 (ruční / E2E)
+
+| Oblast | Stav | Poznámka |
+|--------|------|----------|
+| Popisky PHmax v docku | E2E desktop | `metric-label-casing.spec.ts` – PHmax, ne PHMAX |
+| Dashboard role + export wizard | E2E desktop | `dashboard-ux-013.spec.ts` |
+| ZŠ quick tour | contract + ručně | `ZS_QUICK_TOUR_*` v modulu ZŠ |
+
+Detailní checklist: [smoke-checklist-post-0.3.14.md](./smoke-checklist-post-0.3.14.md).
+
 ## Příkazy
 
 ```bash

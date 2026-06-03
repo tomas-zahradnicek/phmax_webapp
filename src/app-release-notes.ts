@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Popisky metrik zobrazují PHmax správně (ne PHMAX) ve všech modulech – dock, hero i mobilní souhrn.",
-    "Dashboard: porovnání pojmenovaných záloh ZŠ, krok exportu pro IT; ZŠ quick tour v základním režimu.",
-    "Handout ředitele: sekce „Kde zadat co“ (MŠ v PV vs přípravná třída v ZŠ). Import IS stále 0.4.0.",
+    "Dashboard: kontrolní list před exportem pro IT – appVersion, scénář, coherenceWarnings a odkazy na dokumentaci.",
+    "ZŠ: autosave ukládá _phmaxAuditTotals v souladu s přepočtem PHmax (méně falešných varování na přehledu).",
+    "Dokumentace: smoke checklist po 0.3.14; E2E desktop pokrývá role na dashboardu a popisky PHmax.",
   ],
 };

@@ -752,8 +752,16 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         attentionModuleLabels,
         auditCoherenceWarnings,
         exportDisclaimerConfirmed,
+        appVersion: APP_VERSION,
+        scenarioLabel: scenarioLabel.trim() || "Celá škola (autosave)",
       }),
-    [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, exportDisclaimerConfirmed],
+    [
+      crossPhmax,
+      attentionModuleLabels,
+      auditCoherenceWarnings,
+      exportDisclaimerConfirmed,
+      scenarioLabel,
+    ],
   );
 
   const printSchoolReview = useCallback(() => {

@@ -12,6 +12,9 @@ describe("E2E smoke contract", () => {
   it("Playwright smoke je v repozitáři (PV, ŠD, ZŠ, SŠ, NV75 + desktop TOC)", () => {
     expect(fs.existsSync(path.resolve(repoRoot, "playwright.config.ts"))).toBe(true);
     expect(readSource("playwright.config.ts")).toContain("desktop-chrome");
+    expect(readSource("playwright.config.ts")).toContain("dashboard-ux-013");
+    expect(readSource("playwright.config.ts")).toContain("metric-label-casing");
+    expect(readSource(".github/workflows/ci.yml")).toContain("npm run build");
     for (const specFile of [
       "e2e/pv-mobile-smoke.spec.ts",
       "e2e/sd-mobile-smoke.spec.ts",
@@ -20,6 +23,8 @@ describe("E2E smoke contract", () => {
       "e2e/nv75-mobile-smoke.spec.ts",
       "e2e/desktop-toc-smoke.spec.ts",
       "e2e/dashboard-deep-link-smoke.spec.ts",
+      "e2e/dashboard-ux-013.spec.ts",
+      "e2e/metric-label-casing.spec.ts",
     ]) {
       expect(fs.existsSync(path.resolve(repoRoot, specFile))).toBe(true);
     }

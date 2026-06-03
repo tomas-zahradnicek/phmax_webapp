@@ -11,6 +11,11 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.3.15 (UX)
+
+- **Po 0.3.14:** IT checklist exportu na dashboardu; kontrakt ZŠ přepočet vs audit; smoke checklist `docs/smoke-checklist-post-0.3.14.md`.
+- **Kvalita:** golden + kontrakty audit/E2E.
+
 ## Verze 0.3.14 (UX)
 
 - **Po 0.3.13:** popisky PHmax bez uppercase; dashboard hint záloh ZŠ, IT krok exportu; ZŠ quick tour; handout „Kde zadat co“.

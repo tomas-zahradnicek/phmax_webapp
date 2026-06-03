@@ -2,9 +2,11 @@
 
 Aplikace **neposílá data přímo** do Bakalářů, EduPage ani jiného IS – chybí jednotné veřejné API MŠMT.
 
-## Co je k dispozici (v0.3.13)
+## Co je k dispozici (v0.3.14+)
 
-Stejné schéma jako v 0.3.4+ – bez breaking change. Dashboard: export mini-wizard (kroky pro IT), tisk kontroly před jednáním; po stažení JSON volitelné vymazání lokálních dat (sdílený počítač). Import ze školy až ve 0.4.0.
+Stejné schéma jako v 0.3.4+ – bez breaking change. Dashboard: export mini-wizard (krok 2 pro IT – `appVersion`, `coherenceWarnings`, docs), kontrolní list před exportem, tisk kontroly; po stažení JSON volitelné vymazání lokálních dat (sdílený počítač). Import ze školy až ve 0.4.0.
+
+**Předání IT (checklist v UI):** stáhnout JSON scénář nebo handoff → ověřit `appVersion` a `scenarioLabel` → předat pole `coherenceWarnings` (prázdné = OK, jinak vyřešit v modulech) → mapování polí: `docs/export-field-mapping.md`.
 
 ## Historie (v0.3.4+)
 
