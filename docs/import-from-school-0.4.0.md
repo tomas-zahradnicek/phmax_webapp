@@ -80,9 +80,14 @@ NV75 se **nezapočítává** do cross-součtu PHmax na dashboardu.
 - Pojmenované zálohy a scénáře – zůstanou v prohlížeči, pokud je IT nezařadí do vlastního DMS.
 - Právně závazný podpis / verze výkazu pro zřizovatele.
 
+## CSV šablona (pilot PV + ZŠ)
+
+Konkrétní sloupce, příklady a mapování na autosave: **[import-templates/phmax-import-pv-zs-v1.md](./import-templates/phmax-import-pv-zs-v1.md)**  
+Soubory: `phmax-import-meta-v1.example.csv`, `phmax-import-pv-v1.example.csv`, `phmax-import-zs-summary-v1.example.csv`.
+
 ## Doporučený postup pro zřizovatele / IT
 
-1. Schválit **jednu šablonu** (minimálně: identifikátor školy, rok, modul, JSON nebo CSV sloupce).
+1. Schválit **jednu šablonu** (minimálně: identifikátor školy, rok, modul, JSON nebo CSV sloupce) – pilot v1: PV + ZŠ souhrn.
 2. Pilot: import JSON ve tvaru `phmax-is-handoff-v1` → transformace na `moduleSnapshots`.
 3. V aplikaci ověřit dashboard Σ a prázdné `coherenceWarnings`.
 4. Teprve potom napojit automatický upload (0.4.0+).
