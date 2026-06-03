@@ -2,9 +2,9 @@
 
 Aplikace **neposílá data přímo** do Bakalářů, EduPage ani jiného IS – chybí jednotné veřejné API MŠMT.
 
-## Co je k dispozici (v0.3.12)
+## Co je k dispozici (v0.3.13)
 
-Stejné schéma jako v 0.3.4+ – bez breaking change. Dashboard po stažení JSON může nabídnout vymazání lokálních dat (sdílený počítač).
+Stejné schéma jako v 0.3.4+ – bez breaking change. Dashboard: export mini-wizard (kroky pro IT), tisk kontroly před jednáním; po stažení JSON volitelné vymazání lokálních dat (sdílený počítač). Import ze školy až ve 0.4.0.
 
 ## Historie (v0.3.4+)
 

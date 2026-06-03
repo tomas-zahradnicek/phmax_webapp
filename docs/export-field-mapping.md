@@ -20,7 +20,7 @@ Orientační dokument (bez API integrace). Slouží jako podklad pro budoucí na
 | Banka NV75 | Hodiny odpočtů zástupce | Jiná jednotka než PHmax |
 | `_phmaxAuditTotals` (ZŠ autosave) | Interní kontrola před exportem | Už v localStorage |
 
-## Dashboard Σ (0.3.12)
+## Dashboard Σ (0.3.13)
 
 | Stav v UI | Význam pro integrátora |
 |-----------|------------------------|

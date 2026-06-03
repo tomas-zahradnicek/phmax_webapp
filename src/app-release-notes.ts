@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Dashboard Σ: modul nevyplněn vs. PHmax = 0; proklik z varování koherence do modulu; připomínka vymazání dat po exportu JSON.",
-    "ZŠ: 3krokový průvodce PHAmax a PHPmax v základním režimu (ZsHeroHeader); nápovědy modulů + globální hustota/fokus.",
-    "0.4.0 import IS – stále čeká na schválený formát od zřizovatele (viz docs/export-field-mapping.md).",
+    "Všechny moduly: řádek „co teď“ s CTA (export / přejít k chybě); quick tour při prvním spuštění (PV, ŠD, SŠ, NV75).",
+    "Dashboard: vstup podle role (ředitel / metodik / IT), export mini-wizard, tisk kontroly před jednáním, badge stavu modulů.",
+    "ZŠ: mapa PHmax → PHAmax → PHPmax v docku; expertní režim – jednorázová nápověda k ukázkám. Import IS stále 0.4.0.",
   ],
 };

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.13 (2026-05-28)
+
+### UX vlna A–C
+- Moduly: sjednocený akční řádek „co teď“ (`CalculatorNextActionStrip`) podle verdiktu.
+- Dashboard: role vstup (ředitel / metodik / IT), krok „Celá škola za 15 min“, export mini-wizard, tisk kontroly ze stavu prohlížeče.
+- ZŠ: mapa záložek PHmax/PHAmax/PHPmax s checkmarky; badge stavu na KPI dlaždicích.
+- Hero: pulz u první návštěvy tooltipu `?`; banner po prvním přepnutí na Expertní; mobilní sticky „Další krok průvodce“.
+- Quick tour PV/ŠD/SŠ/NV75; placeholder Import ze školy (0.4.0).
+
+### Kvalita
+- Contract `phmax-ux-wave-abc-contract.test.ts` v `test:golden`.
+- Golden 171/171, E2E 97/97 (mobile + desktop).
+
 ## 0.3.12 (2026-05-28)
 
 ### Dashboard a ZŠ

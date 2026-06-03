@@ -11,6 +11,11 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.3.13 (UX)
+
+- **Vlna A–C:** akční řádek „co teď“, role na dashboardu, export mini-wizard, tisk kontroly, ZŠ mapa záložek, quick tour, import placeholder 0.4.0.
+- **Kvalita:** golden + E2E green; contract `phmax-ux-wave-abc-contract`.
+
 ## Verze 0.3.7 (UX)
 
 - **Refaktor PV:** `PvWorkplaceRowsSection`, sdílené typy v `pv-workplace-shared`.

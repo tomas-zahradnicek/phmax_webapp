@@ -1,6 +1,6 @@
 # PHmax webapp – orientační kalkulačka pro školu
 
-**Verze 0.3.12** · jednostránkový přehled pro ředitele a zřizovatele  
+**Verze 0.3.13** · jednostránkový přehled pro ředitele a zřizovatele  
 *Dokument je informativní; nejedná se o závazný výkaz ani právní posudek.*
 
 ---
@@ -28,22 +28,23 @@ Webová aplikace v prohlížeči pomáhá **spočítat a zkontrolovat orientačn
 
 ---
 
-## Co je hotové k běžnému použití (v0.3.12)
+## Co je hotové k běžnému použití (v0.3.13)
 
 | Oblast | Stav | Poznámka pro vedení školy |
 |--------|------|---------------------------|
-| Výpočty v modulech PV, ZŠ, ŠD, SŠ, NV75 | **Ano** | průvodce (vč. PHAmax/PHPmax u ZŠ), mobilní souhrn, export CSV/XLSX |
+| Výpočty v modulech PV, ZŠ, ŠD, SŠ, NV75 | **Ano** | průvodce, řádek „co teď“, quick tour (PV/ŠD/SŠ/NV75), mobilní souhrn |
+| **ZŠ** mapa PHmax / PHAmax / PHPmax | **Ano** | orientace v docku (checkmarky) |
 | **PV** § 1d krácení | **Orientačně** | v exportu CSV/XLSX; závazně až po KÚ |
-| **Dashboard** – součet PHmax (PV+ŠD+ZŠ+SŠ) | **Ano** | nevyplněno vs. PHmax=0; proklik z koherence; kontrolní list; připomínka mazání dat po JSON exportu |
+| **Dashboard** – součet PHmax (PV+ŠD+ZŠ+SŠ) | **Ano** | role vstup, export mini-wizard, tisk kontroly, badge stavu modulů |
 | Export **scénář celá škola** (JSON) | **Ano** | včetně `coherenceWarnings` pro IT |
 | Export **handoff pro IS** (JSON / POST) | **Ano** | pro integrátora; ne automatický import |
-| Import do IS / šablona zřizovatele | **Ne (0.4.0)** | čeká na schválený formát |
+| Import do IS / šablona zřizovatele | **Ne (0.4.0)** | placeholder v UI; čeká na schválený formát |
 
 ---
 
 ## Doporučený postup pro školu (15 minut)
 
-1. Otevřít **Dashboard** (`?view=dash`) – zkontrolovat dlaždice a případně „Vyžaduje pozornost“.
+1. Otevřít **Dashboard** (`?view=dash`) – zvolit roli (ředitel / metodik / IT) nebo dlaždice modulů.
 2. Otevřít příslušný modul (PV / ZŠ / SŠ …) – **volitelně** načíst ukázkový příklad, nebo rovnou vyplnit **vlastní údaje** (formulář je editovatelný).
 3. Zkontrolovat **souhrn výsledků** a varování u neúplných vstupů.
 4. **Exportovat** CSV (modul) nebo JSON scénář (dashboard) pro archiv.
@@ -67,4 +68,4 @@ Všechny exporty obsahují **verzi aplikace a datum** a jsou označeny jako **or
 
 **Technická podpora / další dokumentace:** repozitář projektu – `docs/acceptance-pv-zs-nv75.md`, `docs/ss-acceptance-checklist.md`, `CHANGELOG.md`.
 
-*PHmax webapp 0.3.12 · orientační kalkulačka · neoficiální výstup*
+*PHmax webapp 0.3.13 · orientační kalkulačka · neoficiální výstup*
