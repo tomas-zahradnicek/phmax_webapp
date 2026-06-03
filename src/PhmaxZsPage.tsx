@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   B11_B13,
   B13_MORE_THAN_2,
@@ -1065,7 +1065,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     }
   }, [applySnapshotPayload]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     reloadFromAutosave();
     setStorageHydrated(true);
   }, [reloadFromAutosave]);

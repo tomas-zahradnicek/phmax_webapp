@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { PsychRow } from "../phmax-zs-logic";
 import { applyZsFormSnapshot, buildZsFormSnapshot, type ZsFormSnapshotSetters } from "./zs-form-snapshot";
 
 describe("zs-form-snapshot", () => {
@@ -137,5 +138,80 @@ describe("zs-form-snapshot", () => {
     expect(calls).toContain("tab:phmax");
     expect(calls).toContain("b1c:3");
     expect(calls).toContain("notice:ok");
+  });
+
+  it("apply odfiltruje neplatné psychRows z autosave", () => {
+    const psychCalls: PsychRow[][] = [];
+    const setters = {
+      setTab: () => {},
+      setMode: () => {},
+      setBasicType: () => {},
+      setBasic1Classes: () => {},
+      setBasic1Pupils: () => {},
+      setBasic2Classes: () => {},
+      setBasic2Pupils: () => {},
+      setIncl1Classes: () => {},
+      setIncl1Pupils: () => {},
+      setIncl2Classes: () => {},
+      setIncl2Pupils: () => {},
+      setPsychRows: (v: PsychRow[]) => psychCalls.push(v),
+      setHealthRows: () => {},
+      setExportLabel: () => {},
+      setMinorityType: () => {},
+      setMinority1Classes: () => {},
+      setMinority1Pupils: () => {},
+      setMinority2Classes: () => {},
+      setMinority2Pupils: () => {},
+      setGymRows: () => {},
+      setMixedRows: () => {},
+      setSpecial1Classes: () => {},
+      setSpecial1Pupils: () => {},
+      setSpecial2Classes: () => {},
+      setSpecial2Pupils: () => {},
+      setSpecialIIClasses: () => {},
+      setSpecialIIPupils: () => {},
+      setPrepClasses: () => {},
+      setPrepChildren: () => {},
+      setPrepSpecialClasses: () => {},
+      setPrepSpecialChildren: () => {},
+      setP38First: () => {},
+      setP38Second: () => {},
+      setP41First: () => {},
+      setP41Second: () => {},
+      setPhaRows: () => {},
+      setPhpYear1: () => {},
+      setPhpYear2: () => {},
+      setPhpYear3: () => {},
+      setPhpWizardStep: () => {},
+      setPhpMethodMode: () => {},
+      setPhpExcludedAbroad: () => {},
+      setPhpExcludedForeignSchoolCz: () => {},
+      setPhpExcludedIndividual: () => {},
+      setPhpExcludedSchool: () => {},
+      setSelectedExample: () => {},
+      setWizardChoice: () => {},
+      setZsWizardStep: () => {},
+      setDataMode: () => {},
+      setNv75Role: () => {},
+      setNv75School: () => {},
+      setNv75TeacherMin: () => {},
+      setNv75TeacherMax: () => {},
+      setMixedMethodFirstZsPupils: () => {},
+      setMixedMethodFirstZsClasses: () => {},
+      setMixedMethodFirstSpecialPupils: () => {},
+      setMixedMethodFirstSpecialClasses: () => {},
+      setMixedMethodSecondZsPupils: () => {},
+      setMixedMethodSecondZsClasses: () => {},
+      setMixedMethodSecondSpecialPupils: () => {},
+      setMixedMethodSecondSpecialClasses: () => {},
+    } as ZsFormSnapshotSetters;
+
+    applyZsFormSnapshot(
+      { psychRows: [{ kind: "psycholog", currentClasses: 1, currentPupils: 8 }] },
+      setters,
+      "ok",
+      () => {},
+    );
+    expect(psychCalls.at(-1)).toEqual([]);
   });
 });
