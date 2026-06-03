@@ -4,11 +4,8 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { PHMAX_IS_EXPORT_SCHEMA } from "./phmax-is-export-adapter";
 import { applyPhmaxIsHandoffToStorage } from "./phmax-is-handoff-apply";
-import {
-  classifyImportCsvText,
-  csvTextsToHandoffPayload,
-  parseSemicolonCsv,
-} from "./phmax-import-pv-zs";
+import { csvTextsToHandoffPayload, parseSemicolonCsv } from "./phmax-import-pv-zs";
+import { classifyImportCsvText } from "./phmax-import-xlsx";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const templatesDir = path.join(repoRoot, "docs/import-templates");

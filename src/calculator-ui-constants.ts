@@ -63,8 +63,15 @@ export const CALCULATOR_HINT_FIRST_VISIT_LS_KEY = "phmax-calculator-hint-first-v
 export const CALCULATOR_EXPERT_FIRST_SWITCH_LS_KEY = "phmax-calculator-expert-first-switch-v1";
 
 export const DASH_IMPORT_LABEL = "Import ze školy (PV + ZŠ)";
+export const DASH_IMPORT_TEMPLATE_LABEL = "Stáhnout šablonu Excel (.xlsx)";
+export const DASH_IMPORT_UPLOAD_LABEL = "Nahrát soubor a importovat";
 export const DASH_IMPORT_HINT =
-  "Vyplňte šablonu Excel nebo CSV a načtěte údaje do modulů PV a ZŠ v tomto prohlížeči. ŠD, SŠ a detailní záložky ZŠ doplníte v aplikaci.";
+  "Nejdřív stáhněte šablonu (tlačítko vedle importu), vyplňte ji v Excelu a teprve pak nahrajte soubor. Povinné listy Meta, PV a ZŠ souhrn; volitelně ŠD, SŠ, psycholog a zdravotní třídy.";
+export const DASH_IMPORT_STEPS = [
+  "Stáhněte šablonu Excel – české názvy sloupců, soubor phmax-import-skola-v2.xlsx.",
+  "Vyplňte listy podle evidence školy (stejné ID školy a název scénáře všude).",
+  "Nahrajte soubor tlačítkem Import – zkontrolujte náhled a načtěte do kalkulaček.",
+] as const;
 export const DASH_IMPORT_DIALOG_LEAD =
   "Stáhněte šablonu, vyplňte listy Meta, PV a ZŠ podle evidence školy a nahrajte soubor. Po kontrole náhledu se data uloží do autosave – stejně jako ruční zadání.";
 export const DASH_IMPORT_CONFIRM_HINT =

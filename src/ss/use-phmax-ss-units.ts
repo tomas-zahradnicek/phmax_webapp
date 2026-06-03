@@ -40,6 +40,7 @@ import {
 import { createEmptyPhmaxSsUnitRow, revivePhmaxSsUnitRow, type PhmaxSsUnitRow } from "./phmax-ss-types";
 import { buildSsDraftStoragePayload, parseSsDraftRowsFromLs } from "./ss-draft-storage";
 import { computeSsPhmaxTotalFromSnapshot } from "./ss-compute-phmax-total-from-snapshot";
+import { PHMAX_IMPORT_APPLIED_EVENT } from "../phmax-import-applied-event";
 
 function parseStoredRows(raw: string | null): PhmaxSsUnitRow[] {
   const rows = parseSsDraftRowsFromLs(raw);
@@ -173,6 +174,18 @@ export function usePhmaxSsUnits(
 
   useEffect(() => {
     setNamedSnapshots(readNamedSsSnapshotsFromLs());
+  }, []);
+
+  useEffect(() => {
+    const onImport = () => {
+      try {
+        setRows(parseStoredRows(localStorage.getItem(PHMAX_SS_UNITS_STORAGE_KEY)));
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener(PHMAX_IMPORT_APPLIED_EVENT, onImport);
+    return () => window.removeEventListener(PHMAX_IMPORT_APPLIED_EVENT, onImport);
   }, []);
 
   useEffect(() => {

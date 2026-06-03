@@ -1,13 +1,26 @@
 import type { ImportCsvRow } from "./phmax-import-pv-zs";
-import { importTablesToHandoffPayload, parseImportCsvFileBundle } from "./phmax-import-pv-zs";
+import { importTablesToHandoffPayload, parseSemicolonCsv } from "./phmax-import-pv-zs";
 
 type ExcelWorksheet = import("exceljs").Worksheet;
 type ExcelWorkbook = import("exceljs").Workbook;
 
-const SHEET_ALIASES: Record<"meta" | "pv" | "zs", readonly string[]> = {
+export type ImportSheetKind =
+  | "meta"
+  | "pv"
+  | "zs"
+  | "sd"
+  | "ss"
+  | "zsPsych"
+  | "zsHealth";
+
+const SHEET_ALIASES: Record<ImportSheetKind, readonly string[]> = {
   meta: ["meta", "údaje školy", "udaje skoly"],
   pv: ["pv", "mateřská škola", "materska skola", "mš", "ms"],
-  zs: ["zs", "základní škola", "zakladni skola", "zš", "zs souhrn", "zs_summary"],
+  zs: ["zs", "zš souhrn", "zs souhrn", "zs_summary", "základní škola souhrn", "zakladni skola souhrn"],
+  sd: ["šd", "sd", "školní družina", "skolni druzina"],
+  ss: ["sš", "ss", "střední škola", "stredni skola"],
+  zsPsych: ["zš psycholog", "zs psycholog", "zs_psych", "psycholog"],
+  zsHealth: ["zš zdravotní", "zs zdravotni", "zs_health", "zdravotní", "zdravotni"],
 };
 
 function normalizeSheetName(name: string): string {
@@ -18,9 +31,9 @@ function normalizeSheetName(name: string): string {
     .replace(/\p{M}/gu, "");
 }
 
-function resolveSheetKind(sheetName: string): "meta" | "pv" | "zs" | null {
+function resolveSheetKind(sheetName: string): ImportSheetKind | null {
   const n = normalizeSheetName(sheetName);
-  for (const [kind, aliases] of Object.entries(SHEET_ALIASES) as [keyof typeof SHEET_ALIASES, readonly string[]][]) {
+  for (const [kind, aliases] of Object.entries(SHEET_ALIASES) as [ImportSheetKind, readonly string[]][]) {
     if (aliases.some((a) => normalizeSheetName(a) === n)) return kind;
   }
   return null;
@@ -51,6 +64,7 @@ export function worksheetToImportRows(sheet: ExcelWorksheet): ImportCsvRow[] {
     if (!Array.isArray(vals)) continue;
     const cells = vals.slice(1).map(cellToString);
     if (cells.every((c) => c === "")) continue;
+    if (cells.every((c) => c === "" || /^\([a-z0-9_]+\)$/i.test(c))) continue;
     const record: ImportCsvRow = {};
     headers.forEach((h, i) => {
       if (!h) return;
@@ -65,13 +79,13 @@ export async function parseImportXlsxArrayBuffer(buffer: ArrayBuffer) {
   const ExcelJS = (await import("exceljs")).default;
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer);
-  const tables: Partial<Record<"meta" | "pv" | "zs", ImportCsvRow[]>> = {};
+  const tables: Partial<Record<ImportSheetKind, ImportCsvRow[]>> = {};
 
   workbook.eachSheet((sheet) => {
     const kind = resolveSheetKind(sheet.name);
     if (!kind) return;
     if (tables[kind]) {
-      throw new Error(`Excel: duplicitní list pro ${kind.toUpperCase()} (${sheet.name}).`);
+      throw new Error(`Excel: duplicitní list (${sheet.name}).`);
     }
     tables[kind] = worksheetToImportRows(sheet);
   });
@@ -79,7 +93,7 @@ export async function parseImportXlsxArrayBuffer(buffer: ArrayBuffer) {
   if (!tables.meta || !tables.pv || !tables.zs) {
     const missing = (["meta", "pv", "zs"] as const).filter((k) => !tables[k]);
     throw new Error(
-      `Excel musí obsahovat listy Meta, PV a ZŠ (chybí: ${missing.join(", ")}). Stáhněte šablonu z dashboardu.`,
+      `Excel musí obsahovat listy Meta, PV a ZŠ souhrn (chybí: ${missing.join(", ")}). Stáhněte šablonu z dashboardu.`,
     );
   }
 
@@ -87,6 +101,10 @@ export async function parseImportXlsxArrayBuffer(buffer: ArrayBuffer) {
     metaRows: tables.meta,
     pvRows: tables.pv,
     zsRows: tables.zs,
+    sdRows: tables.sd,
+    ssRows: tables.ss,
+    zsPsychRows: tables.zsPsych,
+    zsHealthRows: tables.zsHealth,
   });
 }
 
@@ -100,7 +118,78 @@ export async function parseImportFile(file: File) {
     const text = await file.text();
     return parseImportCsvFileBundle([{ name: file.name, text }]);
   }
-  throw new Error("Podporované formáty: .xlsx (doporučeno) nebo tři soubory .csv najednou.");
+  throw new Error("Podporované formáty: .xlsx (doporučeno) nebo CSV.");
+}
+
+function headerSignalsMeta(headers: string[]): boolean {
+  return headers.some((h) => h === "schema_version" || h.includes("verze"));
+}
+
+function headerSignalsPv(headers: string[]): boolean {
+  return headers.includes("provoz") || headers.includes("row_key");
+}
+
+function headerSignalsZsSummary(headers: string[]): boolean {
+  return headers.includes("basic_type") || headers.includes("basic1_classes");
+}
+
+function headerSignalsSd(headers: string[]): boolean {
+  return headers.includes("pupils") && headers.includes("departments");
+}
+
+function headerSignalsSs(headers: string[]): boolean {
+  return headers.includes("education_field") || (headers.includes("study_form") && headers.includes("row_key"));
+}
+
+export function classifyImportCsvText(
+  text: string,
+): "meta" | "pv" | "zs" | "sd" | "ss" | "zsPsych" | "zsHealth" | "unknown" {
+  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.length < 2) return "unknown";
+  const rawHeaders = lines[0].split(";").map((h) => h.trim().replace(/^\uFEFF/, ""));
+  const headerLine = rawHeaders.join(" ").toLowerCase();
+  if (headerLine.includes("psycholog")) return "zsPsych";
+  if (headerLine.includes("zdravotn")) return "zsHealth";
+  const keys = rawHeaders.map((h) =>
+    h
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/\p{M}/gu, "")
+      .replace(/\s+/g, "_"),
+  );
+  if (headerSignalsMeta(keys)) return "meta";
+  if (headerSignalsSd(keys)) return "sd";
+  if (headerSignalsSs(keys)) return "ss";
+  if (headerSignalsPv(keys)) return "pv";
+  if (headerSignalsZsSummary(keys)) return "zs";
+  return "unknown";
+}
+
+export function parseImportCsvFileBundle(files: { name: string; text: string }[]) {
+  const tables: Partial<Record<ImportSheetKind, ImportCsvRow[]>> = {};
+  for (const file of files) {
+    const kind = classifyImportCsvText(file.text);
+    if (kind === "unknown") {
+      throw new Error(`Soubor ${file.name}: neznámá struktura CSV.`);
+    }
+    if (tables[kind]) {
+      throw new Error(`Soubor ${file.name}: duplicitní typ ${kind}.`);
+    }
+    tables[kind] = parseSemicolonCsv(file.text);
+  }
+  if (!tables.meta || !tables.pv || !tables.zs) {
+    const missing = (["meta", "pv", "zs"] as const).filter((k) => !tables[k]);
+    throw new Error(`Chybí CSV: ${missing.join(", ")}. Nahrajte Excel nebo všechny povinné CSV.`);
+  }
+  return importTablesToHandoffPayload({
+    metaRows: tables.meta,
+    pvRows: tables.pv,
+    zsRows: tables.zs,
+    sdRows: tables.sd,
+    ssRows: tables.ss,
+    zsPsychRows: tables.zsPsych,
+    zsHealthRows: tables.zsHealth,
+  });
 }
 
 export async function parseImportFileList(files: readonly File[]) {
@@ -108,7 +197,7 @@ export async function parseImportFileList(files: readonly File[]) {
   if (files.length === 1) return parseImportFile(files[0]);
   const csvs = files.filter((f) => f.name.toLowerCase().endsWith(".csv"));
   if (csvs.length !== files.length) {
-    throw new Error("Při více souborech nahrajte pouze CSV (Meta, PV, ZŠ), nebo jeden soubor Excel.");
+    throw new Error("Při více souborech nahrajte pouze CSV, nebo jeden soubor Excel.");
   }
   const bundle = await Promise.all(
     csvs.map(async (f) => ({ name: f.name, text: await f.text() })),

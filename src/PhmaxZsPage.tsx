@@ -64,6 +64,7 @@ import {
   ZS_AUTOSAVE_STORAGE_KEY,
   type ZsFormSnapshotSetters,
 } from "./zs/zs-form-snapshot";
+import { PHMAX_IMPORT_APPLIED_EVENT } from "./phmax-import-applied-event";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
 import { createZsPageHandlers } from "./zs/zs-page-handlers";
@@ -1051,7 +1052,33 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     [zsSnapshotSetters, setUiNotice],
   );
 
-  const { lastSavedAt, setLastSavedAt, persistSnapshot } = useZsFormAutosave(buildSnapshot, [
+  const [storageHydrated, setStorageHydrated] = useState(false);
+
+  const reloadFromAutosave = useCallback(() => {
+    try {
+      const raw = localStorage.getItem(ZS_AUTOSAVE_STORAGE_KEY);
+      if (!raw) return;
+      const s = JSON.parse(raw) as Record<string, unknown>;
+      applySnapshotPayload(s, "Načtena uložená data z prohlížeče.");
+    } catch (error) {
+      console.error("Nepodařilo se načíst autosave ZŠ.", error);
+    }
+  }, [applySnapshotPayload]);
+
+  useEffect(() => {
+    reloadFromAutosave();
+    setStorageHydrated(true);
+  }, [reloadFromAutosave]);
+
+  useEffect(() => {
+    const onImport = () => reloadFromAutosave();
+    window.addEventListener(PHMAX_IMPORT_APPLIED_EVENT, onImport);
+    return () => window.removeEventListener(PHMAX_IMPORT_APPLIED_EVENT, onImport);
+  }, [reloadFromAutosave]);
+
+  const { lastSavedAt, setLastSavedAt, persistSnapshot } = useZsFormAutosave(
+    buildSnapshot,
+    [
     tab,
     mode,
     basicType,
@@ -1116,7 +1143,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     totalPhmax,
     totalPha,
     totalPhp,
-  ]);
+  ],
+    { persistEnabled: storageHydrated },
+  );
 
   const {
     namedSnapshots,

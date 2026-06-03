@@ -4,11 +4,16 @@ import {
   CALCULATOR_LIMITS_NOTE,
   DASH_IMPORT_HINT,
   DASH_IMPORT_LABEL,
+  DASH_IMPORT_STEPS,
+  DASH_IMPORT_TEMPLATE_LABEL,
+  DASH_IMPORT_UPLOAD_LABEL,
   DASH_OPEN_MODULE_OWN_DATA_BUTTON_SUFFIX,
   DASH_OPEN_MODULE_EXAMPLE_BUTTON_SUFFIX,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { DashboardSchoolImportDialog } from "./DashboardSchoolImportDialog";
+import { dispatchPhmaxImportApplied } from "./phmax-import-applied-event";
+import { downloadPhmaxImportTemplateXlsx } from "./phmax-import-template-xlsx";
 import { FillStatusBadge, dashboardRowFillStatusKind } from "./FillStatusBadge";
 import { APP_VERSION } from "./app-version";
 import {
@@ -629,6 +634,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   const [isEndpoint, setIsEndpoint] = useState(() => readPhmaxIsEndpoint());
   const [exportDisclaimerConfirmed, setExportDisclaimerConfirmed] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importTemplateBusy, setImportTemplateBusy] = useState(false);
   const importTriggerRef = React.useRef<HTMLButtonElement>(null);
 
   const refresh = useCallback(() => {
@@ -694,6 +700,19 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     setImportDialogOpen(true);
   }, []);
 
+  const handleDownloadImportTemplate = useCallback(async () => {
+    if (importTemplateBusy) return;
+    setImportTemplateBusy(true);
+    try {
+      await downloadPhmaxImportTemplateXlsx();
+      publishNotice("Šablona phmax-import-skola-v2.xlsx byla stažena do složky Stažené soubory.");
+    } catch (e) {
+      publishNotice(e instanceof Error ? e.message : "Stažení šablony se nepodařilo.");
+    } finally {
+      setImportTemplateBusy(false);
+    }
+  }, [importTemplateBusy, publishNotice]);
+
   const handleImportApplied = useCallback(
     (payload: ReturnType<typeof buildPhmaxIsHandoffPayload>) => {
       const label = payload.schoolScenario.scenarioLabel?.trim();
@@ -702,8 +721,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         setScenarioLabel(label);
       }
       setRefreshAt(new Date());
+      dispatchPhmaxImportApplied();
       publishNotice(
-        `Import PV+ZŠ uložen. Orientační součet PHmax: ${payload.schoolScenario.summary.totalPhmax ?? "–"} h/týden.`,
+        `Import uložen (PV, ZŠ${payload.schoolScenario.moduleSnapshots.sd ? ", ŠD" : ""}${payload.schoolScenario.moduleSnapshots.ss ? ", SŠ" : ""}). Součet PHmax: ${payload.schoolScenario.summary.totalPhmax ?? "–"} h/týden.`,
       );
     },
     [publishNotice],
@@ -974,19 +994,37 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           aria-labelledby="dash-import-heading"
         >
           <h2 id="dash-import-heading" className="section-title">
-            Import ze školy (PV + ZŠ)
+            Import ze školy
           </h2>
           <p className="muted-text">{DASH_IMPORT_HINT}</p>
-          <div className="dash-card__actions" style={{ marginTop: 12 }}>
+          <ol className="dash-school-import__steps muted-text">
+            {DASH_IMPORT_STEPS.map((step, i) => (
+              <li key={step}>
+                <strong>{i + 1}.</strong> {step}
+              </li>
+            ))}
+          </ol>
+          <div className="dash-card__actions dash-school-import__actions">
+            <button
+              type="button"
+              className="btn primary"
+              data-testid="dash-import-download-template"
+              disabled={importTemplateBusy}
+              aria-busy={importTemplateBusy}
+              title="Krok 1 – prázdná šablona s listy Meta, PV, ZŠ a volitelně ŠD, SŠ"
+              onClick={() => void handleDownloadImportTemplate()}
+            >
+              {importTemplateBusy ? "Připravuji šablonu…" : DASH_IMPORT_TEMPLATE_LABEL}
+            </button>
             <button
               ref={importTriggerRef}
               type="button"
-              className="btn primary"
+              className="btn ghost"
               data-testid="dash-import-open-main"
-              title={DASH_IMPORT_HINT}
+              title="Krok 3 – nahrát vyplněný Excel nebo CSV"
               onClick={openImportDialog}
             >
-              {DASH_IMPORT_LABEL}
+              {DASH_IMPORT_UPLOAD_LABEL}
             </button>
           </div>
         </section>

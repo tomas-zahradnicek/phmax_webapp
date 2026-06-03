@@ -4,12 +4,14 @@ import { ZS_AUTOSAVE_STORAGE_KEY } from "./zs-form-snapshot";
 export function useZsFormAutosave(
   buildSnapshot: () => Record<string, unknown>,
   deps: DependencyList,
+  options?: { persistEnabled?: boolean },
 ): {
   lastSavedAt: string;
   setLastSavedAt: (value: string) => void;
   persistSnapshot: () => void;
 } {
   const [lastSavedAt, setLastSavedAt] = useState("");
+  const persistEnabled = options?.persistEnabled !== false;
 
   const persistSnapshot = useCallback(() => {
     localStorage.setItem(ZS_AUTOSAVE_STORAGE_KEY, JSON.stringify(buildSnapshot()));
@@ -17,6 +19,7 @@ export function useZsFormAutosave(
   }, [buildSnapshot]);
 
   useEffect(() => {
+    if (!persistEnabled) return;
     try {
       persistSnapshot();
     } catch (error) {

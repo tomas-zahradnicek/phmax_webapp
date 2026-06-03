@@ -53,6 +53,7 @@ import {
 import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { createSdScrollToInputs } from "./sd/create-sd-scroll-to-inputs";
+import { PHMAX_IMPORT_APPLIED_EVENT } from "./phmax-import-applied-event";
 import { buildCalculatorNextAction } from "./calculator-next-action";
 import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
 import { CalculatorModuleQuickTour } from "./CalculatorModuleQuickTour";
@@ -769,6 +770,12 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
       setUiNoticeRef.current(`Obnovení uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);
     }
   }, [applySdSnapshot]);
+
+  useEffect(() => {
+    const onImport = () => restoreSdSnapshot();
+    window.addEventListener(PHMAX_IMPORT_APPLIED_EVENT, onImport);
+    return () => window.removeEventListener(PHMAX_IMPORT_APPLIED_EVENT, onImport);
+  }, [restoreSdSnapshot]);
 
   const saveNamedSnapshot = useCallback(() => {
     const name = namedSaveName.trim() || new Date().toLocaleString("cs-CZ");

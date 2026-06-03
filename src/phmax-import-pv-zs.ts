@@ -1,12 +1,20 @@
 import { APP_VERSION } from "./app-version";
 import { buildPhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import type { CrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
+import { normalizeImportRows } from "./phmax-import-columns";
 import { computePvPhmaxTotal } from "./phmax-pv-logic";
 import type { PvProvozKind } from "./phmax-pv-logic";
 import type { SchoolScenarioExportPayload } from "./phmax-school-scenario-export";
+import { computeSdPhmaxTotalFromSnapshot } from "./sd/sd-compute-phmax-total-from-snapshot";
+import { computeSsPhmaxTotalFromSnapshot } from "./ss/ss-compute-phmax-total-from-snapshot";
+import { revivePhmaxSsUnitRow } from "./ss/phmax-ss-types";
+import type { HealthRow, PsychRow } from "./phmax-zs-logic";
 import { computeZsPhmaxTotalFromSnapshot } from "./zs/zs-compute-phmax-total-from-snapshot";
 
 export const PHMAX_IMPORT_PV_ZS_SCHEMA = "phmax-import-pv-zs-v1" as const;
+export const PHMAX_IMPORT_SCHOOL_SCHEMA = "phmax-import-school-v2" as const;
+
+const ACCEPTED_SCHEMA_VERSIONS = new Set<string>([PHMAX_IMPORT_PV_ZS_SCHEMA, PHMAX_IMPORT_SCHOOL_SCHEMA]);
 
 export const IMPORT_META_HEADERS = [
   "school_id",
@@ -61,6 +69,10 @@ export type ImportTablesInput = {
   metaRows: ImportCsvRow[];
   pvRows: ImportCsvRow[];
   zsRows: ImportCsvRow[];
+  sdRows?: ImportCsvRow[];
+  ssRows?: ImportCsvRow[];
+  zsPsychRows?: ImportCsvRow[];
+  zsHealthRows?: ImportCsvRow[];
   appVersion?: string;
 };
 
@@ -70,6 +82,10 @@ export type ImportPreviewSummary = {
   pvRowCount: number;
   pvPhmax: number | null;
   zsPhmax: number | null;
+  sdPhmax: number | null;
+  ssPhmax: number | null;
+  zsPsychRowCount: number;
+  zsHealthRowCount: number;
   totalPhmax: number | null;
 };
 
@@ -173,7 +189,47 @@ function buildPvSnapshot(pvRows: ImportCsvRow[]) {
   return { snapshot, totalPhmax: any ? Math.round((totalPhmax + Number.EPSILON) * 100) / 100 : null };
 }
 
-function buildZsSnapshot(zsRow: ImportCsvRow) {
+const ZS_PSYCH_KINDS = new Set(["psych1", "psych2", "psychMix"]);
+const ZS_HEALTH_KINDS = new Set(["health1", "health2", "healthMix"]);
+
+function buildZsPsychRows(rows: ImportCsvRow[]): PsychRow[] {
+  return rows.map((r, i) => {
+    const kind = r.kind;
+    if (!ZS_PSYCH_KINDS.has(kind)) throw new Error(`Neplatný druh psychologa: ${kind}`);
+    const mode = r.mode === "higher_of_two" ? "higher_of_two" : "current_only";
+    return {
+      id: parseImportNum(r.row_id, "row_id") || i + 1,
+      kind: kind as PsychRow["kind"],
+      mode,
+      currentPupils: parseImportNum(r.current_pupils, "current_pupils"),
+      currentClasses: parseImportNum(r.current_classes, "current_classes"),
+      prevPupils: parseImportNum(r.prev_pupils, "prev_pupils"),
+      prevClasses: parseImportNum(r.prev_classes, "prev_classes"),
+    };
+  });
+}
+
+function buildZsHealthRows(rows: ImportCsvRow[]): HealthRow[] {
+  return rows.map((r, i) => {
+    const kind = r.kind;
+    if (!ZS_HEALTH_KINDS.has(kind)) throw new Error(`Neplatný druh zdravotní třídy: ${kind}`);
+    const mode = r.mode === "higher_of_two" ? "higher_of_two" : "current_only";
+    return {
+      id: parseImportNum(r.row_id, "row_id") || i + 1,
+      kind: kind as HealthRow["kind"],
+      mode,
+      currentPupils: parseImportNum(r.current_pupils, "current_pupils"),
+      currentClasses: parseImportNum(r.current_classes, "current_classes"),
+      prevPupils: parseImportNum(r.prev_pupils, "prev_pupils"),
+      prevClasses: parseImportNum(r.prev_classes, "prev_classes"),
+    };
+  });
+}
+
+function buildZsSnapshot(
+  zsRow: ImportCsvRow,
+  opts?: { psychRows?: PsychRow[]; healthRows?: HealthRow[] },
+) {
   const basicType = zsRow.basic_type;
   if (!ZS_BASIC_TYPES.has(basicType)) throw new Error(`Neplatný basic_type: ${basicType}`);
 
@@ -193,8 +249,8 @@ function buildZsSnapshot(zsRow: ImportCsvRow) {
     prepChildren: parseImportNum(zsRow.prep_children, "prep_children"),
     prepSpecialClasses: 0,
     prepSpecialChildren: 0,
-    psychRows: [],
-    healthRows: [],
+    psychRows: opts?.psychRows ?? [],
+    healthRows: opts?.healthRows ?? [],
     gymRows: [],
     mixedRows: [],
     exportLabel: zsRow.export_label ?? "",
@@ -217,10 +273,27 @@ function buildZsSnapshot(zsRow: ImportCsvRow) {
     phpYear1: 0,
     phpYear2: 0,
     phpYear3: 0,
+    phpWizardStep: "a",
     phpMethodMode: "three_year_avg",
+    phpExcludedAbroad: 0,
+    phpExcludedForeignSchoolCz: 0,
+    phpExcludedIndividual: 0,
+    phpExcludedSchool: false,
     dataMode: "own",
     wizardChoice: "",
-    zsWizardStep: 1,
+    zsWizardStep: 2,
+    nv75Role: "ucitel",
+    nv75School: "plavecka_skola",
+    nv75TeacherMin: 22,
+    nv75TeacherMax: 30,
+    mixedMethodFirstZsPupils: 0,
+    mixedMethodFirstZsClasses: 0,
+    mixedMethodFirstSpecialPupils: 0,
+    mixedMethodFirstSpecialClasses: 0,
+    mixedMethodSecondZsPupils: 0,
+    mixedMethodSecondZsClasses: 0,
+    mixedMethodSecondSpecialPupils: 0,
+    mixedMethodSecondSpecialClasses: 0,
   };
 
   const totalPhmax = computeZsPhmaxTotalFromSnapshot(snapshot);
@@ -230,12 +303,67 @@ function buildZsSnapshot(zsRow: ImportCsvRow) {
   return { snapshot, totalPhmax };
 }
 
-function buildImportSummary(pvPhmax: number | null, zsPhmax: number | null): CrossPhmaxSummary {
+function buildSdSnapshot(sdRow: ImportCsvRow) {
+  const inputMode = sdRow.input_mode === "detail" ? "detail" : "summary";
+  const snapshot: Record<string, unknown> = {
+    pupils: parseImportNum(sdRow.pupils, "pupils"),
+    manualDepts: false,
+    departments: Math.max(1, parseImportNum(sdRow.departments, "departments")),
+    inputMode,
+    summarySpecialDepartments: [],
+    regularExceptionGranted: false,
+    specialExceptionGranted: false,
+    detailDepartments: [{ kind: "regular", participants: 0 }],
+  };
+  const totalPhmax = computeSdPhmaxTotalFromSnapshot(snapshot);
+  if (totalPhmax != null) {
+    snapshot._phmaxAuditTotals = { totalPhmax, tab: "phmax" };
+  }
+  return { snapshot, totalPhmax };
+}
+
+function buildSsSnapshot(ssRows: ImportCsvRow[]) {
+  const rows = ssRows.map((r, i) =>
+    revivePhmaxSsUnitRow(
+      {
+        id: i + 1,
+        label: r.label ?? "",
+        educationField: r.education_field ?? "",
+        studyForm: r.study_form || "denni",
+        classCount: r.class_count ?? "1",
+        averageStudents: r.average_students ?? "",
+        phmaxMode: "",
+        oborCountInClass: "1",
+        additionalOborCodes: "",
+        oborStudentCountsRaw: "",
+        isArt82TalentClass: false,
+        classType: "",
+        isPar16Class: false,
+        isLegacyMultioborClass: false,
+        legacyMaxOborCount: "",
+        note: "",
+      },
+      i + 1,
+    ),
+  );
+  const payload = { rows };
+  const totalPhmax = computeSsPhmaxTotalFromSnapshot(payload);
+  const snapshot: Record<string, unknown> =
+    totalPhmax != null ? { rows, _phmaxAuditTotals: { totalPhmax, tab: "phmax" } } : { rows };
+  return { snapshot, totalPhmax };
+}
+
+function buildImportSummary(modules: {
+  pv: number | null;
+  sd: number | null;
+  zs: number | null;
+  ss: number | null;
+}): CrossPhmaxSummary {
   const slices = [
-    { id: "pv" as const, label: "PV", phmax: pvPhmax, hasData: pvPhmax != null, incomplete: false },
-    { id: "sd" as const, label: "ŠD", phmax: null, hasData: false, incomplete: false },
-    { id: "zs" as const, label: "ZŠ", phmax: zsPhmax, hasData: zsPhmax != null, incomplete: false },
-    { id: "ss" as const, label: "SŠ", phmax: null, hasData: false, incomplete: false },
+    { id: "pv" as const, label: "PV", phmax: modules.pv, hasData: modules.pv != null, incomplete: false },
+    { id: "sd" as const, label: "ŠD", phmax: modules.sd, hasData: modules.sd != null, incomplete: false },
+    { id: "zs" as const, label: "ZŠ", phmax: modules.zs, hasData: modules.zs != null, incomplete: false },
+    { id: "ss" as const, label: "SŠ", phmax: modules.ss, hasData: modules.ss != null, incomplete: false },
   ];
   const withValues = slices.filter((s) => s.hasData && s.phmax != null);
   const totalPhmax =
@@ -251,22 +379,68 @@ function buildImportSummary(pvPhmax: number | null, zsPhmax: number | null): Cro
 }
 
 export function importTablesToHandoffPayload(input: ImportTablesInput) {
-  const { metaRows, pvRows, zsRows } = input;
+  const metaRows = normalizeImportRows(input.metaRows, "meta");
+  const pvRows = normalizeImportRows(input.pvRows, "pv");
+  const zsRows = normalizeImportRows(input.zsRows, "zs");
+  const sdRows = input.sdRows?.length ? normalizeImportRows(input.sdRows, "sd") : undefined;
+  const ssRows = input.ssRows?.length ? normalizeImportRows(input.ssRows, "ss") : undefined;
+  const zsPsychRows = input.zsPsychRows?.length
+    ? normalizeImportRows(input.zsPsychRows, "zsPsych")
+    : undefined;
+  const zsHealthRows = input.zsHealthRows?.length
+    ? normalizeImportRows(input.zsHealthRows, "zsHealth")
+    : undefined;
+
   if (metaRows.length !== 1) throw new Error("List Meta musí mít právě jeden datový řádek.");
   const meta = metaRows[0];
-  if (meta.schema_version !== PHMAX_IMPORT_PV_ZS_SCHEMA) {
-    throw new Error(`Očekáván schema_version ${PHMAX_IMPORT_PV_ZS_SCHEMA}, dostáno: ${meta.schema_version}`);
+  if (!ACCEPTED_SCHEMA_VERSIONS.has(meta.schema_version)) {
+    throw new Error(
+      `Očekáván schema_version ${PHMAX_IMPORT_PV_ZS_SCHEMA} nebo ${PHMAX_IMPORT_SCHOOL_SCHEMA}, dostáno: ${meta.schema_version}`,
+    );
   }
-  if (zsRows.length !== 1) throw new Error("List ZŠ musí mít právě jeden datový řádek.");
+  if (zsRows.length !== 1) throw new Error("List ZŠ souhrn musí mít právě jeden datový řádek.");
   if (pvRows.length < 1) throw new Error("List PV musí mít alespoň jeden řádek pracoviště.");
 
   const keys = { school_id: meta.school_id, scenario_label: meta.scenario_label };
   assertSameBatch(pvRows, keys, "PV");
   assertSameBatch(zsRows, keys, "ZŠ");
+  if (sdRows) assertSameBatch(sdRows, keys, "ŠD");
+  if (ssRows) assertSameBatch(ssRows, keys, "SŠ");
+  if (zsPsychRows) assertSameBatch(zsPsychRows, keys, "ZŠ psycholog");
+  if (zsHealthRows) assertSameBatch(zsHealthRows, keys, "ZŠ zdravotní");
 
   const { snapshot: pvSnapshot, totalPhmax: pvPhmax } = buildPvSnapshot(pvRows);
-  const { snapshot: zsSnapshot, totalPhmax: zsPhmax } = buildZsSnapshot(zsRows[0]);
-  const summary = buildImportSummary(pvPhmax, zsPhmax);
+  const psych = zsPsychRows ? buildZsPsychRows(zsPsychRows) : [];
+  const health = zsHealthRows ? buildZsHealthRows(zsHealthRows) : [];
+  const { snapshot: zsSnapshot, totalPhmax: zsPhmax } = buildZsSnapshot(zsRows[0], {
+    psychRows: psych,
+    healthRows: health,
+  });
+
+  const moduleSnapshots: SchoolScenarioExportPayload["moduleSnapshots"] = {
+    pv: pvSnapshot,
+    zs: zsSnapshot,
+  };
+  let sdPhmax: number | null = null;
+  let ssPhmax: number | null = null;
+
+  if (sdRows?.length === 1) {
+    const sd = buildSdSnapshot(sdRows[0]);
+    moduleSnapshots.sd = sd.snapshot;
+    sdPhmax = sd.totalPhmax;
+  }
+  if (ssRows && ssRows.length > 0) {
+    const ss = buildSsSnapshot(ssRows);
+    moduleSnapshots.ss = ss.snapshot;
+    ssPhmax = ss.totalPhmax;
+  }
+
+  const summary = buildImportSummary({
+    pv: pvPhmax,
+    sd: sdPhmax,
+    zs: zsPhmax,
+    ss: ssPhmax,
+  });
   const scenarioLabel = meta.scenario_label.trim() || "Import ze školy";
 
   const schoolScenario: SchoolScenarioExportPayload = {
@@ -274,10 +448,10 @@ export function importTablesToHandoffPayload(input: ImportTablesInput) {
     appVersion: input.appVersion ?? APP_VERSION,
     exportedAt: new Date().toISOString(),
     disclaimer:
-      "Import ze šablony PV+ZŠ. Orientační – ověřte v aplikaci PHmax před odesláním do IS.",
+      "Import ze šablony školy. Orientační – ověřte v aplikaci PHmax před odesláním do IS.",
     summary,
     attentionModuleLabels: [],
-    moduleSnapshots: { pv: pvSnapshot, zs: zsSnapshot },
+    moduleSnapshots,
     scenarioLabel,
     coherenceWarnings: [],
   };
@@ -289,13 +463,20 @@ export function buildImportPreviewSummary(payload: ReturnType<typeof importTable
   const meta = payload.schoolScenario;
   const pvSlice = meta.summary.slices.find((s) => s.id === "pv");
   const zsSlice = meta.summary.slices.find((s) => s.id === "zs");
-  const pvRows = meta.moduleSnapshots.pv as { rows?: unknown[] } | undefined;
+  const pvSnap = meta.moduleSnapshots.pv as { rows?: unknown[] } | undefined;
+  const zsSnap = meta.moduleSnapshots.zs as { psychRows?: unknown[]; healthRows?: unknown[] } | undefined;
+  const sdSlice = meta.summary.slices.find((s) => s.id === "sd");
+  const ssSlice = meta.summary.slices.find((s) => s.id === "ss");
   return {
     scenarioLabel: meta.scenarioLabel,
     schoolId: "",
-    pvRowCount: Array.isArray(pvRows?.rows) ? pvRows.rows.length : 0,
+    pvRowCount: Array.isArray(pvSnap?.rows) ? pvSnap.rows.length : 0,
     pvPhmax: pvSlice?.phmax ?? null,
     zsPhmax: zsSlice?.phmax ?? null,
+    sdPhmax: sdSlice?.phmax ?? null,
+    ssPhmax: ssSlice?.phmax ?? null,
+    zsPsychRowCount: Array.isArray(zsSnap?.psychRows) ? zsSnap.psychRows.length : 0,
+    zsHealthRowCount: Array.isArray(zsSnap?.healthRows) ? zsSnap.healthRows.length : 0,
     totalPhmax: meta.summary.totalPhmax,
   };
 }
@@ -314,47 +495,3 @@ export function csvTextsToHandoffPayload(input: {
   });
 }
 
-function headerSignalsMeta(headers: string[]): boolean {
-  return headers.includes("schema_version") && headers.includes("school_id");
-}
-
-function headerSignalsPv(headers: string[]): boolean {
-  return headers.includes("provoz") && headers.includes("row_key");
-}
-
-function headerSignalsZs(headers: string[]): boolean {
-  return headers.includes("basic_type") && headers.includes("basic1_classes");
-}
-
-export function classifyImportCsvText(text: string): "meta" | "pv" | "zs" | "unknown" {
-  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lines.length < 2) return "unknown";
-  const headers = splitCsvLine(lines[0]).map((h) => h.trim());
-  if (headerSignalsMeta(headers)) return "meta";
-  if (headerSignalsPv(headers)) return "pv";
-  if (headerSignalsZs(headers)) return "zs";
-  return "unknown";
-}
-
-export function parseImportCsvFileBundle(files: { name: string; text: string }[]) {
-  const tables: Partial<Record<"meta" | "pv" | "zs", ImportCsvRow[]>> = {};
-  for (const file of files) {
-    const kind = classifyImportCsvText(file.text);
-    if (kind === "unknown") {
-      throw new Error(`Soubor ${file.name}: neznámá struktura CSV (očekávány sloupce Meta, PV nebo ZŠ).`);
-    }
-    if (tables[kind]) {
-      throw new Error(`Soubor ${file.name}: duplicitní CSV typu ${kind}. Nahrajte jeden soubor na list.`);
-    }
-    tables[kind] = parseSemicolonCsv(file.text);
-  }
-  if (!tables.meta || !tables.pv || !tables.zs) {
-    const missing = (["meta", "pv", "zs"] as const).filter((k) => !tables[k]);
-    throw new Error(`Chybí CSV soubory: ${missing.join(", ")}. Nahrajte tři soubory nebo jeden Excel (.xlsx).`);
-  }
-  return importTablesToHandoffPayload({
-    metaRows: tables.meta,
-    pvRows: tables.pv,
-    zsRows: tables.zs,
-  });
-}

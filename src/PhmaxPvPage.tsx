@@ -82,6 +82,7 @@ import {
   pvHeroExampleSnapshot,
 } from "./phmax-pv-hero-examples";
 import { computePv1d3Reduction } from "./phmax-pv-1d3-reduction";
+import { PHMAX_IMPORT_APPLIED_EVENT } from "./phmax-import-applied-event";
 import { PvResultsOverviewSection } from "./pv/PvResultsOverviewSection";
 import { PvWorkplacesSummarySection } from "./pv/PvWorkplacesSummarySection";
 import { PvWorkplaceRowsSection } from "./pv/PvWorkplaceRowsSection";
@@ -330,6 +331,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
   useEffect(() => {
     setUiNoticeRef.current = setUiNotice;
   }, [setUiNotice]);
+
+  useEffect(() => {
+    const onImport = () => setRows(loadPvRowsFromStorage());
+    window.addEventListener(PHMAX_IMPORT_APPLIED_EVENT, onImport);
+    return () => window.removeEventListener(PHMAX_IMPORT_APPLIED_EVENT, onImport);
+  }, []);
+
   const selectedPvHeroExampleMeta =
     selectedPvHeroExample && selectedPvHeroExample in PV_HERO_EXAMPLE_META
       ? PV_HERO_EXAMPLE_META[selectedPvHeroExample as Exclude<PvHeroExampleKey, "">]

@@ -1,6 +1,11 @@
 import React, { useCallback, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { DASH_IMPORT_CONFIRM_HINT, DASH_IMPORT_DIALOG_LEAD } from "./calculator-ui-constants";
+import {
+  DASH_IMPORT_CONFIRM_HINT,
+  DASH_IMPORT_DIALOG_LEAD,
+  DASH_IMPORT_TEMPLATE_LABEL,
+  DASH_IMPORT_UPLOAD_LABEL,
+} from "./calculator-ui-constants";
 import { useModalDialogA11y } from "./modal-dialog-a11y";
 import { applyPhmaxIsHandoffToLocalStorage } from "./phmax-is-handoff-apply";
 import type { PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
@@ -121,18 +126,22 @@ export function DashboardSchoolImportDialog({
         </div>
 
         <div className="dash-import-dialog__body">
+          <p className="muted-text" style={{ fontSize: "0.88rem", marginBottom: 10 }}>
+            <strong>Krok 1:</strong> šablona · <strong>Krok 2:</strong> vyplnit v Excelu · <strong>Krok 3:</strong> nahrát
+            soubor níže
+          </p>
           <div className="dash-import-dialog__actions">
             <button
               type="button"
               className="btn primary"
-              data-testid="dash-import-download-template"
+              data-testid="dash-import-download-template-dialog"
               disabled={templateBusy}
               onClick={() => void handleDownloadTemplate()}
             >
-              {templateBusy ? "Připravuji šablonu…" : "Stáhnout šablonu Excel (.xlsx)"}
+              {templateBusy ? "Připravuji šablonu…" : DASH_IMPORT_TEMPLATE_LABEL}
             </button>
             <label className="btn ghost" style={{ cursor: "pointer" }}>
-              {busy ? "Načítám soubor…" : "Vybrat soubor…"}
+              {busy ? "Načítám soubor…" : DASH_IMPORT_UPLOAD_LABEL}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -146,8 +155,8 @@ export function DashboardSchoolImportDialog({
             </label>
           </div>
           <p className="muted-text" style={{ marginTop: 8, fontSize: "0.88rem" }}>
-            Doporučeno: jeden soubor <code className="methodology-strip__code">phmax-import-pv-zs-v1.xlsx</code> se
-            listy Meta, PV a ZŠ. Alternativa: tři CSV se středníkem (stejné sloupce jako v šabloně).
+            Doporučeno: jeden soubor <code className="methodology-strip__code">phmax-import-skola-v2.xlsx</code> (české
+            názvy sloupců). Povinné listy Meta, PV, ZŠ souhrn; volitelně ŠD, SŠ, ZŠ psycholog / zdravotní.
           </p>
 
           {error ? (
@@ -171,9 +180,25 @@ export function DashboardSchoolImportDialog({
                 </li>
                 <li>
                   ZŠ souhrn: PHmax <strong>{summary.zsPhmax ?? "–"}</strong>
+                  {(summary.zsPsychRowCount > 0 || summary.zsHealthRowCount > 0) && (
+                    <>
+                      {" "}
+                      (psycholog {summary.zsPsychRowCount}, zdravotní {summary.zsHealthRowCount})
+                    </>
+                  )}
                 </li>
+                {summary.sdPhmax != null ? (
+                  <li>
+                    ŠD: PHmax <strong>{summary.sdPhmax}</strong>
+                  </li>
+                ) : null}
+                {summary.ssPhmax != null ? (
+                  <li>
+                    SŠ: PHmax <strong>{summary.ssPhmax}</strong>
+                  </li>
+                ) : null}
                 <li>
-                  Orientační součet PV+ZŠ: <strong>{summary.totalPhmax ?? "–"}</strong> h/týden
+                  Orientační součet: <strong>{summary.totalPhmax ?? "–"}</strong> h/týden
                 </li>
               </ul>
               <label className="field" style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 8 }}>
@@ -193,7 +218,7 @@ export function DashboardSchoolImportDialog({
                   disabled={!confirmed}
                   onClick={handleApply}
                 >
-                  Načíst do kalkulaček PV a ZŠ
+                  Načíst do kalkulaček
                 </button>
                 <button type="button" className="btn ghost" onClick={resetPreview}>
                   Zvolit jiný soubor
