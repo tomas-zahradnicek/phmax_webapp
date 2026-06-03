@@ -17,6 +17,7 @@ Orientační plán většího scope mimo patch release. Neblokuje běžné UX vy
 | **Hotovo (0.3.11+)** | SŠ `_phmaxAuditTotals` v autosave; handout 0.3.11; E2E cross-PHmax JSON download. |
 | **Hotovo (0.3.12)** | Dashboard Σ: nevyplněno vs. PHmax=0; proklik koherence; připomínka mazání po exportu; ZŠ PHA/PHP 3krokový průvodce; nápovědy + globální hustota/fokus. |
 | **Hotovo (0.3.13)** | Vlna A–C: akční řádek „co teď“, badge stavu, role na dashboardu, export mini-wizard, tisk kontroly, ZŠ mapa záložek, první návštěva tooltipu, expert banner, quick tour PV/ŠD/SŠ/NV75, import placeholder 0.4.0. |
+| **Hotovo (0.3.14)** | Popisky PHmax bez uppercase; dashboard hint záloh ZŠ + IT krok exportu; ZŠ quick tour; handout „Kde zadat co“. |
 | **Další** | Napojení IS u dodavatele; sjednocení přepočtu ZŠ s `useZsPageDerivedState`. |
 | **Blokováno → 0.4.0** | CSV/import podle šablony zřizovatele nebo IS – čeká na schválený formát (viz §2). |
 

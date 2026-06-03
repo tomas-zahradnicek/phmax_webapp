@@ -19,7 +19,7 @@ type ZsSetupSectionProps = {
 
 export function ZsSetupSection({ mode, modeOptions, onModeChange, SectionLead }: ZsSetupSectionProps) {
   return (
-    <section className="card card--elevated section-card section-card--setup" data-section="setup" data-wizard-step="1">
+    <section id="zs-setup" className="card card--elevated section-card section-card--setup" data-section="setup" data-wizard-step="1">
       <h2 className="section-title">Typ školy a režim výpočtu</h2>
       <SectionLead>
         Tady vyberete, jaký typ výpočtu chcete zobrazit. Rozcestník výše vám může s výběrem pomoci.

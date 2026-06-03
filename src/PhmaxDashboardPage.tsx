@@ -903,8 +903,13 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   Otevřít ZŠ – vlastní data
                 </button>
                 {zsNamedBackupCount > 0 ? (
-                  <button type="button" className="btn ghost" onClick={() => setProductView("zs")}>
-                    Porovnat pojmenované zálohy v ZŠ
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    data-testid="dash-open-zs-compare"
+                    onClick={() => setProductView("zs")}
+                  >
+                    Porovnat pojmenované zálohy ({zsNamedBackupCount}) v ZŠ
                   </button>
                 ) : null}
               </div>
@@ -1098,8 +1103,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   <strong>Krok 1:</strong> Stáhněte JSON (součet, scénář nebo handoff) – orientační, neoficiální.
                 </p>
                 <p className="dash-export-wizard__step">
-                  <strong>Krok 2:</strong> IT – předejte soubor + verzi aplikace ({APP_VERSION}) a případná varování
-                  koherence níže.
+                  <strong>Krok 2 – IT:</strong> předejte soubor, verzi aplikace ({APP_VERSION}), název scénáře a pole{" "}
+                  <code className="methodology-strip__code">coherenceWarnings</code> (pokud není prázdné). Dokumentace:{" "}
+                  <code className="methodology-strip__code">docs/phmax-is-integration.md</code>.
                 </p>
                 <p className="dash-export-wizard__step">
                   <strong>Krok 3:</strong> Na sdíleném PC po exportu zvažte smazání lokálních dat (nabídne aplikace).
@@ -1185,6 +1191,26 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 </article>
               ))}
             </div>
+          </section>
+        ) : null}
+
+        {zsNamedBackupCount > 0 ? (
+          <section className="card section-card dash-compare-hint" aria-labelledby="dash-compare-heading">
+            <h2 id="dash-compare-heading" className="section-title">
+              Porovnání scénářů (ZŠ)
+            </h2>
+            <p className="muted-text" style={{ marginBottom: 10 }}>
+              V prohlížeči máte <strong>{zsNamedBackupCount}</strong> pojmenovaných záloh ZŠ. V modulu ZŠ otevřete panel{" "}
+              <strong>Akce</strong> → porovnání se zálohou nebo export audit JSON.
+            </p>
+            <button
+              type="button"
+              className="btn primary"
+              data-testid="dash-compare-zs-primary"
+              onClick={() => setProductView("zs")}
+            >
+              Otevřít ZŠ – pojmenované zálohy
+            </button>
           </section>
         ) : null}
 
@@ -1299,6 +1325,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             {rows.map((row) => (
               <article key={row.id} className="dash-card">
                 <h3 className="dash-card__title">{row.title}</h3>
+                <FillStatusBadge
+                  kind={dashboardRowFillStatusKind(row.hasData, row.verdict?.tone)}
+                  label={row.status}
+                  className="dash-card__fill-badge"
+                />
                 {row.verdict ? (
                   <p className={`dash-card__verdict dash-card__verdict--${row.verdict.tone}`}>{row.status}</p>
                 ) : (

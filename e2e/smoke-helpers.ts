@@ -38,3 +38,25 @@ export async function confirmDashboardExportDisclaimer(page: Page): Promise<void
   await expect(checkbox).toBeVisible();
   await checkbox.check();
 }
+
+const ZS_NAMED_SNAPSHOTS_LS_KEY = "edu-cz-zs-named-snapshots-v1";
+
+/** Jedna pojmenovaná záloha ZŠ – zobrazí hint porovnání na dashboardu. */
+export async function seedZsNamedSnapshot(page: Page): Promise<void> {
+  const payload = JSON.stringify({
+    items: [
+      {
+        id: "e2e-zs-named-1",
+        name: "E2E záloha",
+        savedAt: "2026-01-01T12:00:00.000Z",
+        snapshot: {},
+      },
+    ],
+  });
+  await page.addInitScript(
+    ({ key, json }) => {
+      localStorage.setItem(key, json);
+    },
+    { key: ZS_NAMED_SNAPSHOTS_LS_KEY, json: payload },
+  );
+}

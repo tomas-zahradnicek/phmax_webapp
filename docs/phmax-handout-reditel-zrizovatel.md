@@ -1,6 +1,6 @@
 # PHmax webapp – orientační kalkulačka pro školu
 
-**Verze 0.3.13** · jednostránkový přehled pro ředitele a zřizovatele  
+**Verze 0.3.14** · jednostránkový přehled pro ředitele a zřizovatele  
 *Dokument je informativní; nejedná se o závazný výkaz ani právní posudek.*
 
 ---
@@ -28,11 +28,26 @@ Webová aplikace v prohlížeči pomáhá **spočítat a zkontrolovat orientačn
 
 ---
 
-## Co je hotové k běžnému použití (v0.3.13)
+## Kde zadat co (časté dotazy)
+
+| Potřeba | Modul | Kde v aplikaci |
+|--------|--------|----------------|
+| Mateřská škola (MŠ), pracoviště | **PV** | Řádky pracovišť, provoz (polodenní/celodenní…) |
+| Přípravná třída **u ZŠ** (PHmax/PHAmax) | **ZŠ** | Záložka PHmax → režim *„přípravné třídy, přípravný stupeň, § 38 a § 41“* → počet tříd a dětí |
+| ZŠ běžné třídy, gymnázium, § 16/9… | **ZŠ** | Režim podle typu školy v rozbalovači „Typ školy a režim“ |
+| Školní družina | **ŠD** | Vstupy oddělení / souhrn |
+| Střední škola | **SŠ** | Evidence jednotek (tříd) |
+| Banka odpočtů **zástupce** (hodiny, ne PHmax) | **NV75** | Řádky *druhu školy/zařízení* z přílohy NV 75 (např. ZŠ příl. 2) – **ne** role „učitel přípravné třídy“ v UI |
+
+Přípravná třída ZŠ **není** stejné zadání jako MŠ v modulu PV.
+
+---
+
+## Co je hotové k běžnému použití (v0.3.14)
 
 | Oblast | Stav | Poznámka pro vedení školy |
 |--------|------|---------------------------|
-| Výpočty v modulech PV, ZŠ, ŠD, SŠ, NV75 | **Ano** | průvodce, řádek „co teď“, quick tour (PV/ŠD/SŠ/NV75), mobilní souhrn |
+| Výpočty v modulech PV, ZŠ, ŠD, SŠ, NV75 | **Ano** | průvodce, řádek „co teď“, quick tour (vč. ZŠ), mobilní souhrn |
 | **ZŠ** mapa PHmax / PHAmax / PHPmax | **Ano** | orientace v docku (checkmarky) |
 | **PV** § 1d krácení | **Orientačně** | v exportu CSV/XLSX; závazně až po KÚ |
 | **Dashboard** – součet PHmax (PV+ŠD+ZŠ+SŠ) | **Ano** | role vstup, export mini-wizard, tisk kontroly, badge stavu modulů |
@@ -68,4 +83,4 @@ Všechny exporty obsahují **verzi aplikace a datum** a jsou označeny jako **or
 
 **Technická podpora / další dokumentace:** repozitář projektu – `docs/acceptance-pv-zs-nv75.md`, `docs/ss-acceptance-checklist.md`, `CHANGELOG.md`.
 
-*PHmax webapp 0.3.13 · orientační kalkulačka · neoficiální výstup*
+*PHmax webapp 0.3.14 · orientační kalkulačka · neoficiální výstup*

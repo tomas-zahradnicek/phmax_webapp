@@ -37,4 +37,18 @@ describe("UX wave A/B/C contract", () => {
     expect(readSource("src/CalculatorHeroDisplayControls.tsx")).toContain("CalculatorExpertModeNotice");
     expect(readSource("src/calculator-ui-constants.ts")).toContain("Expertní: až když znáte metodiku");
   });
+
+  it("PHmax metric labels are not forced to uppercase in CSS", () => {
+    const css = readSource("src/styles.css");
+    for (const sel of [
+      ".result-anchor-card__primary-label",
+      ".hero-expert-strip__kpi-label",
+      ".calculator-sticky-context__label",
+    ]) {
+      const block = css.slice(css.indexOf(sel));
+      const end = block.indexOf("\n.", sel.length + 2);
+      const chunk = end > 0 ? block.slice(0, end) : block.slice(0, 400);
+      expect(chunk, sel).not.toMatch(/text-transform:\s*uppercase/);
+    }
+  });
 });

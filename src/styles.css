@@ -8080,8 +8080,7 @@ select:focus {
   font-size: 0.74rem;
   font-weight: 600;
   color: var(--muted-strong);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
 .result-anchor-card__status {
@@ -9044,8 +9043,7 @@ select:focus {
   margin: 0;
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: rgba(255, 255, 255, 0.78);
 }
 
@@ -9236,8 +9234,7 @@ select:focus {
 .calculator-sticky-context__label {
   font-size: 0.72rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   opacity: 0.9;
 }
 
@@ -9578,6 +9575,15 @@ select:focus {
 
 .dash-kpi-tile__fill-badge {
   margin-bottom: 4px;
+}
+
+.dash-card__fill-badge {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.dash-compare-hint {
+  margin-bottom: 14px;
 }
 
 .calculator-quick-tour-highlight {

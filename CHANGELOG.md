@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.14 (2026-06-03)
+
+### UX po 0.3.13
+- Popisky metrik **PHmax** bez `text-transform: uppercase` (PV, ŠD, ZŠ, SŠ) – zobrazuje se „PHmax celkem“, ne „PHMAX CELKEM“.
+- Dashboard: hint porovnání pojmenovaných záloh ZŠ, krok 2 export wizardu pro IT, badge stavu na kartách modulů.
+- ZŠ: quick tour v základním režimu; handout – sekce „Kde zadat co“ (MŠ/PV vs přípravná třída ZŠ).
+
+### Kvalita
+- E2E `dashboard-ux-013`, `metric-label-casing` (projekt desktop-chrome).
+- Golden 176/176 včetně kontraktu CSS popisků PHmax.
+
 ## 0.3.13 (2026-05-28)
 
 ### UX vlna A–C

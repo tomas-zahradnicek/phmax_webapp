@@ -22,6 +22,7 @@ import {
   PV_QUICK_TOUR_LS_KEY,
   SD_QUICK_TOUR_LS_KEY,
   SS_QUICK_TOUR_LS_KEY,
+  ZS_QUICK_TOUR_LS_KEY,
 } from "./phmax-module-quick-tour";
 import { PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY } from "./phmax-school-scenario-export";
 
@@ -62,6 +63,7 @@ export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
   SD_QUICK_TOUR_LS_KEY,
   SS_QUICK_TOUR_LS_KEY,
   NV75_QUICK_TOUR_LS_KEY,
+  ZS_QUICK_TOUR_LS_KEY,
   PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
 ];
 

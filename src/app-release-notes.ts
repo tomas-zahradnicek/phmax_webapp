@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Všechny moduly: řádek „co teď“ s CTA (export / přejít k chybě); quick tour při prvním spuštění (PV, ŠD, SŠ, NV75).",
-    "Dashboard: vstup podle role (ředitel / metodik / IT), export mini-wizard, tisk kontroly před jednáním, badge stavu modulů.",
-    "ZŠ: mapa PHmax → PHAmax → PHPmax v docku; expertní režim – jednorázová nápověda k ukázkám. Import IS stále 0.4.0.",
+    "Popisky metrik zobrazují PHmax správně (ne PHMAX) ve všech modulech – dock, hero i mobilní souhrn.",
+    "Dashboard: porovnání pojmenovaných záloh ZŠ, krok exportu pro IT; ZŠ quick tour v základním režimu.",
+    "Handout ředitele: sekce „Kde zadat co“ (MŠ v PV vs přípravná třída v ZŠ). Import IS stále 0.4.0.",
   ],
 };

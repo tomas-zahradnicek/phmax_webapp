@@ -53,7 +53,9 @@ import { buildCalculatorNextAction } from "./calculator-next-action";
 import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
 import { focusCalculatorElementById } from "./calculator-focus-element";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
+import { CalculatorModuleQuickTour } from "./CalculatorModuleQuickTour";
 import { ZS_PHA_HERO_EXAMPLE_SELECT_ID } from "./zs/zs-pha-basic-wizard";
+import { ZS_QUICK_TOUR_LS_KEY, ZS_QUICK_TOUR_STEPS } from "./phmax-module-quick-tour";
 import {
 } from "./zs/zs-form-validation";
 import {
@@ -1869,6 +1871,14 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           />
         ) : null}
 
+        {viewMode === "basic" ? (
+          <CalculatorModuleQuickTour
+            moduleLabel="ZŠ"
+            storageKey={ZS_QUICK_TOUR_LS_KEY}
+            steps={ZS_QUICK_TOUR_STEPS}
+            exampleSelectId={ZS_PHA_HERO_EXAMPLE_SELECT_ID}
+          />
+        ) : null}
         <CalculatorNextActionStrip action={zsNextAction} />
 
         <ZsCalculatorShell
