@@ -11,7 +11,8 @@ import {
   type PhaRow,
   type PsychRow,
 } from "../phmax-zs-logic";
-import type { CalculatorMode } from "../config/calculator-config";
+import { MODE_CONFIG, type CalculatorMode } from "../config/calculator-config";
+import { DEFAULT_MODE } from "../config/default-form-state";
 import type { ZsHeroExampleKey } from "../zs-hero-example-groups";
 import { clampZsBasicWizardStep } from "../zs-basic-wizard";
 
@@ -134,6 +135,11 @@ export function sanitizePhaRows(raw: unknown): PhaRow[] {
   return out;
 }
 
+export function sanitizeCalculatorMode(raw: unknown): CalculatorMode {
+  if (typeof raw === "string" && raw in MODE_CONFIG) return raw as CalculatorMode;
+  return DEFAULT_MODE;
+}
+
 export function parseZsWizardStep(raw: unknown): 1 | 2 | 3 | 4 | 5 | undefined {
   if (typeof raw === "number" && Number.isFinite(raw)) return clampZsBasicWizardStep(raw);
   if (typeof raw === "string" && raw.trim() !== "") {
@@ -164,7 +170,7 @@ export function sanitizeZsAutosaveSnapshot(raw: Record<string, unknown>): Record
   return {
     ...raw,
     tab,
-    mode: (raw.mode === "full" ? "full" : "basic") as CalculatorMode,
+    mode: sanitizeCalculatorMode(raw.mode),
     basicType: basicType as BasicType,
     basic1Classes: num(raw.basic1Classes),
     basic1Pupils: num(raw.basic1Pupils),

@@ -268,7 +268,9 @@ export type PhmaxZsPageProps = {
 export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const initialAutosave = peekSanitizedZsAutosaveFromStorage();
   const [tab, setTab] = useState<TabKey>("phmax");
-  const [mode, setMode] = useState<CalculatorMode>(getZsInitialPreferredMode());
+  const [mode, setMode] = useState<CalculatorMode>(
+    () => (initialAutosave?.mode as CalculatorMode) ?? getZsInitialPreferredMode(),
+  );
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
   const [focusMode, setFocusMode] = useCalculatorFocusMode();
   const heroHeaderRef = useRef<HTMLElement>(null);

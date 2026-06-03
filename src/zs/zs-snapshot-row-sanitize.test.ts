@@ -1,12 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { B11_B13, B14_B16, pickBand } from "../phmax-zs-logic";
+import { DEFAULT_MODE } from "../config/default-form-state";
 import {
+  sanitizeCalculatorMode,
   sanitizeHealthRows,
   sanitizePsychRows,
   sanitizeZsAutosaveSnapshot,
 } from "./zs-snapshot-row-sanitize";
 
 describe("zs-snapshot-row-sanitize", () => {
+  it("sanitizeCalculatorMode odmítne legacy full/basic", () => {
+    expect(sanitizeCalculatorMode("full")).toBe(DEFAULT_MODE);
+    expect(sanitizeCalculatorMode("basic")).toBe(DEFAULT_MODE);
+    expect(sanitizeCalculatorMode("phmax_full_zs")).toBe("phmax_full_zs");
+  });
+
+  it("sanitizeZsAutosaveSnapshot nepřepíše mode na basic", () => {
+    const safe = sanitizeZsAutosaveSnapshot({ mode: "phmax_psychiatric" });
+    expect(safe.mode).toBe("phmax_psychiatric");
+  });
+
   it("odfiltruje neplatný kind psychologa", () => {
     expect(
       sanitizePsychRows([{ kind: "bad", currentClasses: 1, currentPupils: 10 }]),
