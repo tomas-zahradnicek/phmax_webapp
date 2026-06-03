@@ -97,6 +97,7 @@ import {
 import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsWarnings } from "./zs/zs-warnings";
 import { buildZsBandUpgradeHints } from "./zs/zs-band-sensitivity";
+import { buildZsPhaBandUpgradeHints, buildZsPhpBandUpgradeHints } from "./zs/zs-pha-php-band-sensitivity";
 import { ZsCalculatorShell } from "./zs/ZsCalculatorShell";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
@@ -870,36 +871,13 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     ],
   );
 
-  const bandUpgradeHints = useMemo(
-    () =>
-      buildZsBandUpgradeHints({
-        tab,
-        basicType,
-        basic1Classes,
-        basic1Pupils,
-        basic2Classes,
-        basic2Pupils,
-        incl1Classes,
-        incl1Pupils,
-        incl2Classes,
-        incl2Pupils,
-        psychRows,
-        healthRows,
-        minorityType,
-        minority1Classes,
-        minority1Pupils,
-        minority2Classes,
-        minority2Pupils,
-        gymRows,
-        special1Classes,
-        special1Pupils,
-        special2Classes,
-        special2Pupils,
-        specialIIClasses,
-        specialIIPupils,
-      }),
-    [
-      tab,
+  const bandUpgradeHints = useMemo(() => {
+    if (tab === "pha") return buildZsPhaBandUpgradeHints(phaRows);
+    if (tab === "php") {
+      return buildZsPhpBandUpgradeHints({ phpExcludedSchool, phpAdjustedValue });
+    }
+    return buildZsBandUpgradeHints({
+      tab: "phmax",
       basicType,
       basic1Classes,
       basic1Pupils,
@@ -923,8 +901,36 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       special2Pupils,
       specialIIClasses,
       specialIIPupils,
-    ],
-  );
+    });
+  }, [
+    tab,
+    phaRows,
+    phpExcludedSchool,
+    phpAdjustedValue,
+    basicType,
+    basic1Classes,
+    basic1Pupils,
+    basic2Classes,
+    basic2Pupils,
+    incl1Classes,
+    incl1Pupils,
+    incl2Classes,
+    incl2Pupils,
+    psychRows,
+    healthRows,
+    minorityType,
+    minority1Classes,
+    minority1Pupils,
+    minority2Classes,
+    minority2Pupils,
+    gymRows,
+    special1Classes,
+    special1Pupils,
+    special2Classes,
+    special2Pupils,
+    specialIIClasses,
+    specialIIPupils,
+  ]);
 
   const { add: addPha, update: updatePha, remove: removePha } = createZsRowHandlers(setPhaRows, createEmptyPhaRow);
   const { add: addPsych, update: updatePsych, remove: removePsych } = createZsRowHandlers(setPsychRows, createEmptyPsychRow);

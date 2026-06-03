@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { B13_MORE_THAN_2 } from "./phmax-zs-logic";
 import {
   buildBandUpgradeHint,
+  buildScalarBandUpgradeHint,
   findMinAvgForHigherBand,
   formatBandUpgradeHint,
 } from "./phmax-band-sensitivity";
+import { PHP_TABLE } from "./phmax-zs-logic";
 
 describe("phmax-band-sensitivity", () => {
   it("findMinAvgForHigherBand najde prah pro vyšší pásmo", () => {
@@ -22,5 +24,11 @@ describe("phmax-band-sensitivity", () => {
   it("vrátí null na nejvyšším pásmu", () => {
     const hint = buildBandUpgradeHint("test", 5, 500, B13_MORE_THAN_2.first);
     expect(hint).toBeNull();
+  });
+
+  it("buildScalarBandUpgradeHint pro PHP tabulku", () => {
+    const msg = buildScalarBandUpgradeHint("PHPmax", 250, PHP_TABLE);
+    expect(msg).toContain("PHPmax");
+    expect(msg).toContain("h./týd.");
   });
 });

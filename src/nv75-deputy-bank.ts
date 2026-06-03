@@ -263,9 +263,13 @@ function reductionFromTable(table: ReductionTable, units: number): ReductionMatc
   return { hours: 0, bandLabel: "mimo pásmo" };
 }
 
-function reductionByKind(kind: Nv75DeputyKind, unitsIn: number): ReductionMatch {
+export function getNv75ReductionForUnits(kind: Nv75DeputyKind, unitsIn: number): ReductionMatch {
   const units = clampInt(unitsIn);
   return reductionFromTable(NV75_REDUCTION_TABLES[kind], units);
+}
+
+function reductionByKind(kind: Nv75DeputyKind, unitsIn: number): ReductionMatch {
+  return getNv75ReductionForUnits(kind, unitsIn);
 }
 
 function bonus4dByKind(kind: Nv75DeputyKind, additionalEligibleIn: number) {

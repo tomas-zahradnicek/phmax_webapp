@@ -57,6 +57,7 @@ import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { NV75_DEPUTY_LEGIS_TOOLTIPS } from "./nv75-deputy-legislativa";
 import { calculateNv75DeputyBank, type Nv75DeputyKind } from "./nv75-deputy-bank";
+import { buildNv75UnitsUpgradeHints } from "./nv75-units-sensitivity";
 
 type PhmaxNv75DeputyPageProps = {
   productView: ProductView;
@@ -664,6 +665,17 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       }),
     [calculationRows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor],
   );
+  const nv75BandUpgradeHints = useMemo(
+    () =>
+      buildNv75UnitsUpgradeHints(
+        rows.map((row) => ({
+          kind: row.kind,
+          units: row.units,
+          label: NV75_KIND_LABEL[row.kind],
+        })),
+      ),
+    [rows],
+  );
   const hasPracticalContext = useMemo(() => rows.some((r) => r.kind === "ss_konz" || r.kind === "vos"), [rows]);
   const nv75InputWarnings = useMemo(() => {
     const messages: string[] = [];
@@ -1122,6 +1134,13 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
 
         {nv75NeedsInputBanner ? (
           <CalculatorInputIssueBanner {...calculatorInputIssueBannerFromVerdict(nv75Verdict, nv75ScrollToInputs)} />
+        ) : null}
+
+        {!nv75NeedsInputBanner && nv75BandUpgradeHints.length > 0 ? (
+          <CalculatorInputIssueBanner
+            label="Orientace k vyššímu pásmu §4b (NV75)"
+            items={nv75BandUpgradeHints.map((label) => ({ label }))}
+          />
         ) : null}
 
         {nv75BasicWizardActive ? (

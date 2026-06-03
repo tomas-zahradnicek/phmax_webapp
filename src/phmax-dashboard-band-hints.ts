@@ -1,11 +1,14 @@
 import { getSdDepartmentRangeFromPupils } from "./phmax-sd-narrative";
 import { buildPvDurationUpgradeHint } from "./phmax-pv-band-sensitivity";
 import { computePvPhmaxTotal, type PvProvozKind } from "./phmax-pv-logic";
+import { buildNv75UnitsUpgradeHint } from "./nv75-units-sensitivity";
+import type { Nv75DeputyKind } from "./nv75-deputy-bank";
 import { buildZsBandUpgradeHintsFromSnapshot } from "./zs/zs-band-sensitivity";
 
 const LS_PV = "edu-cz-pv-calculator-state";
 const LS_SD = "edu-cz-sd-calculator-state";
 const LS_ZS = "edu-cz-zs-calculator-state";
+const LS_NV75 = "edu-cz-nv75-deputy-bank-state";
 
 function safeJsonParse(raw: string | null): unknown {
   if (!raw) return null;
@@ -82,12 +85,32 @@ function buildSdHintsFromLs(): string[] {
   return [];
 }
 
+function buildNv75HintsFromLs(maxPerModule: number): string[] {
+  const data = readLs(LS_NV75);
+  if (!data || typeof data !== "object") return [];
+  const rowsRaw = (data as { rows?: unknown }).rows;
+  if (!Array.isArray(rowsRaw)) return [];
+  const out: string[] = [];
+  for (const item of rowsRaw) {
+    if (!item || typeof item !== "object") continue;
+    const r = item as Record<string, unknown>;
+    const kind = r.kind as Nv75DeputyKind;
+    const units = typeof r.units === "number" ? r.units : 0;
+    if (!kind || units <= 0) continue;
+    const hint = buildNv75UnitsUpgradeHint(kind, units, `NV75 (${kind})`);
+    if (hint) out.push(hint);
+    if (out.length >= maxPerModule) break;
+  }
+  return out;
+}
+
 /** Souhrnné nápovědy z autosave pro dashboard (orientační, ne závazný výpočet). */
 export function buildDashboardBandHints(maxTotal = 8): string[] {
   const out: string[] = [
-    ...buildZsBandUpgradeHintsFromSnapshot(readLs(LS_ZS), 4),
-    ...buildPvHintsFromLs(3),
+    ...buildZsBandUpgradeHintsFromSnapshot(readLs(LS_ZS), 3),
+    ...buildPvHintsFromLs(2),
     ...buildSdHintsFromLs(),
+    ...buildNv75HintsFromLs(2),
   ];
   return out.slice(0, maxTotal);
 }

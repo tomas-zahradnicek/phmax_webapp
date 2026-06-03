@@ -14,7 +14,8 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 ## Verze 0.3.15 (UX)
 
 - **Po 0.3.14:** IT checklist exportu na dashboardu; kontrakt ZŠ přepočet vs audit; smoke checklist `docs/smoke-checklist-post-0.3.14.md`.
-- **Kvalita:** golden + kontrakty audit/E2E.
+- **Import / tisk / nápovědy pásem:** blob tisk, šablona ŠD „Počet účastníků“, orientační hinty PHmax/PHAmax/PHPmax/PV/NV75; po deployi `docs/post-deploy-checklist.md`.
+- **Kvalita:** golden + kontrakty audit/E2E; `phmax-import-roundtrip.test.ts`.
 
 ## Verze 0.3.14 (UX)
 
