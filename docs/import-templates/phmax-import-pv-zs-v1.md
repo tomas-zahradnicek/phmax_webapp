@@ -109,10 +109,40 @@ Jeden řádek = jedna škola (ne více řádků tříd). Vhodné pro první napo
 
 ---
 
+## Transformační skript (ukázka)
+
+Z repozitáře (vyžaduje síť pro jednorázové stažení `tsx`):
+
+```bash
+npm run import:csv-handoff
+```
+
+Výchozí vstupy: `phmax-import-*-v1.example.csv` v této složce.  
+Výstup: `phmax-is-handoff.generated.json` (`phmax-is-handoff-v1`).
+
+Vlastní cesty:
+
+```bash
+npx --yes tsx scripts/csv-to-phmax-handoff.ts --meta ./meta.csv --pv ./pv.csv --zs ./zs.csv --out ./handoff.json
+```
+
+**Použití v prohlížeči (ručně):** JSON nejde přímo „nahrát“ tlačítkem Import (0.4.0). IT použije helper:
+
+1. Vygenerovat handoff: `npm run import:csv-handoff`
+2. Vytisknout skript pro konzoli (na stejném originu jako běžící PHmax):
+
+```bash
+npm run import:handoff-apply-snippet
+```
+
+3. V DevTools → Console vložit výstup a Enter (zapíše autosave PV/ZŠ, název scénáře, wizard krok „Vstupy“, volitelně `location.reload()`).
+
+Programaticky: `applyPhmaxIsHandoffToLocalStorage(payload)` v `src/phmax-is-handoff-apply.ts` (např. budoucí import UI).
+
 ## Kontrola po transformaci
 
-1. Načíst JSON v testovacím skriptu → `moduleSnapshots` jako u handoffu.  
-2. Otevřít PV a ZŠ v aplikaci – ověřit přepočet PHmax.  
+1. Spustit `npm run import:csv-handoff` – ověřit součty v konzoli.  
+2. Otevřít PV a ZŠ v aplikaci – přepočet PHmax po načtení snapshotů.  
 3. Dashboard Σ – `coherenceWarnings` musí být prázdné po uložení modulů.
 
 ## Odmítnutí / mimo šablonu v1

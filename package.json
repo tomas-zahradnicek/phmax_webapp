@@ -23,7 +23,9 @@
     "docs:concat-md": "node scripts/concat-zdroje-md.mjs",
     "docs:concat-ts": "node scripts/concat-zdroje-ts.mjs",
     "docs:concat-all": "node scripts/concat-zdroje-md.mjs && node scripts/concat-zdroje-ts.mjs",
-    "docs:handout-pdf": "node scripts/generate-handout-pdf.mjs"
+    "docs:handout-pdf": "node scripts/generate-handout-pdf.mjs",
+    "import:csv-handoff": "npx --yes tsx scripts/csv-to-phmax-handoff.ts",
+    "import:handoff-apply-snippet": "npx --yes tsx scripts/print-phmax-handoff-apply-snippet.ts"
   },
   "dependencies": {
     "exceljs": "^4.4.0",

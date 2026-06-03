@@ -1,0 +1,140 @@
+{
+  "schema": "phmax-is-handoff-v1",
+  "appVersion": "0.1.0",
+  "exportedAt": "2026-06-03T16:57:36.622Z",
+  "disclaimer": "Handoff JSON pro import do IS školy – vyžaduje transformační skript podle dokumentace zřizovatele. Neoficiální výstup.",
+  "schoolScenario": {
+    "schema": "phmax-school-scenario-v1",
+    "appVersion": "0.3.15",
+    "exportedAt": "2026-06-03T16:57:36.620Z",
+    "disclaimer": "Vygenerováno skriptem csv-to-phmax-handoff.ts z CSV šablony. Orientační – ověřte v aplikaci PHmax před odesláním do IS.",
+    "summary": {
+      "slices": [
+        {
+          "id": "pv",
+          "label": "PV",
+          "phmax": 266,
+          "hasData": true,
+          "incomplete": false
+        },
+        {
+          "id": "sd",
+          "label": "ŠD",
+          "phmax": null,
+          "hasData": false,
+          "incomplete": false
+        },
+        {
+          "id": "zs",
+          "label": "ZŠ",
+          "phmax": 817,
+          "hasData": true,
+          "incomplete": false
+        },
+        {
+          "id": "ss",
+          "label": "SŠ",
+          "phmax": null,
+          "hasData": false,
+          "incomplete": false
+        }
+      ],
+      "modulesWithPhmax": 2,
+      "totalPhmax": 1083,
+      "hasIncomplete": false
+    },
+    "attentionModuleLabels": [],
+    "moduleSnapshots": {
+      "pv": {
+        "rows": [
+          {
+            "id": "pv-1",
+            "label": "Budova A - MŠ",
+            "provoz": "celodenni",
+            "classCount": 4,
+            "avgHours": 8,
+            "sec16Count": 0,
+            "languageGroups": 0,
+            "pv1dActualChildren": 0,
+            "pv1dMinimumChildren": 0,
+            "pv1dKuPhmaxCap": 0,
+            "pv1dExemption": false,
+            "pv1dKuDecisionRef": ""
+          },
+          {
+            "id": "pv-2",
+            "label": "Školka polodenní",
+            "provoz": "polodenni",
+            "classCount": 2,
+            "avgHours": 5,
+            "sec16Count": 0,
+            "languageGroups": 1,
+            "pv1dActualChildren": 0,
+            "pv1dMinimumChildren": 0,
+            "pv1dKuPhmaxCap": 0,
+            "pv1dExemption": false,
+            "pv1dKuDecisionRef": ""
+          }
+        ],
+        "_phmaxAuditTotals": {
+          "totalPhmax": 266,
+          "tab": "phmax"
+        }
+      },
+      "zs": {
+        "tab": "phmax",
+        "mode": "basic",
+        "basicType": "full_more_than_2",
+        "basic1Classes": 10,
+        "basic1Pupils": 250,
+        "basic2Classes": 8,
+        "basic2Pupils": 225,
+        "incl1Classes": 2,
+        "incl1Pupils": 26,
+        "incl2Classes": 1,
+        "incl2Pupils": 12,
+        "prepClasses": 2,
+        "prepChildren": 40,
+        "prepSpecialClasses": 0,
+        "prepSpecialChildren": 0,
+        "psychRows": [],
+        "healthRows": [],
+        "gymRows": [],
+        "mixedRows": [],
+        "exportLabel": "Import z IS 2026-05",
+        "minorityType": "minorityFull1",
+        "minority1Classes": 0,
+        "minority1Pupils": 0,
+        "minority2Classes": 0,
+        "minority2Pupils": 0,
+        "special1Classes": 0,
+        "special1Pupils": 0,
+        "special2Classes": 0,
+        "special2Pupils": 0,
+        "specialIIClasses": 0,
+        "specialIIPupils": 0,
+        "p38First": 0,
+        "p38Second": 0,
+        "p41First": 0,
+        "p41Second": 0,
+        "phaRows": [],
+        "phpYear1": 0,
+        "phpYear2": 0,
+        "phpYear3": 0,
+        "phpMethodMode": "three_year_avg",
+        "dataMode": "own",
+        "wizardChoice": "",
+        "zsWizardStep": 1,
+        "_phmaxAuditTotals": {
+          "totalPhmax": 817,
+          "totalPha": 0,
+          "totalPhp": 0,
+          "tab": "phmax"
+        }
+      }
+    },
+    "scenarioLabel": "Import z IS 2026-05",
+    "coherenceWarnings": []
+  },
+  "fieldMapVersion": "2026-05"
+}

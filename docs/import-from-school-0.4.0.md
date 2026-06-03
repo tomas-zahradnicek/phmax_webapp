@@ -83,7 +83,9 @@ NV75 se **nezapočítává** do cross-součtu PHmax na dashboardu.
 ## CSV šablona (pilot PV + ZŠ)
 
 Konkrétní sloupce, příklady a mapování na autosave: **[import-templates/phmax-import-pv-zs-v1.md](./import-templates/phmax-import-pv-zs-v1.md)**  
-Soubory: `phmax-import-meta-v1.example.csv`, `phmax-import-pv-v1.example.csv`, `phmax-import-zs-summary-v1.example.csv`.
+Soubory: `phmax-import-meta-v1.example.csv`, `phmax-import-pv-v1.example.csv`, `phmax-import-zs-summary-v1.example.csv`.  
+Skript CSV → handoff JSON: `npm run import:csv-handoff` (viz šablona v1).  
+Zápis do prohlížeče: `npm run import:handoff-apply-snippet` → konzole (`src/phmax-is-handoff-apply.ts`).
 
 ## Doporučený postup pro zřizovatele / IT
 

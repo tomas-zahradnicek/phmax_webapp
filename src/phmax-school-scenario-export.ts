@@ -3,12 +3,14 @@ import type { CrossPhmaxExportPayload } from "./phmax-dashboard-cross-phmax-expo
 import { buildCrossPhmaxExportPayload } from "./phmax-dashboard-cross-phmax-export";
 import type { CrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
 
-const LS_KEYS = {
+export const PHMAX_MODULE_AUTOSAVE_LS_KEYS = {
   pv: "edu-cz-pv-calculator-state",
   sd: "edu-cz-sd-calculator-state",
   zs: "edu-cz-zs-calculator-state",
   ss: "phmax-ss-units-draft",
 } as const;
+
+const LS_KEYS = PHMAX_MODULE_AUTOSAVE_LS_KEYS;
 
 export const PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY = "phmax-school-scenario-label";
 
