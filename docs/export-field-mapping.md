@@ -28,6 +28,10 @@ Orientační dokument (bez API integrace). Slouží jako podklad pro budoucí na
 | PHmax = 0 | Modul vyplněn, výsledek nula – započítat do cross-součtu jako 0 |
 | `coherenceWarnings` | Nesoulad KPI vs. přepočet – ruční oprava před importem |
 
+## Import ze školy (0.4.0 – návrh)
+
+Podrobný seznam polí po modulech (PV, ZŠ, ŠD, SŠ, NV75) a meta scénáře: **[import-from-school-0.4.0.md](./import-from-school-0.4.0.md)**.
+
 ## Co zatím neimplementovat (0.4.0)
 
 - Přímý upload do ISŠ, EduPage, Excel šablony zřizovatele – **až po dodání schválené šablony sloupců**.

@@ -867,15 +867,15 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             <div>
               <h1 className="hero__title">{PRODUCT_CALCULATOR_TITLES.dash}</h1>
               <p className="hero__text">{CALCULATOR_LIMITS_NOTE}</p>
-              <p className="muted-text" style={{ marginTop: 8 }}>
+              <p className="hero__text" style={{ marginTop: 8 }}>
                 Souhrnný přehled (Σ) čte uložený stav z prohlížeče u každého modulu zvlášť. Orientační součet PHmax napříč PV, ŠD, ZŠ a SŠ je níže –{" "}
                 <strong>NV75</strong> (banka odpočtů hodin, ne PHmax) a krácení <strong>PV § 1d</strong> v cross-součtu nejsou.
                 Pro první orientaci můžete v modulu použít combobox <strong>Příkladové výpočty</strong>, nebo rovnou
                 vyplnit vlastní údaje do formuláře – pole nejsou uzamčená, souhrn se přepočítá podle vašich vstupů.
               </p>
-              <p className="muted-text" style={{ marginTop: 8 }}>
+              <p className="hero__text hero__text--url" style={{ marginTop: 8 }}>
                 URL:{" "}
-                <code className="methodology-strip__code">
+                <code className="hero__url-code">
                   {typeof window !== "undefined" ? window.location.origin : ""}?view=dash
                 </code>
               </p>

@@ -256,10 +256,18 @@ button.pill--hero-toggle--active {
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
 }
 
+.hero__pills-row-trailing .calculator-hero-display-controls__actions .btn.btn--hero-help,
+.hero__pills-row-trailing .calculator-hero-display-controls__actions .glossary-icon-btn--hero {
+  min-width: 8.25rem;
+  justify-content: center;
+  padding: 8px 14px !important;
+  font-size: 0.875rem;
+}
+
 .btn.btn--hero-help {
   flex-shrink: 0;
   font-weight: 700;
-  padding: 9px 18px;
+  padding: 8px 14px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.95);
   color: #0f172a;
@@ -289,7 +297,7 @@ button.pill--hero-toggle--active {
 .hero__pills-row .glossary-icon-btn--hero {
   flex-shrink: 0;
   min-height: auto;
-  padding: 9px 18px;
+  padding: 8px 14px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.95);
   color: #0f172a;
@@ -4941,15 +4949,11 @@ input[type="radio"] {
   }
 
   .hero__pills-row .btn.btn--hero-help,
-  .hero__pills-row .btn--hero-guide {
-    width: auto !important;
-    flex: 0 0 auto;
-    min-width: 9rem;
-  }
-
+  .hero__pills-row .btn--hero-guide,
   .hero__pills-row .glossary-icon-btn--hero {
     width: auto !important;
     flex: 0 0 auto;
+    min-width: 8.25rem;
   }
 
   .hero-actions__divider {
@@ -6356,6 +6360,36 @@ select:focus {
   margin-bottom: 8px;
   max-width: 52rem;
   color: #334155;
+}
+
+/* Hero gradient – čitelný text v liště akcí (ne šedá na modrém skle) */
+.hero--feature .hero-zone-actions {
+  background: rgba(15, 23, 42, 0.22);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.hero--feature .hero-zone-actions .own-data-hint--hero,
+.hero--feature .hero-zone-actions .muted-text {
+  color: rgba(255, 255, 255, 0.94) !important;
+}
+
+.hero--feature .hero-zone-actions .own-data-hint--hero strong,
+.hero--feature .hero-zone-actions .muted-text strong {
+  color: #fff;
+}
+
+.hero__text--url {
+  font-size: 0.88rem;
+  opacity: 0.95;
+}
+
+.hero__url-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.86em;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.98);
 }
 
 .own-data-hint--form {
@@ -9423,13 +9457,6 @@ select:focus {
 
 .fill-status-badge--danger .fill-status-badge__icon {
   background: #dc2626;
-}
-
-.calculator-hint-tooltip--coachmark .calculator-hint-tooltip__coachmark-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #1d4ed8;
-  margin-right: 4px;
 }
 
 .calculator-hint-tooltip--coachmark .calculator-hint-tooltip__trigger {

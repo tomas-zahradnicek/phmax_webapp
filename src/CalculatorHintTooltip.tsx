@@ -6,9 +6,8 @@ export type CalculatorHintTooltipProps = {
   label: string;
   text: string;
   className?: string;
-  /** Jednorázový popisek u první návštěvy (localStorage). */
+  /** Jednorázový pulz u ? u první návštěvy (localStorage), bez textového štítku. */
   firstVisitCoachmark?: boolean;
-  firstVisitCoachmarkLabel?: string;
 };
 
 /** Krátké vysvětlení u kompaktních přepínačů v hero – hover/focus, na mobilu klepnutí. */
@@ -17,7 +16,6 @@ export function CalculatorHintTooltip({
   text,
   className,
   firstVisitCoachmark = false,
-  firstVisitCoachmarkLabel = "Nápověda k režimu",
 }: CalculatorHintTooltipProps) {
   const [open, setOpen] = useState(false);
   const [coachmark, setCoachmark] = useState(
@@ -62,9 +60,6 @@ export function CalculatorHintTooltip({
         .filter(Boolean)
         .join(" ")}
     >
-      {coachmark ? (
-        <span className="calculator-hint-tooltip__coachmark-label">{firstVisitCoachmarkLabel}</span>
-      ) : null}
       <button
         type="button"
         className="calculator-hint-tooltip__trigger"
