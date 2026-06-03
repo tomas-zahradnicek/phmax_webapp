@@ -5,7 +5,12 @@ import { describe, expect, it } from "vitest";
 import { PHMAX_IS_EXPORT_SCHEMA } from "./phmax-is-export-adapter";
 import { applyPhmaxIsHandoffToStorage } from "./phmax-is-handoff-apply";
 import { IMPORT_SD_LABELS } from "./phmax-import-columns";
-import { csvTextsToHandoffPayload, importTablesToHandoffPayload, parseSemicolonCsv } from "./phmax-import-pv-zs";
+import {
+  buildImportPreviewSummary,
+  csvTextsToHandoffPayload,
+  importTablesToHandoffPayload,
+  parseSemicolonCsv,
+} from "./phmax-import-pv-zs";
 import { classifyImportCsvText } from "./phmax-import-xlsx";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -72,6 +77,8 @@ describe("phmax-import-pv-zs", () => {
       zsCsv: readFileSync(path.join(templatesDir, "phmax-import-zs-summary-v1.example.csv"), "utf8"),
     });
     expect(payload.schoolScenario.coherenceWarnings?.some((w) => w.includes("ŠD"))).toBe(true);
+    const preview = buildImportPreviewSummary(payload);
+    expect(preview.coherenceWarnings.some((w) => w.includes("ŠD"))).toBe(true);
   });
 
   it("klasifikace CSV podle hlavičky", () => {

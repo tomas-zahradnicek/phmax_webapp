@@ -57,6 +57,7 @@ import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { NV75_DEPUTY_LEGIS_TOOLTIPS } from "./nv75-deputy-legislativa";
 import { calculateNv75DeputyBank, type Nv75DeputyKind } from "./nv75-deputy-bank";
+import { buildNv75Bonus4cUpgradeHints } from "./nv75-bonus4c-sensitivity";
 import { buildNv75UnitsUpgradeHints } from "./nv75-units-sensitivity";
 
 type PhmaxNv75DeputyPageProps = {
@@ -665,17 +666,20 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
       }),
     [calculationRows, practicalGeneralNonOv, practicalOvEhl0, practicalSec16, ovGroupsSchool, ovGroupsInstructor],
   );
-  const nv75BandUpgradeHints = useMemo(
-    () =>
-      buildNv75UnitsUpgradeHints(
-        rows.map((row) => ({
-          kind: row.kind,
-          units: row.units,
-          label: NV75_KIND_LABEL[row.kind],
-        })),
-      ),
-    [rows],
-  );
+  const nv75BandUpgradeHints = useMemo(() => {
+    const unitHints = buildNv75UnitsUpgradeHints(
+      rows.map((row) => ({
+        kind: row.kind,
+        units: row.units,
+        label: NV75_KIND_LABEL[row.kind],
+      })),
+    );
+    const bonus4cHints = buildNv75Bonus4cUpgradeHints({
+      practicalStudentsGeneralCounted: bank.practicalStudentsGeneralCounted,
+      practicalStudentsSec16: practicalSec16,
+    });
+    return [...unitHints, ...bonus4cHints].slice(0, 6);
+  }, [bank.practicalStudentsGeneralCounted, practicalSec16, rows]);
   const hasPracticalContext = useMemo(() => rows.some((r) => r.kind === "ss_konz" || r.kind === "vos"), [rows]);
   const nv75InputWarnings = useMemo(() => {
     const messages: string[] = [];

@@ -213,6 +213,18 @@ export function DashboardSchoolImportDialog({
                   Orientační součet: <strong>{formatCsNumberOrDash(summary.totalPhmax)}</strong> {CS_HOURS_PER_WEEK_SHORT}
                 </li>
               </ul>
+              {summary.coherenceWarnings.length > 0 ? (
+                <div role="status" style={{ marginTop: 8 }}>
+                  <p className="muted-text" style={{ margin: "0 0 4px" }}>
+                    Upozornění k souboru:
+                  </p>
+                  <ul className="muted-text" style={{ paddingLeft: "1.25rem", margin: 0 }}>
+                    {summary.coherenceWarnings.map((w) => (
+                      <li key={w}>{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
               <label className="field" style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 8 }}>
                 <input
                   type="checkbox"

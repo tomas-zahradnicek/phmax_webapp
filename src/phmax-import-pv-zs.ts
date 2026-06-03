@@ -88,6 +88,7 @@ export type ImportPreviewSummary = {
   zsPsychRowCount: number;
   zsHealthRowCount: number;
   totalPhmax: number | null;
+  coherenceWarnings: readonly string[];
 };
 
 /** Jednoduchý CSV (;) s podporou uvozovek – stejný formát jako šablona v1. */
@@ -493,6 +494,7 @@ export function buildImportPreviewSummary(payload: ReturnType<typeof importTable
     zsPsychRowCount: Array.isArray(zsSnap?.psychRows) ? zsSnap.psychRows.length : 0,
     zsHealthRowCount: Array.isArray(zsSnap?.healthRows) ? zsSnap.healthRows.length : 0,
     totalPhmax: meta.summary.totalPhmax,
+    coherenceWarnings: meta.coherenceWarnings ?? [],
   };
 }
 

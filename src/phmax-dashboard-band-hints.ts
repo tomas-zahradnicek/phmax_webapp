@@ -1,9 +1,11 @@
 import { getSdDepartmentRangeFromPupils } from "./phmax-sd-narrative";
 import { buildPvDurationUpgradeHint } from "./phmax-pv-band-sensitivity";
 import { computePvPhmaxTotal, type PvProvozKind } from "./phmax-pv-logic";
+import { buildNv75Bonus4cHintsFromAutosave } from "./nv75-bonus4c-sensitivity";
 import { buildNv75UnitsUpgradeHint } from "./nv75-units-sensitivity";
 import type { Nv75DeputyKind } from "./nv75-deputy-bank";
 import { buildZsBandUpgradeHintsFromSnapshot } from "./zs/zs-band-sensitivity";
+import { buildZsPhaPhpHintsFromSnapshot } from "./zs/zs-pha-php-band-sensitivity";
 
 const LS_PV = "edu-cz-pv-calculator-state";
 const LS_SD = "edu-cz-sd-calculator-state";
@@ -106,11 +108,15 @@ function buildNv75HintsFromLs(maxPerModule: number): string[] {
 
 /** Souhrnné nápovědy z autosave pro dashboard (orientační, ne závazný výpočet). */
 export function buildDashboardBandHints(maxTotal = 8): string[] {
+  const zsLs = readLs(LS_ZS);
+  const nv75Ls = readLs(LS_NV75);
   const out: string[] = [
-    ...buildZsBandUpgradeHintsFromSnapshot(readLs(LS_ZS), 3),
+    ...buildZsBandUpgradeHintsFromSnapshot(zsLs, 2),
+    ...buildZsPhaPhpHintsFromSnapshot(zsLs, 2),
     ...buildPvHintsFromLs(2),
     ...buildSdHintsFromLs(),
-    ...buildNv75HintsFromLs(2),
+    ...buildNv75HintsFromLs(1),
+    ...buildNv75Bonus4cHintsFromAutosave(nv75Ls),
   ];
   return out.slice(0, maxTotal);
 }
