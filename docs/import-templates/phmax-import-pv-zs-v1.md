@@ -1,7 +1,7 @@
 # CSV šablony importu PHmax – PV + ZŠ (návrh v1)
 
-**Stav:** návrh pro zřizovatele / IT, **bez implementace** v aplikaci (0.4.0).  
-**Cíl:** jednoduchý import z IS nebo Excelu bez JSON skillů.
+**Stav:** pilot **PV + ZŠ** v aplikaci (dashboard – šablona Excel + import). Fáze C: ŠD, SŠ, detail ZŠ.  
+**Cíl:** jednoduchý import z evidence školy bez JSON skillů.
 
 ## Soubory
 
@@ -126,18 +126,14 @@ Vlastní cesty:
 npx --yes tsx scripts/csv-to-phmax-handoff.ts --meta ./meta.csv --pv ./pv.csv --zs ./zs.csv --out ./handoff.json
 ```
 
-**Použití v prohlížeči (ručně):** JSON nejde přímo „nahrát“ tlačítkem Import (0.4.0). IT použije helper:
+**Použití ve škole (aplikace):**
 
-1. Vygenerovat handoff: `npm run import:csv-handoff`
-2. Vytisknout skript pro konzoli (na stejném originu jako běžící PHmax):
+1. Dashboard Σ → **Stáhnout šablonu Excel** (listy Návod, Meta, PV, ZŠ).
+2. Vyplnit a uložit `.xlsx` (nebo tři CSV se středníkem).
+3. **Import ze školy** → vybrat soubor → náhled → **Načíst do kalkulaček PV a ZŠ**.
+4. Ověřit moduly PV a ZŠ a součet na dashboardu.
 
-```bash
-npm run import:handoff-apply-snippet
-```
-
-3. V DevTools → Console vložit výstup a Enter (zapíše autosave PV/ZŠ, název scénáře, wizard krok „Vstupy“, volitelně `location.reload()`).
-
-Programaticky: `applyPhmaxIsHandoffToLocalStorage(payload)` v `src/phmax-is-handoff-apply.ts` (např. budoucí import UI).
+**IT (bez UI):** `npm run import:csv-handoff`, případně `npm run import:handoff-apply-snippet` pro konzoli (`applyPhmaxIsHandoffToLocalStorage`).
 
 ## Kontrola po transformaci
 

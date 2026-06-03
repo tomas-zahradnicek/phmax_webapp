@@ -2,12 +2,13 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import {
   CALCULATOR_LIMITS_NOTE,
-  DASH_IMPORT_PLACEHOLDER_HINT,
-  DASH_IMPORT_PLACEHOLDER_LABEL,
+  DASH_IMPORT_HINT,
+  DASH_IMPORT_LABEL,
   DASH_OPEN_MODULE_OWN_DATA_BUTTON_SUFFIX,
   DASH_OPEN_MODULE_EXAMPLE_BUTTON_SUFFIX,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
+import { DashboardSchoolImportDialog } from "./DashboardSchoolImportDialog";
 import { FillStatusBadge, dashboardRowFillStatusKind } from "./FillStatusBadge";
 import { APP_VERSION } from "./app-version";
 import {
@@ -627,6 +628,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   const [scenarioLabel, setScenarioLabel] = useState(() => readSchoolScenarioLabel());
   const [isEndpoint, setIsEndpoint] = useState(() => readPhmaxIsEndpoint());
   const [exportDisclaimerConfirmed, setExportDisclaimerConfirmed] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const importTriggerRef = React.useRef<HTMLButtonElement>(null);
 
   const refresh = useCallback(() => {
     setRefreshAt(new Date());
@@ -686,6 +689,25 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   const scrollToSchool15Min = useCallback(() => {
     document.getElementById("dash-school-15min")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
+
+  const openImportDialog = useCallback(() => {
+    setImportDialogOpen(true);
+  }, []);
+
+  const handleImportApplied = useCallback(
+    (payload: ReturnType<typeof buildPhmaxIsHandoffPayload>) => {
+      const label = payload.schoolScenario.scenarioLabel?.trim();
+      if (label) {
+        localStorage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, label);
+        setScenarioLabel(label);
+      }
+      setRefreshAt(new Date());
+      publishNotice(
+        `Import PV+ZŠ uložen. Orientační součet PHmax: ${payload.schoolScenario.summary.totalPhmax ?? "–"} h/týden.`,
+      );
+    },
+    [publishNotice],
+  );
 
   const openModuleWithExampleHint = useCallback(
     (id: Exclude<ProductView, "dash">) => {
@@ -935,15 +957,46 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 <button
                   type="button"
                   className="btn ghost"
-                  disabled
-                  title={DASH_IMPORT_PLACEHOLDER_HINT}
+                  data-testid="dash-import-open"
+                  title={DASH_IMPORT_HINT}
+                  onClick={openImportDialog}
                 >
-                  {DASH_IMPORT_PLACEHOLDER_LABEL}
+                  {DASH_IMPORT_LABEL}
                 </button>
               </div>
             </article>
           </div>
         </section>
+
+        <section
+          id="dash-school-import"
+          className="card section-card dash-school-import"
+          aria-labelledby="dash-import-heading"
+        >
+          <h2 id="dash-import-heading" className="section-title">
+            Import ze školy (PV + ZŠ)
+          </h2>
+          <p className="muted-text">{DASH_IMPORT_HINT}</p>
+          <div className="dash-card__actions" style={{ marginTop: 12 }}>
+            <button
+              ref={importTriggerRef}
+              type="button"
+              className="btn primary"
+              data-testid="dash-import-open-main"
+              title={DASH_IMPORT_HINT}
+              onClick={openImportDialog}
+            >
+              {DASH_IMPORT_LABEL}
+            </button>
+          </div>
+        </section>
+
+        <DashboardSchoolImportDialog
+          open={importDialogOpen}
+          onClose={() => setImportDialogOpen(false)}
+          onApplied={handleImportApplied}
+          triggerRef={importTriggerRef}
+        />
 
         {continueRow ? (
           <section className="card card--accent section-card dash-continue-card" aria-labelledby="dash-continue-heading">
@@ -1127,10 +1180,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               <button
                 type="button"
                 className="btn ghost"
-                disabled
-                title={DASH_IMPORT_PLACEHOLDER_HINT}
+                data-testid="dash-import-open-export"
+                title={DASH_IMPORT_HINT}
+                onClick={openImportDialog}
               >
-                {DASH_IMPORT_PLACEHOLDER_LABEL}
+                {DASH_IMPORT_LABEL}
               </button>
               <button
                 type="button"

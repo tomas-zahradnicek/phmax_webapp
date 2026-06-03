@@ -22,7 +22,9 @@ describe("UX wave A/B/C contract", () => {
     expect(dash).toContain("dash-export-wizard");
     expect(dash).toContain("dash-school-15min");
     expect(dash).toContain("printSchoolReview");
-    expect(dash).toContain("DASH_IMPORT_PLACEHOLDER_LABEL");
+    expect(dash).toContain("DASH_IMPORT_LABEL");
+    expect(dash).toContain("dash-school-import");
+    expect(dash).toContain("DashboardSchoolImportDialog");
     expect(dash).toContain("Celá škola za 15 min");
   });
 

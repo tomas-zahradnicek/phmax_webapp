@@ -62,9 +62,13 @@ export const VIEW_MODE_HINT_EXPERT =
 export const CALCULATOR_HINT_FIRST_VISIT_LS_KEY = "phmax-calculator-hint-first-visit-v1";
 export const CALCULATOR_EXPERT_FIRST_SWITCH_LS_KEY = "phmax-calculator-expert-first-switch-v1";
 
-export const DASH_IMPORT_PLACEHOLDER_LABEL = "Import ze školy (připravujeme – 0.4.0)";
-export const DASH_IMPORT_PLACEHOLDER_HINT =
-  "Import podle šablony zřizovatele nebo IS bude ve verzi 0.4.0 – čeká na schválený formát (docs/export-field-mapping.md).";
+export const DASH_IMPORT_LABEL = "Import ze školy (PV + ZŠ)";
+export const DASH_IMPORT_HINT =
+  "Vyplňte šablonu Excel nebo CSV a načtěte údaje do modulů PV a ZŠ v tomto prohlížeči. ŠD, SŠ a detailní záložky ZŠ doplníte v aplikaci.";
+export const DASH_IMPORT_DIALOG_LEAD =
+  "Stáhněte šablonu, vyplňte listy Meta, PV a ZŠ podle evidence školy a nahrajte soubor. Po kontrole náhledu se data uloží do autosave – stejně jako ruční zadání.";
+export const DASH_IMPORT_CONFIRM_HINT =
+  "Potvrzuji, že import je orientační – ověřím výpočet v modulech PV a ZŠ před použitím součtu nebo exportu.";
 
 export const CALCULATOR_GLOBAL_DISPLAY_HINT =
   "Pohodlné / Kompaktní a Fokus na formulář platí pro všechny kalkulačky v tomto prohlížeči.";

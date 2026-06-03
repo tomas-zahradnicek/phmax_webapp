@@ -1,6 +1,6 @@
 # Import dat ze školy (návrh 0.4.0)
 
-Orientační specifikace – **v aplikaci zatím není** (placeholder na dashboardu). Vychází ze struktury autosave a exportu `phmax-school-scenario-v1` / `phmax-is-handoff-v1`.
+Orientační specifikace. **Pilot PV + ZŠ v aplikaci:** dashboard → Import ze školy, šablona Excel `.xlsx`. ŠD, SŠ a detailní listy ZŠ – fáze C. Vychází ze struktury autosave a exportu `phmax-school-scenario-v1` / `phmax-is-handoff-v1`.
 
 ## Princip
 
@@ -84,8 +84,8 @@ NV75 se **nezapočítává** do cross-součtu PHmax na dashboardu.
 
 Konkrétní sloupce, příklady a mapování na autosave: **[import-templates/phmax-import-pv-zs-v1.md](./import-templates/phmax-import-pv-zs-v1.md)**  
 Soubory: `phmax-import-meta-v1.example.csv`, `phmax-import-pv-v1.example.csv`, `phmax-import-zs-summary-v1.example.csv`.  
-Skript CSV → handoff JSON: `npm run import:csv-handoff` (viz šablona v1).  
-Zápis do prohlížeče: `npm run import:handoff-apply-snippet` → konzole (`src/phmax-is-handoff-apply.ts`).
+**V aplikaci:** Stáhnout šablonu Excel → vyplnit → Import ze školy na dashboardu (náhled → načtení do PV a ZŠ).  
+**IT:** Skript CSV → handoff JSON: `npm run import:csv-handoff`. Zápis konzolí: `npm run import:handoff-apply-snippet` (`src/phmax-is-handoff-apply.ts`).
 
 ## Doporučený postup pro zřizovatele / IT
 

@@ -3461,6 +3461,18 @@ input[type="radio"] {
   align-items: flex-start;
   margin-bottom: 16px;
 }
+
+.dash-import-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.dash-import-dialog__error {
+  margin-top: 12px;
+  color: #9a3412;
+  font-size: 0.92rem;
+}
 .glossary-list {
   display: grid;
   gap: 12px;

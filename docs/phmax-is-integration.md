@@ -28,7 +28,12 @@ Pole **`coherenceWarnings`** (0.3.9+) obsahuje textová varování z `crossPhmax
 
 Na dashboardu lze uložit **URL endpoint IS** do `localStorage` (`phmax-is-handoff-endpoint`) a odeslat handoff přes `postPhmaxIsHandoff` (`src/phmax-is-handoff-client.ts`). Vyžaduje CORS a schválený endpoint u dodavatele IS.
 
-## Import z handoff do prohlížeče (IT, bez UI 0.4.0)
+## Import ze školy (pilot PV + ZŠ v aplikaci)
+
+- Dashboard → **Import ze školy** → šablona Excel (`phmax-import-pv-zs-v1.xlsx`, listy Meta / PV / ZŠ) → náhled → načtení do autosave.
+- Kód: `src/phmax-import-pv-zs.ts`, `src/phmax-import-xlsx.ts`, `src/phmax-import-template-xlsx.ts`, `src/DashboardSchoolImportDialog.tsx`.
+
+## Import z handoff (IT / konzole)
 
 - `npm run import:csv-handoff` → `docs/import-templates/phmax-is-handoff.generated.json`
 - `npm run import:handoff-apply-snippet` → JS pro DevTools na originu aplikace
