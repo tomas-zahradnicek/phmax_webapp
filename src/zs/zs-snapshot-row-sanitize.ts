@@ -3,6 +3,7 @@ import {
   B14_B16,
   B17_B21,
   B22_B25,
+  PHA_TABLE,
   type BasicType,
   type GymRow,
   type HealthRow,
@@ -116,7 +117,21 @@ export function sanitizeMixedRows(raw: unknown): MixedRow[] {
 
 export function sanitizePhaRows(raw: unknown): PhaRow[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter((item) => item && typeof item === "object") as PhaRow[];
+  const out: PhaRow[] = [];
+  for (let i = 0; i < raw.length; i++) {
+    const item = raw[i];
+    if (!item || typeof item !== "object") continue;
+    const r = item as Record<string, unknown>;
+    const kind = r.kind;
+    if (typeof kind !== "string" || !(kind in PHA_TABLE)) continue;
+    out.push({
+      id: num(r.id, i + 1),
+      kind: kind as PhaRow["kind"],
+      classes: num(r.classes),
+      pupils: num(r.pupils),
+    });
+  }
+  return out;
 }
 
 export function parseZsWizardStep(raw: unknown): 1 | 2 | 3 | 4 | 5 | undefined {

@@ -45,9 +45,12 @@ export const n = (v: unknown) => {
   return Number.isFinite(x) ? x : 0;
 };
 
-export function pickBand(avg: number, bands: readonly Band[]) {
+const EMPTY_BAND: Band = { label: "–", value: 0, test: () => false };
+
+export function pickBand(avg: number, bands: readonly Band[] | undefined) {
+  if (!bands?.length) return EMPTY_BAND;
   const found = bands.find((b) => b.test(avg));
-  return found ?? { label: "–", value: 0, test: () => false };
+  return found ?? EMPTY_BAND;
 }
 
 export const B13_MORE_THAN_2 = {

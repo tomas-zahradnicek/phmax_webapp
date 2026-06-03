@@ -61,6 +61,8 @@ import {
 import {
   applyZsFormSnapshot,
   buildZsFormSnapshot,
+  peekSanitizedZsAutosaveFromStorage,
+  readSanitizedZsAutosaveFromStorage,
   ZS_AUTOSAVE_STORAGE_KEY,
   type ZsFormSnapshotSetters,
 } from "./zs/zs-form-snapshot";
@@ -264,6 +266,7 @@ export type PhmaxZsPageProps = {
 };
 
 export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
+  const initialAutosave = peekSanitizedZsAutosaveFromStorage();
   const [tab, setTab] = useState<TabKey>("phmax");
   const [mode, setMode] = useState<CalculatorMode>(getZsInitialPreferredMode());
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
@@ -317,7 +320,9 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     [visibleSections],
   );
 
-  const [basicType, setBasicType] = useState<BasicType>("full_more_than_2");
+  const [basicType, setBasicType] = useState<BasicType>(
+    () => (initialAutosave?.basicType as BasicType) ?? "full_more_than_2",
+  );
   const [basic1Classes, setBasic1Classes] = useState(0);
   const [basic1Pupils, setBasic1Pupils] = useState(0);
   const [basic2Classes, setBasic2Classes] = useState(0);
@@ -328,18 +333,26 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [incl2Classes, setIncl2Classes] = useState(0);
   const [incl2Pupils, setIncl2Pupils] = useState(0);
 
-  const [psychRows, setPsychRows] = useState<PsychRow[]>([]);
-  const [healthRows, setHealthRows] = useState<HealthRow[]>([]);
+  const [psychRows, setPsychRows] = useState<PsychRow[]>(
+    () => (initialAutosave?.psychRows as PsychRow[]) ?? [],
+  );
+  const [healthRows, setHealthRows] = useState<HealthRow[]>(
+    () => (initialAutosave?.healthRows as HealthRow[]) ?? [],
+  );
 
-  const [minorityType, setMinorityType] = useState<keyof typeof B17_B21>("minority1");
+  const [minorityType, setMinorityType] = useState<keyof typeof B17_B21>(
+    () => (initialAutosave?.minorityType as keyof typeof B17_B21) ?? "minority1",
+  );
   const [minority1Classes, setMinority1Classes] = useState(0);
   const [minority1Pupils, setMinority1Pupils] = useState(0);
   const [minority2Classes, setMinority2Classes] = useState(0);
   const [minority2Pupils, setMinority2Pupils] = useState(0);
 
-  const [gymRows, setGymRows] = useState<GymRow[]>([]);
+  const [gymRows, setGymRows] = useState<GymRow[]>(() => (initialAutosave?.gymRows as GymRow[]) ?? []);
 
-  const [mixedRows, setMixedRows] = useState<MixedRow[]>([]);
+  const [mixedRows, setMixedRows] = useState<MixedRow[]>(
+    () => (initialAutosave?.mixedRows as MixedRow[]) ?? [],
+  );
 
   const [mixedMethodFirstZsPupils, setMixedMethodFirstZsPupils] = useState(0);
   const [mixedMethodFirstZsClasses, setMixedMethodFirstZsClasses] = useState(0);
@@ -367,7 +380,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   const [p41First, setP41First] = useState(0);
   const [p41Second, setP41Second] = useState(0);
 
-  const [phaRows, setPhaRows] = useState<PhaRow[]>([]);
+  const [phaRows, setPhaRows] = useState<PhaRow[]>(() => (initialAutosave?.phaRows as PhaRow[]) ?? []);
 
   const [phpYear1, setPhpYear1] = useState(0);
   const [phpYear2, setPhpYear2] = useState(0);
@@ -1056,10 +1069,10 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const reloadFromAutosave = useCallback(() => {
     try {
-      const raw = localStorage.getItem(ZS_AUTOSAVE_STORAGE_KEY);
-      if (!raw) return;
-      const s = JSON.parse(raw) as Record<string, unknown>;
-      applySnapshotPayload(s, "Načtena uložená data z prohlížeče.");
+      const safe = readSanitizedZsAutosaveFromStorage();
+      if (!safe) return;
+      localStorage.setItem(ZS_AUTOSAVE_STORAGE_KEY, JSON.stringify(safe));
+      applySnapshotPayload(safe, "Načtena uložená data z prohlížeče.");
     } catch (error) {
       console.error("Nepodařilo se načíst autosave ZŠ.", error);
     }
@@ -1160,13 +1173,13 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
 
   const restoreSnapshot = () => {
     try {
-      const raw = localStorage.getItem(ZS_AUTOSAVE_STORAGE_KEY);
-      if (!raw) {
+      const safe = readSanitizedZsAutosaveFromStorage();
+      if (!safe) {
         setUiNotice(MSG_NO_LOCAL_AUTOSAVE_DATA);
         return;
       }
-      const s = JSON.parse(raw) as Record<string, unknown>;
-      applySnapshotPayload(s, "Uložená data byla obnovena.");
+      localStorage.setItem(ZS_AUTOSAVE_STORAGE_KEY, JSON.stringify(safe));
+      applySnapshotPayload(safe, "Uložená data byla obnovena.");
     } catch (error) {
       console.error("Nepodařilo se obnovit uložená data.", error);
       setUiNotice(`Obnovení uložených dat se nepodařilo. ${BROWSER_ERROR_NEXT_STEP_HINT}`);

@@ -21,6 +21,16 @@ describe("zs-snapshot-row-sanitize", () => {
     expect(sanitizeHealthRows([{ kind: "health1", currentClasses: 1 }])).toHaveLength(1);
   });
 
+  it("odfiltruje neplatný kind PHA řádku", () => {
+    expect(sanitizeZsAutosaveSnapshot({ phaRows: [{ kind: "B35", classes: 1, pupils: 5 }] }).phaRows).toEqual(
+      [],
+    );
+    const safe = sanitizeZsAutosaveSnapshot({
+      phaRows: [{ kind: "zs1", classes: 2, pupils: 10 }],
+    });
+    expect(safe.phaRows).toHaveLength(1);
+  });
+
   it("sanitizeZsAutosaveSnapshot zabrání pádu pickBand na neplatných řádcích", () => {
     const safe = sanitizeZsAutosaveSnapshot({
       psychRows: [{ kind: "psycholog", currentClasses: 1, currentPupils: 8 }],

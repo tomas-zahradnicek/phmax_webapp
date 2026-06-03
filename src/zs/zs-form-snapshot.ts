@@ -14,6 +14,38 @@ import { sanitizeZsAutosaveSnapshot } from "./zs-snapshot-row-sanitize";
 
 export const ZS_AUTOSAVE_STORAGE_KEY = "edu-cz-zs-calculator-state";
 
+let cachedSanitizedAutosave: Record<string, unknown> | null | undefined;
+
+/** Jednorázově načte a sanitizuje autosave (pro synchronní init stavu ZŠ). */
+export function peekSanitizedZsAutosaveFromStorage(): Record<string, unknown> | null {
+  if (cachedSanitizedAutosave !== undefined) return cachedSanitizedAutosave;
+  if (typeof window === "undefined") {
+    cachedSanitizedAutosave = null;
+    return null;
+  }
+  try {
+    const raw = localStorage.getItem(ZS_AUTOSAVE_STORAGE_KEY);
+    if (!raw) {
+      cachedSanitizedAutosave = null;
+      return null;
+    }
+    cachedSanitizedAutosave = sanitizeZsAutosaveSnapshot(JSON.parse(raw) as Record<string, unknown>);
+    return cachedSanitizedAutosave;
+  } catch {
+    cachedSanitizedAutosave = null;
+    return null;
+  }
+}
+
+export function invalidateZsAutosavePeekCache(): void {
+  cachedSanitizedAutosave = undefined;
+}
+
+export function readSanitizedZsAutosaveFromStorage(): Record<string, unknown> | null {
+  invalidateZsAutosavePeekCache();
+  return peekSanitizedZsAutosaveFromStorage();
+}
+
 export type ZsTabKey = "phmax" | "pha" | "php";
 export type ZsPhpWizardStep = "a" | "b" | "c" | "d";
 export type ZsPhpMethodMode = "three_year_avg" | "short_period";

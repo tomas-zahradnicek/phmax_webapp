@@ -78,4 +78,10 @@ describe("pickBand", () => {
     expect(r.value).toBe(0);
     expect(r.label).toBe("–");
   });
+
+  it("neplatná tabulka pásma nespadne", () => {
+    const r = pickBand(10, undefined);
+    expect(r.value).toBe(0);
+    expect(r.label).toBe("–");
+  });
 });
