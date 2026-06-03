@@ -10,8 +10,10 @@ export function downloadTextFile(filename: string, content: string, mime = "text
   URL.revokeObjectURL(url);
 }
 
+import { formatExportCell } from "./cs-format";
+
 export function exportCsvLocalized(rows: readonly (readonly [string, string | number])[]) {
-  const escapeCell = (value: string | number) => `"${String(value).replace(/"/g, '""')}"`;
+  const escapeCell = (value: string | number) => `"${String(formatExportCell(value)).replace(/"/g, '""')}"`;
   const body = rows.map(([label, value]) => [escapeCell(label), escapeCell(value)].join(";")).join("\r\n");
   return "\ufeff" + ["Položka;Hodnota", body].join("\r\n");
 }

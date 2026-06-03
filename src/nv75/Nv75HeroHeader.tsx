@@ -6,6 +6,7 @@ import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
 import type { DisplayDensity } from "../display-density";
+import { formatCsHoursPerWeek } from "../cs-format";
 import { NV75_HERO_EXAMPLE_SELECT_ID } from "../nv75-basic-wizard";
 import { Nv75HeroToolbar, type Nv75HeroToolbarProps } from "./Nv75HeroToolbar";
 
@@ -76,7 +77,7 @@ export function Nv75HeroHeader({
       <HeroExpertStrip
         title="Banka odpočtů – NV č. 75/2016 Sb. (§4b–§4d)"
         kpis={[
-          { label: "Banka celkem", value: `${bankHoursTotal} h/týd` },
+          { label: "Banka celkem", value: formatCsHoursPerWeek(bankHoursTotal) },
           { label: "Řádky", value: rowCount },
           { label: "§4b", value: appliedRule ?? "–" },
           { label: "Stav", value: verdictLabel },

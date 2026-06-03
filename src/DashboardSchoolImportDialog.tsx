@@ -1,4 +1,4 @@
-import React, { useCallback, useId, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   DASH_IMPORT_CONFIRM_HINT,
@@ -7,17 +7,21 @@ import {
   DASH_IMPORT_UPLOAD_LABEL,
 } from "./calculator-ui-constants";
 import { useModalDialogA11y } from "./modal-dialog-a11y";
-import { applyPhmaxIsHandoffToLocalStorage } from "./phmax-is-handoff-apply";
+import { applyPhmaxIsHandoffToLocalStorage, type HandoffApplyResult } from "./phmax-is-handoff-apply";
 import type { PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import { buildImportPreviewSummary } from "./phmax-import-pv-zs";
 import { parseImportFileList } from "./phmax-import-xlsx";
+import { CS_HOURS_PER_WEEK_SHORT, formatCsNumberOrDash } from "./cs-format";
 import { downloadPhmaxImportTemplateXlsx } from "./phmax-import-template-xlsx";
 
 type DashboardSchoolImportDialogProps = {
   open: boolean;
   onClose: () => void;
-  onApplied: (payload: PhmaxIsHandoffPayload) => void;
+  onApplied: (payload: PhmaxIsHandoffPayload, result: HandoffApplyResult) => void;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
+  /** Náhled z uploadu na kartě dashboardu – po otevření dialogu se aplikuje. */
+  pendingPreview?: PhmaxIsHandoffPayload | null;
+  onPendingPreviewConsumed?: () => void;
 };
 
 export function DashboardSchoolImportDialog({
@@ -25,6 +29,8 @@ export function DashboardSchoolImportDialog({
   onClose,
   onApplied,
   triggerRef,
+  pendingPreview = null,
+  onPendingPreviewConsumed,
 }: DashboardSchoolImportDialogProps) {
   const titleId = useId();
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -56,6 +62,14 @@ export function DashboardSchoolImportDialog({
     resetPreview();
     onClose();
   }, [onClose, resetPreview]);
+
+  useEffect(() => {
+    if (!open || !pendingPreview) return;
+    setPreview(pendingPreview);
+    setConfirmed(false);
+    setError(null);
+    onPendingPreviewConsumed?.();
+  }, [open, onPendingPreviewConsumed, pendingPreview]);
 
   const handleDownloadTemplate = useCallback(async () => {
     if (templateBusy) return;
@@ -90,15 +104,7 @@ export function DashboardSchoolImportDialog({
     if (!preview || !confirmed) return;
     try {
       const result = applyPhmaxIsHandoffToLocalStorage(preview);
-      onApplied(preview);
-      const modules = result.appliedModules.map((m) => m.toUpperCase()).join(", ");
-      const warn =
-        result.warnings.length > 0
-          ? ` Varování: ${result.warnings.join(" ")}`
-          : "";
-      window.alert(
-        `Import dokončen (${modules}). Scénář: ${result.scenarioLabel ?? "–"}. Otevřete moduly PV a ZŠ a zkontrolujte výpočet.${warn}`,
-      );
+      onApplied(preview, result);
       handleClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Import se nepodařilo uložit.");
@@ -131,16 +137,7 @@ export function DashboardSchoolImportDialog({
             soubor níže
           </p>
           <div className="dash-import-dialog__actions">
-            <button
-              type="button"
-              className="btn primary"
-              data-testid="dash-import-download-template-dialog"
-              disabled={templateBusy}
-              onClick={() => void handleDownloadTemplate()}
-            >
-              {templateBusy ? "Připravuji šablonu…" : DASH_IMPORT_TEMPLATE_LABEL}
-            </button>
-            <label className="btn ghost" style={{ cursor: "pointer" }}>
+            <label className="btn primary" style={{ cursor: busy ? "wait" : "pointer" }}>
               {busy ? "Načítám soubor…" : DASH_IMPORT_UPLOAD_LABEL}
               <input
                 ref={fileInputRef}
@@ -153,6 +150,15 @@ export function DashboardSchoolImportDialog({
                 onChange={(e) => void handleFiles(e.target.files)}
               />
             </label>
+            <button
+              type="button"
+              className="btn ghost"
+              data-testid="dash-import-download-template-dialog"
+              disabled={templateBusy}
+              onClick={() => void handleDownloadTemplate()}
+            >
+              {templateBusy ? "Připravuji šablonu…" : DASH_IMPORT_TEMPLATE_LABEL}
+            </button>
           </div>
           <p className="muted-text" style={{ marginTop: 8, fontSize: "0.88rem" }}>
             Doporučeno: jeden soubor <code className="methodology-strip__code">phmax-import-skola-v2.xlsx</code> (české
@@ -173,13 +179,19 @@ export function DashboardSchoolImportDialog({
               <ul className="muted-text" style={{ paddingLeft: "1.25rem", margin: "8px 0" }}>
                 <li>
                   Scénář: <strong>{summary.scenarioLabel}</strong>
+                  {summary.schoolId ? (
+                    <>
+                      {" "}
+                      · ID školy: <strong>{summary.schoolId}</strong>
+                    </>
+                  ) : null}
                 </li>
                 <li>
                   PV: <strong>{summary.pvRowCount}</strong> pracovišť, PHmax{" "}
-                  <strong>{summary.pvPhmax ?? "–"}</strong>
+                  <strong>{formatCsNumberOrDash(summary.pvPhmax)}</strong>
                 </li>
                 <li>
-                  ZŠ souhrn: PHmax <strong>{summary.zsPhmax ?? "–"}</strong>
+                  ZŠ souhrn: PHmax <strong>{formatCsNumberOrDash(summary.zsPhmax)}</strong>
                   {(summary.zsPsychRowCount > 0 || summary.zsHealthRowCount > 0) && (
                     <>
                       {" "}
@@ -189,16 +201,16 @@ export function DashboardSchoolImportDialog({
                 </li>
                 {summary.sdPhmax != null ? (
                   <li>
-                    ŠD: PHmax <strong>{summary.sdPhmax}</strong>
+                    ŠD: PHmax <strong>{formatCsNumberOrDash(summary.sdPhmax)}</strong>
                   </li>
                 ) : null}
                 {summary.ssPhmax != null ? (
                   <li>
-                    SŠ: PHmax <strong>{summary.ssPhmax}</strong>
+                    SŠ: PHmax <strong>{formatCsNumberOrDash(summary.ssPhmax)}</strong>
                   </li>
                 ) : null}
                 <li>
-                  Orientační součet: <strong>{summary.totalPhmax ?? "–"}</strong> h/týden
+                  Orientační součet: <strong>{formatCsNumberOrDash(summary.totalPhmax)}</strong> {CS_HOURS_PER_WEEK_SHORT}
                 </li>
               </ul>
               <label className="field" style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 8 }}>

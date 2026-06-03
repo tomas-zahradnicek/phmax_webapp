@@ -43,7 +43,7 @@ Import **není** závazný výkaz ani náhrada ručního doplnění metodických
 
 | Z evidence | Pole |
 |----------|------|
-| Počet žáků (1. stupeň ZŠ v družině) | `pupils` |
+| Počet účastníků (1. stupeň ZŠ v družině) | `pupils` |
 | Počet oddělení | `departments` |
 | Souhrnný vs. detailní režim | `inputMode`, `detailDepartments[]` |
 

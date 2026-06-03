@@ -15,6 +15,8 @@ export type ZsPageCompareDerivedInput = Pick<
 export type UseZsPageDerivedStateArgs = {
   tab: "phmax" | "pha" | "php";
   warnings: string[];
+  /** Orientační nápovědy k vyššímu pásmu PHmax (nejsou metodická varování). */
+  bandUpgradeHints?: readonly string[];
   validation: ZsFormValidationInput;
   summary: ZsSummaryRowsInput;
   exportParams: Omit<ZsExportBuildInputParams, "summaryRows">;
@@ -22,7 +24,7 @@ export type UseZsPageDerivedStateArgs = {
 };
 
 export function useZsPageDerivedState(args: UseZsPageDerivedStateArgs) {
-  const { tab, warnings, validation, summary, exportParams, compare } = args;
+  const { tab, warnings, bandUpgradeHints = [], validation, summary, exportParams, compare } = args;
   const { workspaceStickyRef, goToSection } = useZsSectionScroll(tab);
 
   const validationIssues = useMemo(() => buildZsValidationIssues(validation), [validation]);
@@ -62,8 +64,9 @@ export function useZsPageDerivedState(args: UseZsPageDerivedStateArgs) {
         onFix: () => goToSection(item.section),
       })),
       ...warnings.map((w) => ({ label: w })),
+      ...bandUpgradeHints.map((w) => ({ label: w })),
     ],
-    [validationIssues, warnings, goToSection],
+    [validationIssues, warnings, bandUpgradeHints, goToSection],
   );
   const showZsInputBanner = zsInputBannerItems.length > 0;
 

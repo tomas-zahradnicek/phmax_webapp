@@ -2,6 +2,7 @@
  * Porovnání variant nad jednotným `PhmaxProductAuditProtocol` (PV, ŠD, ZŠ, SŠ).
  */
 import type { PhmaxProductAuditProtocol, PhmaxProductId } from "./phmax-product-audit-types";
+import { formatCsNumber } from "./cs-format";
 
 export type CompareProductVariant = {
   id: string;
@@ -30,7 +31,7 @@ export type CompareProductVariantsResult = {
 };
 
 function formatHours(value: number): string {
-  return value.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return formatCsNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function metricsFromProtocol(v: CompareProductVariant): CompareProductVariantMetrics {

@@ -33,7 +33,7 @@ describe("buildCrossPhmaxSummary", () => {
         },
         {
           id: "nv75",
-          primaryKpi: { label: "Banka h/týd", value: "40" },
+          primaryKpi: { label: "Banka h./týd.", value: "40" },
           hasData: true,
           verdict: { tone: "ok" },
         },
@@ -79,7 +79,7 @@ describe("buildCrossPhmaxSummary", () => {
     );
     const pv = summary.slices.find((s) => s.id === "pv")!;
     const sd = summary.slices.find((s) => s.id === "sd")!;
-    expect(formatCrossPhmaxSliceLabel(pv)).toBe("PV: PHmax = 0 h/týden");
+    expect(formatCrossPhmaxSliceLabel(pv)).toBe("PV: PHmax = 0 h./týd.");
     expect(formatCrossPhmaxSliceLabel(sd)).toBe("ŠD: modul nevyplněn");
   });
 });

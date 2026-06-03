@@ -10,6 +10,7 @@ import { computeSsPhmaxTotalFromSnapshot } from "./ss/ss-compute-phmax-total-fro
 import { revivePhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import type { HealthRow, PsychRow } from "./phmax-zs-logic";
 import { computeZsPhmaxTotalFromSnapshot } from "./zs/zs-compute-phmax-total-from-snapshot";
+import { sanitizeCalculatorMode } from "./zs/zs-snapshot-row-sanitize";
 
 export const PHMAX_IMPORT_PV_ZS_SCHEMA = "phmax-import-pv-zs-v1" as const;
 export const PHMAX_IMPORT_SCHOOL_SCHEMA = "phmax-import-school-v2" as const;
@@ -134,10 +135,13 @@ export function parseImportNum(raw: string | undefined, field: string): number {
 }
 
 function assertSameBatch(rows: ImportCsvRow[], keys: { school_id: string; scenario_label: string }, label: string) {
-  for (const r of rows) {
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i]!;
     if (r.school_id !== keys.school_id || r.scenario_label !== keys.scenario_label) {
+      const rowNo = i + 2;
       throw new Error(
-        `${label}: school_id/scenario_label se neshodují s meta (${keys.school_id} / ${keys.scenario_label})`,
+        `${label}, řádek ${rowNo}: school_id/scenario_label se neshodují s Meta ` +
+          `(očekáváno ${keys.school_id} / ${keys.scenario_label}, nalezeno ${r.school_id} / ${r.scenario_label})`,
       );
     }
   }
@@ -235,7 +239,7 @@ function buildZsSnapshot(
 
   const snapshot: Record<string, unknown> = {
     tab: "phmax",
-    mode: "basic",
+    mode: sanitizeCalculatorMode("phmax_full_zs"),
     basicType,
     basic1Classes: parseImportNum(zsRow.basic1_classes, "basic1_classes"),
     basic1Pupils: parseImportNum(zsRow.basic1_pupils, "basic1_pupils"),
@@ -443,6 +447,12 @@ export function importTablesToHandoffPayload(input: ImportTablesInput) {
   });
   const scenarioLabel = meta.scenario_label.trim() || "Import ze školy";
 
+  const importNotes: string[] = [];
+  if (!sdRows?.length) importNotes.push("List ŠD v souboru chybí – PHmax školní družiny nebyl importován.");
+  if (!ssRows?.length) importNotes.push("List SŠ v souboru chybí – PHmax střední školy nebyl importován.");
+  if (!zsPsychRows?.length) importNotes.push("List ZŠ psycholog v souboru chybí – řádky psychiatrie nebyly importovány.");
+  if (!zsHealthRows?.length) importNotes.push("List ZŠ zdravotní v souboru chybí – řádky zdravotní školy nebyly importovány.");
+
   const schoolScenario: SchoolScenarioExportPayload = {
     schema: "phmax-school-scenario-v1",
     appVersion: input.appVersion ?? APP_VERSION,
@@ -453,7 +463,12 @@ export function importTablesToHandoffPayload(input: ImportTablesInput) {
     attentionModuleLabels: [],
     moduleSnapshots,
     scenarioLabel,
-    coherenceWarnings: [],
+    coherenceWarnings: importNotes,
+    importBatchMeta: {
+      school_id: meta.school_id,
+      school_name: meta.school_name ?? "",
+      school_year: meta.school_year ?? "",
+    },
   };
 
   return buildPhmaxIsHandoffPayload(schoolScenario);
@@ -469,7 +484,7 @@ export function buildImportPreviewSummary(payload: ReturnType<typeof importTable
   const ssSlice = meta.summary.slices.find((s) => s.id === "ss");
   return {
     scenarioLabel: meta.scenarioLabel,
-    schoolId: "",
+    schoolId: meta.importBatchMeta?.school_id ?? "",
     pvRowCount: Array.isArray(pvSnap?.rows) ? pvSnap.rows.length : 0,
     pvPhmax: pvSlice?.phmax ?? null,
     zsPhmax: zsSlice?.phmax ?? null,

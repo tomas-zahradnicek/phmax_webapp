@@ -96,6 +96,8 @@ import {
 } from "./zs/zs-hero-example-load";
 import { buildZsShareText } from "./zs/zs-share-text";
 import { buildZsWarnings } from "./zs/zs-warnings";
+import { buildZsBandUpgradeHints } from "./zs/zs-band-sensitivity";
+import { openPrintHtmlWindow } from "./phmax-open-print-html";
 import { ZsCalculatorShell } from "./zs/ZsCalculatorShell";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName } from "./calculator-view-mode";
@@ -873,6 +875,62 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
     ],
   );
 
+  const bandUpgradeHints = useMemo(
+    () =>
+      buildZsBandUpgradeHints({
+        tab,
+        basicType,
+        basic1Classes,
+        basic1Pupils,
+        basic2Classes,
+        basic2Pupils,
+        incl1Classes,
+        incl1Pupils,
+        incl2Classes,
+        incl2Pupils,
+        psychRows,
+        healthRows,
+        minorityType,
+        minority1Classes,
+        minority1Pupils,
+        minority2Classes,
+        minority2Pupils,
+        gymRows,
+        special1Classes,
+        special1Pupils,
+        special2Classes,
+        special2Pupils,
+        specialIIClasses,
+        specialIIPupils,
+      }),
+    [
+      tab,
+      basicType,
+      basic1Classes,
+      basic1Pupils,
+      basic2Classes,
+      basic2Pupils,
+      incl1Classes,
+      incl1Pupils,
+      incl2Classes,
+      incl2Pupils,
+      psychRows,
+      healthRows,
+      minorityType,
+      minority1Classes,
+      minority1Pupils,
+      minority2Classes,
+      minority2Pupils,
+      gymRows,
+      special1Classes,
+      special1Pupils,
+      special2Classes,
+      special2Pupils,
+      specialIIClasses,
+      specialIIPupils,
+    ],
+  );
+
   const { add: addPha, update: updatePha, remove: removePha } = createZsRowHandlers(setPhaRows, createEmptyPhaRow);
   const { add: addPsych, update: updatePsych, remove: removePsych } = createZsRowHandlers(setPsychRows, createEmptyPsychRow);
   const { add: addHealth, update: updateHealth, remove: removeHealth } = createZsRowHandlers(setHealthRows, createEmptyHealthRow);
@@ -1232,19 +1290,21 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
       }),
     );
     const text = plain.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
-    const win = window.open("", "_blank", "width=900,height=700");
-    if (!win) return;
-    win.document.write(
+    const html =
       `<!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"/><title>Shrnutí kalkulačky ZŠ</title>` +
-        `<style>${APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES}` +
-        `h1{font-size:12pt;margin:0 0 8px;font-weight:800}` +
-        `.box{border:1px solid #94a3b8;border-radius:6px;padding:10px 12px;background:#fff}` +
-        `</style></head><body class="print-summary-doc"><main class="print-summary-doc__main">` +
-        `<h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div></main>${getAppAuthorPrintFooterHtml()}</body></html>`,
-    );
-    win.document.close();
-    win.focus();
-    win.print();
+      `<style>${APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES}` +
+      `h1{font-size:12pt;margin:0 0 8px;font-weight:800}` +
+      `.box{border:1px solid #94a3b8;border-radius:6px;padding:10px 12px;background:#fff}` +
+      `</style></head><body class="print-summary-doc"><main class="print-summary-doc__main">` +
+      `<h1>Shrnutí kalkulačky ZŠ</h1><div class="box">${text}</div></main>${getAppAuthorPrintFooterHtml()}</body></html>`;
+    const printResult = openPrintHtmlWindow(html);
+    if (!printResult.ok) {
+      setUiNotice(
+        printResult.reason === "blocked"
+          ? "Tisk se nepodařil – povolte vyskakovací okna pro tuto stránku."
+          : "Tisk shrnutí se nepodařil otevřít.",
+      );
+    }
   };
 
   const zsValidationInput = useMemo(
@@ -1526,6 +1586,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
   } = useZsPageDerivedState({
     tab,
     warnings,
+    bandUpgradeHints,
     validation: zsValidationInput,
     summary: zsSummaryInput,
     exportParams: zsExportParams,

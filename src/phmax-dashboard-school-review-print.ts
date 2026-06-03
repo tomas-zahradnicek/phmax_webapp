@@ -1,4 +1,5 @@
-import type { CrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
+import { CS_HOURS_PER_WEEK_SHORT, formatCsNumberOrDash } from "./cs-format";
+import { formatCrossPhmaxSliceLabel, type CrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
 
 export type SchoolReviewPrintModuleRow = {
   label: string;
@@ -28,7 +29,7 @@ export function buildSchoolReviewPrintHtml(input: SchoolReviewPrintInput): strin
       ? `<ul>${input.coherenceWarnings.map((w) => `<li>${escapeHtml(w)}</li>`).join("")}</ul>`
       : "<p>Žádná upozornění koherence.</p>";
   const slices = input.crossPhmax.slices
-    .map((s) => `<li>${escapeHtml(s.label)}: ${s.phmax ?? "–"} h/týden${s.incomplete ? " (neúplný)" : ""}</li>`)
+    .map((s) => `<li>${escapeHtml(formatCrossPhmaxSliceLabel(s))}${s.incomplete ? " (neúplný)" : ""}</li>`)
     .join("");
 
   return `<!DOCTYPE html>
@@ -50,7 +51,7 @@ export function buildSchoolReviewPrintHtml(input: SchoolReviewPrintInput): strin
   <p class="muted">Vygenerováno: ${escapeHtml(input.generatedAt)} · PHmax webapp ${escapeHtml(input.appVersion)}</p>
   <p><strong>Scénář:</strong> ${escapeHtml(input.scenarioLabel)}</p>
   <h2>Součet PHmax (PV + ŠD + ZŠ + SŠ)</h2>
-  <p><strong>${input.crossPhmax.totalPhmax ?? "–"}</strong> h/týden
+  <p><strong>${escapeHtml(formatCsNumberOrDash(input.crossPhmax.totalPhmax))}</strong> ${escapeHtml(CS_HOURS_PER_WEEK_SHORT)}
     ${input.crossPhmax.hasIncomplete ? " – některé moduly neúplné" : ""}</p>
   <ul>${slices}</ul>
   <h2>Stav modulů</h2>
@@ -74,10 +75,15 @@ function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-export function openSchoolReviewPrintWindow(html: string): void {
-  const win = window.open("", "_blank", "noopener,noreferrer");
-  if (!win) return;
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
+export type OpenSchoolReviewPrintResult =
+  | { ok: true }
+  | { ok: false; reason: "blocked" | "failed" };
+
+/**
+ * Otevře náhled tisku přes blob URL – funguje i s noopener (document.write na about:blank selhává).
+ */
+import { openPrintHtmlWindow, type OpenPrintHtmlResult } from "./phmax-open-print-html";
+
+export function openSchoolReviewPrintWindow(html: string): OpenSchoolReviewPrintResult {
+  return openPrintHtmlWindow(html) as OpenPrintHtmlResult;
 }

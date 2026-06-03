@@ -20,8 +20,10 @@ import {
   buildSchoolReviewPrintHtml,
   openSchoolReviewPrintWindow,
 } from "./phmax-dashboard-school-review-print";
+import { buildDashboardBandHints } from "./phmax-dashboard-band-hints";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { ProductViewPills, type ProductView } from "./ProductViewPills";
+import { CS_HOURS_PER_WEEK_SHORT, formatCsNumberOrDash } from "./cs-format";
 import { round2 } from "./phmax-zs-logic";
 import { computePvPhmaxTotal, getPhaMaxPv, type PvProvozKind } from "./phmax-pv-logic";
 import { calculateNv75DeputyBank } from "./nv75-deputy-bank";
@@ -64,7 +66,9 @@ import {
   PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
   readSchoolScenarioLabel,
 } from "./phmax-school-scenario-export";
-import { buildPhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
+import { buildPhmaxIsHandoffPayload, type PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
+import type { HandoffApplyResult } from "./phmax-is-handoff-apply";
+import { parseImportFileList } from "./phmax-import-xlsx";
 import { crossPhmaxAuditCoherenceWarnings } from "./phmax-cross-phmax-coherence";
 import { buildDashboardExportChecklist } from "./phmax-dashboard-export-checklist";
 import {
@@ -480,20 +484,18 @@ function buildDashboardRows(): DashboardRow[] {
       status: dashboardModuleFillLabel(
         pv.present,
         derivePvDashboardVerdict(pv),
-        pv.phmax != null ? String(pv.phmax) : undefined,
+        pv.phmax != null ? formatCsNumberOrDash(pv.phmax) : undefined,
       ),
       primaryKpi: {
         label: "PHmax",
-        value: pv.phmax != null ? String(pv.phmax) : "–",
+        value: formatCsNumberOrDash(pv.phmax),
       },
       secondaryKpis: [
-        { label: "PHAmax", value: pv.pha != null ? String(pv.pha) : "–" },
+        { label: "PHAmax", value: formatCsNumberOrDash(pv.pha) },
         { label: "Pracoviště", value: String(pv.rowCount) },
       ],
       detail: pv.present
-        ? `Pracoviště: ${pv.rowCount}${pv.incomplete ? " · součet PHmax může být neúplný" : ""} · PHmax: ${
-            pv.phmax ?? "–"
-          } · PHAmax: ${pv.pha ?? "–"}`
+        ? `Pracoviště: ${pv.rowCount}${pv.incomplete ? " · součet PHmax může být neúplný" : ""} · PHmax: ${formatCsNumberOrDash(pv.phmax)} · PHAmax: ${formatCsNumberOrDash(pv.pha)}`
         : "Po prvním uložení v PV se zde objeví orientační PHmax.",
       namedBackups: namedCount(LS_PV_NAMED),
       lastVisit: formatDashboardProductVisit("pv"),
@@ -506,16 +508,16 @@ function buildDashboardRows(): DashboardRow[] {
       status: dashboardModuleFillLabel(Boolean(sd), sd ? deriveSdDashboardVerdict(sd) : null),
       primaryKpi: {
         label: sd?.phmax != null ? "PHmax" : "Oddělení",
-        value: sd?.phmax != null ? String(sd.phmax) : sd ? String(sd.departments) : "–",
+        value: sd?.phmax != null ? formatCsNumberOrDash(sd.phmax) : sd ? String(sd.departments) : "–",
       },
       secondaryKpis: [
         { label: "Účastníci", value: sd ? String(sd.pupils) : "–" },
         { label: sd?.phmax != null ? "Oddělení" : "Režim", value: sd ? (sd.phmax != null ? String(sd.departments) : sd.inputMode === "detail" ? "detailní" : "souhrnný") : "–" },
-        ...(sd?.pha != null ? [{ label: "PHAmax", value: String(sd.pha) }] : []),
+        ...(sd?.pha != null ? [{ label: "PHAmax", value: formatCsNumberOrDash(sd.pha) }] : []),
       ],
       detail: sd
         ? sd.phmax != null
-          ? `PHmax ${sd.phmax}${sd.pha != null ? `, PHAmax ${sd.pha}` : ""} · účastníci ${sd.pupils}, oddělení ${sd.departments}, režim ${sd.inputMode === "detail" ? "detailní" : "souhrnný"}.`
+          ? `PHmax ${formatCsNumberOrDash(sd.phmax)}${sd.pha != null ? `, PHAmax ${formatCsNumberOrDash(sd.pha)}` : ""} · účastníci ${sd.pupils}, oddělení ${sd.departments}, režim ${sd.inputMode === "detail" ? "detailní" : "souhrnný"}.`
           : `Účastníci: ${sd.pupils}, oddělení: ${sd.departments}, režim: ${sd.inputMode === "detail" ? "detailní" : "souhrnný"} · PHmax nelze dopočítat – doplňte vstupy v modulu ŠD.`
         : "Po uložení stavu v ŠD se zde zobrazí základ vstupů.",
       namedBackups: namedCount(LS_SD_NAMED),
@@ -541,18 +543,18 @@ function buildDashboardRows(): DashboardRow[] {
                 detail: "",
               }
             : null,
-        zsTotals != null ? String(zsTotals.totalPhmax) : undefined,
+        zsTotals != null ? formatCsNumberOrDash(zsTotals.totalPhmax) : undefined,
       ),
       primaryKpi: {
         label: "PHmax",
-        value: zsTotals != null ? String(zsTotals.totalPhmax) : "–",
+        value: formatCsNumberOrDash(zsTotals?.totalPhmax),
       },
       secondaryKpis: [
-        { label: "PHAmax", value: zsTotals != null ? String(zsTotals.totalPha) : "–" },
-        { label: "PHPmax", value: zsTotals != null ? String(zsTotals.totalPhp) : "–" },
+        { label: "PHAmax", value: formatCsNumberOrDash(zsTotals?.totalPha) },
+        { label: "PHPmax", value: formatCsNumberOrDash(zsTotals?.totalPhp) },
       ],
       detail: zsTotals
-        ? `Součty z autosave (záložka ${String(zsTotals.tab ?? "–")}): PHmax ${zsTotals.totalPhmax}, PHAmax ${zsTotals.totalPha}, PHPmax ${zsTotals.totalPhp}.`
+        ? `Součty z autosave (záložka ${String(zsTotals.tab ?? "–")}): PHmax ${formatCsNumberOrDash(zsTotals.totalPhmax)}, PHAmax ${formatCsNumberOrDash(zsTotals.totalPha)}, PHPmax ${formatCsNumberOrDash(zsTotals.totalPhp)}.`
         : zsSnapshotHasAnyInput()
           ? "Stav ZŠ je uložen; otevřete ZŠ – po uložení autosave se doplní řádek _phmaxAuditTotals pro souhrnné PHmax/PHAmax/PHPmax."
           : "Zatím nebyl uložen žádný stav ZŠ v tomto prohlížeči.",
@@ -563,7 +565,7 @@ function buildDashboardRows(): DashboardRow[] {
           ? {
               tone: "ok",
               label: "Souhrn z autosave",
-              detail: `PHmax ${zsTotals.totalPhmax}, PHAmax ${zsTotals.totalPha}, PHPmax ${zsTotals.totalPhp} (záložka ${String(zsTotals.tab ?? "phmax")}).`,
+              detail: `PHmax ${formatCsNumberOrDash(zsTotals.totalPhmax)}, PHAmax ${formatCsNumberOrDash(zsTotals.totalPha)}, PHPmax ${formatCsNumberOrDash(zsTotals.totalPhp)} (záložka ${String(zsTotals.tab ?? "phmax")}).`,
             }
           : zsSnapshotHasAnyInput()
             ? {
@@ -580,21 +582,21 @@ function buildDashboardRows(): DashboardRow[] {
       status: dashboardModuleFillLabel(
         ss.present,
         deriveSsDashboardVerdict(),
-        ss.phmax != null ? String(ss.phmax) : undefined,
+        ss.phmax != null ? formatCsNumberOrDash(ss.phmax) : undefined,
       ),
       primaryKpi: {
         label: "PHmax",
-        value: ss.phmax != null ? String(ss.phmax) : "–",
+        value: formatCsNumberOrDash(ss.phmax),
       },
       secondaryKpis: [
         {
           label: "PHAmax PrŠ",
-          value: ss.phamaxPractical != null ? String(ss.phamaxPractical) : "–",
+          value: formatCsNumberOrDash(ss.phamaxPractical),
         },
         { label: "Řádky", value: String(ss.rowCount) },
       ],
       detail: ss.present
-        ? `Řádky evidence: ${ss.rowCount}, součet PHmax (platné řádky): ${ss.phmax}${ss.phamaxPractical != null ? `, PHAmax (PrŠ, denní): ${ss.phamaxPractical}` : ""}`
+        ? `Řádky evidence: ${ss.rowCount}, součet PHmax (platné řádky): ${formatCsNumberOrDash(ss.phmax)}${ss.phamaxPractical != null ? `, PHAmax (PrŠ, denní): ${formatCsNumberOrDash(ss.phamaxPractical)}` : ""}`
         : "Po vyplnění SŠ se zde zobrazí orientační PHmax ze stejné logiky jako ve formuláři.",
       namedBackups: 0,
       lastVisit: formatDashboardProductVisit("ss"),
@@ -606,8 +608,8 @@ function buildDashboardRows(): DashboardRow[] {
       hasData: nv.rowCount > 0 || nv.bankTotal != null,
       status: dashboardModuleFillLabel(nv.rowCount > 0 || nv.bankTotal != null, deriveNv75DashboardVerdict(nv)),
       primaryKpi: {
-        label: "Banka h/týd",
-        value: nv.bankTotal != null ? String(nv.bankTotal) : "–",
+        label: "Banka h./týd.",
+        value: formatCsNumberOrDash(nv.bankTotal),
       },
       secondaryKpis: [
         { label: "Řádky", value: String(nv.rowCount) },
@@ -635,7 +637,10 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   const [exportDisclaimerConfirmed, setExportDisclaimerConfirmed] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importTemplateBusy, setImportTemplateBusy] = useState(false);
+  const [importUploadBusy, setImportUploadBusy] = useState(false);
+  const [importPendingPreview, setImportPendingPreview] = useState<PhmaxIsHandoffPayload | null>(null);
   const importTriggerRef = React.useRef<HTMLButtonElement>(null);
+  const importCardFileRef = React.useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(() => {
     setRefreshAt(new Date());
@@ -700,6 +705,24 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     setImportDialogOpen(true);
   }, []);
 
+  const handleImportFilePick = useCallback(
+    async (fileList: FileList | null) => {
+      if (!fileList?.length) return;
+      setImportUploadBusy(true);
+      try {
+        const payload = await parseImportFileList(Array.from(fileList));
+        setImportPendingPreview(payload);
+        setImportDialogOpen(true);
+      } catch (e) {
+        publishNotice(e instanceof Error ? e.message : "Soubor se nepodařilo načíst.");
+      } finally {
+        setImportUploadBusy(false);
+        if (importCardFileRef.current) importCardFileRef.current.value = "";
+      }
+    },
+    [publishNotice],
+  );
+
   const handleDownloadImportTemplate = useCallback(async () => {
     if (importTemplateBusy) return;
     setImportTemplateBusy(true);
@@ -714,7 +737,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   }, [importTemplateBusy, publishNotice]);
 
   const handleImportApplied = useCallback(
-    (payload: ReturnType<typeof buildPhmaxIsHandoffPayload>) => {
+    (payload: PhmaxIsHandoffPayload, result: HandoffApplyResult) => {
       const label = payload.schoolScenario.scenarioLabel?.trim();
       if (label) {
         localStorage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, label);
@@ -722,9 +745,12 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
       }
       setRefreshAt(new Date());
       dispatchPhmaxImportApplied();
-      publishNotice(
-        `Import uložen (PV, ZŠ${payload.schoolScenario.moduleSnapshots.sd ? ", ŠD" : ""}${payload.schoolScenario.moduleSnapshots.ss ? ", SŠ" : ""}). Součet PHmax: ${payload.schoolScenario.summary.totalPhmax ?? "–"} h/týden.`,
-      );
+      const mods = result.appliedModules.map((m) => m.toUpperCase()).join(", ");
+      let msg = `Import dokončen (${mods}). Scénář: ${result.scenarioLabel ?? "–"}. Ověřte výpočet v modulech. Součet PHmax: ${formatCsNumberOrDash(payload.schoolScenario.summary.totalPhmax)} ${CS_HOURS_PER_WEEK_SHORT}`;
+      if (result.warnings.length > 0) {
+        msg += ` Varování: ${result.warnings.join(" ")}`;
+      }
+      publishNotice(msg);
     },
     [publishNotice],
   );
@@ -777,6 +803,10 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   );
 
   const crossPhmax = buildCrossPhmaxSummary(rows, DASH_CALC_LABEL);
+  const dashboardBandHints = useMemo(() => {
+    void refreshAt;
+    return buildDashboardBandHints();
+  }, [refreshAt]);
 
   const attentionModuleLabels = attentionRows.map((r) => DASH_CALC_LABEL[r.id]);
   const attentionIds = new Set(attentionRows.map((r) => r.id));
@@ -821,7 +851,15 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
       disclaimer:
         "Orientační výpočet z autosave v tomto prohlížeči – neoficiální podklad před jednáním. NV75 a PV § 1d v cross-součtu nejsou.",
     });
-    openSchoolReviewPrintWindow(html);
+    const printResult = openSchoolReviewPrintWindow(html);
+    if (!printResult.ok) {
+      publishNotice(
+        printResult.reason === "blocked"
+          ? "Tisk se nepodařil – prohlížeč zablokoval vyskakovací okno. Povolte okna pro tuto stránku a zkuste znovu."
+          : "Tisk se nepodařil otevřít.",
+      );
+      return;
+    }
     publishNotice("Otevřeno okno pro tisk kontroly před jednáním.");
   }, [crossPhmax, rows, scenarioLabel, auditCoherenceWarnings, publishNotice]);
 
@@ -838,6 +876,13 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     const payload = {
       ...buildCrossPhmaxExportPayload(crossPhmax, attentionModuleLabels),
       coherenceWarnings: auditCoherenceWarnings,
+      displayForHumansCs: {
+        totalPhmax:
+          crossPhmax.totalPhmax != null
+            ? `${formatCsNumberOrDash(crossPhmax.totalPhmax)} ${CS_HOURS_PER_WEEK_SHORT}`
+            : null,
+        modules: crossPhmax.slices.map((s) => formatCrossPhmaxSliceLabel(s)),
+      },
     };
     downloadTextFile(
       exportFilenameStamped("phmax-cross-phmax", "json"),
@@ -848,12 +893,22 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   }, [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, afterDashboardJsonExport]);
 
   const downloadSchoolScenarioJson = useCallback(() => {
-    const payload = buildSchoolScenarioExportPayload(
+    const scenario = buildSchoolScenarioExportPayload(
       crossPhmax,
       attentionModuleLabels,
       scenarioLabel,
       auditCoherenceWarnings,
     );
+    const payload = {
+      ...scenario,
+      displayForHumansCs: {
+        totalPhmax:
+          scenario.summary.totalPhmax != null
+            ? `${formatCsNumberOrDash(scenario.summary.totalPhmax)} ${CS_HOURS_PER_WEEK_SHORT}`
+            : null,
+        modules: scenario.summary.slices.map((s) => formatCrossPhmaxSliceLabel(s)),
+      },
+    };
     downloadTextFile(
       exportFilenameStamped("phmax-skola-scenar", "json"),
       JSON.stringify(payload, null, 2),
@@ -869,7 +924,19 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
       scenarioLabel,
       auditCoherenceWarnings,
     );
-    const payload = buildPhmaxIsHandoffPayload(scenario);
+    const payload = {
+      ...buildPhmaxIsHandoffPayload(scenario),
+      schoolScenario: {
+        ...scenario,
+        displayForHumansCs: {
+          totalPhmax:
+            scenario.summary.totalPhmax != null
+              ? `${formatCsNumberOrDash(scenario.summary.totalPhmax)} ${CS_HOURS_PER_WEEK_SHORT}`
+              : null,
+          modules: scenario.summary.slices.map((s) => formatCrossPhmaxSliceLabel(s)),
+        },
+      },
+    };
     downloadTextFile(
       exportFilenameStamped("phmax-is-handoff", "json"),
       JSON.stringify(payload, null, 2),
@@ -1005,9 +1072,31 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             ))}
           </ol>
           <div className="dash-card__actions dash-school-import__actions">
+            <input
+              ref={importCardFileRef}
+              type="file"
+              data-testid="dash-import-file-card"
+              accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+              multiple
+              disabled={importUploadBusy}
+              style={{ display: "none" }}
+              onChange={(e) => void handleImportFilePick(e.target.files)}
+            />
             <button
+              ref={importTriggerRef}
               type="button"
               className="btn primary"
+              data-testid="dash-import-open-main"
+              disabled={importUploadBusy}
+              aria-busy={importUploadBusy}
+              title="Krok 3 – nahrát vyplněný Excel nebo CSV"
+              onClick={() => importCardFileRef.current?.click()}
+            >
+              {importUploadBusy ? "Načítám soubor…" : DASH_IMPORT_UPLOAD_LABEL}
+            </button>
+            <button
+              type="button"
+              className="btn ghost"
               data-testid="dash-import-download-template"
               disabled={importTemplateBusy}
               aria-busy={importTemplateBusy}
@@ -1015,16 +1104,6 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               onClick={() => void handleDownloadImportTemplate()}
             >
               {importTemplateBusy ? "Připravuji šablonu…" : DASH_IMPORT_TEMPLATE_LABEL}
-            </button>
-            <button
-              ref={importTriggerRef}
-              type="button"
-              className="btn ghost"
-              data-testid="dash-import-open-main"
-              title="Krok 3 – nahrát vyplněný Excel nebo CSV"
-              onClick={openImportDialog}
-            >
-              {DASH_IMPORT_UPLOAD_LABEL}
             </button>
           </div>
         </section>
@@ -1034,6 +1113,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           onClose={() => setImportDialogOpen(false)}
           onApplied={handleImportApplied}
           triggerRef={importTriggerRef}
+          pendingPreview={importPendingPreview}
+          onPendingPreviewConsumed={() => setImportPendingPreview(null)}
         />
 
         {continueRow ? (
@@ -1105,7 +1186,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               Sloučení autosave z modulů v tomto prohlížeči – neoficiální souhrn pro kontrolu. NV75 (banka odpočtů) a krácení PV § 1d v cross-součtu nejsou.
             </p>
             <p className="dash-cross-phmax__total" style={{ marginTop: 12, fontSize: "1.35rem" }}>
-              Celkem PHmax: <strong>{crossPhmax.totalPhmax != null ? crossPhmax.totalPhmax : "–"}</strong> h/týden
+              Celkem PHmax: <strong>{formatCsNumberOrDash(crossPhmax.totalPhmax)}</strong> {CS_HOURS_PER_WEEK_SHORT}
               {crossPhmax.hasIncomplete ? (
                 <span className="muted-text" style={{ display: "block", fontSize: "0.88rem", marginTop: 6 }}>
                   Některé moduly mají neúplný výpočet – součet může být podhodnocený.
@@ -1116,6 +1197,19 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   <strong>Upozornění:</strong> modul(y) {crossPhmaxMismatches.join(", ")} jsou zároveň ve Vyžaduje
                   pozornost – opravte vstupy před použitím součtu.
                 </p>
+              ) : null}
+              {dashboardBandHints.length > 0 ? (
+                <div style={{ marginTop: 12 }}>
+                  <strong style={{ fontSize: "0.92rem" }}>Orientace k vyššímu PHmax (z autosave)</strong>
+                  <ul className="muted-text" style={{ marginTop: 6, paddingLeft: "1.25rem", fontSize: "0.88rem" }}>
+                    {dashboardBandHints.map((hint) => (
+                      <li key={hint}>{hint}</li>
+                    ))}
+                  </ul>
+                  <p className="muted-text" style={{ marginTop: 6, fontSize: "0.85rem" }}>
+                    Jde o orientační odhad podle pásem v metodice – ověřte v modulu PV / ZŠ / ŠD.
+                  </p>
+                </div>
               ) : null}
               {auditCoherenceWarnings.length > 0 ? (
                 <ul className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.88rem", paddingLeft: "1.25rem" }}>

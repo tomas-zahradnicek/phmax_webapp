@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { PHMAX_IS_EXPORT_SCHEMA } from "./phmax-is-export-adapter";
 import { applyPhmaxIsHandoffToStorage } from "./phmax-is-handoff-apply";
-import { csvTextsToHandoffPayload, parseSemicolonCsv } from "./phmax-import-pv-zs";
+import { IMPORT_SD_LABELS } from "./phmax-import-columns";
+import { csvTextsToHandoffPayload, importTablesToHandoffPayload, parseSemicolonCsv } from "./phmax-import-pv-zs";
 import { classifyImportCsvText } from "./phmax-import-xlsx";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -35,6 +36,42 @@ describe("phmax-import-pv-zs", () => {
 
     const pv = payload.schoolScenario.moduleSnapshots.pv as { rows: unknown[] };
     expect(pv.rows.length).toBe(2);
+    const zs = payload.schoolScenario.moduleSnapshots.zs as { mode: string };
+    expect(zs.mode).toBe("phmax_full_zs");
+    expect(payload.schoolScenario.importBatchMeta?.school_id).toBeTruthy();
+  });
+
+  it("IMPORT_SD_LABELS: sloupec pupils je Počet účastníků", () => {
+    expect(IMPORT_SD_LABELS.pupils).toBe("Počet účastníků");
+  });
+
+  it("assertSameBatch hlásí číslo řádku v listu PV", () => {
+    const metaRows = parseSemicolonCsv(
+      readFileSync(path.join(templatesDir, "phmax-import-meta-v1.example.csv"), "utf8"),
+    );
+    const pvRows = parseSemicolonCsv(readFileSync(path.join(templatesDir, "phmax-import-pv-v1.example.csv"), "utf8"));
+    const zsRows = parseSemicolonCsv(
+      readFileSync(path.join(templatesDir, "phmax-import-zs-summary-v1.example.csv"), "utf8"),
+    );
+    const badPv = [...pvRows];
+    badPv[1] = { ...badPv[1]!, school_id: "JINY_SKOLA" };
+
+    expect(() =>
+      importTablesToHandoffPayload({
+        metaRows,
+        pvRows: badPv,
+        zsRows,
+      }),
+    ).toThrow(/PV, řádek 3/);
+  });
+
+  it("import bez volitelných listů přidá coherenceWarnings", () => {
+    const payload = csvTextsToHandoffPayload({
+      metaCsv: readFileSync(path.join(templatesDir, "phmax-import-meta-v1.example.csv"), "utf8"),
+      pvCsv: readFileSync(path.join(templatesDir, "phmax-import-pv-v1.example.csv"), "utf8"),
+      zsCsv: readFileSync(path.join(templatesDir, "phmax-import-zs-summary-v1.example.csv"), "utf8"),
+    });
+    expect(payload.schoolScenario.coherenceWarnings?.some((w) => w.includes("ŠD"))).toBe(true);
   });
 
   it("klasifikace CSV podle hlavičky", () => {

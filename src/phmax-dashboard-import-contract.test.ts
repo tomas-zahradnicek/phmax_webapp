@@ -13,6 +13,10 @@ describe("dashboard school import contract", () => {
   it("import dialog, šablona xlsx a sdílený parser", () => {
     expect(readSource("src/DashboardSchoolImportDialog.tsx")).toContain("dash-import-download-template-dialog");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("dash-import-download-template");
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain('data-testid="dash-import-open-main"');
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain('className="btn primary"');
+    expect(readSource("src/DashboardSchoolImportDialog.tsx")).toContain('className="btn primary"');
+    expect(readSource("src/DashboardSchoolImportDialog.tsx")).toContain("DASH_IMPORT_UPLOAD_LABEL");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("DASH_IMPORT_TEMPLATE_LABEL");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("dash-school-import__steps");
     expect(readSource("src/phmax-import-template-xlsx.ts")).toContain("downloadPhmaxImportTemplateXlsx");

@@ -1,4 +1,5 @@
 import type { ProductView } from "./ProductViewPills";
+import { CS_HOURS_PER_WEEK_SHORT, formatCsNumber } from "./cs-format";
 
 export type CrossPhmaxModuleId = Exclude<ProductView, "dash" | "nv75">;
 
@@ -29,8 +30,8 @@ export function parseDashboardKpiPhmax(value: string): number | null {
 export function formatCrossPhmaxSliceLabel(slice: CrossPhmaxSlice): string {
   if (!slice.hasData) return `${slice.label}: modul nevyplněn`;
   if (slice.phmax == null) return `${slice.label}: PHmax nedopočteno`;
-  if (slice.phmax === 0) return `${slice.label}: PHmax = 0 h/týden`;
-  return `${slice.label}: ${slice.phmax} h/týden`;
+  if (slice.phmax === 0) return `${slice.label}: PHmax = 0 ${CS_HOURS_PER_WEEK_SHORT}`;
+  return `${slice.label}: ${formatCsNumber(slice.phmax)} ${CS_HOURS_PER_WEEK_SHORT}`;
 }
 
 /** Orientační součet PHmax z modulů s autosave (NV75 – banka – se nezapočítává). */

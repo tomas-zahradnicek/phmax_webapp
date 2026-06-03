@@ -41,7 +41,7 @@ export const IMPORT_ZS_SUMMARY_LABELS = {
 export const IMPORT_SD_LABELS = {
   school_id: "ID školy",
   scenario_label: "Název scénáře",
-  pupils: "Počet žáků",
+  pupils: "Počet účastníků",
   departments: "Počet oddělení",
   input_mode: "Režim (souhrn/detail)",
 } as const;

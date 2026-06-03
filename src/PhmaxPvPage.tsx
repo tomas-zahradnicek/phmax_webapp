@@ -30,6 +30,7 @@ import { exportCsvLocalized, downloadTextFile, exportFilenameStamped } from "./e
 import { heroExampleOptionsFromKeys } from "./HeroExampleSelect";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
+import { buildPvDurationUpgradeHint } from "./phmax-pv-band-sensitivity";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
@@ -409,6 +410,22 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       return { row, computed, phaMax, provozLabel, reduction1d3, effectivePhmax };
     });
   }, [rows]);
+
+  const pvBandUpgradeHints = useMemo(() => {
+    const out: string[] = [];
+    for (const c of rowComputations) {
+      if (c.computed.totalPhmax == null) continue;
+      const hint = buildPvDurationUpgradeHint({
+        workplaceLabel: c.row.label,
+        provoz: c.row.provoz,
+        classCount: c.row.classCount,
+        avgHoursPerDay: c.row.avgHours,
+      });
+      if (hint) out.push(hint);
+      if (out.length >= 4) break;
+    }
+    return out;
+  }, [rowComputations]);
 
   const pvMethodologyActiveCells: PvMethodologyActiveCell[] = useMemo(() => {
     const out: PvMethodologyActiveCell[] = [];
@@ -872,6 +889,13 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
       {pvHasInputIssue ? (
         <CalculatorInputIssueBanner
           {...calculatorInputIssueBannerFromVerdict(pvVerdict, pvScrollToInputs)}
+        />
+      ) : null}
+
+      {!pvHasInputIssue && pvBandUpgradeHints.length > 0 ? (
+        <CalculatorInputIssueBanner
+          label="Orientace k vyššímu pásmu PHmax (PV)"
+          items={pvBandUpgradeHints.map((label) => ({ label }))}
         />
       ) : null}
 

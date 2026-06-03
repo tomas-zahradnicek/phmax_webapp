@@ -21,6 +21,12 @@ export type SchoolScenarioExportPayload = Omit<CrossPhmaxExportPayload, "schema"
   scenarioLabel: string;
   /** Varování koherence audit / přepočet v době exportu. */
   coherenceWarnings: readonly string[];
+  /** Meta z importní šablony (volitelné, jen po importu ze školy). */
+  importBatchMeta?: {
+    school_id: string;
+    school_name: string;
+    school_year: string;
+  };
 };
 
 export function readSchoolScenarioLabel(): string {
