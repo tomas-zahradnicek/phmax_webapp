@@ -7,6 +7,7 @@ import {
   recordLastActiveProduct,
   type DashboardVisitProduct,
 } from "./phmax-dashboard-visits";
+import { applyPhmaxDocumentHead } from "./phmax-document-head";
 import { readInitialProductView } from "./product-view-url";
 import { UiToastHost } from "./ui-toast";
 
@@ -37,6 +38,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    applyPhmaxDocumentHead(productView);
     if (productView !== "dash") {
       const product = productView as DashboardVisitProduct;
       recordDashboardProductVisit(product);

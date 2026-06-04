@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://phmax-webapp.vercel.app/?view=dash</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://phmax-webapp.vercel.app/?view=pv</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://phmax-webapp.vercel.app/?view=sd</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://phmax-webapp.vercel.app/?view=zs</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://phmax-webapp.vercel.app/?view=ss</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://phmax-webapp.vercel.app/?view=nv75</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+</urlset>

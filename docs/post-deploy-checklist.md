@@ -2,6 +2,9 @@
 
 Orientační checklist po push na `master` a deployi na Vercel (např. https://phmax-webapp.vercel.app).
 
+**Pilot s řediteli:** viz [pilot-reditel-5min.md](./pilot-reditel-5min.md).  
+**SEO:** `public/robots.txt`, `public/sitemap.xml`; title/meta/OG/JSON-LD se mění podle `?view=` (viz `src/phmax-document-head.ts`).
+
 ## Prohlížeč
 
 1. **Tvrdé obnovení** – `Ctrl+F5` (Windows) / `Cmd+Shift+R` (Mac), případně anonymní okno.
