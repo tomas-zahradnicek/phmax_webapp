@@ -52,6 +52,9 @@ export function Nv75HeroHeader({
 }: Nv75HeroHeaderProps) {
   return (
     <header className="hero hero--feature" ref={heroHeaderRef as React.Ref<HTMLElement>}>
+      <div className="hero__orb hero__orb--one" />
+      <div className="hero__orb hero__orb--two" />
+
       <div className="hero__pills-row">
         <ProductViewPills productView={productView} setProductView={setProductView} />
         <CalculatorHeroDisplayControls

@@ -9130,7 +9130,18 @@ select:focus {
   display: none;
 }
 
-.calculator-shell--expert .hero__grid--context {
+.calculator-shell--expert .hero__grid--context:not(.dash-hero-brand) {
+  display: none;
+}
+
+/* Expertní režim skrývá dlouhý kontext, logo zůstává u titulku v expert strip */
+.calculator-shell--expert .hero__grid--context.dash-hero-brand {
+  display: flex;
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+
+.calculator-shell--expert .hero__grid--context.dash-hero-brand .dash-hero-brand__copy {
   display: none;
 }
 
