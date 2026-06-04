@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
+import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import {
   CALCULATOR_WORKSPACE_DOCK_LABEL,
   PHMAX_SS_ONBOARDING_LS_KEY,
@@ -1086,7 +1087,12 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
 
           </>
         }
-        afterWorkspace={viewMode === "expert" ? <MethodologyStrip /> : null}
+        afterWorkspace={
+          <>
+            <PhmaxModuleSeoSection view="ss" setProductView={setProductView} />
+            {viewMode === "expert" ? <MethodologyStrip /> : null}
+          </>
+        }
         footer={
           <footer className="zs-app-footer">
             <HeroStatusBar

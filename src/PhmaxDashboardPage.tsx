@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
+import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import {
   CALCULATOR_LIMITS_NOTE,
   DASH_IMPORT_HINT,
@@ -1702,6 +1703,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         </details>
 
         </main>
+
+        <PhmaxModuleSeoSection view="dash" setProductView={setProductView} />
 
         <footer className="zs-app-footer">
           <HeroStatusBar

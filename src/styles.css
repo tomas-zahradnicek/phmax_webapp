@@ -9939,6 +9939,52 @@ select:focus {
   letter-spacing: 0.01em;
 }
 
+.phmax-module-seo {
+  margin-top: 16px;
+}
+
+.phmax-module-seo__title {
+  margin-bottom: 10px;
+}
+
+.phmax-module-seo__subtitle {
+  margin: 14px 0 6px;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.phmax-module-seo__text {
+  margin: 0 0 8px;
+  line-height: 1.55;
+}
+
+.phmax-module-seo__related-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.phmax-module-seo__related-link {
+  font-weight: 750;
+}
+
+.phmax-module-seo__faq-item {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.phmax-module-seo__faq-item summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.phmax-module-seo__methodology {
+  margin: 12px 0 0;
+  font-size: 0.88rem;
+}
+
 .dash-role-segmented {
   display: flex;
   flex-wrap: wrap;

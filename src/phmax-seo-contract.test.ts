@@ -12,14 +12,23 @@ function readSource(rel: string): string {
 describe("SEO fáze A contract", () => {
   it("App aplikuje document head při změně view", () => {
     expect(readSource("src/App.tsx")).toContain("applyPhmaxDocumentHead");
+    expect(readSource("src/App.tsx")).toContain("writeProductViewUrl");
     expect(readSource("src/phmax-document-head.ts")).toContain("SoftwareApplication");
+    expect(readSource("src/phmax-document-head.ts")).toContain("FAQPage");
     expect(readSource("src/phmax-document-head.ts")).toContain("og:description");
+  });
+
+  it("čisté URL a SEO bloky pod kalkulačkou", () => {
+    expect(readSource("src/product-view-paths.ts")).toContain("/phmax-zakladni-skola");
+    expect(readSource("src/PhmaxZsPage.tsx")).toContain("PhmaxModuleSeoSection");
+    expect(readSource("src/PhmaxModuleSeoSection.tsx")).toContain("Nejčastější dotazy");
   });
 
   it("robots a sitemap ve public", () => {
     expect(readSource("public/robots.txt")).toContain("Sitemap:");
-    expect(readSource("public/sitemap.xml")).toContain("?view=dash");
-    expect(readSource("public/sitemap.xml")).toContain("?view=zs");
+    expect(readSource("public/sitemap.xml")).toContain("/prehled");
+    expect(readSource("public/sitemap.xml")).toContain("/phmax-zakladni-skola");
+    expect(readSource("vercel.json")).toContain("rewrites");
   });
 
   it("pilotní materiál pro ředitele", () => {

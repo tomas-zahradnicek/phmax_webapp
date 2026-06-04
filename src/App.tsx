@@ -8,7 +8,7 @@ import {
   type DashboardVisitProduct,
 } from "./phmax-dashboard-visits";
 import { applyPhmaxDocumentHead } from "./phmax-document-head";
-import { readInitialProductView } from "./product-view-url";
+import { isLegacyViewQueryUrl, readInitialProductView, writeProductViewUrl } from "./product-view-url";
 import { UiToastHost } from "./ui-toast";
 
 const PhmaxPvPage = lazy(() => import("./PhmaxPvPage").then((m) => ({ default: m.PhmaxPvPage })));
@@ -28,13 +28,21 @@ export default function App() {
       recordLastActiveProduct(product);
     }
     window.scrollTo(0, 0);
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.set("view", v);
-      window.history.replaceState({}, "", url.toString());
-    } catch {
-      /* ignore */
+    writeProductViewUrl(v, "push");
+  }, []);
+
+  useEffect(() => {
+    if (isLegacyViewQueryUrl()) {
+      writeProductViewUrl(readInitialProductView(), "replace");
     }
+  }, []);
+
+  useEffect(() => {
+    const onPopState = () => {
+      setProductViewState(readInitialProductView());
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
   useEffect(() => {

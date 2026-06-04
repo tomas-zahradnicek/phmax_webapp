@@ -19,7 +19,9 @@ describe("phmax-document-head", () => {
   });
 
   it("canonical URL používá parametr view", () => {
-    expect(buildPhmaxCanonicalUrl("zs", "https://example.test")).toBe("https://example.test/?view=zs");
+    expect(buildPhmaxCanonicalUrl("zs", "https://example.test")).toBe(
+      "https://example.test/phmax-zakladni-skola",
+    );
     expect(listPhmaxSitemapUrls("https://example.test")).toHaveLength(PRODUCT_VIEW_CODES.length);
   });
 });

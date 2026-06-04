@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
+import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import { LegisTooltipRef } from "./LegisTooltipRef";
 import {
   APP_AUTHOR_CREDIT_LINE,
@@ -1413,6 +1414,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
 
           </>
           }
+          afterWorkspace={<PhmaxModuleSeoSection view="nv75" setProductView={setProductView} />}
           footer={
             <footer className="zs-app-footer">
               <HeroStatusBar variant="nv75" placement="footer" productLabel={PRODUCT_CALCULATOR_TITLES.nv75} lastSavedAt={lastSavedAt} notice={uiNotice} />

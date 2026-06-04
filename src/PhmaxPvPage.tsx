@@ -31,6 +31,7 @@ import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
+import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import { GlossaryDialog, type GlossaryTerm } from "./GlossaryDialog";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, PvLegisRef } from "./PhmaxProductLegisUi";
@@ -1143,6 +1144,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         }
         afterWorkspace={
           <>
+            <PhmaxModuleSeoSection view="pv" setProductView={setProductView} />
             {viewMode === "expert" ? <ProductLegisContextPanel variant="pv" /> : null}
             {viewMode === "expert" ? <MethodologyStrip /> : null}
           </>

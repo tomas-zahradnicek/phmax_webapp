@@ -3,7 +3,7 @@
 Orientační checklist po push na `master` a deployi na Vercel (např. https://phmax-webapp.vercel.app).
 
 **Pilot s řediteli:** viz [pilot-reditel-5min.md](./pilot-reditel-5min.md).  
-**SEO:** `public/robots.txt`, `public/sitemap.xml`; title/meta/OG/JSON-LD se mění podle `?view=` (viz `src/phmax-document-head.ts`).
+**SEO:** `public/robots.txt`, `public/sitemap.xml`, `vercel.json` (SPA rewrite); title/meta/OG/JSON-LD + FAQ schema podle modulu (`src/phmax-document-head.ts`). Čisté URL: `/prehled`, `/phmax-zakladni-skola`, … (`src/product-view-paths.ts`). SEO bloky pod kalkulačkou: `PhmaxModuleSeoSection`.
 
 ## Prohlížeč
 

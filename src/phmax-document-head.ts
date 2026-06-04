@@ -1,4 +1,6 @@
-import { PRODUCT_VIEW_CODES, type ProductViewCode } from "./calculator-ui-constants";
+import type { ProductViewCode } from "./calculator-ui-constants";
+import { PHMAX_SEO_MODULE_CONTENT } from "./phmax-seo-module-content";
+import { buildProductViewPageUrl, listProductViewPathUrls } from "./product-view-paths";
 
 export const PHMAX_SITE_NAME = "Ředitelský průvodce";
 
@@ -51,6 +53,7 @@ export const PHMAX_DOCUMENT_HEAD: Record<ProductViewCode, PhmaxDocumentHeadMeta>
 };
 
 const PHMAX_JSON_LD_ID = "phmax-software-application-jsonld";
+const PHMAX_FAQ_JSON_LD_ID = "phmax-faq-jsonld";
 
 export function resolvePhmaxSiteOrigin(): string {
   if (typeof window !== "undefined" && window.location?.origin) {
@@ -60,9 +63,7 @@ export function resolvePhmaxSiteOrigin(): string {
 }
 
 export function buildPhmaxCanonicalUrl(view: ProductViewCode, origin = resolvePhmaxSiteOrigin()): string {
-  const url = new URL("/", origin);
-  url.searchParams.set("view", view);
-  return url.href;
+  return buildProductViewPageUrl(view, origin);
 }
 
 function upsertMeta(attribute: "name" | "property", key: string, content: string): void {
@@ -131,9 +132,27 @@ export function applyPhmaxDocumentHead(view: ProductViewCode): void {
       priceCurrency: "CZK",
     },
   });
+
+  const faq = PHMAX_SEO_MODULE_CONTENT[view].faq;
+  if (faq.length > 0) {
+    upsertJsonLd(PHMAX_FAQ_JSON_LD_ID, {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faq.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.answer,
+        },
+      })),
+    });
+  } else {
+    document.getElementById(PHMAX_FAQ_JSON_LD_ID)?.remove();
+  }
 }
 
-/** Všechny URL pro sitemap (shodné s `?view=` routingem). */
+/** Všechny URL pro sitemap (čisté path). */
 export function listPhmaxSitemapUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): string[] {
-  return PRODUCT_VIEW_CODES.map((view) => buildPhmaxCanonicalUrl(view, origin));
+  return listProductViewPathUrls(origin);
 }

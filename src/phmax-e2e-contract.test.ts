@@ -45,13 +45,12 @@ describe("E2E smoke contract", () => {
     expect(fs.existsSync(path.resolve(repoRoot, "docs/acceptance-pv-zs-nv75.md"))).toBe(true);
   });
 
-  it("Dashboard KPI strip zobrazuje stav modulu a je klikatelný", () => {
+  it("Dashboard KPI kompaktní strip je klikatelný", () => {
     const dash = readSource("src/PhmaxDashboardPage.tsx");
-    expect(dash).toContain("dash-kpi-tile__status");
-    expect(dash).toContain("dash-kpi-tile__detail");
-    expect(dash).toContain("dash-kpi-tile--clickable");
+    expect(dash).toContain("dash-kpi-compact");
+    expect(dash).toContain("dash-kpi-compact__cell");
     expect(dash).toContain("openDashboardKpiModule");
     expect(dash).toContain("Začít u ukázky");
-    expect(readSource("src/styles.css")).toContain(".dash-kpi-tile__status--ok");
+    expect(readSource("src/styles.css")).toContain(".dash-kpi-compact__value");
   });
 });

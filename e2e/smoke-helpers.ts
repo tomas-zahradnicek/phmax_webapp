@@ -1,5 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import type { ProductView } from "../src/ProductViewPills";
+import { PRODUCT_VIEW_PATH } from "../src/product-view-paths";
 
 /** Vymaže klíče localStorage před načtením stránky (izolovaný smoke stav). */
 export async function clearLocalStorageKeys(page: Page, keys: readonly string[]): Promise<void> {
@@ -9,7 +11,8 @@ export async function clearLocalStorageKeys(page: Page, keys: readonly string[])
 }
 
 export async function gotoProductView(page: Page, view: string): Promise<void> {
-  await page.goto(`/?view=${view}`);
+  const path = PRODUCT_VIEW_PATH[view as ProductView];
+  await page.goto(path ?? `/?view=${view}`);
 }
 
 /** Dashboard – otevře modul ze sekce Vyžaduje pozornost (PV, ZŠ, SŠ, …). */
@@ -25,8 +28,8 @@ export async function openDashboardAttentionModule(page: Page, moduleLabel: stri
 /** Dashboard – otevře modul přes KPI dlaždici (včetně ok stavu). */
 export async function openDashboardKpiModule(page: Page, moduleLabel: string): Promise<void> {
   await gotoProductView(page, "dash");
-  const tile = page.locator(".dash-kpi-tile").filter({
-    has: page.locator(".dash-kpi-tile__module", { hasText: moduleLabel }),
+  const tile = page.locator(".dash-kpi-compact__cell").filter({
+    has: page.locator(".dash-kpi-compact__label", { hasText: moduleLabel }),
   });
   await expect(tile).toBeVisible();
   await tile.click();

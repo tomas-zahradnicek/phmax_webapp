@@ -358,7 +358,7 @@ test.describe("Dashboard deep-link", () => {
       ssRowId: 97,
     });
     await gotoProductView(page, "dash");
-    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
     await expect(page.getByRole("button", { name: "Stáhnout JSON součtu PHmax" })).toBeDisabled();
   });
 
@@ -369,7 +369,7 @@ test.describe("Dashboard deep-link", () => {
       ssRowId: 91,
     });
     await gotoProductView(page, "dash");
-    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
     await expect(page.locator(".dash-cross-phmax")).toContainText(/PV:/);
     await expect(page.locator(".dash-cross-phmax")).toContainText(/ŠD:/);
     await expect(page.locator(".dash-cross-phmax")).toContainText(/ZŠ:/);
@@ -385,7 +385,7 @@ test.describe("Dashboard deep-link", () => {
       ssRowId: 92,
     });
     await gotoProductView(page, "dash");
-    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
     await confirmDashboardExportDisclaimer(page);
     const exportBtn = page.getByRole("button", { name: "Export pro IS školy (JSON)" });
     await exportBtn.scrollIntoViewIfNeeded();
@@ -421,7 +421,7 @@ test.describe("Dashboard deep-link", () => {
     });
 
     await gotoProductView(page, "dash");
-    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
     await confirmDashboardExportDisclaimer(page);
     const postBtn = page.getByRole("button", { name: "Odeslat handoff na IS (POST)" });
     await postBtn.scrollIntoViewIfNeeded();
@@ -444,7 +444,7 @@ test.describe("Dashboard deep-link", () => {
     });
 
     await gotoProductView(page, "dash");
-    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
     await confirmDashboardExportDisclaimer(page);
     const scenarioBtn = page.getByRole("button", { name: "Scénář celá škola (JSON)" });
     await scenarioBtn.scrollIntoViewIfNeeded();
@@ -469,7 +469,7 @@ test.describe("Dashboard deep-link", () => {
     });
 
     await gotoProductView(page, "dash");
-    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
     await confirmDashboardExportDisclaimer(page);
     const jsonBtn = page.getByRole("button", { name: "Stáhnout JSON součtu PHmax" });
     await jsonBtn.scrollIntoViewIfNeeded();
@@ -493,7 +493,7 @@ test.describe("Dashboard deep-link", () => {
     });
 
     await gotoProductView(page, "dash");
-    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
     await expect(page.locator(".dash-cross-phmax")).toContainText(/PV.*dashboard Σ.*audit autosave/i);
   });
 
@@ -506,7 +506,7 @@ test.describe("Dashboard deep-link", () => {
     });
 
     await gotoProductView(page, "dash");
-    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
     await expect(page.locator(".dash-cross-phmax")).toContainText(/ZŠ.*přepočet/i);
   });
 });

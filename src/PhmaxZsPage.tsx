@@ -46,6 +46,7 @@ import {
 import { buildZsConnectedBlocks } from "./phmax-zs-connected-blocks";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
+import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
@@ -2086,6 +2087,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           }
           afterWorkspace={
             <>
+              <PhmaxModuleSeoSection view="zs" setProductView={setProductView} />
               {viewMode === "expert" ? <ProductLegisContextPanel variant="zs" /> : null}
               {viewMode === "expert" ? <MethodologyStrip /> : null}
             </>

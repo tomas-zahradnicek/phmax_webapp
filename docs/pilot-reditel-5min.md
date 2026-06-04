@@ -13,7 +13,7 @@
 
 ## Odkaz na test
 
-- Produkce: https://phmax-webapp.vercel.app/?view=dash (přehled)
+- Produkce: https://phmax-webapp.vercel.app/prehled (přehled; staré `?view=dash` přesměruje automaticky)
 - Případně vlastní deploy po nasazení `master`
 
 Doporučení: **anonymní okno** nebo jiný prohlížeč než ten, kde už máte vyplněná data – uvidíte „prázdný“ i „vyplněný“ stav podle toho, zda účastník někdy kalkulačku používal.

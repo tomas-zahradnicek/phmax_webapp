@@ -33,6 +33,7 @@ import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { useDisplayDensity } from "./useDisplayDensity";
 import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
+import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, SdLegisRef } from "./PhmaxProductLegisUi";
 import { SD_LEGIS_ZAKONY_URL } from "./phmax-sd-legislativa";
@@ -2132,6 +2133,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         }
         afterWorkspace={
           <>
+            <PhmaxModuleSeoSection view="sd" setProductView={setProductView} />
             {viewMode === "expert" ? <ProductLegisContextPanel variant="sd" /> : null}
             {viewMode === "expert" ? <MethodologyStrip /> : null}
           </>

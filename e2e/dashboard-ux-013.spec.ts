@@ -23,7 +23,7 @@ test.describe("Dashboard UX 0.3.14", () => {
       ssRowId: 113,
     });
     await gotoProductView(page, "dash");
-    await expect(page.getByRole("heading", { name: /Orientační součet PHmax/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
     await expect(page.locator("[data-testid='dash-export-wizard']")).toHaveCount(0);
     await confirmDashboardExportDisclaimer(page);
     await expect(page.locator("[data-testid='dash-export-wizard']")).toBeVisible();
