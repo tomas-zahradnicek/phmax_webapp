@@ -1,7 +1,8 @@
 import {
   APP_AUTHOR_CREDIT_LINE,
+  APP_AUTHOR_CONTACT_LABEL,
+  APP_AUTHOR_CONTACT_URL,
   APP_AUTHOR_DISPLAY_NAME,
-  APP_AUTHOR_EMAIL,
 } from "./calculator-ui-constants";
 import { openPrintHtmlWindow, type OpenPrintHtmlResult } from "./phmax-open-print-html";
 
@@ -58,11 +59,12 @@ export const APP_AUTHOR_PRINT_SUMMARY_DOC_STYLES = `
 ${APP_AUTHOR_PRINT_FOOTER_STYLES}
 `;
 
-/** HTML patička „tisk shrnutí“ – jméno je mailto odkaz (e-mail v href). */
+/** HTML patička „tisk shrnutí“ – kontakt vede na formulář. */
 export function getAppAuthorPrintFooterHtml(): string {
   return (
     `<footer class="print-doc-footer" role="contentinfo">` +
-    `<p class="print-doc-author">Vytvořil: <a href="mailto:${APP_AUTHOR_EMAIL}">${APP_AUTHOR_DISPLAY_NAME}</a></p>` +
+    `<p class="print-doc-author">Vytvořil: ${APP_AUTHOR_DISPLAY_NAME} · ` +
+    `<a href="${APP_AUTHOR_CONTACT_URL}">${APP_AUTHOR_CONTACT_LABEL}</a></p>` +
     `</footer>`
   );
 }

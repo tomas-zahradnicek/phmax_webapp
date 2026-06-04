@@ -1,5 +1,6 @@
 import type { ProductViewCode } from "./calculator-ui-constants";
 import { PHMAX_SEO_MODULE_CONTENT } from "./phmax-seo-module-content";
+import { APP_BRAND_LOGO_PATH } from "./calculator-ui-constants";
 import { buildProductViewPageUrl, listProductViewPathUrls } from "./product-view-paths";
 
 export const PHMAX_SITE_NAME = "Ředitelský průvodce";
@@ -116,6 +117,7 @@ export function applyPhmaxDocumentHead(view: ProductViewCode): void {
   upsertMeta("property", "og:type", "website");
   upsertMeta("property", "og:locale", "cs_CZ");
   upsertMeta("property", "og:site_name", PHMAX_SITE_NAME);
+  upsertMeta("property", "og:image", new URL(APP_BRAND_LOGO_PATH, origin).href);
 
   upsertJsonLd(PHMAX_JSON_LD_ID, {
     "@context": "https://schema.org",

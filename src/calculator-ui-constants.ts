@@ -250,10 +250,19 @@ export function namedBackupSavedNotice(name: string, maxCount: number): string {
   return `Pojmenovaná záloha „${name}“ uložena (max. ${maxCount}).`;
 }
 
-/** Autor aplikace – e-mail a texty do exportů / shrnutí. */
+/** Autor aplikace – e-mail v exportech / shrnutí; kontakt v UI jde na formulář. */
 export const APP_AUTHOR_EMAIL = "reditelskypruvodce@gmail.com";
 
 export const APP_AUTHOR_DISPLAY_NAME = "Mgr. Tomáš Zahradníček";
+
+/** Kontaktní formulář (místo mailto ve footeru a tisku). */
+export const APP_AUTHOR_CONTACT_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSdtK983su7arfAG1wEBGlLeprKlIgi7mClZnbVY9FMBmeCgdQ/viewform";
+
+export const APP_AUTHOR_CONTACT_LABEL = "Kontaktní formulář";
+
+/** Logo Ředitelského průvodce (public/). */
+export const APP_BRAND_LOGO_PATH = "/reditelskypruvodce-logo.png";
 
 /** Řádka pro kopírování shrnutí, CSV a čistě textové výstupy (e-mail v závorce). */
 export const APP_AUTHOR_CREDIT_LINE = `Vytvořil: ${APP_AUTHOR_DISPLAY_NAME} (${APP_AUTHOR_EMAIL})`;

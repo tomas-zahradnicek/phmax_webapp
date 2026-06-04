@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import {
+  APP_BRAND_LOGO_PATH,
   CALCULATOR_LIMITS_NOTE,
   DASH_IMPORT_HINT,
   DASH_IMPORT_LABEL,
@@ -1028,8 +1029,16 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               Vymazat lokální data
             </button>
           </div>
-          <div className="hero__grid" style={{ marginTop: 8 }}>
-            <div>
+          <div className="hero__grid dash-hero-brand" style={{ marginTop: 8 }}>
+            <img
+              src={APP_BRAND_LOGO_PATH}
+              alt=""
+              className="dash-hero-brand__logo"
+              width={80}
+              height={80}
+              decoding="async"
+            />
+            <div className="dash-hero-brand__copy">
               <h1 className="hero__title">Ředitelský průvodce</h1>
               <ul className="dash-hero-stats" aria-label="Souhrn stavu školy">
                 <li>

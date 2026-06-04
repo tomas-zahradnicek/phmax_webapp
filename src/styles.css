@@ -9802,6 +9802,27 @@ select:focus {
   }
 }
 
+.dash-hero-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.dash-hero-brand__logo {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.dash-hero-brand__copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .dash-hero-stats {
   display: flex;
   flex-wrap: wrap;
