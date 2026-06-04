@@ -9790,6 +9790,98 @@ select:focus {
   }
 }
 
+.dash-hero-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dash-role-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 92%, #e2e8f0);
+  border: 1px solid var(--line);
+}
+
+.dash-role-bar__label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.dash-role-bar__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.dash-role-hint {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.dash-quick-start__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dash-quick-start__btn {
+  flex: 1 1 11rem;
+  min-width: min(100%, 11rem);
+}
+
+.dash-quick-start__more {
+  margin-top: 12px;
+}
+
+.dash-quick-start__more summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.dash-advanced-tools {
+  margin-top: 4px;
+}
+
+.dash-advanced-tools__summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.dash-advanced-tools__summary::-webkit-details-marker {
+  display: none;
+}
+
+.dash-advanced-tools__body {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dash-advanced-tools__subtitle {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.dash-advanced-tools__block + .dash-advanced-tools__block {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
 .dash-new-user-card__steps {
   margin: 0 0 14px;
   padding-left: 1.25rem;

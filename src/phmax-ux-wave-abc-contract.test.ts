@@ -16,11 +16,14 @@ describe("UX wave A/B/C contract", () => {
     expect(readSource("src/FillStatusBadge.tsx")).toContain("fill-status-badge");
   });
 
-  it("dashboard role cards, export wizard, print, import placeholder", () => {
+  it("dashboard role bar, quick start, export wizard, import v pokročilých nástrojích", () => {
     const dash = readSource("src/PhmaxDashboardPage.tsx");
-    expect(dash).toContain("dash-role-cards");
+    expect(dash).toContain("dash-role-bar");
+    expect(dash).toContain("dash-quick-start");
+    expect(dash).toContain("dash-browser-overview");
     expect(dash).toContain("dash-export-wizard");
     expect(dash).toContain("dash-school-15min");
+    expect(dash).toContain("dash-advanced-tools");
     expect(dash).toContain("printSchoolReview");
     expect(dash).toContain("DASH_IMPORT_LABEL");
     expect(dash).toContain("dash-school-import");

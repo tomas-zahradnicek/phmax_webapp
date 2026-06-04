@@ -7,8 +7,6 @@ import {
   DASH_IMPORT_STEPS,
   DASH_IMPORT_TEMPLATE_LABEL,
   DASH_IMPORT_UPLOAD_LABEL,
-  DASH_OPEN_MODULE_OWN_DATA_BUTTON_SUFFIX,
-  DASH_OPEN_MODULE_EXAMPLE_BUTTON_SUFFIX,
   PRODUCT_CALCULATOR_TITLES,
 } from "./calculator-ui-constants";
 import { DashboardSchoolImportDialog } from "./DashboardSchoolImportDialog";
@@ -80,8 +78,6 @@ import {
 import { downloadTextFile, exportFilenameStamped } from "./export-utils";
 import { useUiNotice } from "./useUiNotice";
 
-const DASH_QUICK_IDS: Exclude<ProductView, "dash">[] = ["pv", "sd", "zs", "ss", "nv75"];
-
 /** Moduly pro dashboard deep-link na vstupy. */
 const DASH_INPUT_FOCUS_IDS = ["pv", "sd", "zs", "ss", "nv75"] as const satisfies readonly Exclude<ProductView, "dash">[];
 
@@ -95,6 +91,31 @@ const DASH_START_MODULES: ReadonlyArray<{
   { id: "ss", lead: "Střední škola – evidence tříd; ukázka volitelná." },
   { id: "nv75", lead: "Banka odpočtů – ukázka A volitelná, nebo vlastní řádky." },
 ];
+
+const DASH_ROLE_LS_KEY = "phmax-dash-role-v1";
+
+type DashAudienceRole = "director" | "methodologist" | "it";
+
+const DASH_PRIMARY_ACTIONS: ReadonlyArray<{
+  id: Exclude<ProductView, "dash">;
+  cta: string;
+}> = [
+  { id: "zs", cta: "Spočítat PHmax ZŠ" },
+  { id: "pv", cta: "Spočítat PHmax PV" },
+  { id: "nv75", cta: "Banka odpočtů NV75" },
+  { id: "sd", cta: "Spočítat PHmax ŠD" },
+  { id: "ss", cta: "Spočítat PHmax SŠ" },
+];
+
+function readDashAudienceRole(): DashAudienceRole {
+  try {
+    const stored = localStorage.getItem(DASH_ROLE_LS_KEY);
+    if (stored === "methodologist" || stored === "it" || stored === "director") return stored;
+  } catch {
+    /* ignore */
+  }
+  return "director";
+}
 
 const DASH_CALC_LABEL: Record<Exclude<ProductView, "dash">, string> = {
   pv: "PV",
@@ -640,8 +661,18 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   const [importTemplateBusy, setImportTemplateBusy] = useState(false);
   const [importUploadBusy, setImportUploadBusy] = useState(false);
   const [importPendingPreview, setImportPendingPreview] = useState<PhmaxIsHandoffPayload | null>(null);
+  const [audienceRole, setAudienceRole] = useState<DashAudienceRole>(() => readDashAudienceRole());
   const importTriggerRef = React.useRef<HTMLButtonElement>(null);
   const importCardFileRef = React.useRef<HTMLInputElement>(null);
+
+  const persistAudienceRole = useCallback((role: DashAudienceRole) => {
+    setAudienceRole(role);
+    try {
+      localStorage.setItem(DASH_ROLE_LS_KEY, role);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const refresh = useCallback(() => {
     setRefreshAt(new Date());
@@ -974,488 +1005,115 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               <h1 className="hero__title">{PRODUCT_CALCULATOR_TITLES.dash}</h1>
               <p className="hero__text">{CALCULATOR_LIMITS_NOTE}</p>
               <p className="hero__text" style={{ marginTop: 8 }}>
-                Souhrnný přehled (Σ) čte uložený stav z prohlížeče u každého modulu zvlášť. Orientační součet PHmax napříč PV, ŠD, ZŠ a SŠ je níže –{" "}
-                <strong>NV75</strong> (banka odpočtů hodin, ne PHmax) a krácení <strong>PV § 1d</strong> v cross-součtu nejsou.
-                Pro první orientaci můžete v modulu použít combobox <strong>Příkladové výpočty</strong>, nebo rovnou
-                vyplnit vlastní údaje do formuláře – pole nejsou uzamčená, souhrn se přepočítá podle vašich vstupů.
+                Řídicí panel školy – stav kalkulaček v tomto prohlížeči. Vyberte modul nebo pokračujte v rozpracované práci;
+                import a export pro IT jsou dole v pokročilých nástrojích.
               </p>
-              <p className="hero__text hero__text--url" style={{ marginTop: 8 }}>
-                URL:{" "}
-                <code className="hero__url-code">
-                  {typeof window !== "undefined" ? window.location.origin : ""}?view=dash
-                </code>
-              </p>
+              <div className="dash-hero-quick" aria-label="Rychlé akce">
+                {DASH_PRIMARY_ACTIONS.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className="btn primary dash-hero-quick__btn"
+                    onClick={() => openModuleForOwnData(action.id)}
+                  >
+                    {action.cta}
+                  </button>
+                ))}
+                {continueRow ? (
+                  <button
+                    type="button"
+                    className="btn ghost dash-hero-quick__btn"
+                    onClick={() => openDashboardModule(continueRow)}
+                  >
+                    Otevřít poslední ({DASH_CALC_LABEL[continueRow.id]})
+                  </button>
+                ) : null}
+              </div>
             </div>
           </div>
         </header>
 
         <main id={PHMAX_DASHBOARD_MAIN_ID} tabIndex={-1}>
-        <section className="card section-card dash-role-cards" aria-labelledby="dash-role-heading">
-          <h2 id="dash-role-heading" className="section-title">
-            Kdo jste? Rychlý vstup
-          </h2>
-          <div className="dash-role-cards__grid">
-            <article className="dash-role-cards__tile">
-              <h3 className="dash-role-cards__tile-title">Ředitel / zřizovatel</h3>
-              <p className="muted-text">
-                Souhrn školy, kontrolní list exportu a tisk před jednáním. Handout PDF v dokumentaci projektu.
-              </p>
-              <div className="dash-role-cards__actions">
-                <button type="button" className="btn primary" onClick={scrollToSchool15Min}>
-                  Celá škola za 15 min
-                </button>
-                <button type="button" className="btn ghost" onClick={printSchoolReview}>
-                  Kontrola před jednáním (tisk)
-                </button>
-              </div>
-            </article>
-            <article className="dash-role-cards__tile">
-              <h3 className="dash-role-cards__tile-title">Metodik</h3>
-              <p className="muted-text">Modul po modulu – ukázka volitelná, vlastní data vždy editovatelná.</p>
-              <div className="dash-role-cards__actions">
-                <button type="button" className="btn primary" onClick={() => openModuleForOwnData("zs")}>
-                  Otevřít ZŠ – vlastní data
-                </button>
-                {zsNamedBackupCount > 0 ? (
-                  <button
-                    type="button"
-                    className="btn ghost"
-                    data-testid="dash-open-zs-compare"
-                    onClick={() => setProductView("zs")}
-                  >
-                    Porovnat pojmenované zálohy ({zsNamedBackupCount}) v ZŠ
-                  </button>
-                ) : null}
-              </div>
-            </article>
-            <article className="dash-role-cards__tile">
-              <h3 className="dash-role-cards__tile-title">IT / správce</h3>
-              <p className="muted-text">
-                Scénář JSON, handoff a varování koherence – viz{" "}
-                <code className="methodology-strip__code">docs/phmax-is-integration.md</code>.
-              </p>
-              <div className="dash-role-cards__actions">
-                <button type="button" className="btn primary" onClick={scrollToSchool15Min}>
-                  Export a scénář školy
-                </button>
-                <button
-                  type="button"
-                  className="btn ghost"
-                  data-testid="dash-import-open"
-                  title={DASH_IMPORT_HINT}
-                  onClick={openImportDialog}
-                >
-                  {DASH_IMPORT_LABEL}
-                </button>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section
-          id="dash-school-import"
-          className="card section-card dash-school-import"
-          aria-labelledby="dash-import-heading"
-        >
-          <h2 id="dash-import-heading" className="section-title">
-            Import ze školy
-          </h2>
-          <p className="muted-text">{DASH_IMPORT_HINT}</p>
-          <ol className="dash-school-import__steps muted-text">
-            {DASH_IMPORT_STEPS.map((step, i) => (
-              <li key={step}>
-                <strong>{i + 1}.</strong> {step}
-              </li>
-            ))}
-          </ol>
-          <div className="dash-card__actions dash-school-import__actions">
+        <div className="dash-role-bar" role="group" aria-labelledby="dash-role-heading">
+          <span id="dash-role-heading" className="dash-role-bar__label">
+            Role:
+          </span>
+          <label className="dash-role-bar__option">
             <input
-              ref={importCardFileRef}
-              type="file"
-              data-testid="dash-import-file-card"
-              accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
-              multiple
-              disabled={importUploadBusy}
-              style={{ display: "none" }}
-              onChange={(e) => void handleImportFilePick(e.target.files)}
+              type="radio"
+              name="dash-audience-role"
+              checked={audienceRole === "director"}
+              onChange={() => persistAudienceRole("director")}
             />
-            <button
-              ref={importTriggerRef}
-              type="button"
-              className="btn primary"
-              data-testid="dash-import-open-main"
-              disabled={importUploadBusy}
-              aria-busy={importUploadBusy}
-              title="Krok 3 – nahrát vyplněný Excel nebo CSV"
-              onClick={() => importCardFileRef.current?.click()}
-            >
-              {importUploadBusy ? "Načítám soubor…" : DASH_IMPORT_UPLOAD_LABEL}
+            Ředitel
+          </label>
+          <label className="dash-role-bar__option">
+            <input
+              type="radio"
+              name="dash-audience-role"
+              checked={audienceRole === "methodologist"}
+              onChange={() => persistAudienceRole("methodologist")}
+            />
+            Metodik
+          </label>
+          <label className="dash-role-bar__option">
+            <input
+              type="radio"
+              name="dash-audience-role"
+              checked={audienceRole === "it"}
+              onChange={() => persistAudienceRole("it")}
+            />
+            IT
+          </label>
+        </div>
+        {audienceRole === "director" ? (
+          <div className="dash-role-hint">
+            <button type="button" className="btn ghost" onClick={scrollToSchool15Min}>
+              Celá škola za 15 min
             </button>
-            <button
-              type="button"
-              className="btn ghost"
-              data-testid="dash-import-download-template"
-              disabled={importTemplateBusy}
-              aria-busy={importTemplateBusy}
-              title="Krok 1 – prázdná šablona s listy Meta, PV, ZŠ a volitelně ŠD, SŠ"
-              onClick={() => void handleDownloadImportTemplate()}
-            >
-              {importTemplateBusy ? "Připravuji šablonu…" : DASH_IMPORT_TEMPLATE_LABEL}
+            <button type="button" className="btn ghost" onClick={printSchoolReview}>
+              Kontrola před jednáním (tisk)
             </button>
           </div>
-        </section>
-
-        <DashboardSchoolImportDialog
-          open={importDialogOpen}
-          onClose={() => setImportDialogOpen(false)}
-          onApplied={handleImportApplied}
-          triggerRef={importTriggerRef}
-          pendingPreview={importPendingPreview}
-          onPendingPreviewConsumed={() => setImportPendingPreview(null)}
-        />
-
-        {continueRow ? (
-          <section className="card card--accent section-card dash-continue-card" aria-labelledby="dash-continue-heading">
-            <h2 id="dash-continue-heading" className="section-title">
-              Pokračovat v {DASH_CALC_LABEL[continueRow.id]}
-            </h2>
-            <p className="muted-text" style={{ marginBottom: 12 }}>
-              Naposledy jste pracovali v modulu <strong>{continueRow.title}</strong>. Níže je rychlý náhled z uloženého stavu v tomto prohlížeči.
-            </p>
-            <p
-              className={`dash-continue-card__fill-status ${dashboardFillStatusClass(continueRow.hasData, continueRow.verdict)}`}
-            >
-              <FillStatusBadge
-                kind={dashboardRowFillStatusKind(continueRow.hasData, continueRow.verdict?.tone)}
-                label={dashboardModuleFillLabel(continueRow.hasData, continueRow.verdict)}
-              />
-            </p>
-            {continueRow.verdict ? (
-              <div
-                className={`dash-continue-card__verdict dash-continue-card__verdict--${continueRow.verdict.tone}`}
-                role="status"
-              >
-                <strong>{continueRow.verdict.label}</strong>
-                <p className="muted-text" style={{ margin: 0 }}>
-                  {continueRow.verdict.detail}
-                </p>
-              </div>
-            ) : null}
-            <div className="dash-continue-card__kpi" aria-label="Hlavní metrika modulu">
-              <span className="dash-continue-card__kpi-label">{continueRow.primaryKpi.label}</span>
-              <strong className="dash-continue-card__kpi-value">{continueRow.primaryKpi.value}</strong>
-            </div>
-            <div className="dash-card__kpis" style={{ marginTop: 10 }} aria-label="Doplňkové metriky">
-              {continueRow.secondaryKpis.map((kpi) => (
-                <span key={kpi.label} className="dash-card__kpi-pill">
-                  {kpi.label}: <strong>{kpi.value}</strong>
-                </span>
-              ))}
-            </div>
-            <p className="dash-card__meta">{continueRow.status}</p>
-            <div className="dash-card__actions">
-              <button
-                type="button"
-                className="btn primary"
-                onClick={() => openDashboardModule(continueRow)}
-              >
-                {continueRow.hasData ? `Pokračovat v ${DASH_CALC_LABEL[continueRow.id]}` : `Otevřít ${DASH_CALC_LABEL[continueRow.id]} a ukázku`}
-              </button>
-              {!continueRow.hasData ? (
-                <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(continueRow.id)}>
-                  Začít u ukázkového příkladu
-                </button>
-              ) : null}
-            </div>
-          </section>
         ) : null}
-
-        {crossPhmax.modulesWithPhmax >= 2 ? (
-          <section
-            id="dash-school-15min"
-            className="card section-card dash-cross-phmax"
-            aria-labelledby="dash-cross-phmax-heading"
-          >
-            <h2 id="dash-cross-phmax-heading" className="section-title">
-              Orientační součet PHmax (PV + ŠD + ZŠ + SŠ)
-            </h2>
-            <p className="muted-text" style={{ marginTop: 0 }}>
-              Sloučení autosave z modulů v tomto prohlížeči – neoficiální souhrn pro kontrolu. NV75 (banka odpočtů) a krácení PV § 1d v cross-součtu nejsou.
-            </p>
-            <p className="dash-cross-phmax__total" style={{ marginTop: 12, fontSize: "1.35rem" }}>
-              Celkem PHmax: <strong>{formatCsNumberOrDash(crossPhmax.totalPhmax)}</strong> {CS_HOURS_PER_WEEK_SHORT}
-              {crossPhmax.hasIncomplete ? (
-                <span className="muted-text" style={{ display: "block", fontSize: "0.88rem", marginTop: 6 }}>
-                  Některé moduly mají neúplný výpočet – součet může být podhodnocený.
-                </span>
-              ) : null}
-              {crossPhmaxMismatches.length > 0 ? (
-                <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.88rem" }}>
-                  <strong>Upozornění:</strong> modul(y) {crossPhmaxMismatches.join(", ")} jsou zároveň ve Vyžaduje
-                  pozornost – opravte vstupy před použitím součtu.
-                </p>
-              ) : null}
-              {dashboardBandHints.length > 0 ? (
-                <div style={{ marginTop: 12 }}>
-                  <strong style={{ fontSize: "0.92rem" }}>Orientace k vyššímu PHmax (z autosave)</strong>
-                  <ul className="muted-text" style={{ marginTop: 6, paddingLeft: "1.25rem", fontSize: "0.88rem" }}>
-                    {dashboardBandHints.map((hint) => (
-                      <li key={hint}>{hint}</li>
-                    ))}
-                  </ul>
-                  <p className="muted-text" style={{ marginTop: 6, fontSize: "0.85rem" }}>
-                    Jde o orientační odhad podle pásem v metodice – ověřte v modulu PV / ZŠ / ŠD.
-                  </p>
-                </div>
-              ) : null}
-              {auditCoherenceWarnings.length > 0 ? (
-                <ul className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.88rem", paddingLeft: "1.25rem" }}>
-                  {auditCoherenceWarnings.map((w) => {
-                    const moduleId = coherenceWarningModuleId(w);
-                    return (
-                      <li key={w}>
-                        {w}
-                        {moduleId ? (
-                          <>
-                            {" "}
-                            <button
-                              type="button"
-                              className="btn ghost"
-                              style={{ display: "inline", padding: "0 4px", fontSize: "inherit", verticalAlign: "baseline" }}
-                              onClick={() => openModuleForOwnData(moduleId)}
-                            >
-                              Otevřít {DASH_CALC_LABEL[moduleId]}
-                            </button>
-                          </>
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : null}
-            </p>
-            <label className="field" style={{ marginTop: 12, maxWidth: 420 }}>
-              <span className="field__label">Název scénáře školy (JSON export)</span>
-              <input
-                type="text"
-                className="input"
-                value={scenarioLabel}
-                onChange={(e) => persistScenarioLabel(e.target.value)}
-                placeholder="Celá škola (autosave)"
-              />
-            </label>
-            <label className="field" style={{ marginTop: 8, maxWidth: 520 }}>
-              <span className="field__label">URL endpoint IS (volitelné POST)</span>
-              <input
-                type="url"
-                className="input"
-                value={isEndpoint}
-                onChange={(e) => {
-                  setIsEndpoint(e.target.value);
-                  writePhmaxIsEndpoint(e.target.value);
-                }}
-                placeholder="https://…/phmax-handoff"
-              />
-            </label>
-            <ul className="dash-cross-phmax__list muted-text" style={{ marginTop: 10, paddingLeft: "1.25rem" }}>
-              {crossPhmax.slices.map((slice) => (
-                <li key={slice.id}>
-                  {formatCrossPhmaxSliceLabel(slice)}
-                  {slice.incomplete ? " (neúplný)" : ""}
-                  {attentionIds.has(slice.id) ? " (vyžaduje pozornost)" : ""}
-                </li>
-              ))}
-            </ul>
-            <details className="dash-export-checklist" style={{ marginTop: 12 }} open>
-              <summary className="section-title" style={{ fontSize: "1rem", cursor: "pointer" }}>
-                Kontrolní list před exportem
-              </summary>
-              <ul className="muted-text" style={{ marginTop: 8, paddingLeft: "1.25rem" }}>
-                {exportChecklist.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <label className="field" style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <input
-                  type="checkbox"
-                  data-testid="dash-export-confirm"
-                  checked={exportDisclaimerConfirmed}
-                  onChange={(e) => setExportDisclaimerConfirmed(e.target.checked)}
-                />
-                <span className="muted-text">
-                  Potvrzuji, že export je orientační a neoficiální – použiji ho jen pro interní kontrolu školy.
-                </span>
-              </label>
-            </details>
-            {exportDisclaimerConfirmed ? (
-              <div className="dash-export-wizard muted-text" data-testid="dash-export-wizard">
-                <p className="dash-export-wizard__step dash-export-wizard__step--active">
-                  <strong>Krok 1:</strong> Stáhněte JSON (součet, scénář nebo handoff) – orientační, neoficiální.
-                </p>
-                <p className="dash-export-wizard__step">
-                  <strong>Krok 2 – IT:</strong> předejte soubor, verzi aplikace ({APP_VERSION}), název scénáře a pole{" "}
-                  <code className="methodology-strip__code">coherenceWarnings</code> (pokud není prázdné). Dokumentace:{" "}
-                  <code className="methodology-strip__code">docs/phmax-is-integration.md</code>.
-                </p>
-                <p className="dash-export-wizard__step">
-                  <strong>Krok 3:</strong> Na sdíleném PC po exportu zvažte smazání lokálních dat (nabídne aplikace).
-                </p>
-              </div>
-            ) : null}
-            <div className="dash-card__actions" style={{ marginTop: 12 }}>
-              <button type="button" className="btn ghost" onClick={printSchoolReview}>
-                Kontrola před jednáním (tisk)
-              </button>
-              <button
-                type="button"
-                className="btn ghost"
-                data-testid="dash-import-open-export"
-                title={DASH_IMPORT_HINT}
-                onClick={openImportDialog}
-              >
-                {DASH_IMPORT_LABEL}
-              </button>
-              <button
-                type="button"
-                className="btn ghost"
-                disabled={!exportDisclaimerConfirmed}
-                onClick={downloadCrossPhmaxJson}
-              >
-                Stáhnout JSON součtu PHmax
-              </button>
-              <button
-                type="button"
-                className="btn ghost"
-                disabled={!exportDisclaimerConfirmed}
-                onClick={downloadSchoolScenarioJson}
-              >
-                Scénář celá škola (JSON)
-              </button>
-              <button
-                type="button"
-                className="btn ghost"
-                disabled={!exportDisclaimerConfirmed}
-                onClick={downloadIsHandoffJson}
-              >
-                Export pro IS školy (JSON)
-              </button>
-              {isEndpoint.trim() ? (
-                <button
-                  type="button"
-                  className="btn ghost"
-                  disabled={!exportDisclaimerConfirmed}
-                  onClick={() => void sendIsHandoff()}
-                >
-                  Odeslat handoff na IS (POST)
-                </button>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
-
-        {attentionRows.length > 0 ? (
-          <section className="card section-card dash-attention-card" aria-labelledby="dash-attention-heading">
-            <h2 id="dash-attention-heading" className="section-title">
-              Vyžaduje pozornost
-            </h2>
-            <p className="muted-text" style={{ marginBottom: 12 }}>
-              Moduly s varováním nebo chybou vstupů – po otevření se posunete k první problematické sekci.
-            </p>
-            <div className="dash-attention-card__list">
-              {attentionRows.map((row) => (
-                <article
-                  key={row.id}
-                  className={`dash-attention-card__item dash-attention-card__item--${row.verdict?.tone ?? "warning"}`}
-                >
-                  <div>
-                    <strong>{DASH_CALC_LABEL[row.id]}</strong>
-                    <span className="muted-text"> – {row.verdict?.label}</span>
-                    {row.verdict?.detail ? (
-                      <p className="muted-text" style={{ margin: "4px 0 0" }}>
-                        {row.verdict.detail}
-                      </p>
-                    ) : null}
-                  </div>
-                  <button type="button" className="btn primary" onClick={() => openDashboardModule(row)}>
-                    Otevřít a přejít k chybě
-                  </button>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {zsNamedBackupCount > 0 ? (
-          <section className="card section-card dash-compare-hint" aria-labelledby="dash-compare-heading">
-            <h2 id="dash-compare-heading" className="section-title">
-              Porovnání scénářů (ZŠ)
-            </h2>
-            <p className="muted-text" style={{ marginBottom: 10 }}>
-              V prohlížeči máte <strong>{zsNamedBackupCount}</strong> pojmenovaných záloh ZŠ. V modulu ZŠ otevřete panel{" "}
-              <strong>Akce</strong> → porovnání se zálohou nebo export audit JSON.
-            </p>
-            <button
-              type="button"
-              className="btn primary"
-              data-testid="dash-compare-zs-primary"
-              onClick={() => setProductView("zs")}
-            >
-              Otevřít ZŠ – pojmenované zálohy
+        {audienceRole === "methodologist" ? (
+          <div className="dash-role-hint">
+            <button type="button" className="btn ghost" onClick={() => openModuleForOwnData("zs")}>
+              Otevřít ZŠ – vlastní data
             </button>
-          </section>
+            {zsNamedBackupCount > 0 ? (
+              <button
+                type="button"
+                className="btn ghost"
+                data-testid="dash-open-zs-compare"
+                onClick={() => setProductView("zs")}
+              >
+                Porovnat zálohy ZŠ ({zsNamedBackupCount})
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+        {audienceRole === "it" ? (
+          <div className="dash-role-hint">
+            <button type="button" className="btn ghost" onClick={() => document.getElementById("dash-advanced-tools")?.scrollIntoView({ behavior: "smooth" })}>
+              Import a export (níže)
+            </button>
+          </div>
         ) : null}
 
-        <div className="dash-overview-stack">
-        {showNewUserGuide ? (
-          <section className="card card--accent section-card dash-new-user-card" aria-labelledby="dash-new-user-heading">
-            <h2 id="dash-new-user-heading" className="section-title">
-              Nejste si jisti? Začněte u jedné kalkulačky
-            </h2>
-            <p className="muted-text" style={{ marginBottom: 12 }}>
-              Po otevření modulu vás aplikace může posunout k poli <strong>Příkladové výpočty</strong> – ukázka je
-              volitelná. Můžete rovnou vyplnit vlastní školu; načtenou ukázku lze kdykoli upravit nebo vymazat v Akcích.
-            </p>
-            <ol className="dash-new-user-card__steps muted-text">
-              <li>Vyberte modul (PV, ŠD, ZŠ, SŠ nebo NV75).</li>
-              <li>Vyplňte vlastní data nebo volitelnou ukázku.</li>
-              <li>
-                <strong>Celá škola za 15 min</strong> – souhrn Σ a export JSON pro IT (
-                <button type="button" className="btn ghost" style={{ display: "inline", padding: "0 4px" }} onClick={scrollToSchool15Min}>
-                  přejít na souhrn
-                </button>
-                ).
-              </li>
-            </ol>
-            <div className="dash-new-user-card__grid">
-              {DASH_START_MODULES.map((item) => (
-                <article key={item.id} className="dash-new-user-card__tile">
-                  <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
-                  <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
-                  <div className="dash-new-user-card__actions">
-                    <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
-                      Otevřít {DASH_CALC_LABEL[item.id]} ({DASH_OPEN_MODULE_EXAMPLE_BUTTON_SUFFIX})
-                    </button>
-                    <button type="button" className="btn ghost" onClick={() => openModuleForOwnData(item.id)}>
-                      Otevřít {DASH_CALC_LABEL[item.id]} – {DASH_OPEN_MODULE_OWN_DATA_BUTTON_SUFFIX}
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        <section className="card muted section-card dash-browser-overview">
-          <h2 className="section-title">Přehled podle uloženého stavu v prohlížeči</h2>
+        <section className="card section-card dash-browser-overview" aria-labelledby="dash-overview-heading">
+          <h2 id="dash-overview-heading" className="section-title">
+            Moje kalkulačky
+          </h2>
           <p className="muted-text" style={{ marginBottom: 8 }}>
-            Slouží jen k orientaci v tomto prohlížeči. Metriky počítám stejnou logikou jako v příslušné kartě (kde je k tomu dostupná data).
+            Přehled podle uloženého stavu v tomto prohlížeči – stejná logika jako v jednotlivých modulech.
           </p>
           <p className="dash-overview-summary muted-text">
-            Moduly s uloženými daty: <strong>{modulesWithData}</strong> z {rows.length} · poslední návštěva modulu je u každé karty níže.
+            Moduly s uloženými daty: <strong>{modulesWithData}</strong> z {rows.length}
             {modulesWithData === 0 ? (
               <>
                 {" "}
-                Zatím nic neuloženo v tomto prohlížeči – u každého modulu můžete začít tlačítkem <strong>Začít u ukázky</strong>.
+                – začněte tlačítkem <strong>Začít u ukázky</strong> u modulu níže.
               </>
             ) : null}
           </p>
@@ -1535,28 +1193,441 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             ))}
           </div>
         </section>
-        </div>
 
-        <section className="card card--accent section-card section-card--guide" aria-labelledby="dash-user-first-heading">
-          <h2 id="dash-user-first-heading" className="section-title">
-            Začněte uživatelsky nejdříve tady
+        <section className="card card--accent section-card dash-quick-start" aria-labelledby="dash-quick-start-heading">
+          <h2 id="dash-quick-start-heading" className="section-title">
+            Co chcete dnes udělat?
           </h2>
-            <p className="muted-text" style={{ marginBottom: 12 }}>
-              V každé kalkulačce můžete zvolit <strong>Příkladové výpočty</strong> pro orientaci, nebo rovnou vyplnit
-              vlastní údaje – formulář není jen pro čtení. Tlačítko <strong>Nápověda</strong> v hero liště průvodce znovu zobrazí; u ZŠ může navíc pomoci rozcestník v expertním režimu. V tabulkách PHmax používejte rozbalení{" "}
-            <strong>„Proč tyto vstupy ovlivní PHmax?“</strong> (viz PV, ŠD, ZŠ, NV75) – u <strong>SŠ</strong> doplňuje stejný smysl tlačítko „Proč?“ u každého řádku přehledu.
-          </p>
-          <p className="muted-text" style={{ marginBottom: 12 }}>
-            Rychlé otevření kalkulačky (stav zůstává v paměti tohoto prohlížeče):
-          </p>
-          <div className="toolbar" style={{ flexWrap: "wrap", gap: 8 }}>
-            {DASH_QUICK_IDS.map((id) => (
-              <button key={id} type="button" className="btn ghost" title={PRODUCT_CALCULATOR_TITLES[id]} onClick={() => setProductView(id)}>
-                Otevřít {DASH_CALC_LABEL[id]}
+          {showNewUserGuide ? (
+            <p className="muted-text" style={{ marginBottom: 10 }}>
+              Ukázka je volitelná – můžete rovnou vyplnit vlastní školu. Po otevření modulu hledejte{" "}
+              <strong>Příkladové výpočty</strong> v horní liště.
+            </p>
+          ) : null}
+          <div className="dash-quick-start__grid">
+            {DASH_PRIMARY_ACTIONS.map((action) => (
+              <button
+                key={action.id}
+                type="button"
+                className="btn primary dash-quick-start__btn"
+                onClick={() => openModuleForOwnData(action.id)}
+              >
+                {action.cta}
               </button>
             ))}
+            {continueRow ? (
+              <button
+                type="button"
+                className="btn ghost dash-quick-start__btn"
+                onClick={() => openDashboardModule(continueRow)}
+              >
+                Otevřít poslední práci ({DASH_CALC_LABEL[continueRow.id]})
+              </button>
+            ) : null}
           </div>
+          <details className="dash-quick-start__more muted-text">
+            <summary>Vytvořit kalkulačku s ukázkou (volitelné)</summary>
+            <div className="dash-new-user-card__grid" style={{ marginTop: 10 }}>
+              {DASH_START_MODULES.map((item) => (
+                <article key={item.id} className="dash-new-user-card__tile">
+                  <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
+                  <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
+                  <div className="dash-new-user-card__actions">
+                    <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
+                      Ukázka ({DASH_CALC_LABEL[item.id]})
+                    </button>
+                    <button type="button" className="btn ghost" onClick={() => openModuleForOwnData(item.id)}>
+                      Vlastní data
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </details>
         </section>
+
+        <DashboardSchoolImportDialog
+          open={importDialogOpen}
+          onClose={() => setImportDialogOpen(false)}
+          onApplied={handleImportApplied}
+          triggerRef={importTriggerRef}
+          pendingPreview={importPendingPreview}
+          onPendingPreviewConsumed={() => setImportPendingPreview(null)}
+        />
+
+        {attentionRows.length > 0 ? (
+          <section className="card section-card dash-attention-card" aria-labelledby="dash-attention-heading">
+            <h2 id="dash-attention-heading" className="section-title">
+              Vyžaduje pozornost
+            </h2>
+            <p className="muted-text" style={{ marginBottom: 12 }}>
+              Moduly s varováním nebo chybou vstupů – po otevření se posunete k první problematické sekci.
+            </p>
+            <div className="dash-attention-card__list">
+              {attentionRows.map((row) => (
+                <article
+                  key={row.id}
+                  className={`dash-attention-card__item dash-attention-card__item--${row.verdict?.tone ?? "warning"}`}
+                >
+                  <div>
+                    <strong>{DASH_CALC_LABEL[row.id]}</strong>
+                    <span className="muted-text"> – {row.verdict?.label}</span>
+                    {row.verdict?.detail ? (
+                      <p className="muted-text" style={{ margin: "4px 0 0" }}>
+                        {row.verdict.detail}
+                      </p>
+                    ) : null}
+                  </div>
+                  <button type="button" className="btn primary" onClick={() => openDashboardModule(row)}>
+                    Otevřít a přejít k chybě
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {continueRow ? (
+          <section className="card card--accent section-card dash-continue-card" aria-labelledby="dash-continue-heading">
+            <h2 id="dash-continue-heading" className="section-title">
+              Rozpracovaná práce – {DASH_CALC_LABEL[continueRow.id]}
+            </h2>
+            <p className="muted-text" style={{ marginBottom: 12 }}>
+              Naposledy jste pracovali v modulu <strong>{continueRow.title}</strong>. Níže je rychlý náhled z uloženého stavu v tomto prohlížeči.
+            </p>
+            <p
+              className={`dash-continue-card__fill-status ${dashboardFillStatusClass(continueRow.hasData, continueRow.verdict)}`}
+            >
+              <FillStatusBadge
+                kind={dashboardRowFillStatusKind(continueRow.hasData, continueRow.verdict?.tone)}
+                label={dashboardModuleFillLabel(continueRow.hasData, continueRow.verdict)}
+              />
+            </p>
+            {continueRow.verdict ? (
+              <div
+                className={`dash-continue-card__verdict dash-continue-card__verdict--${continueRow.verdict.tone}`}
+                role="status"
+              >
+                <strong>{continueRow.verdict.label}</strong>
+                <p className="muted-text" style={{ margin: 0 }}>
+                  {continueRow.verdict.detail}
+                </p>
+              </div>
+            ) : null}
+            <div className="dash-continue-card__kpi" aria-label="Hlavní metrika modulu">
+              <span className="dash-continue-card__kpi-label">{continueRow.primaryKpi.label}</span>
+              <strong className="dash-continue-card__kpi-value">{continueRow.primaryKpi.value}</strong>
+            </div>
+            <div className="dash-card__kpis" style={{ marginTop: 10 }} aria-label="Doplňkové metriky">
+              {continueRow.secondaryKpis.map((kpi) => (
+                <span key={kpi.label} className="dash-card__kpi-pill">
+                  {kpi.label}: <strong>{kpi.value}</strong>
+                </span>
+              ))}
+            </div>
+            <p className="dash-card__meta">{continueRow.status}</p>
+            <div className="dash-card__actions">
+              <button
+                type="button"
+                className="btn primary"
+                onClick={() => openDashboardModule(continueRow)}
+              >
+                {continueRow.hasData ? `Pokračovat v ${DASH_CALC_LABEL[continueRow.id]}` : `Otevřít ${DASH_CALC_LABEL[continueRow.id]} a ukázku`}
+              </button>
+              {!continueRow.hasData ? (
+                <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(continueRow.id)}>
+                  Začít u ukázkového příkladu
+                </button>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
+        {crossPhmax.modulesWithPhmax >= 2 ? (
+          <section
+            id="dash-school-15min"
+            className="card section-card dash-cross-phmax"
+            aria-labelledby="dash-cross-phmax-heading"
+          >
+            <h2 id="dash-cross-phmax-heading" className="section-title">
+              Souhrnný PHmax (PV + ŠD + ZŠ + SŠ)
+            </h2>
+            <p className="muted-text" style={{ marginTop: 0 }}>
+              Sloučení autosave z modulů v tomto prohlížeči – neoficiální souhrn pro kontrolu. NV75 (banka odpočtů) a krácení PV § 1d v cross-součtu nejsou.
+            </p>
+            <p className="dash-cross-phmax__total" style={{ marginTop: 12, fontSize: "1.35rem" }}>
+              Celkem PHmax: <strong>{formatCsNumberOrDash(crossPhmax.totalPhmax)}</strong> {CS_HOURS_PER_WEEK_SHORT}
+              {crossPhmax.hasIncomplete ? (
+                <span className="muted-text" style={{ display: "block", fontSize: "0.88rem", marginTop: 6 }}>
+                  Některé moduly mají neúplný výpočet – součet může být podhodnocený.
+                </span>
+              ) : null}
+              {crossPhmaxMismatches.length > 0 ? (
+                <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.88rem" }}>
+                  <strong>Upozornění:</strong> modul(y) {crossPhmaxMismatches.join(", ")} jsou zároveň ve Vyžaduje
+                  pozornost – opravte vstupy před použitím součtu.
+                </p>
+              ) : null}
+              {dashboardBandHints.length > 0 ? (
+                <div style={{ marginTop: 12 }}>
+                  <strong style={{ fontSize: "0.92rem" }}>Orientace k vyššímu PHmax (z autosave)</strong>
+                  <ul className="muted-text" style={{ marginTop: 6, paddingLeft: "1.25rem", fontSize: "0.88rem" }}>
+                    {dashboardBandHints.map((hint) => (
+                      <li key={hint}>{hint}</li>
+                    ))}
+                  </ul>
+                  <p className="muted-text" style={{ marginTop: 6, fontSize: "0.85rem" }}>
+                    Jde o orientační odhad podle pásem v metodice – ověřte v modulu PV / ZŠ / ŠD.
+                  </p>
+                </div>
+              ) : null}
+              {auditCoherenceWarnings.length > 0 ? (
+                <ul className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.88rem", paddingLeft: "1.25rem" }}>
+                  {auditCoherenceWarnings.map((w) => {
+                    const moduleId = coherenceWarningModuleId(w);
+                    return (
+                      <li key={w}>
+                        {w}
+                        {moduleId ? (
+                          <>
+                            {" "}
+                            <button
+                              type="button"
+                              className="btn ghost"
+                              style={{ display: "inline", padding: "0 4px", fontSize: "inherit", verticalAlign: "baseline" }}
+                              onClick={() => openModuleForOwnData(moduleId)}
+                            >
+                              Otevřít {DASH_CALC_LABEL[moduleId]}
+                            </button>
+                          </>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+            </p>
+            <ul className="dash-cross-phmax__list muted-text" style={{ marginTop: 10, paddingLeft: "1.25rem" }}>
+              {crossPhmax.slices.map((slice) => (
+                <li key={slice.id}>
+                  {formatCrossPhmaxSliceLabel(slice)}
+                  {slice.incomplete ? " (neúplný)" : ""}
+                  {attentionIds.has(slice.id) ? " (vyžaduje pozornost)" : ""}
+                </li>
+              ))}
+            </ul>
+            <p className="muted-text" style={{ marginTop: 10, fontSize: "0.88rem" }}>
+              Export JSON, import ze školy a integrace IS jsou v sekci{" "}
+              <button
+                type="button"
+                className="btn ghost"
+                style={{ display: "inline", padding: "0 4px", fontSize: "inherit", verticalAlign: "baseline" }}
+                onClick={() => document.getElementById("dash-advanced-tools")?.scrollIntoView({ behavior: "smooth" })}
+              >
+                Pokročilé nástroje
+              </button>{" "}
+              níže na stránce.
+            </p>
+          </section>
+        ) : null}
+
+        {zsNamedBackupCount > 0 ? (
+          <section className="card section-card dash-compare-hint" aria-labelledby="dash-compare-heading">
+            <h2 id="dash-compare-heading" className="section-title">
+              Porovnání scénářů (ZŠ)
+            </h2>
+            <p className="muted-text" style={{ marginBottom: 10 }}>
+              V prohlížeči máte <strong>{zsNamedBackupCount}</strong> pojmenovaných záloh ZŠ. V modulu ZŠ otevřete panel{" "}
+              <strong>Akce</strong> → porovnání se zálohou nebo export audit JSON.
+            </p>
+            <button
+              type="button"
+              className="btn primary"
+              data-testid="dash-compare-zs-primary"
+              onClick={() => setProductView("zs")}
+            >
+              Otevřít ZŠ – pojmenované zálohy
+            </button>
+          </section>
+        ) : null}
+
+        <details id="dash-advanced-tools" className="card section-card dash-advanced-tools">
+          <summary className="section-title dash-advanced-tools__summary">
+            Pokročilé nástroje – import, export a integrace
+          </summary>
+          <div className="dash-advanced-tools__body">
+            <section
+              id="dash-school-import"
+              className="dash-school-import dash-advanced-tools__block"
+              aria-labelledby="dash-import-heading"
+            >
+              <h3 id="dash-import-heading" className="dash-advanced-tools__subtitle">
+                Import ze školy
+              </h3>
+              <p className="muted-text">{DASH_IMPORT_HINT}</p>
+              <ol className="dash-school-import__steps muted-text">
+                {DASH_IMPORT_STEPS.map((step, i) => (
+                  <li key={step}>
+                    <strong>{i + 1}.</strong> {step}
+                  </li>
+                ))}
+              </ol>
+              <div className="dash-card__actions dash-school-import__actions">
+                <input
+                  ref={importCardFileRef}
+                  type="file"
+                  data-testid="dash-import-file-card"
+                  accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+                  multiple
+                  disabled={importUploadBusy}
+                  style={{ display: "none" }}
+                  onChange={(e) => void handleImportFilePick(e.target.files)}
+                />
+                <button
+                  ref={importTriggerRef}
+                  type="button"
+                  className="btn primary"
+                  data-testid="dash-import-open-main"
+                  disabled={importUploadBusy}
+                  aria-busy={importUploadBusy}
+                  title="Krok 3 – nahrát vyplněný Excel nebo CSV"
+                  onClick={() => importCardFileRef.current?.click()}
+                >
+                  {importUploadBusy ? "Načítám soubor…" : DASH_IMPORT_UPLOAD_LABEL}
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  data-testid="dash-import-download-template"
+                  disabled={importTemplateBusy}
+                  aria-busy={importTemplateBusy}
+                  onClick={() => void handleDownloadImportTemplate()}
+                >
+                  {importTemplateBusy ? "Připravuji šablonu…" : DASH_IMPORT_TEMPLATE_LABEL}
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  data-testid="dash-import-open"
+                  title={DASH_IMPORT_HINT}
+                  onClick={openImportDialog}
+                >
+                  {DASH_IMPORT_LABEL} (náhled)
+                </button>
+              </div>
+            </section>
+
+            {crossPhmax.modulesWithPhmax >= 2 ? (
+              <section className="dash-advanced-tools__block" aria-labelledby="dash-export-heading">
+                <h3 id="dash-export-heading" className="dash-advanced-tools__subtitle">
+                  Export a scénář školy
+                </h3>
+                <p className="muted-text">
+                  Orientační JSON pro metodika / IT – viz{" "}
+                  <code className="methodology-strip__code">docs/phmax-is-integration.md</code>.
+                </p>
+                <label className="field" style={{ marginTop: 12, maxWidth: 420 }}>
+                  <span className="field__label">Název scénáře školy (JSON export)</span>
+                  <input
+                    type="text"
+                    className="input"
+                    value={scenarioLabel}
+                    onChange={(e) => persistScenarioLabel(e.target.value)}
+                    placeholder="Celá škola (autosave)"
+                  />
+                </label>
+                <label className="field" style={{ marginTop: 8, maxWidth: 520 }}>
+                  <span className="field__label">URL endpoint IS (volitelné POST)</span>
+                  <input
+                    type="url"
+                    className="input"
+                    value={isEndpoint}
+                    onChange={(e) => {
+                      setIsEndpoint(e.target.value);
+                      writePhmaxIsEndpoint(e.target.value);
+                    }}
+                    placeholder="https://…/phmax-handoff"
+                  />
+                </label>
+                <details className="dash-export-checklist" style={{ marginTop: 12 }}>
+                  <summary className="section-title" style={{ fontSize: "1rem", cursor: "pointer" }}>
+                    Kontrolní list před exportem
+                  </summary>
+                  <ul className="muted-text" style={{ marginTop: 8, paddingLeft: "1.25rem" }}>
+                    {exportChecklist.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                  <label className="field" style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "flex-start" }}>
+                    <input
+                      type="checkbox"
+                      data-testid="dash-export-confirm"
+                      checked={exportDisclaimerConfirmed}
+                      onChange={(e) => setExportDisclaimerConfirmed(e.target.checked)}
+                    />
+                    <span className="muted-text">
+                      Potvrzuji, že export je orientační a neoficiální – použiji ho jen pro interní kontrolu školy.
+                    </span>
+                  </label>
+                </details>
+                {exportDisclaimerConfirmed ? (
+                  <div className="dash-export-wizard muted-text" data-testid="dash-export-wizard">
+                    <p className="dash-export-wizard__step dash-export-wizard__step--active">
+                      <strong>Krok 1:</strong> Stáhněte JSON (součet, scénář nebo handoff) – orientační, neoficiální.
+                    </p>
+                    <p className="dash-export-wizard__step">
+                      <strong>Krok 2 – IT:</strong> předejte soubor, verzi aplikace ({APP_VERSION}), název scénáře a pole{" "}
+                      <code className="methodology-strip__code">coherenceWarnings</code>.
+                    </p>
+                    <p className="dash-export-wizard__step">
+                      <strong>Krok 3:</strong> Na sdíleném PC po exportu zvažte smazání lokálních dat.
+                    </p>
+                  </div>
+                ) : null}
+                <div className="dash-card__actions" style={{ marginTop: 12 }}>
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    disabled={!exportDisclaimerConfirmed}
+                    onClick={downloadCrossPhmaxJson}
+                  >
+                    Stáhnout JSON součtu PHmax
+                  </button>
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    disabled={!exportDisclaimerConfirmed}
+                    onClick={downloadSchoolScenarioJson}
+                  >
+                    Scénář celá škola (JSON)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    disabled={!exportDisclaimerConfirmed}
+                    onClick={downloadIsHandoffJson}
+                  >
+                    Export pro IS školy (JSON)
+                  </button>
+                  {isEndpoint.trim() ? (
+                    <button
+                      type="button"
+                      className="btn ghost"
+                      disabled={!exportDisclaimerConfirmed}
+                      onClick={() => void sendIsHandoff()}
+                    >
+                      Odeslat handoff na IS (POST)
+                    </button>
+                  ) : null}
+                </div>
+              </section>
+            ) : (
+              <p className="muted-text dash-advanced-tools__block">
+                Export scénáře školy se zobrazí po vyplnění alespoň dvou modulů s PHmax (PV, ŠD, ZŠ nebo SŠ).
+              </p>
+            )}
+          </div>
+        </details>
 
         </main>
 

@@ -62,7 +62,8 @@ describe("UX contract: basic onboarding steps + CTA", () => {
 
   it("dashboard pro nové uživatele nabízí ukázku bez modalu", () => {
     const dash = readSource("src/PhmaxDashboardPage.tsx");
-    expect(dash).toContain("dash-new-user-card");
+    expect(dash).toContain("dash-quick-start");
+    expect(dash).toContain("dash-new-user-card__grid");
     expect(dash).toContain("showNewUserGuide");
     expect(dash).toContain("requestFocusExampleSelect");
     expect(dash).toContain("openModuleWithExampleHint");
