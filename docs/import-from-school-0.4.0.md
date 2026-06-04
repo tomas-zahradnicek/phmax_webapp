@@ -10,6 +10,8 @@ Orientační specifikace. **Pilot PV + ZŠ v aplikaci:** dashboard → Import ze
 
 Import **není** závazný výkaz ani náhrada ručního doplnění metodických detailů (§ 16, víceoborové třídy, výjimky).
 
+**Doporučení (pilot):** ze školy / IS přenášet **agregované počty a řádky** podle šablony Excel v2 (české názvy sloupců i hodnot výčtů). **PHAmax, PHPmax, gymnázia, menšinové třídy, smíšené třídy, § 1d PV, výjimky a pojmenované scénáře** nechte uživateli doplnit v kalkulačce po importu – rozšíření šablony je možné ve fázi C, ale zvyšuje riziko chybné metodiky bez kontroly v UI.
+
 ## Co lze importovat po modulech
 
 ### PV (mateřská škola)

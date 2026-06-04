@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import {
   DASH_IMPORT_CONFIRM_HINT,
   DASH_IMPORT_DIALOG_LEAD,
+  DASH_IMPORT_SCOPE_NOTE,
   DASH_IMPORT_TEMPLATE_LABEL,
   DASH_IMPORT_UPLOAD_LABEL,
 } from "./calculator-ui-constants";
@@ -162,7 +163,10 @@ export function DashboardSchoolImportDialog({
           </div>
           <p className="muted-text" style={{ marginTop: 8, fontSize: "0.88rem" }}>
             Doporučeno: jeden soubor <code className="methodology-strip__code">phmax-import-skola-v2.xlsx</code> (české
-            názvy sloupců). Povinné listy Meta, PV, ZŠ souhrn; volitelně ŠD, SŠ, ZŠ psycholog / zdravotní.
+            názvy sloupců a hodnot). Povinné listy Meta, PV, ZŠ souhrn; volitelně ŠD, SŠ, ZŠ psycholog / zdravotní.
+          </p>
+          <p className="muted-text" style={{ marginTop: 6, fontSize: "0.88rem" }}>
+            {DASH_IMPORT_SCOPE_NOTE}
           </p>
 
           {error ? (

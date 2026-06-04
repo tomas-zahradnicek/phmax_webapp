@@ -7,6 +7,14 @@ import {
   IMPORT_ZS_PSYCH_LABELS,
   IMPORT_ZS_SUMMARY_LABELS,
 } from "./phmax-import-columns";
+import {
+  IMPORT_BASIC_TYPE_LABELS,
+  IMPORT_PSYCH_KIND_LABELS,
+  IMPORT_ROW_MODE_LABELS,
+  IMPORT_SD_MODE_LABELS,
+  IMPORT_TEMPLATE_NAVOD_VALUE_LINES,
+} from "./phmax-import-czech-values";
+import { PV_PROVOZ_OPTIONS } from "./pv/pv-workplace-shared";
 import { PHMAX_IMPORT_SCHOOL_SCHEMA } from "./phmax-import-pv-zs";
 
 const HEADER_FILL = "FFE8EEF7";
@@ -20,14 +28,14 @@ const META_EXAMPLE = [
 ];
 
 const PV_EXAMPLES: readonly (readonly string[])[] = [
-  ["zs-praha-123", "Import ze školy 2026-05", "pv-1", "Budova A - MŠ", "celodenni", "4", "8", "0", "0"],
-  ["zs-praha-123", "Import ze školy 2026-05", "pv-2", "Školka polodenní", "polodenni", "2", "5", "0", "1"],
+  ["zs-praha-123", "Import ze školy 2026-05", "pv-1", "Budova A - MŠ", PV_PROVOZ_OPTIONS[1]!.label, "4", "8", "0", "0"],
+  ["zs-praha-123", "Import ze školy 2026-05", "pv-2", "Školka polodenní", PV_PROVOZ_OPTIONS[0]!.label, "2", "5", "0", "1"],
 ];
 
 const ZS_EXAMPLE = [
   "zs-praha-123",
   "Import ze školy 2026-05",
-  "full_more_than_2",
+  IMPORT_BASIC_TYPE_LABELS.full_more_than_2,
   "10",
   "250",
   "8",
@@ -41,7 +49,7 @@ const ZS_EXAMPLE = [
   "Import ze školy 2026-05",
 ];
 
-const SD_EXAMPLE = ["zs-praha-123", "Import ze školy 2026-05", "30", "2", "summary"];
+const SD_EXAMPLE = ["zs-praha-123", "Import ze školy 2026-05", "30", "2", IMPORT_SD_MODE_LABELS.summary];
 
 const SS_EXAMPLE = [
   "zs-praha-123",
@@ -58,8 +66,8 @@ const ZS_PSYCH_EXAMPLE = [
   "zs-praha-123",
   "Import ze školy 2026-05",
   "1",
-  "psych1",
-  "current_only",
+  IMPORT_PSYCH_KIND_LABELS.psych1,
+  IMPORT_ROW_MODE_LABELS.current_only,
   "40",
   "2",
   "0",
@@ -99,13 +107,11 @@ function addNavodSheet(workbook: import("exceljs").Workbook) {
     [""],
     ["Povinné listy: Meta (1 řádek), PV (řádky MŠ), ZŠ souhrn (1 řádek)."],
     ["Volitelné: ŠD, SŠ, ZŠ psycholog, ZŠ zdravotní."],
-    ["Řádek 1 = český název sloupce, řádek 2 = kód pole v závorce (pro kontrolu)."],
+    ["Řádek 1 = český název sloupce, řádek 2 = interní klíč v závorce (pro IT)."],
+    ["Řádek 3+ = data – u výčtů používejte české popisky z kalkulačky (viz níže)."],
     ["school_id a Název scénáře musí být stejné ve všech listech."],
     [""],
-    ["provoz (PV): polodenni | celodenni | internat | zdravotnicke"],
-    ["basic_type (ZŠ): full_more_than_2 | full_max_2 | first_only_1 … first_only_4"],
-    ["Režim ŠD: souhrn nebo detail"],
-    ["psych kind: psych1 | psych2 | psychMix — health: health1 | health2 | healthMix"],
+    ...IMPORT_TEMPLATE_NAVOD_VALUE_LINES.map((line) => [line]),
   ];
   for (const [text] of lines) {
     sheet.addRow([text]);

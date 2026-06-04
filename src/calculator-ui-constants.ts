@@ -77,6 +77,10 @@ export const DASH_IMPORT_DIALOG_LEAD =
 export const DASH_IMPORT_CONFIRM_HINT =
   "Potvrzuji, že import je orientační – ověřím výpočet v modulech PV a ZŠ před použitím součtu nebo exportu.";
 
+/** Co šablona importu neobsahuje – doplnění v kalkulačce po načtení. */
+export const DASH_IMPORT_SCOPE_NOTE =
+  "Šablona přenáší hlavní počty a řádky (PV, ZŠ souhrn, volitelně ŠD, SŠ, psycholog, zdravotní). Výjimky, PHAmax/PHPmax, gymnázia, § 16, § 1d PV a další metodické detaily doplníte v kalkulačce po importu – to je záměr pilotu.";
+
 export const CALCULATOR_GLOBAL_DISPLAY_HINT =
   "Pohodlné / Kompaktní a Fokus na formulář platí pro všechny kalkulačky v tomto prohlížeči.";
 
@@ -247,7 +251,7 @@ export function namedBackupSavedNotice(name: string, maxCount: number): string {
 }
 
 /** Autor aplikace – e-mail a texty do exportů / shrnutí. */
-export const APP_AUTHOR_EMAIL = "tomas.zahradnicek.hradec@gmail.com";
+export const APP_AUTHOR_EMAIL = "reditelskypruvodce@gmail.com";
 
 export const APP_AUTHOR_DISPLAY_NAME = "Mgr. Tomáš Zahradníček";
 

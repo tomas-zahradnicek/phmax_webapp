@@ -45,13 +45,15 @@ Jeden řádek = jedno pracoviště (mateřská škola).
 | `scenario_label` | ano | `Import z IS 2026-05` | – |
 | `row_key` | ano | `pv-1` | `id` (řetězec, unikátní v dávce) |
 | `label` | ne | `Budova A` | `label` |
-| `provoz` | ano | `celodenni` | `provoz` – viz hodnoty níže |
+| `provoz` | ano | `Celodenní provoz (tabulka 2)` | `provoz` – český popisek nebo kód, viz níže |
 | `class_count` | ano | `4` | `classCount` |
 | `avg_hours` | ano | `8` | `avgHours` |
 | `sec16_count` | ne | `0` | `sec16Count` |
 | `language_groups` | ne | `0` | `languageGroups` |
 
-**Hodnoty `provoz`:** `polodenni` | `celodenni` | `internat` | `zdravotnicke`
+**Hodnoty `provoz` (český text z kalkulačky nebo kód):**  
+Polodenní provoz (tabulka 1) | Celodenní provoz (tabulka 2) | Internátní provoz (tabulka 3) | Mateřská škola při zdravotnickém zařízení (S 4-01)  
+— nebo kódy: `polodenni` | `celodenni` | `internat` | `zdravotnicke`
 
 **Fáze 2 (volitelné sloupce PV):** `pv1d_actual_children`, `pv1d_minimum_children`, `pv1d_ku_phmax_cap`, `pv1d_exemption` (0/1) – § 1d; bez nich aplikace doplní výchozí nulu / false.
 
@@ -83,7 +85,7 @@ Jeden řádek = jedna škola (ne více řádků tříd). Vhodné pro první napo
 |---------|---------|---------|----------|
 | `school_id` | ano | `zs-praha-123` | – |
 | `scenario_label` | ano | `Import z IS 2026-05` | – |
-| `basic_type` | ano | `full_more_than_2` | `basicType` – viz hodnoty |
+| `basic_type` | ano | `Úplná ZŠ – více než 2 třídy v některém ročníku` | `basicType` – český popisek nebo kód |
 | `basic1_classes` | ne | `10` | `basic1Classes` |
 | `basic1_pupils` | ne | `250` | `basic1Pupils` |
 | `basic2_classes` | ne | `8` | `basic2Classes` |
@@ -96,10 +98,11 @@ Jeden řádek = jedna škola (ne více řádků tříd). Vhodné pro první napo
 | `prep_children` | ne | `40` | `prepChildren` |
 | `export_label` | ne | `Import IS` | `exportLabel` |
 
-**Hodnoty `basic_type`:**  
-`full_more_than_2` | `full_max_2` | `first_only_1` | `first_only_2` | `first_only_3` | `first_only_4`
+**Hodnoty `basic_type` (český text z kalkulačky nebo kód):**  
+Úplná ZŠ – více než 2 třídy v některém ročníku | Úplná ZŠ – nejvýše 2 třídy v každém ročníku | Neúplná ZŠ – 1–4 třídy 1. stupně (viz list Návod ve šabloně v2)  
+— nebo kódy: `full_more_than_2` | `full_max_2` | `first_only_1` … `first_only_4`
 
-**Po importu** skript nastaví `tab: "phmax"`, prázdné pole řádků (`psychRows`, `healthRows`, …) jako `[]`, `mode: "basic"`. Uživatel v aplikaci doplní specializované sekce nebo použije ukázku.
+**Po importu** skript nastaví `tab: "phmax"`, prázdné pole řádků (`psychRows`, `healthRows`, …) jako `[]`, `mode: "basic"`. Uživatel v aplikaci doplní specializované sekce (PHA/PHP, gymnázium, výjimky) nebo použije ukázku.
 
 **Fáze 2 ZŠ (samostatné soubory, volitelně):**
 

@@ -1,4 +1,12 @@
 import type { ImportCsvRow } from "./phmax-import-pv-zs";
+import {
+  IMPORT_BASIC_TYPE_ALIASES,
+  IMPORT_HEALTH_KIND_ALIASES,
+  IMPORT_PROVOZ_ALIASES,
+  IMPORT_PSYCH_KIND_ALIASES,
+  IMPORT_ROW_MODE_ALIASES,
+  IMPORT_SD_MODE_ALIASES,
+} from "./phmax-import-czech-values";
 
 /** České popisky sloupců ve šabloně Excel (řádek 1). Interní klíč je v závorce nebo mapování níže. */
 export const IMPORT_META_LABELS = {
@@ -14,7 +22,7 @@ export const IMPORT_PV_LABELS = {
   scenario_label: "Název scénáře",
   row_key: "Klíč řádku",
   label: "Označení pracoviště",
-  provoz: "Druh provozu (kód)",
+  provoz: "Druh provozu",
   class_count: "Počet tříd",
   avg_hours: "Průměrná denní doba (h)",
   sec16_count: "Třídy § 16",
@@ -24,7 +32,7 @@ export const IMPORT_PV_LABELS = {
 export const IMPORT_ZS_SUMMARY_LABELS = {
   school_id: "ID školy",
   scenario_label: "Název scénáře",
-  basic_type: "Typ základního vzdělávání (kód)",
+  basic_type: "Typ základního vzdělávání",
   basic1_classes: "Třídy 1. stupeň",
   basic1_pupils: "Žáci 1. stupeň",
   basic2_classes: "Třídy 2. stupeň",
@@ -43,7 +51,7 @@ export const IMPORT_SD_LABELS = {
   scenario_label: "Název scénáře",
   pupils: "Počet účastníků",
   departments: "Počet oddělení",
-  input_mode: "Režim (souhrn/detail)",
+  input_mode: "Režim ŠD",
 } as const;
 
 export const IMPORT_SS_LABELS = {
@@ -61,8 +69,8 @@ export const IMPORT_ZS_PSYCH_LABELS = {
   school_id: "ID školy",
   scenario_label: "Název scénáře",
   row_id: "Č. řádku",
-  kind: "Druh (kód psych)",
-  mode: "Režim (vyšší/aktuální)",
+  kind: "Stupeň (psychiatrie)",
+  mode: "Režim výpočtu",
   current_pupils: "Žáci aktuálně",
   current_classes: "Třídy aktuálně",
   prev_pupils: "Žáci předchozí",
@@ -73,8 +81,8 @@ export const IMPORT_ZS_HEALTH_LABELS = {
   school_id: "ID školy",
   scenario_label: "Název scénáře",
   row_id: "Č. řádku",
-  kind: "Druh (kód zdravotní)",
-  mode: "Režim (vyšší/aktuální)",
+  kind: "Stupeň (zdravotní třída)",
+  mode: "Režim výpočtu",
   current_pupils: "Žáci aktuálně",
   current_classes: "Třídy aktuálně",
   prev_pupils: "Žáci předchozí",
@@ -126,45 +134,6 @@ export function normalizeImportRows(rows: ImportCsvRow[], kind: ImportSheetKind)
   });
 }
 
-const PROVOZ_ALIASES: Record<string, string> = {
-  polodenni: "polodenni",
-  polodenní: "polodenni",
-  celodenni: "celodenni",
-  celodenní: "celodenni",
-  internat: "internat",
-  zdravotnicke: "zdravotnicke",
-  zdravotnické: "zdravotnicke",
-};
-
-const BASIC_TYPE_ALIASES: Record<string, string> = {
-  full_more_than_2: "full_more_than_2",
-  "plny rozsah nad 2h": "full_more_than_2",
-  "plný rozsah nad 2h": "full_more_than_2",
-  full_max_2: "full_max_2",
-  "plny rozsah max 2h": "full_max_2",
-  first_only_1: "first_only_1",
-  first_only_2: "first_only_2",
-  first_only_3: "first_only_3",
-  first_only_4: "first_only_4",
-};
-
-const INPUT_MODE_ALIASES: Record<string, "summary" | "detail"> = {
-  summary: "summary",
-  souhrn: "summary",
-  detail: "detail",
-  detailni: "detail",
-  detailní: "detail",
-};
-
-const ROW_MODE_ALIASES: Record<string, "higher_of_two" | "current_only"> = {
-  higher_of_two: "higher_of_two",
-  "vyssi z obou": "higher_of_two",
-  "vyšší z obou": "higher_of_two",
-  current_only: "current_only",
-  aktualni: "current_only",
-  aktuální: "current_only",
-};
-
 function normKey(s: string): string {
   return s
     .trim()
@@ -176,17 +145,24 @@ function normKey(s: string): string {
 function normalizeImportValues(row: ImportCsvRow, kind: ImportSheetKind): ImportCsvRow {
   const out = { ...row };
   if (kind === "pv" && out.provoz) {
-    out.provoz = PROVOZ_ALIASES[normKey(out.provoz)] ?? normKey(out.provoz).replace(/\s+/g, "_");
+    out.provoz = IMPORT_PROVOZ_ALIASES[normKey(out.provoz)] ?? normKey(out.provoz).replace(/\s+/g, "_");
   }
   if (kind === "zs" && out.basic_type) {
     const k = normKey(out.basic_type);
-    out.basic_type = BASIC_TYPE_ALIASES[k] ?? out.basic_type.trim();
+    out.basic_type = IMPORT_BASIC_TYPE_ALIASES[k] ?? out.basic_type.trim();
   }
   if (kind === "sd" && out.input_mode) {
-    out.input_mode = INPUT_MODE_ALIASES[normKey(out.input_mode)] ?? "summary";
+    out.input_mode = (IMPORT_SD_MODE_ALIASES[normKey(out.input_mode)] as "summary" | "detail" | undefined) ?? "summary";
   }
   if ((kind === "zsPsych" || kind === "zsHealth") && out.mode) {
-    out.mode = ROW_MODE_ALIASES[normKey(out.mode)] ?? "current_only";
+    out.mode =
+      (IMPORT_ROW_MODE_ALIASES[normKey(out.mode)] as "higher_of_two" | "current_only" | undefined) ?? "current_only";
+  }
+  if (kind === "zsPsych" && out.kind) {
+    out.kind = IMPORT_PSYCH_KIND_ALIASES[normKey(out.kind)] ?? out.kind.trim();
+  }
+  if (kind === "zsHealth" && out.kind) {
+    out.kind = IMPORT_HEALTH_KIND_ALIASES[normKey(out.kind)] ?? out.kind.trim();
   }
   return out;
 }
