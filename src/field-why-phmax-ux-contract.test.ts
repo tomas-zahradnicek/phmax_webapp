@@ -29,12 +29,12 @@ describe("UX contract: FieldWhyPhmax + dashboard user-first blok", () => {
     }
   });
 
-  it("Souhrnný přehled má uživatelsky-první úvodní sekci", () => {
+  it("Ředitelský přehled má hero, KPI a návštěvy modulů", () => {
     const dash = readSource("src/PhmaxDashboardPage.tsx");
-    expect(dash).toContain("Začněte uživatelsky nejdříve tady");
+    expect(dash).toContain("Ředitelský průvodce");
     expect(dash).toContain("Otevřít");
-    expect(dash).toContain("DASH_QUICK_IDS");
-    expect(dash).toContain("dash-kpi-strip");
+    expect(dash).toContain("DASH_PRIMARY_ACTIONS");
+    expect(dash).toContain("dash-kpi-compact");
     expect(dash).toContain("primaryKpi");
     expect(dash).toContain("lastVisit");
     expect(dash).toContain("modulesWithData");

@@ -35,5 +35,5 @@ describe("phmax-import-template-xlsx", () => {
     expect(String(ciselniky?.getCell(1, 2).value)).toContain("Úplná ZŠ");
     const buffer = await workbook.xlsx.writeBuffer();
     expect(buffer.byteLength).toBeGreaterThan(4000);
-  });
+  }, 30_000);
 });

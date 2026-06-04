@@ -9835,12 +9835,64 @@ select:focus {
 
 .dash-hero-brand__logo {
   display: block;
+}
+
+.app-brand-logo {
+  display: block;
+}
+
+.app-brand-logo--hero {
   width: 80px;
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
   border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.app-brand-logo--card {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+}
+
+.card-brand-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.card-brand-head .section-title,
+.card-brand-head .dash-school-status__title,
+.card-brand-head .dash-card__title,
+.card-brand-head .dash-new-user-card__tile-title,
+.card-brand-head .dash-continue-card__compact-title {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.card-brand-head--in-summary {
+  margin-bottom: 0;
+  width: 100%;
+}
+
+.dash-card__head {
+  margin-bottom: 4px;
+}
+
+.dash-attention-card__item-head {
+  margin-bottom: 0;
+  flex: 1 1 12rem;
+}
+
+.dash-new-user-card__tile-head {
+  margin-bottom: 8px;
 }
 
 .dash-hero-brand__copy {
