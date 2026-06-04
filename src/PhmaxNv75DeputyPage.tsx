@@ -32,7 +32,7 @@ import {
   NV75_HERO_EXAMPLE_SELECT_ID,
 } from "./nv75-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { sectionNeedsAttentionClass } from "./calculator-section-focus";
 import { createNv75ScrollToInputs } from "./nv75/create-nv75-scroll-to-inputs";
 import { buildCalculatorNextAction } from "./calculator-next-action";
 import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
@@ -1196,14 +1196,6 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
                 ) : null
               }
               actions={[
-                ...(nv75NeedsInputBanner
-                  ? [
-                      {
-                        label: "Přejít k chybě",
-                        onClick: () => scrollToFirstNeedsAttentionSection(["nv75-vstupy"]),
-                      },
-                    ]
-                  : []),
                 { label: "Uložit scénář", onClick: saveNamedSnapshot },
                 { label: "Export CSV", onClick: handleExportCsv },
                 { label: "Porovnat se zálohou", onClick: compareWithNamedSnapshot },

@@ -1,45 +1,46 @@
 import React from "react";
 import { APP_BRAND_LOGO_PATH } from "./calculator-ui-constants";
-
-export type AppBrandLogoSize = "hero" | "card";
+import type { ProductView } from "./ProductViewPills";
 
 export type AppBrandLogoProps = {
-  size?: AppBrandLogoSize;
   className?: string;
   alt?: string;
 };
 
-export function AppBrandLogo({ size = "card", className, alt = "" }: AppBrandLogoProps) {
-  const dim = size === "hero" ? 80 : 40;
+export function AppBrandLogo({ className, alt = "" }: AppBrandLogoProps) {
   return (
     <img
       src={APP_BRAND_LOGO_PATH}
       alt={alt}
-      className={[
-        "app-brand-logo",
-        size === "hero" ? "app-brand-logo--hero" : "app-brand-logo--card",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      width={dim}
-      height={dim}
+      className={["app-brand-logo", "app-brand-logo--hero", className].filter(Boolean).join(" ")}
+      width={80}
+      height={80}
       decoding="async"
     />
   );
 }
 
-export type CardBrandHeadProps = {
-  children: React.ReactNode;
-  className?: string;
+export type HeroBrandLogoButtonProps = {
+  productView: ProductView;
+  setProductView: (view: ProductView) => void;
 };
 
-/** Logo vlevo vedle nadpisu karty / sekce. */
-export function CardBrandHead({ children, className }: CardBrandHeadProps) {
+/** Logo v hero – klik vrátí na přehled školy. */
+export function HeroBrandLogoButton({ productView, setProductView }: HeroBrandLogoButtonProps) {
   return (
-    <div className={["card-brand-head", className].filter(Boolean).join(" ")}>
-      <AppBrandLogo size="card" />
-      {children}
-    </div>
+    <button
+      type="button"
+      className="dash-hero-brand__logo-btn"
+      aria-label="Přehled školy"
+      onClick={() => {
+        if (productView === "dash") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          setProductView("dash");
+        }
+      }}
+    >
+      <AppBrandLogo className="dash-hero-brand__logo" />
+    </button>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { AppBrandLogo, CardBrandHead } from "./AppBrandLogo";
+import { HeroBrandLogoButton } from "./AppBrandLogo";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import {
@@ -1060,21 +1060,8 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               Vymazat lokální data
             </button>
           </div>
-          <div className="hero__grid dash-hero-brand" style={{ marginTop: 8 }}>
-            <button
-              type="button"
-              className="dash-hero-brand__logo-btn"
-              aria-label="Přehled školy"
-              onClick={() => {
-                if (productView === "dash") {
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                } else {
-                  setProductView("dash");
-                }
-              }}
-            >
-              <AppBrandLogo size="hero" className="dash-hero-brand__logo" />
-            </button>
+          <div className="hero__grid dash-hero-brand">
+            <HeroBrandLogoButton productView={productView} setProductView={setProductView} />
             <div className="dash-hero-brand__copy">
               <h1 className="hero__title">Ředitelský průvodce</h1>
               <ul className="dash-hero-stats" aria-label="Souhrn stavu školy">
@@ -1103,15 +1090,13 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           className={`card section-card dash-school-status dash-school-status--${schoolStatusTone}`}
           aria-labelledby="dash-school-status-heading"
         >
-          <CardBrandHead>
-            <h2 id="dash-school-status-heading" className="dash-school-status__title">
-              {schoolStatusTone === "ok"
-                ? "🟢 Stav školy"
-                : schoolStatusTone === "warning"
-                  ? "🔴 Vyžaduje pozornost"
-                  : "Stav školy"}
-            </h2>
-          </CardBrandHead>
+          <h2 id="dash-school-status-heading" className="dash-school-status__title">
+            {schoolStatusTone === "ok"
+              ? "🟢 Stav školy"
+              : schoolStatusTone === "warning"
+                ? "🔴 Vyžaduje pozornost"
+                : "Stav školy"}
+          </h2>
           <ul className="dash-school-status__facts">
             <li>
               <strong>{modulesCompleted}</strong> {csDashModulesOkLabel(modulesCompleted)}
@@ -1203,11 +1188,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         ) : null}
 
         <section className="card section-card dash-browser-overview" aria-labelledby="dash-overview-heading">
-          <CardBrandHead>
-            <h2 id="dash-overview-heading" className="section-title">
-              Moje kalkulačky
-            </h2>
-          </CardBrandHead>
+          <h2 id="dash-overview-heading" className="section-title">
+            Moje kalkulačky
+          </h2>
           {modulesWithData === 0 ? (
             <p className="muted-text dash-overview-summary">
               Zatím žádná uložená data – začněte u modulu, který vaše škola provozuje (např. PV nebo ZŠ), v sekci{" "}
@@ -1259,9 +1242,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             {rows.map((row) => (
               <article key={row.id} className="dash-card">
                 <div className="dash-card__body">
-                  <CardBrandHead className="dash-card__head">
-                    <h3 className="dash-card__title">{row.title}</h3>
-                  </CardBrandHead>
+                  <h3 className="dash-card__title">{row.title}</h3>
                   <FillStatusBadge
                     kind={
                       row.hasData
@@ -1299,11 +1280,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
 
         {attentionRows.length > 0 ? (
           <section className="card section-card dash-attention-card" aria-labelledby="dash-attention-heading">
-            <CardBrandHead>
-              <h2 id="dash-attention-heading" className="section-title">
-                Vyžaduje pozornost
-              </h2>
-            </CardBrandHead>
+            <h2 id="dash-attention-heading" className="section-title">
+              Vyžaduje pozornost
+            </h2>
             <p className="muted-text" style={{ marginBottom: 12 }}>
               Moduly s varováním nebo chybou vstupů – po otevření se posunete k první problematické sekci.
             </p>
@@ -1313,17 +1292,15 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   key={row.id}
                   className={`dash-attention-card__item dash-attention-card__item--${row.verdict?.tone ?? "warning"}`}
                 >
-                  <CardBrandHead className="dash-attention-card__item-head">
-                    <div>
-                      <strong>{DASH_CALC_LABEL[row.id]}</strong>
-                      <span className="muted-text"> – {row.verdict?.label}</span>
-                      {row.verdict?.detail ? (
-                        <p className="muted-text" style={{ margin: "4px 0 0" }}>
-                          {row.verdict.detail}
-                        </p>
-                      ) : null}
-                    </div>
-                  </CardBrandHead>
+                  <div>
+                    <strong>{DASH_CALC_LABEL[row.id]}</strong>
+                    <span className="muted-text"> – {row.verdict?.label}</span>
+                    {row.verdict?.detail ? (
+                      <p className="muted-text" style={{ margin: "4px 0 0" }}>
+                        {row.verdict.detail}
+                      </p>
+                    ) : null}
+                  </div>
                   <button type="button" className="btn primary" onClick={() => openDashboardModule(row)}>
                     Otevřít a přejít k chybě
                   </button>
@@ -1339,11 +1316,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             className="card section-card dash-cross-phmax"
             aria-labelledby="dash-cross-phmax-heading"
           >
-            <CardBrandHead>
-              <h2 id="dash-cross-phmax-heading" className="section-title">
-                Souhrnný PHmax
-              </h2>
-            </CardBrandHead>
+            <h2 id="dash-cross-phmax-heading" className="section-title">
+              Souhrnný PHmax
+            </h2>
             <div className="dash-cross-phmax__hero">
               <span className="dash-cross-phmax__hero-label">Celkem PHmax</span>
               <div className="dash-cross-phmax__hero-value">
@@ -1445,11 +1420,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
         ) : null}
 
         <section className="card card--accent section-card dash-quick-start" aria-labelledby="dash-quick-start-heading">
-          <CardBrandHead>
-            <h2 id="dash-quick-start-heading" className="section-title">
-              Co chcete dnes udělat?
-            </h2>
-          </CardBrandHead>
+          <h2 id="dash-quick-start-heading" className="section-title">
+            Co chcete dnes udělat?
+          </h2>
           {showNewUserGuide ? (
             <p className="muted-text" style={{ marginBottom: 10 }}>
               Ukázka je volitelná – můžete rovnou vyplnit vlastní školu. Po otevření modulu hledejte{" "}
@@ -1484,9 +1457,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             <div className="dash-new-user-card__grid" style={{ marginTop: 10 }}>
               {DASH_START_MODULES.map((item) => (
                 <article key={item.id} className="dash-new-user-card__tile">
-                  <CardBrandHead className="dash-new-user-card__tile-head">
-                    <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
-                  </CardBrandHead>
+                  <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
                   <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
                   <div className="dash-new-user-card__actions">
                     <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
@@ -1517,11 +1488,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             aria-labelledby="dash-continue-heading"
           >
             <div className="dash-continue-card__compact-head">
-              <CardBrandHead>
-                <h2 id="dash-continue-heading" className="section-title dash-continue-card__compact-title">
-                  Rozpracovaná práce – {DASH_CALC_LABEL[continueRow.id]}
-                </h2>
-              </CardBrandHead>
+              <h2 id="dash-continue-heading" className="section-title dash-continue-card__compact-title">
+                Rozpracovaná práce – {DASH_CALC_LABEL[continueRow.id]}
+              </h2>
               <dl className="dash-continue-card__compact-facts">
                 <div>
                   <dt>{continueRow.primaryKpi.label}</dt>
@@ -1586,11 +1555,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
 
         {zsNamedBackupCount > 0 ? (
           <section className="card section-card dash-compare-hint" aria-labelledby="dash-compare-heading">
-            <CardBrandHead>
-              <h2 id="dash-compare-heading" className="section-title">
-                Porovnání scénářů (ZŠ)
-              </h2>
-            </CardBrandHead>
+            <h2 id="dash-compare-heading" className="section-title">
+              Porovnání scénářů (ZŠ)
+            </h2>
             <p className="muted-text" style={{ marginBottom: 10 }}>
               V prohlížeči máte <strong>{zsNamedBackupCount}</strong> pojmenovaných záloh ZŠ. V modulu ZŠ otevřete panel{" "}
               <strong>Akce</strong> → porovnání se zálohou nebo export audit JSON.
@@ -1608,11 +1575,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
 
         <details id="dash-advanced-tools" className="card section-card dash-advanced-tools dash-advanced-tools--highlight">
           <summary className="section-title dash-advanced-tools__summary">
-            <CardBrandHead className="card-brand-head--in-summary">
-              <span className="dash-advanced-tools__summary-label">
-                Pokročilé nástroje – import, export a integrace
-              </span>
-            </CardBrandHead>
+            <span className="dash-advanced-tools__summary-label">Pokročilé nástroje – import, export a integrace</span>
           </summary>
           <div className="dash-advanced-tools__body">
             <section

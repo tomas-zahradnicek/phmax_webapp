@@ -777,7 +777,7 @@ button.pill--hero-toggle--active {
   color: white;
   box-shadow: var(--shadow-lg);
   margin-bottom: 14px;
-  z-index: 100;
+  z-index: 0;
   isolation: isolate;
 }
 
@@ -796,9 +796,14 @@ button.pill--hero-toggle--active {
   color: rgba(255, 255, 255, 0.92);
 }
 
-/* Obsah pod hero v DOM – jinak překrývá rozbalené panely toolbaru */
+/* Obsah pod hero – nad stacking context hero (toolbar dropdowny zůstávají uvnitř hero) */
+.calculator-shell .container > :not(.hero--feature):not(.hero),
 .calculator-shell .calculator-workspace,
-.calculator-shell .card--onboarding {
+.calculator-shell .card--onboarding,
+.calculator-shell .calculator-input-issue-banner,
+.calculator-shell .calculator-next-action,
+.calculator-shell .product-basic-wizard,
+.calculator-shell .calculator-module-quick-tour {
   position: relative;
   z-index: 1;
 }
@@ -8638,6 +8643,11 @@ select:focus {
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
 }
 
+/* Banner už má vlastní CTA – ne duplikovat ve stripu pod ním */
+.app-shell--validation-hint .calculator-next-action .calculator-next-action__cta {
+  display: none;
+}
+
 .calculator-input-issue-banner__label {
   display: block;
   font-size: 0.92rem;
@@ -9815,6 +9825,7 @@ select:focus {
   display: flex;
   align-items: flex-start;
   gap: 16px;
+  margin-top: 8px;
 }
 
 .dash-hero-brand__logo-btn {
@@ -9848,51 +9859,6 @@ select:focus {
   object-fit: cover;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
   border: 2px solid rgba(255, 255, 255, 0.85);
-}
-
-.app-brand-logo--card {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 2px solid color-mix(in srgb, var(--accent) 22%, var(--line));
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
-}
-
-.card-brand-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.card-brand-head .section-title,
-.card-brand-head .dash-school-status__title,
-.card-brand-head .dash-card__title,
-.card-brand-head .dash-new-user-card__tile-title,
-.card-brand-head .dash-continue-card__compact-title {
-  margin: 0;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.card-brand-head--in-summary {
-  margin-bottom: 0;
-  width: 100%;
-}
-
-.dash-card__head {
-  margin-bottom: 4px;
-}
-
-.dash-attention-card__item-head {
-  margin-bottom: 0;
-  flex: 1 1 12rem;
-}
-
-.dash-new-user-card__tile-head {
-  margin-bottom: 8px;
 }
 
 .dash-hero-brand__copy {

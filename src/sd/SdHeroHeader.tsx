@@ -1,4 +1,5 @@
 import React from "react";
+import { HeroBrandLogoButton } from "../AppBrandLogo";
 import { CalculatorHeroDisplayControls } from "../CalculatorHeroDisplayControls";
 import { GlossaryIconButton } from "../GlossaryIconButton";
 import { HeroExpertStrip } from "../HeroExpertStrip";
@@ -101,8 +102,9 @@ export function SdHeroHeader({
         ]}
       />
 
-      <div className="grid two hero__grid hero__grid--context">
-        <div>
+      <div className="hero__grid dash-hero-brand hero__grid--context">
+        <HeroBrandLogoButton productView={productView} setProductView={setProductView} />
+        <div className="dash-hero-brand__copy">
           <p className="hero-zone-label">A. Kontext výpočtu</p>
           <h1 className="hero__title hero__title--sd">PHmax ve školní družině</h1>
           <p className="hero__text hero__text--sd">

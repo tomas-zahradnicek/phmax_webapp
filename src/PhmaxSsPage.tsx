@@ -28,7 +28,7 @@ import {
   SS_HERO_EXAMPLE_SELECT_ID,
 } from "./ss-basic-wizard";
 import { useProductBasicWizard } from "./use-product-basic-wizard";
-import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
+import { sectionNeedsAttentionClass } from "./calculator-section-focus";
 import { createSsScrollToInputs } from "./ss/create-ss-scroll-to-inputs";
 import { useFocusInputsOnMount } from "./useFocusInputsOnMount";
 import { buildCalculatorNextAction } from "./calculator-next-action";
@@ -1052,14 +1052,6 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
               ) : null
             }
             actions={[
-              ...(ssNeedsInputBanner
-                ? [
-                    {
-                      label: "Přejít k chybě",
-                      onClick: () => scrollToFirstNeedsAttentionSection(["ss-vstupy"]),
-                    },
-                  ]
-                : []),
               { label: "Uložit scénář", onClick: ss.saveSnapshotManually },
               { label: "Export CSV", onClick: ss.handleExportCsv },
               { label: "Porovnat se zálohou", onClick: ss.handleCompareSsWithNamedSnapshot },
