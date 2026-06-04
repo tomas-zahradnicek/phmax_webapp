@@ -25,8 +25,9 @@ export const PHMAX_SEO_MODULE_CONTENT: Record<ProductViewCode, PhmaxModuleSeoCon
   dash: {
     howItWorksTitle: "Jak funguje ředitelský přehled",
     howItWorksParagraphs: [
-      "Přehled načítá uložený stav kalkulaček v tomto prohlížeči (autosave). U každého modulu vidíte hlavní metriku, stav vstupů a případná upozornění.",
-      "Orientační součet PHmax slučuje moduly PV, ŠD, ZŠ a SŠ, které mají dopočtený výsledek. Banka odpočtů NV75 a některá krácení v metodice v tomto součtu nejsou.",
+      "Přehled načítá uložený stav kalkulaček v tomto prohlížeči. U každého modulu vidíte hlavní výsledek, stav vstupů a případná upozornění.",
+      "Orientační součet PHmax sloučí moduly PV, ŠD, ZŠ a SŠ, které máte vyplněné. Banka odpočtů NV75 a některá krácení v metodice v součtu nejsou.",
+      "Vyplňujte jen moduly, které vaše škola skutečně provozuje – ostatní nejsou povinné.",
       "Jde o pomocný nástroj pro řízení školy – výsledky před jednáním ověřte v příslušných modulech a v metodice MŠMT.",
     ],
     whenToUseTitle: "Kdy použít přehled",
@@ -38,7 +39,12 @@ export const PHMAX_SEO_MODULE_CONTENT: Record<ProductViewCode, PhmaxModuleSeoCon
       {
         question: "Proč se liší součet a modul ZŠ?",
         answer:
-          "Cross-součet bere autosave z více modulů. Pokud audit v modulu hlásí nesoulad nebo neúplný výpočet, součet může být podhodnocený – otevřete modul a opravte vstupy.",
+          "Souhrn v přehledu sčítá uložené výsledky z více modulů. Pokud se v modulu změní vstupy a nepřepočítáte ho, nebo je výpočet neúplný, součet v přehledu může být nižší – otevřete modul a dokončete úpravy.",
+      },
+      {
+        question: "Musím vyplnit všechny moduly?",
+        answer:
+          "Ne. Mateřská škola vyplní jen PV, základní škola PV, ZŠ a případně ŠD. NV75 je volitelná banka odpočtů zástupců. Prázdné moduly neznamenají chybu.",
       },
       {
         question: "Ukládá se stav na server?",

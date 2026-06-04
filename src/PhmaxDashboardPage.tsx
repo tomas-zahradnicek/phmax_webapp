@@ -14,7 +14,11 @@ import {
 import { DashboardSchoolImportDialog } from "./DashboardSchoolImportDialog";
 import { dispatchPhmaxImportApplied } from "./phmax-import-applied-event";
 import { downloadPhmaxImportTemplateXlsx } from "./phmax-import-template-xlsx";
-import { FillStatusBadge, dashboardRowFillStatusKind } from "./FillStatusBadge";
+import {
+  FillStatusBadge,
+  dashboardRowFillStatusKind,
+  dashboardUnusedModuleFillStatusKind,
+} from "./FillStatusBadge";
 import { APP_VERSION } from "./app-version";
 import {
   buildSchoolReviewPrintHtml,
@@ -402,7 +406,7 @@ function dashboardModuleFillLabel(
   verdict: DashboardVerdict | null,
   phmaxKpiValue?: string,
 ): string {
-  if (!hasData) return "Ještě nevyplněno";
+  if (!hasData) return "Nepoužíváte – volitelný modul";
   if (phmaxKpiValue != null && phmaxKpiValue !== "–") {
     const phmax = parseDashboardKpiPhmax(phmaxKpiValue);
     if (phmax === 0) return "PHmax = 0 (modul vyplněn)";
@@ -427,23 +431,49 @@ function dashOverviewCompactMetric(value: string): string {
   return m ? m[0].replace(".", ",") : head;
 }
 
-function csDashActiveModulesLabel(count: number): string {
-  if (count === 1) return "aktivní modul";
-  if (count >= 2 && count <= 4) return "aktivní moduly";
-  return "aktivních modulů";
+function csDashModulesPreparedLabel(count: number): string {
+  if (count === 0) return "modulů připraveno";
+  if (count === 1) return "modul připraven";
+  if (count >= 2 && count <= 4) return "moduly připraveny";
+  return "modulů připraveno";
+}
+
+function formatDashHeroAttentionLine(attentionCount: number): React.ReactNode {
+  if (attentionCount === 0) {
+    return <>✓ bez upozornění</>;
+  }
+  if (attentionCount === 1) {
+    return (
+      <>
+        <strong>1</strong> věc ke kontrole
+      </>
+    );
+  }
+  if (attentionCount >= 2 && attentionCount <= 4) {
+    return (
+      <>
+        <strong>{attentionCount}</strong> věci ke kontrole
+      </>
+    );
+  }
+  return (
+    <>
+      <strong>{attentionCount}</strong> věcí ke kontrole
+    </>
+  );
+}
+
+function formatDashSchoolStatusAttention(attentionCount: number): string {
+  if (attentionCount === 0) return "✓ bez upozornění";
+  if (attentionCount === 1) return "1 modul ke kontrole";
+  if (attentionCount >= 2 && attentionCount <= 4) return `${attentionCount} moduly ke kontrole`;
+  return `${attentionCount} modulů ke kontrole`;
 }
 
 function csDashModulesOkLabel(count: number): string {
   if (count === 1) return "modul v pořádku";
   if (count >= 2 && count <= 4) return "moduly v pořádku";
   return "modulů v pořádku";
-}
-
-function csDashModulesAttentionLabel(count: number): string {
-  if (count === 0) return "modulů vyžaduje kontrolu";
-  if (count === 1) return "modul vyžaduje kontrolu";
-  if (count >= 2 && count <= 4) return "moduly vyžadují kontrolu";
-  return "modulů vyžaduje kontrolu";
 }
 
 function dashboardVerdictNeedsAttention(verdict: DashboardVerdict | null): boolean {
@@ -854,6 +884,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   );
 
   const modulesCompleted = rows.filter((r) => r.hasData && r.verdict?.tone === "ok").length;
+  const hasUnusedModules = rows.some((r) => !r.hasData);
   const schoolStatusTone: "ok" | "warning" | "neutral" =
     attentionRows.length > 0 ? "warning" : modulesWithData === 0 ? "neutral" : "ok";
   const lastRefreshLabel = refreshAt.toLocaleString("cs-CZ", {
@@ -1030,23 +1061,39 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             </button>
           </div>
           <div className="hero__grid dash-hero-brand" style={{ marginTop: 8 }}>
-            <img
-              src={APP_BRAND_LOGO_PATH}
-              alt=""
-              className="dash-hero-brand__logo"
-              width={80}
-              height={80}
-              decoding="async"
-            />
+            <button
+              type="button"
+              className="dash-hero-brand__logo-btn"
+              aria-label="Přehled školy"
+              onClick={() => {
+                if (productView === "dash") {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                } else {
+                  setProductView("dash");
+                }
+              }}
+            >
+              <img
+                src={APP_BRAND_LOGO_PATH}
+                alt=""
+                className="dash-hero-brand__logo"
+                width={80}
+                height={80}
+                decoding="async"
+              />
+            </button>
             <div className="dash-hero-brand__copy">
               <h1 className="hero__title">Ředitelský průvodce</h1>
               <ul className="dash-hero-stats" aria-label="Souhrn stavu školy">
+                {modulesWithData > 0 && attentionRows.length === 0 ? (
+                  <li className="dash-hero-stats__ok-line">
+                    Stav školy: <strong>v pořádku</strong>
+                  </li>
+                ) : null}
                 <li>
-                  <strong>{modulesWithData}</strong> {csDashActiveModulesLabel(modulesWithData)}
+                  <strong>{modulesWithData}</strong> {csDashModulesPreparedLabel(modulesWithData)}
                 </li>
-                <li>
-                  <strong>{attentionRows.length}</strong> upozornění
-                </li>
+                <li>{formatDashHeroAttentionLine(attentionRows.length)}</li>
                 <li>
                   Poslední práce: <strong>{continueRow ? DASH_CALC_LABEL[continueRow.id] : "–"}</strong>
                 </li>
@@ -1074,16 +1121,16 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             <li>
               <strong>{modulesCompleted}</strong> {csDashModulesOkLabel(modulesCompleted)}
             </li>
-            <li>
-              <strong>{attentionRows.length}</strong> {csDashModulesAttentionLabel(attentionRows.length)}
-            </li>
+            <li>{formatDashSchoolStatusAttention(attentionRows.length)}</li>
             <li>
               Poslední úprava: <strong>{lastRefreshLabel}</strong>
             </li>
           </ul>
           {schoolStatusTone === "ok" && attentionRows.length === 0 ? (
             <p className="dash-school-status__lead dash-school-status__lead--done">
-              ✓ Všechny moduly bez chyb · škola připravena
+              {hasUnusedModules
+                ? "✓ Vyplněné moduly jsou v pořádku. Ostatní moduly vyplňujte jen pokud je vaše škola provozuje."
+                : "✓ Škola připravena – vyplněné moduly bez chyb."}
             </p>
           ) : null}
           {schoolStatusTone === "warning" ? (
@@ -1166,7 +1213,12 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           </h2>
           {modulesWithData === 0 ? (
             <p className="muted-text dash-overview-summary">
-              Zatím žádná uložená data – začněte u modulu níže nebo v sekci <strong>Co chcete dnes udělat?</strong>
+              Zatím žádná uložená data – začněte u modulu, který vaše škola provozuje (např. PV nebo ZŠ), v sekci{" "}
+              <strong>Co chcete dnes udělat?</strong>
+            </p>
+          ) : hasUnusedModules ? (
+            <p className="muted-text dash-overview-summary">
+              Moduly bez dat nemusíte vyplňovat – použijte jen ty, které provozujete. NV75 (banka odpočtů) je volitelná.
             </p>
           ) : null}
           <div className="dash-kpi-compact" aria-label="KPI přehled modulů">
@@ -1196,9 +1248,13 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               ]
                 .filter(Boolean)
                 .join(" ")}
-              aria-label={`${attentionRows.length} modulů vyžaduje pozornost`}
+              aria-label={
+                attentionRows.length === 0
+                  ? "Žádný modul ke kontrole"
+                  : `${attentionRows.length} modulů ke kontrole`
+              }
             >
-              <span className="dash-kpi-compact__label">Chyby</span>
+              <span className="dash-kpi-compact__label">Ke kontrole</span>
               <strong className="dash-kpi-compact__value">{attentionRows.length}</strong>
             </div>
           </div>
@@ -1208,7 +1264,11 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 <div className="dash-card__body">
                   <h3 className="dash-card__title">{row.title}</h3>
                   <FillStatusBadge
-                    kind={dashboardRowFillStatusKind(row.hasData, row.verdict?.tone)}
+                    kind={
+                      row.hasData
+                        ? dashboardRowFillStatusKind(row.hasData, row.verdict?.tone)
+                        : dashboardUnusedModuleFillStatusKind()
+                    }
                     label={row.status}
                     className="dash-card__fill-badge"
                   />
@@ -1311,7 +1371,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             <details className="dash-cross-phmax__details muted-text">
               <summary>Metodická upozornění a rozpad</summary>
               <p style={{ marginTop: 10 }}>
-                Sloučení autosave v tomto prohlížeči – neoficiální souhrn. NV75 a krácení PV § 1d v součtu nejsou.
+                Souhrn z uložených výsledků v tomto prohlížeči – orientační, neoficiální. NV75 a krácení PV § 1d v součtu nejsou.
               </p>
               {crossPhmaxMismatches.length > 0 ? (
                 <p style={{ marginTop: 8, color: "#9a3412" }}>
@@ -1477,7 +1537,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               </div>
             </div>
             <details className="dash-continue-card__more muted-text">
-              <summary>Detail z autosave</summary>
+              <summary>Detail z uloženého stavu</summary>
               <p className="muted-text" style={{ marginTop: 10 }}>
                 Modul <strong>{continueRow.title}</strong> · uloženo v tomto prohlížeči.
               </p>

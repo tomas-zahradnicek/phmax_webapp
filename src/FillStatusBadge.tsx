@@ -1,9 +1,10 @@
 import React from "react";
 
-export type FillStatusKind = "empty" | "ok" | "warning" | "danger";
+export type FillStatusKind = "empty" | "optional" | "ok" | "warning" | "danger";
 
 const FILL_STATUS_LABEL: Record<FillStatusKind, string> = {
   empty: "Ještě nevyplněno",
+  optional: "Nepoužíváte",
   ok: "V pořádku",
   warning: "Pozornost",
   danger: "Chyba",
@@ -31,6 +32,11 @@ export function FillStatusBadge({ kind, label, className, iconOnly = false }: Fi
       {iconOnly ? null : <span className="fill-status-badge__text">{text}</span>}
     </span>
   );
+}
+
+/** Modul na přehledu bez dat – škola ho nemusí provozovat (ne chyba). */
+export function dashboardUnusedModuleFillStatusKind(): FillStatusKind {
+  return "optional";
 }
 
 export function dashboardRowFillStatusKind(

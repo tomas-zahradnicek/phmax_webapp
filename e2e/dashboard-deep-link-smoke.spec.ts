@@ -494,7 +494,7 @@ test.describe("Dashboard deep-link", () => {
 
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
-    await expect(page.locator(".dash-cross-phmax")).toContainText(/PV.*dashboard Σ.*audit autosave/i);
+    await expect(page.locator(".dash-cross-phmax")).toContainText(/PV:.*v přehledu/i);
   });
 
   test("varování nesouladu audit ZŠ vs přepočet", async ({ page }) => {

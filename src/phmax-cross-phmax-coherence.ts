@@ -45,10 +45,10 @@ function computePvPhmaxFromSnapshot(snapshot: unknown): number | null {
 }
 
 function warnMismatch(label: string, dashboardValue: number, otherLabel: string, otherValue: number): string {
-  return `${label}: dashboard Σ (${dashboardValue}) ≠ ${otherLabel} (${otherValue}) – uložte modul znovu nebo obnovte přehled.`;
+  return `${label}: v přehledu ${dashboardValue} h/týd., ${otherLabel} ${otherValue} h/týd. – otevřete modul a uložte znovu.`;
 }
 
-/** Upozornění na nesoulad KPI / přepočtu vs. auditní součet v autosave. */
+/** Upozornění na nesoulad souhrnu v přehledu a přepočtu v modulu. */
 export function crossPhmaxAuditCoherenceWarnings(
   summary: CrossPhmaxSummary,
   moduleSnapshots: SchoolScenarioExportPayload["moduleSnapshots"],
@@ -64,14 +64,14 @@ export function crossPhmaxAuditCoherenceWarnings(
     if (computed != null && audit?.totalPhmax != null && audit.tab === "phmax") {
       if (Math.abs(audit.totalPhmax - computed) > 0.05) {
         warnings.push(
-          `PV: audit autosave (${audit.totalPhmax}) ≠ přepočet z řádků (${computed}) – otevřete PV a uložte stav.`,
+          `PV: uložený součet (${audit.totalPhmax}) se liší od přepočtu z řádků (${computed}) – otevřete PV a uložte stav.`,
         );
       }
     }
     if (computed != null && Math.abs(slice.phmax - computed) > 0.05) {
       warnings.push(warnMismatch("PV", slice.phmax, "přepočet z řádků", computed));
     } else if (audit?.totalPhmax != null && audit.tab === "phmax" && Math.abs(slice.phmax - audit.totalPhmax) > 0.05) {
-      warnings.push(warnMismatch("PV", slice.phmax, "audit autosave", audit.totalPhmax));
+      warnings.push(warnMismatch("PV", slice.phmax, "uložený součet", audit.totalPhmax));
     }
   };
 
@@ -83,7 +83,7 @@ export function crossPhmaxAuditCoherenceWarnings(
     if (computed == null) return;
     if (audit?.totalPhmax != null && audit.tab === "phmax" && Math.abs(audit.totalPhmax - computed) > 0.05) {
       warnings.push(
-        `ZŠ: audit autosave (${audit.totalPhmax}) ≠ přepočet z vstupů (${computed}) – otevřete ZŠ a uložte stav.`,
+        `ZŠ: uložený součet (${audit.totalPhmax}) se liší od přepočtu z vstupů (${computed}) – otevřete ZŠ a uložte stav.`,
       );
     }
     if (slice?.phmax != null && Math.abs(slice.phmax - computed) > 0.05) {
@@ -99,7 +99,7 @@ export function crossPhmaxAuditCoherenceWarnings(
     if (computed == null) return;
     if (audit?.totalPhmax != null && audit.tab === "phmax" && Math.abs(audit.totalPhmax - computed) > 0.05) {
       warnings.push(
-        `ŠD: audit autosave (${audit.totalPhmax}) ≠ přepočet z vstupů (${computed}) – otevřete ŠD a uložte stav.`,
+        `ŠD: uložený součet (${audit.totalPhmax}) se liší od přepočtu z vstupů (${computed}) – otevřete ŠD a uložte stav.`,
       );
     }
     if (slice?.phmax != null && Math.abs(slice.phmax - computed) > 0.05) {
@@ -115,7 +115,7 @@ export function crossPhmaxAuditCoherenceWarnings(
     if (computed == null) return;
     if (audit?.totalPhmax != null && audit.tab === "phmax" && Math.abs(audit.totalPhmax - computed) > 0.05) {
       warnings.push(
-        `SŠ: audit autosave (${audit.totalPhmax}) ≠ přepočet z řádků (${computed}) – otevřete SŠ a uložte stav.`,
+        `SŠ: uložený součet (${audit.totalPhmax}) se liší od přepočtu z řádků (${computed}) – otevřete SŠ a uložte stav.`,
       );
     }
     if (slice?.phmax != null && Math.abs(slice.phmax - computed) > 0.05) {

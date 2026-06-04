@@ -5,6 +5,8 @@ Orientační checklist po push na `master` a deployi na Vercel (např. https://p
 **Pilot s řediteli:** viz [pilot-reditel-5min.md](./pilot-reditel-5min.md).  
 **SEO:** `public/robots.txt`, `public/sitemap.xml`, `vercel.json` (SPA rewrite); title/meta/OG/JSON-LD + FAQ schema podle modulu (`src/phmax-document-head.ts`). Čisté URL: `/prehled`, `/phmax-zakladni-skola`, … (`src/product-view-paths.ts`). SEO bloky pod kalkulačkou: `PhmaxModuleSeoSection`.
 
+**Analytika:** Google Analytics (`G-LRMBR1Y874`) a Microsoft Clarity v `index.html` (Vite SPA, ne Next.js `layout.tsx`).
+
 **Ikona a logo:** `public/favicon.ico`, `favicon-32.png`, `apple-touch-icon.png`, `reditelskypruvodce-logo.png` – po výměně loga: `node scripts/generate-favicon-ico.mjs` (vyžaduje jednorázově `npm install --no-save to-ico`).
 
 ## Prohlížeč
