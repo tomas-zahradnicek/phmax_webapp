@@ -955,7 +955,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, isEndpoint, publishNotice]);
 
   return (
-    <div className="app-shell app-shell--gradient">
+    <div className="app-shell app-shell--gradient dash-page">
       <div className="container container--app">
         <header className="hero hero--feature">
           <div className="hero__orb hero__orb--one" />
@@ -1405,6 +1405,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           </section>
         ) : null}
 
+        <div className="dash-overview-stack">
         {showNewUserGuide ? (
           <section className="card card--accent section-card dash-new-user-card" aria-labelledby="dash-new-user-heading">
             <h2 id="dash-new-user-heading" className="section-title">
@@ -1444,7 +1445,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           </section>
         ) : null}
 
-        <section className="card muted section-card">
+        <section className="card muted section-card dash-browser-overview">
           <h2 className="section-title">Přehled podle uloženého stavu v prohlížeči</h2>
           <p className="muted-text" style={{ marginBottom: 8 }}>
             Slouží jen k orientaci v tomto prohlížeči. Metriky počítám stejnou logikou jako v příslušné kartě (kde je k tomu dostupná data).
@@ -1534,6 +1535,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             ))}
           </div>
         </section>
+        </div>
 
         <section className="card card--accent section-card section-card--guide" aria-labelledby="dash-user-first-heading">
           <h2 id="dash-user-first-heading" className="section-title">

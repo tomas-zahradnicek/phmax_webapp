@@ -6708,8 +6708,9 @@ select:focus {
 }
 
 .dash-new-user-card__actions .btn {
-  flex: 1 1 9rem;
-  min-height: 2.5rem;
+  flex: 0 1 auto;
+  width: auto;
+  min-height: 0;
   justify-content: center;
   text-align: center;
 }
@@ -6733,8 +6734,9 @@ select:focus {
 }
 
 .dash-card__actions .btn {
-  flex: 1 1 7.5rem;
-  min-height: 2.5rem;
+  flex: 0 1 auto;
+  width: auto;
+  min-height: 0;
 }
 
 .hero-zone-actions__toolbar-row {
@@ -7322,6 +7324,30 @@ select:focus {
   font-size: 0.78rem;
   font-weight: 650;
   color: #334155;
+}
+
+/* Dashboard – hlavní obsah vždy jeden sloupec */
+.dash-page #phmax-dashboard-main {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.dash-overview-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.dash-overview-stack > .dash-new-user-card,
+.dash-overview-stack > .dash-browser-overview {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  flex: 0 0 auto;
 }
 
 .dash-new-user-card__grid {
@@ -9649,8 +9675,119 @@ select:focus {
 .dash-role-cards__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+/* Dashboard – kompaktní tlačítka a akční řádky */
+.dash-page #phmax-dashboard-main .btn,
+.dash-page .hero--feature .hero__pills-row .btn,
+.dash-import-dialog .btn {
+  padding: 5px 10px;
+  min-height: 0;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.3;
+  box-shadow: 0 3px 10px rgba(29, 78, 216, 0.1);
+}
+
+.dash-page #phmax-dashboard-main .btn.ghost,
+.dash-page .hero--feature .hero__pills-row .btn.ghost,
+.dash-import-dialog .btn.ghost {
+  box-shadow: none;
+}
+
+.dash-page #phmax-dashboard-main .btn:hover,
+.dash-page .hero--feature .hero__pills-row .btn:hover,
+.dash-import-dialog .btn:hover {
+  transform: none;
+}
+
+.dash-page .dash-card__actions,
+.dash-page .dash-new-user-card__actions,
+.dash-page .dash-role-cards__actions,
+.dash-page .dash-school-import__actions,
+.dash-import-dialog__actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.dash-page .dash-school-import__actions {
   margin-top: 10px;
+}
+
+.dash-page .dash-card__actions {
+  padding-top: 8px;
+}
+
+.dash-page .dash-card__actions .btn.primary,
+.dash-page .dash-card__actions .btn.ghost {
+  order: unset;
+}
+
+.dash-page .dash-card {
+  padding: 12px 14px;
+}
+
+.dash-page .dash-card__metric {
+  font-size: 1.35rem;
+}
+
+.dash-page .dash-card__body {
+  gap: 8px;
+}
+
+.dash-page .dash-card__meta {
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.dash-page .dash-kpi-tile {
+  padding: 8px 10px;
+}
+
+.dash-page .dash-kpi-tile__value {
+  font-size: 1.15rem;
+}
+
+.dash-page .dash-continue-card__kpi-value {
+  font-size: 1.35rem;
+}
+
+.dash-page .dash-role-cards__tile {
+  padding: 10px 12px;
+}
+
+.dash-page .dash-new-user-card__tile {
+  padding: 10px 12px;
+}
+
+.dash-page .dash-attention-card__item {
+  padding: 10px 12px;
+  gap: 8px;
+}
+
+.dash-page .section-card.card {
+  padding: 14px 16px;
+}
+
+.dash-page .card + .card {
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .dash-page #phmax-dashboard-main .dash-card__actions .btn,
+  .dash-page #phmax-dashboard-main .dash-new-user-card__actions .btn,
+  .dash-page #phmax-dashboard-main .dash-role-cards__actions .btn,
+  .dash-page #phmax-dashboard-main .dash-school-import__actions .btn,
+  .dash-page #phmax-dashboard-main .toolbar .btn,
+  .dash-page .dash-attention-card__item .btn {
+    width: auto;
+    flex: 0 1 auto;
+  }
 }
 
 .dash-new-user-card__steps {
