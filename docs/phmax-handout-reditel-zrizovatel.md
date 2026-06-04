@@ -1,6 +1,6 @@
 # PHmax webapp – orientační kalkulačka pro školu
 
-**Verze 0.3.14** · jednostránkový přehled pro ředitele a zřizovatele  
+**Verze 0.3.15** · jednostránkový přehled pro ředitele a zřizovatele  
 *Dokument je informativní; nejedná se o závazný výkaz ani právní posudek.*
 
 ---
@@ -43,7 +43,7 @@ Přípravná třída ZŠ **není** stejné zadání jako MŠ v modulu PV.
 
 ---
 
-## Co je hotové k běžnému použití (v0.3.14)
+## Co je hotové k běžnému použití (v0.3.15)
 
 | Oblast | Stav | Poznámka pro vedení školy |
 |--------|------|---------------------------|
@@ -52,8 +52,8 @@ Přípravná třída ZŠ **není** stejné zadání jako MŠ v modulu PV.
 | **PV** § 1d krácení | **Orientačně** | v exportu CSV/XLSX; závazně až po KÚ |
 | **Dashboard** – součet PHmax (PV+ŠD+ZŠ+SŠ) | **Ano** | role vstup, export mini-wizard, tisk kontroly, badge stavu modulů |
 | Export **scénář celá škola** (JSON) | **Ano** | včetně `coherenceWarnings` pro IT |
-| Export **handoff pro IS** (JSON / POST) | **Ano** | pro integrátora; ne automatický import |
-| Import do IS / šablona zřizovatele | **Ne (0.4.0)** | placeholder v UI; čeká na schválený formát |
+| Export **handoff pro IS** (JSON / POST) | **Ano** | pro integrátora |
+| **Import ze školy** (šablona Excel v2) | **Ano (pilot)** | české sloupce a hodnoty, rozbalovací seznamy; PHA/PHP a výjimky doplníte v kalkulačce po načtení |
 
 ---
 
@@ -62,7 +62,7 @@ Přípravná třída ZŠ **není** stejné zadání jako MŠ v modulu PV.
 1. Otevřít **Dashboard** (`?view=dash`) – zvolit roli (ředitel / metodik / IT) nebo dlaždice modulů.
 2. Otevřít příslušný modul (PV / ZŠ / SŠ …) – **volitelně** načíst ukázkový příklad, nebo rovnou vyplnit **vlastní údaje** (formulář je editovatelný).
 3. Zkontrolovat **souhrn výsledků** a varování u neúplných vstupů.
-4. **Exportovat** CSV (modul) nebo JSON scénář (dashboard) pro archiv.
+4. **Exportovat** CSV (modul) nebo JSON scénář (dashboard) pro archiv; případně **importovat** vyplněnou šablonu Excel z dashboardu (náhled → načtení do modulů).
 5. Na sdíleném počítači po ukončení použít **Vymazat lokální data**.
 
 ---
@@ -83,4 +83,4 @@ Všechny exporty obsahují **verzi aplikace a datum** a jsou označeny jako **or
 
 **Technická podpora / další dokumentace:** repozitář projektu – `docs/acceptance-pv-zs-nv75.md`, `docs/ss-acceptance-checklist.md`, `CHANGELOG.md`.
 
-*PHmax webapp 0.3.14 · orientační kalkulačka · neoficiální výstup*
+*PHmax webapp 0.3.15 · orientační kalkulačka · neoficiální výstup*

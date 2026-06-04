@@ -1,4 +1,5 @@
 import type { BasicType } from "./phmax-zs-logic";
+import { PHMAX_SS_STUDY_FORM_OPTIONS } from "./ss/phmax-ss-helpers";
 import { PV_PROVOZ_OPTIONS } from "./pv/pv-workplace-shared";
 
 /** České popisky hodnot ve šabloně importu (stejné texty jako v kalkulačce). */
@@ -32,6 +33,19 @@ export const IMPORT_SD_MODE_LABELS = {
   summary: "Souhrn",
   detail: "Detail",
 } as const;
+
+export const IMPORT_SS_STUDY_FORM_LABELS = Object.fromEntries(
+  PHMAX_SS_STUDY_FORM_OPTIONS.map((o) => [o.value, o.label]),
+) as Record<(typeof PHMAX_SS_STUDY_FORM_OPTIONS)[number]["value"], string>;
+
+/** Hodnoty pro rozbalovací seznamy ve šabloně Excel. */
+export const IMPORT_PROVOZ_DROPDOWN_VALUES = PV_PROVOZ_OPTIONS.map((o) => o.label);
+export const IMPORT_BASIC_TYPE_DROPDOWN_VALUES = Object.values(IMPORT_BASIC_TYPE_LABELS);
+export const IMPORT_PSYCH_KIND_DROPDOWN_VALUES = Object.values(IMPORT_PSYCH_KIND_LABELS);
+export const IMPORT_HEALTH_KIND_DROPDOWN_VALUES = Object.values(IMPORT_HEALTH_KIND_LABELS);
+export const IMPORT_ROW_MODE_DROPDOWN_VALUES = Object.values(IMPORT_ROW_MODE_LABELS);
+export const IMPORT_SD_MODE_DROPDOWN_VALUES = Object.values(IMPORT_SD_MODE_LABELS);
+export const IMPORT_SS_STUDY_FORM_DROPDOWN_VALUES = PHMAX_SS_STUDY_FORM_OPTIONS.map((o) => o.label);
 
 function normKey(s: string): string {
   return s
@@ -119,6 +133,11 @@ export const IMPORT_ROW_MODE_ALIASES = buildValueAliases(
 export const IMPORT_SD_MODE_ALIASES = buildValueAliases(
   Object.keys(IMPORT_SD_MODE_LABELS),
   IMPORT_SD_MODE_LABELS as Record<string, string>,
+);
+
+export const IMPORT_SS_STUDY_FORM_ALIASES = buildValueAliases(
+  PHMAX_SS_STUDY_FORM_OPTIONS.map((o) => o.value),
+  IMPORT_SS_STUDY_FORM_LABELS as Record<string, string>,
 );
 
 /** Řádky listu Návod ve šabloně Excel v2. */

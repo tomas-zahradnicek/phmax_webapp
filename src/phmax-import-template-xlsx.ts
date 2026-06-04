@@ -8,12 +8,25 @@ import {
   IMPORT_ZS_SUMMARY_LABELS,
 } from "./phmax-import-columns";
 import {
+  IMPORT_BASIC_TYPE_DROPDOWN_VALUES,
   IMPORT_BASIC_TYPE_LABELS,
+  IMPORT_HEALTH_KIND_DROPDOWN_VALUES,
+  IMPORT_HEALTH_KIND_LABELS,
+  IMPORT_PSYCH_KIND_DROPDOWN_VALUES,
   IMPORT_PSYCH_KIND_LABELS,
+  IMPORT_PROVOZ_DROPDOWN_VALUES,
+  IMPORT_ROW_MODE_DROPDOWN_VALUES,
   IMPORT_ROW_MODE_LABELS,
+  IMPORT_SD_MODE_DROPDOWN_VALUES,
   IMPORT_SD_MODE_LABELS,
+  IMPORT_SS_STUDY_FORM_DROPDOWN_VALUES,
   IMPORT_TEMPLATE_NAVOD_VALUE_LINES,
 } from "./phmax-import-czech-values";
+import {
+  addImportCiselnikySheet,
+  applyImportColumnDropdowns,
+  type ImportTemplateDropdown,
+} from "./phmax-import-template-validation";
 import { PV_PROVOZ_OPTIONS } from "./pv/pv-workplace-shared";
 import { PHMAX_IMPORT_SCHOOL_SCHEMA } from "./phmax-import-pv-zs";
 
@@ -57,7 +70,7 @@ const SS_EXAMPLE = [
   "ss-1",
   "1.A",
   "82-41-L/01",
-  "denni",
+  IMPORT_SS_STUDY_FORM_DROPDOWN_VALUES[0]!,
   "2",
   "17",
 ];
@@ -74,6 +87,28 @@ const ZS_PSYCH_EXAMPLE = [
   "0",
 ];
 
+const ZS_HEALTH_EXAMPLE = [
+  "zs-praha-123",
+  "Import ze školy 2026-05",
+  "1",
+  IMPORT_HEALTH_KIND_LABELS.health1,
+  IMPORT_ROW_MODE_LABELS.higher_of_two,
+  "24",
+  "2",
+  "20",
+  "2",
+];
+
+const CISNIKY_LISTS = [
+  { id: "provoz", options: IMPORT_PROVOZ_DROPDOWN_VALUES },
+  { id: "basic_type", options: IMPORT_BASIC_TYPE_DROPDOWN_VALUES },
+  { id: "input_mode", options: IMPORT_SD_MODE_DROPDOWN_VALUES },
+  { id: "study_form", options: IMPORT_SS_STUDY_FORM_DROPDOWN_VALUES },
+  { id: "kind_psych", options: IMPORT_PSYCH_KIND_DROPDOWN_VALUES },
+  { id: "kind_health", options: IMPORT_HEALTH_KIND_DROPDOWN_VALUES },
+  { id: "mode", options: IMPORT_ROW_MODE_DROPDOWN_VALUES },
+] as const;
+
 function labelRow(labels: Record<string, string>): string[] {
   return Object.values(labels);
 }
@@ -82,22 +117,39 @@ function keyHintRow(labels: Record<string, string>): string[] {
   return Object.keys(labels).map((k) => `(${k})`);
 }
 
-function addDataSheet(
-  workbook: import("exceljs").Workbook,
-  name: string,
-  labels: Record<string, string>,
-  dataRows: readonly (readonly string[])[],
-) {
-  const sheet = workbook.addWorksheet(name, { views: [{ state: "frozen", ySplit: 2 }] });
-  const headerRow = sheet.addRow(labelRow(labels));
+type DataSheetConfig = {
+  name: string;
+  labels: Record<string, string>;
+  dataRows: readonly (readonly string[])[];
+  dropdowns?: readonly ImportTemplateDropdown[];
+};
+
+function addDataSheet(workbook: import("exceljs").Workbook, config: DataSheetConfig, rangeById: Map<string, string>) {
+  const sheet = workbook.addWorksheet(config.name, { views: [{ state: "frozen", ySplit: 2 }] });
+  const headerRow = sheet.addRow(labelRow(config.labels));
   headerRow.font = { bold: true, color: { argb: "FF1E293B" } };
   headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_FILL } };
-  const hintRow = sheet.addRow(keyHintRow(labels));
+  const hintRow = sheet.addRow(keyHintRow(config.labels));
   hintRow.font = { italic: true, color: { argb: "FF64748B" }, size: 9 };
-  for (const row of dataRows) {
+  for (const row of config.dataRows) {
     sheet.addRow([...row]);
   }
-  sheet.columns = Object.keys(labels).map(() => ({ width: 18 }));
+  sheet.columns = Object.keys(config.labels).map(() => ({ width: 22 }));
+
+  if (config.dropdowns?.length) {
+    const rangeByFieldKey = new Map<string, string>();
+    for (const dd of config.dropdowns) {
+      const ciselnikId =
+        dd.fieldKey === "kind"
+          ? config.name.includes("psycholog")
+            ? "kind_psych"
+            : "kind_health"
+          : dd.fieldKey;
+      const range = rangeById.get(ciselnikId);
+      if (range) rangeByFieldKey.set(dd.fieldKey, range);
+    }
+    applyImportColumnDropdowns(sheet, config.labels, config.dropdowns, rangeByFieldKey);
+  }
 }
 
 function addNavodSheet(workbook: import("exceljs").Workbook) {
@@ -108,7 +160,7 @@ function addNavodSheet(workbook: import("exceljs").Workbook) {
     ["Povinné listy: Meta (1 řádek), PV (řádky MŠ), ZŠ souhrn (1 řádek)."],
     ["Volitelné: ŠD, SŠ, ZŠ psycholog, ZŠ zdravotní."],
     ["Řádek 1 = český název sloupce, řádek 2 = interní klíč v závorce (pro IT)."],
-    ["Řádek 3+ = data – u výčtů používejte české popisky z kalkulačky (viz níže)."],
+    ["Řádek 3+ = data – u výčtů použijte rozbalovací seznam v buňce (nebo český text)."],
     ["school_id a Název scénáře musí být stejné ve všech listech."],
     [""],
     ...IMPORT_TEMPLATE_NAVOD_VALUE_LINES.map((line) => [line]),
@@ -119,22 +171,94 @@ function addNavodSheet(workbook: import("exceljs").Workbook) {
   sheet.getColumn(1).width = 78;
 }
 
-/** Stažení oficiální šablony Excel pro školy. */
-export async function downloadPhmaxImportTemplateXlsx(): Promise<void> {
+/** Sestaví workbook šablony importu (pro testy i stažení). */
+export async function buildPhmaxImportTemplateWorkbook(): Promise<import("exceljs").Workbook> {
   const ExcelJS = (await import("exceljs")).default;
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "PHmax kalkulačka";
   workbook.created = new Date();
 
-  addNavodSheet(workbook);
-  addDataSheet(workbook, "Meta", IMPORT_META_LABELS, [META_EXAMPLE]);
-  addDataSheet(workbook, "PV", IMPORT_PV_LABELS, PV_EXAMPLES);
-  addDataSheet(workbook, "ZŠ souhrn", IMPORT_ZS_SUMMARY_LABELS, [ZS_EXAMPLE]);
-  addDataSheet(workbook, "ŠD", IMPORT_SD_LABELS, [SD_EXAMPLE]);
-  addDataSheet(workbook, "SŠ", IMPORT_SS_LABELS, [SS_EXAMPLE]);
-  addDataSheet(workbook, "ZŠ psycholog", IMPORT_ZS_PSYCH_LABELS, [ZS_PSYCH_EXAMPLE]);
-  addDataSheet(workbook, "ZŠ zdravotní", IMPORT_ZS_HEALTH_LABELS, []);
+  const rangeById = addImportCiselnikySheet(workbook, [...CISNIKY_LISTS]);
 
+  addNavodSheet(workbook);
+  addDataSheet(
+    workbook,
+    { name: "Meta", labels: IMPORT_META_LABELS, dataRows: [META_EXAMPLE] },
+    rangeById,
+  );
+  addDataSheet(
+    workbook,
+    {
+      name: "PV",
+      labels: IMPORT_PV_LABELS,
+      dataRows: PV_EXAMPLES,
+      dropdowns: [{ fieldKey: "provoz", options: IMPORT_PROVOZ_DROPDOWN_VALUES }],
+    },
+    rangeById,
+  );
+  addDataSheet(
+    workbook,
+    {
+      name: "ZŠ souhrn",
+      labels: IMPORT_ZS_SUMMARY_LABELS,
+      dataRows: [ZS_EXAMPLE],
+      dropdowns: [{ fieldKey: "basic_type", options: IMPORT_BASIC_TYPE_DROPDOWN_VALUES }],
+    },
+    rangeById,
+  );
+  addDataSheet(
+    workbook,
+    {
+      name: "ŠD",
+      labels: IMPORT_SD_LABELS,
+      dataRows: [SD_EXAMPLE],
+      dropdowns: [{ fieldKey: "input_mode", options: IMPORT_SD_MODE_DROPDOWN_VALUES }],
+    },
+    rangeById,
+  );
+  addDataSheet(
+    workbook,
+    {
+      name: "SŠ",
+      labels: IMPORT_SS_LABELS,
+      dataRows: [SS_EXAMPLE],
+      dropdowns: [{ fieldKey: "study_form", options: IMPORT_SS_STUDY_FORM_DROPDOWN_VALUES }],
+    },
+    rangeById,
+  );
+  addDataSheet(
+    workbook,
+    {
+      name: "ZŠ psycholog",
+      labels: IMPORT_ZS_PSYCH_LABELS,
+      dataRows: [ZS_PSYCH_EXAMPLE],
+      dropdowns: [
+        { fieldKey: "kind", options: IMPORT_PSYCH_KIND_DROPDOWN_VALUES },
+        { fieldKey: "mode", options: IMPORT_ROW_MODE_DROPDOWN_VALUES },
+      ],
+    },
+    rangeById,
+  );
+  addDataSheet(
+    workbook,
+    {
+      name: "ZŠ zdravotní",
+      labels: IMPORT_ZS_HEALTH_LABELS,
+      dataRows: [ZS_HEALTH_EXAMPLE],
+      dropdowns: [
+        { fieldKey: "kind", options: IMPORT_HEALTH_KIND_DROPDOWN_VALUES },
+        { fieldKey: "mode", options: IMPORT_ROW_MODE_DROPDOWN_VALUES },
+      ],
+    },
+    rangeById,
+  );
+
+  return workbook;
+}
+
+/** Stažení oficiální šablony Excel pro školy. */
+export async function downloadPhmaxImportTemplateXlsx(): Promise<void> {
+  const workbook = await buildPhmaxImportTemplateWorkbook();
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

@@ -6,6 +6,7 @@ import {
   IMPORT_PSYCH_KIND_ALIASES,
   IMPORT_ROW_MODE_ALIASES,
   IMPORT_SD_MODE_ALIASES,
+  IMPORT_SS_STUDY_FORM_ALIASES,
 } from "./phmax-import-czech-values";
 
 /** České popisky sloupců ve šabloně Excel (řádek 1). Interní klíč je v závorce nebo mapování níže. */
@@ -60,7 +61,7 @@ export const IMPORT_SS_LABELS = {
   row_key: "Klíč řádku",
   label: "Označení třídy",
   education_field: "Kód oboru",
-  study_form: "Forma studia (kód)",
+  study_form: "Forma studia",
   class_count: "Počet tříd",
   average_students: "Průměr žáků",
 } as const;
@@ -163,6 +164,9 @@ function normalizeImportValues(row: ImportCsvRow, kind: ImportSheetKind): Import
   }
   if (kind === "zsHealth" && out.kind) {
     out.kind = IMPORT_HEALTH_KIND_ALIASES[normKey(out.kind)] ?? out.kind.trim();
+  }
+  if (kind === "ss" && out.study_form) {
+    out.study_form = IMPORT_SS_STUDY_FORM_ALIASES[normKey(out.study_form)] ?? out.study_form.trim();
   }
   return out;
 }
