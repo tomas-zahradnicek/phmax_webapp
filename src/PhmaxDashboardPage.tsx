@@ -48,7 +48,7 @@ import { clearAllPhmaxLocalStorage } from "./phmax-local-storage-clear";
 import { PHMAX_DASHBOARD_MAIN_ID } from "./phmax-main-landmarks";
 import { requestFocusExampleSelect } from "./phmax-focus-example-hint";
 import { requestFocusModuleInputs } from "./phmax-focus-inputs-hint";
-import { sortByDashboardAttention } from "./phmax-dashboard-sort";
+import { sortByDashModuleOrder } from "./phmax-dashboard-sort";
 import {
   buildCrossPhmaxSummary,
   formatCrossPhmaxSliceLabel,
@@ -100,11 +100,11 @@ const DASH_PRIMARY_ACTIONS: ReadonlyArray<{
   id: Exclude<ProductView, "dash">;
   cta: string;
 }> = [
-  { id: "zs", cta: "Spočítat PHmax ZŠ" },
   { id: "pv", cta: "Spočítat PHmax PV" },
-  { id: "nv75", cta: "Banka odpočtů NV75" },
   { id: "sd", cta: "Spočítat PHmax ŠD" },
+  { id: "zs", cta: "Spočítat PHmax ZŠ" },
   { id: "ss", cta: "Spočítat PHmax SŠ" },
+  { id: "nv75", cta: "Banka odpočtů NV75" },
 ];
 
 function readDashAudienceRole(): DashAudienceRole {
@@ -417,11 +417,31 @@ function dashboardFillStatusClass(hasData: boolean, verdict: DashboardVerdict | 
   return "dash-continue-card__fill-status--empty";
 }
 
-function dashboardKpiStatusClass(row: DashboardRow): string {
-  if (!row.hasData) return "dash-kpi-tile__status--empty";
-  if (row.verdict?.tone === "ok") return "dash-kpi-tile__status--ok";
-  if (row.verdict?.tone === "danger") return "dash-kpi-tile__status--danger";
-  return "dash-kpi-tile__status--warning";
+/** Kompaktní číslo pro KPI řádek (bez jednotek a hvězdičky neúplnosti). */
+function dashOverviewCompactMetric(value: string): string {
+  if (value === "–" || !value.trim()) return "–";
+  const head = value.replace(/\s/g, "").split("*")[0];
+  const m = head.match(/^[\d]+([,.]\d+)?/);
+  return m ? m[0].replace(".", ",") : head;
+}
+
+function csDashActiveModulesLabel(count: number): string {
+  if (count === 1) return "aktivní modul";
+  if (count >= 2 && count <= 4) return "aktivní moduly";
+  return "aktivních modulů";
+}
+
+function csDashModulesOkLabel(count: number): string {
+  if (count === 1) return "modul v pořádku";
+  if (count >= 2 && count <= 4) return "moduly v pořádku";
+  return "modulů v pořádku";
+}
+
+function csDashModulesAttentionLabel(count: number): string {
+  if (count === 0) return "modulů vyžaduje kontrolu";
+  if (count === 1) return "modul vyžaduje kontrolu";
+  if (count >= 2 && count <= 4) return "moduly vyžadují kontrolu";
+  return "modulů vyžaduje kontrolu";
 }
 
 function dashboardVerdictNeedsAttention(verdict: DashboardVerdict | null): boolean {
@@ -722,7 +742,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  const rows = sortByDashboardAttention(buildDashboardRows());
+  const rows = sortByDashModuleOrder(buildDashboardRows());
   const modulesWithData = rows.filter((r) => r.hasData).length;
   const lastActive = readLastActiveProduct();
   const continueRow = lastActive ? rows.find((row) => row.id === lastActive) ?? null : null;
@@ -827,12 +847,19 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
     [openDashboardModule],
   );
 
-  const attentionRows = sortByDashboardAttention(
-    rows.filter(
-      (row) =>
-        dashboardRowSupportsInputFocus(row.id) && row.hasData && dashboardVerdictNeedsAttention(row.verdict),
-    ),
+  const attentionRows = rows.filter(
+    (row) => dashboardRowSupportsInputFocus(row.id) && row.hasData && dashboardVerdictNeedsAttention(row.verdict),
   );
+
+  const modulesCompleted = rows.filter((r) => r.hasData && r.verdict?.tone === "ok").length;
+  const schoolStatusTone: "ok" | "warning" | "neutral" =
+    attentionRows.length > 0 ? "warning" : modulesWithData === 0 ? "neutral" : "ok";
+  const lastRefreshLabel = refreshAt.toLocaleString("cs-CZ", {
+    day: "numeric",
+    month: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   const crossPhmax = buildCrossPhmaxSummary(rows, DASH_CALC_LABEL);
   const dashboardBandHints = useMemo(() => {
@@ -1002,69 +1029,84 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           </div>
           <div className="hero__grid" style={{ marginTop: 8 }}>
             <div>
-              <h1 className="hero__title">{PRODUCT_CALCULATOR_TITLES.dash}</h1>
-              <p className="hero__text">{CALCULATOR_LIMITS_NOTE}</p>
-              <p className="hero__text" style={{ marginTop: 8 }}>
-                Řídicí panel školy – stav kalkulaček v tomto prohlížeči. Vyberte modul nebo pokračujte v rozpracované práci;
-                import a export pro IT jsou dole v pokročilých nástrojích.
+              <h1 className="hero__title">Ředitelský průvodce</h1>
+              <ul className="dash-hero-stats" aria-label="Souhrn stavu školy">
+                <li>
+                  <strong>{modulesWithData}</strong> {csDashActiveModulesLabel(modulesWithData)}
+                </li>
+                <li>
+                  <strong>{attentionRows.length}</strong> upozornění
+                </li>
+                <li>
+                  Poslední práce: <strong>{continueRow ? DASH_CALC_LABEL[continueRow.id] : "–"}</strong>
+                </li>
+              </ul>
+              <p className="hero__text hero__text--compact">
+                Stav v tomto prohlížeči · obnoveno {lastRefreshLabel}. {CALCULATOR_LIMITS_NOTE}
               </p>
-              <div className="dash-hero-quick" aria-label="Rychlé akce">
-                {DASH_PRIMARY_ACTIONS.map((action) => (
-                  <button
-                    key={action.id}
-                    type="button"
-                    className="btn primary dash-hero-quick__btn"
-                    onClick={() => openModuleForOwnData(action.id)}
-                  >
-                    {action.cta}
-                  </button>
-                ))}
-                {continueRow ? (
-                  <button
-                    type="button"
-                    className="btn ghost dash-hero-quick__btn"
-                    onClick={() => openDashboardModule(continueRow)}
-                  >
-                    Otevřít poslední ({DASH_CALC_LABEL[continueRow.id]})
-                  </button>
-                ) : null}
-              </div>
             </div>
           </div>
         </header>
 
         <main id={PHMAX_DASHBOARD_MAIN_ID} tabIndex={-1}>
-        <div className="dash-role-bar" role="group" aria-labelledby="dash-role-heading">
-          <span id="dash-role-heading" className="dash-role-bar__label">
-            Role:
+        <section
+          className={`card section-card dash-school-status dash-school-status--${schoolStatusTone}`}
+          aria-labelledby="dash-school-status-heading"
+        >
+          <h2 id="dash-school-status-heading" className="dash-school-status__title">
+            {schoolStatusTone === "ok"
+              ? "🟢 Stav školy"
+              : schoolStatusTone === "warning"
+                ? "🔴 Vyžaduje pozornost"
+                : "Stav školy"}
+          </h2>
+          <ul className="dash-school-status__facts">
+            <li>
+              <strong>{modulesCompleted}</strong> {csDashModulesOkLabel(modulesCompleted)}
+            </li>
+            <li>
+              <strong>{attentionRows.length}</strong> {csDashModulesAttentionLabel(attentionRows.length)}
+            </li>
+            <li>
+              Poslední úprava: <strong>{lastRefreshLabel}</strong>
+            </li>
+          </ul>
+          {schoolStatusTone === "ok" && attentionRows.length === 0 ? (
+            <p className="dash-school-status__lead">V uložených datech nejsou kritické chyby vstupů.</p>
+          ) : null}
+        </section>
+
+        <div
+          className="dash-role-segmented"
+          role="radiogroup"
+          aria-labelledby="dash-role-heading"
+        >
+          <span id="dash-role-heading" className="dash-role-segmented__label">
+            Role
           </span>
-          <label className="dash-role-bar__option">
-            <input
-              type="radio"
-              name="dash-audience-role"
-              checked={audienceRole === "director"}
-              onChange={() => persistAudienceRole("director")}
-            />
-            Ředitel
-          </label>
-          <label className="dash-role-bar__option">
-            <input
-              type="radio"
-              name="dash-audience-role"
-              checked={audienceRole === "methodologist"}
-              onChange={() => persistAudienceRole("methodologist")}
-            />
-            Metodik
-          </label>
-          <label className="dash-role-bar__option">
-            <input
-              type="radio"
-              name="dash-audience-role"
-              checked={audienceRole === "it"}
-              onChange={() => persistAudienceRole("it")}
-            />
-            IT
-          </label>
+          {(
+            [
+              { id: "director" as const, label: "Ředitel" },
+              { id: "methodologist" as const, label: "Metodik" },
+              { id: "it" as const, label: "IT" },
+            ] as const
+          ).map((role) => (
+            <button
+              key={role.id}
+              type="button"
+              role="radio"
+              aria-checked={audienceRole === role.id}
+              className={[
+                "dash-role-segmented__btn",
+                audienceRole === role.id ? "dash-role-segmented__btn--active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() => persistAudienceRole(role.id)}
+            >
+              {role.label}
+            </button>
+          ))}
         </div>
         {audienceRole === "director" ? (
           <div className="dash-role-hint">
@@ -1105,50 +1147,43 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           <h2 id="dash-overview-heading" className="section-title">
             Moje kalkulačky
           </h2>
-          <p className="muted-text" style={{ marginBottom: 8 }}>
-            Přehled podle uloženého stavu v tomto prohlížeči – stejná logika jako v jednotlivých modulech.
-          </p>
-          <p className="dash-overview-summary muted-text">
-            Moduly s uloženými daty: <strong>{modulesWithData}</strong> z {rows.length}
-            {modulesWithData === 0 ? (
-              <>
-                {" "}
-                – začněte tlačítkem <strong>Začít u ukázky</strong> u modulu níže.
-              </>
-            ) : null}
-          </p>
-          <div className="dash-kpi-strip" aria-label="Souhrnné KPI modulů">
+          {modulesWithData === 0 ? (
+            <p className="muted-text dash-overview-summary">
+              Zatím žádná uložená data – začněte u modulu níže nebo v sekci <strong>Co chcete dnes udělat?</strong>
+            </p>
+          ) : null}
+          <div className="dash-kpi-compact" aria-label="KPI přehled modulů">
             {rows.map((row) => (
-              <article
+              <button
                 key={row.id}
-                className={["dash-kpi-tile", "dash-kpi-tile--clickable", row.hasData ? "" : "dash-kpi-tile--empty"]
+                type="button"
+                className={[
+                  "dash-kpi-compact__cell",
+                  row.hasData ? "" : "dash-kpi-compact__cell--empty",
+                  dashboardVerdictNeedsAttention(row.verdict) ? "dash-kpi-compact__cell--warn" : "",
+                ]
                   .filter(Boolean)
                   .join(" ")}
-                role="button"
-                tabIndex={0}
-                aria-label={`Otevřít ${DASH_CALC_LABEL[row.id]}${row.hasData ? "" : " – začít u ukázky"}`}
                 onClick={() => openDashboardKpiModule(row)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    openDashboardKpiModule(row);
-                  }
-                }}
+                aria-label={`${DASH_CALC_LABEL[row.id]}: ${row.primaryKpi.value}`}
               >
-                <span className="dash-kpi-tile__module">{DASH_CALC_LABEL[row.id]}</span>
-                <FillStatusBadge
-                  kind={dashboardRowFillStatusKind(row.hasData, row.verdict?.tone)}
-                  label={row.status}
-                  className="dash-kpi-tile__fill-badge"
-                />
-                <strong className="dash-kpi-tile__value">{row.primaryKpi.value}</strong>
-                <span className="dash-kpi-tile__hint">{row.primaryKpi.label}</span>
-                <span className={`dash-kpi-tile__status ${dashboardKpiStatusClass(row)}`}>{row.status}</span>
-                {row.hasData && row.verdict?.detail ? (
-                  <span className="dash-kpi-tile__detail">{row.verdict.detail}</span>
-                ) : null}
-              </article>
+                <span className="dash-kpi-compact__label">{DASH_CALC_LABEL[row.id]}</span>
+                <strong className="dash-kpi-compact__value">{dashOverviewCompactMetric(row.primaryKpi.value)}</strong>
+              </button>
             ))}
+            <div
+              className={[
+                "dash-kpi-compact__cell",
+                "dash-kpi-compact__cell--errors",
+                attentionRows.length > 0 ? "dash-kpi-compact__cell--errors-active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-label={`${attentionRows.length} modulů vyžaduje pozornost`}
+            >
+              <span className="dash-kpi-compact__label">Chyby</span>
+              <strong className="dash-kpi-compact__value">{attentionRows.length}</strong>
+            </div>
           </div>
           <div className="dash-cards">
             {rows.map((row) => (
@@ -1160,24 +1195,16 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                     label={row.status}
                     className="dash-card__fill-badge"
                   />
-                  {row.verdict ? (
-                    <p className={`dash-card__verdict dash-card__verdict--${row.verdict.tone}`}>{row.status}</p>
-                  ) : (
-                    <p className={`dash-card__verdict ${row.hasData ? "" : "dash-card__verdict--warning"}`}>{row.status}</p>
-                  )}
-                  <p className="dash-card__metric">
-                    {row.primaryKpi.label}: {row.primaryKpi.value}
-                  </p>
-                  <div className="dash-card__kpis" aria-label="Doplňkové metriky">
-                    {row.secondaryKpis.map((kpi) => (
-                      <span key={kpi.label} className="dash-card__kpi-pill">
-                        {kpi.label}: <strong>{kpi.value}</strong>
-                      </span>
-                    ))}
+                  <div className="dash-card__metric" aria-label={row.primaryKpi.label}>
+                    <strong className="dash-card__metric-value">{row.primaryKpi.value}</strong>
+                    <span className="dash-card__metric-label">{row.primaryKpi.label}</span>
                   </div>
-                  <p className="dash-card__meta">{row.detail}</p>
-                  <p className="dash-card__meta">Naposledy otevřeno: {row.lastVisit}</p>
-                  <p className="dash-card__meta">Pojmenované zálohy: {row.namedBackups}</p>
+                  {row.lastVisit !== "Nikdy" ? (
+                    <p className="dash-card__meta">Naposledy: {row.lastVisit}</p>
+                  ) : null}
+                  {row.namedBackups > 0 ? (
+                    <p className="dash-card__meta">Zálohy: {row.namedBackups}</p>
+                  ) : null}
                 </div>
                 <div className="dash-card__actions">
                   <button type="button" className="btn primary" onClick={() => openDashboardModule(row)}>
@@ -1193,67 +1220,6 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             ))}
           </div>
         </section>
-
-        <section className="card card--accent section-card dash-quick-start" aria-labelledby="dash-quick-start-heading">
-          <h2 id="dash-quick-start-heading" className="section-title">
-            Co chcete dnes udělat?
-          </h2>
-          {showNewUserGuide ? (
-            <p className="muted-text" style={{ marginBottom: 10 }}>
-              Ukázka je volitelná – můžete rovnou vyplnit vlastní školu. Po otevření modulu hledejte{" "}
-              <strong>Příkladové výpočty</strong> v horní liště.
-            </p>
-          ) : null}
-          <div className="dash-quick-start__grid">
-            {DASH_PRIMARY_ACTIONS.map((action) => (
-              <button
-                key={action.id}
-                type="button"
-                className="btn primary dash-quick-start__btn"
-                onClick={() => openModuleForOwnData(action.id)}
-              >
-                {action.cta}
-              </button>
-            ))}
-            {continueRow ? (
-              <button
-                type="button"
-                className="btn ghost dash-quick-start__btn"
-                onClick={() => openDashboardModule(continueRow)}
-              >
-                Otevřít poslední práci ({DASH_CALC_LABEL[continueRow.id]})
-              </button>
-            ) : null}
-          </div>
-          <details className="dash-quick-start__more muted-text">
-            <summary>Vytvořit kalkulačku s ukázkou (volitelné)</summary>
-            <div className="dash-new-user-card__grid" style={{ marginTop: 10 }}>
-              {DASH_START_MODULES.map((item) => (
-                <article key={item.id} className="dash-new-user-card__tile">
-                  <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
-                  <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
-                  <div className="dash-new-user-card__actions">
-                    <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
-                      Ukázka ({DASH_CALC_LABEL[item.id]})
-                    </button>
-                    <button type="button" className="btn ghost" onClick={() => openModuleForOwnData(item.id)}>
-                      Vlastní data
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </details>
-        </section>
-
-        <DashboardSchoolImportDialog
-          open={importDialogOpen}
-          onClose={() => setImportDialogOpen(false)}
-          onApplied={handleImportApplied}
-          triggerRef={importTriggerRef}
-          pendingPreview={importPendingPreview}
-          onPendingPreviewConsumed={() => setImportPendingPreview(null)}
-        />
 
         {attentionRows.length > 0 ? (
           <section className="card section-card dash-attention-card" aria-labelledby="dash-attention-heading">
@@ -1286,6 +1252,69 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             </div>
           </section>
         ) : null}
+
+        <section className="card card--accent section-card dash-quick-start" aria-labelledby="dash-quick-start-heading">
+          <h2 id="dash-quick-start-heading" className="section-title">
+            Co chcete dnes udělat?
+          </h2>
+          {showNewUserGuide ? (
+            <p className="muted-text" style={{ marginBottom: 10 }}>
+              Ukázka je volitelná – můžete rovnou vyplnit vlastní školu. Po otevření modulu hledejte{" "}
+              <strong>Příkladové výpočty</strong> v horní liště.
+            </p>
+          ) : null}
+          <div className="dash-quick-start__grid">
+            {DASH_PRIMARY_ACTIONS.map((action) => (
+              <button
+                key={action.id}
+                type="button"
+                className="btn primary dash-quick-start__btn"
+                onClick={() => openModuleForOwnData(action.id)}
+              >
+                {action.cta}
+              </button>
+            ))}
+          </div>
+          {continueRow ? (
+            <div className="dash-action-continue">
+              <button
+                type="button"
+                className="btn ghost dash-quick-start__btn"
+                onClick={() => openDashboardModule(continueRow)}
+              >
+                Otevřít poslední práci ({DASH_CALC_LABEL[continueRow.id]})
+              </button>
+            </div>
+          ) : null}
+          <details className="dash-quick-start__more muted-text">
+            <summary>Vytvořit kalkulačku s ukázkou (volitelné)</summary>
+            <div className="dash-new-user-card__grid" style={{ marginTop: 10 }}>
+              {DASH_START_MODULES.map((item) => (
+                <article key={item.id} className="dash-new-user-card__tile">
+                  <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
+                  <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
+                  <div className="dash-new-user-card__actions">
+                    <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
+                      Ukázka ({DASH_CALC_LABEL[item.id]})
+                    </button>
+                    <button type="button" className="btn ghost" onClick={() => openModuleForOwnData(item.id)}>
+                      Vlastní data
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </details>
+        </section>
+
+        <DashboardSchoolImportDialog
+          open={importDialogOpen}
+          onClose={() => setImportDialogOpen(false)}
+          onApplied={handleImportApplied}
+          triggerRef={importTriggerRef}
+          pendingPreview={importPendingPreview}
+          onPendingPreviewConsumed={() => setImportPendingPreview(null)}
+        />
 
         {continueRow ? (
           <section className="card card--accent section-card dash-continue-card" aria-labelledby="dash-continue-heading">
@@ -1350,39 +1379,60 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             aria-labelledby="dash-cross-phmax-heading"
           >
             <h2 id="dash-cross-phmax-heading" className="section-title">
-              Souhrnný PHmax (PV + ŠD + ZŠ + SŠ)
+              Souhrnný PHmax
             </h2>
-            <p className="muted-text" style={{ marginTop: 0 }}>
-              Sloučení autosave z modulů v tomto prohlížeči – neoficiální souhrn pro kontrolu. NV75 (banka odpočtů) a krácení PV § 1d v cross-součtu nejsou.
-            </p>
-            <p className="dash-cross-phmax__total" style={{ marginTop: 12, fontSize: "1.35rem" }}>
-              Celkem PHmax: <strong>{formatCsNumberOrDash(crossPhmax.totalPhmax)}</strong> {CS_HOURS_PER_WEEK_SHORT}
+            <div className="dash-cross-phmax__hero">
+              <span className="dash-cross-phmax__hero-label">Celkem PHmax</span>
+              <div className="dash-cross-phmax__hero-value">
+                <strong>{formatCsNumberOrDash(crossPhmax.totalPhmax)}</strong>
+                <span>{CS_HOURS_PER_WEEK_SHORT}</span>
+              </div>
               {crossPhmax.hasIncomplete ? (
-                <span className="muted-text" style={{ display: "block", fontSize: "0.88rem", marginTop: 6 }}>
-                  Některé moduly mají neúplný výpočet – součet může být podhodnocený.
-                </span>
+                <p className="dash-cross-phmax__hero-note muted-text">Některé moduly mají neúplný výpočet – součet může být nižší.</p>
               ) : null}
+            </div>
+            <div className="dash-cross-phmax__breakdown" aria-label="PHmax podle modulu">
+              {crossPhmax.slices.map((slice) => (
+                <div
+                  key={slice.id}
+                  className={[
+                    "dash-cross-phmax__slice",
+                    slice.incomplete ? "dash-cross-phmax__slice--incomplete" : "",
+                    attentionIds.has(slice.id) ? "dash-cross-phmax__slice--attention" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <span className="dash-cross-phmax__slice-label">{DASH_CALC_LABEL[slice.id]}</span>
+                  <strong className="dash-cross-phmax__slice-value">
+                    {slice.hasData && slice.phmax != null ? formatCsNumberOrDash(slice.phmax) : "–"}
+                  </strong>
+                </div>
+              ))}
+            </div>
+            <details className="dash-cross-phmax__details muted-text">
+              <summary>Metodická upozornění a rozpad</summary>
+              <p style={{ marginTop: 10 }}>
+                Sloučení autosave v tomto prohlížeči – neoficiální souhrn. NV75 a krácení PV § 1d v součtu nejsou.
+              </p>
               {crossPhmaxMismatches.length > 0 ? (
-                <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.88rem" }}>
-                  <strong>Upozornění:</strong> modul(y) {crossPhmaxMismatches.join(", ")} jsou zároveň ve Vyžaduje
-                  pozornost – opravte vstupy před použitím součtu.
+                <p style={{ marginTop: 8, color: "#9a3412" }}>
+                  <strong>Upozornění:</strong> modul(y) {crossPhmaxMismatches.join(", ")} jsou ve Vyžaduje pozornost –
+                  opravte vstupy před použitím součtu.
                 </p>
               ) : null}
               {dashboardBandHints.length > 0 ? (
                 <div style={{ marginTop: 12 }}>
-                  <strong style={{ fontSize: "0.92rem" }}>Orientace k vyššímu PHmax (z autosave)</strong>
-                  <ul className="muted-text" style={{ marginTop: 6, paddingLeft: "1.25rem", fontSize: "0.88rem" }}>
+                  <strong>Orientace k vyššímu PHmax</strong>
+                  <ul style={{ marginTop: 6, paddingLeft: "1.25rem" }}>
                     {dashboardBandHints.map((hint) => (
                       <li key={hint}>{hint}</li>
                     ))}
                   </ul>
-                  <p className="muted-text" style={{ marginTop: 6, fontSize: "0.85rem" }}>
-                    Jde o orientační odhad podle pásem v metodice – ověřte v modulu PV / ZŠ / ŠD.
-                  </p>
                 </div>
               ) : null}
               {auditCoherenceWarnings.length > 0 ? (
-                <ul className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.88rem", paddingLeft: "1.25rem" }}>
+                <ul style={{ marginTop: 8, color: "#9a3412", paddingLeft: "1.25rem" }}>
                   {auditCoherenceWarnings.map((w) => {
                     const moduleId = coherenceWarningModuleId(w);
                     return (
@@ -1406,17 +1456,17 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   })}
                 </ul>
               ) : null}
-            </p>
-            <ul className="dash-cross-phmax__list muted-text" style={{ marginTop: 10, paddingLeft: "1.25rem" }}>
-              {crossPhmax.slices.map((slice) => (
-                <li key={slice.id}>
-                  {formatCrossPhmaxSliceLabel(slice)}
-                  {slice.incomplete ? " (neúplný)" : ""}
-                  {attentionIds.has(slice.id) ? " (vyžaduje pozornost)" : ""}
-                </li>
-              ))}
-            </ul>
-            <p className="muted-text" style={{ marginTop: 10, fontSize: "0.88rem" }}>
+              <ul className="dash-cross-phmax__list" style={{ marginTop: 10, paddingLeft: "1.25rem" }}>
+                {crossPhmax.slices.map((slice) => (
+                  <li key={slice.id}>
+                    {formatCrossPhmaxSliceLabel(slice)}
+                    {slice.incomplete ? " (neúplný)" : ""}
+                    {attentionIds.has(slice.id) ? " (vyžaduje pozornost)" : ""}
+                  </li>
+                ))}
+              </ul>
+            </details>
+            <p className="muted-text dash-cross-phmax__footnote" style={{ marginTop: 10, fontSize: "0.88rem" }}>
               Export JSON, import ze školy a integrace IS jsou v sekci{" "}
               <button
                 type="button"
@@ -1451,9 +1501,9 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           </section>
         ) : null}
 
-        <details id="dash-advanced-tools" className="card section-card dash-advanced-tools">
+        <details id="dash-advanced-tools" className="card section-card dash-advanced-tools dash-advanced-tools--highlight">
           <summary className="section-title dash-advanced-tools__summary">
-            Pokročilé nástroje – import, export a integrace
+            <span className="dash-advanced-tools__summary-label">Pokročilé nástroje – import, export a integrace</span>
           </summary>
           <div className="dash-advanced-tools__body">
             <section
