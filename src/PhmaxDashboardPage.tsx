@@ -1072,7 +1072,14 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             </li>
           </ul>
           {schoolStatusTone === "ok" && attentionRows.length === 0 ? (
-            <p className="dash-school-status__lead">V uložených datech nejsou kritické chyby vstupů.</p>
+            <p className="dash-school-status__lead dash-school-status__lead--done">
+              ✓ Všechny moduly bez chyb · škola připravena
+            </p>
+          ) : null}
+          {schoolStatusTone === "warning" ? (
+            <p className="dash-school-status__lead dash-school-status__lead--warn">
+              Opravte označené moduly před použitím souhrnného PHmax.
+            </p>
           ) : null}
         </section>
 
@@ -1253,125 +1260,6 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           </section>
         ) : null}
 
-        <section className="card card--accent section-card dash-quick-start" aria-labelledby="dash-quick-start-heading">
-          <h2 id="dash-quick-start-heading" className="section-title">
-            Co chcete dnes udělat?
-          </h2>
-          {showNewUserGuide ? (
-            <p className="muted-text" style={{ marginBottom: 10 }}>
-              Ukázka je volitelná – můžete rovnou vyplnit vlastní školu. Po otevření modulu hledejte{" "}
-              <strong>Příkladové výpočty</strong> v horní liště.
-            </p>
-          ) : null}
-          <div className="dash-quick-start__grid">
-            {DASH_PRIMARY_ACTIONS.map((action) => (
-              <button
-                key={action.id}
-                type="button"
-                className="btn primary dash-quick-start__btn"
-                onClick={() => openModuleForOwnData(action.id)}
-              >
-                {action.cta}
-              </button>
-            ))}
-          </div>
-          {continueRow ? (
-            <div className="dash-action-continue">
-              <button
-                type="button"
-                className="btn ghost dash-quick-start__btn"
-                onClick={() => openDashboardModule(continueRow)}
-              >
-                Otevřít poslední práci ({DASH_CALC_LABEL[continueRow.id]})
-              </button>
-            </div>
-          ) : null}
-          <details className="dash-quick-start__more muted-text">
-            <summary>Vytvořit kalkulačku s ukázkou (volitelné)</summary>
-            <div className="dash-new-user-card__grid" style={{ marginTop: 10 }}>
-              {DASH_START_MODULES.map((item) => (
-                <article key={item.id} className="dash-new-user-card__tile">
-                  <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
-                  <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
-                  <div className="dash-new-user-card__actions">
-                    <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
-                      Ukázka ({DASH_CALC_LABEL[item.id]})
-                    </button>
-                    <button type="button" className="btn ghost" onClick={() => openModuleForOwnData(item.id)}>
-                      Vlastní data
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </details>
-        </section>
-
-        <DashboardSchoolImportDialog
-          open={importDialogOpen}
-          onClose={() => setImportDialogOpen(false)}
-          onApplied={handleImportApplied}
-          triggerRef={importTriggerRef}
-          pendingPreview={importPendingPreview}
-          onPendingPreviewConsumed={() => setImportPendingPreview(null)}
-        />
-
-        {continueRow ? (
-          <section className="card card--accent section-card dash-continue-card" aria-labelledby="dash-continue-heading">
-            <h2 id="dash-continue-heading" className="section-title">
-              Rozpracovaná práce – {DASH_CALC_LABEL[continueRow.id]}
-            </h2>
-            <p className="muted-text" style={{ marginBottom: 12 }}>
-              Naposledy jste pracovali v modulu <strong>{continueRow.title}</strong>. Níže je rychlý náhled z uloženého stavu v tomto prohlížeči.
-            </p>
-            <p
-              className={`dash-continue-card__fill-status ${dashboardFillStatusClass(continueRow.hasData, continueRow.verdict)}`}
-            >
-              <FillStatusBadge
-                kind={dashboardRowFillStatusKind(continueRow.hasData, continueRow.verdict?.tone)}
-                label={dashboardModuleFillLabel(continueRow.hasData, continueRow.verdict)}
-              />
-            </p>
-            {continueRow.verdict ? (
-              <div
-                className={`dash-continue-card__verdict dash-continue-card__verdict--${continueRow.verdict.tone}`}
-                role="status"
-              >
-                <strong>{continueRow.verdict.label}</strong>
-                <p className="muted-text" style={{ margin: 0 }}>
-                  {continueRow.verdict.detail}
-                </p>
-              </div>
-            ) : null}
-            <div className="dash-continue-card__kpi" aria-label="Hlavní metrika modulu">
-              <span className="dash-continue-card__kpi-label">{continueRow.primaryKpi.label}</span>
-              <strong className="dash-continue-card__kpi-value">{continueRow.primaryKpi.value}</strong>
-            </div>
-            <div className="dash-card__kpis" style={{ marginTop: 10 }} aria-label="Doplňkové metriky">
-              {continueRow.secondaryKpis.map((kpi) => (
-                <span key={kpi.label} className="dash-card__kpi-pill">
-                  {kpi.label}: <strong>{kpi.value}</strong>
-                </span>
-              ))}
-            </div>
-            <p className="dash-card__meta">{continueRow.status}</p>
-            <div className="dash-card__actions">
-              <button
-                type="button"
-                className="btn primary"
-                onClick={() => openDashboardModule(continueRow)}
-              >
-                {continueRow.hasData ? `Pokračovat v ${DASH_CALC_LABEL[continueRow.id]}` : `Otevřít ${DASH_CALC_LABEL[continueRow.id]} a ukázku`}
-              </button>
-              {!continueRow.hasData ? (
-                <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(continueRow.id)}>
-                  Začít u ukázkového příkladu
-                </button>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
-
         {crossPhmax.modulesWithPhmax >= 2 ? (
           <section
             id="dash-school-15min"
@@ -1478,6 +1366,140 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
               </button>{" "}
               níže na stránce.
             </p>
+          </section>
+        ) : null}
+
+        <section className="card card--accent section-card dash-quick-start" aria-labelledby="dash-quick-start-heading">
+          <h2 id="dash-quick-start-heading" className="section-title">
+            Co chcete dnes udělat?
+          </h2>
+          {showNewUserGuide ? (
+            <p className="muted-text" style={{ marginBottom: 10 }}>
+              Ukázka je volitelná – můžete rovnou vyplnit vlastní školu. Po otevření modulu hledejte{" "}
+              <strong>Příkladové výpočty</strong> v horní liště.
+            </p>
+          ) : null}
+          <div className="dash-quick-start__grid">
+            {DASH_PRIMARY_ACTIONS.map((action) => (
+              <button
+                key={action.id}
+                type="button"
+                className="btn primary dash-quick-start__btn"
+                onClick={() => openModuleForOwnData(action.id)}
+              >
+                {action.cta}
+              </button>
+            ))}
+          </div>
+          {continueRow ? (
+            <div className="dash-action-continue">
+              <button
+                type="button"
+                className="btn ghost dash-quick-start__btn"
+                onClick={() => openDashboardModule(continueRow)}
+              >
+                Otevřít poslední práci ({DASH_CALC_LABEL[continueRow.id]})
+              </button>
+            </div>
+          ) : null}
+          <details className="dash-quick-start__more muted-text">
+            <summary>Vytvořit kalkulačku s ukázkou (volitelné)</summary>
+            <div className="dash-new-user-card__grid" style={{ marginTop: 10 }}>
+              {DASH_START_MODULES.map((item) => (
+                <article key={item.id} className="dash-new-user-card__tile">
+                  <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
+                  <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
+                  <div className="dash-new-user-card__actions">
+                    <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
+                      Ukázka ({DASH_CALC_LABEL[item.id]})
+                    </button>
+                    <button type="button" className="btn ghost" onClick={() => openModuleForOwnData(item.id)}>
+                      Vlastní data
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </details>
+        </section>
+
+        <DashboardSchoolImportDialog
+          open={importDialogOpen}
+          onClose={() => setImportDialogOpen(false)}
+          onApplied={handleImportApplied}
+          triggerRef={importTriggerRef}
+          pendingPreview={importPendingPreview}
+          onPendingPreviewConsumed={() => setImportPendingPreview(null)}
+        />
+
+        {continueRow ? (
+          <section
+            className="card card--accent section-card dash-continue-card dash-continue-card--compact"
+            aria-labelledby="dash-continue-heading"
+          >
+            <div className="dash-continue-card__compact-head">
+              <h2 id="dash-continue-heading" className="section-title dash-continue-card__compact-title">
+                Rozpracovaná práce – {DASH_CALC_LABEL[continueRow.id]}
+              </h2>
+              <dl className="dash-continue-card__compact-facts">
+                <div>
+                  <dt>{continueRow.primaryKpi.label}</dt>
+                  <dd>{continueRow.primaryKpi.value}</dd>
+                </div>
+                <div>
+                  <dt>Stav</dt>
+                  <dd>{continueRow.status}</dd>
+                </div>
+              </dl>
+              <div className="dash-continue-card__compact-actions">
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={() => openDashboardModule(continueRow)}
+                >
+                  {continueRow.hasData ? "Pokračovat" : "Otevřít a ukázku"}
+                </button>
+                {!continueRow.hasData ? (
+                  <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(continueRow.id)}>
+                    Začít u ukázky
+                  </button>
+                ) : null}
+              </div>
+            </div>
+            <details className="dash-continue-card__more muted-text">
+              <summary>Detail z autosave</summary>
+              <p className="muted-text" style={{ marginTop: 10 }}>
+                Modul <strong>{continueRow.title}</strong> · uloženo v tomto prohlížeči.
+              </p>
+              <p
+                className={`dash-continue-card__fill-status ${dashboardFillStatusClass(continueRow.hasData, continueRow.verdict)}`}
+              >
+                <FillStatusBadge
+                  kind={dashboardRowFillStatusKind(continueRow.hasData, continueRow.verdict?.tone)}
+                  label={dashboardModuleFillLabel(continueRow.hasData, continueRow.verdict)}
+                />
+              </p>
+              {continueRow.verdict ? (
+                <div
+                  className={`dash-continue-card__verdict dash-continue-card__verdict--${continueRow.verdict.tone}`}
+                  role="status"
+                >
+                  <strong>{continueRow.verdict.label}</strong>
+                  <p className="muted-text" style={{ margin: 0 }}>
+                    {continueRow.verdict.detail}
+                  </p>
+                </div>
+              ) : null}
+              {continueRow.secondaryKpis.length > 0 ? (
+                <div className="dash-card__kpis" style={{ marginTop: 10 }} aria-label="Doplňkové metriky">
+                  {continueRow.secondaryKpis.map((kpi) => (
+                    <span key={kpi.label} className="dash-card__kpi-pill">
+                      {kpi.label}: <strong>{kpi.value}</strong>
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </details>
           </section>
         ) : null}
 

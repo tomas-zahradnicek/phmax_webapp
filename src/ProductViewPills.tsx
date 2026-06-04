@@ -9,7 +9,7 @@ type ProductViewPillsProps = {
 };
 
 const PILL_SHORT: Record<ProductView, string> = {
-  dash: "Σ",
+  dash: "Přehled",
   pv: "PV",
   sd: "ŠD",
   zs: "ZŠ",

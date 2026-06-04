@@ -9870,6 +9870,75 @@ select:focus {
   color: #166534;
 }
 
+.dash-school-status__lead--done {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.dash-school-status__lead--warn {
+  color: #9a3412;
+  font-weight: 650;
+}
+
+.dash-continue-card--compact .dash-continue-card__compact-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 20px;
+}
+
+.dash-continue-card__compact-title {
+  flex: 1 1 100%;
+  margin: 0;
+}
+
+.dash-continue-card__compact-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 0;
+}
+
+.dash-continue-card__compact-facts dt {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.dash-continue-card__compact-facts dd {
+  margin: 2px 0 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.dash-continue-card__compact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.dash-continue-card__more {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+
+.dash-continue-card__more summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pill--hero-toggle:first-child {
+  min-width: 4.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
+}
+
 .dash-role-segmented {
   display: flex;
   flex-wrap: wrap;
