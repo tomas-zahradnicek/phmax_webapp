@@ -12,6 +12,9 @@ import {
   parseSemicolonCsv,
 } from "./phmax-import-pv-zs";
 import { classifyImportCsvText } from "./phmax-import-xlsx";
+import { IMPORT_NV75_KIND_LABELS } from "./phmax-import-czech-values";
+import { computeSsPhmaxTotalFromSnapshot } from "./ss/ss-compute-phmax-total-from-snapshot";
+import { PHMAX_MODULE_AUTOSAVE_LS_KEYS } from "./phmax-school-scenario-export";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const templatesDir = path.join(repoRoot, "docs/import-templates");
@@ -99,6 +102,66 @@ describe("phmax-import-pv-zs", () => {
     expect(result.appliedModules).toEqual(["pv", "zs"]);
     expect(mem.getItem("edu-cz-pv-calculator-state")).toContain('"rows"');
     expect(mem.getItem("edu-cz-zs-calculator-state")).toContain("basic1Classes");
+  });
+
+  it("import SŠ s platným kódem oboru 39-41-L/01 má PHmax > 0", () => {
+    const metaRows = parseSemicolonCsv(
+      readFileSync(path.join(templatesDir, "phmax-import-meta-v1.example.csv"), "utf8"),
+    );
+    const pvRows = parseSemicolonCsv(readFileSync(path.join(templatesDir, "phmax-import-pv-v1.example.csv"), "utf8"));
+    const zsRows = parseSemicolonCsv(
+      readFileSync(path.join(templatesDir, "phmax-import-zs-summary-v1.example.csv"), "utf8"),
+    );
+    const keys = { school_id: metaRows[0]!.school_id, scenario_label: metaRows[0]!.scenario_label };
+    const ssRows = [
+      {
+        ...keys,
+        row_key: "ss-1",
+        label: "1.A",
+        education_field: "39-41-L/01",
+        study_form: "denni",
+        class_count: "2",
+        average_students: "17",
+      },
+    ];
+    const payload = importTablesToHandoffPayload({ metaRows, pvRows, zsRows, ssRows });
+    const ss = payload.schoolScenario.moduleSnapshots.ss as { rows: unknown[] };
+    expect(ss.rows.length).toBe(1);
+    expect(payload.schoolScenario.summary.slices.find((s) => s.id === "ss")?.phmax).toBe(100);
+    expect(computeSsPhmaxTotalFromSnapshot(ss)).toBe(100);
+  });
+
+  it("import NV75 zapíše řádky banky odpočtů", () => {
+    const metaRows = parseSemicolonCsv(
+      readFileSync(path.join(templatesDir, "phmax-import-meta-v1.example.csv"), "utf8"),
+    );
+    const pvRows = parseSemicolonCsv(readFileSync(path.join(templatesDir, "phmax-import-pv-v1.example.csv"), "utf8"));
+    const zsRows = parseSemicolonCsv(
+      readFileSync(path.join(templatesDir, "phmax-import-zs-summary-v1.example.csv"), "utf8"),
+    );
+    const keys = { school_id: metaRows[0]!.school_id, scenario_label: metaRows[0]!.scenario_label };
+    const nv75Rows = [
+      {
+        ...keys,
+        row_key: "nv75-1",
+        kind: IMPORT_NV75_KIND_LABELS.zs,
+        units: "19",
+        additional_workplaces: "10;4",
+      },
+    ];
+    const payload = importTablesToHandoffPayload({ metaRows, pvRows, zsRows, nv75Rows });
+    const nv75 = payload.schoolScenario.moduleSnapshots.nv75 as {
+      rows: { kind: string; units: number; additionalWorkplaceUnits: number[] }[];
+    };
+    expect(nv75.rows).toHaveLength(1);
+    expect(nv75.rows[0]!.kind).toBe("zs");
+    expect(nv75.rows[0]!.units).toBe(19);
+    expect(nv75.rows[0]!.additionalWorkplaceUnits).toEqual([10, 4]);
+
+    const mem = new MemoryStorage();
+    const result = applyPhmaxIsHandoffToStorage(mem, payload);
+    expect(result.appliedModules).toContain("nv75");
+    expect(mem.getItem(PHMAX_MODULE_AUTOSAVE_LS_KEYS.nv75)).toContain('"rows"');
   });
 
   it("generovaný JSON existuje po npm run import:csv-handoff", () => {

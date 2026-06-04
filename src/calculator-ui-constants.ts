@@ -66,11 +66,11 @@ export const DASH_IMPORT_LABEL = "Import ze školy (PV + ZŠ)";
 export const DASH_IMPORT_TEMPLATE_LABEL = "Stáhnout šablonu Excel (.xlsx)";
 export const DASH_IMPORT_UPLOAD_LABEL = "Nahrát soubor a importovat";
 export const DASH_IMPORT_HINT =
-  "Nejdřív stáhněte šablonu (tlačítko vedle importu), vyplňte ji v Excelu a teprve pak nahrajte soubor. Povinné listy Meta, PV a ZŠ souhrn; volitelně ŠD, SŠ, psycholog a zdravotní třídy.";
+  "Nejdřív stáhněte šablonu (tlačítko vedle importu), vyplňte ji v Excelu a teprve pak nahrajte soubor. Povinné listy Meta, PV a ZŠ souhrn; volitelně ŠD, SŠ, NV75, psycholog a zdravotní třídy.";
 export const DASH_IMPORT_STEPS = [
-  "Stáhněte šablonu Excel – české názvy sloupců, soubor phmax-import-skola-v2.xlsx.",
+  "Stáhněte šablonu Excel – české sloupce, rozbalovací seznamy, odkazy na listy (phmax-import-skola-v2.xlsx).",
   "Vyplňte listy podle evidence školy (stejné ID školy a název scénáře všude).",
-  "Nahrajte soubor tlačítkem Import – zkontrolujte náhled a načtěte do kalkulaček.",
+  "Nahrajte soubor tlačítkem Import – zkontrolujte náhled a načtěte do kalkulaček (včetně NV75).",
 ] as const;
 export const DASH_IMPORT_DIALOG_LEAD =
   "Stáhněte šablonu, vyplňte listy Meta, PV a ZŠ podle evidence školy a nahrajte soubor. Po kontrole náhledu se data uloží do autosave – stejně jako ruční zadání.";

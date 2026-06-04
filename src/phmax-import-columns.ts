@@ -4,6 +4,7 @@ import {
   IMPORT_HEALTH_KIND_ALIASES,
   IMPORT_PROVOZ_ALIASES,
   IMPORT_PSYCH_KIND_ALIASES,
+  IMPORT_NV75_KIND_ALIASES,
   IMPORT_ROW_MODE_ALIASES,
   IMPORT_SD_MODE_ALIASES,
   IMPORT_SS_STUDY_FORM_ALIASES,
@@ -60,10 +61,29 @@ export const IMPORT_SS_LABELS = {
   scenario_label: "Název scénáře",
   row_key: "Klíč řádku",
   label: "Označení třídy",
-  education_field: "Kód oboru",
+  education_field: "Kód oboru (RVP)",
   study_form: "Forma studia",
   class_count: "Počet tříd",
   average_students: "Průměr žáků",
+} as const;
+
+export const IMPORT_NV75_LABELS = {
+  school_id: "ID školy",
+  scenario_label: "Název scénáře",
+  row_key: "Klíč řádku",
+  kind: "Druh školy / zařízení",
+  units: "Počet jednotek §4",
+  additional_workplaces: "Další pracoviště §4d (jednotky, středník)",
+} as const;
+
+export const IMPORT_NV75_PRACTICE_LABELS = {
+  school_id: "ID školy",
+  scenario_label: "Název scénáře",
+  practical_general_non_ov: "§4c odst. 1 – žáci (bez OV při 10+ skupinách)",
+  practical_ov_ehl0: "§4c – žáci OV (E/H/L0)",
+  practical_sec16: "§4c odst. 2 – žáci §16",
+  ov_groups_school: "Skupiny OV ve škole",
+  ov_groups_instructor: "Skupiny OV u učitele OV",
 } as const;
 
 export const IMPORT_ZS_PSYCH_LABELS = {
@@ -109,6 +129,8 @@ const HEADER_MAPS = {
   ss: invertLabels(IMPORT_SS_LABELS),
   zsPsych: invertLabels(IMPORT_ZS_PSYCH_LABELS),
   zsHealth: invertLabels(IMPORT_ZS_HEALTH_LABELS),
+  nv75: invertLabels(IMPORT_NV75_LABELS),
+  nv75Practice: invertLabels(IMPORT_NV75_PRACTICE_LABELS),
 } as const;
 
 export type ImportSheetKind = keyof typeof HEADER_MAPS;
@@ -167,6 +189,9 @@ function normalizeImportValues(row: ImportCsvRow, kind: ImportSheetKind): Import
   }
   if (kind === "ss" && out.study_form) {
     out.study_form = IMPORT_SS_STUDY_FORM_ALIASES[normKey(out.study_form)] ?? out.study_form.trim();
+  }
+  if (kind === "nv75" && out.kind) {
+    out.kind = IMPORT_NV75_KIND_ALIASES[normKey(out.kind)] ?? out.kind.trim();
   }
   return out;
 }

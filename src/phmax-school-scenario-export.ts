@@ -8,6 +8,7 @@ export const PHMAX_MODULE_AUTOSAVE_LS_KEYS = {
   sd: "edu-cz-sd-calculator-state",
   zs: "edu-cz-zs-calculator-state",
   ss: "phmax-ss-units-draft",
+  nv75: "edu-cz-nv75-deputy-bank-state",
 } as const;
 
 const LS_KEYS = PHMAX_MODULE_AUTOSAVE_LS_KEYS;
@@ -16,7 +17,7 @@ export const PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY = "phmax-school-scenario-label";
 
 export type SchoolScenarioExportPayload = Omit<CrossPhmaxExportPayload, "schema"> & {
   schema: "phmax-school-scenario-v1";
-  moduleSnapshots: Partial<Record<"pv" | "sd" | "zs" | "ss", unknown>>;
+  moduleSnapshots: Partial<Record<keyof typeof PHMAX_MODULE_AUTOSAVE_LS_KEYS, unknown>>;
   /** Pojmenování scénáře pro archiv / IS (volitelné). */
   scenarioLabel: string;
   /** Varování koherence audit / přepočet v době exportu. */

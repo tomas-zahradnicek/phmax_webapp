@@ -1430,7 +1430,7 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                 <article key={item.id} className="dash-new-user-card__tile">
                   <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
                   <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
-                  <div className="dash-new-user-card__actions" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <div className="dash-new-user-card__actions">
                     <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
                       Otevřít {DASH_CALC_LABEL[item.id]} ({DASH_OPEN_MODULE_EXAMPLE_BUTTON_SUFFIX})
                     </button>
@@ -1443,27 +1443,6 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
             </div>
           </section>
         ) : null}
-
-        <section className="card card--accent section-card section-card--guide" aria-labelledby="dash-user-first-heading">
-          <h2 id="dash-user-first-heading" className="section-title">
-            Začněte uživatelsky nejdříve tady
-          </h2>
-            <p className="muted-text" style={{ marginBottom: 12 }}>
-              V každé kalkulačce můžete zvolit <strong>Příkladové výpočty</strong> pro orientaci, nebo rovnou vyplnit
-              vlastní údaje – formulář není jen pro čtení. Tlačítko <strong>Nápověda</strong> v hero liště průvodce znovu zobrazí; u ZŠ může navíc pomoci rozcestník v expertním režimu. V tabulkách PHmax používejte rozbalení{" "}
-            <strong>„Proč tyto vstupy ovlivní PHmax?“</strong> (viz PV, ŠD, ZŠ, NV75) – u <strong>SŠ</strong> doplňuje stejný smysl tlačítko „Proč?“ u každého řádku přehledu.
-          </p>
-          <p className="muted-text" style={{ marginBottom: 12 }}>
-            Rychlé otevření kalkulačky (stav zůstává v paměti tohoto prohlížeče):
-          </p>
-          <div className="toolbar" style={{ flexWrap: "wrap", gap: 8 }}>
-            {DASH_QUICK_IDS.map((id) => (
-              <button key={id} type="button" className="btn ghost" title={PRODUCT_CALCULATOR_TITLES[id]} onClick={() => setProductView(id)}>
-                Otevřít {DASH_CALC_LABEL[id]}
-              </button>
-            ))}
-          </div>
-        </section>
 
         <section className="card muted section-card">
           <h2 className="section-title">Přehled podle uloženého stavu v prohlížeči</h2>
@@ -1515,30 +1494,32 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
           <div className="dash-cards">
             {rows.map((row) => (
               <article key={row.id} className="dash-card">
-                <h3 className="dash-card__title">{row.title}</h3>
-                <FillStatusBadge
-                  kind={dashboardRowFillStatusKind(row.hasData, row.verdict?.tone)}
-                  label={row.status}
-                  className="dash-card__fill-badge"
-                />
-                {row.verdict ? (
-                  <p className={`dash-card__verdict dash-card__verdict--${row.verdict.tone}`}>{row.status}</p>
-                ) : (
-                  <p className={`dash-card__verdict ${row.hasData ? "" : "dash-card__verdict--warning"}`}>{row.status}</p>
-                )}
-                <p className="dash-card__metric">
-                  {row.primaryKpi.label}: {row.primaryKpi.value}
-                </p>
-                <div className="dash-card__kpis" aria-label="Doplňkové metriky">
-                  {row.secondaryKpis.map((kpi) => (
-                    <span key={kpi.label} className="dash-card__kpi-pill">
-                      {kpi.label}: <strong>{kpi.value}</strong>
-                    </span>
-                  ))}
+                <div className="dash-card__body">
+                  <h3 className="dash-card__title">{row.title}</h3>
+                  <FillStatusBadge
+                    kind={dashboardRowFillStatusKind(row.hasData, row.verdict?.tone)}
+                    label={row.status}
+                    className="dash-card__fill-badge"
+                  />
+                  {row.verdict ? (
+                    <p className={`dash-card__verdict dash-card__verdict--${row.verdict.tone}`}>{row.status}</p>
+                  ) : (
+                    <p className={`dash-card__verdict ${row.hasData ? "" : "dash-card__verdict--warning"}`}>{row.status}</p>
+                  )}
+                  <p className="dash-card__metric">
+                    {row.primaryKpi.label}: {row.primaryKpi.value}
+                  </p>
+                  <div className="dash-card__kpis" aria-label="Doplňkové metriky">
+                    {row.secondaryKpis.map((kpi) => (
+                      <span key={kpi.label} className="dash-card__kpi-pill">
+                        {kpi.label}: <strong>{kpi.value}</strong>
+                      </span>
+                    ))}
+                  </div>
+                  <p className="dash-card__meta">{row.detail}</p>
+                  <p className="dash-card__meta">Naposledy otevřeno: {row.lastVisit}</p>
+                  <p className="dash-card__meta">Pojmenované zálohy: {row.namedBackups}</p>
                 </div>
-                <p className="dash-card__meta">{row.detail}</p>
-                <p className="dash-card__meta">Naposledy otevřeno: {row.lastVisit}</p>
-                <p className="dash-card__meta">Pojmenované zálohy: {row.namedBackups}</p>
                 <div className="dash-card__actions">
                   <button type="button" className="btn primary" onClick={() => openDashboardModule(row)}>
                     Otevřít
@@ -1550,6 +1531,27 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   ) : null}
                 </div>
               </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="card card--accent section-card section-card--guide" aria-labelledby="dash-user-first-heading">
+          <h2 id="dash-user-first-heading" className="section-title">
+            Začněte uživatelsky nejdříve tady
+          </h2>
+            <p className="muted-text" style={{ marginBottom: 12 }}>
+              V každé kalkulačce můžete zvolit <strong>Příkladové výpočty</strong> pro orientaci, nebo rovnou vyplnit
+              vlastní údaje – formulář není jen pro čtení. Tlačítko <strong>Nápověda</strong> v hero liště průvodce znovu zobrazí; u ZŠ může navíc pomoci rozcestník v expertním režimu. V tabulkách PHmax používejte rozbalení{" "}
+            <strong>„Proč tyto vstupy ovlivní PHmax?“</strong> (viz PV, ŠD, ZŠ, NV75) – u <strong>SŠ</strong> doplňuje stejný smysl tlačítko „Proč?“ u každého řádku přehledu.
+          </p>
+          <p className="muted-text" style={{ marginBottom: 12 }}>
+            Rychlé otevření kalkulačky (stav zůstává v paměti tohoto prohlížeče):
+          </p>
+          <div className="toolbar" style={{ flexWrap: "wrap", gap: 8 }}>
+            {DASH_QUICK_IDS.map((id) => (
+              <button key={id} type="button" className="btn ghost" title={PRODUCT_CALCULATOR_TITLES[id]} onClick={() => setProductView(id)}>
+                Otevřít {DASH_CALC_LABEL[id]}
+              </button>
             ))}
           </div>
         </section>

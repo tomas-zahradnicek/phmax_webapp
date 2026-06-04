@@ -11,7 +11,9 @@ export type ImportSheetKind =
   | "sd"
   | "ss"
   | "zsPsych"
-  | "zsHealth";
+  | "zsHealth"
+  | "nv75"
+  | "nv75Practice";
 
 const SHEET_ALIASES: Record<ImportSheetKind, readonly string[]> = {
   meta: ["meta", "údaje školy", "udaje skoly"],
@@ -21,6 +23,8 @@ const SHEET_ALIASES: Record<ImportSheetKind, readonly string[]> = {
   ss: ["sš", "ss", "střední škola", "stredni skola"],
   zsPsych: ["zš psycholog", "zs psycholog", "zs_psych", "psycholog"],
   zsHealth: ["zš zdravotní", "zs zdravotni", "zs_health", "zdravotní", "zdravotni"],
+  nv75: ["nv75", "banka odpoctu", "banka odpočtu", "zastupce"],
+  nv75Practice: ["nv75 §4c", "nv75 4c", "nv75 prakticke", "nv75 praktické"],
 };
 
 function normalizeSheetName(name: string): string {
@@ -105,6 +109,8 @@ export async function parseImportXlsxArrayBuffer(buffer: ArrayBuffer) {
     ssRows: tables.ss,
     zsPsychRows: tables.zsPsych,
     zsHealthRows: tables.zsHealth,
+    nv75Rows: tables.nv75,
+    nv75PracticeRows: tables.nv75Practice,
   });
 }
 
@@ -189,6 +195,8 @@ export function parseImportCsvFileBundle(files: { name: string; text: string }[]
     ssRows: tables.ss,
     zsPsychRows: tables.zsPsych,
     zsHealthRows: tables.zsHealth,
+    nv75Rows: tables.nv75,
+    nv75PracticeRows: tables.nv75Practice,
   });
 }
 

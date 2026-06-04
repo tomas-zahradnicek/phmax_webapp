@@ -1,5 +1,7 @@
 import {
   IMPORT_META_LABELS,
+  IMPORT_NV75_LABELS,
+  IMPORT_NV75_PRACTICE_LABELS,
   IMPORT_PV_LABELS,
   IMPORT_SD_LABELS,
   IMPORT_SS_LABELS,
@@ -12,6 +14,8 @@ import {
   IMPORT_BASIC_TYPE_LABELS,
   IMPORT_HEALTH_KIND_DROPDOWN_VALUES,
   IMPORT_HEALTH_KIND_LABELS,
+  IMPORT_NV75_KIND_DROPDOWN_VALUES,
+  IMPORT_NV75_KIND_LABELS,
   IMPORT_PSYCH_KIND_DROPDOWN_VALUES,
   IMPORT_PSYCH_KIND_LABELS,
   IMPORT_PROVOZ_DROPDOWN_VALUES,
@@ -23,14 +27,19 @@ import {
   IMPORT_TEMPLATE_NAVOD_VALUE_LINES,
 } from "./phmax-import-czech-values";
 import {
+  addImportNavSheetLinks,
+  styleImportHeaderAndDataRows,
+  styleImportWorksheetTab,
+  type ImportNavSheetLink,
+} from "./phmax-import-template-sheet-style";
+import {
   addImportCiselnikySheet,
   applyImportColumnDropdowns,
+  IMPORT_CISNIKY_SHEET_NAME,
   type ImportTemplateDropdown,
 } from "./phmax-import-template-validation";
 import { PV_PROVOZ_OPTIONS } from "./pv/pv-workplace-shared";
 import { PHMAX_IMPORT_SCHOOL_SCHEMA } from "./phmax-import-pv-zs";
-
-const HEADER_FILL = "FFE8EEF7";
 
 const META_EXAMPLE = [
   "zs-praha-123",
@@ -64,12 +73,13 @@ const ZS_EXAMPLE = [
 
 const SD_EXAMPLE = ["zs-praha-123", "Import ze školy 2026-05", "30", "2", IMPORT_SD_MODE_LABELS.summary];
 
+/** Platný kód oboru v datasetu SŠ (39-41-L/01) – ne 82-41-L/01. */
 const SS_EXAMPLE = [
   "zs-praha-123",
   "Import ze školy 2026-05",
   "ss-1",
-  "1.A",
-  "82-41-L/01",
+  "1.A – denní",
+  "39-41-L/01",
   IMPORT_SS_STUDY_FORM_DROPDOWN_VALUES[0]!,
   "2",
   "17",
@@ -99,6 +109,21 @@ const ZS_HEALTH_EXAMPLE = [
   "2",
 ];
 
+const NV75_EXAMPLES: readonly (readonly string[])[] = [
+  ["zs-praha-123", "Import ze školy 2026-05", "nv75-1", IMPORT_NV75_KIND_LABELS.zs, "19", "10;4"],
+  ["zs-praha-123", "Import ze školy 2026-05", "nv75-2", IMPORT_NV75_KIND_LABELS.sd, "4", ""],
+];
+
+const NV75_PRACTICE_EXAMPLE = [
+  "zs-praha-123",
+  "Import ze školy 2026-05",
+  "120",
+  "0",
+  "0",
+  "0",
+  "0",
+];
+
 const CISNIKY_LISTS = [
   { id: "provoz", options: IMPORT_PROVOZ_DROPDOWN_VALUES },
   { id: "basic_type", options: IMPORT_BASIC_TYPE_DROPDOWN_VALUES },
@@ -106,8 +131,21 @@ const CISNIKY_LISTS = [
   { id: "study_form", options: IMPORT_SS_STUDY_FORM_DROPDOWN_VALUES },
   { id: "kind_psych", options: IMPORT_PSYCH_KIND_DROPDOWN_VALUES },
   { id: "kind_health", options: IMPORT_HEALTH_KIND_DROPDOWN_VALUES },
+  { id: "kind_nv75", options: IMPORT_NV75_KIND_DROPDOWN_VALUES },
   { id: "mode", options: IMPORT_ROW_MODE_DROPDOWN_VALUES },
 ] as const;
+
+const NAV_SHEET_LINKS: readonly ImportNavSheetLink[] = [
+  { label: "Meta", sheetName: "Meta" },
+  { label: "PV", sheetName: "PV" },
+  { label: "ZŠ", sheetName: "ZŠ souhrn" },
+  { label: "ŠD", sheetName: "ŠD" },
+  { label: "SŠ", sheetName: "SŠ" },
+  { label: "Psych", sheetName: "ZŠ psycholog" },
+  { label: "Zdravotní", sheetName: "ZŠ zdravotní" },
+  { label: "NV75", sheetName: "NV75" },
+  { label: "NV75 §4c", sheetName: "NV75 §4c" },
+];
 
 function labelRow(labels: Record<string, string>): string[] {
   return Object.values(labels);
@@ -122,29 +160,33 @@ type DataSheetConfig = {
   labels: Record<string, string>;
   dataRows: readonly (readonly string[])[];
   dropdowns?: readonly ImportTemplateDropdown[];
+  /** id v listu Číselníky pro sloupec kind */
+  kindCiselnikId?: "kind_psych" | "kind_health" | "kind_nv75";
 };
 
 function addDataSheet(workbook: import("exceljs").Workbook, config: DataSheetConfig, rangeById: Map<string, string>) {
   const sheet = workbook.addWorksheet(config.name, { views: [{ state: "frozen", ySplit: 2 }] });
-  const headerRow = sheet.addRow(labelRow(config.labels));
-  headerRow.font = { bold: true, color: { argb: "FF1E293B" } };
-  headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_FILL } };
-  const hintRow = sheet.addRow(keyHintRow(config.labels));
-  hintRow.font = { italic: true, color: { argb: "FF64748B" }, size: 9 };
+  styleImportWorksheetTab(sheet, config.name);
+
+  sheet.addRow(labelRow(config.labels));
+  sheet.addRow(keyHintRow(config.labels));
   for (const row of config.dataRows) {
     sheet.addRow([...row]);
   }
-  sheet.columns = Object.keys(config.labels).map(() => ({ width: 22 }));
+
+  const colCount = Object.keys(config.labels).length;
+  sheet.columns = Object.keys(config.labels).map((_, i) => ({
+    width: i === colCount - 1 && colCount > 5 ? 28 : 20,
+  }));
+  styleImportHeaderAndDataRows(sheet, colCount, config.dataRows.length);
 
   if (config.dropdowns?.length) {
     const rangeByFieldKey = new Map<string, string>();
     for (const dd of config.dropdowns) {
-      const ciselnikId =
-        dd.fieldKey === "kind"
-          ? config.name.includes("psycholog")
-            ? "kind_psych"
-            : "kind_health"
-          : dd.fieldKey;
+      let ciselnikId = dd.fieldKey;
+      if (dd.fieldKey === "kind") {
+        ciselnikId = config.kindCiselnikId ?? "kind_psych";
+      }
       const range = rangeById.get(ciselnikId);
       if (range) rangeByFieldKey.set(dd.fieldKey, range);
     }
@@ -153,20 +195,26 @@ function addDataSheet(workbook: import("exceljs").Workbook, config: DataSheetCon
 }
 
 function addNavodSheet(workbook: import("exceljs").Workbook) {
-  const sheet = workbook.addWorksheet("Návod");
+  const sheet = workbook.addWorksheet("Návod", { views: [{ state: "frozen", ySplit: 4 }] });
+  styleImportWorksheetTab(sheet, "Návod");
+  addImportNavSheetLinks(sheet, NAV_SHEET_LINKS);
+
   const lines = [
     ["Import PHmax – šablona celé školy (v2)"],
     [""],
     ["Povinné listy: Meta (1 řádek), PV (řádky MŠ), ZŠ souhrn (1 řádek)."],
-    ["Volitelné: ŠD, SŠ, ZŠ psycholog, ZŠ zdravotní."],
+    ["Volitelné: ŠD, SŠ, ZŠ psycholog, ZŠ zdravotní, NV75, NV75 §4c."],
     ["Řádek 1 = český název sloupce, řádek 2 = interní klíč v závorce (pro IT)."],
-    ["Řádek 3+ = data – u výčtů použijte rozbalovací seznam v buňce (nebo český text)."],
+    ["Řádek 3+ = data – u výčtů použijte rozbalovací seznam (modré odkazy výše = přechod na list)."],
     ["school_id a Název scénáře musí být stejné ve všech listech."],
     [""],
     ...IMPORT_TEMPLATE_NAVOD_VALUE_LINES.map((line) => [line]),
   ];
   for (const [text] of lines) {
-    sheet.addRow([text]);
+    const row = sheet.addRow([text]);
+    if (String(text).startsWith("Import PHmax")) {
+      row.getCell(1).font = { bold: true, size: 13, color: { argb: "FF0F172A" } };
+    }
   }
   sheet.getColumn(1).width = 78;
 }
@@ -179,13 +227,10 @@ export async function buildPhmaxImportTemplateWorkbook(): Promise<import("excelj
   workbook.created = new Date();
 
   const rangeById = addImportCiselnikySheet(workbook, [...CISNIKY_LISTS]);
+  styleImportWorksheetTab(workbook.getWorksheet(IMPORT_CISNIKY_SHEET_NAME)!, IMPORT_CISNIKY_SHEET_NAME);
 
   addNavodSheet(workbook);
-  addDataSheet(
-    workbook,
-    { name: "Meta", labels: IMPORT_META_LABELS, dataRows: [META_EXAMPLE] },
-    rangeById,
-  );
+  addDataSheet(workbook, { name: "Meta", labels: IMPORT_META_LABELS, dataRows: [META_EXAMPLE] }, rangeById);
   addDataSheet(
     workbook,
     {
@@ -236,6 +281,7 @@ export async function buildPhmaxImportTemplateWorkbook(): Promise<import("excelj
         { fieldKey: "kind", options: IMPORT_PSYCH_KIND_DROPDOWN_VALUES },
         { fieldKey: "mode", options: IMPORT_ROW_MODE_DROPDOWN_VALUES },
       ],
+      kindCiselnikId: "kind_psych",
     },
     rangeById,
   );
@@ -249,7 +295,24 @@ export async function buildPhmaxImportTemplateWorkbook(): Promise<import("excelj
         { fieldKey: "kind", options: IMPORT_HEALTH_KIND_DROPDOWN_VALUES },
         { fieldKey: "mode", options: IMPORT_ROW_MODE_DROPDOWN_VALUES },
       ],
+      kindCiselnikId: "kind_health",
     },
+    rangeById,
+  );
+  addDataSheet(
+    workbook,
+    {
+      name: "NV75",
+      labels: IMPORT_NV75_LABELS,
+      dataRows: NV75_EXAMPLES,
+      dropdowns: [{ fieldKey: "kind", options: IMPORT_NV75_KIND_DROPDOWN_VALUES }],
+      kindCiselnikId: "kind_nv75",
+    },
+    rangeById,
+  );
+  addDataSheet(
+    workbook,
+    { name: "NV75 §4c", labels: IMPORT_NV75_PRACTICE_LABELS, dataRows: [NV75_PRACTICE_EXAMPLE] },
     rangeById,
   );
 

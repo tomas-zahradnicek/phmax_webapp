@@ -10,9 +10,9 @@ import { ZS_BASIC_WIZARD_LS_KEY } from "./zs-basic-wizard";
 
 export type PhmaxModuleId = keyof typeof PHMAX_MODULE_AUTOSAVE_LS_KEYS;
 
-const MODULE_IDS: readonly PhmaxModuleId[] = ["pv", "sd", "zs", "ss"];
+const MODULE_IDS: readonly PhmaxModuleId[] = ["pv", "sd", "zs", "ss", "nv75"];
 
-const MODULE_WIZARD_LS_KEYS: Record<PhmaxModuleId, string> = {
+const MODULE_WIZARD_LS_KEYS: Partial<Record<PhmaxModuleId, string>> = {
   pv: PV_BASIC_WIZARD_LS_KEY,
   sd: SD_BASIC_WIZARD_LS_KEY,
   zs: ZS_BASIC_WIZARD_LS_KEY,
@@ -61,8 +61,9 @@ export function buildHandoffLocalStorageWrites(
     const snap = payload.schoolScenario.moduleSnapshots[id];
     if (snap == null) continue;
     writes.push({ key: PHMAX_MODULE_AUTOSAVE_LS_KEYS[id], value: JSON.stringify(snap) });
-    if (!options.skipWizardReset) {
-      writes.push({ key: MODULE_WIZARD_LS_KEYS[id], value: WIZARD_READY_STEP });
+    const wizardKey = MODULE_WIZARD_LS_KEYS[id];
+    if (!options.skipWizardReset && wizardKey) {
+      writes.push({ key: wizardKey, value: WIZARD_READY_STEP });
     }
   }
   return writes;

@@ -1,4 +1,5 @@
 import type { BasicType } from "./phmax-zs-logic";
+import { NV75_DEPUTY_KIND_OPTIONS } from "./nv75/nv75-deputy-kind-options";
 import { PHMAX_SS_STUDY_FORM_OPTIONS } from "./ss/phmax-ss-helpers";
 import { PV_PROVOZ_OPTIONS } from "./pv/pv-workplace-shared";
 
@@ -46,6 +47,12 @@ export const IMPORT_HEALTH_KIND_DROPDOWN_VALUES = Object.values(IMPORT_HEALTH_KI
 export const IMPORT_ROW_MODE_DROPDOWN_VALUES = Object.values(IMPORT_ROW_MODE_LABELS);
 export const IMPORT_SD_MODE_DROPDOWN_VALUES = Object.values(IMPORT_SD_MODE_LABELS);
 export const IMPORT_SS_STUDY_FORM_DROPDOWN_VALUES = PHMAX_SS_STUDY_FORM_OPTIONS.map((o) => o.label);
+
+export const IMPORT_NV75_KIND_LABELS = Object.fromEntries(
+  NV75_DEPUTY_KIND_OPTIONS.map((o) => [o.value, o.label]),
+) as Record<(typeof NV75_DEPUTY_KIND_OPTIONS)[number]["value"], string>;
+
+export const IMPORT_NV75_KIND_DROPDOWN_VALUES = NV75_DEPUTY_KIND_OPTIONS.map((o) => o.label);
 
 function normKey(s: string): string {
   return s
@@ -140,6 +147,11 @@ export const IMPORT_SS_STUDY_FORM_ALIASES = buildValueAliases(
   IMPORT_SS_STUDY_FORM_LABELS as Record<string, string>,
 );
 
+export const IMPORT_NV75_KIND_ALIASES = buildValueAliases(
+  NV75_DEPUTY_KIND_OPTIONS.map((o) => o.value),
+  IMPORT_NV75_KIND_LABELS as Record<string, string>,
+);
+
 /** Řádky listu Návod ve šabloně Excel v2. */
 export const IMPORT_TEMPLATE_NAVOD_VALUE_LINES: readonly string[] = [
   "PV – druh provozu (vyplňte jeden z textů):",
@@ -158,5 +170,9 @@ export const IMPORT_TEMPLATE_NAVOD_VALUE_LINES: readonly string[] = [
   "",
   "ŠD – režim: Souhrn | Detail",
   "",
-  "Technické kódy (full_more_than_2, psych1, …) import stále přijme – pro IT a starší soubory.",
+  "NV75 – druh školy/zařízení (viz list NV75):",
+  `  ${IMPORT_NV75_KIND_DROPDOWN_VALUES.slice(0, 4).join(" | ")} …`,
+  "NV75 §4c – žáci praktického vyučování a skupiny OV (1 řádek na listu NV75 §4c).",
+  "",
+  "Technické kódy (full_more_than_2, psych1, zs, …) import stále přijme – pro IT a starší soubory.",
 ];

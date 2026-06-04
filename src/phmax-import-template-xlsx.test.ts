@@ -10,9 +10,28 @@ describe("phmax-import-template-xlsx", () => {
     expect(ciselniky?.state).toBe("veryHidden");
     expect(String(ciselniky?.getCell(1, 1).value)).toContain("Polodenní");
 
-    for (const name of ["Meta", "PV", "ZŠ souhrn", "ŠD", "SŠ", "ZŠ psycholog", "ZŠ zdravotní"]) {
+    for (const name of [
+      "Meta",
+      "PV",
+      "ZŠ souhrn",
+      "ŠD",
+      "SŠ",
+      "NV75",
+      "NV75 §4c",
+      "ZŠ psycholog",
+      "ZŠ zdravotní",
+      "Návod",
+    ]) {
       expect(workbook.getWorksheet(name)).toBeDefined();
     }
+    const ss = workbook.getWorksheet("SŠ");
+    const ssDataRow = String(ss?.getCell(3, 5).value ?? "");
+    expect(ssDataRow).toBe("39-41-L/01");
+
+    const sheetNames = workbook.worksheets.map((ws) => ws.name);
+    const zdravotniIdx = sheetNames.indexOf("ZŠ zdravotní");
+    expect(sheetNames.indexOf("NV75")).toBeGreaterThan(zdravotniIdx);
+    expect(sheetNames.indexOf("NV75 §4c")).toBeGreaterThan(zdravotniIdx);
     expect(String(ciselniky?.getCell(1, 2).value)).toContain("Úplná ZŠ");
     const buffer = await workbook.xlsx.writeBuffer();
     expect(buffer.byteLength).toBeGreaterThan(4000);

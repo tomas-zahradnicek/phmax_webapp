@@ -7,6 +7,8 @@ import type { PvProvozKind } from "./phmax-pv-logic";
 import type { SchoolScenarioExportPayload } from "./phmax-school-scenario-export";
 import { computeSdPhmaxTotalFromSnapshot } from "./sd/sd-compute-phmax-total-from-snapshot";
 import { computeSsPhmaxTotalFromSnapshot } from "./ss/ss-compute-phmax-total-from-snapshot";
+import type { Nv75DeputyKind } from "./nv75-deputy-bank";
+import { NV75_DEPUTY_KIND_OPTIONS } from "./nv75/nv75-deputy-kind-options";
 import { revivePhmaxSsUnitRow } from "./ss/phmax-ss-types";
 import type { HealthRow, PsychRow } from "./phmax-zs-logic";
 import { computeZsPhmaxTotalFromSnapshot } from "./zs/zs-compute-phmax-total-from-snapshot";
@@ -74,6 +76,8 @@ export type ImportTablesInput = {
   ssRows?: ImportCsvRow[];
   zsPsychRows?: ImportCsvRow[];
   zsHealthRows?: ImportCsvRow[];
+  nv75Rows?: ImportCsvRow[];
+  nv75PracticeRows?: ImportCsvRow[];
   appVersion?: string;
 };
 
@@ -196,6 +200,41 @@ function buildPvSnapshot(pvRows: ImportCsvRow[]) {
 
 const ZS_PSYCH_KINDS = new Set(["psych1", "psych2", "psychMix"]);
 const ZS_HEALTH_KINDS = new Set(["health1", "health2", "healthMix"]);
+const NV75_KINDS = new Set(NV75_DEPUTY_KIND_OPTIONS.map((o) => o.value));
+
+function parseAdditionalWorkplaceUnitsList(raw: string): number[] {
+  if (!raw.trim()) return [];
+  return raw
+    .split(/[;,]/)
+    .map((part) => parseImportNum(part.trim(), "additional_workplaces"))
+    .filter((n) => n > 0);
+}
+
+function buildNv75Snapshot(nv75Rows: ImportCsvRow[], practiceRow?: ImportCsvRow) {
+  const rows = nv75Rows.map((r, i) => {
+    const kind = r.kind;
+    if (!NV75_KINDS.has(kind as Nv75DeputyKind)) {
+      throw new Error(`Neplatný druh NV75: ${kind}`);
+    }
+    return {
+      id: i + 1,
+      kind: kind as Nv75DeputyKind,
+      units: parseImportNum(r.units, "units"),
+      additionalWorkplaceUnits: parseAdditionalWorkplaceUnitsList(r.additional_workplaces ?? ""),
+    };
+  });
+  const snapshot: Record<string, unknown> = {
+    rows,
+    practicalGeneralNonOv: practiceRow
+      ? parseImportNum(practiceRow.practical_general_non_ov, "practical_general_non_ov")
+      : 0,
+    practicalOvEhl0: practiceRow ? parseImportNum(practiceRow.practical_ov_ehl0, "practical_ov_ehl0") : 0,
+    practicalSec16: practiceRow ? parseImportNum(practiceRow.practical_sec16, "practical_sec16") : 0,
+    ovGroupsSchool: practiceRow ? parseImportNum(practiceRow.ov_groups_school, "ov_groups_school") : 0,
+    ovGroupsInstructor: practiceRow ? parseImportNum(practiceRow.ov_groups_instructor, "ov_groups_instructor") : 0,
+  };
+  return { snapshot };
+}
 
 function buildZsPsychRows(rows: ImportCsvRow[]): PsychRow[] {
   return rows.map((r, i) => {
@@ -395,6 +434,10 @@ export function importTablesToHandoffPayload(input: ImportTablesInput) {
   const zsHealthRows = input.zsHealthRows?.length
     ? normalizeImportRows(input.zsHealthRows, "zsHealth")
     : undefined;
+  const nv75Rows = input.nv75Rows?.length ? normalizeImportRows(input.nv75Rows, "nv75") : undefined;
+  const nv75PracticeRows = input.nv75PracticeRows?.length
+    ? normalizeImportRows(input.nv75PracticeRows, "nv75Practice")
+    : undefined;
 
   if (metaRows.length !== 1) throw new Error("List Meta musí mít právě jeden datový řádek.");
   const meta = metaRows[0];
@@ -411,6 +454,11 @@ export function importTablesToHandoffPayload(input: ImportTablesInput) {
   assertSameBatch(zsRows, keys, "ZŠ");
   if (sdRows) assertSameBatch(sdRows, keys, "ŠD");
   if (ssRows) assertSameBatch(ssRows, keys, "SŠ");
+  if (nv75Rows) assertSameBatch(nv75Rows, keys, "NV75");
+  if (nv75PracticeRows?.length === 1) assertSameBatch(nv75PracticeRows, keys, "NV75 §4c");
+  if (nv75PracticeRows && nv75PracticeRows.length > 1) {
+    throw new Error("List NV75 §4c: očekáván právě jeden řádek souhrnu.");
+  }
   if (zsPsychRows) assertSameBatch(zsPsychRows, keys, "ZŠ psycholog");
   if (zsHealthRows) assertSameBatch(zsHealthRows, keys, "ZŠ zdravotní");
 
@@ -439,6 +487,10 @@ export function importTablesToHandoffPayload(input: ImportTablesInput) {
     moduleSnapshots.ss = ss.snapshot;
     ssPhmax = ss.totalPhmax;
   }
+  if (nv75Rows && nv75Rows.length > 0) {
+    const nv75 = buildNv75Snapshot(nv75Rows, nv75PracticeRows?.[0]);
+    moduleSnapshots.nv75 = nv75.snapshot;
+  }
 
   const summary = buildImportSummary({
     pv: pvPhmax,
@@ -453,6 +505,9 @@ export function importTablesToHandoffPayload(input: ImportTablesInput) {
   if (!ssRows?.length) importNotes.push("List SŠ v souboru chybí – PHmax střední školy nebyl importován.");
   if (!zsPsychRows?.length) importNotes.push("List ZŠ psycholog v souboru chybí – řádky psychiatrie nebyly importovány.");
   if (!zsHealthRows?.length) importNotes.push("List ZŠ zdravotní v souboru chybí – řádky zdravotní školy nebyly importovány.");
+  if (!nv75Rows?.length) {
+    importNotes.push("List NV75 v souboru chybí – banka odpočtů zástupce nebyla importována.");
+  }
 
   const schoolScenario: SchoolScenarioExportPayload = {
     schema: "phmax-school-scenario-v1",
