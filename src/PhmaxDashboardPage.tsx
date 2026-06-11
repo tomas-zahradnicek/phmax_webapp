@@ -1249,11 +1249,9 @@ export function PhmaxDashboardPage({
                       Rychlý PHmax
                     </button>
                   ) : null}
-                  {!row.hasData ? (
-                    <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(row.id)}>
-                      Začít u ukázky
-                    </button>
-                  ) : null}
+                  <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(row.id)}>
+                    Začít u ukázky
+                  </button>
                 </div>
               </article>
             ))}
