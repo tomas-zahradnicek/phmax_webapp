@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import { PHMAX_MODULE_AUTOSAVE_LS_KEYS } from "./phmax-school-scenario-export";
-import { buildImportModuleStorageDiff, formatImportModuleStorageDiff } from "./phmax-import-storage-diff";
+import {
+  buildImportModuleStorageDiff,
+  firstImportAffectedModule,
+  formatImportModuleStorageDiff,
+} from "./phmax-import-storage-diff";
 
 const LABELS = { pv: "PV", sd: "ŠD", zs: "ZŠ", ss: "SŠ", nv75: "NV75" } as const;
 
@@ -63,5 +67,6 @@ describe("buildImportModuleStorageDiff", () => {
       loadNew: [] as const[],
     };
     expect(formatImportModuleStorageDiff(diff, LABELS)).toBe("Přepíše / načte: PV, ZŠ · Beze změny: ŠD");
+    expect(firstImportAffectedModule(diff)).toBe("pv");
   });
 });

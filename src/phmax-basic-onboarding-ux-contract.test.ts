@@ -141,7 +141,8 @@ describe("UX contract: basic onboarding steps + CTA", () => {
 
   it("dashboard Σ a koherence (0.3.12)", () => {
     expect(readSource("src/phmax-dashboard-cross-phmax.ts")).toContain("formatCrossPhmaxSliceLabel");
-    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("coherenceWarningModuleId");
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("coherenceWarningFocusHint");
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("Přejít k opravě");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("offerClearBrowserDataAfterDashboardExport");
   });
 });

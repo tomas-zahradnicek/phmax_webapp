@@ -25,7 +25,7 @@ export function buildDashboardExportChecklist(input: DashboardExportChecklistInp
     items.push(w);
   }
   if (input.auditCoherenceWarnings.length === 0) {
-    items.push("Pole coherenceWarnings ve scénáři je prázdné – audit autosave sedí s přepočtem modulů.");
+    items.push("Ve scénáři nejsou varování k nesouladu uloženého součtu a přepočtu v modulech.");
   }
   if (input.appVersion?.trim()) {
     items.push(`Do JSON uveďte appVersion: ${input.appVersion.trim()} (stejná verze jako v patičce aplikace).`);

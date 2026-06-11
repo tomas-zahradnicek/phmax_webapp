@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { HeroBrandLogoButton } from "../AppBrandLogo";
 import { AuthorCreditFooter } from "../AuthorCreditFooter";
-import { CALCULATOR_LIMITS_NOTE, PRODUCT_CALCULATOR_TITLES } from "../calculator-ui-constants";
+import { CALCULATOR_LIMITS_NOTE } from "../calculator-ui-constants";
+import { LiteToFullHint } from "../LiteToFullHint";
 import { IntegerInput } from "../IntegerInput";
 import { ProductViewPills, type ProductView } from "../ProductViewPills";
 import { writeSdLiteHandoffToFullStorage } from "../phmax-lite-handoff";
@@ -199,13 +200,7 @@ export function PhmaxSdLitePage({ productView, setProductView, onOpenFullVersion
               </span>
             </label>
           ) : null}
-          <p className="muted-text phmax-lite-form__note">
-            Neplatí pro speciální oddělení dle § 16, výjimky a složitější organizaci – použijte{" "}
-            <button type="button" className="btn ghost" style={{ display: "inline", padding: "0 4px" }} onClick={openFull}>
-              plnou verzi {PRODUCT_CALCULATOR_TITLES.sd}
-            </button>
-            .
-          </p>
+          <LiteToFullHint module="sd" onOpenFull={openFull} />
         </section>
 
         <section className="card section-card phmax-lite-result" aria-labelledby="sd-lite-result-heading">

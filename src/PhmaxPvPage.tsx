@@ -48,7 +48,7 @@ import {
 import { useProductBasicWizard } from "./use-product-basic-wizard";
 import { sectionNeedsAttentionClass, scrollToFirstNeedsAttentionSection } from "./calculator-section-focus";
 import { createPvScrollToInputs } from "./pv/create-pv-scroll-to-inputs";
-import { buildCalculatorNextAction } from "./calculator-next-action";
+import { buildCalculatorNextAction, formatWhatNowMessage } from "./calculator-next-action";
 import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
 import { CalculatorModuleQuickTour } from "./CalculatorModuleQuickTour";
 import { focusCalculatorElementById } from "./calculator-focus-element";
@@ -782,18 +782,24 @@ export function PhmaxPvPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const pvBasicWizardActive = viewMode === "basic";
   const pvHasInputIssue = pvVerdict.tone !== "ok";
   const pvScrollToInputs = useMemo(() => createPvScrollToInputs(), []);
+  const pvIncompleteWhatNow = useMemo(() => {
+    const idx = rowComputations.findIndex((c) => c.computed.totalPhmax == null);
+    if (idx < 0) return undefined;
+    const workplace = rows[idx]?.label?.trim() || `pracoviště ${idx + 1}`;
+    return formatWhatNowMessage(`U ${workplace} chybí povinné údaje`, "doplňte třídy a průměrnou denní dobu");
+  }, [rowComputations, rows]);
   const pvNextAction = useMemo(
     () =>
       buildCalculatorNextAction({
         verdict: pvVerdict,
         hasData: rows.length > 0,
         incomplete: aggregate.incomplete,
-        incompleteDetail: "Některá pracoviště nemají vyplněné povinné údaje – součet může být neúplný.",
+        incompleteDetail: pvIncompleteWhatNow,
         onFix: pvHasInputIssue ? pvScrollToInputs : undefined,
         onExport: rows.length > 0 ? handleExportCsv : undefined,
         onOpenExamples: () => focusCalculatorElementById(PV_HERO_EXAMPLE_SELECT_ID),
       }),
-    [pvVerdict, rows.length, aggregate.incomplete, pvHasInputIssue, pvScrollToInputs, handleExportCsv],
+    [pvVerdict, rows.length, aggregate.incomplete, pvIncompleteWhatNow, pvHasInputIssue, pvScrollToInputs, handleExportCsv],
   );
   const { step: pvWizardStep, goToStep: goToPvWizardStep, handleBack: handlePvWizardBack, handleNext: handlePvWizardNext } =
     useProductBasicWizard({

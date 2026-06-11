@@ -41,14 +41,19 @@ export function HeroActionsDrawer({
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
+  const wasOpenRef = useRef(false);
   const headingId = useId();
 
   const closeDrawer = useCallback(() => {
     setOpen(false);
-    requestAnimationFrame(() => {
-      triggerRef.current?.focus();
-    });
   }, []);
+
+  useEffect(() => {
+    if (wasOpenRef.current && !open) {
+      triggerRef.current?.focus();
+    }
+    wasOpenRef.current = open;
+  }, [open]);
 
   useEffect(() => {
     if (!narrow) setOpen(false);

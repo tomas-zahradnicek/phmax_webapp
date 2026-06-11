@@ -28,53 +28,139 @@ function arr<T>(v: unknown): T[] {
   return Array.isArray(v) ? (v as T[]) : [];
 }
 
-/** Přepočet PHmax ze ZŠ autosave (záložka phmax) – stejná logika jako na stránce ZŠ. */
-export function computeZsPhmaxTotalFromSnapshot(snapshot: unknown): number | null {
-  if (!snapshot || typeof snapshot !== "object") return null;
-  const s = snapshot as Record<string, unknown>;
-  const tab = typeof s.tab === "string" ? s.tab : "phmax";
-  if (tab !== "phmax") return null;
+/** Vstupy pro přepočet PHmax – stejná pole jako v autosave ZŠ (bez závislosti na aktivní záložce). */
+export type ZsPhmaxComputeFields = {
+  basicType: BasicType;
+  basic1Classes: number;
+  basic1Pupils: number;
+  basic2Classes: number;
+  basic2Pupils: number;
+  incl1Classes: number;
+  incl1Pupils: number;
+  incl2Classes: number;
+  incl2Pupils: number;
+  psychRows: PsychRow[];
+  healthRows: HealthRow[];
+  minorityType: keyof typeof B17_B21;
+  minority1Classes: number;
+  minority1Pupils: number;
+  minority2Classes: number;
+  minority2Pupils: number;
+  gymRows: GymRow[];
+  mixedRows: MixedRow[];
+  special1Classes: number;
+  special1Pupils: number;
+  special2Classes: number;
+  special2Pupils: number;
+  specialIIClasses: number;
+  specialIIPupils: number;
+  prepClasses: number;
+  prepChildren: number;
+  prepSpecialClasses: number;
+  prepSpecialChildren: number;
+  p38First: number;
+  p38Second: number;
+  p41First: number;
+  p41Second: number;
+  mixedMethodFirstZsPupils: number;
+  mixedMethodFirstZsClasses: number;
+  mixedMethodFirstSpecialPupils: number;
+  mixedMethodFirstSpecialClasses: number;
+  mixedMethodSecondZsPupils: number;
+  mixedMethodSecondZsClasses: number;
+  mixedMethodSecondSpecialPupils: number;
+  mixedMethodSecondSpecialClasses: number;
+};
 
-  const basicType = (s.basicType as BasicType) || "full_more_than_2";
-  const basic1Classes = num(s.basic1Classes);
-  const basic1Pupils = num(s.basic1Pupils);
-  const basic2Classes = num(s.basic2Classes);
-  const basic2Pupils = num(s.basic2Pupils);
-  const incl1Classes = num(s.incl1Classes);
-  const incl1Pupils = num(s.incl1Pupils);
-  const incl2Classes = num(s.incl2Classes);
-  const incl2Pupils = num(s.incl2Pupils);
-  const psychRows = arr<PsychRow>(s.psychRows);
-  const healthRows = arr<HealthRow>(s.healthRows);
-  const minorityType = (s.minorityType as keyof typeof B17_B21) || "minorityFull1";
-  const minority1Classes = num(s.minority1Classes);
-  const minority1Pupils = num(s.minority1Pupils);
-  const minority2Classes = num(s.minority2Classes);
-  const minority2Pupils = num(s.minority2Pupils);
-  const gymRows = arr<GymRow>(s.gymRows);
-  const mixedRows = arr<MixedRow>(s.mixedRows);
-  const special1Classes = num(s.special1Classes);
-  const special1Pupils = num(s.special1Pupils);
-  const special2Classes = num(s.special2Classes);
-  const special2Pupils = num(s.special2Pupils);
-  const specialIIClasses = num(s.specialIIClasses);
-  const specialIIPupils = num(s.specialIIPupils);
-  const prepClasses = num(s.prepClasses);
-  const prepChildren = num(s.prepChildren);
-  const prepSpecialClasses = num(s.prepSpecialClasses);
-  const prepSpecialChildren = num(s.prepSpecialChildren);
-  const p38First = num(s.p38First);
-  const p38Second = num(s.p38Second);
-  const p41First = num(s.p41First);
-  const p41Second = num(s.p41Second);
-  const mixedMethodFirstZsPupils = num(s.mixedMethodFirstZsPupils);
-  const mixedMethodFirstZsClasses = num(s.mixedMethodFirstZsClasses);
-  const mixedMethodFirstSpecialPupils = num(s.mixedMethodFirstSpecialPupils);
-  const mixedMethodFirstSpecialClasses = num(s.mixedMethodFirstSpecialClasses);
-  const mixedMethodSecondZsPupils = num(s.mixedMethodSecondZsPupils);
-  const mixedMethodSecondZsClasses = num(s.mixedMethodSecondZsClasses);
-  const mixedMethodSecondSpecialPupils = num(s.mixedMethodSecondSpecialPupils);
-  const mixedMethodSecondSpecialClasses = num(s.mixedMethodSecondSpecialClasses);
+export function parseZsPhmaxComputeFields(snapshot: Record<string, unknown>): ZsPhmaxComputeFields {
+  return {
+    basicType: (snapshot.basicType as BasicType) || "full_more_than_2",
+    basic1Classes: num(snapshot.basic1Classes),
+    basic1Pupils: num(snapshot.basic1Pupils),
+    basic2Classes: num(snapshot.basic2Classes),
+    basic2Pupils: num(snapshot.basic2Pupils),
+    incl1Classes: num(snapshot.incl1Classes),
+    incl1Pupils: num(snapshot.incl1Pupils),
+    incl2Classes: num(snapshot.incl2Classes),
+    incl2Pupils: num(snapshot.incl2Pupils),
+    psychRows: arr<PsychRow>(snapshot.psychRows),
+    healthRows: arr<HealthRow>(snapshot.healthRows),
+    minorityType: (snapshot.minorityType as keyof typeof B17_B21) || "minorityFull1",
+    minority1Classes: num(snapshot.minority1Classes),
+    minority1Pupils: num(snapshot.minority1Pupils),
+    minority2Classes: num(snapshot.minority2Classes),
+    minority2Pupils: num(snapshot.minority2Pupils),
+    gymRows: arr<GymRow>(snapshot.gymRows),
+    mixedRows: arr<MixedRow>(snapshot.mixedRows),
+    special1Classes: num(snapshot.special1Classes),
+    special1Pupils: num(snapshot.special1Pupils),
+    special2Classes: num(snapshot.special2Classes),
+    special2Pupils: num(snapshot.special2Pupils),
+    specialIIClasses: num(snapshot.specialIIClasses),
+    specialIIPupils: num(snapshot.specialIIPupils),
+    prepClasses: num(snapshot.prepClasses),
+    prepChildren: num(snapshot.prepChildren),
+    prepSpecialClasses: num(snapshot.prepSpecialClasses),
+    prepSpecialChildren: num(snapshot.prepSpecialChildren),
+    p38First: num(snapshot.p38First),
+    p38Second: num(snapshot.p38Second),
+    p41First: num(snapshot.p41First),
+    p41Second: num(snapshot.p41Second),
+    mixedMethodFirstZsPupils: num(snapshot.mixedMethodFirstZsPupils),
+    mixedMethodFirstZsClasses: num(snapshot.mixedMethodFirstZsClasses),
+    mixedMethodFirstSpecialPupils: num(snapshot.mixedMethodFirstSpecialPupils),
+    mixedMethodFirstSpecialClasses: num(snapshot.mixedMethodFirstSpecialClasses),
+    mixedMethodSecondZsPupils: num(snapshot.mixedMethodSecondZsPupils),
+    mixedMethodSecondZsClasses: num(snapshot.mixedMethodSecondZsClasses),
+    mixedMethodSecondSpecialPupils: num(snapshot.mixedMethodSecondSpecialPupils),
+    mixedMethodSecondSpecialClasses: num(snapshot.mixedMethodSecondSpecialClasses),
+  };
+}
+
+/** Jediný přepočet PHmax ze vstupních polí ZŠ – používá stránka, autosave i koherence. */
+export function computeZsPhmaxTotalFromFields(fields: ZsPhmaxComputeFields): number {
+  const {
+    basicType,
+    basic1Classes,
+    basic1Pupils,
+    basic2Classes,
+    basic2Pupils,
+    incl1Classes,
+    incl1Pupils,
+    incl2Classes,
+    incl2Pupils,
+    psychRows,
+    healthRows,
+    minorityType,
+    minority1Classes,
+    minority1Pupils,
+    minority2Classes,
+    minority2Pupils,
+    gymRows,
+    mixedRows,
+    special1Classes,
+    special1Pupils,
+    special2Classes,
+    special2Pupils,
+    specialIIClasses,
+    specialIIPupils,
+    prepClasses,
+    prepChildren,
+    prepSpecialClasses,
+    prepSpecialChildren,
+    p38First,
+    p38Second,
+    p41First,
+    p41Second,
+    mixedMethodFirstZsPupils,
+    mixedMethodFirstZsClasses,
+    mixedMethodFirstSpecialPupils,
+    mixedMethodFirstSpecialClasses,
+    mixedMethodSecondZsPupils,
+    mixedMethodSecondZsClasses,
+    mixedMethodSecondSpecialPupils,
+    mixedMethodSecondSpecialClasses,
+  } = fields;
 
   const isFull = basicType === "full_more_than_2" || basicType === "full_max_2";
   const basic1Avg = basic1Classes > 0 ? basic1Pupils / basic1Classes : 0;
@@ -210,4 +296,100 @@ export function computeZsPhmaxTotalFromSnapshot(snapshot: unknown): number | nul
   return round2(
     basicPhmax + inclPhmax + psychPhmax + healthPhmax + minorityPhmax + gymPhmax + specialPhmax + mixedForTotal + extrasPhmax,
   );
+}
+
+/** Přepočet PHmax ze ZŠ autosave – jen při záložce phmax (koherence na přehledu). */
+export function computeZsPhmaxTotalFromSnapshot(snapshot: unknown): number | null {
+  if (!snapshot || typeof snapshot !== "object") return null;
+  const s = snapshot as Record<string, unknown>;
+  const tab = typeof s.tab === "string" ? s.tab : "phmax";
+  if (tab !== "phmax") return null;
+  return computeZsPhmaxTotalFromFields(parseZsPhmaxComputeFields(s));
+}
+
+/** Mapování stavu formuláře na vstupy přepočtu (autosave, stránka ZŠ). */
+export function zsPhmaxFieldsFromFormState(state: {
+  basicType: BasicType;
+  basic1Classes: number;
+  basic1Pupils: number;
+  basic2Classes: number;
+  basic2Pupils: number;
+  incl1Classes: number;
+  incl1Pupils: number;
+  incl2Classes: number;
+  incl2Pupils: number;
+  psychRows: PsychRow[];
+  healthRows: HealthRow[];
+  minorityType: keyof typeof B17_B21;
+  minority1Classes: number;
+  minority1Pupils: number;
+  minority2Classes: number;
+  minority2Pupils: number;
+  gymRows: GymRow[];
+  mixedRows: MixedRow[];
+  special1Classes: number;
+  special1Pupils: number;
+  special2Classes: number;
+  special2Pupils: number;
+  specialIIClasses: number;
+  specialIIPupils: number;
+  prepClasses: number;
+  prepChildren: number;
+  prepSpecialClasses: number;
+  prepSpecialChildren: number;
+  p38First: number;
+  p38Second: number;
+  p41First: number;
+  p41Second: number;
+  mixedMethodFirstZsPupils: number;
+  mixedMethodFirstZsClasses: number;
+  mixedMethodFirstSpecialPupils: number;
+  mixedMethodFirstSpecialClasses: number;
+  mixedMethodSecondZsPupils: number;
+  mixedMethodSecondZsClasses: number;
+  mixedMethodSecondSpecialPupils: number;
+  mixedMethodSecondSpecialClasses: number;
+}): ZsPhmaxComputeFields {
+  return {
+    basicType: state.basicType,
+    basic1Classes: state.basic1Classes,
+    basic1Pupils: state.basic1Pupils,
+    basic2Classes: state.basic2Classes,
+    basic2Pupils: state.basic2Pupils,
+    incl1Classes: state.incl1Classes,
+    incl1Pupils: state.incl1Pupils,
+    incl2Classes: state.incl2Classes,
+    incl2Pupils: state.incl2Pupils,
+    psychRows: state.psychRows,
+    healthRows: state.healthRows,
+    minorityType: state.minorityType,
+    minority1Classes: state.minority1Classes,
+    minority1Pupils: state.minority1Pupils,
+    minority2Classes: state.minority2Classes,
+    minority2Pupils: state.minority2Pupils,
+    gymRows: state.gymRows,
+    mixedRows: state.mixedRows,
+    special1Classes: state.special1Classes,
+    special1Pupils: state.special1Pupils,
+    special2Classes: state.special2Classes,
+    special2Pupils: state.special2Pupils,
+    specialIIClasses: state.specialIIClasses,
+    specialIIPupils: state.specialIIPupils,
+    prepClasses: state.prepClasses,
+    prepChildren: state.prepChildren,
+    prepSpecialClasses: state.prepSpecialClasses,
+    prepSpecialChildren: state.prepSpecialChildren,
+    p38First: state.p38First,
+    p38Second: state.p38Second,
+    p41First: state.p41First,
+    p41Second: state.p41Second,
+    mixedMethodFirstZsPupils: state.mixedMethodFirstZsPupils,
+    mixedMethodFirstZsClasses: state.mixedMethodFirstZsClasses,
+    mixedMethodFirstSpecialPupils: state.mixedMethodFirstSpecialPupils,
+    mixedMethodFirstSpecialClasses: state.mixedMethodFirstSpecialClasses,
+    mixedMethodSecondZsPupils: state.mixedMethodSecondZsPupils,
+    mixedMethodSecondZsClasses: state.mixedMethodSecondZsClasses,
+    mixedMethodSecondSpecialPupils: state.mixedMethodSecondSpecialPupils,
+    mixedMethodSecondSpecialClasses: state.mixedMethodSecondSpecialClasses,
+  };
 }

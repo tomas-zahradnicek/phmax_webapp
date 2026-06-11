@@ -5,6 +5,7 @@ import type { DashboardSchoolProfileModel } from "./build-dashboard-school-profi
 type DashboardSchoolProfileProps = {
   profile: DashboardSchoolProfileModel;
   onModuleChipClick: (id: DashboardSchoolProfileModel["moduleChips"][number]["id"]) => void;
+  onPrintProfile?: () => void;
 };
 
 function csModulesInUseLabel(count: number): string {
@@ -26,16 +27,28 @@ function formatAttentionCount(count: number): string {
   return `${count} modulů ke kontrole`;
 }
 
-export function DashboardSchoolProfile({ profile, onModuleChipClick }: DashboardSchoolProfileProps) {
+export function DashboardSchoolProfile({ profile, onModuleChipClick, onPrintProfile }: DashboardSchoolProfileProps) {
   return (
     <section
       className={`card section-card dash-school-profile dash-school-profile--${profile.tone}`}
       aria-labelledby="dash-school-profile-heading"
     >
       <div className="dash-school-profile__head">
-        <h2 id="dash-school-profile-heading" className="section-title dash-school-profile__title">
-          Školní profil
-        </h2>
+        <div className="dash-school-profile__head-row">
+          <h2 id="dash-school-profile-heading" className="section-title dash-school-profile__title">
+            Školní profil
+          </h2>
+          {onPrintProfile ? (
+            <button
+              type="button"
+              className="btn ghost btn--sm dash-school-profile__print"
+              data-testid="dash-school-profile-print"
+              onClick={onPrintProfile}
+            >
+              Tisk profilu školy
+            </button>
+          ) : null}
+        </div>
         <p className="muted-text dash-school-profile__scenario">
           Scénář: <strong>{profile.scenarioLabel}</strong>
         </p>

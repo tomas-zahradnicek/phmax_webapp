@@ -155,7 +155,7 @@ export const LAY_USER_QUICK_START_NV75 =
 
 /** Mobilní UX – plovoucí souhrn dole a záložka Obsah (společné pro všechny kalkulačky). */
 export const LAY_USER_QUICK_START_MOBILE_UX =
-  "Mobil a tablet: výsledek sledujte v pruhu dole – klepnutím přejdete k plnému souhrnu nahoře. Záložka Obsah (vpravo nad souhrnem) vede na sekce formuláře; souhrn lze dočasně skrýt tlačítkem Skrýt souhrn.";
+  "Mobil a tablet: výsledek sledujte v pruhu dole – klepnutím přejdete k plnému souhrnu nahoře. Záložka Obsah (vpravo nad souhrnem) vede na sekce formuláře; souhrn lze dočasně skrýt tlačítkem Skrýt souhrn. Na úzkém displeji otevřete tlačítko „Akce, tisk, uložení a export…“ v horní liště – uložení, export CSV/Excel a tisk jsou v postranním panelu s popisky.";
 
 /** Jednořádek kontextu v přehledu (PV) – srozumitelná orientace mimo odbornou terminologii. */
 export function formatPvLayContextLine(workplaceCount: number, aggregateIncomplete: boolean): string {

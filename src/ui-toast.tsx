@@ -3,18 +3,24 @@ import { createPortal } from "react-dom";
 
 const TOAST_MS = 4200;
 
+export type UiToastOptions = {
+  /** Důležité zprávy (import, export) – čtečky obrazovky oznámí ihned. */
+  assertive?: boolean;
+};
+
 type ToastItem = {
   id: number;
   message: string;
+  assertive: boolean;
 };
 
-let pushToast: ((message: string) => void) | null = null;
+let pushToast: ((message: string, options?: UiToastOptions) => void) | null = null;
 
 /** Krátké potvrzení akce (uložení, export, …) – viditelné i mimo patičku stránky. */
-export function showUiToast(message: string): void {
+export function showUiToast(message: string, options?: UiToastOptions): void {
   const text = message.trim();
   if (!text || !pushToast) return;
-  pushToast(text);
+  pushToast(text, options);
 }
 
 export function UiToastHost() {
@@ -26,9 +32,9 @@ export function UiToastHost() {
   }, []);
 
   useEffect(() => {
-    pushToast = (message: string) => {
+    pushToast = (message: string, options?: UiToastOptions) => {
       const id = ++seq.current;
-      setItems((prev) => [...prev.slice(-2), { id, message }]);
+      setItems((prev) => [...prev.slice(-2), { id, message, assertive: Boolean(options?.assertive) }]);
       window.setTimeout(() => dismiss(id), TOAST_MS);
     };
     return () => {
@@ -39,9 +45,15 @@ export function UiToastHost() {
   if (items.length === 0 || typeof document === "undefined") return null;
 
   const stack = (
-    <div className="ui-toast-stack" aria-live="polite" aria-atomic="true">
+    <div className="ui-toast-stack">
       {items.map((item) => (
-        <div key={item.id} className="ui-toast" role="status">
+        <div
+          key={item.id}
+          className="ui-toast"
+          role="status"
+          aria-live={item.assertive ? "assertive" : "polite"}
+          aria-atomic="true"
+        >
           {item.message}
         </div>
       ))}

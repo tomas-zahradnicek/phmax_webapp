@@ -29,14 +29,15 @@ test.describe("Dashboard UX 0.3.14", () => {
     await expect(page.locator("[data-testid='dash-export-wizard']")).toBeVisible();
   });
 
-  test("porovnání záloh ZŠ – karta a odkaz", async ({ page }) => {
-    await seedZsNamedSnapshot(page);
+  test("porovnání záloh ZŠ – karta a odkaz od 2 scénářů", async ({ page }) => {
+    await seedZsNamedSnapshot(page, 2);
     await gotoProductView(page, "dash");
-    await expect(page.getByRole("heading", { name: "Porovnání scénářů (ZŠ)" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Scénáře ZŠ" })).toBeVisible();
+    await expect(page.locator("[data-testid='dash-zs-scenarios-card']")).toBeVisible();
     await expect(page.locator("[data-testid='dash-compare-zs-primary']")).toBeVisible();
     await expect(
       page.locator(".dash-school-profile__metric").filter({ hasText: "Pojmenované zálohy" }),
-    ).toContainText("1");
+    ).toContainText("2");
   });
 
   test("akční řádek v modulu PV (desktop dock)", async ({ page }) => {

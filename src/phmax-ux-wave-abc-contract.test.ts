@@ -12,6 +12,7 @@ function readSource(rel: string): string {
 describe("UX wave A/B/C contract", () => {
   it("shared next-action and fill status", () => {
     expect(readSource("src/calculator-next-action.ts")).toContain("buildCalculatorNextAction");
+    expect(readSource("src/calculator-next-action.ts")).toContain("formatWhatNowMessage");
     expect(readSource("src/CalculatorNextActionStrip.tsx")).toContain("data-testid=\"calculator-next-action\"");
     expect(readSource("src/FillStatusBadge.tsx")).toContain("fill-status-badge");
   });
@@ -28,6 +29,9 @@ describe("UX wave A/B/C contract", () => {
     expect(dash).toContain("dash-school-15min");
     expect(dash).toContain("dash-advanced-tools");
     expect(dash).toContain("printSchoolReview");
+    expect(dash).toContain("printSchoolProfile");
+    expect(dash).toContain("DashboardZsScenariosCard");
+    expect(dash).toContain("DashboardNewUserChecklist");
     expect(dash).toContain("DASH_IMPORT_LABEL");
     expect(dash).toContain("dash-school-import");
     expect(dash).toContain("DashboardSchoolImportDialog");

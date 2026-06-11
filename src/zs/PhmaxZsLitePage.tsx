@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { HeroBrandLogoButton } from "../AppBrandLogo";
 import { AuthorCreditFooter } from "../AuthorCreditFooter";
-import { CALCULATOR_LIMITS_NOTE, PRODUCT_CALCULATOR_TITLES } from "../calculator-ui-constants";
+import { CALCULATOR_LIMITS_NOTE } from "../calculator-ui-constants";
+import { LiteToFullHint } from "../LiteToFullHint";
 import { IntegerInput } from "../IntegerInput";
 import { ProductViewPills, type ProductView } from "../ProductViewPills";
 import { writeZsLiteHandoffToFullStorage } from "../phmax-lite-handoff";
@@ -371,13 +372,7 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
               ) : null}
             </>
           ) : null}
-          <p className="muted-text phmax-lite-form__note">
-            Nezahrnuje speciální třídy, psychiatrii, gymnázia, PHAmax ani PHPmax – použijte{" "}
-            <button type="button" className="btn ghost" style={{ display: "inline", padding: "0 4px" }} onClick={openFull}>
-              plnou verzi {PRODUCT_CALCULATOR_TITLES.zs}
-            </button>
-            .
-          </p>
+          <LiteToFullHint module="zs" onOpenFull={openFull} />
         </section>
 
         <section className="card section-card phmax-lite-result" aria-labelledby="zs-lite-result-heading">

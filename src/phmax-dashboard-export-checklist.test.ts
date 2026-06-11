@@ -34,7 +34,7 @@ describe("buildDashboardExportChecklist", () => {
     });
     expect(items.some((x) => x.includes("appVersion"))).toBe(true);
     expect(items.some((x) => x.includes("phmax-is-integration"))).toBe(true);
-    expect(items.some((x) => x.includes("coherenceWarnings"))).toBe(true);
+    expect(items.some((x) => x.includes("nesouladu"))).toBe(true);
     expect(items.some((x) => x.includes("Test škola"))).toBe(true);
   });
 });

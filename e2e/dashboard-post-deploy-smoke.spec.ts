@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { gotoProductView, openHeroActionsDrawerIfNeeded } from "./smoke-helpers";
+import { clickHeroExportCsv, gotoProductView } from "./smoke-helpers";
 
 const PV_STORAGE_KEY = "edu-cz-pv-calculator-state";
 const PV_WIZARD_KEY = "phmax-pv-basic-wizard-step";
@@ -37,11 +37,8 @@ test.describe("Post-deploy smoke – Přehled → modul → export", () => {
     await pvCard.getByRole("button", { name: "Otevřít" }).click();
     await expect(page.locator("#pv-hero-example-select")).toBeAttached({ timeout: 10_000 });
 
-    await openHeroActionsDrawerIfNeeded(page);
-    const exportBtn = page.getByRole("button", { name: "Export CSV" });
-    await exportBtn.scrollIntoViewIfNeeded();
     const downloadPromise = page.waitForEvent("download");
-    await exportBtn.click();
+    await clickHeroExportCsv(page);
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.csv$/i);
   });

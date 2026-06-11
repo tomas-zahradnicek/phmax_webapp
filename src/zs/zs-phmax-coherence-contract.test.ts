@@ -98,4 +98,20 @@ describe("ZŠ PHmax koherence (autosave vs přepočet)", () => {
       tab: "phmax",
     });
   });
+
+  it("buildZsFormSnapshot přepisuje chybný totalPhmax přepočtem ze vstupů", () => {
+    const computed = computeZsPhmaxTotalFromSnapshot({
+      tab: "phmax",
+      basicType: "full_more_than_2",
+      basic1Classes: 2,
+      basic1Pupils: 40,
+    });
+    const snap = buildZsFormSnapshot(
+      minimalZsSnapshotState({
+        auditTotals: { totalPhmax: 99_999, totalPha: 0, totalPhp: 0, tab: "phmax" },
+      }),
+    );
+    expect((snap._phmaxAuditTotals as { totalPhmax: number }).totalPhmax).toBe(computed);
+    expect((snap._phmaxAuditTotals as { totalPhmax: number }).totalPhmax).not.toBe(99_999);
+  });
 });

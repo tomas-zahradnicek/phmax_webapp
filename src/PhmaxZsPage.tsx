@@ -50,7 +50,7 @@ import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import { HeroStatusBar } from "./HeroStatusBar";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
-import { buildCalculatorNextAction } from "./calculator-next-action";
+import { buildCalculatorNextAction, formatWhatNowMessage } from "./calculator-next-action";
 import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
 import { focusCalculatorElementById } from "./calculator-focus-element";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
@@ -68,6 +68,10 @@ import {
   type ZsFormSnapshotSetters,
 } from "./zs/zs-form-snapshot";
 import { PHMAX_IMPORT_APPLIED_EVENT } from "./phmax-import-applied-event";
+import {
+  computeZsPhmaxTotalFromFields,
+  zsPhmaxFieldsFromFormState,
+} from "./zs/zs-compute-phmax-total-from-snapshot";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
 import { createZsPageHandlers } from "./zs/zs-page-handlers";
@@ -637,8 +641,49 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const mixedForTotal = round2(hasMixedMethodTableData ? mixedMethodTotal : mixedPhmax);
 
   const extrasPhmax = round2(prepClassPhmax + prepSpecialPhmax + par38Phmax + par41Phmax);
-  const totalPhmax = round2(
-    basicPhmax + inclPhmax + psychPhmax + healthPhmax + minorityPhmax + gymPhmax + specialPhmax + mixedForTotal + extrasPhmax
+  const totalPhmax = computeZsPhmaxTotalFromFields(
+    zsPhmaxFieldsFromFormState({
+      basicType,
+      basic1Classes,
+      basic1Pupils,
+      basic2Classes,
+      basic2Pupils,
+      incl1Classes,
+      incl1Pupils,
+      incl2Classes,
+      incl2Pupils,
+      psychRows,
+      healthRows,
+      minorityType,
+      minority1Classes,
+      minority1Pupils,
+      minority2Classes,
+      minority2Pupils,
+      gymRows,
+      mixedRows,
+      special1Classes,
+      special1Pupils,
+      special2Classes,
+      special2Pupils,
+      specialIIClasses,
+      specialIIPupils,
+      prepClasses,
+      prepChildren,
+      prepSpecialClasses,
+      prepSpecialChildren,
+      p38First,
+      p38Second,
+      p41First,
+      p41Second,
+      mixedMethodFirstZsPupils,
+      mixedMethodFirstZsClasses,
+      mixedMethodFirstSpecialPupils,
+      mixedMethodFirstSpecialClasses,
+      mixedMethodSecondZsPupils,
+      mixedMethodSecondZsClasses,
+      mixedMethodSecondSpecialPupils,
+      mixedMethodSecondSpecialClasses,
+    }),
   );
 
   const phaComputedRows = phaRows.map((row) => {
@@ -1684,13 +1729,23 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const zsTabPrimaryLabel = tab === "phmax" ? "PHmax celkem" : tab === "pha" ? "PHAmax celkem" : "PHPmax celkem";
   const zsTabPrimaryValue = tab === "phmax" ? totalPhmax : tab === "pha" ? totalPha : totalPhp;
   const zsHasData = totalPhmax > 0 || totalPha > 0 || totalPhp > 0;
+  const zsIncompleteWhatNow = useMemo(() => {
+    const first = validationIssues[0];
+    if (first) {
+      return formatWhatNowMessage(first.label.replace(/\.$/, ""), "doplňte údaje v označené sekci");
+    }
+    if (incompleteSections > 0) {
+      return formatWhatNowMessage(`Zbývá doplnit ${incompleteSections} částí PHmax`, "projděte sekce s upozorněním");
+    }
+    return undefined;
+  }, [incompleteSections, validationIssues]);
   const zsNextAction = useMemo(
     () =>
       buildCalculatorNextAction({
         verdict: zsVerdict,
         hasData: zsHasData,
         incomplete: incompleteSections > 0,
-        incompleteDetail: `Zbývá doplnit ${incompleteSections} částí PHmax.`,
+        incompleteDetail: zsIncompleteWhatNow,
         onFix: showZsInputBanner ? zsScrollToInputs : undefined,
         onExport: zsHasData ? handleExportCsv : undefined,
         onOpenExamples: () => focusCalculatorElementById(ZS_PHA_HERO_EXAMPLE_SELECT_ID),
@@ -1699,6 +1754,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       zsVerdict,
       zsHasData,
       incompleteSections,
+      zsIncompleteWhatNow,
       showZsInputBanner,
       zsScrollToInputs,
       handleExportCsv,

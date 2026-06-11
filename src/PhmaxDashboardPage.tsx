@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DashHeroHeader } from "./dashboard/DashHeroHeader";
+import { DashboardNewUserChecklist } from "./dashboard/DashboardNewUserChecklist";
 import { DashboardQuickTour } from "./dashboard/DashboardQuickTour";
 import { DashboardSchoolProfile } from "./dashboard/DashboardSchoolProfile";
+import { DashboardZsScenariosCard } from "./dashboard/DashboardZsScenariosCard";
 import { buildDashboardSchoolProfile } from "./dashboard/build-dashboard-school-profile";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
@@ -28,6 +30,10 @@ import {
   buildSchoolReviewPrintHtml,
   openSchoolReviewPrintWindow,
 } from "./phmax-dashboard-school-review-print";
+import {
+  buildSchoolProfilePrintHtml,
+  openSchoolProfilePrintWindow,
+} from "./phmax-dashboard-school-profile-print";
 import { buildDashboardBandHints } from "./phmax-dashboard-band-hints";
 import { PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE } from "./app-author-print";
 import { HeroStatusBar } from "./HeroStatusBar";
@@ -57,14 +63,14 @@ import { formatDashboardProductVisit, readLastActiveProduct } from "./phmax-dash
 import { clearAllPhmaxLocalStorage } from "./phmax-local-storage-clear";
 import { PHMAX_DASHBOARD_MAIN_ID } from "./phmax-main-landmarks";
 import { requestFocusExampleSelect } from "./phmax-focus-example-hint";
-import { requestFocusModuleInputs } from "./phmax-focus-inputs-hint";
+import { requestFocusModuleInputs, type ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
 import { sortByDashModuleOrder } from "./phmax-dashboard-sort";
 import {
   buildCrossPhmaxSummary,
   formatCrossPhmaxSliceLabel,
   parseDashboardKpiPhmax,
 } from "./phmax-dashboard-cross-phmax";
-import { coherenceWarningModuleId } from "./phmax-cross-phmax-coherence-nav";
+import { coherenceWarningFocusHint } from "./phmax-cross-phmax-coherence-nav";
 import { offerClearBrowserDataAfterDashboardExport } from "./phmax-dashboard-export-followup";
 import {
   buildCrossPhmaxExportPayload,
@@ -76,7 +82,7 @@ import {
   readSchoolScenarioLabel,
 } from "./phmax-school-scenario-export";
 import { buildPhmaxIsHandoffPayload, type PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
-import type { HandoffApplyResult } from "./phmax-is-handoff-apply";
+import type { HandoffApplyResult, PhmaxModuleId } from "./phmax-is-handoff-apply";
 import { parseImportHandoffFileList } from "./phmax-import-handoff-file";
 import {
   formatDashboardLastExportLabel,
@@ -667,6 +673,7 @@ export function PhmaxDashboardPage({
   const [importTemplateBusy, setImportTemplateBusy] = useState(false);
   const [importUploadBusy, setImportUploadBusy] = useState(false);
   const [importPendingPreview, setImportPendingPreview] = useState<PhmaxIsHandoffPayload | null>(null);
+  const [importFollowUpModule, setImportFollowUpModule] = useState<PhmaxModuleId | null>(null);
   const [audienceRole, setAudienceRole] = useState<DashAudienceRole>(() => readDashAudienceRole());
   const importTriggerRef = React.useRef<HTMLButtonElement>(null);
   const importCardFileRef = React.useRef<HTMLInputElement>(null);
@@ -714,7 +721,7 @@ export function PhmaxDashboardPage({
     (notice: string, exportKind: string) => {
       recordDashboardLastExport(exportKind);
       setRefreshAt(new Date());
-      publishNotice(notice);
+      publishNotice(notice, { assertive: true });
       offerClearBrowserDataAfterDashboardExport(clearLocalDataNow);
     },
     [clearLocalDataNow, publishNotice],
@@ -754,7 +761,7 @@ export function PhmaxDashboardPage({
         setImportPendingPreview(payload);
         setImportDialogOpen(true);
       } catch (e) {
-        publishNotice(e instanceof Error ? e.message : "Soubor se nepodařilo načíst.");
+        publishNotice(e instanceof Error ? e.message : "Soubor se nepodařilo načíst.", { assertive: true });
       } finally {
         setImportUploadBusy(false);
         if (importCardFileRef.current) importCardFileRef.current.value = "";
@@ -768,9 +775,9 @@ export function PhmaxDashboardPage({
     setImportTemplateBusy(true);
     try {
       await downloadPhmaxImportTemplateXlsx();
-      publishNotice("Šablona phmax-import-skola-v2.xlsx byla stažena do složky Stažené soubory.");
+      publishNotice("Šablona phmax-import-skola-v2.xlsx byla stažena do složky Stažené soubory.", { assertive: true });
     } catch (e) {
-      publishNotice(e instanceof Error ? e.message : "Stažení šablony se nepodařilo.");
+      publishNotice(e instanceof Error ? e.message : "Stažení šablony se nepodařilo.", { assertive: true });
     } finally {
       setImportTemplateBusy(false);
     }
@@ -785,14 +792,46 @@ export function PhmaxDashboardPage({
       }
       setRefreshAt(new Date());
       dispatchPhmaxImportApplied();
-      const mods = result.appliedModules.map((m) => m.toUpperCase()).join(", ");
-      let msg = `Import dokončen (${mods}). Scénář: ${result.scenarioLabel ?? "–"}. Ověřte výpočet v modulech. Součet PHmax: ${formatCsNumberOrDash(payload.schoolScenario.summary.totalPhmax)} ${CS_HOURS_PER_WEEK_SHORT}`;
+      setImportFollowUpModule(result.appliedModules[0] ?? null);
+      const mods = result.appliedModules.map((m) => DASH_CALC_LABEL[m]).join(", ");
+      let msg = `Import dokončen (${mods}). Scénář: ${result.scenarioLabel ?? "–"}. Součet PHmax: ${formatCsNumberOrDash(payload.schoolScenario.summary.totalPhmax)} ${CS_HOURS_PER_WEEK_SHORT}`;
       if (result.warnings.length > 0) {
         msg += ` Varování: ${result.warnings.join(" ")}`;
       }
-      publishNotice(msg);
+      publishNotice(msg, { assertive: true });
+      requestAnimationFrame(() => document.getElementById("dash-import-followup")?.scrollIntoView({ behavior: "smooth" }));
     },
     [publishNotice],
+  );
+
+  const openModuleWithInputsFocus = useCallback(
+    (id: Exclude<ProductView, "dash">, focusOverride?: ModuleInputsFocusHint) => {
+      if (dashboardRowSupportsInputFocus(id)) {
+        const hint = focusOverride ?? getDashboardFocusHint(id, { preferIssue: true });
+        requestFocusModuleInputs(hint ?? focusOverride);
+      } else {
+        requestFocusModuleInputs(focusOverride);
+      }
+      setProductView(id);
+    },
+    [setProductView],
+  );
+
+  const openModuleForCoherenceWarning = useCallback(
+    (warning: string) => {
+      const coherence = coherenceWarningFocusHint(warning);
+      if (!coherence) return;
+      const { moduleId, ...coherenceHint } = coherence;
+      const dashboardHint = getDashboardFocusHint(moduleId, { preferIssue: true });
+      openModuleWithInputsFocus(moduleId, {
+        ...dashboardHint,
+        ...coherenceHint,
+        sectionId: dashboardHint?.sectionId ?? coherenceHint.sectionId,
+        rowKey: dashboardHint?.rowKey,
+        rowId: dashboardHint?.rowId,
+      });
+    },
+    [openModuleWithInputsFocus],
   );
 
   const openModuleWithExampleHint = useCallback(
@@ -808,10 +847,9 @@ export function PhmaxDashboardPage({
 
   const openModuleForOwnData = useCallback(
     (id: Exclude<ProductView, "dash">) => {
-      requestFocusModuleInputs();
-      setProductView(id);
+      openModuleWithInputsFocus(id);
     },
-    [setProductView],
+    [openModuleWithInputsFocus],
   );
 
   const openDashboardModule = useCallback(
@@ -904,6 +942,21 @@ export function PhmaxDashboardPage({
       scenarioLabel,
     ],
   );
+
+  const printSchoolProfile = useCallback(() => {
+    const html = buildSchoolProfilePrintHtml({
+      generatedAt: new Date().toLocaleString("cs-CZ"),
+      appVersion: APP_VERSION,
+      profile: schoolProfile,
+      coherenceWarnings: auditCoherenceWarnings,
+    });
+    const printResult = openSchoolProfilePrintWindow(html);
+    if (!printResult.ok) {
+      publishNotice(printResult.reason === "blocked" ? PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE : "Tisk se nepodařil otevřít.");
+      return;
+    }
+    publishNotice("Otevřeno okno pro tisk školního profilu.");
+  }, [schoolProfile, auditCoherenceWarnings, publishNotice]);
 
   const printSchoolReview = useCallback(() => {
     const html = buildSchoolReviewPrintHtml({
@@ -1008,7 +1061,7 @@ export function PhmaxDashboardPage({
       "application/json;charset=utf-8",
     );
     afterDashboardJsonExport(
-      "Stažen handoff JSON pro IS školy – viz docs/phmax-is-integration.md.",
+      "Stažen export JSON pro IS školy – viz docs/phmax-is-integration.md.",
       "Handoff JSON",
     );
   }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, afterDashboardJsonExport]);
@@ -1022,7 +1075,7 @@ export function PhmaxDashboardPage({
     );
     const payload = buildPhmaxIsHandoffPayload(scenario);
     const result = await postPhmaxIsHandoff(isEndpoint, payload);
-    publishNotice(result.ok ? `Handoff odeslán (HTTP ${result.status}).` : result.message);
+    publishNotice(result.ok ? `Handoff odeslán (HTTP ${result.status}).` : result.message, { assertive: true });
   }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, isEndpoint, publishNotice]);
 
   return (
@@ -1057,10 +1110,20 @@ export function PhmaxDashboardPage({
         <main id={PHMAX_DASHBOARD_MAIN_ID} tabIndex={-1}>
         <DashboardSchoolProfile
           profile={schoolProfile}
+          onPrintProfile={modulesWithData > 0 ? printSchoolProfile : undefined}
           onModuleChipClick={(id) => {
             const row = rows.find((r) => r.id === id);
             if (row) openDashboardModule(row);
           }}
+        />
+        {modulesWithData === 0 ? (
+          <DashboardNewUserChecklist
+            onScrollToModules={() => document.getElementById("dash-overview-heading")?.scrollIntoView({ behavior: "smooth" })}
+          />
+        ) : null}
+        <DashboardZsScenariosCard
+          namedBackupCount={zsNamedBackupCount}
+          onCompare={() => setProductView("zs")}
         />
         <DashboardQuickTour />
 
@@ -1100,6 +1163,9 @@ export function PhmaxDashboardPage({
           <div className="dash-role-hint">
             <button type="button" className="btn ghost" onClick={scrollToSchool15Min}>
               Celá škola za 15 min
+            </button>
+            <button type="button" className="btn ghost" onClick={printSchoolProfile}>
+              Tisk profilu školy
             </button>
             <button type="button" className="btn ghost" onClick={printSchoolReview}>
               Kontrola před jednáním (tisk)
@@ -1168,6 +1234,11 @@ export function PhmaxDashboardPage({
                   ) : null}
                   {row.namedBackups > 0 ? (
                     <p className="dash-card__meta">Zálohy: {row.namedBackups}</p>
+                  ) : null}
+                  {row.id === "nv75" ? (
+                    <p className="dash-card__context muted-text">
+                      Banka odpočtů — nezapočítává se do součtu PHmax, slouží k plánování zástupů.
+                    </p>
                   ) : null}
                 </div>
                 <div className="dash-card__actions">
@@ -1274,7 +1345,7 @@ export function PhmaxDashboardPage({
                 Souhrn z uložených výsledků v tomto prohlížeči – orientační, neoficiální. NV75 a krácení PV § 1d v součtu nejsou.
               </p>
               {crossPhmaxMismatches.length > 0 ? (
-                <p style={{ marginTop: 8, color: "#9a3412" }}>
+                <p className="dash-coherence-warnings dash-coherence-warnings--lead">
                   <strong>Upozornění:</strong> modul(y) {crossPhmaxMismatches.join(", ")} jsou ve Vyžaduje pozornost –
                   opravte vstupy před použitím součtu.
                 </p>
@@ -1290,22 +1361,22 @@ export function PhmaxDashboardPage({
                 </div>
               ) : null}
               {auditCoherenceWarnings.length > 0 ? (
-                <ul style={{ marginTop: 8, color: "#9a3412", paddingLeft: "1.25rem" }}>
+                <ul className="dash-coherence-warnings dash-coherence-warnings--list">
                   {auditCoherenceWarnings.map((w) => {
-                    const moduleId = coherenceWarningModuleId(w);
+                    const focus = coherenceWarningFocusHint(w);
                     return (
                       <li key={w}>
                         {w}
-                        {moduleId ? (
+                        {focus ? (
                           <>
                             {" "}
                             <button
                               type="button"
                               className="btn ghost"
                               style={{ display: "inline", padding: "0 4px", fontSize: "inherit", verticalAlign: "baseline" }}
-                              onClick={() => openModuleForOwnData(moduleId)}
+                              onClick={() => openModuleForCoherenceWarning(w)}
                             >
-                              Otevřít {DASH_CALC_LABEL[moduleId]}
+                              Přejít k opravě ({DASH_CALC_LABEL[focus.moduleId]})
                             </button>
                           </>
                         ) : null}
@@ -1366,6 +1437,46 @@ export function PhmaxDashboardPage({
             ))}
           </div>
         </section>
+
+        {importFollowUpModule ? (
+          <section
+            id="dash-import-followup"
+            className="card card--accent section-card dash-import-followup"
+            aria-live="polite"
+            data-testid="dash-import-followup"
+          >
+            <p className="dash-import-followup__lead">
+              <strong>Import dokončen.</strong> Ověřte načtená data v modulu nebo zkontrolujte souhrn PHmax na Přehledu.
+            </p>
+            <div className="dash-import-followup__actions">
+              <button
+                type="button"
+                className="btn primary"
+                data-testid="dash-import-followup-module"
+                onClick={() => {
+                  openModuleWithInputsFocus(importFollowUpModule);
+                  setImportFollowUpModule(null);
+                }}
+              >
+                Otevřít {DASH_CALC_LABEL[importFollowUpModule]}
+              </button>
+              <button
+                type="button"
+                className="btn ghost"
+                data-testid="dash-import-followup-summary"
+                onClick={() => {
+                  scrollToSchool15Min();
+                  setImportFollowUpModule(null);
+                }}
+              >
+                Zkontrolovat souhrn PHmax
+              </button>
+              <button type="button" className="btn ghost" onClick={() => setImportFollowUpModule(null)}>
+                Zavřít
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         <DashboardSchoolImportDialog
           open={importDialogOpen}
@@ -1442,26 +1553,6 @@ export function PhmaxDashboardPage({
                 </div>
               ) : null}
             </details>
-          </section>
-        ) : null}
-
-        {zsNamedBackupCount > 0 ? (
-          <section className="card section-card dash-compare-hint" aria-labelledby="dash-compare-heading">
-            <h2 id="dash-compare-heading" className="section-title">
-              Porovnání scénářů (ZŠ)
-            </h2>
-            <p className="muted-text" style={{ marginBottom: 10 }}>
-              V prohlížeči máte <strong>{zsNamedBackupCount}</strong> pojmenovaných záloh ZŠ. V modulu ZŠ otevřete panel{" "}
-              <strong>Akce</strong> → porovnání se zálohou nebo export audit JSON.
-            </p>
-            <button
-              type="button"
-              className="btn primary"
-              data-testid="dash-compare-zs-primary"
-              onClick={() => setProductView("zs")}
-            >
-              Otevřít ZŠ – pojmenované zálohy
-            </button>
           </section>
         ) : null}
 
@@ -1587,11 +1678,12 @@ export function PhmaxDashboardPage({
                 {exportDisclaimerConfirmed ? (
                   <div className="dash-export-wizard muted-text" data-testid="dash-export-wizard">
                     <p className="dash-export-wizard__step dash-export-wizard__step--active">
-                      <strong>Krok 1:</strong> Stáhněte JSON (součet, scénář nebo handoff) – orientační, neoficiální.
+                      <strong>Krok 1:</strong> Stáhněte JSON (součet, scénář nebo export pro IS) – orientační, neoficiální.
                     </p>
                     <p className="dash-export-wizard__step">
-                      <strong>Krok 2 – IT:</strong> předejte soubor, verzi aplikace ({APP_VERSION}), název scénáře a pole{" "}
-                      <code className="methodology-strip__code">coherenceWarnings</code>.
+                      <strong>Krok 2 – IT:</strong> předejte soubor, verzi aplikace ({APP_VERSION}), název scénáře a varování k
+                      nesouladu výpočtů (pole{" "}
+                      <code className="methodology-strip__code">coherenceWarnings</code> ve formátu JSON).
                     </p>
                     <p className="dash-export-wizard__step">
                       <strong>Krok 3:</strong> Na sdíleném PC po exportu zvažte smazání lokálních dat.
@@ -1630,7 +1722,7 @@ export function PhmaxDashboardPage({
                       disabled={!exportDisclaimerConfirmed}
                       onClick={() => void sendIsHandoff()}
                     >
-                      Odeslat handoff na IS (POST)
+                      Odeslat export na IS (POST)
                     </button>
                   ) : null}
                 </div>

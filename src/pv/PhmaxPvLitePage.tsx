@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { HeroBrandLogoButton } from "../AppBrandLogo";
 import { AuthorCreditFooter } from "../AuthorCreditFooter";
-import { CALCULATOR_LIMITS_NOTE, PRODUCT_CALCULATOR_TITLES } from "../calculator-ui-constants";
+import { CALCULATOR_LIMITS_NOTE } from "../calculator-ui-constants";
+import { LiteToFullHint } from "../LiteToFullHint";
 import { IntegerInput } from "../IntegerInput";
 import { NumericInput } from "../NumericInput";
 import { ProductViewPills, type ProductView } from "../ProductViewPills";
@@ -257,13 +258,7 @@ export function PhmaxPvLitePage({ productView, setProductView, onOpenFullVersion
               )}
             </label>
           </div>
-          <p className="muted-text phmax-lite-form__note">
-            Neplatí pro jazykovou přípravu, více pracovišť a PHAmax – použijte{" "}
-            <button type="button" className="btn ghost" style={{ display: "inline", padding: "0 4px" }} onClick={openFull}>
-              plnou verzi {PRODUCT_CALCULATOR_TITLES.pv}
-            </button>
-            .
-          </p>
+          <LiteToFullHint module="pv" onOpenFull={openFull} />
         </section>
 
         <section className="card section-card phmax-lite-result" aria-labelledby="pv-lite-result-heading">

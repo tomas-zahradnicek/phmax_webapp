@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { coherenceWarningModuleId } from "./phmax-cross-phmax-coherence-nav";
+import { coherenceWarningFocusHint, coherenceWarningModuleId } from "./phmax-cross-phmax-coherence-nav";
 
 describe("coherenceWarningModuleId", () => {
   it("parsuje prefix modulu z varování", () => {
@@ -14,5 +14,15 @@ describe("coherenceWarningModuleId", () => {
       "ss",
     );
     expect(coherenceWarningModuleId("neznámé varování")).toBeNull();
+  });
+});
+
+describe("coherenceWarningFocusHint", () => {
+  it("vrací modul a sekci formuláře", () => {
+    expect(coherenceWarningFocusHint("ZŠ: audit ≠ přepočet")).toEqual({ moduleId: "zs", sectionId: "basic" });
+    expect(coherenceWarningFocusHint("PV: uložený součet (1) se liší")).toEqual({
+      moduleId: "pv",
+      sectionId: "pv-vstupy",
+    });
   });
 });

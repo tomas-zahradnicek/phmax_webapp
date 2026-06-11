@@ -12,7 +12,11 @@ import { applyPhmaxIsHandoffToLocalStorage, type HandoffApplyResult } from "./ph
 import type { PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import { buildImportPreviewSummary } from "./phmax-import-pv-zs";
 import { parseImportHandoffFileList } from "./phmax-import-handoff-file";
-import { buildImportModuleStorageDiff, formatImportModuleStorageDiff } from "./phmax-import-storage-diff";
+import {
+  buildImportModuleStorageDiff,
+  firstImportAffectedModule,
+  formatImportModuleStorageDiff,
+} from "./phmax-import-storage-diff";
 import { CS_HOURS_PER_WEEK_SHORT, formatCsNumberOrDash } from "./cs-format";
 import { downloadPhmaxImportTemplateXlsx } from "./phmax-import-template-xlsx";
 
@@ -126,6 +130,7 @@ export function DashboardSchoolImportDialog({
   const summary = preview ? buildImportPreviewSummary(preview) : null;
   const storageDiff = preview ? buildImportModuleStorageDiff(preview) : null;
   const storageDiffLabel = storageDiff ? formatImportModuleStorageDiff(storageDiff, IMPORT_MODULE_LABELS) : null;
+  const firstAffectedModule = storageDiff ? firstImportAffectedModule(storageDiff) : null;
 
   const modal = (
     <div className="glossary-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
@@ -177,8 +182,8 @@ export function DashboardSchoolImportDialog({
             názvy sloupců a hodnot). Povinné listy Meta, PV, ZŠ souhrn; volitelně ŠD, SŠ, ZŠ psycholog / zdravotní.
           </p>
           <p className="muted-text" style={{ marginTop: 6, fontSize: "0.88rem" }}>
-            {DASH_IMPORT_SCOPE_NOTE} Lze nahrát i handoff JSON (<code className="methodology-strip__code">phmax-is-handoff-v1</code>
-            ).
+            {DASH_IMPORT_SCOPE_NOTE} Lze nahrát i export pro IS školy ve formátu JSON (
+            <code className="methodology-strip__code">phmax-is-handoff-v1</code>).
           </p>
 
           {error ? (
@@ -246,6 +251,17 @@ export function DashboardSchoolImportDialog({
                   </ul>
                 </div>
               ) : null}
+              <p className="muted-text dash-import-dialog__next-hint" data-testid="dash-import-next-hint">
+                Po načtení doporučujeme{" "}
+                {firstAffectedModule ? (
+                  <>
+                    ověřit modul <strong>{IMPORT_MODULE_LABELS[firstAffectedModule]}</strong>
+                  </>
+                ) : (
+                  "ověřit dotčené moduly"
+                )}{" "}
+                a zkontrolovat souhrn PHmax na Přehledu – tlačítka se zobrazí hned po importu.
+              </p>
               <label className="field" style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 8 }}>
                 <input
                   type="checkbox"

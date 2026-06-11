@@ -7,6 +7,11 @@ export type CalculatorNextAction = {
   tone: CalculatorVerdictTone;
 };
 
+/** Jedna věta „co teď“ – stejný tón jako lead ve školním profilu na Přehledu. */
+export function formatWhatNowMessage(issue: string, remedy: string): string {
+  return `${issue} → ${remedy}`;
+}
+
 export function buildCalculatorNextAction(input: {
   verdict: CalculatorVerdictCopy;
   hasData: boolean;
@@ -21,7 +26,10 @@ export function buildCalculatorNextAction(input: {
   if (!hasData) {
     return {
       tone: "neutral",
-      message: "Začněte vyplněním formuláře, nebo zvolte volitelnou ukázku v Akcích nahoře.",
+      message: formatWhatNowMessage(
+        "Formulář je prázdný",
+        onOpenExamples ? "zvolte ukázku v Akcích nahoře nebo vyplňte vlastní údaje" : "začněte vyplněním vstupů níže",
+      ),
       actionLabel: onOpenExamples ? "Přejít k ukázkám" : undefined,
       onAction: onOpenExamples,
     };
@@ -30,16 +38,22 @@ export function buildCalculatorNextAction(input: {
   if (incomplete) {
     return {
       tone: "warning",
-      message: incompleteDetail ?? "Některé povinné údaje chybí – součet může být neúplný.",
+      message:
+        incompleteDetail ??
+        formatWhatNowMessage("Chybí povinné údaje", "doplňte označená pole – součet může být neúplný"),
       actionLabel: onFix ? "Přejít k chybě" : undefined,
       onAction: onFix,
     };
   }
 
   if (verdict.tone === "danger" || verdict.tone === "warning") {
+    const message =
+      verdict.detail && verdict.detail.includes("→")
+        ? verdict.detail
+        : formatWhatNowMessage(verdict.label, verdict.detail || "doplňte označená pole");
     return {
       tone: verdict.tone,
-      message: verdict.detail || verdict.label,
+      message,
       actionLabel: onFix ? "Přejít k chybě" : undefined,
       onAction: onFix,
     };
@@ -48,7 +62,7 @@ export function buildCalculatorNextAction(input: {
   if (verdict.tone === "ok" && onExport) {
     return {
       tone: "ok",
-      message: "PHmax je v pořádku – můžete exportovat nebo pokračovat v úpravách.",
+      message: formatWhatNowMessage("Vstupy jsou v pořádku", "můžete exportovat nebo pokračovat v úpravách"),
       actionLabel: "Export",
       onAction: onExport,
     };

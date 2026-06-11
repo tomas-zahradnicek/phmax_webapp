@@ -81,6 +81,14 @@ export async function openHeroActionsDrawerIfNeeded(page: Page): Promise<void> {
   }
 }
 
+/** Modul – export CSV (včetně panelu Akce na mobilu). */
+export async function clickHeroExportCsv(page: Page): Promise<void> {
+  await openHeroActionsDrawerIfNeeded(page);
+  const exportBtn = page.getByRole("button", { name: "Export CSV" });
+  await exportBtn.scrollIntoViewIfNeeded();
+  await exportBtn.click();
+}
+
 /** Dashboard – exportní tlačítka v pokročilých nástrojích. */
 export async function expectDashboardExportButton(page: Page, name: string | RegExp): Promise<void> {
   await openDashboardAdvancedTools(page);
@@ -91,22 +99,23 @@ export async function expectDashboardExportButton(page: Page, name: string | Reg
 
 const ZS_NAMED_SNAPSHOTS_LS_KEY = "edu-cz-zs-named-snapshots-v1";
 
-/** Jedna pojmenovaná záloha ZŠ – zobrazí hint porovnání na dashboardu. */
-export async function seedZsNamedSnapshot(page: Page): Promise<void> {
-  const payload = JSON.stringify({
-    items: [
-      {
-        id: "e2e-zs-named-1",
-        name: "E2E záloha",
-        savedAt: "2026-01-01T12:00:00.000Z",
-        snapshot: {},
-      },
-    ],
-  });
+function buildZsNamedSnapshotsJson(count: number): string {
+  const items = Array.from({ length: count }, (_, index) => ({
+    id: `e2e-zs-named-${index + 1}`,
+    name: index === 0 ? "E2E záloha" : `E2E záloha ${index + 1}`,
+    savedAt: "2026-01-01T12:00:00.000Z",
+    snapshot: {},
+  }));
+  return JSON.stringify({ items });
+}
+
+/** Pojmenované zálohy ZŠ – karta porovnání na Přehledu se zobrazí od 2 záloh. */
+export async function seedZsNamedSnapshot(page: Page, count = 1): Promise<void> {
+  const json = buildZsNamedSnapshotsJson(count);
   await page.addInitScript(
-    ({ key, json }) => {
-      localStorage.setItem(key, json);
+    ({ key, json: payload }) => {
+      localStorage.setItem(key, payload);
     },
-    { key: ZS_NAMED_SNAPSHOTS_LS_KEY, json: payload },
+    { key: ZS_NAMED_SNAPSHOTS_LS_KEY, json },
   );
 }

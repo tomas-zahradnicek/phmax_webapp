@@ -3574,6 +3574,19 @@ input[type="radio"] {
   color: #9a3412;
   font-size: 0.92rem;
 }
+.dash-import-dialog__next-hint {
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+.dash-import-followup__lead {
+  margin: 0 0 12px;
+}
+.dash-import-followup__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
 .glossary-list {
   display: grid;
   gap: 12px;
@@ -8731,14 +8744,14 @@ select:focus {
 .calculator-input-issue-banner__label {
   display: block;
   font-size: 0.92rem;
-  color: #92400e;
+  color: #7c2d12;
 }
 
 .calculator-input-issue-banner__detail {
   margin: 4px 0 0;
   font-size: 0.84rem;
   line-height: 1.45;
-  color: #78350f;
+  color: #7c2d12;
 }
 
 .calculator-input-issue-banner__action {
@@ -8751,7 +8764,7 @@ select:focus {
   padding-left: 1.15rem;
   font-size: 0.84rem;
   line-height: 1.45;
-  color: #78350f;
+  color: #7c2d12;
 }
 
 .calculator-input-issue-banner__list-item {
@@ -10703,6 +10716,10 @@ select:focus {
   background: #fffbeb;
 }
 
+.calculator-next-action--warning .calculator-next-action__message {
+  color: #7c2d12;
+}
+
 .calculator-next-action--danger {
   border-color: #fecaca;
   background: #fef2f2;
@@ -11110,7 +11127,7 @@ select:focus {
 }
 
 .dash-school-status__lead--warn {
-  color: #9a3412;
+  color: #7c2d12;
   font-weight: 650;
 }
 
@@ -11135,6 +11152,18 @@ select:focus {
 
 .dash-school-profile__head {
   margin-bottom: 10px;
+}
+
+.dash-school-profile__head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.dash-school-profile__print {
+  flex-shrink: 0;
 }
 
 .dash-school-profile__title {
@@ -11253,8 +11282,21 @@ select:focus {
 }
 
 .dash-school-profile__lead--warning {
-  color: #9a3412;
+  color: #7c2d12;
   font-weight: 650;
+}
+
+.dash-coherence-warnings {
+  color: #7c2d12;
+}
+
+.dash-coherence-warnings--lead {
+  margin-top: 8px;
+}
+
+.dash-coherence-warnings--list {
+  margin-top: 8px;
+  padding-left: 1.25rem;
 }
 
 .dash-import-dialog__diff {
@@ -11265,6 +11307,41 @@ select:focus {
   border: 1px solid #e2e8f0;
   font-size: 0.88rem;
   line-height: 1.45;
+}
+
+.dash-zs-scenarios__title {
+  margin-bottom: 6px;
+}
+
+.dash-zs-scenarios__lead {
+  margin: 0 0 12px;
+}
+
+.dash-new-user-checklist__steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 8px;
+}
+
+.dash-new-user-checklist__cta {
+  margin-top: 12px;
+}
+
+.dash-card__context {
+  margin: 8px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.phmax-lite-full-hint {
+  margin-top: 12px;
+}
+
+.phmax-lite-full-hint__btn {
+  display: inline;
+  padding: 0 4px;
+  vertical-align: baseline;
 }
 
 .dash-quick-tour {

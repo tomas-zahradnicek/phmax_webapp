@@ -11,6 +11,10 @@ import type { ZsHeroExampleKey } from "../zs-hero-example-groups";
 import { clampZsBasicWizardStep, type ZsBasicWizardStep } from "../zs-basic-wizard";
 import { B17_B21 } from "../phmax-zs-logic";
 import { sanitizeZsAutosaveSnapshot } from "./zs-snapshot-row-sanitize";
+import {
+  computeZsPhmaxTotalFromFields,
+  zsPhmaxFieldsFromFormState,
+} from "./zs-compute-phmax-total-from-snapshot";
 
 export const ZS_AUTOSAVE_STORAGE_KEY = "edu-cz-zs-calculator-state";
 
@@ -133,6 +137,7 @@ export type ZsFormSnapshotState = {
 };
 
 export function buildZsFormSnapshot(state: ZsFormSnapshotState): Record<string, unknown> {
+  const recomputedTotalPhmax = computeZsPhmaxTotalFromFields(zsPhmaxFieldsFromFormState(state));
   return {
     tab: state.tab,
     mode: state.mode,
@@ -195,7 +200,12 @@ export function buildZsFormSnapshot(state: ZsFormSnapshotState): Record<string, 
     mixedMethodSecondZsClasses: state.mixedMethodSecondZsClasses,
     mixedMethodSecondSpecialPupils: state.mixedMethodSecondSpecialPupils,
     mixedMethodSecondSpecialClasses: state.mixedMethodSecondSpecialClasses,
-    _phmaxAuditTotals: state.auditTotals,
+    _phmaxAuditTotals: {
+      totalPhmax: recomputedTotalPhmax,
+      totalPha: state.auditTotals.totalPha,
+      totalPhp: state.auditTotals.totalPhp,
+      tab: state.auditTotals.tab,
+    },
   };
 }
 

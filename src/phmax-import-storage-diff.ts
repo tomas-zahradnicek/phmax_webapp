@@ -33,6 +33,10 @@ export function buildImportModuleStorageDiff(payload: PhmaxIsHandoffPayload): Im
   return { overwrite, unchanged, loadNew };
 }
 
+export function firstImportAffectedModule(diff: ImportModuleStorageDiff): PhmaxModuleId | null {
+  return diff.overwrite[0] ?? diff.loadNew[0] ?? null;
+}
+
 export function formatImportModuleStorageDiff(
   diff: ImportModuleStorageDiff,
   labels: Record<PhmaxModuleId, string>,
