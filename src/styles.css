@@ -10062,6 +10062,37 @@ select:focus {
   color: #64748b;
 }
 
+.calculator-hero-shell--pro .calculator-hero-work-card__exports .hero-compact-toolbar__panel-summary {
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  border-radius: 10px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.calculator-hero-shell--pro .calculator-hero-work-card__exports .hero-compact-toolbar__panel-summary:hover,
+.calculator-hero-shell--pro .calculator-hero-work-card__exports .hero-toolbar-dropdown__trigger[aria-expanded="true"],
+.calculator-hero-shell--pro .calculator-hero-work-card__exports .hero-compact-toolbar__panel[open] .hero-compact-toolbar__panel-summary {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.calculator-hero-shell--pro .calculator-hero-work-card__exports .hero-compact-toolbar__panel-summary:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.68);
+  outline-offset: 2px;
+}
+
+.calculator-hero-shell--pro .calculator-hero-work-card__exports .hero-compact-toolbar__divider {
+  color: #cbd5e1;
+}
+
 .calculator-hero-settings--header .calculator-hero-settings__trigger {
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.38);

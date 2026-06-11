@@ -42,6 +42,10 @@ export const HERO_EXAMPLE_FIELD_LABEL = "Začněte zde";
 /** Nadpis sekce exportů v hlavní pracovní kartě hero. */
 export const HERO_EXPORT_TOOLS_LABEL = "Export a nástroje";
 
+/** Rozbalovací panely v kompaktní hero liště (zálohy a doplňkové akce). */
+export const HERO_TOOLBAR_BACKUPS_LABEL = "Scénáře a zálohy";
+export const HERO_TOOLBAR_MORE_TOOLS_LABEL = "Další nástroje";
+
 /** Hero lišta (viditelné i v expertním režimu, kde je select ukázky skrytý). */
 export const HERO_OWN_DATA_HINT =
   "Formulář je editovatelný: můžete rovnou zadat údaje své školy, upravit načtenou ukázku, nebo začít od prázdného stavu v panelu Akce (Vymazat formulář). Souhrn výsledků se přepočítá podle vašich vstupů.";

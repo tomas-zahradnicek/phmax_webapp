@@ -1,4 +1,5 @@
 import React from "react";
+import { HERO_TOOLBAR_BACKUPS_LABEL, HERO_TOOLBAR_MORE_TOOLS_LABEL } from "./calculator-ui-constants";
 import { HeroIconActionButton, IconSaveQuick } from "./HeroActionIconButton";
 import { HeroToolbarDropdown } from "./HeroToolbarDropdown";
 
@@ -18,8 +19,8 @@ export function HeroCompactToolbar({
   primary,
   backups,
   technical,
-  backupsSummary = "Scénáře a zálohy",
-  technicalSummary = "Technické",
+  backupsSummary = HERO_TOOLBAR_BACKUPS_LABEL,
+  technicalSummary = HERO_TOOLBAR_MORE_TOOLS_LABEL,
   className,
 }: HeroCompactToolbarProps) {
   return (
