@@ -9339,15 +9339,48 @@ select:focus {
 .calculator-hero-shell__kpi-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 10px 12px;
   margin-bottom: 10px;
 }
 
-.calculator-hero-shell__kpi-row .calculator-hero-kpi-chips {
+.calculator-hero-shell__kpi-row > .calculator-hero-kpi-chips {
   margin-bottom: 0;
   flex: 1 1 280px;
+}
+
+.calculator-hero-shell__kpi-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  margin-left: auto;
+  min-width: 9.5rem;
+  max-width: 18rem;
+  flex: 0 1 11rem;
+  align-self: flex-start;
+}
+
+.calculator-hero-shell__kpi-aside .calculator-hero-kpi-chips {
+  margin-bottom: 0;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.calculator-hero-shell__kpi-aside .calculator-hero-kpi-chips__item--status {
+  margin-left: 0;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: none;
+}
+
+.calculator-hero-shell__guide-btn {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  white-space: nowrap;
 }
 
 .calculator-hero-shell__kpi-actions {
@@ -9486,6 +9519,13 @@ select:focus {
   padding: 5px 10px;
 }
 
+.calculator-hero-kpi-chips--compact .calculator-hero-kpi-chips__item--status {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 12px;
+}
+
 .calculator-hero-kpi-chips__value {
   font-size: 1.05rem;
   font-weight: 800;
@@ -9571,6 +9611,26 @@ select:focus {
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.25;
+}
+
+.calculator-hero-kpi-chips__footer {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.calculator-hero-kpi-chips__guide-link {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.calculator-hero-kpi-chips__guide-link:hover,
+.calculator-hero-kpi-chips__guide-link:focus-visible {
+  text-decoration: underline;
 }
 
 .calculator-hero-kpi-chips__item--tone-ok {
@@ -9890,7 +9950,7 @@ select:focus {
   z-index: 1;
 }
 
-.calculator-hero-shell--pro .calculator-hero-shell__tabs {
+.calculator-hero-shell--pro .calculator-hero-shell__nav {
   margin-bottom: 12px;
 }
 

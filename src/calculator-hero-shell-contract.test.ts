@@ -61,6 +61,10 @@ describe("CalculatorHeroShell contract (variant A)", () => {
     const dash = readSource("src/dashboard/DashHeroHeader.tsx");
     expect(dash).toContain("CalculatorHeroShell");
     expect(dash).toContain("showDisplaySettings={false}");
+    expect(dash).toContain("USER_GUIDE_PATH");
+    expect(dash).toContain("tabsAside");
+    expect(dash).toContain("calculator-hero-shell__guide-btn");
+    expect(dash).toContain('label: "Stav"');
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("DashHeroHeader");
     expect(readSource("src/PhmaxDashboardPage.tsx")).not.toMatch(/<header className="hero hero--feature">/);
   });

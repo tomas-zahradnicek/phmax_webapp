@@ -9,6 +9,8 @@ export type HeroExpertKpi = {
   /** Hierarchie v hero KPI řádku (variant A). */
   variant?: "primary" | "secondary" | "status";
   tone?: CalculatorVerdictTone;
+  /** Doplňkový obsah pod hodnotou (např. odkaz pod čipem Stav na přehledu). */
+  footer?: React.ReactNode;
 };
 
 type HeroExpertStripProps = {

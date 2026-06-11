@@ -73,7 +73,10 @@ export function CalculatorHeroKpiChips({ kpis, compact = false, theme = "hero" }
           ) : (
             <span className="calculator-hero-kpi-chips__value">{kpi.value}</span>
           )}
-          {compact ? null : <span className="calculator-hero-kpi-chips__label">{kpi.label}</span>}
+          {compact && kpi.variant !== "status" ? null : (
+            <span className="calculator-hero-kpi-chips__label">{kpi.label}</span>
+          )}
+          {kpi.footer ? <div className="calculator-hero-kpi-chips__footer">{kpi.footer}</div> : null}
         </li>
       ))}
     </ul>

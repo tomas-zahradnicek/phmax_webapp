@@ -54,6 +54,9 @@ export type CalculatorHeroShellProps = {
 
   kpis: HeroExpertKpi[];
 
+  /** Obsah vpravo vedle záložek modulů (např. Návod k použití na přehledu). */
+  tabsAside?: React.ReactNode;
+
   /** Malé logo vlevo od nadpisu (základní režim). */
 
   showMiniLogo?: boolean;
@@ -132,6 +135,8 @@ export function CalculatorHeroShell({
   titleClassName,
 
   kpis,
+
+  tabsAside,
 
   showMiniLogo = false,
 
@@ -223,22 +228,15 @@ export function CalculatorHeroShell({
 
       <div className="calculator-hero-shell__workspace">
 
-        <div className="calculator-hero-shell__tabs">
-
+        <div className="calculator-hero-shell__nav">
           <ProductViewPills productView={productView} setProductView={setProductView} />
-
+          {tabsAside ? <div className="calculator-hero-shell__nav-trailing">{tabsAside}</div> : null}
         </div>
 
-
-
         <CalculatorHeroKpiChips
-
           kpis={kpis}
-
           compact={showDisplaySettings && viewMode === "expert"}
-
           theme="workspace"
-
         />
 
 
