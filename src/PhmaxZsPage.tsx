@@ -262,9 +262,10 @@ const GLOSSARY_TERMS = [
 export type PhmaxZsPageProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
+  onOpenRychlyPhmax?: () => void;
 };
 
-export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
+export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: PhmaxZsPageProps) {
   const initialAutosave = peekSanitizedZsAutosaveFromStorage();
   const [tab, setTab] = useState<TabKey>("phmax");
   const [mode, setMode] = useState<CalculatorMode>(
@@ -1875,6 +1876,7 @@ export function PhmaxZsPage({ productView, setProductView }: PhmaxZsPageProps) {
           heroHeaderRef={heroHeaderRef}
           productView={productView}
           setProductView={setProductView}
+          onOpenRychlyPhmax={onOpenRychlyPhmax}
           viewMode={viewMode}
           setViewMode={setViewMode}
           displayDensity={displayDensity}

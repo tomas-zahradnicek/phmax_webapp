@@ -26,6 +26,7 @@ import {
   NAMED_BACKUPS_SELECT_PLACEHOLDER,
   namedBackupsMicrocopy,
 } from "../calculator-ui-constants";
+import { HERO_EXAMPLE_FIELD_LABEL, HERO_EXPORT_TOOLS_LABEL } from "../calculator-ui-constants";
 import type { PvHeroExampleKey } from "../phmax-pv-hero-examples";
 
 export type PvHeroToolbarProps = {
@@ -55,6 +56,9 @@ export type PvHeroToolbarProps = {
   onCopySummary: () => void;
   onClearStored: () => void;
   onResetAll: () => void;
+  /** Když hint řeší CalculatorHeroShell, neopakovat v toolbaru. */
+  suppressOwnDataHint?: boolean;
+  onOpenRychlyPhmax?: () => void;
 };
 
 export function PvHeroToolbar({
@@ -84,14 +88,16 @@ export function PvHeroToolbar({
   onCopySummary,
   onClearStored,
   onResetAll,
+  suppressOwnDataHint = false,
+  onOpenRychlyPhmax,
 }: PvHeroToolbarProps) {
   return (
-    <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
-      <OwnDataHint variant="hero" />
-      <div className="hero-zone-actions__toolbar-row">
+    <section className="hero-zone-actions hero-zone-actions--toolbar calculator-hero-work-card__body" aria-label="Akce výpočtu">
+      {suppressOwnDataHint ? null : <OwnDataHint variant="hero" />}
+      <div className="calculator-hero-work-card__start">
         <div className="field field--hero-select hero-actions__example hero-pv-example-select">
           <span className="field__label field__label--hero" id="pv-hero-example-label">
-            Ukázkový příklad
+            {HERO_EXAMPLE_FIELD_LABEL}
           </span>
           <HeroExampleSelect
             id="pv-hero-example-select"
@@ -116,6 +122,24 @@ export function PvHeroToolbar({
           ) : null}
         </div>
 
+        {onOpenRychlyPhmax ? (
+          <div className="calculator-hero-work-card__cta">
+            <button
+              type="button"
+              className="btn primary calculator-hero-work-card__quick-btn"
+              onClick={onOpenRychlyPhmax}
+            >
+              <span className="calculator-hero-work-card__quick-icon" aria-hidden>
+                ⚡
+              </span>
+              Rychlý výpočet
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="calculator-hero-work-card__exports">
+        <span className="calculator-hero-work-card__section-label">{HERO_EXPORT_TOOLS_LABEL}</span>
         <HeroActionsDrawer>
           <HeroCompactToolbar
             primary={

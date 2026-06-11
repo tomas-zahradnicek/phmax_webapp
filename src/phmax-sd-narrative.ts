@@ -1,4 +1,5 @@
 import { SD_MAX_DEPARTMENTS_IN_TABLE, suggestedDepartmentsFromPupils } from "./phmax-sd-logic";
+import type { SdStaffingSplitNv75 } from "./phmax-sd-staffing-nv75";
 
 /**
  * Orientační meze počtu oddělení z počtu žáků 1. stupně – pro laický text v UI, ne pro právní normu.
@@ -63,4 +64,37 @@ export function buildSdPlainNarrativeText(params: {
     " metodickými popisy, ale nijak nenapodobujeme konkrétní texty třetích stran.";
 
   return { p1, p2, disclaimer };
+}
+
+/** Laický odstavec k orientačnímu rozdělení úvazků v rychlém režimu ŠD. */
+export function buildSdLiteStaffingPlainText(staffing: SdStaffingSplitNv75): string | null {
+  if (staffing.inconsistent || staffing.totalPhmax <= 0) return null;
+
+  const slot = staffing.vychovatelFullPpc;
+  const parts: string[] = [];
+
+  if (staffing.headVedouciHours > 0) {
+    parts.push(
+      `Orientačně ${staffing.headVedouciHours.toLocaleString("cs-CZ")} h týdně pro vedoucího vychovatele (tab. 7.2 NV č. 75/2005 Sb.)`,
+    );
+  } else if (staffing.headNote) {
+    parts.push(staffing.headNote);
+  }
+
+  if (staffing.fullTimeSlots > 0 && staffing.partialHours > 0.01) {
+    parts.push(
+      `zbylý rozsah odpovídá přibližně ${staffing.fullTimeSlots} plnému úvazku vychovatele (${slot} h) a jednomu zkrácenému úvazku asi ${staffing.partialHours.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} h`,
+    );
+  } else if (staffing.fullTimeSlots > 0) {
+    parts.push(
+      `zbylý rozsah odpovídá přibližně ${staffing.fullTimeSlots} plnému úvazku vychovatele (${slot} h týdně přímé pedagogické činnosti)`,
+    );
+  } else if (staffing.partialHours > 0.01) {
+    parts.push(
+      `celý rozsah odpovídá zkrácenému úvazku asi ${staffing.partialHours.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} h (${slot} h je plný úvazek)`,
+    );
+  }
+
+  if (parts.length === 0) return null;
+  return `${parts.join("; ")}. Konečné smluvní úvazky závisí na vnitřní organizaci školy.`;
 }

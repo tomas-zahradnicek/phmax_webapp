@@ -20,6 +20,8 @@ import { OwnDataHint } from "../OwnDataHint";
 import { CompareVariantsPanel } from "../CompareVariantsPanel";
 import type { CompareProductVariantsResult } from "../phmax-product-compare";
 import {
+  HERO_EXAMPLE_FIELD_LABEL,
+  HERO_EXPORT_TOOLS_LABEL,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
   NAMED_BACKUPS_DELETE_LABEL,
   NAMED_BACKUPS_NAME_LABEL,
@@ -64,6 +66,7 @@ export type SsHeroToolbarProps = {
   onCopySummary: () => void;
   onClearStored: () => void;
   onResetAll: () => void;
+  suppressOwnDataHint?: boolean;
 };
 
 export function SsHeroToolbar({
@@ -100,14 +103,15 @@ export function SsHeroToolbar({
   onCopySummary,
   onClearStored,
   onResetAll,
+  suppressOwnDataHint = false,
 }: SsHeroToolbarProps) {
   return (
-    <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
-      <OwnDataHint variant="hero" />
-      <div className="hero-zone-actions__toolbar-row">
+    <section className="hero-zone-actions hero-zone-actions--toolbar calculator-hero-work-card__body" aria-label="Akce výpočtu">
+      {suppressOwnDataHint ? null : <OwnDataHint variant="hero" />}
+      <div className="calculator-hero-work-card__start">
         <div className="field field--hero-select hero-actions__example hero-ss-example-select">
           <span className="field__label field__label--hero" id="ss-hero-example-label">
-            Ukázkový příklad
+            {HERO_EXAMPLE_FIELD_LABEL}
           </span>
           <HeroExampleSelect
             id="ss-hero-example-select"
@@ -131,7 +135,10 @@ export function SsHeroToolbar({
             </p>
           ) : null}
         </div>
+      </div>
 
+      <div className="calculator-hero-work-card__exports">
+        <span className="calculator-hero-work-card__section-label">{HERO_EXPORT_TOOLS_LABEL}</span>
         <HeroActionsDrawer>
           <HeroCompactToolbar
             primary={

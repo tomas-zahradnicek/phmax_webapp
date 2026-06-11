@@ -5,6 +5,7 @@ import {
   computePvPhmaxTotal,
   getPhaMaxPv,
   getPhmaxPvBase,
+  getPvSec2MinimumChildrenTotal,
   polodenniDurationColumnIndex,
 } from "./phmax-pv-logic";
 
@@ -59,5 +60,13 @@ describe("pásma doby (shoda se sloupci přílohy)", () => {
 
   it("celodenní mezi 6,5 a 7 → první sloupec", () => {
     expect(celodenniDurationColumnIndex(6.75)).toBe(0);
+  });
+});
+
+describe("getPvSec2MinimumChildrenTotal", () => {
+  it("vrací minima dle § 2 odst. 1 a 2", () => {
+    expect(getPvSec2MinimumChildrenTotal({ soleMsInMunicipality: false, classCount: 1 })).toBe(15);
+    expect(getPvSec2MinimumChildrenTotal({ soleMsInMunicipality: true, classCount: 1 })).toBe(13);
+    expect(getPvSec2MinimumChildrenTotal({ soleMsInMunicipality: true, classCount: 3 })).toBe(48);
   });
 });

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { heroHasDisplaySettings } from "./calculator-hero-display-contract";
 
 const repoRoot = path.resolve(__dirname, "..");
 
@@ -15,7 +16,8 @@ describe("UX contract: PV + ŠD view mode toggle", () => {
 
     expect(src).toContain('const PV_VIEW_MODE_LS_KEY = "phmax-pv-view-mode";');
     expect(hero).toContain('viewModeName="pv-view-mode"');
-    expect(hero).toContain("CalculatorHeroDisplayControls");
+    expect(heroHasDisplaySettings(hero)).toBe(true);
+    expect(hero).toContain("CalculatorHeroShell");
     expect(src).toContain('{viewMode === "expert" ? <ProductLegisContextPanel variant="pv" /> : null}');
     expect(src).toContain('{viewMode === "expert" ? <MethodologyStrip /> : null}');
   });
@@ -26,7 +28,7 @@ describe("UX contract: PV + ŠD view mode toggle", () => {
 
     expect(src).toContain('const SD_VIEW_MODE_LS_KEY = "phmax-sd-view-mode";');
     expect(hero).toContain('viewModeName="sd-view-mode"');
-    expect(hero).toContain("CalculatorHeroDisplayControls");
+    expect(heroHasDisplaySettings(hero)).toBe(true);
     expect(src).toContain('{viewMode === "expert" && detailedResult != null ? (');
     expect(src).toContain(') : viewMode === "expert" && breakdown != null && breakdown.length > 0 && basePhmax != null ? (');
     expect(src).toContain('{viewMode === "expert" && activeMethodikaRow != null ? (');

@@ -18,6 +18,8 @@ import { OwnDataHint } from "../OwnDataHint";
 import { CompareVariantsPanel } from "../CompareVariantsPanel";
 import type { CompareProductVariantsResult } from "../phmax-product-compare";
 import {
+  HERO_EXAMPLE_FIELD_LABEL,
+  HERO_EXPORT_TOOLS_LABEL,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
   NAMED_BACKUPS_DELETE_LABEL,
   NAMED_BACKUPS_NAME_LABEL,
@@ -55,6 +57,8 @@ export type SdHeroToolbarProps = {
   onCopySummary: () => void;
   onClearStored: () => void;
   onResetAll: () => void;
+  suppressOwnDataHint?: boolean;
+  onOpenRychlyPhmax?: () => void;
 };
 
 export function SdHeroToolbar({
@@ -84,14 +88,16 @@ export function SdHeroToolbar({
   onCopySummary,
   onClearStored,
   onResetAll,
+  suppressOwnDataHint = false,
+  onOpenRychlyPhmax,
 }: SdHeroToolbarProps) {
   return (
-    <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
-      <OwnDataHint variant="hero" />
-      <div className="hero-zone-actions__toolbar-row">
+    <section className="hero-zone-actions hero-zone-actions--toolbar calculator-hero-work-card__body" aria-label="Akce výpočtu">
+      {suppressOwnDataHint ? null : <OwnDataHint variant="hero" />}
+      <div className="calculator-hero-work-card__start">
         <div className="field field--hero-select hero-actions__example hero-sd-example-select">
           <span className="field__label field__label--hero" id="sd-hero-example-label">
-            Ukázkový příklad
+            {HERO_EXAMPLE_FIELD_LABEL}
           </span>
           <HeroExampleSelect
             id="sd-hero-example-select"
@@ -102,7 +108,11 @@ export function SdHeroToolbar({
             groups={exampleGroups}
             onChange={(key) => onExampleChange(key as SdHeroExampleKey)}
           />
-          <p id="sd-hero-example-legend" className="muted-text" style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}>
+          <p
+            id="sd-hero-example-legend"
+            className="muted-text"
+            style={{ marginTop: 8, fontSize: "0.82rem", maxWidth: "48rem", lineHeight: 1.5 }}
+          >
             {exampleLegend}
           </p>
           {selectedExampleMetaTitle ? (
@@ -112,6 +122,24 @@ export function SdHeroToolbar({
           ) : null}
         </div>
 
+        {onOpenRychlyPhmax ? (
+          <div className="calculator-hero-work-card__cta">
+            <button
+              type="button"
+              className="btn primary calculator-hero-work-card__quick-btn"
+              onClick={onOpenRychlyPhmax}
+            >
+              <span className="calculator-hero-work-card__quick-icon" aria-hidden>
+                ⚡
+              </span>
+              Rychlý výpočet
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="calculator-hero-work-card__exports">
+        <span className="calculator-hero-work-card__section-label">{HERO_EXPORT_TOOLS_LABEL}</span>
         <HeroActionsDrawer>
           <HeroCompactToolbar
             primary={

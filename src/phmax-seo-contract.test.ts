@@ -28,6 +28,9 @@ describe("SEO fáze A contract", () => {
     expect(readSource("public/robots.txt")).toContain("Sitemap:");
     expect(readSource("public/sitemap.xml")).toContain("/prehled");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-zakladni-skola");
+    expect(readSource("public/sitemap.xml")).toContain("/phmax-predskolni-vzdelavani/rychly");
+    expect(readSource("public/sitemap.xml")).toContain("/phmax-skolni-druzina/rychly");
+    expect(readSource("public/sitemap.xml")).toContain("/phmax-zakladni-skola/rychly");
     expect(readSource("vercel.json")).toContain("rewrites");
   });
 

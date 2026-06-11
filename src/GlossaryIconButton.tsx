@@ -4,17 +4,26 @@ type GlossaryIconButtonProps = {
   onClick: () => void;
   className?: string;
   expanded?: boolean;
+  /** inline = pilulka, tile = KPI dlaždice, icon = jen ikona v hlavičce. */
+  layout?: "inline" | "tile" | "icon";
 };
 
 export const GlossaryIconButton = forwardRef<HTMLButtonElement, GlossaryIconButtonProps>(
-  function GlossaryIconButton({ onClick, className, expanded = false }, ref) {
+  function GlossaryIconButton({ onClick, className, expanded = false, layout = "inline" }, ref) {
     return (
       <button
         ref={ref}
         type="button"
-        className={["glossary-icon-btn", className].filter(Boolean).join(" ")}
+        className={[
+          "glossary-icon-btn",
+          layout === "tile" ? "glossary-icon-btn--tile" : "",
+          layout === "icon" ? "glossary-icon-btn--icon" : "",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")}
         onClick={onClick}
-        title="Otevřít slovníček pojmů"
+        title="Slovníček"
         aria-label="Otevřít slovníček pojmů"
         aria-haspopup="dialog"
         aria-expanded={expanded}
@@ -22,7 +31,7 @@ export const GlossaryIconButton = forwardRef<HTMLButtonElement, GlossaryIconButt
         <span className="glossary-icon-btn__book" aria-hidden="true">
           📘
         </span>
-        <span className="glossary-icon-btn__label">Slovníček</span>
+        {layout === "icon" ? null : <span className="glossary-icon-btn__label">Slovníček</span>}
       </button>
     );
   },

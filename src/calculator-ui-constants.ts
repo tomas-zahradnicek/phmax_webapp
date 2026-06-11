@@ -36,6 +36,12 @@ export const HERO_ACTIONS_NARROW_FOOTER =
 /** Placeholder comboboxu ukázkových příkladů – zdůrazní, že ukázka není povinná. */
 export const HERO_EXAMPLE_SELECT_PLACEHOLDER = "Volitelná ukázka – nebo vyplňte vlastní údaje níže";
 
+/** Popisek pole ukázkového příkladu v hero – výzva k výpočtu, ne k „ukázce“. */
+export const HERO_EXAMPLE_FIELD_LABEL = "Začněte zde";
+
+/** Nadpis sekce exportů v hlavní pracovní kartě hero. */
+export const HERO_EXPORT_TOOLS_LABEL = "Export a nástroje";
+
 /** Hero lišta (viditelné i v expertním režimu, kde je select ukázky skrytý). */
 export const HERO_OWN_DATA_HINT =
   "Formulář je editovatelný: můžete rovnou zadat údaje své školy, upravit načtenou ukázku, nebo začít od prázdného stavu v panelu Akce (Vymazat formulář). Souhrn výsledků se přepočítá podle vašich vstupů.";

@@ -1,13 +1,12 @@
 import React from "react";
-import { HeroBrandLogoButton } from "../AppBrandLogo";
-import { CalculatorHeroDisplayControls } from "../CalculatorHeroDisplayControls";
 import { GlossaryIconButton } from "../GlossaryIconButton";
-import { HeroExpertStrip } from "../HeroExpertStrip";
-import { ProductViewPills, type ProductView } from "../ProductViewPills";
+import { CalculatorHeroShell } from "../CalculatorHeroShell";
 import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
+import type { CalculatorVerdictTone } from "../calculator-verdict-ui";
 import type { DisplayDensity } from "../display-density";
+import type { ProductView } from "../ProductViewPills";
 import { SD_HERO_EXAMPLE_SELECT_ID } from "../sd-basic-wizard";
 import { SdHeroToolbar, type SdHeroToolbarProps } from "./SdHeroToolbar";
 
@@ -15,6 +14,7 @@ export type SdHeroHeaderProps = {
   heroHeaderRef: React.RefObject<HTMLElement | null>;
   productView: ProductView;
   setProductView: (view: ProductView) => void;
+  onOpenRychlyPhmax?: () => void;
   viewMode: CalculatorViewMode;
   setViewMode: (mode: CalculatorViewMode) => void;
   displayDensity: DisplayDensity;
@@ -31,6 +31,7 @@ export type SdHeroHeaderProps = {
   pupils: number;
   departmentCount: number;
   verdictLabel: string;
+  verdictTone: CalculatorVerdictTone;
   toolbar: SdHeroToolbarProps;
 };
 
@@ -38,6 +39,7 @@ export function SdHeroHeader({
   heroHeaderRef,
   productView,
   setProductView,
+  onOpenRychlyPhmax,
   viewMode,
   setViewMode,
   displayDensity,
@@ -54,70 +56,59 @@ export function SdHeroHeader({
   pupils,
   departmentCount,
   verdictLabel,
+  verdictTone,
   toolbar,
 }: SdHeroHeaderProps) {
   return (
-    <header className="hero hero--feature" ref={heroHeaderRef as React.Ref<HTMLElement>}>
-      <div className="hero__orb hero__orb--one" />
-      <div className="hero__orb hero__orb--two" />
-
-      <div className="hero__pills-row">
-        <ProductViewPills productView={productView} setProductView={setProductView} />
-        <CalculatorHeroDisplayControls
-          moduleLabel="ŠD"
-          viewModeName="sd-view-mode"
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          displayDensityName="sd-display-density"
-          displayDensity={displayDensity}
-          setDisplayDensity={setDisplayDensity}
-          focusMode={focusMode}
-          setFocusMode={setFocusMode}
-          expertExampleSelectId={SD_HERO_EXAMPLE_SELECT_ID}
-          trailing={
-            <>
-              <GlossaryIconButton
-                ref={glossaryTriggerRef as React.Ref<HTMLButtonElement>}
-                className="glossary-icon-btn--hero"
-                expanded={glossaryOpen}
-                onClick={() => setGlossaryOpen(true)}
-              />
-              <QuickOnboardingHeroButton
-                guideOpen={guideOpen}
-                onToggle={toggleGuide}
-                buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
-              />
-            </>
-          }
-        />
-      </div>
-
-      <HeroExpertStrip
-        title="PHmax ve školní družině"
-        kpis={[
-          { label: "PHmax", value: phmaxDisplay },
-          { label: "Účastníci", value: pupils },
-          { label: "Oddělení", value: departmentCount },
-          { label: "Stav", value: verdictLabel },
-        ]}
-      />
-
-      <div className="hero__grid dash-hero-brand hero__grid--context">
-        <HeroBrandLogoButton productView={productView} setProductView={setProductView} />
-        <div className="dash-hero-brand__copy">
-          <p className="hero-zone-label">A. Kontext výpočtu</p>
-          <h1 className="hero__title hero__title--sd">PHmax ve školní družině</h1>
-          <p className="hero__text hero__text--sd">
-            Orientační výpočet podle{" "}
-            <strong>vyhlášky č. 74/2005 Sb., o zájmovém vzdělávání</strong> (zejména § 10 a{" "}
-            <strong>přílohy s tabulkou</strong> týdenního nejvyššího rozsahu přímé pedagogické činnosti / PHmax podle
-            počtu oddělení) a metodických pokynů MŠMT. U „speciálních“ oddělení dle § 16 školského zákona a u méně než
-            čtyř oddělení platí další pravidla – vždy vycházejte z úplného znění vyhlášky a metodiky.
-          </p>
-        </div>
-      </div>
-
-      <SdHeroToolbar {...toolbar} />
-    </header>
+    <CalculatorHeroShell
+      heroHeaderRef={heroHeaderRef}
+      productView={productView}
+      setProductView={setProductView}
+      viewMode={viewMode}
+      setViewMode={setViewMode}
+      displayDensity={displayDensity}
+      setDisplayDensity={setDisplayDensity}
+      focusMode={focusMode}
+      setFocusMode={setFocusMode}
+      moduleLabel="ŠD"
+      viewModeName="sd-view-mode"
+      displayDensityName="sd-display-density"
+      expertExampleSelectId={SD_HERO_EXAMPLE_SELECT_ID}
+      title="PHmax ve školní družině"
+      titleClassName="hero__title hero__title--sd"
+      showMiniLogo
+      kpis={[
+        { label: "PHmax", value: phmaxDisplay, variant: "primary" },
+        { label: "Účastníci", value: pupils, variant: "secondary" },
+        { label: "Oddělení", value: departmentCount, variant: "secondary" },
+        { label: "Stav", value: verdictLabel, variant: "status", tone: verdictTone },
+      ]}
+      aboutContent={
+        <p className="calculator-hero-shell__about-text">
+          Orientační výpočet podle <strong>vyhlášky č. 74/2005 Sb., o zájmovém vzdělávání</strong> (zejména § 10 a{" "}
+          <strong>přílohy s tabulkou</strong> týdenního nejvyššího rozsahu přímé pedagogické činnosti / PHmax podle
+          počtu oddělení) a metodických pokynů MŠMT. U „speciálních“ oddělení dle § 16 školského zákona a u méně než
+          čtyř oddělení platí další pravidla – vždy vycházejte z úplného znění vyhlášky a metodiky.
+        </p>
+      }
+      headerActions={
+        <>
+          <GlossaryIconButton
+            ref={glossaryTriggerRef as React.Ref<HTMLButtonElement>}
+            className="glossary-icon-btn--header"
+            layout="icon"
+            expanded={glossaryOpen}
+            onClick={() => setGlossaryOpen(true)}
+          />
+          <QuickOnboardingHeroButton
+            guideOpen={guideOpen}
+            onToggle={toggleGuide}
+            layout="icon"
+            buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
+          />
+        </>
+      }
+      toolbar={<SdHeroToolbar {...toolbar} suppressOwnDataHint onOpenRychlyPhmax={onOpenRychlyPhmax} />}
+    />
   );
 }

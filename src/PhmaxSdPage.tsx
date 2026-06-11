@@ -178,6 +178,7 @@ const SD_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
 type PhmaxSdPageProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
+  onOpenRychlyPhmax?: () => void;
 };
 
 const SD_HERO_EXAMPLE_SELECT_LEGEND =
@@ -309,7 +310,7 @@ function loadSdStateFromStorage(): SdPersistedSnapshot {
   }
 }
 
-export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
+export function PhmaxSdPage({ productView, setProductView, onOpenRychlyPhmax }: PhmaxSdPageProps) {
   const initial = loadSdStateFromStorage();
   const [pupils, setPupils] = useState(() => initial.pupils);
   const [manualDepts, setManualDepts] = useState(() => initial.manualDepts);
@@ -1050,6 +1051,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         heroHeaderRef={heroHeaderRef}
         productView={productView}
         setProductView={setProductView}
+        onOpenRychlyPhmax={onOpenRychlyPhmax}
         viewMode={viewMode}
         setViewMode={setViewMode}
         displayDensity={displayDensity}
@@ -1066,6 +1068,7 @@ export function PhmaxSdPage({ productView, setProductView }: PhmaxSdPageProps) {
         pupils={pupils}
         departmentCount={inputMode === "detail" ? detailDepartments.length : effectiveDepts}
         verdictLabel={sdVerdict.label}
+        verdictTone={sdVerdict.tone}
         toolbar={{
           selectedExample: selectedSdHeroExample,
           exampleGroups: sdHeroExampleGroups,

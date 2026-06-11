@@ -96,6 +96,7 @@ import { PhmaxPvMethodologyTables123, type PvMethodologyActiveCell } from "./phm
 type PhmaxPvPageProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
+  onOpenRychlyPhmax?: () => void;
 };
 
 const PV_GLOSSARY_TERMS: readonly GlossaryTerm[] = [
@@ -299,7 +300,7 @@ function applyPvHeroExampleSelection(
   }
 }
 
-export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
+export function PhmaxPvPage({ productView, setProductView, onOpenRychlyPhmax }: PhmaxPvPageProps) {
   const [rows, setRows] = useState<PvWorkplaceRowState[]>(() => loadPvRowsFromStorage());
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState("");
@@ -812,6 +813,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         heroHeaderRef={heroHeaderRef}
         productView={productView}
         setProductView={setProductView}
+        onOpenRychlyPhmax={onOpenRychlyPhmax}
         viewMode={viewMode}
         setViewMode={setViewMode}
         displayDensity={displayDensity}
@@ -828,6 +830,7 @@ export function PhmaxPvPage({ productView, setProductView }: PhmaxPvPageProps) {
         phaMaxDisplay={aggregate.phaSum > 0 ? aggregate.phaSum : "–"}
         workplaceCount={rows.length}
         verdictLabel={pvVerdict.label}
+        verdictTone={pvVerdict.tone}
         aggregateIncomplete={aggregate.incomplete}
         toolbar={{
           selectedExample: selectedPvHeroExample,

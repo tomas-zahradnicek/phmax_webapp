@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { heroHasDisplaySettings } from "./calculator-hero-display-contract";
 
 const repoRoot = path.resolve(__dirname, "..");
 
@@ -55,7 +56,7 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
         /calculator-workspace-dock|CalculatorWorkflowDock|ZsWorkflowDockPanel|ZsCalculatorShell|SdWorkflowDockPanel|SdCalculatorShell|PvWorkflowDockPanel|PvCalculatorShell/,
       );
       expect(toolbarSrc, page).toContain("HeroCompactToolbar");
-      expect(heroSrc, page).toContain("CalculatorHeroDisplayControls");
+      expect(heroHasDisplaySettings(heroSrc), page).toBe(true);
       expect(heroSrc, page).toMatch(/hero-zone-actions--toolbar|(Zs|Pv|Sd|Nv75|Ss)HeroToolbar/);
       expect(src, page).toMatch(
         /CalculatorWorkflowDock|ZsWorkflowDockPanel|ZsCalculatorShell|SdWorkflowDockPanel|SdCalculatorShell|PvWorkflowDockPanel|PvCalculatorShell/,
@@ -88,8 +89,8 @@ describe("UX contract: hero result + tiered actions (post TOP 4)", () => {
     expect(readSource("src/zs/ZsPhmaxBasicSection.tsx")).toContain('data-phmax-pane="classes"');
     expect(readSource("src/zs/ZsPhmaxMinoritySection.tsx")).toContain('data-phmax-pane="exceptions"');
     expect(readSource("src/zs/ZsOverviewSection.tsx")).toContain('data-phmax-pane="summary"');
-    expect(heroHeader).toContain("heroHeaderRef as React.Ref<HTMLElement>");
+    expect(heroHeader).toContain("CalculatorHeroShell");
     expect(heroHeader).toContain("hero__title--zs");
-    expect(heroHeader).toMatch(/hero-zone-actions--toolbar|ZsHeroToolbar/);
+    expect(heroHeader).toMatch(/calculator-hero-work-card|ZsHeroToolbar/);
   });
 });

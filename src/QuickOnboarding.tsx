@@ -69,20 +69,50 @@ type QuickOnboardingHeroButtonProps = {
   guideOpen: boolean;
   onToggle: () => void;
   buttonRef?: React.Ref<HTMLButtonElement>;
+  /** inline = pilulka, tile = KPI dlaždice, icon = jen ikona v hlavičce. */
+  layout?: "inline" | "tile" | "icon";
 };
 
 /** Sjednocené tlačítko Nápověda / Skrýt nápovědu v hero liště. */
-export function QuickOnboardingHeroButton({ guideOpen, onToggle, buttonRef }: QuickOnboardingHeroButtonProps) {
+export function QuickOnboardingHeroButton({
+  guideOpen,
+  onToggle,
+  buttonRef,
+  layout = "inline",
+}: QuickOnboardingHeroButtonProps) {
+  const label = guideOpen ? QUICK_ONBOARDING_DISMISS_LABEL : QUICK_ONBOARDING_OPEN_LABEL;
+
   return (
     <button
       ref={buttonRef}
       type="button"
-      className="btn btn--hero-help"
+      className={[
+        "btn btn--hero-help",
+        layout === "tile" ? "btn--hero-help--tile" : "",
+        layout === "icon" ? "btn--hero-help--icon" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       onClick={onToggle}
       aria-expanded={guideOpen}
       aria-haspopup="dialog"
+      aria-label={layout === "icon" ? label : undefined}
+      title={label}
     >
-      {guideOpen ? QUICK_ONBOARDING_DISMISS_LABEL : QUICK_ONBOARDING_OPEN_LABEL}
+      {layout === "tile" ? (
+        <>
+          <span className="btn--hero-help__icon" aria-hidden>
+            ?
+          </span>
+          <span className="btn--hero-help__label">{label}</span>
+        </>
+      ) : layout === "icon" ? (
+        <span className="btn--hero-help__icon" aria-hidden>
+          ?
+        </span>
+      ) : (
+        label
+      )}
     </button>
   );
 }

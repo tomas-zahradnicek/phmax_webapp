@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { HeroBrandLogoButton } from "./AppBrandLogo";
+import { DashHeroHeader } from "./dashboard/DashHeroHeader";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import {
-  CALCULATOR_LIMITS_NOTE,
   DASH_IMPORT_HINT,
   DASH_IMPORT_LABEL,
   DASH_IMPORT_STEPS,
@@ -27,7 +26,7 @@ import {
 import { buildDashboardBandHints } from "./phmax-dashboard-band-hints";
 import { PRINT_SUMMARY_POPUP_BLOCKED_MESSAGE } from "./app-author-print";
 import { HeroStatusBar } from "./HeroStatusBar";
-import { ProductViewPills, type ProductView } from "./ProductViewPills";
+import type { ProductView } from "./ProductViewPills";
 import { CS_HOURS_PER_WEEK_SHORT, formatCsNumberOrDash } from "./cs-format";
 import { round2 } from "./phmax-zs-logic";
 import { computePvPhmaxTotal, getPhaMaxPv, type PvProvozKind } from "./phmax-pv-logic";
@@ -134,6 +133,9 @@ const DASH_CALC_LABEL: Record<Exclude<ProductView, "dash">, string> = {
 type PhmaxDashboardPageProps = {
   productView: ProductView;
   setProductView: (v: ProductView) => void;
+  onOpenPvLite?: () => void;
+  onOpenSdLite?: () => void;
+  onOpenZsLite?: () => void;
 };
 
 const LS_PV = "edu-cz-pv-calculator-state";
@@ -431,38 +433,6 @@ function dashOverviewCompactMetric(value: string): string {
   return m ? m[0].replace(".", ",") : head;
 }
 
-function csDashModulesPreparedLabel(count: number): string {
-  if (count === 0) return "modulů připraveno";
-  if (count === 1) return "modul připraven";
-  if (count >= 2 && count <= 4) return "moduly připraveny";
-  return "modulů připraveno";
-}
-
-function formatDashHeroAttentionLine(attentionCount: number): React.ReactNode {
-  if (attentionCount === 0) {
-    return <>✓ bez upozornění</>;
-  }
-  if (attentionCount === 1) {
-    return (
-      <>
-        <strong>1</strong> věc ke kontrole
-      </>
-    );
-  }
-  if (attentionCount >= 2 && attentionCount <= 4) {
-    return (
-      <>
-        <strong>{attentionCount}</strong> věci ke kontrole
-      </>
-    );
-  }
-  return (
-    <>
-      <strong>{attentionCount}</strong> věcí ke kontrole
-    </>
-  );
-}
-
 function formatDashSchoolStatusAttention(attentionCount: number): string {
   if (attentionCount === 0) return "✓ bez upozornění";
   if (attentionCount === 1) return "1 modul ke kontrole";
@@ -703,7 +673,13 @@ function buildDashboardRows(): DashboardRow[] {
   return rows;
 }
 
-export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboardPageProps) {
+export function PhmaxDashboardPage({
+  productView,
+  setProductView,
+  onOpenPvLite,
+  onOpenSdLite,
+  onOpenZsLite,
+}: PhmaxDashboardPageProps) {
   const [refreshAt, setRefreshAt] = useState(() => new Date());
   const [notice, publishNotice] = useUiNotice();
   const [scenarioLabel, setScenarioLabel] = useState(() => readSchoolScenarioLabel());
@@ -1048,42 +1024,31 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
   return (
     <div className="app-shell app-shell--gradient dash-page">
       <div className="container container--app">
-        <header className="hero hero--feature">
-          <div className="hero__orb hero__orb--one" />
-          <div className="hero__orb hero__orb--two" />
-          <div className="hero__pills-row">
-            <ProductViewPills productView={productView} setProductView={setProductView} />
-            <button type="button" className="btn ghost" onClick={refresh}>
-              Obnovit z prohlížeče
-            </button>
-            <button type="button" className="btn ghost" onClick={handleClearLocalData}>
-              Vymazat lokální data
-            </button>
-          </div>
-          <div className="hero__grid dash-hero-brand">
-            <HeroBrandLogoButton productView={productView} setProductView={setProductView} />
-            <div className="dash-hero-brand__copy">
-              <h1 className="hero__title">Ředitelský průvodce</h1>
-              <ul className="dash-hero-stats" aria-label="Souhrn stavu školy">
-                {modulesWithData > 0 && attentionRows.length === 0 ? (
-                  <li className="dash-hero-stats__ok-line">
-                    Stav školy: <strong>v pořádku</strong>
-                  </li>
-                ) : null}
-                <li>
-                  <strong>{modulesWithData}</strong> {csDashModulesPreparedLabel(modulesWithData)}
-                </li>
-                <li>{formatDashHeroAttentionLine(attentionRows.length)}</li>
-                <li>
-                  Poslední práce: <strong>{continueRow ? DASH_CALC_LABEL[continueRow.id] : "–"}</strong>
-                </li>
-              </ul>
-              <p className="hero__text hero__text--compact">
-                Stav v tomto prohlížeči · obnoveno {lastRefreshLabel}. {CALCULATOR_LIMITS_NOTE}
-              </p>
-            </div>
-          </div>
-        </header>
+        <DashHeroHeader
+          productView={productView}
+          setProductView={setProductView}
+          phmaxTotalDisplay={
+            crossPhmax.totalPhmax != null
+              ? `${formatCsNumberOrDash(crossPhmax.totalPhmax)} ${CS_HOURS_PER_WEEK_SHORT}`
+              : "–"
+          }
+          modulesWithData={modulesWithData}
+          attentionCount={attentionRows.length}
+          continueModuleLabel={continueRow ? DASH_CALC_LABEL[continueRow.id] : "–"}
+          statusLabel={
+            modulesWithData === 0
+              ? "Začněte výpočtem"
+              : attentionRows.length > 0
+                ? "Vyžaduje pozornost"
+                : "V pořádku"
+          }
+          statusTone={schoolStatusTone}
+          toolbar={{
+            lastRefreshLabel,
+            onRefresh: refresh,
+            onClearLocalData: handleClearLocalData,
+          }}
+        />
 
         <main id={PHMAX_DASHBOARD_MAIN_ID} tabIndex={-1}>
         <section
@@ -1267,6 +1232,21 @@ export function PhmaxDashboardPage({ productView, setProductView }: PhmaxDashboa
                   <button type="button" className="btn primary" onClick={() => openDashboardModule(row)}>
                     Otevřít
                   </button>
+                  {row.id === "pv" && onOpenPvLite ? (
+                    <button type="button" className="btn ghost" onClick={onOpenPvLite}>
+                      Rychlý PHmax
+                    </button>
+                  ) : null}
+                  {row.id === "sd" && onOpenSdLite ? (
+                    <button type="button" className="btn ghost" onClick={onOpenSdLite}>
+                      Rychlý PHmax
+                    </button>
+                  ) : null}
+                  {row.id === "zs" && onOpenZsLite ? (
+                    <button type="button" className="btn ghost" onClick={onOpenZsLite}>
+                      Rychlý PHmax
+                    </button>
+                  ) : null}
                   {!row.hasData ? (
                     <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(row.id)}>
                       Začít u ukázky

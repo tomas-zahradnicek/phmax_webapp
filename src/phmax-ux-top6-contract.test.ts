@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { heroHasDisplaySettings } from "./calculator-hero-display-contract";
 
 const repoRoot = path.resolve(__dirname, "..");
 
@@ -139,7 +140,7 @@ describe("UX TOP 6 contract", () => {
                   ? readSource("src/nv75/Nv75HeroHeader.tsx")
                   : readSource(page);
       expect(toolbarSrc).toContain("HeroCompactToolbar");
-      expect(heroSrc).toContain("CalculatorHeroDisplayControls");
+      expect(heroHasDisplaySettings(heroSrc)).toBe(true);
       expect(heroSrc).toMatch(/hero-zone-actions--toolbar|(Zs|Pv|Sd|Ss|Nv75)HeroToolbar/);
     }
     expect(readSource("src/sd/SdResultsSection.tsx")).toContain('data-section="sd-vysledek"');

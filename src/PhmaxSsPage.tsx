@@ -539,6 +539,7 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         phamaxHeroValue={phamaxHeroValue}
         rowCount={ssMetrics.rowCount}
         verdictLabel={ssVerdict.label}
+        verdictTone={ssVerdict.tone}
         toolbar={{
           selectedExample: selectedSsHeroExample,
           exampleGroups: ssHeroExampleGroups,

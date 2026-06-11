@@ -1,13 +1,12 @@
 import React from "react";
-import { HeroBrandLogoButton } from "../AppBrandLogo";
-import { CalculatorHeroDisplayControls } from "../CalculatorHeroDisplayControls";
-import { HeroExpertStrip } from "../HeroExpertStrip";
-import { ProductViewPills, type ProductView } from "../ProductViewPills";
+import { CalculatorHeroShell } from "../CalculatorHeroShell";
 import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
+import type { CalculatorVerdictTone } from "../calculator-verdict-ui";
 import type { DisplayDensity } from "../display-density";
 import { formatCsHoursPerWeek } from "../cs-format";
+import type { ProductView } from "../ProductViewPills";
 import { NV75_HERO_EXAMPLE_SELECT_ID } from "../nv75-basic-wizard";
 import { Nv75HeroToolbar, type Nv75HeroToolbarProps } from "./Nv75HeroToolbar";
 
@@ -28,6 +27,7 @@ export type Nv75HeroHeaderProps = {
   rowCount: number;
   appliedRule: string | null | undefined;
   verdictLabel: string;
+  verdictTone: CalculatorVerdictTone;
   toolbar: Nv75HeroToolbarProps;
 };
 
@@ -48,59 +48,47 @@ export function Nv75HeroHeader({
   rowCount,
   appliedRule,
   verdictLabel,
+  verdictTone,
   toolbar,
 }: Nv75HeroHeaderProps) {
   return (
-    <header className="hero hero--feature" ref={heroHeaderRef as React.Ref<HTMLElement>}>
-      <div className="hero__orb hero__orb--one" />
-      <div className="hero__orb hero__orb--two" />
-
-      <div className="hero__pills-row">
-        <ProductViewPills productView={productView} setProductView={setProductView} />
-        <CalculatorHeroDisplayControls
-          moduleLabel="NV75"
-          viewModeName="nv75-view-mode"
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          displayDensityName="nv75-display-density"
-          displayDensity={displayDensity}
-          setDisplayDensity={setDisplayDensity}
-          focusMode={focusMode}
-          setFocusMode={setFocusMode}
-          expertExampleSelectId={NV75_HERO_EXAMPLE_SELECT_ID}
-          trailing={
-            <QuickOnboardingHeroButton
-              guideOpen={guideOpen}
-              onToggle={toggleGuide}
-              buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
-            />
-          }
+    <CalculatorHeroShell
+      heroHeaderRef={heroHeaderRef}
+      productView={productView}
+      setProductView={setProductView}
+      viewMode={viewMode}
+      setViewMode={setViewMode}
+      displayDensity={displayDensity}
+      setDisplayDensity={setDisplayDensity}
+      focusMode={focusMode}
+      setFocusMode={setFocusMode}
+      moduleLabel="NV75"
+      viewModeName="nv75-view-mode"
+      displayDensityName="nv75-display-density"
+      expertExampleSelectId={NV75_HERO_EXAMPLE_SELECT_ID}
+      title="Banka odpočtů zástupců ředitele"
+      showMiniLogo
+      kpis={[
+        { label: "Banka celkem", value: formatCsHoursPerWeek(bankHoursTotal), variant: "primary" },
+        { label: "Řádky", value: rowCount, variant: "secondary" },
+        { label: "§4b", value: appliedRule ?? "–", variant: "secondary" },
+        { label: "Stav", value: verdictLabel, variant: "status", tone: verdictTone },
+      ]}
+      aboutContent={
+        <p className="calculator-hero-shell__about-text">
+          Orientační výpočet banky hodin podle <strong>§4b–§4d NV č. 75/2016 Sb.</strong> V expertním režimu zůstává
+          kompaktní lišta akcí; podrobný audit a tabulky jsou níže ve formuláři.
+        </p>
+      }
+      headerActions={
+        <QuickOnboardingHeroButton
+          guideOpen={guideOpen}
+          onToggle={toggleGuide}
+          layout="icon"
+          buttonRef={helpButtonRef as React.Ref<HTMLButtonElement>}
         />
-      </div>
-
-      <HeroExpertStrip
-        title="Banka odpočtů – NV č. 75/2016 Sb. (§4b–§4d)"
-        kpis={[
-          { label: "Banka celkem", value: formatCsHoursPerWeek(bankHoursTotal) },
-          { label: "Řádky", value: rowCount },
-          { label: "§4b", value: appliedRule ?? "–" },
-          { label: "Stav", value: verdictLabel },
-        ]}
-      />
-
-      <div className="hero__grid dash-hero-brand hero__grid--context">
-        <HeroBrandLogoButton productView={productView} setProductView={setProductView} />
-        <div className="dash-hero-brand__copy">
-          <p className="hero-zone-label">A. Kontext výpočtu</p>
-          <h1 className="hero__title">Banka odpočtů zástupců ředitele</h1>
-          <p className="hero__text">
-            Orientační výpočet banky hodin podle <strong>§4b–§4d NV č. 75/2016 Sb.</strong> V expertním režimu zůstává
-            kompaktní lišta akcí; podrobný audit a tabulky jsou níže ve formuláři.
-          </p>
-        </div>
-      </div>
-
-      <Nv75HeroToolbar {...toolbar} />
-    </header>
+      }
+      toolbar={<Nv75HeroToolbar {...toolbar} suppressOwnDataHint />}
+    />
   );
 }

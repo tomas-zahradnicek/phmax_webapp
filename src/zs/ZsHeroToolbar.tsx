@@ -17,7 +17,11 @@ import { HeroCompactToolbar, HeroToolbarSaveButton } from "../HeroCompactToolbar
 import { OwnDataHint } from "../OwnDataHint";
 import { CompareVariantsPanel } from "../CompareVariantsPanel";
 import type { CompareProductVariantsResult } from "../phmax-product-compare";
-import { NAMED_BACKUPS_COMPARE_JSON_LABEL } from "../calculator-ui-constants";
+import {
+  HERO_EXAMPLE_FIELD_LABEL,
+  HERO_EXPORT_TOOLS_LABEL,
+  NAMED_BACKUPS_COMPARE_JSON_LABEL,
+} from "../calculator-ui-constants";
 import type { ZsHeroExampleKey } from "../zs-hero-example-groups";
 import { ZS_HERO_EXAMPLE_GROUPS } from "../zs-hero-example-groups";
 import { ZsNamedSnapshotsHeroPanel } from "./ZsNamedSnapshotsHeroPanel";
@@ -48,6 +52,8 @@ export type ZsHeroToolbarProps = {
   onCopySummary: () => void;
   onClearStored: () => void;
   onResetAll: () => void;
+  suppressOwnDataHint?: boolean;
+  onOpenRychlyPhmax?: () => void;
 };
 
 export function ZsHeroToolbar({
@@ -76,14 +82,16 @@ export function ZsHeroToolbar({
   onCopySummary,
   onClearStored,
   onResetAll,
+  suppressOwnDataHint = false,
+  onOpenRychlyPhmax,
 }: ZsHeroToolbarProps) {
   return (
-    <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu">
-      <OwnDataHint variant="hero" />
-      <div className="hero-zone-actions__toolbar-row">
+    <section className="hero-zone-actions hero-zone-actions--toolbar calculator-hero-work-card__body" aria-label="Akce výpočtu">
+      {suppressOwnDataHint ? null : <OwnDataHint variant="hero" />}
+      <div className="calculator-hero-work-card__start">
         <div className="field field--hero-select hero-actions__example hero-zs-example-select">
           <span className="field__label field__label--hero" id="zs-hero-example-label">
-            Ukázkový příklad
+            {HERO_EXAMPLE_FIELD_LABEL}
           </span>
           <HeroExampleSelect
             id="zs-hero-example-select"
@@ -102,6 +110,25 @@ export function ZsHeroToolbar({
             {exampleLegend}
           </p>
         </div>
+
+        {onOpenRychlyPhmax ? (
+          <div className="calculator-hero-work-card__cta">
+            <button
+              type="button"
+              className="btn primary calculator-hero-work-card__quick-btn"
+              onClick={onOpenRychlyPhmax}
+            >
+              <span className="calculator-hero-work-card__quick-icon" aria-hidden>
+                ⚡
+              </span>
+              Rychlý výpočet
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="calculator-hero-work-card__exports">
+        <span className="calculator-hero-work-card__section-label">{HERO_EXPORT_TOOLS_LABEL}</span>
         <HeroActionsDrawer>
           <HeroCompactToolbar
             primary={

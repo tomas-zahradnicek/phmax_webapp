@@ -1,7 +1,10 @@
 import type { ProductViewCode } from "./calculator-ui-constants";
 import { PHMAX_SEO_MODULE_CONTENT } from "./phmax-seo-module-content";
 import { APP_BRAND_LOGO_PATH } from "./calculator-ui-constants";
+import { PHMAX_PV_LITE_PATH, PHMAX_SD_LITE_PATH, PHMAX_ZS_LITE_PATH } from "./phmax-lite-paths";
 import { buildProductViewPageUrl, listProductViewPathUrls } from "./product-view-paths";
+
+export type PhmaxLiteKind = "pv" | "sd" | "zs";
 
 export const PHMAX_SITE_NAME = "Ředitelský průvodce";
 
@@ -53,6 +56,33 @@ export const PHMAX_DOCUMENT_HEAD: Record<ProductViewCode, PhmaxDocumentHeadMeta>
   },
 };
 
+export const PHMAX_LITE_DOCUMENT_HEAD: Record<PhmaxLiteKind, PhmaxDocumentHeadMeta> = {
+  pv: {
+    title: "Rychlý PHmax – předškolní vzdělávání | Ředitelský průvodce",
+    description:
+      "Zjednodušený orientační výpočet PHmax pro jedno pracoviště mateřské školy – druh provozu, počet tříd a doba provozu. Pomocný nástroj bez exportu a složitých výjimek.",
+    applicationName: "Rychlý PHmax pro předškolní vzdělávání",
+  },
+  sd: {
+    title: "Rychlý PHmax – školní družina | Ředitelský průvodce",
+    description:
+      "Zjednodušený orientační výpočet PHmax školní družiny z počtu účastníků a oddělení. Pomocný nástroj pro rychlou kontrolu bez detailní tabulky oddělení.",
+    applicationName: "Rychlý PHmax pro školní družiny",
+  },
+  zs: {
+    title: "Rychlý PHmax – základní škola | Ředitelský průvodce",
+    description:
+      "Zjednodušený orientační výpočet PHmax pro běžné třídy základní školy z počtu tříd a žáků. Pomocný nástroj bez inkluze, PHAmax a PHPmax.",
+    applicationName: "Rychlý PHmax pro základní školy",
+  },
+};
+
+const PHMAX_LITE_PATH: Record<PhmaxLiteKind, string> = {
+  pv: PHMAX_PV_LITE_PATH,
+  sd: PHMAX_SD_LITE_PATH,
+  zs: PHMAX_ZS_LITE_PATH,
+};
+
 const PHMAX_JSON_LD_ID = "phmax-software-application-jsonld";
 const PHMAX_FAQ_JSON_LD_ID = "phmax-faq-jsonld";
 
@@ -99,13 +129,8 @@ function upsertJsonLd(id: string, data: Record<string, unknown>): void {
   el.textContent = JSON.stringify(data);
 }
 
-/** Nastaví title, meta description, Open Graph, canonical a JSON-LD pro aktivní modul. */
-export function applyPhmaxDocumentHead(view: ProductViewCode): void {
-  if (typeof document === "undefined") return;
-
-  const meta = PHMAX_DOCUMENT_HEAD[view];
+function applyPhmaxHeadMeta(meta: PhmaxDocumentHeadMeta, canonical: string, faqView: ProductViewCode): void {
   const origin = resolvePhmaxSiteOrigin();
-  const canonical = buildPhmaxCanonicalUrl(view, origin);
 
   document.title = meta.title;
   upsertMeta("name", "description", meta.description);
@@ -135,7 +160,7 @@ export function applyPhmaxDocumentHead(view: ProductViewCode): void {
     },
   });
 
-  const faq = PHMAX_SEO_MODULE_CONTENT[view].faq;
+  const faq = PHMAX_SEO_MODULE_CONTENT[faqView].faq;
   if (faq.length > 0) {
     upsertJsonLd(PHMAX_FAQ_JSON_LD_ID, {
       "@context": "https://schema.org",
@@ -154,7 +179,29 @@ export function applyPhmaxDocumentHead(view: ProductViewCode): void {
   }
 }
 
-/** Všechny URL pro sitemap (čisté path). */
+/** Nastaví title, meta description, Open Graph, canonical a JSON-LD pro aktivní modul. */
+export function applyPhmaxDocumentHead(view: ProductViewCode): void {
+  if (typeof document === "undefined") return;
+  const meta = PHMAX_DOCUMENT_HEAD[view];
+  const canonical = buildPhmaxCanonicalUrl(view, resolvePhmaxSiteOrigin());
+  applyPhmaxHeadMeta(meta, canonical, view);
+}
+
+/** Document head pro režim „Rychlý PHmax“ (/rychly). */
+export function applyPhmaxLiteDocumentHead(lite: PhmaxLiteKind): void {
+  if (typeof document === "undefined") return;
+  const meta = PHMAX_LITE_DOCUMENT_HEAD[lite];
+  const origin = resolvePhmaxSiteOrigin();
+  const canonical = new URL(PHMAX_LITE_PATH[lite], origin).href;
+  applyPhmaxHeadMeta(meta, canonical, lite);
+}
+
+/** Všechny URL pro sitemap (čisté path včetně rychlého PHmax). */
 export function listPhmaxSitemapUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): string[] {
-  return listProductViewPathUrls(origin);
+  return [
+    ...listProductViewPathUrls(origin),
+    new URL(PHMAX_PV_LITE_PATH, origin).href,
+    new URL(PHMAX_SD_LITE_PATH, origin).href,
+    new URL(PHMAX_ZS_LITE_PATH, origin).href,
+  ];
 }

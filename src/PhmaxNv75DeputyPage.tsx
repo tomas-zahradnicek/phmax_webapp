@@ -1102,6 +1102,7 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           rowCount={rows.length}
           appliedRule={bank.appliedRule}
           verdictLabel={nv75Verdict.label}
+          verdictTone={nv75Verdict.tone}
           toolbar={{
             onAddRow: addRow,
             onExportCsv: handleExportCsv,

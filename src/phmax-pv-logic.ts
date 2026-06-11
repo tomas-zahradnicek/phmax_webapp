@@ -273,6 +273,29 @@ export function getPvAppendixBandLabels(provoz: PvProvozKind): readonly string[]
   return null;
 }
 
+/**
+ * Celkový nejnižší počet dětí dle § 2 vyhl. 14/2005 Sb. (pro orientační krácení § 1d odst. 3).
+ * `soleMsInMunicipality` odpovídá § 2 odst. 2 (jediná MŠ v obci).
+ */
+export function getPvSec2MinimumChildrenTotal(params: {
+  soleMsInMunicipality: boolean;
+  classCount: number;
+}): number | null {
+  const classCount = Math.floor(params.classCount);
+  if (classCount < 1) return null;
+
+  if (params.soleMsInMunicipality) {
+    if (classCount === 1) return 13;
+    if (classCount === 2) return 25;
+    return 16 * classCount;
+  }
+
+  if (classCount === 1) return 15;
+  if (classCount === 2) return 25;
+  if (classCount === 3) return round2(16.33 * 3);
+  return 18 * classCount;
+}
+
 /** +5 h/týden za každou třídu (školu) dle § 16 odst. 9 (metodika PV v4). */
 export function phmaxPvSec16Bonus(sec16ClassCount: number): number {
   return Math.max(0, sec16ClassCount) * 5;

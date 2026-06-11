@@ -1,5 +1,6 @@
 import { PRODUCT_VIEW_CODES } from "./calculator-ui-constants";
 import type { ProductView } from "./ProductViewPills";
+import { isPvLitePathname, isSdLitePathname, isZsLitePathname } from "./phmax-lite-paths";
 import {
   LEGACY_VIEW_QUERY,
   productViewFromPathname,
@@ -15,6 +16,9 @@ export {
 
 export function readInitialProductView(): ProductView {
   if (typeof window === "undefined") return "zs";
+  if (isSdLitePathname(window.location.pathname)) return "sd";
+  if (isPvLitePathname(window.location.pathname)) return "pv";
+  if (isZsLitePathname(window.location.pathname)) return "zs";
   const fromPath = productViewFromPathname(window.location.pathname);
   if (fromPath) return fromPath;
   const q = new URLSearchParams(window.location.search).get(LEGACY_VIEW_QUERY);

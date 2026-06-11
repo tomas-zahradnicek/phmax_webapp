@@ -1,10 +1,9 @@
-/** Normalizuje text čísla – odstraní úvodní nuly z celé části, zachová desetinnou čárku/tečku. */
+/** Normalizuje text čísla – odstraní úvodní nuly z celé části; výstup vždy s desetinnou čárkou. */
 export function sanitizeNumericInputString(raw: string): string {
   const trimmed = raw.trim();
   if (trimmed === "") return "";
 
-  const useComma = trimmed.includes(",") && !trimmed.includes(".");
-  const decSep = useComma ? "," : ".";
+  const decSep = ",";
   const normalized = trimmed.replace(",", ".");
   const cleaned = normalized.replace(/[^\d.]/g, "");
 
@@ -39,7 +38,12 @@ export function formatNumericInputDisplay(value: number, emptyWhenZero = true): 
   if (!Number.isFinite(value)) return "";
   if (emptyWhenZero && value === 0) return "";
   if (Number.isInteger(value)) return String(value);
-  return value.toFixed(4).replace(/\.?0+$/, "");
+  const formatted = value.toLocaleString("cs-CZ", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 4,
+    useGrouping: false,
+  });
+  return formatted;
 }
 
 export function clampNumber(value: number, min?: number, max?: number): number {

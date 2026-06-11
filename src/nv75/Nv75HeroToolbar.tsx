@@ -15,6 +15,7 @@ import { HeroCompactToolbar } from "../HeroCompactToolbar";
 import { OwnDataHint } from "../OwnDataHint";
 import {
   ADVANCED_AUDIT_GROUP_LABEL,
+  HERO_EXPORT_TOOLS_LABEL,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
   NAMED_BACKUPS_NAME_LABEL,
   NAMED_BACKUPS_SAVE_LABEL,
@@ -38,6 +39,7 @@ export type Nv75HeroToolbarProps = {
   onCompareWithNamedSnapshot: () => void;
   onCopySummary: () => void;
   onResetAll: () => void;
+  suppressOwnDataHint?: boolean;
 };
 
 export function Nv75HeroToolbar({
@@ -57,11 +59,13 @@ export function Nv75HeroToolbar({
   onCompareWithNamedSnapshot,
   onCopySummary,
   onResetAll,
+  suppressOwnDataHint = false,
 }: Nv75HeroToolbarProps) {
   return (
-    <section className="hero-zone-actions hero-zone-actions--toolbar" aria-label="Akce výpočtu NV75">
-      <OwnDataHint variant="hero" />
-      <div className="hero-zone-actions__toolbar-row">
+    <section className="hero-zone-actions hero-zone-actions--toolbar calculator-hero-work-card__body" aria-label="Akce výpočtu NV75">
+      {suppressOwnDataHint ? null : <OwnDataHint variant="hero" />}
+      <div className="calculator-hero-work-card__exports calculator-hero-work-card__exports--solo">
+        <span className="calculator-hero-work-card__section-label">{HERO_EXPORT_TOOLS_LABEL}</span>
         <HeroActionsDrawer>
           <HeroCompactToolbar
             primary={

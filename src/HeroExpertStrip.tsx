@@ -1,9 +1,14 @@
 import React from "react";
 
+import type { CalculatorVerdictTone } from "./calculator-verdict-ui";
+
 export type HeroExpertKpi = {
   label: string;
   value: React.ReactNode;
   title?: string;
+  /** Hierarchie v hero KPI řádku (variant A). */
+  variant?: "primary" | "secondary" | "status";
+  tone?: CalculatorVerdictTone;
 };
 
 type HeroExpertStripProps = {

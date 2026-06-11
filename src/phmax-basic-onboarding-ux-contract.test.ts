@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { heroHasDisplaySettings } from "./calculator-hero-display-contract";
 
 const repoRoot = path.resolve(__dirname, "..");
 
@@ -90,6 +91,7 @@ describe("UX contract: basic onboarding steps + CTA", () => {
     expect(readSource("src/calculator-ui-constants.ts")).toContain("VIEW_MODE_HINT_BASIC");
     expect(readSource("src/calculator-ui-constants.ts")).toContain("RESULT_ANCHOR_INPUT_DRIVEN_BADGE");
     expect(readSource("src/calculator-ui-constants.ts")).toContain("HERO_EXAMPLE_SELECT_PLACEHOLDER");
+    expect(readSource("src/calculator-ui-constants.ts")).toContain("HERO_EXPORT_TOOLS_LABEL");
     expect(readSource("src/OwnDataHint.tsx")).toContain('variant?: OwnDataHintVariant');
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain('<OwnDataHint variant="dock" />');
     expect(readSource("src/CalculatorWorkflowDock.tsx")).toContain("RESULT_ANCHOR_INPUT_DRIVEN_BADGE");
@@ -105,17 +107,24 @@ describe("UX contract: basic onboarding steps + CTA", () => {
       "src/ss/SsHeroHeader.tsx",
       "src/nv75/Nv75HeroHeader.tsx",
     ]) {
-      expect(readSource(hero)).toContain("CalculatorHeroDisplayControls");
+      expect(heroHasDisplaySettings(readSource(hero))).toBe(true);
     }
 
-    for (const toolbar of [
-      "src/pv/PvHeroToolbar.tsx",
-      "src/zs/ZsHeroToolbar.tsx",
-      "src/sd/SdHeroToolbar.tsx",
-      "src/ss/SsHeroToolbar.tsx",
-      "src/nv75/Nv75HeroToolbar.tsx",
-    ]) {
-      expect(readSource(toolbar)).toContain('<OwnDataHint variant="hero" />');
+    const heroToolbarPairs: [string, string][] = [
+      ["src/pv/PvHeroHeader.tsx", "src/pv/PvHeroToolbar.tsx"],
+      ["src/zs/ZsHeroHeader.tsx", "src/zs/ZsHeroToolbar.tsx"],
+      ["src/sd/SdHeroHeader.tsx", "src/sd/SdHeroToolbar.tsx"],
+      ["src/ss/SsHeroHeader.tsx", "src/ss/SsHeroToolbar.tsx"],
+      ["src/nv75/Nv75HeroHeader.tsx", "src/nv75/Nv75HeroToolbar.tsx"],
+    ];
+    for (const [hero, toolbar] of heroToolbarPairs) {
+      const heroSrc = readSource(hero);
+      const toolbarSrc = readSource(toolbar);
+      const ownDataViaShell =
+        heroSrc.includes("CalculatorHeroShell") &&
+        readSource("src/CalculatorHeroCollapsibleHint.tsx").includes('<OwnDataHint variant="hero" />');
+      const ownDataViaToolbar = toolbarSrc.includes('<OwnDataHint variant="hero" />');
+      expect(ownDataViaShell || ownDataViaToolbar, `${hero} / ${toolbar}`).toBe(true);
     }
 
     expect(readSource("src/ProductBasicWizard.tsx")).toContain("WIZARD_START_EMPTY_FORM_BUTTON_LABEL");
