@@ -118,7 +118,7 @@ export function ZsPhmaxBasicSection({
               <ResultCard label="Počet tříd × PHmax" value={`${basic1Classes} × ${basicFirstBand.value}`} tone="success" />
             </div>
             {basic1Classes <= 0 || basic1Pupils <= 0 ? (
-              <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+              <p className="muted-text field-validation-warning">
                 {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U 1. stupně doplňte počet tříd i počet žáků.
               </p>
             ) : null}
@@ -141,7 +141,7 @@ export function ZsPhmaxBasicSection({
               <ResultCard label="Počet tříd × PHmax" value={`${basic2Classes} × ${basicSecondBand.value}`} tone="success" />
             </div>
             {basic2Classes <= 0 || basic2Pupils <= 0 ? (
-              <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+              <p className="muted-text field-validation-warning">
                 {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U 2. stupně doplňte počet tříd i počet žáků.
               </p>
             ) : null}

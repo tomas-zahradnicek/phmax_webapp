@@ -2,8 +2,8 @@ import type { CrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
 import type { SchoolScenarioExportPayload } from "./phmax-school-scenario-export";
 import { computeSdPhmaxTotalFromSnapshot } from "./sd/sd-compute-phmax-total-from-snapshot";
 import { computeSsPhmaxTotalFromSnapshot } from "./ss/ss-compute-phmax-total-from-snapshot";
+import { computePvPhmaxTotalFromSnapshot } from "./pv/pv-compute-phmax-total-from-snapshot";
 import { computeZsPhmaxTotalFromSnapshot } from "./zs/zs-compute-phmax-total-from-snapshot";
-import { computePvPhmaxTotal } from "./phmax-pv-logic";
 
 type AuditTotals = { totalPhmax?: number; tab?: string };
 
@@ -16,32 +16,6 @@ function readAuditTotals(snapshot: unknown): AuditTotals | null {
     totalPhmax: typeof o.totalPhmax === "number" ? o.totalPhmax : undefined,
     tab: typeof o.tab === "string" ? o.tab : undefined,
   };
-}
-
-function computePvPhmaxFromSnapshot(snapshot: unknown): number | null {
-  if (!snapshot || typeof snapshot !== "object") return null;
-  const rows = (snapshot as { rows?: unknown }).rows;
-  if (!Array.isArray(rows)) return null;
-  let sum = 0;
-  let any = false;
-  for (const item of rows) {
-    if (!item || typeof item !== "object") continue;
-    const r = item as Record<string, unknown>;
-    const provoz = r.provoz;
-    if (typeof provoz !== "string") continue;
-    const { totalPhmax } = computePvPhmaxTotal({
-      provoz: provoz as "polodenni" | "celodenni" | "internat" | "zdravotnicke",
-      classCount: typeof r.classCount === "number" ? r.classCount : 0,
-      avgHoursPerDay: typeof r.avgHours === "number" ? r.avgHours : 0,
-      sec16ClassCount: typeof r.sec16Count === "number" ? r.sec16Count : 0,
-      languageGroupCount: typeof r.languageGroups === "number" ? r.languageGroups : 0,
-    });
-    if (totalPhmax != null) {
-      sum += totalPhmax;
-      any = true;
-    }
-  }
-  return any ? Math.round((sum + Number.EPSILON) * 100) / 100 : null;
 }
 
 function warnMismatch(label: string, dashboardValue: number, otherLabel: string, otherValue: number): string {
@@ -59,7 +33,7 @@ export function crossPhmaxAuditCoherenceWarnings(
     const slice = summary.slices.find((s) => s.id === "pv");
     if (slice?.phmax == null) return;
     const snapshot = moduleSnapshots.pv;
-    const computed = computePvPhmaxFromSnapshot(snapshot);
+    const computed = computePvPhmaxTotalFromSnapshot(snapshot);
     const audit = readAuditTotals(snapshot);
     if (computed != null && audit?.totalPhmax != null && audit.tab === "phmax") {
       if (Math.abs(audit.totalPhmax - computed) > 0.05) {

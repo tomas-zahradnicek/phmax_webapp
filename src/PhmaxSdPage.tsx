@@ -1200,7 +1200,7 @@ export function PhmaxSdPage({ productView, setProductView, onOpenRychlyPhmax }: 
               onChange={(v) => setPupils(Math.max(0, Math.round(v)))}
             />
             {pupils <= 0 ? (
-              <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+              <p className="muted-text field-validation-warning">
                 {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} Bez počtu účastníků nelze spočítat PHmax.
               </p>
             ) : null}
@@ -1246,7 +1246,7 @@ export function PhmaxSdPage({ productView, setProductView, onOpenRychlyPhmax }: 
                   />
                 ) : null}
                 {manualDepts && departments <= 0 ? (
-                  <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                  <p className="muted-text field-validation-warning">
                     {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} V souhrnném režimu musí být aspoň jedno běžné oddělení.
                   </p>
                 ) : null}

@@ -11299,6 +11299,14 @@ select:focus {
   padding-left: 1.25rem;
 }
 
+/* Varování u polí / řádků – kontrast na světlém pozadí (WCAG) */
+.field-validation-warning {
+  margin-top: 8px;
+  color: #7c2d12;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
 .dash-import-dialog__diff {
   margin: 8px 0 0;
   padding: 8px 10px;

@@ -321,7 +321,7 @@ function PhmaxSsUnitsFormView({
                     </div>
 
                     {!hasEducationField || !avgValid || !classCountValid ? (
-                      <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.85rem", lineHeight: 1.45 }}>
+                      <p className="muted-text field-validation-warning">
                         {!hasEducationField ? `${INLINE_VALIDATION_MSG_REQUIRED_FIELD} Vyplňte kód oboru z RVP.` : null}
                         {!hasEducationField && (!avgValid || !classCountValid) ? " " : null}
                         {!avgValid ? `${INLINE_VALIDATION_MSG_POSITIVE_NUMBER} U pole „${sec.colAvgStudents}“.` : null}

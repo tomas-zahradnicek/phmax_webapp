@@ -120,7 +120,7 @@ export function PvWorkplaceRowsSection({
                   max={maxClasses}
                 />
                 {row.classCount <= 0 ? (
-                  <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                  <p className="muted-text field-validation-warning">
                     {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} Pro toto pole platí rozsah 1 až {maxClasses}; bez počtu tříd
                     se pracoviště do PHmax nezapočte.
                   </p>
@@ -167,11 +167,11 @@ export function PvWorkplaceRowsSection({
                   hint={avgMeta.hint}
                 />
                 {row.avgHours <= 0 ? (
-                  <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                  <p className="muted-text field-validation-warning">
                     {INLINE_VALIDATION_MSG_REQUIRED_FIELD} Zadejte hodnotu v rozsahu {avgMeta.min} až {avgMeta.max} h.
                   </p>
                 ) : row.avgHours < avgMeta.min || row.avgHours > avgMeta.max ? (
-                  <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+                  <p className="muted-text field-validation-warning">
                     Hodnota neodpovídá vybranému typu provozu. Povolený rozsah je {avgMeta.min} až {avgMeta.max} h.
                   </p>
                 ) : null}

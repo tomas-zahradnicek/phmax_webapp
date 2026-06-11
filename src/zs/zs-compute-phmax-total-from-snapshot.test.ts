@@ -13,7 +13,18 @@ describe("computeZsPhmaxTotalFromSnapshot", () => {
     expect(total).toBeGreaterThan(0);
   });
 
-  it("mimo záložku phmax vrací null", () => {
-    expect(computeZsPhmaxTotalFromSnapshot({ tab: "pha", basic1Classes: 1, basic1Pupils: 20 })).toBeNull();
+  it("přepočítá i při uložené záložce pha/php (koherence na přehledu)", () => {
+    const fromPhmaxTab = computeZsPhmaxTotalFromSnapshot({
+      tab: "phmax",
+      basic1Classes: 2,
+      basic1Pupils: 40,
+    });
+    const fromPhaTab = computeZsPhmaxTotalFromSnapshot({
+      tab: "pha",
+      basic1Classes: 2,
+      basic1Pupils: 40,
+    });
+    expect(fromPhaTab).toBe(fromPhmaxTab);
+    expect(fromPhaTab).toBeGreaterThan(0);
   });
 });

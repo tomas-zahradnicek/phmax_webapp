@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Dashboard: kontrolní list před exportem pro IT – appVersion, scénář, coherenceWarnings a odkazy na dokumentaci.",
-    "ZŠ: autosave ukládá _phmaxAuditTotals v souladu s přepočtem PHmax (méně falešných varování na přehledu).",
-    "Dokumentace: smoke checklist po 0.3.14; E2E desktop pokrývá role na dashboardu a popisky PHmax.",
+    "Dashboard: scénáře ZŠ od 2 záloh, import s dalším krokem, checklist prázdného stavu a tisk školního profilu.",
+    "Přepočet PHmax: jeden zdroj pravdy pro ZŠ, PV, ŠD a SŠ – méně falešných varování koherence na přehledu.",
+    "Přístupnost: assertive toast po importu/exportu, návrat fokusu z draweru Akce, kontrast varování u polí.",
   ],
 };

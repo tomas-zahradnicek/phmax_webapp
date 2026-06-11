@@ -190,7 +190,8 @@ export function usePhmaxSsUnits(
 
   useEffect(() => {
     try {
-      const total = computeSsPhmaxTotalFromSnapshot(rows);
+      const draft = { rows };
+      const total = computeSsPhmaxTotalFromSnapshot(draft);
       localStorage.setItem(
         PHMAX_SS_UNITS_STORAGE_KEY,
         JSON.stringify(buildSsDraftStoragePayload(rows, total)),

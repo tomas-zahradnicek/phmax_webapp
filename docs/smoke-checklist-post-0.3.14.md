@@ -1,4 +1,4 @@
-# Smoke checklist po 0.3.14
+# Smoke checklist po 0.3.16
 
 Orientační ruční kontrola po release. Automatizace: `npm run test:e2e` (mobil + desktop projekty v `playwright.config.ts`).
 
@@ -25,15 +25,24 @@ E2E běží proti `npm run preview` – **build musí proběhnout před E2E** (C
 
 ## Dashboard
 
-- [ ] Sekce **Kdo jste? Rychlý vstup** (role cards).
+- [ ] Sekce **Kdo jste?** – segmented role (Ředitel / Metodik / IT), ne staré role cards.
 - [ ] Po seed ≥2 modulů: checkbox exportu → mini-wizard (krok IT).
-- [ ] Pojmenovaná záloha ZŠ → sekce **Porovnání scénářů (ZŠ)**.
+- [ ] ≥2 pojmenované zálohy ZŠ → karta **Scénáře ZŠ** (ne stará sekce „Porovnání scénářů“).
 - [ ] Kontrolní list exportu obsahuje `appVersion`, `coherenceWarnings`, odkaz na IS docs.
+- [ ] Import JSON → toast s `aria-live="assertive"`; banner **Další krok** pod importem.
+- [ ] Prázdný přehled → checklist nového uživatele.
 
 ## ZŠ
 
 - [ ] Quick tour (základní režim, první návštěva).
 - [ ] Přípravná třída: režim v ZŠ, ne MŠ v PV (viz handout „Kde zadat co“).
+- [ ] Koherence na přehledu funguje i když je v autosave uložená záložka PHA/PHP.
+
+## Přístupnost (viz `docs/keyboard-a11y-checklist.md`)
+
+- [ ] Drawer **Akce…** (mobil): Escape → fokus zpět na trigger.
+- [ ] Import dialog: Escape → fokus zpět na tlačítko importu.
+- [ ] Varování u polí: třída `.field-validation-warning` (kontrast `#7c2d12`).
 
 ## Handout PDF (volitelně)
 

@@ -53,6 +53,10 @@ describe("UX contract: release notes + přístupnost", () => {
     expect(readSource("src/PhmaxSdPage.tsx")).toMatch(/Přejít k chybě|SdWorkflowDockPanel|SdCalculatorShell/);
     expect(readSource("src/PhmaxZsPage.tsx")).not.toContain("Kontrola vstupů");
     expect(readSource("src/styles.css")).toContain(".app-shell--validation-hint .calculator-input-issue-banner");
+    expect(readSource("src/styles.css")).toContain(".field-validation-warning");
+    expect(readSource("src/ui-toast.tsx")).toContain('aria-live={item.assertive ? "assertive" : "polite"}');
+    expect(readSource("src/HeroActionsDrawer.tsx")).toContain("wasOpenRef");
+    expect(readSource("src/DashboardSchoolImportDialog.tsx")).toContain("returnFocusRef: triggerRef");
     expect(fs.existsSync(path.resolve(repoRoot, "docs/mobile-smoke-checklist.md"))).toBe(true);
     expect(fs.existsSync(path.resolve(repoRoot, "docs/keyboard-a11y-checklist.md"))).toBe(true);
   });

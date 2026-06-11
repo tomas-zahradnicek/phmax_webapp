@@ -118,7 +118,7 @@ export function ZsPhmaxSec16Section({
         </div>
         {(showFirst && (firstClasses <= 0 || firstPupils <= 0)) ||
         (showSecond && (secondClasses <= 0 || secondPupils <= 0)) ? (
-          <p className="muted-text" style={{ marginTop: 8, color: "#9a3412", fontSize: "0.86rem" }}>
+          <p className="muted-text field-validation-warning">
             {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} Pro výpočet tříd podle § 16/9 vyplňte třídy i žáky v aktivní části.
           </p>
         ) : null}

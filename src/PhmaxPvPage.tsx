@@ -88,6 +88,7 @@ import {
   PV_PROVOZ_OPTIONS,
   type PvWorkplaceRowState,
 } from "./pv/pv-workplace-shared";
+import { computePvPhmaxTotalFromSnapshot } from "./pv/pv-compute-phmax-total-from-snapshot";
 import { round2 } from "./phmax-zs-logic";
 import { ScrollGrabRegion } from "./ScrollGrabRegion";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
@@ -559,19 +560,12 @@ export function PhmaxPvPage({ productView, setProductView, onOpenRychlyPhmax }: 
   }, [exportRows, xlsxExportBusy]);
 
   const buildPvSnapshot = useCallback(() => {
-    let totalPhmax = 0;
-    let any = false;
-    for (const c of rowComputations) {
-      if (c.computed.totalPhmax != null) {
-        totalPhmax += c.computed.totalPhmax;
-        any = true;
-      }
-    }
+    const totalPhmax = computePvPhmaxTotalFromSnapshot({ rows });
     return {
       rows,
-      ...(any ? { _phmaxAuditTotals: { totalPhmax: round2(totalPhmax), tab: "phmax" as const } } : {}),
+      ...(totalPhmax != null ? { _phmaxAuditTotals: { totalPhmax, tab: "phmax" as const } } : {}),
     };
-  }, [rows, rowComputations]);
+  }, [rows]);
 
   const applyPvSnapshot = useCallback((data: unknown) => {
     const next = parsePvSnapshot(data);

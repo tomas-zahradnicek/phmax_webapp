@@ -298,13 +298,10 @@ export function computeZsPhmaxTotalFromFields(fields: ZsPhmaxComputeFields): num
   );
 }
 
-/** Přepočet PHmax ze ZŠ autosave – jen při záložce phmax (koherence na přehledu). */
+/** Přepočet PHmax ze ZŠ autosave – nezávisle na aktivní záložce (pha/php vstupy zůstávají). */
 export function computeZsPhmaxTotalFromSnapshot(snapshot: unknown): number | null {
   if (!snapshot || typeof snapshot !== "object") return null;
-  const s = snapshot as Record<string, unknown>;
-  const tab = typeof s.tab === "string" ? s.tab : "phmax";
-  if (tab !== "phmax") return null;
-  return computeZsPhmaxTotalFromFields(parseZsPhmaxComputeFields(s));
+  return computeZsPhmaxTotalFromFields(parseZsPhmaxComputeFields(snapshot as Record<string, unknown>));
 }
 
 /** Mapování stavu formuláře na vstupy přepočtu (autosave, stránka ZŠ). */

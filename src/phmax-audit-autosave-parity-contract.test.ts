@@ -17,4 +17,11 @@ describe("Audit autosave parity (PV, ŠD, ZŠ, SŠ)", () => {
     expect(readSource("src/ss/ss-draft-storage.ts")).toContain("_phmaxAuditTotals");
     expect(readSource("src/phmax-cross-phmax-coherence.ts")).toContain("crossPhmaxAuditCoherenceWarnings");
   });
+
+  it("přepočet ze snapshotu je sdílený modul pro PV, ŠD, ZŠ a SŠ", () => {
+    expect(readSource("src/PhmaxPvPage.tsx")).toContain("computePvPhmaxTotalFromSnapshot");
+    expect(readSource("src/PhmaxSdPage.tsx")).toContain("computeSdPhmaxTotalFromSnapshot");
+    expect(readSource("src/zs/zs-form-snapshot.ts")).toContain("computeZsPhmaxTotalFromFields");
+    expect(readSource("src/ss/use-phmax-ss-units.ts")).toContain("computeSsPhmaxTotalFromSnapshot");
+  });
 });
