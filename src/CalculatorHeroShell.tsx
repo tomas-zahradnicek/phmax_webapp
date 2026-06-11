@@ -181,7 +181,7 @@ export function CalculatorHeroShell({
 
         <div className="calculator-hero-shell__topbar-main">
 
-          {showMiniLogo && (!showDisplaySettings || viewMode === "basic") ? (
+          {showMiniLogo ? (
 
             <HeroBrandLogoButton productView={productView} setProductView={setProductView} />
 

@@ -9775,6 +9775,19 @@ select:focus {
   min-width: 0;
 }
 
+.calculator-hero-shell--pro .calculator-hero-shell__topbar .dash-hero-brand__logo-btn {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.calculator-hero-shell--pro .calculator-hero-shell__topbar .dash-hero-brand__logo,
+.calculator-hero-shell--pro .calculator-hero-shell__topbar .app-brand-logo--hero {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
 .calculator-hero-shell--pro .calculator-hero-shell__topbar-actions {
   display: flex;
   flex-wrap: wrap;
@@ -10143,10 +10156,6 @@ select:focus {
   color: #fff;
   font-size: 1.1rem;
   border-radius: 0;
-}
-
-.calculator-shell--expert .calculator-hero-shell--pro .calculator-hero-shell__topbar .dash-hero-brand__logo-btn {
-  display: none;
 }
 
 .calculator-shell--expert .calculator-hero-shell--pro .calculator-hero-shell__workspace {

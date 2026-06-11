@@ -42,6 +42,21 @@ describe("CalculatorHeroShell contract (variant A)", () => {
     }
   });
 
+  it("SŠ a NV75 mají logo v hero jako ostatní moduly", () => {
+    for (const file of ["src/ss/SsHeroHeader.tsx", "src/nv75/Nv75HeroHeader.tsx"]) {
+      expect(readSource(file)).toContain("showMiniLogo");
+    }
+    const shell = readSource("src/CalculatorHeroShell.tsx");
+    expect(shell).toContain("showMiniLogo ?");
+    expect(shell).not.toMatch(/showMiniLogo && \(!showDisplaySettings \|\| viewMode === "basic"\)/);
+    expect(readSource("src/styles.css")).toContain(
+      ".calculator-hero-shell--pro .calculator-hero-shell__topbar .dash-hero-brand__logo-btn",
+    );
+    expect(readSource("src/styles.css")).not.toContain(
+      ".calculator-shell--expert .calculator-hero-shell--pro .calculator-hero-shell__topbar .dash-hero-brand__logo-btn",
+    );
+  });
+
   it("Přehled používá CalculatorHeroShell bez panelu Zobrazení", () => {
     const dash = readSource("src/dashboard/DashHeroHeader.tsx");
     expect(dash).toContain("CalculatorHeroShell");
