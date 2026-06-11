@@ -22,7 +22,7 @@ export const ZS_BASIC_WIZARD_STEPS: ReadonlyArray<{
   {
     step: 3,
     label: "Výjimky",
-    lead: "Doplňte § 16/9, ZŠ speciální, psychiatrii, gymnasium a další moduly, pokud je škola používá.",
+    lead: "Doplňte § 16/9, ZŠ speciální, psychiatrii, gymnázia a další moduly, pokud je škola používá.",
   },
   {
     step: 4,

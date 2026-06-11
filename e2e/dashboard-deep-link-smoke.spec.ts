@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { applyCrossPhmaxSeed, CROSS_PHMAX_LS, defaultCrossPhmaxSeedKeys } from "./cross-phmax-seed";
 import {
   confirmDashboardExportDisclaimer,
+  expectDashboardExportButton,
   openDashboardAttentionModule,
   openDashboardKpiModule,
   gotoProductView,
@@ -359,6 +360,7 @@ test.describe("Dashboard deep-link", () => {
     });
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
+    await expectDashboardExportButton(page, "Stáhnout JSON součtu PHmax");
     await expect(page.getByRole("button", { name: "Stáhnout JSON součtu PHmax" })).toBeDisabled();
   });
 
@@ -374,8 +376,8 @@ test.describe("Dashboard deep-link", () => {
     await expect(page.locator(".dash-cross-phmax")).toContainText(/ŠD:/);
     await expect(page.locator(".dash-cross-phmax")).toContainText(/ZŠ:/);
     await expect(page.locator(".dash-cross-phmax")).toContainText(/SŠ:/);
-    await expect(page.getByRole("button", { name: "Stáhnout JSON součtu PHmax" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Scénář celá škola (JSON)" })).toBeVisible();
+    await expectDashboardExportButton(page, "Stáhnout JSON součtu PHmax");
+    await expectDashboardExportButton(page, "Scénář celá škola (JSON)");
   });
 
   test("export handoff IS školy stáhne phmax-is-handoff-v1", async ({ page }) => {
@@ -494,7 +496,7 @@ test.describe("Dashboard deep-link", () => {
 
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
-    await expect(page.locator(".dash-cross-phmax")).toContainText(/PV:.*v přehledu/i);
+    await expect(page.locator(".dash-cross-phmax")).toContainText("uložený součet 1 h/týd");
   });
 
   test("varování nesouladu audit ZŠ vs přepočet", async ({ page }) => {

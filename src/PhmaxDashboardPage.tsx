@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DashHeroHeader } from "./dashboard/DashHeroHeader";
+import { DashboardQuickTour } from "./dashboard/DashboardQuickTour";
+import { DashboardSchoolProfile } from "./dashboard/DashboardSchoolProfile";
+import { buildDashboardSchoolProfile } from "./dashboard/build-dashboard-school-profile";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import { PhmaxModuleSeoSection } from "./PhmaxModuleSeoSection";
 import {
@@ -74,7 +77,12 @@ import {
 } from "./phmax-school-scenario-export";
 import { buildPhmaxIsHandoffPayload, type PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import type { HandoffApplyResult } from "./phmax-is-handoff-apply";
-import { parseImportFileList } from "./phmax-import-xlsx";
+import { parseImportHandoffFileList } from "./phmax-import-handoff-file";
+import {
+  formatDashboardLastExportLabel,
+  readDashboardLastExport,
+  recordDashboardLastExport,
+} from "./phmax-dashboard-last-export";
 import { crossPhmaxAuditCoherenceWarnings } from "./phmax-cross-phmax-coherence";
 import { buildDashboardExportChecklist } from "./phmax-dashboard-export-checklist";
 import {
@@ -87,17 +95,6 @@ import { useUiNotice } from "./useUiNotice";
 
 /** Moduly pro dashboard deep-link na vstupy. */
 const DASH_INPUT_FOCUS_IDS = ["pv", "sd", "zs", "ss", "nv75"] as const satisfies readonly Exclude<ProductView, "dash">[];
-
-const DASH_START_MODULES: ReadonlyArray<{
-  id: Exclude<ProductView, "dash">;
-  lead: string;
-}> = [
-  { id: "pv", lead: "Předškolní vzdělávání – ukázka volitelná, nebo rovnou vlastní pracoviště." },
-  { id: "sd", lead: "Školní družina – ukázka volitelná, nebo rovnou vlastní údaje." },
-  { id: "zs", lead: "PHmax / PHAmax / PHPmax – vlastní škola nebo ukázka z metodiky." },
-  { id: "ss", lead: "Střední škola – evidence tříd; ukázka volitelná." },
-  { id: "nv75", lead: "Banka odpočtů – ukázka A volitelná, nebo vlastní řádky." },
-];
 
 const DASH_ROLE_LS_KEY = "phmax-dash-role-v1";
 
@@ -427,27 +424,6 @@ function dashboardFillStatusClass(hasData: boolean, verdict: DashboardVerdict | 
   return "dash-continue-card__fill-status--empty";
 }
 
-/** Kompaktní číslo pro KPI řádek (bez jednotek a hvězdičky neúplnosti). */
-function dashOverviewCompactMetric(value: string): string {
-  if (value === "–" || !value.trim()) return "–";
-  const head = value.replace(/\s/g, "").split("*")[0];
-  const m = head.match(/^[\d]+([,.]\d+)?/);
-  return m ? m[0].replace(".", ",") : head;
-}
-
-function formatDashSchoolStatusAttention(attentionCount: number): string {
-  if (attentionCount === 0) return "✓ bez upozornění";
-  if (attentionCount === 1) return "1 modul ke kontrole";
-  if (attentionCount >= 2 && attentionCount <= 4) return `${attentionCount} moduly ke kontrole`;
-  return `${attentionCount} modulů ke kontrole`;
-}
-
-function csDashModulesOkLabel(count: number): string {
-  if (count === 1) return "modul v pořádku";
-  if (count >= 2 && count <= 4) return "moduly v pořádku";
-  return "modulů v pořádku";
-}
-
 function dashboardVerdictNeedsAttention(verdict: DashboardVerdict | null): boolean {
   return verdict?.tone === "warning" || verdict?.tone === "danger";
 }
@@ -735,7 +711,9 @@ export function PhmaxDashboardPage({
   }, [clearLocalDataNow]);
 
   const afterDashboardJsonExport = useCallback(
-    (notice: string) => {
+    (notice: string, exportKind: string) => {
+      recordDashboardLastExport(exportKind);
+      setRefreshAt(new Date());
       publishNotice(notice);
       offerClearBrowserDataAfterDashboardExport(clearLocalDataNow);
     },
@@ -772,7 +750,7 @@ export function PhmaxDashboardPage({
       if (!fileList?.length) return;
       setImportUploadBusy(true);
       try {
-        const payload = await parseImportFileList(Array.from(fileList));
+        const payload = await parseImportHandoffFileList(Array.from(fileList));
         setImportPendingPreview(payload);
         setImportDialogOpen(true);
       } catch (e) {
@@ -821,8 +799,11 @@ export function PhmaxDashboardPage({
     (id: Exclude<ProductView, "dash">) => {
       requestFocusExampleSelect();
       setProductView(id);
+      publishNotice(
+        `Otevřen modul ${DASH_CALC_LABEL[id]} – vyberte ukázkový scénář v horní liště (Příkladové výpočty).`,
+      );
     },
-    [setProductView],
+    [publishNotice, setProductView],
   );
 
   const openModuleForOwnData = useCallback(
@@ -850,21 +831,12 @@ export function PhmaxDashboardPage({
     [openModuleWithExampleHint, setProductView],
   );
 
-  const openDashboardKpiModule = useCallback(
-    (row: DashboardRow) => {
-      openDashboardModule(row);
-    },
-    [openDashboardModule],
-  );
-
   const attentionRows = rows.filter(
     (row) => dashboardRowSupportsInputFocus(row.id) && row.hasData && dashboardVerdictNeedsAttention(row.verdict),
   );
 
   const modulesCompleted = rows.filter((r) => r.hasData && r.verdict?.tone === "ok").length;
   const hasUnusedModules = rows.some((r) => !r.hasData);
-  const schoolStatusTone: "ok" | "warning" | "neutral" =
-    attentionRows.length > 0 ? "warning" : modulesWithData === 0 ? "neutral" : "ok";
   const lastRefreshLabel = refreshAt.toLocaleString("cs-CZ", {
     day: "numeric",
     month: "numeric",
@@ -873,6 +845,33 @@ export function PhmaxDashboardPage({
   });
 
   const crossPhmax = buildCrossPhmaxSummary(rows, DASH_CALC_LABEL);
+  const lastExport = useMemo(() => {
+    void refreshAt;
+    return readDashboardLastExport();
+  }, [refreshAt]);
+  const schoolProfile = useMemo(
+    () =>
+      buildDashboardSchoolProfile({
+        moduleLabels: DASH_CALC_LABEL,
+        rows,
+        crossPhmax,
+        scenarioLabel,
+        attentionCount: attentionRows.length,
+        modulesOk: modulesCompleted,
+        lastExport,
+        formatLastExport: formatDashboardLastExportLabel,
+        hasUnusedModules,
+      }),
+    [
+      rows,
+      crossPhmax,
+      scenarioLabel,
+      attentionRows.length,
+      modulesCompleted,
+      lastExport,
+      hasUnusedModules,
+    ],
+  );
   const dashboardBandHints = useMemo(() => {
     void refreshAt;
     return buildDashboardBandHints();
@@ -955,7 +954,7 @@ export function PhmaxDashboardPage({
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
-    afterDashboardJsonExport("Stažen orientační JSON součtu PHmax.");
+    afterDashboardJsonExport("Stažen orientační JSON součtu PHmax.", "JSON součtu PHmax");
   }, [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, afterDashboardJsonExport]);
 
   const downloadSchoolScenarioJson = useCallback(() => {
@@ -980,7 +979,7 @@ export function PhmaxDashboardPage({
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
-    afterDashboardJsonExport("Stažen scénář celá škola (JSON + autosave modulů).");
+    afterDashboardJsonExport("Stažen scénář celá škola (JSON + autosave modulů).", "Scénář celá škola");
   }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, afterDashboardJsonExport]);
 
   const downloadIsHandoffJson = useCallback(() => {
@@ -1008,7 +1007,10 @@ export function PhmaxDashboardPage({
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
-    afterDashboardJsonExport("Stažen handoff JSON pro IS školy – viz docs/phmax-is-integration.md.");
+    afterDashboardJsonExport(
+      "Stažen handoff JSON pro IS školy – viz docs/phmax-is-integration.md.",
+      "Handoff JSON",
+    );
   }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, afterDashboardJsonExport]);
 
   const sendIsHandoff = useCallback(async () => {
@@ -1044,7 +1046,7 @@ export function PhmaxDashboardPage({
                 ? "Vyžaduje pozornost"
                 : "V pořádku"
           }
-          statusTone={schoolStatusTone}
+          statusTone={schoolProfile.tone === "neutral" ? "ok" : schoolProfile.tone}
           toolbar={{
             lastRefreshLabel,
             onRefresh: refresh,
@@ -1053,39 +1055,14 @@ export function PhmaxDashboardPage({
         />
 
         <main id={PHMAX_DASHBOARD_MAIN_ID} tabIndex={-1}>
-        <section
-          className={`card section-card dash-school-status dash-school-status--${schoolStatusTone}`}
-          aria-labelledby="dash-school-status-heading"
-        >
-          <h2 id="dash-school-status-heading" className="dash-school-status__title">
-            {schoolStatusTone === "ok"
-              ? "🟢 Stav školy"
-              : schoolStatusTone === "warning"
-                ? "🔴 Vyžaduje pozornost"
-                : "Stav školy"}
-          </h2>
-          <ul className="dash-school-status__facts">
-            <li>
-              <strong>{modulesCompleted}</strong> {csDashModulesOkLabel(modulesCompleted)}
-            </li>
-            <li>{formatDashSchoolStatusAttention(attentionRows.length)}</li>
-            <li>
-              Poslední úprava: <strong>{lastRefreshLabel}</strong>
-            </li>
-          </ul>
-          {schoolStatusTone === "ok" && attentionRows.length === 0 ? (
-            <p className="dash-school-status__lead dash-school-status__lead--done">
-              {hasUnusedModules
-                ? "✓ Vyplněné moduly jsou v pořádku. Ostatní moduly vyplňujte jen pokud je vaše škola provozuje."
-                : "✓ Škola připravena – vyplněné moduly bez chyb."}
-            </p>
-          ) : null}
-          {schoolStatusTone === "warning" ? (
-            <p className="dash-school-status__lead dash-school-status__lead--warn">
-              Opravte označené moduly před použitím souhrnného PHmax.
-            </p>
-          ) : null}
-        </section>
+        <DashboardSchoolProfile
+          profile={schoolProfile}
+          onModuleChipClick={(id) => {
+            const row = rows.find((r) => r.id === id);
+            if (row) openDashboardModule(row);
+          }}
+        />
+        <DashboardQuickTour />
 
         <div
           className="dash-role-segmented"
@@ -1168,44 +1145,7 @@ export function PhmaxDashboardPage({
               Moduly bez dat nemusíte vyplňovat – použijte jen ty, které provozujete. NV75 (banka odpočtů) je volitelná.
             </p>
           ) : null}
-          <div className="dash-kpi-compact" aria-label="KPI přehled modulů">
-            {rows.map((row) => (
-              <button
-                key={row.id}
-                type="button"
-                className={[
-                  "dash-kpi-compact__cell",
-                  row.hasData ? "" : "dash-kpi-compact__cell--empty",
-                  dashboardVerdictNeedsAttention(row.verdict) ? "dash-kpi-compact__cell--warn" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onClick={() => openDashboardKpiModule(row)}
-                aria-label={`${DASH_CALC_LABEL[row.id]}: ${row.primaryKpi.value}`}
-              >
-                <span className="dash-kpi-compact__label">{DASH_CALC_LABEL[row.id]}</span>
-                <strong className="dash-kpi-compact__value">{dashOverviewCompactMetric(row.primaryKpi.value)}</strong>
-              </button>
-            ))}
-            <div
-              className={[
-                "dash-kpi-compact__cell",
-                "dash-kpi-compact__cell--errors",
-                attentionRows.length > 0 ? "dash-kpi-compact__cell--errors-active" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              aria-label={
-                attentionRows.length === 0
-                  ? "Žádný modul ke kontrole"
-                  : `${attentionRows.length} modulů ke kontrole`
-              }
-            >
-              <span className="dash-kpi-compact__label">Ke kontrole</span>
-              <strong className="dash-kpi-compact__value">{attentionRows.length}</strong>
-            </div>
-          </div>
-          <div className="dash-cards">
+          <div className="dash-cards" data-dash-tour="module-cards">
             {rows.map((row) => (
               <article key={row.id} className="dash-card">
                 <div className="dash-card__body">
@@ -1408,8 +1348,9 @@ export function PhmaxDashboardPage({
           </p>
           {showNewUserGuide ? (
             <p className="muted-text" style={{ marginBottom: 10 }}>
-              Ukázka je volitelná – můžete rovnou vyplnit vlastní školu. Po otevření modulu hledejte{" "}
-              <strong>Příkladové výpočty</strong> v horní liště.
+              Ukázku spustíte tlačítkem <strong>Začít u ukázky</strong> u karty modulu v sekci{" "}
+              <strong>Moje kalkulačky</strong> výše. Vlastní školu vyplníte přes tlačítka níže nebo{" "}
+              <strong>Otevřít</strong> u příslušné karty.
             </p>
           ) : null}
           <div className="dash-quick-start__grid">
@@ -1424,36 +1365,6 @@ export function PhmaxDashboardPage({
               </button>
             ))}
           </div>
-          {continueRow ? (
-            <div className="dash-action-continue">
-              <button
-                type="button"
-                className="btn ghost dash-quick-start__btn"
-                onClick={() => openDashboardModule(continueRow)}
-              >
-                Otevřít poslední práci ({DASH_CALC_LABEL[continueRow.id]})
-              </button>
-            </div>
-          ) : null}
-          <details className="dash-quick-start__more muted-text">
-            <summary>Vytvořit kalkulačku s ukázkou (volitelné)</summary>
-            <div className="dash-new-user-card__grid" style={{ marginTop: 10 }}>
-              {DASH_START_MODULES.map((item) => (
-                <article key={item.id} className="dash-new-user-card__tile">
-                  <h3 className="dash-new-user-card__tile-title">{PRODUCT_CALCULATOR_TITLES[item.id]}</h3>
-                  <p className="muted-text dash-new-user-card__tile-lead">{item.lead}</p>
-                  <div className="dash-new-user-card__actions">
-                    <button type="button" className="btn primary" onClick={() => openModuleWithExampleHint(item.id)}>
-                      Ukázka ({DASH_CALC_LABEL[item.id]})
-                    </button>
-                    <button type="button" className="btn ghost" onClick={() => openModuleForOwnData(item.id)}>
-                      Vlastní data
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </details>
         </section>
 
         <DashboardSchoolImportDialog
@@ -1492,11 +1403,9 @@ export function PhmaxDashboardPage({
                 >
                   {continueRow.hasData ? "Pokračovat" : "Otevřít a ukázku"}
                 </button>
-                {!continueRow.hasData ? (
-                  <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(continueRow.id)}>
-                    Začít u ukázky
-                  </button>
-                ) : null}
+                <button type="button" className="btn ghost" onClick={() => openModuleWithExampleHint(continueRow.id)}>
+                  Začít u ukázky
+                </button>
               </div>
             </div>
             <details className="dash-continue-card__more muted-text">
@@ -1582,7 +1491,7 @@ export function PhmaxDashboardPage({
                   ref={importCardFileRef}
                   type="file"
                   data-testid="dash-import-file-card"
-                  accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+                  accept=".xlsx,.csv,.json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/json"
                   multiple
                   disabled={importUploadBusy}
                   style={{ display: "none" }}

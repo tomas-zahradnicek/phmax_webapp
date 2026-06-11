@@ -1,6 +1,7 @@
 import React from "react";
 import { GlossaryIconButton } from "../GlossaryIconButton";
 import { CalculatorHeroShell } from "../CalculatorHeroShell";
+import { HeroUserGuideTabLink } from "../HeroUserGuideTabLink";
 import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
@@ -79,6 +80,7 @@ export function SsHeroHeader({
       expertExampleSelectId={SS_HERO_EXAMPLE_SELECT_ID}
       title="PHmax a PHAmax – střední školy"
       showMiniLogo
+      tabsAside={<HeroUserGuideTabLink />}
       kpis={[
         { label: "PHmax", value: phmaxHeroValue, variant: "primary" },
         { label: "PHAmax PrŠ", value: phamaxHeroValue, variant: "secondary" },

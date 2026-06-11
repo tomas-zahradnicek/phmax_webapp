@@ -258,8 +258,8 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
             <p className="hero-zone-label">Rychlý výpočet</p>
             <h1 className="hero__title">Rychlý PHmax – základní škola</h1>
             <p className="hero__text hero__text--compact">
-              Pro běžné třídy ZŠ (B1–B8) a volitelně třídy zřízené podle § 16 odst. 9 (B9–B10). Bez psychiatrie,
-              gymnasium, PHAmax a PHPmax. {CALCULATOR_LIMITS_NOTE}
+              Pro běžné třídy ZŠ (B1–B8) a volitelně třídy zřízené podle § 16 odst. 9 (B9–B10). Bez školy při
+              psychiatrické nemocnici, gymnázia, PHAmax a PHPmax. {CALCULATOR_LIMITS_NOTE}
             </p>
           </div>
         </div>
@@ -372,7 +372,7 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
             </>
           ) : null}
           <p className="muted-text phmax-lite-form__note">
-            Nezahrnuje speciální třídy, psychiatrii, gymnasium, PHAmax ani PHPmax – použijte{" "}
+            Nezahrnuje speciální třídy, psychiatrii, gymnázia, PHAmax ani PHPmax – použijte{" "}
             <button type="button" className="btn ghost" style={{ display: "inline", padding: "0 4px" }} onClick={openFull}>
               plnou verzi {PRODUCT_CALCULATOR_TITLES.zs}
             </button>

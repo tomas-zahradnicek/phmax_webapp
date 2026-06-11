@@ -1,6 +1,7 @@
 import React from "react";
 import { GlossaryIconButton } from "../GlossaryIconButton";
 import { CalculatorHeroShell } from "../CalculatorHeroShell";
+import { HeroUserGuideTabLink } from "../HeroUserGuideTabLink";
 import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
@@ -77,6 +78,7 @@ export function SdHeroHeader({
       title="PHmax ve školní družině"
       titleClassName="hero__title hero__title--sd"
       showMiniLogo
+      tabsAside={<HeroUserGuideTabLink />}
       kpis={[
         { label: "PHmax", value: phmaxDisplay, variant: "primary" },
         { label: "Účastníci", value: pupils, variant: "secondary" },

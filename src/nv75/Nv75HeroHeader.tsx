@@ -1,5 +1,6 @@
 import React from "react";
 import { CalculatorHeroShell } from "../CalculatorHeroShell";
+import { HeroUserGuideTabLink } from "../HeroUserGuideTabLink";
 import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
@@ -68,6 +69,7 @@ export function Nv75HeroHeader({
       expertExampleSelectId={NV75_HERO_EXAMPLE_SELECT_ID}
       title="Banka odpočtů zástupců ředitele"
       showMiniLogo
+      tabsAside={<HeroUserGuideTabLink />}
       kpis={[
         { label: "Banka celkem", value: formatCsHoursPerWeek(bankHoursTotal), variant: "primary" },
         { label: "Řádky", value: rowCount, variant: "secondary" },

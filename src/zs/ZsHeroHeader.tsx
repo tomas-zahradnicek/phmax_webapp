@@ -1,6 +1,7 @@
 import React from "react";
 import { GlossaryIconButton } from "../GlossaryIconButton";
 import { CalculatorHeroShell } from "../CalculatorHeroShell";
+import { HeroUserGuideTabLink } from "../HeroUserGuideTabLink";
 import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorVerdictTone } from "../calculator-verdict-ui";
@@ -62,7 +63,7 @@ export function ZsHeroHeader({
   toolbar,
 }: ZsHeroHeaderProps) {
   const modeFullLabel = MODE_CONFIG[mode].label;
-  const statusLabel = incompleteSections > 0 ? `${incompleteSections} nevyplněno` : "Vstupy kompletní";
+  const statusLabel = incompleteSections > 0 ? `${incompleteSections} nevyplněno` : "Vstupy jsou kompletní";
   const statusTone: CalculatorVerdictTone = incompleteSections > 0 ? "warning" : "ok";
 
   return (
@@ -83,6 +84,7 @@ export function ZsHeroHeader({
       title="PHmax, PHAmax a PHPmax – základní škola"
       titleClassName="hero__title hero__title--sd hero__title--zs"
       showMiniLogo
+      tabsAside={<HeroUserGuideTabLink />}
       kpis={[
         { label: zsTabPrimaryLabel.replace(" celkem", ""), value: zsTabPrimaryValue, variant: "primary" },
         { label: "PHmax", value: totalPhmax, variant: "secondary" },

@@ -38,7 +38,10 @@ Orientační checklist po push na `master` a deployi na Vercel (např. https://p
 npm run lint
 npm run build
 npx vitest run src/phmax-import-roundtrip.test.ts src/phmax-import-pv-zs.test.ts
+npm run test:e2e -- e2e/dashboard-post-deploy-smoke.spec.ts
 ```
+
+Automatický smoke po deployi: `e2e/dashboard-post-deploy-smoke.spec.ts` (Přehled → Otevřít PV → export CSV, toast po „Začít u ukázky“, odkaz Návod v záložkách modulu).
 
 Round-trip import: `src/phmax-import-roundtrip.test.ts` (CSV z `docs/import-templates/`).
 

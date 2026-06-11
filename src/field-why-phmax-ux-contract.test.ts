@@ -36,7 +36,7 @@ describe("UX contract: FieldWhyPhmax + dashboard user-first blok", () => {
     expect(dashHero).toContain("Ředitelský průvodce");
     expect(dash).toContain("Otevřít");
     expect(dash).toContain("DASH_PRIMARY_ACTIONS");
-    expect(dash).toContain("dash-kpi-compact");
+    expect(dash).toContain("DashboardSchoolProfile");
     expect(dash).toContain("primaryKpi");
     expect(dash).toContain("lastVisit");
     expect(dash).toContain("modulesWithData");

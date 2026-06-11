@@ -19,7 +19,9 @@ describe("UX wave A/B/C contract", () => {
   it("dashboard role segmented, quick start, export wizard, import v pokročilých nástrojích", () => {
     const dash = readSource("src/PhmaxDashboardPage.tsx");
     expect(dash).toContain("dash-role-segmented");
-    expect(dash).toContain("dash-school-status");
+    expect(dash).toContain("DashboardSchoolProfile");
+    expect(dash).toContain("DashboardQuickTour");
+    expect(readSource("src/dashboard/DashboardSchoolProfile.tsx")).toContain("dash-school-profile");
     expect(dash).toContain("dash-quick-start");
     expect(dash).toContain("dash-browser-overview");
     expect(dash).toContain("dash-export-wizard");

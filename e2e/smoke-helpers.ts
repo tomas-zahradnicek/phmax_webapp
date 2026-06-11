@@ -25,21 +25,68 @@ export async function openDashboardAttentionModule(page: Page, moduleLabel: stri
   await item.getByRole("button", { name: "Otevřít a přejít k chybě" }).click();
 }
 
-/** Dashboard – otevře modul přes KPI dlaždici (včetně ok stavu). */
+/** Dashboard – otevře modul přes čip v školním profilu (včetně ok stavu). */
 export async function openDashboardKpiModule(page: Page, moduleLabel: string): Promise<void> {
   await gotoProductView(page, "dash");
-  const tile = page.locator(".dash-kpi-compact__cell").filter({
-    has: page.locator(".dash-kpi-compact__label", { hasText: moduleLabel }),
+  const chip = page.locator(".dash-school-profile__chip").filter({
+    has: page.locator(".dash-school-profile__chip-label", { hasText: moduleLabel }),
   });
-  await expect(tile).toBeVisible();
-  await tile.click();
+  await expect(chip).toBeVisible();
+  await chip.click();
+}
+
+/** Dashboard – otevře modul tlačítkem Otevřít na kartě v sekci Moje kalkulačky. */
+export async function openDashboardModuleCard(page: Page, cardTitle: string | RegExp): Promise<void> {
+  await gotoProductView(page, "dash");
+  await expect(page.getByRole("heading", { name: "Moje kalkulačky" })).toBeVisible();
+  const card = page.locator(".dash-card").filter({
+    has: page.getByRole("heading", { name: cardTitle }),
+  });
+  await expect(card).toBeVisible();
+  await card.getByRole("button", { name: "Otevřít" }).click();
+}
+
+async function openDashboardDetails(page: Page, selector: string): Promise<void> {
+  const details = page.locator(selector);
+  await details.scrollIntoViewIfNeeded();
+  const isOpen = await details.evaluate((el) => (el as HTMLDetailsElement).open);
+  if (!isOpen) {
+    await details.locator("summary").first().click();
+  }
+}
+
+async function openDashboardAdvancedTools(page: Page): Promise<void> {
+  await openDashboardDetails(page, "#dash-advanced-tools");
+}
+
+async function scrollDashboardExportSection(page: Page): Promise<void> {
+  await openDashboardAdvancedTools(page);
+  await openDashboardDetails(page, ".dash-export-checklist");
 }
 
 /** Dashboard cross-PHmax – potvrzení orientačního exportu před stažením JSON. */
 export async function confirmDashboardExportDisclaimer(page: Page): Promise<void> {
+  await scrollDashboardExportSection(page);
   const checkbox = page.getByTestId("dash-export-confirm");
   await expect(checkbox).toBeVisible();
   await checkbox.check();
+}
+
+/** Modul – na úzkém displeji otevře panel akcí před exportem. */
+export async function openHeroActionsDrawerIfNeeded(page: Page): Promise<void> {
+  const toggle = page.getByRole("button", { name: /Akce, tisk, uložení a export/i });
+  if (await toggle.isVisible()) {
+    await toggle.click();
+    await expect(page.getByRole("dialog", { name: /Akce a export/i })).toBeVisible();
+  }
+}
+
+/** Dashboard – exportní tlačítka v pokročilých nástrojích. */
+export async function expectDashboardExportButton(page: Page, name: string | RegExp): Promise<void> {
+  await openDashboardAdvancedTools(page);
+  const btn = page.getByRole("button", { name });
+  await btn.scrollIntoViewIfNeeded();
+  await expect(btn).toBeVisible();
 }
 
 const ZS_NAMED_SNAPSHOTS_LS_KEY = "edu-cz-zs-named-snapshots-v1";

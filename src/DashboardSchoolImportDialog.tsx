@@ -11,9 +11,18 @@ import { useModalDialogA11y } from "./modal-dialog-a11y";
 import { applyPhmaxIsHandoffToLocalStorage, type HandoffApplyResult } from "./phmax-is-handoff-apply";
 import type { PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import { buildImportPreviewSummary } from "./phmax-import-pv-zs";
-import { parseImportFileList } from "./phmax-import-xlsx";
+import { parseImportHandoffFileList } from "./phmax-import-handoff-file";
+import { buildImportModuleStorageDiff, formatImportModuleStorageDiff } from "./phmax-import-storage-diff";
 import { CS_HOURS_PER_WEEK_SHORT, formatCsNumberOrDash } from "./cs-format";
 import { downloadPhmaxImportTemplateXlsx } from "./phmax-import-template-xlsx";
+
+const IMPORT_MODULE_LABELS = {
+  pv: "PV",
+  sd: "ŠD",
+  zs: "ZŠ",
+  ss: "SŠ",
+  nv75: "NV75",
+} as const;
 
 type DashboardSchoolImportDialogProps = {
   open: boolean;
@@ -92,7 +101,7 @@ export function DashboardSchoolImportDialog({
     setPreview(null);
     setConfirmed(false);
     try {
-      const payload = await parseImportFileList(Array.from(fileList));
+      const payload = await parseImportHandoffFileList(Array.from(fileList));
       setPreview(payload);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Soubor se nepodařilo načíst.");
@@ -115,6 +124,8 @@ export function DashboardSchoolImportDialog({
   if (!open) return null;
 
   const summary = preview ? buildImportPreviewSummary(preview) : null;
+  const storageDiff = preview ? buildImportModuleStorageDiff(preview) : null;
+  const storageDiffLabel = storageDiff ? formatImportModuleStorageDiff(storageDiff, IMPORT_MODULE_LABELS) : null;
 
   const modal = (
     <div className="glossary-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
@@ -144,7 +155,7 @@ export function DashboardSchoolImportDialog({
                 ref={fileInputRef}
                 type="file"
                 data-testid="dash-import-file"
-                accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+                accept=".xlsx,.csv,.json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/json"
                 multiple
                 disabled={busy}
                 style={{ display: "none" }}
@@ -166,7 +177,8 @@ export function DashboardSchoolImportDialog({
             názvy sloupců a hodnot). Povinné listy Meta, PV, ZŠ souhrn; volitelně ŠD, SŠ, ZŠ psycholog / zdravotní.
           </p>
           <p className="muted-text" style={{ marginTop: 6, fontSize: "0.88rem" }}>
-            {DASH_IMPORT_SCOPE_NOTE}
+            {DASH_IMPORT_SCOPE_NOTE} Lze nahrát i handoff JSON (<code className="methodology-strip__code">phmax-is-handoff-v1</code>
+            ).
           </p>
 
           {error ? (
@@ -180,6 +192,11 @@ export function DashboardSchoolImportDialog({
               <h3 className="section-title" style={{ fontSize: "1rem" }}>
                 Náhled před načtením
               </h3>
+              {storageDiffLabel ? (
+                <p className="dash-import-dialog__diff" role="status" data-testid="dash-import-storage-diff">
+                  <strong>Dopad na uložená data:</strong> {storageDiffLabel}
+                </p>
+              ) : null}
               <ul className="muted-text" style={{ paddingLeft: "1.25rem", margin: "8px 0" }}>
                 <li>
                   Scénář: <strong>{summary.scenarioLabel}</strong>

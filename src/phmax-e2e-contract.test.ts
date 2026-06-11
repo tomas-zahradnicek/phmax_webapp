@@ -12,7 +12,7 @@ describe("E2E smoke contract", () => {
   it("Playwright smoke je v repozitáři (PV, ŠD, ZŠ, SŠ, NV75 + desktop TOC)", () => {
     expect(fs.existsSync(path.resolve(repoRoot, "playwright.config.ts"))).toBe(true);
     expect(readSource("playwright.config.ts")).toContain("desktop-chrome");
-    expect(readSource("playwright.config.ts")).toContain("dashboard-ux-013");
+    expect(readSource("playwright.config.ts")).toContain("post-deploy)-smoke");
     expect(readSource("playwright.config.ts")).toContain("metric-label-casing");
     expect(readSource(".github/workflows/ci.yml")).toContain("npm run build");
     for (const specFile of [
@@ -23,6 +23,7 @@ describe("E2E smoke contract", () => {
       "e2e/nv75-mobile-smoke.spec.ts",
       "e2e/desktop-toc-smoke.spec.ts",
       "e2e/dashboard-deep-link-smoke.spec.ts",
+      "e2e/dashboard-post-deploy-smoke.spec.ts",
       "e2e/dashboard-ux-013.spec.ts",
       "e2e/metric-label-casing.spec.ts",
     ]) {
@@ -33,6 +34,8 @@ describe("E2E smoke contract", () => {
     expect(pvSpec).toContain("calculator-mobile-summary-chip");
     expect(readSource("e2e/smoke-helpers.ts")).toContain("openDashboardAttentionModule");
     expect(readSource("e2e/smoke-helpers.ts")).toContain("openDashboardKpiModule");
+    expect(readSource("e2e/smoke-helpers.ts")).toContain("openDashboardModuleCard");
+    expect(readSource("e2e/dashboard-post-deploy-smoke.spec.ts")).toContain("Export CSV");
     expect(readSource("src/phmax-dashboard-focus.ts")).toContain("getDashboardFocusHint");
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain("data-pv-row-id");
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain('[data-section="basic"]');
@@ -45,12 +48,13 @@ describe("E2E smoke contract", () => {
     expect(fs.existsSync(path.resolve(repoRoot, "docs/acceptance-pv-zs-nv75.md"))).toBe(true);
   });
 
-  it("Dashboard KPI kompaktní strip je klikatelný", () => {
+  it("Dashboard školní profil má klikatelné čipy modulů", () => {
     const dash = readSource("src/PhmaxDashboardPage.tsx");
-    expect(dash).toContain("dash-kpi-compact");
-    expect(dash).toContain("dash-kpi-compact__cell");
-    expect(dash).toContain("openDashboardKpiModule");
+    expect(dash).toContain("DashboardSchoolProfile");
+    expect(dash).toContain("buildDashboardSchoolProfile");
+    expect(readSource("src/dashboard/DashboardSchoolProfile.tsx")).toContain("dash-school-profile__chip");
+    expect(readSource("e2e/smoke-helpers.ts")).toContain("dash-school-profile__chip");
     expect(dash).toContain("Začít u ukázky");
-    expect(readSource("src/styles.css")).toContain(".dash-kpi-compact__value");
+    expect(readSource("src/styles.css")).toContain(".dash-school-profile__chip");
   });
 });
