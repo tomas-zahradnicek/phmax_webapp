@@ -104,6 +104,86 @@ a:focus-visible {
   padding-bottom: 36px;
 }
 
+.container--user-guide {
+  max-width: min(1200px, 100%);
+}
+
+.app-shell--user-guide {
+  min-height: 100vh;
+}
+
+.user-guide-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: calc(100vh - 56px);
+}
+
+.user-guide-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.user-guide-page__brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: min(100%, 20rem);
+}
+
+.user-guide-page__logo {
+  flex: 0 0 auto;
+  border-radius: 8px;
+}
+
+.user-guide-page__title {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.user-guide-page__lead {
+  margin: 0;
+  max-width: 42rem;
+}
+
+.user-guide-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.user-guide-page__frame {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding: 12px;
+}
+
+.user-guide-page__iframe {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: min(72vh, 900px);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: #fff;
+}
+
+.user-guide-page__fallback {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.dash-quick-start__guide-link {
+  margin: 0 0 12px;
+}
+
 @media (min-width: 1200px) {
   .app-shell--with-toc .container--app {
     max-width: min(1450px, calc(100vw - 300px));

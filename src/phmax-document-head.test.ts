@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PRODUCT_VIEW_CODES } from "./calculator-ui-constants";
+import { PRODUCT_VIEW_CODES, USER_GUIDE_PATH } from "./calculator-ui-constants";
 import {
   PHMAX_DOCUMENT_HEAD,
   PHMAX_LITE_DOCUMENT_HEAD,
@@ -25,7 +25,8 @@ describe("phmax-document-head", () => {
       "https://example.test/phmax-zakladni-skola",
     );
     const urls = listPhmaxSitemapUrls("https://example.test");
-    expect(urls).toHaveLength(PRODUCT_VIEW_CODES.length + 3);
+    expect(urls).toHaveLength(PRODUCT_VIEW_CODES.length + 4);
+    expect(urls).toContain(`https://example.test${USER_GUIDE_PATH}`);
     expect(urls).toContain(`https://example.test${PHMAX_PV_LITE_PATH}`);
     expect(urls).toContain(`https://example.test${PHMAX_SD_LITE_PATH}`);
     expect(urls).toContain(`https://example.test/phmax-zakladni-skola/rychly`);

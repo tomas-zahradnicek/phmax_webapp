@@ -271,6 +271,16 @@ export const APP_AUTHOR_CONTACT_URL =
 
 export const APP_AUTHOR_CONTACT_LABEL = "Kontaktní formulář";
 
+/** Webový návod k aplikaci (Gamma) – vložený na /navod, odkaz i v novém okně. */
+export const USER_GUIDE_PATH = "/navod";
+
+export const PRODUCT_USER_GUIDE_URL = "https://reditelsky-pruvodce-info-hu0n162.gamma.site/";
+
+export const PRODUCT_USER_GUIDE_LABEL = "Návod k použití";
+
+export const PRODUCT_USER_GUIDE_LEAD =
+  "Kompletní průvodce aplikací – moduly, postup výpočtu, exporty a limity orientačního nástroje.";
+
 /** Logo Ředitelského průvodce (public/). */
 export const APP_BRAND_LOGO_PATH = "/reditelskypruvodce-logo.png";
 

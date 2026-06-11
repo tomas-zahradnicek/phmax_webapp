@@ -6,6 +6,8 @@ import {
   APP_AUTHOR_CONTACT_LABEL,
   APP_AUTHOR_CONTACT_URL,
   APP_AUTHOR_DISPLAY_NAME,
+  PRODUCT_USER_GUIDE_LABEL,
+  USER_GUIDE_PATH,
 } from "./calculator-ui-constants";
 
 export function AuthorCreditFooter() {
@@ -21,6 +23,8 @@ export function AuthorCreditFooter() {
         </a>
       </p>
       <p className="zs-app-footer__version">
+        <a href={USER_GUIDE_PATH}>{PRODUCT_USER_GUIDE_LABEL}</a>
+        {" · "}
         Verze aplikace {APP_VERSION}
         {" · "}
         <button type="button" className="link-btn" onClick={openWhatsNew}>

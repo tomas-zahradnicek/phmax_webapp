@@ -9,6 +9,8 @@ import {
   DASH_IMPORT_TEMPLATE_LABEL,
   DASH_IMPORT_UPLOAD_LABEL,
   PRODUCT_CALCULATOR_TITLES,
+  PRODUCT_USER_GUIDE_LABEL,
+  USER_GUIDE_PATH,
 } from "./calculator-ui-constants";
 import { DashboardSchoolImportDialog } from "./DashboardSchoolImportDialog";
 import { dispatchPhmaxImportApplied } from "./phmax-import-applied-event";
@@ -1403,6 +1405,9 @@ export function PhmaxDashboardPage({
           <h2 id="dash-quick-start-heading" className="section-title">
             Co chcete dnes udělat?
           </h2>
+          <p className="muted-text dash-quick-start__guide-link">
+            <a href={USER_GUIDE_PATH}>{PRODUCT_USER_GUIDE_LABEL}</a> – kompletní průvodce moduly, postupem a exporty.
+          </p>
           {showNewUserGuide ? (
             <p className="muted-text" style={{ marginBottom: 10 }}>
               Ukázka je volitelná – můžete rovnou vyplnit vlastní školu. Po otevření modulu hledejte{" "}

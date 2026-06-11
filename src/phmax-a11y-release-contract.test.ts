@@ -15,6 +15,8 @@ describe("UX contract: release notes + přístupnost", () => {
     expect(readSource("src/zs-hero-example-groups.ts")).toContain("ZS_HERO_EXAMPLE_GROUPS");
     expect(readSource("src/FieldHintButton.tsx")).toContain("FieldHintButton");
     expect(readSource("src/AuthorCreditFooter.tsx")).toContain("openWhatsNew");
+    expect(readSource("src/AuthorCreditFooter.tsx")).toContain("PRODUCT_USER_GUIDE_LABEL");
+    expect(readSource("src/App.tsx")).toContain("PhmaxUserGuidePage");
     expect(readSource("src/CalculatorMobileScrollResults.tsx")).toContain("calculator-mobile-scroll-results--compact");
     expect(readSource("src/HeroExampleSelect.tsx")).toContain("hero-example-sheet");
     const whatsNew = readSource("src/AppWhatsNewContext.tsx");

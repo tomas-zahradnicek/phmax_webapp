@@ -1,6 +1,7 @@
 import type { ProductViewCode } from "./calculator-ui-constants";
 import { PHMAX_SEO_MODULE_CONTENT } from "./phmax-seo-module-content";
 import { APP_BRAND_LOGO_PATH } from "./calculator-ui-constants";
+import { USER_GUIDE_PATH } from "./calculator-ui-constants";
 import { PHMAX_PV_LITE_PATH, PHMAX_SD_LITE_PATH, PHMAX_ZS_LITE_PATH } from "./phmax-lite-paths";
 import { buildProductViewPageUrl, listProductViewPathUrls } from "./product-view-paths";
 
@@ -187,6 +188,21 @@ export function applyPhmaxDocumentHead(view: ProductViewCode): void {
   applyPhmaxHeadMeta(meta, canonical, view);
 }
 
+export const PHMAX_USER_GUIDE_DOCUMENT_HEAD: PhmaxDocumentHeadMeta = {
+  title: "Návod k použití – Kalkulačky PHmax | Ředitelský průvodce",
+  description:
+    "Kompletní webový průvodce kalkulačkami PHmax – moduly PV, ZŠ, SŠ, ŠD a NV75, doporučený postup, exporty a limity orientačního nástroje.",
+  applicationName: "Ředitelský průvodce – návod k použití",
+};
+
+/** Document head pro stránku /navod s vloženým webovým průvodcem. */
+export function applyPhmaxUserGuideDocumentHead(): void {
+  if (typeof document === "undefined") return;
+  const origin = resolvePhmaxSiteOrigin();
+  const canonical = new URL(USER_GUIDE_PATH, origin).href;
+  applyPhmaxHeadMeta(PHMAX_USER_GUIDE_DOCUMENT_HEAD, canonical, "dash");
+}
+
 /** Document head pro režim „Rychlý PHmax“ (/rychly). */
 export function applyPhmaxLiteDocumentHead(lite: PhmaxLiteKind): void {
   if (typeof document === "undefined") return;
@@ -200,6 +216,7 @@ export function applyPhmaxLiteDocumentHead(lite: PhmaxLiteKind): void {
 export function listPhmaxSitemapUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): string[] {
   return [
     ...listProductViewPathUrls(origin),
+    new URL(USER_GUIDE_PATH, origin).href,
     new URL(PHMAX_PV_LITE_PATH, origin).href,
     new URL(PHMAX_SD_LITE_PATH, origin).href,
     new URL(PHMAX_ZS_LITE_PATH, origin).href,

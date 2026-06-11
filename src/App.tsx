@@ -7,7 +7,8 @@ import {
   recordLastActiveProduct,
   type DashboardVisitProduct,
 } from "./phmax-dashboard-visits";
-import { applyPhmaxDocumentHead, applyPhmaxLiteDocumentHead } from "./phmax-document-head";
+import { applyPhmaxDocumentHead, applyPhmaxLiteDocumentHead, applyPhmaxUserGuideDocumentHead } from "./phmax-document-head";
+import { isUserGuidePathname } from "./phmax-user-guide-paths";
 import {
   isPvLitePathname,
   isSdLitePathname,
@@ -28,6 +29,7 @@ const PhmaxNv75DeputyPage = lazy(() => import("./PhmaxNv75DeputyPage").then((m) 
 const PhmaxZsPage = lazy(() => import("./PhmaxZsPage").then((m) => ({ default: m.PhmaxZsPage })));
 const PhmaxZsLitePage = lazy(() => import("./zs/PhmaxZsLitePage").then((m) => ({ default: m.PhmaxZsLitePage })));
 const PhmaxDashboardPage = lazy(() => import("./PhmaxDashboardPage").then((m) => ({ default: m.PhmaxDashboardPage })));
+const PhmaxUserGuidePage = lazy(() => import("./PhmaxUserGuidePage").then((m) => ({ default: m.PhmaxUserGuidePage })));
 
 export default function App() {
   const [productView, setProductViewState] = useState<ProductView>(() => readInitialProductView());
@@ -40,7 +42,11 @@ export default function App() {
   const [zsLiteActive, setZsLiteActive] = useState(
     () => typeof window !== "undefined" && isZsLitePathname(window.location.pathname),
   );
+  const [userGuideActive, setUserGuideActive] = useState(
+    () => typeof window !== "undefined" && isUserGuidePathname(window.location.pathname),
+  );
   const setProductView = useCallback((v: ProductView) => {
+    setUserGuideActive(false);
     setSdLiteActive(false);
     setPvLiteActive(false);
     setZsLiteActive(false);
@@ -62,6 +68,7 @@ export default function App() {
 
   useEffect(() => {
     const onPopState = () => {
+      setUserGuideActive(isUserGuidePathname(window.location.pathname));
       setProductViewState(readInitialProductView());
       setSdLiteActive(isSdLitePathname(window.location.pathname));
       setPvLiteActive(isPvLitePathname(window.location.pathname));
@@ -72,7 +79,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (pvLiteActive) {
+    if (userGuideActive) {
+      applyPhmaxUserGuideDocumentHead();
+    } else if (pvLiteActive) {
       applyPhmaxLiteDocumentHead("pv");
     } else if (sdLiteActive) {
       applyPhmaxLiteDocumentHead("sd");
@@ -86,7 +95,7 @@ export default function App() {
       recordDashboardProductVisit(product);
       recordLastActiveProduct(product);
     }
-  }, [productView, pvLiteActive, sdLiteActive, zsLiteActive]);
+  }, [productView, pvLiteActive, sdLiteActive, zsLiteActive, userGuideActive]);
 
   const openSdLite = useCallback(() => {
     setProductViewState("sd");
@@ -121,16 +130,18 @@ export default function App() {
     setZsLiteActive(false);
   }, []);
 
-  const shell = (child: React.ReactNode) => (
-    <div className="app-shell app-shell--gradient">
-      <div className="container container--app">
+  const shell = (child: React.ReactNode, variant: "default" | "user-guide" = "default") => (
+    <div className={`app-shell app-shell--gradient${variant === "user-guide" ? " app-shell--user-guide" : ""}`}>
+      <div className={`container container--app${variant === "user-guide" ? " container--user-guide" : ""}`}>
         <Suspense fallback={<div className="card muted">Načítám kalkulačku…</div>}>{child}</Suspense>
       </div>
     </div>
   );
 
   let page: React.ReactNode;
-  switch (productView) {
+  if (userGuideActive) {
+    page = shell(<PhmaxUserGuidePage />, "user-guide");
+  } else switch (productView) {
     case "dash":
       page = (
         <Suspense
