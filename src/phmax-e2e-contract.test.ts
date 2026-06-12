@@ -35,7 +35,8 @@ describe("E2E smoke contract", () => {
     expect(readSource("e2e/smoke-helpers.ts")).toContain("openDashboardAttentionModule");
     expect(readSource("e2e/smoke-helpers.ts")).toContain("openDashboardKpiModule");
     expect(readSource("e2e/smoke-helpers.ts")).toContain("openDashboardModuleCard");
-    expect(readSource("e2e/dashboard-post-deploy-smoke.spec.ts")).toContain("Export CSV");
+    expect(readSource("e2e/smoke-helpers.ts")).toContain("clickHeroExportCsv");
+    expect(readSource("e2e/dashboard-post-deploy-smoke.spec.ts")).toContain("clickHeroExportCsv");
     expect(readSource("src/phmax-dashboard-focus.ts")).toContain("getDashboardFocusHint");
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain("data-pv-row-id");
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain('[data-section="basic"]');
