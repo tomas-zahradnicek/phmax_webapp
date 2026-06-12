@@ -26,6 +26,7 @@ describe("E2E smoke contract", () => {
       "e2e/dashboard-post-deploy-smoke.spec.ts",
       "e2e/dashboard-ux-013.spec.ts",
       "e2e/metric-label-casing.spec.ts",
+      "e2e/own-data-ux-smoke.spec.ts",
     ]) {
       expect(fs.existsSync(path.resolve(repoRoot, specFile))).toBe(true);
     }
@@ -42,6 +43,9 @@ describe("E2E smoke contract", () => {
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain('[data-section="basic"]');
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain("data-nv75-row-id");
     expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain("data-sd-dept-id");
+    expect(readSource("e2e/dashboard-deep-link-smoke.spec.ts")).toContain("Odeslat export na IS (POST)");
+    expect(readSource("e2e/own-data-ux-smoke.spec.ts")).toContain('getByTestId("dash-new-user-checklist")');
+    expect(readSource("src/dashboard/DashboardNewUserChecklist.tsx")).toContain('data-testid="dash-new-user-checklist"');
     expect(readSource("src/phmax-sd-dashboard-focus.ts")).toContain("findFirstSdDashboardFocusHint");
     expect(readSource("package.json")).toContain('"test:e2e"');
     expect(readSource(".github/workflows/ci.yml")).toContain("npm run test:e2e");

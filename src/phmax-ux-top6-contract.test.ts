@@ -54,7 +54,7 @@ describe("UX TOP 6 contract", () => {
     expect(css).toContain(".calculator-mobile-scroll-results--pinned");
     expect(css).toContain(".product-basic-wizard-active");
     expect(css).toContain(".basic-compare-preview");
-    expect(css).toContain(".dash-new-user-card");
+    expect(css).toContain(".dash-new-user-checklist");
     expect(readSource("src/PhmaxZsPage.tsx")).toContain("useProductBasicWizard");
     expect(readSource("src/zs/zs-pha-basic-wizard.ts")).toContain("ZS_PHA_BASIC_WIZARD_STEPS");
     expect(css).toContain(".calculator-shell__supplement--before");

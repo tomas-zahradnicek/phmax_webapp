@@ -1,11 +1,17 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildSchoolProfilePrintHtml } from "./phmax-dashboard-school-profile-print";
+
+const appVersion = (JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"), "utf8")) as {
+  version: string;
+}).version;
 
 describe("buildSchoolProfilePrintHtml", () => {
   it("obsahuje souhrn školy bez technického JSON", () => {
     const html = buildSchoolProfilePrintHtml({
       generatedAt: "1. 1. 2026",
-      appVersion: "0.3.15",
+      appVersion,
       coherenceWarnings: ["ZŠ: audit ≠ přepočet"],
       profile: {
         tone: "ok",

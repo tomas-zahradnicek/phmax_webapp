@@ -11,9 +11,14 @@ Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu př�
 | `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
 | `nv75` | NV 75 – zástupce (banka odpočtů) |
 
+## Verze 0.3.16 (UX)
+
+- **Přehled:** scénáře ZŠ, import follow-up, checklist nového uživatele, tisk profilu; a11y toast/drawer/kontrast.
+- **Parity:** ZŠ/PV/ŠD/SŠ přepočet PHmax shodný s autosave audit; smoke checklist `docs/smoke-checklist-post-0.3.16.md`.
+
 ## Verze 0.3.15 (UX)
 
-- **Po 0.3.14:** IT checklist exportu na dashboardu; kontrakt ZŠ přepočet vs audit; smoke checklist `docs/smoke-checklist-post-0.3.14.md`.
+- **Po 0.3.14:** IT checklist exportu na dashboardu; kontrakt ZŠ přepočet vs audit.
 - **Import / tisk / nápovědy pásem:** blob tisk, šablona ŠD „Počet účastníků“, orientační hinty PHmax/PHAmax/PHPmax/PV/NV75; po deployi `docs/post-deploy-checklist.md`.
 - **Kvalita:** golden + kontrakty audit/E2E; `phmax-import-roundtrip.test.ts`.
 

@@ -1,5 +1,11 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { buildSchoolReviewPrintHtml, openSchoolReviewPrintWindow } from "./phmax-dashboard-school-review-print";
+
+const appVersion = (JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"), "utf8")) as {
+  version: string;
+}).version;
 
 describe("phmax-dashboard-school-review-print", () => {
   afterEach(() => {
@@ -9,7 +15,7 @@ describe("phmax-dashboard-school-review-print", () => {
   it("buildSchoolReviewPrintHtml obsahuje titul a tiskový skript", () => {
     const html = buildSchoolReviewPrintHtml({
       generatedAt: "1. 1. 2025",
-      appVersion: "0.3.15",
+      appVersion,
       scenarioLabel: "Test",
       crossPhmax: {
         slices: [],

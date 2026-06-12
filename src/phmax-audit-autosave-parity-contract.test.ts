@@ -24,4 +24,12 @@ describe("Audit autosave parity (PV, ŠD, ZŠ, SŠ)", () => {
     expect(readSource("src/zs/zs-form-snapshot.ts")).toContain("computeZsPhmaxTotalFromFields");
     expect(readSource("src/ss/use-phmax-ss-units.ts")).toContain("computeSsPhmaxTotalFromSnapshot");
   });
+
+  it("zobrazení PHmax používá stejný přepočet jako autosave (ŠD, SŠ)", () => {
+    const sd = readSource("src/PhmaxSdPage.tsx");
+    expect(sd).toContain("sdPhmaxTotalFromEngine");
+    expect(sd).toContain("formatSdHours(sdPhmaxTotalFromEngine)");
+    expect(sd).toContain("computeSdPhmaxTotalFromSnapshot(sdAutosaveCore)");
+    expect(readSource("src/ss/use-phmax-ss-units.ts")).toContain("computeSsPhmaxTotalFromSnapshot({ rows })");
+  });
 });

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.16 (2026-05-28)
+
+### UX přehledu
+- Dashboard: scénáře ZŠ, import follow-up, checklist nového uživatele, lite→plná, tisk školního profilu.
+- ZŠ: přepočet PHmax ze snapshotu (`computeZsPhmaxTotalFromFields`); koherence bez ohledu na záložku pha/php.
+- PV: přepočet ze snapshotu pro audit parity.
+
+### Přístupnost
+- Toast po importu `aria-live="assertive"`; návrat fokusu z draweru Akce; kontrast varování u polí a koherence.
+
+### Kvalita
+- Kontrakty parity PV/ŠD/ZŠ/SŠ; E2E own-data smoke a POST handoff label.
+- ŠD/SŠ: zobrazení PHmax přes `computeSdPhmaxTotalFromSnapshot` / `computeSsPhmaxTotalFromSnapshot`.
+- Docs: smoke checklist `docs/smoke-checklist-post-0.3.16.md`; release notes v0.3.16.
+
 ## 0.3.15 (2026-06-03)
 
 ### Po 0.3.14

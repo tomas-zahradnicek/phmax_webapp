@@ -105,7 +105,7 @@ Viz **`docs/product-roadmap.md`**. Stručně:
 | Dashboard role + export wizard | E2E desktop | `dashboard-ux-013.spec.ts` |
 | ZŠ quick tour | contract + ručně | `ZS_QUICK_TOUR_*` v modulu ZŠ |
 
-Detailní checklist: [smoke-checklist-post-0.3.14.md](./smoke-checklist-post-0.3.14.md).
+Detailní checklist: [smoke-checklist-post-0.3.16.md](./smoke-checklist-post-0.3.16.md).
 
 ## Příkazy
 

@@ -449,6 +449,40 @@ export function PhmaxSdPage({ productView, setProductView, onOpenRychlyPhmax }: 
     schoolFirstStageClassCount,
   ]);
 
+  const sdAutosaveCore = useMemo(
+    () => ({
+      pupils,
+      manualDepts,
+      departments,
+      inputMode,
+      summarySpecialDepartments,
+      regularExceptionGranted,
+      specialExceptionGranted,
+      detailDepartments,
+      schoolFirstStageClassCount,
+      vychovatelPpcHours,
+      separateVedoucihoDleT72,
+    }),
+    [
+      pupils,
+      manualDepts,
+      departments,
+      inputMode,
+      summarySpecialDepartments,
+      regularExceptionGranted,
+      specialExceptionGranted,
+      detailDepartments,
+      schoolFirstStageClassCount,
+      vychovatelPpcHours,
+      separateVedoucihoDleT72,
+    ],
+  );
+
+  const sdPhmaxTotalFromEngine = useMemo(
+    () => computeSdPhmaxTotalFromSnapshot(sdAutosaveCore),
+    [sdAutosaveCore],
+  );
+
   const tableWarning =
     effectiveDepts > SD_MAX_DEPARTMENTS_IN_TABLE
       ? `Tabulka PHmax v této aplikaci končí ${SD_MAX_DEPARTMENTS_IN_TABLE} odděleními – u vyššího počtu použijte přílohu vyhlášky.`
@@ -519,8 +553,7 @@ export function PhmaxSdPage({ productView, setProductView, onOpenRychlyPhmax }: 
 
   const sdPlainNarrative = useMemo(() => {
     if (pupils <= 0) return null;
-    const phmaxHours =
-      detailedResult != null ? detailedResult.finalPhmax : basePhmax != null ? reduction.adjusted : null;
+    const phmaxHours = sdPhmaxTotalFromEngine;
     if (phmaxHours == null) return null;
     const totalDepartments = detailedResult != null ? detailedResult.totalDepartments : effectiveDepts;
     if (totalDepartments < 1) return null;
@@ -532,12 +565,11 @@ export function PhmaxSdPage({ productView, setProductView, onOpenRychlyPhmax }: 
       totalDepartments,
       phmaxHours,
     });
-  }, [pupils, detailedResult, basePhmax, reduction.adjusted, effectiveDepts, summaryHasSpecial]);
+  }, [pupils, sdPhmaxTotalFromEngine, detailedResult, effectiveDepts, summaryHasSpecial]);
 
   const sdStaffingModel = useMemo(() => {
     if (pupils <= 0) return null;
-    const phmaxHours =
-      detailedResult != null ? detailedResult.finalPhmax : basePhmax != null ? reduction.adjusted : null;
+    const phmaxHours = sdPhmaxTotalFromEngine;
     if (phmaxHours == null) return null;
     const depts = detailedResult != null ? detailedResult.totalDepartments : effectiveDepts;
     if (depts < 1) return null;
@@ -547,7 +579,7 @@ export function PhmaxSdPage({ productView, setProductView, onOpenRychlyPhmax }: 
       vychovatelFullPpc: vychovatelPpcHours,
       separateVedoucihoDleT72,
     });
-  }, [pupils, detailedResult, basePhmax, reduction.adjusted, effectiveDepts, vychovatelPpcHours, separateVedoucihoDleT72]);
+  }, [pupils, sdPhmaxTotalFromEngine, detailedResult, effectiveDepts, vychovatelPpcHours, separateVedoucihoDleT72]);
 
   const sdVerdict = useMemo(() => {
     const activeDeptCount = inputMode === "detail" ? detailDepartments.length : effectiveDepts;
@@ -669,39 +701,14 @@ export function PhmaxSdPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const buildSdSnapshot = useCallback((): SdPersistedSnapshot & {
     _phmaxAuditTotals?: { totalPhmax: number; totalPha: number; tab: "phmax" };
   } => {
-    const core = {
-      pupils,
-      manualDepts,
-      departments,
-      inputMode,
-      summarySpecialDepartments,
-      regularExceptionGranted,
-      specialExceptionGranted,
-      detailDepartments,
-      schoolFirstStageClassCount,
-      vychovatelPpcHours,
-      separateVedoucihoDleT72,
-    };
-    const totalPhmax = computeSdPhmaxTotalFromSnapshot(core);
-    const totalPha = computeSdPhaMaxFromSnapshot(core);
-    if (totalPhmax == null) return core;
+    const totalPhmax = computeSdPhmaxTotalFromSnapshot(sdAutosaveCore);
+    const totalPha = computeSdPhaMaxFromSnapshot(sdAutosaveCore);
+    if (totalPhmax == null) return sdAutosaveCore;
     return {
-      ...core,
+      ...sdAutosaveCore,
       _phmaxAuditTotals: { totalPhmax, totalPha: totalPha ?? 0, tab: "phmax" },
     };
-  }, [
-    pupils,
-    manualDepts,
-    departments,
-    inputMode,
-    summarySpecialDepartments,
-    regularExceptionGranted,
-    specialExceptionGranted,
-    detailDepartments,
-    schoolFirstStageClassCount,
-    vychovatelPpcHours,
-    separateVedoucihoDleT72,
-  ]);
+  }, [sdAutosaveCore]);
 
   const applySdPersisted = useCallback((next: SdPersistedSnapshot) => {
     setPupils(next.pupils);
@@ -1008,17 +1015,12 @@ export function PhmaxSdPage({ productView, setProductView, onOpenRychlyPhmax }: 
     }
   }, [buildSdSnapshot]);
 
-  const sdPhmaxDisplay =
-    detailedResult != null
-      ? formatSdHours(detailedResult.finalPhmax)
-      : basePhmax != null
-        ? formatSdHours(reduction.adjusted)
-        : "–";
+  const sdPhmaxDisplay = sdPhmaxTotalFromEngine != null ? formatSdHours(sdPhmaxTotalFromEngine) : "–";
 
   const sdBasicWizardActive = viewMode === "basic";
   const sdHasInputIssue = sdVerdict.tone !== "ok";
   const sdScrollToInputs = useMemo(() => createSdScrollToInputs(), []);
-  const sdHasData = basePhmax != null;
+  const sdHasData = sdPhmaxTotalFromEngine != null;
   const sdNextAction = useMemo(
     () =>
       buildCalculatorNextAction({

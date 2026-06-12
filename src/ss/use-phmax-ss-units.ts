@@ -227,9 +227,11 @@ export function usePhmaxSsUnits(
   const preview = useMemo(() => deriveSsUnitsPreview(rows), [rows]);
   const brulesPreview = useMemo(() => deriveSsUnitsBrulesPreview(rows), [rows]);
 
-  const computedRows = preview.filter((p) => !p.skipped && "resolved" in p);
-  const totalPhmax = computedRows.reduce((s, p) => s + (p.resolved?.totalPhmax ?? 0), 0);
-  const roundedTotal = Math.round((totalPhmax + Number.EPSILON) * 100) / 100;
+  const computedRows = useMemo(
+    () => preview.filter((p) => !p.skipped && "resolved" in p),
+    [preview],
+  );
+  const roundedTotal = useMemo(() => computeSsPhmaxTotalFromSnapshot({ rows }) ?? 0, [rows]);
 
   const phamaxPracticalTotal = useMemo(() => sumPracticalSchoolPhaMaxFromRows(rows), [rows]);
 

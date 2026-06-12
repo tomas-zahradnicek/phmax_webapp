@@ -58,11 +58,13 @@ PV / ŠD / SŠ / NV75 / ZŠ (při nevyplněných vstupech):
 
 ## Záznam (vyplnit po ručním průchodu)
 
+Poslední spot-check po 0.3.16 (kontrakt `phmax-a11y-release-contract` + E2E own-data). Sloupec **Poznámka** doplňte při změně modálu nebo layoutu.
+
 | Modul | Skip link | Modály | TOC | Drawer Akce | Přejít k chybě | Poznámka |
 |-------|-----------|--------|-----|-------------|----------------|----------|
-| dash | | Import | — | — | — | |
-| pv | | | | | | |
-| sd | | | | | | |
-| ss | | | | | | |
-| zs | | | | | | |
-| nv75 | | | | | | |
+| dash | ✓ | ✓ Import | — | — | — | checklist nového uživatele |
+| pv | ✓ | ✓ Nápověda | ✓ | ✓ | ✓ | own-data E2E |
+| sd | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| ss | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| zs | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| nv75 | ✓ | ✓ | ✓ | ✓ | ✓ | |

@@ -1,5 +1,11 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildDashboardExportChecklist } from "./phmax-dashboard-export-checklist";
+
+const appVersion = (JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"), "utf8")) as {
+  version: string;
+}).version;
 
 describe("buildDashboardExportChecklist", () => {
   it("obsahuje varování koherence", () => {
@@ -29,7 +35,7 @@ describe("buildDashboardExportChecklist", () => {
       attentionModuleLabels: [],
       auditCoherenceWarnings: [],
       exportDisclaimerConfirmed: true,
-      appVersion: "0.3.15",
+      appVersion,
       scenarioLabel: "Test škola",
     });
     expect(items.some((x) => x.includes("appVersion"))).toBe(true);
