@@ -6794,25 +6794,6 @@ select:focus {
   background: color-mix(in srgb, currentColor 12%, transparent);
 }
 
-.dash-new-user-card__actions {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 8px;
-  margin-top: auto;
-  padding-top: 4px;
-  flex-shrink: 0;
-}
-
-.dash-new-user-card__actions .btn {
-  flex: 0 1 auto;
-  width: auto;
-  min-height: 0;
-  justify-content: center;
-  text-align: center;
-}
-
 .dash-card__actions {
   display: flex;
   flex-direction: column;
@@ -7440,42 +7421,12 @@ select:focus {
   max-width: 100%;
 }
 
-.dash-overview-stack > .dash-new-user-card,
+.dash-overview-stack > .dash-new-user-checklist,
 .dash-overview-stack > .dash-browser-overview {
   display: block;
   width: 100%;
   max-width: 100%;
   flex: 0 0 auto;
-}
-
-.dash-new-user-card__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-  margin-top: 12px;
-  align-items: stretch;
-}
-
-.dash-new-user-card__tile {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 100%;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
-  background: #fff;
-}
-
-.dash-new-user-card__tile-title {
-  margin: 0 0 6px;
-  font-size: 1rem;
-}
-
-.dash-new-user-card__tile-lead {
-  margin: 0 0 10px;
-  font-size: 0.86rem;
-  flex: 1 1 auto;
 }
 
 .dash-attention-card__list {
@@ -10917,7 +10868,7 @@ select:focus {
 }
 
 .dash-page .dash-card__actions,
-.dash-page .dash-new-user-card__actions,
+.dash-page .dash-new-user-checklist__cta,
 .dash-page .dash-role-cards__actions,
 .dash-page .dash-school-import__actions,
 .dash-import-dialog__actions {
@@ -10973,10 +10924,6 @@ select:focus {
   padding: 10px 12px;
 }
 
-.dash-page .dash-new-user-card__tile {
-  padding: 10px 12px;
-}
-
 .dash-page .dash-attention-card__item {
   padding: 10px 12px;
   gap: 8px;
@@ -10992,7 +10939,7 @@ select:focus {
 
 @media (max-width: 900px) {
   .dash-page #phmax-dashboard-main .dash-card__actions .btn,
-  .dash-page #phmax-dashboard-main .dash-new-user-card__actions .btn,
+  .dash-page #phmax-dashboard-main .dash-new-user-checklist__cta,
   .dash-page #phmax-dashboard-main .dash-role-cards__actions .btn,
   .dash-page #phmax-dashboard-main .dash-school-import__actions .btn,
   .dash-page #phmax-dashboard-main .toolbar .btn,
@@ -11758,11 +11705,6 @@ select:focus {
 .dash-advanced-tools__block + .dash-advanced-tools__block {
   padding-top: 16px;
   border-top: 1px solid var(--line);
-}
-
-.dash-new-user-card__steps {
-  margin: 0 0 14px;
-  padding-left: 1.25rem;
 }
 
 .dash-export-wizard {

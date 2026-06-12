@@ -41,4 +41,29 @@ describe("PV PHmax koherence (autosave vs přepočet)", () => {
     expect(computePvPhmaxTotalFromSnapshot(snap)).toBe(computed);
     expect((snap._phmaxAuditTotals as { totalPhmax: number }).totalPhmax).not.toBe(computed);
   });
+
+  it("přepočet zahrnuje § 1d odst. 3, když je aktivní redukce", () => {
+    const rows = [
+      {
+        id: "r1",
+        provoz: "celodenni" as const,
+        classCount: 2,
+        avgHours: 8,
+        sec16Count: 0,
+        languageGroups: 0,
+        pv1dActualChildren: 10,
+        pv1dMinimumChildren: 20,
+        pv1dKuPhmaxCap: 0,
+        pv1dExemption: false,
+        pv1dKuDecisionRef: "",
+      },
+    ];
+    const without1d = computePvPhmaxTotalFromSnapshot({
+      rows: [{ ...rows[0], pv1dActualChildren: 0, pv1dMinimumChildren: 0 }],
+    });
+    const with1d = computePvPhmaxTotalFromSnapshot({ rows });
+    expect(without1d).not.toBeNull();
+    expect(with1d).not.toBeNull();
+    expect(with1d!).toBeLessThan(without1d!);
+  });
 });

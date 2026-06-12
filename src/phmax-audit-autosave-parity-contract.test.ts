@@ -32,4 +32,11 @@ describe("Audit autosave parity (PV, ŠD, ZŠ, SŠ)", () => {
     expect(sd).toContain("computeSdPhmaxTotalFromSnapshot(sdAutosaveCore)");
     expect(readSource("src/ss/use-phmax-ss-units.ts")).toContain("computeSsPhmaxTotalFromSnapshot({ rows })");
   });
+
+  it("zobrazení PHmax používá stejný přepočet jako autosave (PV)", () => {
+    const pv = readSource("src/PhmaxPvPage.tsx");
+    expect(pv).toContain("pvPhmaxTotalFromEngine");
+    expect(pv).toContain("computePvPhmaxTotalFromSnapshot({ rows })");
+    expect(readSource("src/pv/pv-compute-phmax-total-from-snapshot.ts")).toContain("computePv1d3Reduction");
+  });
 });

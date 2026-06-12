@@ -47,6 +47,8 @@ const requiredContractEntries = [
   "src/export-time-freeze.test.ts",
   "src/phmax-audit-schema-contract.test.ts",
   "src/snapshot-restore-contract.test.ts",
+  "src/phmax-e2e-contract.test.ts",
+  "src/phmax-handout-contract.test.ts",
 ];
 
 const requiredUiFlowEntries = [

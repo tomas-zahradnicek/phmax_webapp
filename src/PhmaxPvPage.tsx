@@ -439,21 +439,24 @@ export function PhmaxPvPage({ productView, setProductView, onOpenRychlyPhmax }: 
     return out;
   }, [rowComputations]);
 
+  const pvPhmaxTotalFromEngine = useMemo(() => computePvPhmaxTotalFromSnapshot({ rows }), [rows]);
+
   const aggregate = useMemo(() => {
-    let phmaxSum = 0;
+    let partialPhmaxSum = 0;
     let phaSum = 0;
     let incomplete = false;
     for (const c of rowComputations) {
-      if (c.effectivePhmax != null) phmaxSum += c.effectivePhmax;
+      if (c.effectivePhmax != null) partialPhmaxSum += c.effectivePhmax;
       else incomplete = true;
       if (c.phaMax != null) phaSum += c.phaMax;
     }
     return {
-      phmaxSum: round2(phmaxSum),
+      phmaxSum:
+        incomplete || pvPhmaxTotalFromEngine == null ? round2(partialPhmaxSum) : pvPhmaxTotalFromEngine,
       phaSum: round2(phaSum),
       incomplete,
     };
-  }, [rowComputations]);
+  }, [rowComputations, pvPhmaxTotalFromEngine]);
 
   const pvVerdict = useMemo(() => {
     if (rows.length === 0) {

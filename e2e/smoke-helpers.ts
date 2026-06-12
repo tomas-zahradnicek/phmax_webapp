@@ -59,6 +59,11 @@ async function openDashboardAdvancedTools(page: Page): Promise<void> {
   await openDashboardDetails(page, "#dash-advanced-tools");
 }
 
+/** Dashboard – rozbalí sekci Pokročilé nástroje (import, export). */
+export async function openDashboardAdvancedToolsSection(page: Page): Promise<void> {
+  await openDashboardAdvancedTools(page);
+}
+
 async function scrollDashboardExportSection(page: Page): Promise<void> {
   await openDashboardAdvancedTools(page);
   await openDashboardDetails(page, ".dash-export-checklist");
