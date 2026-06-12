@@ -425,7 +425,7 @@ test.describe("Dashboard deep-link", () => {
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
     await confirmDashboardExportDisclaimer(page);
-    const postBtn = page.getByRole("button", { name: "Odeslat handoff na IS (POST)" });
+    const postBtn = page.getByRole("button", { name: "Odeslat export na IS (POST)" });
     await postBtn.scrollIntoViewIfNeeded();
     await postBtn.click();
     await expect(page.locator(".ui-toast").filter({ hasText: /Handoff odeslán \(HTTP 200\)/i })).toBeVisible({
