@@ -10,6 +10,7 @@ import type { DisplayDensity } from "../display-density";
 import type { ProductView } from "../ProductViewPills";
 import {
   PHMAX_SS_METHODOLOGY_LABEL,
+  PHMAX_SS_MSMT_DOWNLOAD_URL,
   PHMAX_SS_MSMT_PAGE_URL,
   PHMAX_SS_RIZENI_SKOLY_URL,
 } from "./phmax-ss-constants";
@@ -93,7 +94,12 @@ export function SsHeroHeader({
           <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
             {PHMAX_SS_METHODOLOGY_LABEL}
           </a>
-          . Doplňující souvislosti:{" "}
+          {" "}
+          (
+          <a href={PHMAX_SS_MSMT_DOWNLOAD_URL} target="_blank" rel="noopener noreferrer" className="status-link">
+            DOCX ke stažení
+          </a>
+          ). Doplňující souvislosti:{" "}
           <a href={PHMAX_SS_RIZENI_SKOLY_URL} target="_blank" rel="noopener noreferrer" className="status-link">
             metodické doporučení (ŘŠ)
           </a>

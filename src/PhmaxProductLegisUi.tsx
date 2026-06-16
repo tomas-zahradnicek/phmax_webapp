@@ -1,5 +1,6 @@
 import React from "react";
 import { LegisTooltipRef } from "./LegisTooltipRef";
+import { MsmtMetodikaDownloadLink } from "./MsmtMetodikaDownloadLink";
 import { PV_LEGIS_PARAGRAPH_TOOLTIPS, PV_LEGIS_ZAKONY_URL } from "./phmax-pv-legislativa";
 import { SD_LEGIS_PARAGRAPH_TOOLTIPS, SD_LEGIS_ZAKONY_URL } from "./phmax-sd-legislativa";
 import { ZS_LEGIS_PARAGRAPH_TOOLTIPS, ZS_LEGIS_ZAKONY_URL } from "./phmax-zs-legislativa";
@@ -56,7 +57,7 @@ export function ProductLegisContextPanel({ variant }: { variant: ProductLegisVar
             {" · "}
             <LawLink href={ZS_LEGIS_ZAKONY_URL.nv75}>NV 75/2005</LawLink>
             {" · "}
-            <LawLink href={ZS_LEGIS_ZAKONY_URL.skolsky561}>školský zákon</LawLink>.
+            <LawLink href={ZS_LEGIS_ZAKONY_URL.skolsky561}>školský zákon</LawLink>. Metodika: <MsmtMetodikaDownloadLink metodikaId="zv" className="status-link ss-why-panel__link" />.
           </p>
         </div>
       </details>
@@ -85,7 +86,7 @@ export function ProductLegisContextPanel({ variant }: { variant: ProductLegisVar
             {" · "}
             <LawLink href={PV_LEGIS_ZAKONY_URL.vyhl14}>vyhl. 14/2005</LawLink>
             {" · "}
-            <LawLink href={PV_LEGIS_ZAKONY_URL.msmtPv}>Metodika MŠMT (PV)</LawLink>.
+            <LawLink href={PV_LEGIS_ZAKONY_URL.msmtPv}>Metodika MŠMT (PDF)</LawLink> · <MsmtMetodikaDownloadLink metodikaId="pv" className="status-link ss-why-panel__link" />.
           </p>
         </div>
       </details>
@@ -117,7 +118,7 @@ export function ProductLegisContextPanel({ variant }: { variant: ProductLegisVar
           {" · "}
           <LawLink href={SD_LEGIS_ZAKONY_URL.nv75_2005}>NV 75/2005 (PPV)</LawLink>
           {" · "}
-          <LawLink href={SD_LEGIS_ZAKONY_URL.skolsky561}>Školský zákon</LawLink>.
+          <LawLink href={SD_LEGIS_ZAKONY_URL.skolsky561}>Školský zákon</LawLink>. Metodika: <MsmtMetodikaDownloadLink metodikaId="sd" className="status-link ss-why-panel__link" />.
         </p>
       </div>
     </details>

@@ -8,7 +8,7 @@ import {
   LAY_USER_QUICK_START_MOBILE_UX,
   LAY_USER_QUICK_START_SS,
 } from "../calculator-ui-constants";
-import { PHMAX_SS_MAX_NAMED_SNAPSHOTS, PHMAX_SS_MSMT_PAGE_URL } from "./phmax-ss-constants";
+import { PHMAX_SS_MAX_NAMED_SNAPSHOTS, PHMAX_SS_MSMT_DOWNLOAD_URL, PHMAX_SS_MSMT_PAGE_URL } from "./phmax-ss-constants";
 
 export type SsQuickOnboardingGuideProps = {
   open: boolean;
@@ -36,7 +36,11 @@ export function SsQuickOnboardingGuide({ open, onDismiss, returnFocusRef }: SsQu
         <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
           metodice MŠMT pro SŠ
         </a>{" "}
-        a výkazům školy. Vedle tlačítka <strong>Nápověda</strong> je <strong>Slovníček</strong> s definicemi pojmů (PHmax,
+        (
+        <a href={PHMAX_SS_MSMT_DOWNLOAD_URL} target="_blank" rel="noopener noreferrer" className="status-link">
+          DOCX ke stažení
+        </a>
+        ) a výkazům školy. Vedle tlačítka <strong>Nápověda</strong> je <strong>Slovníček</strong> s definicemi pojmů (PHmax,
         typ třídy, víceobor…).
       </p>
       <p>

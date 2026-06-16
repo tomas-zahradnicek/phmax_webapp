@@ -1,16 +1,18 @@
 import React from "react";
 import { UI_TEXTS_LAST_REVIEW_DATE } from "./calculator-ui-constants";
+import { MsmtMetodikaDownloadLink } from "./MsmtMetodikaDownloadLink";
 import {
-  PHMAX_SS_MSMT_PAGE_URL,
-  PHMAX_SS_METHODOLOGY_LABEL,
-  PHMAX_SS_RIZENI_SKOLY_URL,
-} from "./ss/phmax-ss-constants";
+  PHMAX_MSMT_METODIKA_BY_ID,
+  PHMAX_MSMT_METODIKY_HUB_URL,
+} from "./phmax-msmt-metodiky";
+import { PHMAX_SS_METHODOLOGY_LABEL, PHMAX_SS_RIZENI_SKOLY_URL } from "./ss/phmax-ss-constants";
 
 /**
  * Společné metodiky a předpisy pro všechny kalkulačky – text pod rozbalitelným shrnutím.
  */
 export function MethodologyStrip() {
   const [open, setOpen] = React.useState(false);
+  const ssDoc = PHMAX_MSMT_METODIKA_BY_ID.ss;
   return (
     <details
       className="methodology-strip methodology-strip--collapsible card muted"
@@ -20,10 +22,17 @@ export function MethodologyStrip() {
         Verze metodik a předpisy
       </summary>
       <div className="methodology-strip__panel">
+        <p className="muted-text methodology-strip__note" style={{ marginTop: 0 }}>
+          Oficiální metodiky MŠMT k výpočtu PHmax:{" "}
+          <a href={PHMAX_MSMT_METODIKY_HUB_URL} target="_blank" rel="noopener noreferrer" className="status-link">
+            přehled na msmt.gov.cz
+          </a>
+          .
+        </p>
         <ul className="methodology-strip__list">
           <li>
-            <strong>Základní vzdělávání (ZŠ):</strong> metodika PHmax / PHAmax / PHPmax pro ZV, verze 5 (březen 2026); NV
-            č. 123/2018 Sb.; vyhl. č. 48/2005 Sb.;{" "}
+            <strong>Základní vzdělávání (ZŠ):</strong> {PHMAX_MSMT_METODIKA_BY_ID.zv.versionLabel}; NV č. 123/2018 Sb.;
+            vyhl. č. 48/2005 Sb.;{" "}
             <a href="https://www.zakonyprolidi.cz/cs/2005-75" target="_blank" rel="noopener noreferrer" className="status-link">
               NV č. 75/2005 Sb.
             </a>{" "}
@@ -31,32 +40,23 @@ export function MethodologyStrip() {
             <a href="https://www.zakonyprolidi.cz/cs/2004-561" target="_blank" rel="noopener noreferrer" className="status-link">
               zákon č. 561/2004 Sb. (školský zákon)
             </a>
-            .
+            . <MsmtMetodikaDownloadLink metodikaId="zv" />.
           </li>
           <li>
             <strong>Školní družina:</strong> příloha k vyhl. č. 74/2005 Sb., o zájmovém vzdělávání – tabulka PHmax podle
-            počtu oddělení; metodické pokyny MŠMT k PHmax ŠD.{" "}
+            počtu oddělení.{" "}
             <a href="https://www.zakonyprolidi.cz/cs/2005-74" target="_blank" rel="noopener noreferrer" className="status-link">
               Zakonyprolidi.cz – vyhl. 74/2005
             </a>
-            .
+            . <MsmtMetodikaDownloadLink metodikaId="sd" />.
           </li>
           <li>
-            <strong>Předškolní vzdělávání (MŠ):</strong> metodika PHmax a PHAmax pro PV, verze 4 (2026); vyhl. č. 14/2005
+            <strong>Předškolní vzdělávání (MŠ):</strong> {PHMAX_MSMT_METODIKA_BY_ID.pv.versionLabel}; vyhl. č. 14/2005
             Sb.{" "}
             <a href="https://www.zakonyprolidi.cz/cs/2005-14" target="_blank" rel="noopener noreferrer" className="status-link">
               Zakonyprolidi.cz – vyhl. 14/2005
             </a>
-            ;{" "}
-            <a
-              href="https://edu.gov.cz/methodology/metodika-stanoveni-phmax-a-phamax-pro-predskolni-vzdelavani/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="status-link"
-            >
-              Metodika MŠMT (PV)
-            </a>
-            .
+            . <MsmtMetodikaDownloadLink metodikaId="pv" />.
           </li>
           <li>
             <strong>Střední vzdělávání (SŠ):</strong> {PHMAX_SS_METHODOLOGY_LABEL}. Rámec zákona:{" "}
@@ -68,14 +68,22 @@ export function MethodologyStrip() {
               vyhl. č. 13/2005 Sb.
             </a>
             .{" "}
-            <a href={PHMAX_SS_MSMT_PAGE_URL} target="_blank" rel="noopener noreferrer" className="status-link">
+            <a href={ssDoc.pageUrl} target="_blank" rel="noopener noreferrer" className="status-link">
               Stránka MŠMT (metodika SŠ)
             </a>
-            ;{" "}
+            ; <MsmtMetodikaDownloadLink metodikaId="ss" />;{" "}
             <a href={PHMAX_SS_RIZENI_SKOLY_URL} target="_blank" rel="noopener noreferrer" className="status-link">
               metodické doporučení (ŘŠ)
             </a>
-            . Legislativní shrnutí pro vývojáře je součástí repozitáře projektu; v aplikaci stačí oficiální odkazy výše.
+            .
+          </li>
+          <li>
+            <strong>NV75 (banka odpočtů zástupce):</strong> samostatná metodika PHmax neexistuje – modul pracuje s rozsahy
+            přímé výuky dle{" "}
+            <a href="https://www.zakonyprolidi.cz/cs/2005-75" target="_blank" rel="noopener noreferrer" className="status-link">
+              NV č. 75/2005 Sb.
+            </a>
+            .
           </li>
         </ul>
         <p className="methodology-strip__note muted-text">

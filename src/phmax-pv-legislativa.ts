@@ -1,4 +1,6 @@
 /** Tooltipy a odkazy – předškolní vzdělávání (metodika PHmax/PHAmax PV v4). */
+import { PHMAX_MSMT_METODIKA_BY_ID } from "./phmax-msmt-metodiky";
+
 export const PV_LEGIS_PARAGRAPH_TOOLTIPS: Record<string, string> = {
   "pv-nv123":
     "NV č. 123/2018 Sb. stanovuje rámec PHmax (max. týdenní hodiny na třídu hrazené ze SR); konkrétní pásma pro PV vycházejí z metodické přílohy (tabulky 1–3).",
@@ -15,5 +17,5 @@ export const PV_LEGIS_PARAGRAPH_TOOLTIPS: Record<string, string> = {
 export const PV_LEGIS_ZAKONY_URL = {
   nv123: "https://www.zakonyprolidi.cz/cs/2018-123",
   vyhl14: "https://www.zakonyprolidi.cz/cs/2005-14",
-  msmtPv: "https://edu.gov.cz/methodology/metodika-stanoveni-phmax-a-phamax-pro-predskolni-vzdelavani/",
+  msmtPv: PHMAX_MSMT_METODIKA_BY_ID.pv.downloadUrl,
 } as const;

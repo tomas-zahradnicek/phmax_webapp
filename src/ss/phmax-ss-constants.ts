@@ -1,12 +1,15 @@
 import type { ModeKey } from "./phmax-ss-helpers";
+import { PHMAX_MSMT_METODIKA_BY_ID } from "../phmax-msmt-metodiky";
 
 /** Metodika SŠ – texty pro UI (odkazy a poznámky; výpočty v `phmax-ss-logic.ts`). */
 export const PHMAX_SS_METHODOLOGY_LABEL =
   "Metodika stanovení PHmax a PHAmax pro střední vzdělávání, verze 3 (2026)";
 
 /** Oficiální vstupní stránka MŠMT k metodice SŠ (soubory i popis). */
-export const PHMAX_SS_MSMT_PAGE_URL =
-  "https://msmt.gov.cz/vzdelavani/skolstvi-v-cr/ekonomika-skolstvi/metodika-vypoctu-phmax-pro-ss-2026";
+export const PHMAX_SS_MSMT_PAGE_URL = PHMAX_MSMT_METODIKA_BY_ID.ss.pageUrl!;
+
+/** Oficiální soubor metodiky SŠ ke stažení (DOCX). */
+export const PHMAX_SS_MSMT_DOWNLOAD_URL = PHMAX_MSMT_METODIKA_BY_ID.ss.downloadUrl;
 
 /** Doplňující metodické doporučení (řazení školy). */
 export const PHMAX_SS_RIZENI_SKOLY_URL =

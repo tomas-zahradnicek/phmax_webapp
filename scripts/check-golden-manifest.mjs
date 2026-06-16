@@ -49,6 +49,7 @@ const requiredContractEntries = [
   "src/snapshot-restore-contract.test.ts",
   "src/phmax-e2e-contract.test.ts",
   "src/phmax-handout-contract.test.ts",
+  "src/phmax-msmt-metodiky-contract.test.ts",
 ];
 
 const requiredUiFlowEntries = [
