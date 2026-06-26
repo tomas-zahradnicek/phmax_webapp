@@ -3,14 +3,14 @@ import { PHMAX_SEO_MODULE_CONTENT } from "./phmax-seo-module-content";
 import { APP_BRAND_LOGO_PATH } from "./calculator-ui-constants";
 import { USER_GUIDE_PATH } from "./calculator-ui-constants";
 import { PHMAX_PV_LITE_PATH, PHMAX_SD_LITE_PATH, PHMAX_ZS_LITE_PATH } from "./phmax-lite-paths";
+import { PHMAX_SITE_ORIGIN_FALLBACK } from "./phmax-site-origin";
 import { buildProductViewPageUrl, listProductViewPathUrls } from "./product-view-paths";
 
 export type PhmaxLiteKind = "pv" | "sd" | "zs";
 
 export const PHMAX_SITE_NAME = "Ředitelský průvodce";
 
-/** Výchozí origin pro sitemap/robots; v prohlížeči se použije `window.location.origin`. */
-export const PHMAX_SITE_ORIGIN_FALLBACK = "https://phmax-webapp.vercel.app";
+export { PHMAX_SITE_ORIGIN_FALLBACK };
 
 export type PhmaxDocumentHeadMeta = {
   title: string;
@@ -221,4 +221,36 @@ export function listPhmaxSitemapUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): strin
     new URL(PHMAX_SD_LITE_PATH, origin).href,
     new URL(PHMAX_ZS_LITE_PATH, origin).href,
   ];
+}
+
+export type PhmaxSitemapEntry = {
+  loc: string;
+  changefreq: "weekly" | "monthly";
+  priority: string;
+};
+
+function phmaxSitemapPriority(pathname: string): { changefreq: PhmaxSitemapEntry["changefreq"]; priority: string } {
+  if (pathname === "/prehled") return { changefreq: "weekly", priority: "1.0" };
+  if (pathname === "/navod") return { changefreq: "monthly", priority: "0.85" };
+  if (pathname.endsWith("/rychly")) return { changefreq: "monthly", priority: "0.85" };
+  if (pathname === "/banka-odpoctu-zastupcu-reditele") return { changefreq: "monthly", priority: "0.8" };
+  return { changefreq: "monthly", priority: "0.9" };
+}
+
+export function buildPhmaxSitemapEntries(origin = PHMAX_SITE_ORIGIN_FALLBACK): PhmaxSitemapEntry[] {
+  return listPhmaxSitemapUrls(origin).map((loc) => {
+    const pathname = new URL(loc).pathname.replace(/\/+$/, "") || "/";
+    const { changefreq, priority } = phmaxSitemapPriority(pathname);
+    return { loc, changefreq, priority };
+  });
+}
+
+export function buildPhmaxSitemapXml(origin = PHMAX_SITE_ORIGIN_FALLBACK): string {
+  const rows = buildPhmaxSitemapEntries(origin)
+    .map(
+      (entry) =>
+        `  <url><loc>${entry.loc}</loc><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`,
+    )
+    .join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows}\n</urlset>\n`;
 }

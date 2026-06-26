@@ -26,7 +26,8 @@ describe("SEO fáze A contract", () => {
 
   it("robots a sitemap ve public", () => {
     expect(readSource("public/robots.txt")).toContain("Sitemap:");
-    expect(readSource("public/sitemap.xml")).toContain("/prehled");
+    expect(readSource("public/sitemap.xml")).toContain("app.reditelskypruvodce.cz");
+    expect(readSource("public/robots.txt")).toContain("app.reditelskypruvodce.cz/sitemap.xml");
     expect(readSource("public/sitemap.xml")).toContain("/navod");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-zakladni-skola");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-predskolni-vzdelavani/rychly");

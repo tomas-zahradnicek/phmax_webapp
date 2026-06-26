@@ -1,4 +1,5 @@
 import { PRODUCT_VIEW_CODES, type ProductViewCode } from "./calculator-ui-constants";
+import { PHMAX_SITE_ORIGIN_FALLBACK } from "./phmax-site-origin";
 
 /** Čisté URL modulů (SEO, sdílení, sitemap). */
 export const PRODUCT_VIEW_PATH: Record<ProductViewCode, string> = {
@@ -29,11 +30,11 @@ export function isLegacyViewQueryUrl(): boolean {
 
 export function buildProductViewPageUrl(
   view: ProductViewCode,
-  origin = typeof window !== "undefined" ? window.location.origin : "https://phmax-webapp.vercel.app",
+  origin = typeof window !== "undefined" ? window.location.origin : PHMAX_SITE_ORIGIN_FALLBACK,
 ): string {
   return new URL(PRODUCT_VIEW_PATH[view], origin).href;
 }
 
-export function listProductViewPathUrls(origin = "https://phmax-webapp.vercel.app"): string[] {
+export function listProductViewPathUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): string[] {
   return PRODUCT_VIEW_CODES.map((view) => buildProductViewPageUrl(view, origin));
 }

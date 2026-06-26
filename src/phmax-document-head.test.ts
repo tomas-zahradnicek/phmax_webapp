@@ -4,6 +4,8 @@ import {
   PHMAX_DOCUMENT_HEAD,
   PHMAX_LITE_DOCUMENT_HEAD,
   buildPhmaxCanonicalUrl,
+  buildPhmaxSitemapEntries,
+  buildPhmaxSitemapXml,
   listPhmaxSitemapUrls,
 } from "./phmax-document-head";
 import { PHMAX_PV_LITE_PATH, PHMAX_SD_LITE_PATH } from "./phmax-lite-paths";
@@ -38,5 +40,13 @@ describe("phmax-document-head", () => {
       expect(meta.title).toContain("Rychlý PHmax");
       expect(meta.description.length).toBeGreaterThan(40);
     }
+  });
+
+  it("sitemap XML obsahuje všechny veřejné cesty na produkční doméně", () => {
+    const xml = buildPhmaxSitemapXml();
+    expect(xml).toContain("https://app.reditelskypruvodce.cz/prehled");
+    expect(xml).toContain("/navod");
+    expect(xml).toContain("/phmax-zakladni-skola/rychly");
+    expect(buildPhmaxSitemapEntries()).toHaveLength(listPhmaxSitemapUrls().length);
   });
 });

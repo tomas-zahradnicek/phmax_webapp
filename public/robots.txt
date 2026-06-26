@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://phmax-webapp.vercel.app/sitemap.xml
+Sitemap: https://app.reditelskypruvodce.cz/sitemap.xml
