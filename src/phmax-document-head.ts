@@ -20,19 +20,19 @@ export type PhmaxDocumentHeadMeta = {
 
 export const PHMAX_DOCUMENT_HEAD: Record<ProductViewCode, PhmaxDocumentHeadMeta> = {
   dash: {
-    title: "Ředitelský průvodce – přehled PHmax školy",
+    title: "Ředitelský průvodce – přehled výpočtu PHmax, PHAmax školy a banky odpočtů zástupců ředitele",
     description:
       "Orientační přehled stavu kalkulaček PHmax v tomto prohlížeči – moduly PV, ŠD, ZŠ, SŠ a banka odpočtů NV75. Pomocný souhrn pro kontrolu scénářů.",
     applicationName: "Ředitelský průvodce PHmax",
   },
   pv: {
-    title: "PHmax pro předškolní vzdělávání | Ředitelský průvodce",
+    title: "PHmax pro předškolní vzdělávání – kalkulačka a orientační výpočet | Ředitelský průvodce",
     description:
       "Orientační výpočet PHmax pro mateřskou školu podle aktuální metodiky MŠMT. Pomocná kalkulačka s vysvětlením vstupů – neoficiální nástroj pro kontrolu scénářů.",
     applicationName: "PHmax kalkulačka pro předškolní vzdělávání",
   },
   sd: {
-    title: "PHmax pro školní družinu | Ředitelský průvodce",
+    title: "PHmax pro školní družinu – kalkulačka a orientační výpočet | Ředitelský průvodce",
     description:
       "Spočítejte orientační PHmax pro školní družinu. Pomocný výpočet podle metodiky s kontrolou vstupů a souhrnem v hodinách týdně.",
     applicationName: "PHmax kalkulačka pro školní družiny",
@@ -44,13 +44,13 @@ export const PHMAX_DOCUMENT_HEAD: Record<ProductViewCode, PhmaxDocumentHeadMeta>
     applicationName: "PHmax kalkulačka pro základní školy",
   },
   ss: {
-    title: "PHmax pro střední školu | Ředitelský průvodce",
+    title: "PHmax pro střední školu – kalkulačka a orientační výpočet | Ředitelský průvodce",
     description:
       "Orientační výpočet PHmax pro střední školu podle metodiky. Pomocná kalkulačka pro kontrolu scénářů a plánování úvazků.",
     applicationName: "PHmax kalkulačka pro střední školy",
   },
   nv75: {
-    title: "Banka odpočtů zástupců ředitele | Ředitelský průvodce",
+    title: "Kalkulačka banky odpočtů zástupců ředitele | Ředitelský průvodce",
     description:
       "Orientační výpočet banky odpočtů podle NV75 pro zástupce ředitele. Pomocný nástroj – po výpočtu ověřte PHmax školy v modulu ZŠ nebo přehledu.",
     applicationName: "Banka odpočtů zástupců ředitele (NV75)",

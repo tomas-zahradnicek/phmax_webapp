@@ -155,7 +155,7 @@ export function PvHeroHeader({
 
       expertExampleSelectId={PV_HERO_EXAMPLE_SELECT_ID}
 
-      title="PHmax a PHAmax – předškolní vzdělávání"
+      title="Kalkulačka PHmax a PHAmax – předškolní vzdělávání"
 
       titleClassName="hero__title--sd"
 

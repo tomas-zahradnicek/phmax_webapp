@@ -81,7 +81,7 @@ export function ZsHeroHeader({
       viewModeName="zs-view-mode"
       displayDensityName="zs-display-density"
       expertExampleSelectId={ZS_PHA_HERO_EXAMPLE_SELECT_ID}
-      title="PHmax, PHAmax a PHPmax – základní škola"
+      title="Kalkulačka PHmax, PHAmax a PHPmax – základní škola"
       titleClassName="hero__title hero__title--sd hero__title--zs"
       showMiniLogo
       tabsAside={<HeroUserGuideTabLink />}

@@ -75,7 +75,7 @@ export function SdHeroHeader({
       viewModeName="sd-view-mode"
       displayDensityName="sd-display-density"
       expertExampleSelectId={SD_HERO_EXAMPLE_SELECT_ID}
-      title="PHmax ve školní družině"
+      title="Kalkulačka PHmax školní družiny a model úvazků vychovatele"
       titleClassName="hero__title hero__title--sd"
       showMiniLogo
       tabsAside={<HeroUserGuideTabLink />}

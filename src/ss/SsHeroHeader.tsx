@@ -79,7 +79,7 @@ export function SsHeroHeader({
       viewModeName="ss-view-mode"
       displayDensityName="ss-display-density"
       expertExampleSelectId={SS_HERO_EXAMPLE_SELECT_ID}
-      title="PHmax a PHAmax – střední školy"
+      title="Kalkulačka PHmax a PHAmax – střední školy"
       showMiniLogo
       tabsAside={<HeroUserGuideTabLink />}
       kpis={[

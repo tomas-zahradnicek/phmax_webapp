@@ -67,7 +67,7 @@ export function Nv75HeroHeader({
       viewModeName="nv75-view-mode"
       displayDensityName="nv75-display-density"
       expertExampleSelectId={NV75_HERO_EXAMPLE_SELECT_ID}
-      title="Banka odpočtů zástupců ředitele"
+      title="Kalkulačka banky odpočtů zástupců ředitele"
       showMiniLogo
       tabsAside={<HeroUserGuideTabLink />}
       kpis={[
