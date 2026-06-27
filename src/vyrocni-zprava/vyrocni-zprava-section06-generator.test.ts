@@ -20,6 +20,7 @@ import { shouldUseSection02Generator } from "./vyrocni-zprava-section02-generato
 import { shouldUseSection03Generator } from "./vyrocni-zprava-section03-generator-service";
 import { shouldUseSection04Generator } from "./vyrocni-zprava-section04-generator-service";
 import { shouldUseSection05Generator } from "./vyrocni-zprava-section05-generator-service";
+import { parseCzechNumberInput } from "./vyrocni-zprava-number-input-helpers";
 
 function createSection06ReadyProfile() {
   return {
@@ -220,6 +221,100 @@ describe("vyrocni-zprava-section06-generator", () => {
       }),
     );
     expect(result.text).toContain("6.4 Výsledky závěrečných zkoušek, maturitních zkoušek a absolutorií");
+  });
+
+  it("prázdné volitelné zkoušky nevytvoří sekci 6.4", () => {
+    const result = generateSection06Draft(
+      buildSection06GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section06Data: {
+          ...createCompleteSection06Data(),
+          finalExams: {},
+          maturitaExams: {},
+          absolutorium: {},
+        },
+      }),
+    );
+    expect(result.text).not.toContain("6.4 Výsledky závěrečných zkoušek, maturitních zkoušek a absolutorií");
+  });
+
+  it("nulové hodnoty volitelných zkoušek nevytvoří sekci 6.4", () => {
+    const result = generateSection06Draft(
+      buildSection06GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section06Data: {
+          ...createCompleteSection06Data(),
+          finalExams: { pupilsTotal: 0, passed: 0, failed: 0 },
+          maturitaExams: { pupilsTotal: 0, passed: 0, failed: 0 },
+          absolutorium: { pupilsTotal: 0, passed: 0, failed: 0 },
+        },
+      }),
+    );
+    expect(result.text).not.toContain("6.4 Výsledky závěrečných zkoušek, maturitních zkoušek a absolutorií");
+  });
+
+  it("popis zkoušky vytvoří sekci 6.4 i bez počtů", () => {
+    const result = generateSection06Draft(
+      buildSection06GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section06Data: {
+          ...createCompleteSection06Data(),
+          maturitaExams: { description: "Maturitní zkoušky proběhly dle harmonogramu." },
+        },
+      }),
+    );
+    expect(result.text).toContain("6.4 Výsledky závěrečných zkoušek, maturitních zkoušek a absolutorií");
+  });
+
+  it("nenulový počet žáků vytvoří sekci 6.4", () => {
+    const result = generateSection06Draft(
+      buildSection06GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section06Data: {
+          ...createCompleteSection06Data(),
+          absolutorium: { pupilsTotal: 2, passed: 2, failed: 0 },
+        },
+      }),
+    );
+    expect(result.text).toContain("6.4 Výsledky závěrečných zkoušek, maturitních zkoušek a absolutorií");
+  });
+
+  it("průměrný prospěch 1,18 zůstane v rozsahu bez warningu", () => {
+    const data = createCompleteSection06Data();
+    const readiness = getSection06Readiness({
+      schoolProfile: profile,
+      section06Data: {
+        ...data,
+        firstTermClassResults: [{ ...data.firstTermClassResults[0], averageGrade: parseCzechNumberInput("1,18") }],
+        secondTermClassResults: [{ ...data.secondTermClassResults[0], averageGrade: parseCzechNumberInput("1,18") }],
+      },
+    });
+    expect(readiness.warnings.some((item) => item.includes("mimo očekávaný rozsah"))).toBe(false);
+  });
+
+  it("průměrný prospěch 1,18 se vygeneruje s českou desetinnou čárkou", () => {
+    const data = createCompleteSection06Data();
+    const result = generateSection06Draft(
+      buildSection06GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section06Data: {
+          ...data,
+          firstTermClassResults: [{ ...data.firstTermClassResults[0], averageGrade: parseCzechNumberInput("1,18") }],
+          secondTermClassResults: [{ ...data.secondTermClassResults[0], averageGrade: parseCzechNumberInput("1,16") }],
+        },
+      }),
+    );
+
+    expect(result.text).toContain("| 1,18 |");
+    expect(result.text).toContain("| 1,16 |");
+    expect(result.text).not.toContain("| 1.18 |");
+    expect(result.text).not.toContain("| 18 |");
+    expect(result.text).not.toContain("| 16 |");
   });
 
   it("sekce 01–05 zůstávají beze změny", () => {

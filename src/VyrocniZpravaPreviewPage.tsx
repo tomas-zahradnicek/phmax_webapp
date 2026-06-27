@@ -13,9 +13,21 @@ import { useVyrocniZpravaReport } from "./vyrocni-zprava/use-vyrocni-zprava-repo
 import { VyrocniZpravaApplicabilityNotice } from "./vyrocni-zprava/VyrocniZpravaApplicabilityNotice";
 import { VyrocniZpravaLegalFrameworkPanel } from "./vyrocni-zprava/VyrocniZpravaLegalFrameworkPanel";
 import { VyrocniZpravaReportPreview } from "./vyrocni-zprava/VyrocniZpravaReportPreview";
+import { useVyrocniZpravaPersonnelData } from "./vyrocni-zprava/vyrocni-zprava-personnel-storage";
+import { useVyrocniZpravaSection04Data } from "./vyrocni-zprava/vyrocni-zprava-section04-data-storage";
+import { useVyrocniZpravaSection05Data } from "./vyrocni-zprava/vyrocni-zprava-section05-data-storage";
+import { useVyrocniZpravaSection06Data } from "./vyrocni-zprava/vyrocni-zprava-section06-data-storage";
+import { useVyrocniZpravaSection07Data } from "./vyrocni-zprava/vyrocni-zprava-section07-data-storage";
+import { useVyrocniZpravaSection11Data } from "./vyrocni-zprava/vyrocni-zprava-section11-data-storage";
 
 export function VyrocniZpravaPreviewPage() {
   const { report, schoolProfile } = useVyrocniZpravaReport();
+  const { personnelData } = useVyrocniZpravaPersonnelData();
+  const { section04Data } = useVyrocniZpravaSection04Data();
+  const { section05Data } = useVyrocniZpravaSection05Data();
+  const { section06Data } = useVyrocniZpravaSection06Data();
+  const { section07Data } = useVyrocniZpravaSection07Data();
+  const { section11Data } = useVyrocniZpravaSection11Data();
 
   return (
     <div className="vyrocni-zprava-page" id="vyrocni-zprava-preview-main">
@@ -43,7 +55,18 @@ export function VyrocniZpravaPreviewPage() {
 
       <VyrocniZpravaLegalFrameworkPanel />
 
-      <VyrocniZpravaReportPreview report={report} schoolProfile={schoolProfile} />
+      <VyrocniZpravaReportPreview
+        report={report}
+        schoolProfile={schoolProfile}
+        structuredData={{
+          section03Data: personnelData,
+          section04Data,
+          section05Data,
+          section06Data,
+          section07Data,
+          section11Data,
+        }}
+      />
 
       <footer className="zs-app-footer">
         <AuthorCreditFooter />

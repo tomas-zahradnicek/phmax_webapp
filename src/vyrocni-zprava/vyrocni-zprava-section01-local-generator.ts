@@ -1,4 +1,5 @@
 import type { Section01GeneratorInput } from "./vyrocni-zprava-section01-generator-input";
+import { appendSentencePeriod, normalizeOptionalText } from "./vyrocni-zprava-text-formatting-helpers";
 
 export const SECTION01_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 01 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -7,6 +8,14 @@ export type Section01DraftResult = {
   ready: boolean;
   text: string;
 };
+
+function normalizeForCompare(value: string | undefined): string {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/[.,;:!?]/g, "")
+    .trim();
+}
 
 function buildIntroParagraph(input: Section01GeneratorInput): string {
   const schoolYear = input.schoolYear.trim();
@@ -41,14 +50,15 @@ function buildSection12(input: Section01GeneratorInput): string {
 
 function buildSection13(input: Section01GeneratorInput): string {
   const lines: string[] = [];
-  if (input.sectionInputs.schoolCharacteristic) {
-    lines.push(input.sectionInputs.schoolCharacteristic);
+  const schoolCharacteristic = normalizeOptionalText(input.sectionInputs.schoolCharacteristic);
+  if (schoolCharacteristic) {
+    lines.push(appendSentencePeriod(schoolCharacteristic));
   }
   if (input.sectionInputs.schoolParts) {
-    lines.push(`Součásti školy: ${input.sectionInputs.schoolParts}`);
+    lines.push(appendSentencePeriod(`Součásti školy: ${input.sectionInputs.schoolParts}`));
   }
   if (input.sectionInputs.schoolCapacity) {
-    lines.push(`Kapacita školy / součástí školy: ${input.sectionInputs.schoolCapacity}`);
+    lines.push(appendSentencePeriod(`Kapacita školy / součástí školy: ${input.sectionInputs.schoolCapacity}`));
   }
   if (lines.length === 0) {
     return "Pro tuto podkapitolu nejsou v podkladech uvedeny doplňující údaje.";
@@ -61,17 +71,34 @@ function buildSection14(input: Section01GeneratorInput): string {
 }
 
 function buildSection15(input: Section01GeneratorInput): string {
-  const lines = [`Ředitel školy: ${input.schoolProfile.principalName}.`];
-  if (input.sectionInputs.leadershipInfo) {
-    lines.push(input.sectionInputs.leadershipInfo);
+  const lines: string[] = [];
+  const leadershipInfo = input.sectionInputs.leadershipInfo;
+  const principalName = input.schoolProfile.principalName;
+  const leadershipMentionsPrincipal =
+    leadershipInfo && principalName
+      ? normalizeForCompare(leadershipInfo).includes(normalizeForCompare(principalName))
+      : false;
+
+  if (!leadershipMentionsPrincipal) {
+    lines.push(`Ředitel školy: ${principalName}.`);
+  }
+  if (leadershipInfo) {
+    lines.push(appendSentencePeriod(leadershipInfo));
   }
   return lines.join("\n");
 }
 
 function buildSection16(input: Section01GeneratorInput): string {
   const lines = [`Webová adresa školy: ${input.schoolProfile.website}.`];
-  if (input.sectionInputs.remoteAccessInfo) {
-    lines.push(input.sectionInputs.remoteAccessInfo);
+  const remoteAccessInfo = input.sectionInputs.remoteAccessInfo;
+  const website = input.schoolProfile.website;
+  const isDuplicateRemoteInfo =
+    remoteAccessInfo && website
+      ? normalizeForCompare(remoteAccessInfo) === normalizeForCompare(website) ||
+        normalizeForCompare(remoteAccessInfo).includes(normalizeForCompare(website))
+      : false;
+  if (remoteAccessInfo && !isDuplicateRemoteInfo) {
+    lines.push(appendSentencePeriod(remoteAccessInfo));
   }
   lines.push(`E-mail školy: ${input.schoolProfile.email}.`);
   if (input.schoolProfile.phone) lines.push(`Telefon: ${input.schoolProfile.phone}.`);
@@ -81,7 +108,7 @@ function buildSection16(input: Section01GeneratorInput): string {
 
 function buildSection17(input: Section01GeneratorInput): string {
   if (input.sectionInputs.schoolCouncilInfo) {
-    return input.sectionInputs.schoolCouncilInfo;
+    return appendSentencePeriod(input.sectionInputs.schoolCouncilInfo);
   }
   return "Pro tuto podkapitolu nejsou v podkladech uvedeny doplňující údaje.";
 }

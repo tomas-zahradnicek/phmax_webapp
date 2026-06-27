@@ -121,6 +121,8 @@ describe("vyrocni-zprava-section03-generator", () => {
     expect(result.text).toContain("3.4 Členění pedagogických pracovníků podle odborné kvalifikace");
     expect(result.text).toContain("Ve školním roce 2024/2025 v ZŠ Ukázková");
     expect(result.text).toContain("Celkem pracovníci školy: 35 fyzických osob");
+    expect(result.text).toContain("18,5 úvazků");
+    expect(result.text).not.toContain("18.5 úvazků");
   });
 
   it("údaje z kalkulaček jsou uvedeny jen jako podpůrné informace", () => {

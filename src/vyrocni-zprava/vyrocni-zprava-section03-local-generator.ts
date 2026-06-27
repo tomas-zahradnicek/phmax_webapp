@@ -1,5 +1,6 @@
 import { formatCsHoursPerWeek, formatCsNumber } from "../cs-format";
 import type { Section03GeneratorInput } from "./vyrocni-zprava-section03-generator-input";
+import { formatCzechDecimal } from "./vyrocni-zprava-number-formatting-helpers";
 
 export const SECTION03_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 03 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -17,7 +18,7 @@ function formatPersons(value: number | undefined): string {
 }
 
 function formatFte(value: number | undefined): string {
-  return value == null ? "–" : formatCsNumber(value, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  return value == null ? "–" : formatCzechDecimal(value, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
 function formatGenderCell(value: number | undefined): string {

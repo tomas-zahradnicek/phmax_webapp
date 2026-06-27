@@ -133,6 +133,23 @@ describe("vyrocni-zprava-section01-generator", () => {
     expect(result.text).toContain("Pro tuto podkapitolu nejsou v podkladech uvedeny doplňující údaje.");
   });
 
+  it("nezdvojuje ředitelku ani web při shodných doplňujících údajích", () => {
+    const result = generateSection01Draft(
+      buildSection01GeneratorInput({
+        schoolProfile: completeProfile,
+        schoolYear: "2024/2025",
+        sectionInputs: {
+          ...defaultSection01Data,
+          leadershipInfo: "Ředitelka školy: Mgr. Jan Novák.",
+          remoteAccessInfo: "https://www.zsukazkova.cz",
+        },
+      }),
+    );
+    expect(result.ready).toBe(true);
+    expect((result.text.match(/Mgr\. Jan Novák/g) ?? []).length).toBe(1);
+    expect((result.text.match(/https:\/\/www\.zsukazkova\.cz/g) ?? []).length).toBe(1);
+  });
+
   it("neúplný návrh kapitoly 01 ponechá stav CHYBI_UDAJE", () => {
     const sectionDef = ANNUAL_REPORT_SECTION_DEFINITIONS.find((item) => item.id === "01");
     expect(sectionDef).toBeDefined();

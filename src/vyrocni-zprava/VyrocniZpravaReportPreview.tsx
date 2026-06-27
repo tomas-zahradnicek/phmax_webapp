@@ -6,12 +6,14 @@ import type { AnnualReportSectionStatus } from "./vyrocni-zprava-types";
 import { ANNUAL_REPORT_SECTION_STATUS_LABELS } from "./vyrocni-zprava-types";
 import { exportAnnualReportPreviewToDocx } from "./vyrocni-zprava-docx-export";
 import { buildDocxExportModel } from "./vyrocni-zprava-docx-export-logic";
+import type { AnnualReportDocxStructuredData } from "./docx/vyrocni-zprava-docx-structured-tables";
 import type { AnnualReportPreviewData, AnnualReportPreviewSection } from "./vyrocni-zprava-report-preview-builder";
 import { buildAnnualReportPreview } from "./vyrocni-zprava-report-preview-builder";
 
 type VyrocniZpravaReportPreviewProps = {
   report: Parameters<typeof buildAnnualReportPreview>[0]["report"];
   schoolProfile: Parameters<typeof buildAnnualReportPreview>[0]["schoolProfile"];
+  structuredData?: AnnualReportDocxStructuredData;
 };
 
 function buildVisibleSections(
@@ -46,7 +48,7 @@ function statusBadgeClass(status: AnnualReportSectionStatus): string {
   }
 }
 
-export function VyrocniZpravaReportPreview({ report, schoolProfile }: VyrocniZpravaReportPreviewProps) {
+export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredData }: VyrocniZpravaReportPreviewProps) {
   const preview = useMemo<AnnualReportPreviewData>(
     () => buildAnnualReportPreview({ report, schoolProfile }),
     [report, schoolProfile],
@@ -110,7 +112,10 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile }: VyrocniZpr
       showUiToast(warning, { assertive: true });
     }
     try {
-      const result = await exportAnnualReportPreviewToDocx(visiblePreview, { mode: "visible-generated" });
+      const result = await exportAnnualReportPreviewToDocx(visiblePreview, {
+        mode: "visible-generated",
+        structuredData,
+      });
       if (!result.exported) {
         const msg = "Nejsou k dispozici žádné kapitoly k exportu.";
         setExportError(msg);
@@ -131,14 +136,14 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile }: VyrocniZpr
     setExportNotice("");
     setExportError("");
     try {
-      const model = buildDocxExportModel(preview, "approved-only");
+      const model = buildDocxExportModel(preview, "approved-only", { structuredData });
       if (model.sections.length === 0) {
         const msg = "Nejsou k dispozici žádné kapitoly k exportu.";
         setExportError(msg);
         showUiToast(msg, { assertive: true });
         return;
       }
-      await exportAnnualReportPreviewToDocx(preview, { mode: "approved-only" });
+      await exportAnnualReportPreviewToDocx(preview, { mode: "approved-only", structuredData });
       const msg = "Export schválených kapitol do Wordu byl dokončen.";
       setExportNotice(msg);
       showUiToast(msg);

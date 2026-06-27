@@ -1,4 +1,5 @@
 import type { AnnualReportSection11Data } from "./vyrocni-zprava-section11-types";
+import { formatCzechCzk } from "./vyrocni-zprava-number-formatting-helpers";
 
 type Revenue = AnnualReportSection11Data["revenue"];
 type Expenses = AnnualReportSection11Data["expenses"];
@@ -42,10 +43,5 @@ export function calculateProfitOrLoss(totalRevenue?: number, totalExpenses?: num
 }
 
 export function formatCzkAmount(value: number | undefined): string {
-  if (!isUsableNumber(value)) return "neuvedeno";
-  const rounded = Math.round(value);
-  const sign = rounded < 0 ? "-" : "";
-  const absolute = Math.abs(rounded);
-  const formatted = absolute.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  return `${sign}${formatted} Kč`;
+  return formatCzechCzk(value);
 }

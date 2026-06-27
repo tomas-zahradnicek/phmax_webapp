@@ -4,12 +4,14 @@ import { createDefaultSchoolProfile } from "../school-profile/school-profile-log
 import { createDefaultAnnualReport } from "./vyrocni-zprava-logic";
 import { VYROCNI_ZPRAVA_GENERATED_PLACEHOLDER } from "./vyrocni-zprava-types";
 import { buildAnnualReportPreview } from "./vyrocni-zprava-report-preview-builder";
+import { createDefaultSection06Data } from "./vyrocni-zprava-section06-data-logic";
 import {
   buildDocxExportModel,
   createAnnualReportDocxFileName,
   detectDocxHeadingLevel,
   getDocxExportSections,
   parseGeneratedTextForDocx,
+  stripDuplicateDocxSectionHeading,
   shouldRenderAsTable,
 } from "./vyrocni-zprava-docx-export-logic";
 
@@ -95,6 +97,24 @@ describe("vyrocni-zprava-docx-export-logic", () => {
     expect(model.sections.find((item) => item.number === "06")).toBeUndefined();
   });
 
+  it("model může nést structured data bez mutace generatedText", () => {
+    let report = createDefaultAnnualReport("2024/2025");
+    report = setSection(report, "06", {
+      generatedText: "06 Nadpis\n6.1 Souhrnná statistika tříd 1. pololetí školního roku\nText.",
+      status: "VYGENEROVANO",
+      approved: false,
+    });
+    const preview = buildAnnualReportPreview({
+      report,
+      schoolProfile: createDefaultSchoolProfile(),
+    });
+    const section06 = createDefaultSection06Data();
+    section06.firstTermClassResults = [{ className: "1.A", pupilsTotal: 20, averageGrade: 1.18 }];
+    const model = buildDocxExportModel(preview, "visible-generated", { structuredData: { section06Data: section06 } });
+    expect(model.structuredData?.section06Data?.firstTermClassResults[0]?.averageGrade).toBe(1.18);
+    expect(preview.sections.find((item) => item.number === "06")?.generatedText).toContain("6.1 Souhrnná statistika tříd 1. pololetí školního roku");
+  });
+
   it("ručně upravený generatedText je exportován", () => {
     let report = createDefaultAnnualReport("2024/2025");
     report = setSection(report, "03", {
@@ -130,16 +150,19 @@ describe("vyrocni-zprava-docx-export-logic", () => {
     expect(detectDocxHeadingLevel("Běžný odstavec textu")).toBeUndefined();
   });
 
-  it("detekce tabulky je konzervativní a vyžaduje konzistentní sloupce", () => {
-    expect(shouldRenderAsTable(["Název | Částka", "Grant A | 120 000 Kč"])).toBe(true);
-    expect(shouldRenderAsTable(["Název | Částka", "Nejasný řádek bez oddělovače"])).toBe(false);
-    expect(shouldRenderAsTable(["Pouze jeden řádek | 1"])).toBe(false);
+  it("detekce tabulky vyžaduje validní markdown tabulku", () => {
+    expect(shouldRenderAsTable(["Název | Částka", "--- | ---", "Grant A | 120 000 Kč"])).toBe(true);
+    expect(shouldRenderAsTable(["- Název: grant", "- Částka: 120 000 Kč"])).toBe(false);
+    expect(shouldRenderAsTable(["- Akce (partner: obec)", "- Soutěž (výsledek: postup)"])).toBe(false);
+    expect(shouldRenderAsTable(["Název | Částka", "--- | ---", "Grant A | 120 000 Kč | navíc"])).toBe(false);
+    expect(shouldRenderAsTable(["Název | Částka", "Grant A | 120 000 Kč"])).toBe(false);
   });
 
   it("parser generovaného textu vrací heading, table i paragraph bloky", () => {
     const blocks = parseGeneratedTextForDocx([
       "9.1 Přehled",
       "Název | Částka",
+      "--- | ---",
       "Grant A | 120 000 Kč",
       "",
       "Souhrnný komentář.",
@@ -161,5 +184,51 @@ describe("vyrocni-zprava-docx-export-logic", () => {
       type: "paragraph",
       text: "Souhrnný komentář.",
     });
+  });
+
+  it("v DOCX renderingu se odstraní duplicitní první řádek nadpisu kapitoly", () => {
+    const section = {
+      number: "01",
+      title: "Základní údaje o škole",
+      text: "01 Základní údaje o škole\n\nObsah kapitoly.",
+      approved: false,
+    } as const;
+    const result = stripDuplicateDocxSectionHeading(section);
+    expect(result).toBe("Obsah kapitoly.");
+  });
+
+  it("odstraní i variantní nadpis začínající stejným číslem kapitoly", () => {
+    const section = {
+      number: "06",
+      title: "Údaje o výsledcích vzdělávání žáků podle cílů stanovených vzdělávacími programy",
+      text:
+        "06 Údaje o výsledcích vzdělávání žáků podle cílů stanovených vzdělávacími programy a podle poskytovaného stupně vzdělání\n\nObsah kapitoly.",
+      approved: false,
+    } as const;
+    const result = stripDuplicateDocxSectionHeading(section);
+    expect(result).toBe("Obsah kapitoly.");
+  });
+
+  it("jiný první řádek zůstane zachován", () => {
+    const section = {
+      number: "01",
+      title: "Základní údaje o škole",
+      text: "Úvodní shrnutí\n01 Základní údaje o škole",
+      approved: false,
+    } as const;
+    const result = stripDuplicateDocxSectionHeading(section);
+    expect(result).toBe("Úvodní shrnutí\n01 Základní údaje o škole");
+  });
+
+  it("uložený generatedText se při odstraňování duplicity nemění", () => {
+    const section = {
+      number: "01",
+      title: "Základní údaje o škole",
+      text: "01 Základní údaje o škole\nObsah.",
+      approved: false,
+    } as const;
+    const original = section.text;
+    stripDuplicateDocxSectionHeading(section);
+    expect(section.text).toBe(original);
   });
 });

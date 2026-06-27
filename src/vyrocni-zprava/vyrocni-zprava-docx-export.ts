@@ -14,9 +14,15 @@ import {
 
 import type { AnnualReportPreviewData } from "./vyrocni-zprava-report-preview-builder";
 import {
+  getStructuredDocxBlocksForSection,
+  type AnnualReportDocxStructuredData,
+  type DocxStructuredBlock,
+} from "./docx/vyrocni-zprava-docx-structured-tables";
+import {
   buildDocxExportModel,
   createAnnualReportDocxFileName,
   parseGeneratedTextForDocx,
+  stripDuplicateDocxSectionHeading,
   type AnnualReportDocxExportModel,
   type DocxParsedBlock,
   type DocxExportMode,
@@ -82,6 +88,69 @@ function renderParsedBlock(block: DocxParsedBlock): Paragraph | Table {
   return paragraphFromLine(block.text);
 }
 
+function normalizeHeading(value: string): string {
+  return value.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function toParsedBlocksFromStructured(blocks: DocxStructuredBlock[]): DocxParsedBlock[] {
+  return blocks.map((block) => {
+    if (block.type === "heading") {
+      return { type: "heading", text: block.text, level: block.level === 3 ? "H3" : "H2" };
+    }
+    if (block.type === "table") {
+      return { type: "table", rows: [block.headers, ...block.rows] };
+    }
+    return { type: "paragraph", text: block.text };
+  });
+}
+
+function mergeStructuredSubsectionsIntoParsedBlocks(
+  parsedBlocks: DocxParsedBlock[],
+  structuredBlocks: DocxStructuredBlock[],
+): DocxParsedBlock[] {
+  if (structuredBlocks.length === 0) return parsedBlocks;
+  const structuredParsed = toParsedBlocksFromStructured(structuredBlocks);
+  const byHeading = new Map<string, DocxParsedBlock[]>();
+
+  for (let index = 0; index < structuredParsed.length; index += 1) {
+    const block = structuredParsed[index]!;
+    if (block.type !== "heading" || block.level !== "H3") continue;
+    const headingKey = normalizeHeading(block.text);
+    const collected: DocxParsedBlock[] = [block];
+    for (let i = index + 1; i < structuredParsed.length; i += 1) {
+      const next = structuredParsed[i]!;
+      if (next.type === "heading" && next.level === "H3") break;
+      collected.push(next);
+    }
+    byHeading.set(headingKey, collected);
+  }
+
+  if (byHeading.size === 0) return parsedBlocks;
+
+  const merged: DocxParsedBlock[] = [];
+  for (let i = 0; i < parsedBlocks.length; i += 1) {
+    const block = parsedBlocks[i]!;
+    if (block.type === "heading" && block.level === "H3") {
+      const replacement = byHeading.get(normalizeHeading(block.text));
+      if (replacement) {
+        merged.push(...replacement);
+        for (let skip = i + 1; skip < parsedBlocks.length; skip += 1) {
+          const next = parsedBlocks[skip]!;
+          if (next.type === "heading") {
+            i = skip - 1;
+            break;
+          }
+          if (skip === parsedBlocks.length - 1) i = parsedBlocks.length;
+        }
+        continue;
+      }
+    }
+    merged.push(block);
+  }
+
+  return merged;
+}
+
 function buildDocxElements(model: AnnualReportDocxExportModel): Array<Paragraph | Table> {
   const elements: Array<Paragraph | Table> = [
     headingParagraph(model.title, HeadingLevel.HEADING_1),
@@ -95,8 +164,11 @@ function buildDocxElements(model: AnnualReportDocxExportModel): Array<Paragraph 
 
   model.sections.forEach((section, index) => {
     elements.push(headingParagraph(`${section.number} ${section.title}`, HeadingLevel.HEADING_2, index > 0));
-    const parsedBlocks = parseGeneratedTextForDocx(section.text);
-    for (const block of parsedBlocks) {
+    const sectionTextForRendering = stripDuplicateDocxSectionHeading(section);
+    const parsedBlocks = parseGeneratedTextForDocx(sectionTextForRendering);
+    const structuredBlocks = getStructuredDocxBlocksForSection(section.number, model.structuredData);
+    const mergedBlocks = mergeStructuredSubsectionsIntoParsedBlocks(parsedBlocks, structuredBlocks);
+    for (const block of mergedBlocks) {
       elements.push(renderParsedBlock(block));
     }
     elements.push(new Paragraph({ spacing: { after: 240 }, text: " " }));
@@ -118,10 +190,10 @@ function triggerDocxDownload(blob: Blob, filename: string): void {
 
 export async function exportAnnualReportPreviewToDocx(
   preview: AnnualReportPreviewData,
-  options?: { mode?: DocxExportMode },
+  options?: { mode?: DocxExportMode; structuredData?: AnnualReportDocxStructuredData },
 ): Promise<{ exported: boolean; reason?: "NO_SECTIONS" }> {
   const mode = options?.mode ?? "visible-generated";
-  const model = buildDocxExportModel(preview, mode);
+  const model = buildDocxExportModel(preview, mode, { structuredData: options?.structuredData });
   if (model.sections.length === 0) {
     return { exported: false, reason: "NO_SECTIONS" };
   }

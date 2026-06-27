@@ -154,6 +154,27 @@ describe("vyrocni-zprava-section04-generator", () => {
     expect(result.text).toContain("4.5 Zvláštní zápis");
     expect(result.text).toContain("4.6 Žáci přijati ke vzdělávání do střední školy");
     expect(result.text).toContain("4.7 Počty žáků");
+    expect(result.text).toContain("Třída | Chlapců | Dívek | Celkem | Třídní učitel");
+    expect(result.text).not.toContain("Děvčata");
+  });
+
+  it("počty žáků používají správné české tvary", () => {
+    const result = generateSection04Draft(
+      buildSection04GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section04Data: {
+          ...createCompleteRequiredSection04Data(),
+          pupilsAdmittedDuringYear: [{ grade: "2. ročník", count: 1 }],
+          pupilsLeftDuringYear: [{ grade: "5. ročník", count: 2 }],
+          secondarySchoolAdmissions: [{ schoolType: "Gymnázium", count: 4 }],
+        },
+      }),
+    );
+    expect(result.text).toContain("2. ročník: 1 žák");
+    expect(result.text).toContain("5. ročník: 2 žáci");
+    expect(result.text).toContain("Gymnázium: 4 žáci");
+    expect(result.text).not.toContain("1 žáků");
   });
 
   it("neúplný návrh kapitoly 04 ponechá stav CHYBI_UDAJE", () => {

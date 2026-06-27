@@ -1,5 +1,6 @@
 import type { Section06GeneratorInput } from "./vyrocni-zprava-section06-generator-input";
 import type { AnnualReportSection06ClassResultRow, AnnualReportSection06EducationalMeasuresTerm } from "./vyrocni-zprava-section06-types";
+import { formatCzechDecimal, formatCzechInteger } from "./vyrocni-zprava-number-formatting-helpers";
 
 export const SECTION06_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 06 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -33,8 +34,11 @@ function buildClassResultsTable(title: string, rows: AnnualReportSection06ClassR
     "--- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---",
   ];
   validRows.forEach((row) => {
+    const averageGrade = row.averageGrade === undefined ? "—" : formatCzechDecimal(row.averageGrade, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const excusedAbsence = row.excusedAbsencePerPupil === undefined ? "—" : formatCzechDecimal(row.excusedAbsencePerPupil, { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+    const unexcusedAbsence = row.unexcusedAbsencePerPupil === undefined ? "—" : formatCzechDecimal(row.unexcusedAbsencePerPupil, { minimumFractionDigits: 0, maximumFractionDigits: 1 });
     lines.push(
-      `${row.className} | ${row.pupilsTotal ?? "—"} | ${row.classTeacher ?? "—"} | ${row.passedWithHonours ?? "—"} | ${row.passed ?? "—"} | ${row.failed ?? "—"} | ${row.notAssessed ?? "—"} | ${row.reducedConductGrade ?? "—"} | ${row.averageGrade ?? "—"} | ${row.excusedAbsencePerPupil ?? "—"} | ${row.unexcusedAbsencePerPupil ?? "—"}`,
+      `${row.className} | ${formatCzechInteger(row.pupilsTotal)} | ${row.classTeacher ?? "—"} | ${formatCzechInteger(row.passedWithHonours)} | ${formatCzechInteger(row.passed)} | ${formatCzechInteger(row.failed)} | ${formatCzechInteger(row.notAssessed)} | ${formatCzechInteger(row.reducedConductGrade)} | ${averageGrade} | ${excusedAbsence} | ${unexcusedAbsence}`,
     );
   });
   return lines.join("\n");
@@ -42,7 +46,7 @@ function buildClassResultsTable(title: string, rows: AnnualReportSection06ClassR
 
 function buildMeasuresTerm(title: string, term?: AnnualReportSection06EducationalMeasuresTerm): string {
   const lines = [
-    `${title}: pochvala třídního učitele ${term?.classTeacherPraise ?? "—"}, pochvala ředitele školy ${term?.principalPraise ?? "—"}, napomenutí třídního učitele ${term?.classTeacherWarning ?? "—"}, důtka třídního učitele ${term?.classTeacherReprimand ?? "—"}, důtka ředitele školy ${term?.principalReprimand ?? "—"}, 2. stupeň z chování ${term?.secondConductGrade ?? "—"}, 3. stupeň z chování ${term?.thirdConductGrade ?? "—"}.`,
+    `${title}: pochvala třídního učitele ${formatCzechInteger(term?.classTeacherPraise)}, pochvala ředitele školy ${formatCzechInteger(term?.principalPraise)}, napomenutí třídního učitele ${formatCzechInteger(term?.classTeacherWarning)}, důtka třídního učitele ${formatCzechInteger(term?.classTeacherReprimand)}, důtka ředitele školy ${formatCzechInteger(term?.principalReprimand)}, 2. stupeň z chování ${formatCzechInteger(term?.secondConductGrade)}, 3. stupeň z chování ${formatCzechInteger(term?.thirdConductGrade)}.`,
   ];
   return lines.join("\n");
 }

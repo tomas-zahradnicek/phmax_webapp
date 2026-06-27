@@ -1,4 +1,6 @@
 import type { Section07GeneratorInput } from "./vyrocni-zprava-section07-generator-input";
+import { appendSentencePeriod } from "./vyrocni-zprava-text-formatting-helpers";
+import { formatCzechInteger } from "./vyrocni-zprava-number-formatting-helpers";
 
 export const SECTION07_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 07 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -26,7 +28,7 @@ function buildIncompleteDraft(input: Section07GeneratorInput): string {
 }
 
 function formatNumber(value: number | undefined): string {
-  return value === undefined ? "neuvedeno" : String(value);
+  return value === undefined ? "neuvedeno" : formatCzechInteger(value);
 }
 
 function buildPreventionProgrammes(input: Section07GeneratorInput): string {
@@ -62,8 +64,8 @@ function buildRiskIncidents(input: Section07GeneratorInput): string {
   return incidents
     .map((item) => {
       const type = item.type || "Neuvedený typ";
-      const measures = item.adoptedMeasures ? ` přijatá opatření: ${item.adoptedMeasures}.` : "";
-      const note = item.note ? ` Poznámka: ${item.note}.` : "";
+      const measures = item.adoptedMeasures ? ` ${appendSentencePeriod(`přijatá opatření: ${item.adoptedMeasures}`)}` : "";
+      const note = item.note ? ` ${appendSentencePeriod(`Poznámka: ${item.note}`)}` : "";
       return `- ${type}: počet řešených případů ${item.count ?? "neuvedeno"}.${measures}${note}`.trim();
     })
     .join("\n");
@@ -80,7 +82,7 @@ function buildSupportNeeds(input: Section07GeneratorInput): string {
     `Počet nadaných žáků: ${formatNumber(s.pupilsGifted)}.`,
     `Počet mimořádně nadaných žáků: ${formatNumber(s.pupilsExceptionallyGifted)}.`,
   ];
-  if (s.note) lines.push(`Poznámka: ${s.note}`);
+  if (s.note) lines.push(appendSentencePeriod(`Poznámka: ${s.note}`));
   return lines.join("\n");
 }
 
@@ -88,19 +90,21 @@ function buildSupportConditions(input: Section07GeneratorInput): string {
   const c = input.supportConditions;
   const parts = [
     c.counsellingWorkplaceDescription
-      ? `Popis práce školního poradenského pracoviště: ${c.counsellingWorkplaceDescription}.`
+      ? appendSentencePeriod(`Popis práce školního poradenského pracoviště: ${c.counsellingWorkplaceDescription}`)
       : undefined,
-    c.cooperationWithPppSpc ? `Spolupráce s PPP/SPC: ${c.cooperationWithPppSpc}.` : undefined,
-    c.supportMeasuresDescription ? `Popis podpůrných opatření: ${c.supportMeasuresDescription}.` : undefined,
-    c.inclusionMeasures ? `Inkluzivní opatření: ${c.inclusionMeasures}.` : undefined,
+    c.cooperationWithPppSpc ? appendSentencePeriod(`Spolupráce s PPP/SPC: ${c.cooperationWithPppSpc}`) : undefined,
+    c.supportMeasuresDescription ? appendSentencePeriod(`Popis podpůrných opatření: ${c.supportMeasuresDescription}`) : undefined,
+    c.inclusionMeasures ? appendSentencePeriod(`Inkluzivní opatření: ${c.inclusionMeasures}`) : undefined,
     c.giftedSupportDescription
-      ? `Podpora nadaných a mimořádně nadaných žáků: ${c.giftedSupportDescription}.`
+      ? appendSentencePeriod(`Podpora nadaných a mimořádně nadaných žáků: ${c.giftedSupportDescription}`)
       : undefined,
-    c.teachingAssistantSupportDescription ? `Podpora asistenty pedagoga: ${c.teachingAssistantSupportDescription}.` : undefined,
+    c.teachingAssistantSupportDescription
+      ? appendSentencePeriod(`Podpora asistenty pedagoga: ${c.teachingAssistantSupportDescription}`)
+      : undefined,
     c.materialAndOrganizationalConditions
-      ? `Materiální a organizační podmínky: ${c.materialAndOrganizationalConditions}.`
+      ? appendSentencePeriod(`Materiální a organizační podmínky: ${c.materialAndOrganizationalConditions}`)
       : undefined,
-    c.evaluation ? `Vyhodnocení podpory: ${c.evaluation}.` : undefined,
+    c.evaluation ? appendSentencePeriod(`Vyhodnocení podpory: ${c.evaluation}`) : undefined,
   ];
   return parts.length > 0
     ? parts.join("\n")
@@ -119,9 +123,9 @@ function buildLanguagePreparation(input: Section07GeneratorInput): string {
     `Počet žáků s nárokem na jazykovou přípravu: ${formatNumber(l.pupilsWithLanguagePreparationEntitlement)}.`,
     `Poskytování jazykové přípravy: ${providedLabel}.`,
   ];
-  if (l.description) lines.push(`Popis zajištění jazykové přípravy: ${l.description}.`);
-  if (l.provider) lines.push(`Poskytovatel: ${l.provider}.`);
-  if (l.note) lines.push(`Poznámka: ${l.note}`);
+  if (l.description) lines.push(appendSentencePeriod(`Popis zajištění jazykové přípravy: ${l.description}`));
+  if (l.provider) lines.push(appendSentencePeriod(`Poskytovatel: ${l.provider}`));
+  if (l.note) lines.push(appendSentencePeriod(`Poznámka: ${l.note}`));
   return lines.join("\n");
 }
 
@@ -146,10 +150,12 @@ export function generateSection07Draft(input: Section07GeneratorInput): Section0
     intro,
     "",
     "7.1 Prevence sociálně patologických jevů a rizikového chování",
-    `Popis preventivní strategie školy: ${input.prevention.preventionStrategyDescription ?? "neuvedeno"}.`,
-    input.prevention.preventionTeam ? `Preventivní tým / odpovědné osoby: ${input.prevention.preventionTeam}.` : undefined,
-    input.prevention.cooperation ? `Spolupráce s institucemi: ${input.prevention.cooperation}.` : undefined,
-    input.prevention.evaluation ? `Vyhodnocení prevence: ${input.prevention.evaluation}.` : undefined,
+    appendSentencePeriod(`Popis preventivní strategie školy: ${input.prevention.preventionStrategyDescription ?? "neuvedeno"}`),
+    input.prevention.preventionTeam
+      ? appendSentencePeriod(`Preventivní tým / odpovědné osoby: ${input.prevention.preventionTeam}`)
+      : undefined,
+    input.prevention.cooperation ? appendSentencePeriod(`Spolupráce s institucemi: ${input.prevention.cooperation}`) : undefined,
+    input.prevention.evaluation ? appendSentencePeriod(`Vyhodnocení prevence: ${input.prevention.evaluation}`) : undefined,
     buildPreventionProgrammes(input),
     "",
     "7.2 Počet výskytu rizikového chování, které škola řešila, a přijatá opatření",

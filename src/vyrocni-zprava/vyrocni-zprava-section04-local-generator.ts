@@ -1,4 +1,5 @@
 import type { Section04GeneratorInput } from "./vyrocni-zprava-section04-generator-input";
+import { formatCzechCount, formatCzechInteger } from "./vyrocni-zprava-number-formatting-helpers";
 
 export const SECTION04_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 04 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -9,7 +10,7 @@ export type Section04DraftResult = {
 };
 
 function tableRow(label: string, total?: number, girls?: number): string {
-  return `${label}: celkem ${total ?? "—"}, z toho dívek ${girls ?? "—"}.`;
+  return `${label}: celkem ${formatCzechInteger(total)}, z toho dívek ${formatCzechInteger(girls)}.`;
 }
 
 function buildAdmissionSummary(summary: Section04GeneratorInput["firstGradeAdmissionCurrentYear"]): string {
@@ -24,13 +25,17 @@ function buildAdmissionSummary(summary: Section04GeneratorInput["firstGradeAdmis
 function buildGradeCountList(rows: Section04GeneratorInput["pupilsAdmittedDuringYear"], emptyFallback: string): string {
   const filledRows = rows.filter((row) => row.grade);
   if (filledRows.length === 0) return emptyFallback;
-  return filledRows.map((row) => `- ${row.grade}: ${row.count ?? "—"} žáků`).join("\n");
+  return filledRows
+    .map((row) => `- ${row.grade}: ${formatCzechCount(row.count, { one: "žák", few: "žáci", many: "žáků" })}`)
+    .join("\n");
 }
 
 function buildSecondaryAdmissions(rows: Section04GeneratorInput["secondarySchoolAdmissions"]): string {
   const filledRows = rows.filter((row) => row.schoolType);
   if (filledRows.length === 0) return "Pro tuto podkapitolu nejsou v podkladech uvedeny doplňující údaje.";
-  return filledRows.map((row) => `- ${row.schoolType}: ${row.count ?? "—"} žáků`).join("\n");
+  return filledRows
+    .map((row) => `- ${row.schoolType}: ${formatCzechCount(row.count, { one: "žák", few: "žáci", many: "žáků" })}`)
+    .join("\n");
 }
 
 function buildPupilCountTable(title: string, rows: Section04GeneratorInput["pupilCountsSeptember"]): string {
@@ -40,12 +45,12 @@ function buildPupilCountTable(title: string, rows: Section04GeneratorInput["pupi
   }
   const lines = [
     title,
-    "Třída | Chlapci | Děvčata | Celkem | Třídní učitel",
+    "Třída | Chlapců | Dívek | Celkem | Třídní učitel",
     "--- | --- | --- | --- | ---",
   ];
   filledRows.forEach((row) => {
     lines.push(
-      `${row.className} | ${row.boys ?? "—"} | ${row.girls ?? "—"} | ${row.total ?? "—"} | ${row.classTeacher ?? "—"}`,
+      `${row.className} | ${formatCzechInteger(row.boys)} | ${formatCzechInteger(row.girls)} | ${formatCzechInteger(row.total)} | ${row.classTeacher ?? "—"}`,
     );
   });
   return lines.join("\n");
