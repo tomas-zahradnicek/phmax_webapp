@@ -5,7 +5,7 @@ import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
 import type { DisplayDensity } from "../display-density";
 import type { ProductView } from "../ProductViewPills";
-import { HeroUserGuideTabLink } from "../HeroUserGuideTabLink";
+import { HeroSecondaryNavLinks } from "../HeroSecondaryNavLinks";
 import { DashHeroToolbar, type DashHeroToolbarProps } from "./DashHeroToolbar";
 
 export type DashHeroHeaderProps = {
@@ -65,7 +65,7 @@ export function DashHeroHeader({
           title: attentionCount > 0 ? `${attentionCount} modulů ke kontrole` : undefined,
         },
       ]}
-      tabsAside={<HeroUserGuideTabLink />}
+      tabsAside={<HeroSecondaryNavLinks />}
       aboutContent={
         <p className="calculator-hero-shell__about-text">
           Souhrnný přehled všech modulů PHmax v tomto prohlížeči. Pokračujte v modulu, kde jste naposledy pracovali,

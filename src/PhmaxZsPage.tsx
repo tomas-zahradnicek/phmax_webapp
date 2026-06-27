@@ -80,6 +80,8 @@ import { buildZsPhmaxTabPanelProps } from "./zs/build-zs-phmax-tab-panel-props";
 import { ZsPhmaxTabPanel } from "./zs/ZsPhmaxTabPanel";
 import { ZsSetupSection } from "./zs/ZsSetupSection";
 import { ZsHeroHeader } from "./zs/ZsHeroHeader";
+import { CalculatorSchoolProfileBanner } from "./CalculatorSchoolProfileBanner";
+import { usePrefillExportLabelFromSchoolProfile } from "./school-profile/use-prefill-export-label";
 import { ZsQuickOnboardingGuide } from "./zs/ZsQuickOnboardingGuide";
 import { ZsWizardShell } from "./zs/ZsWizardShell";
 import { ZsPhaPhpTabPanels } from "./zs/ZsPhaPhpTabPanels";
@@ -414,6 +416,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const [uiNotice, setUiNotice] = useUiNotice();
   useFocusExampleOnMount("zs-hero-example-select");
   const [exportLabel, setExportLabel] = useState("");
+  usePrefillExportLabelFromSchoolProfile(exportLabel, setExportLabel);
   const { guideOpen: zsGuideOpen, dismissGuide: dismissZsGuide, toggleGuide: toggleZsGuideFromHero, helpButtonRef: zsHelpButtonRef } =
     useQuickOnboarding(PHMAX_ZS_ONBOARDING_LS_KEY, { scrollAnchorId: "zs-quick-guide" });
 
@@ -1978,6 +1981,8 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
             onResetAll: resetAll,
           }}
         />
+
+        <CalculatorSchoolProfileBanner />
 
         <ErrorBoundary title="Obsah kalkulačky pro základní školy se nepodařilo zobrazit">
         <ZsQuickOnboardingGuide open={zsGuideOpen} onDismiss={dismissZsGuide} returnFocusRef={zsHelpButtonRef} />

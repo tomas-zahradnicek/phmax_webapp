@@ -104,11 +104,13 @@ a:focus-visible {
   padding-bottom: 36px;
 }
 
-.container--user-guide {
+.container--user-guide,
+.container--standalone-module {
   max-width: min(1200px, 100%);
 }
 
-.app-shell--user-guide {
+.app-shell--user-guide,
+.app-shell--standalone-module {
   min-height: 100vh;
 }
 
@@ -11882,4 +11884,1726 @@ select:focus {
 .calculator-quick-tour-highlight {
   outline: 3px solid #2563eb;
   outline-offset: 3px;
+}
+
+/* —— Výroční zpráva školy —— */
+.vyrocni-zprava-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: calc(100vh - 56px);
+}
+
+.vyrocni-zprava-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.vyrocni-zprava-page__brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: min(100%, 20rem);
+}
+
+.vyrocni-zprava-page__logo {
+  flex: 0 0 auto;
+  border-radius: 8px;
+}
+
+.vyrocni-zprava-page__title {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.vyrocni-zprava-page__lead {
+  margin: 0;
+  max-width: 44rem;
+}
+
+.vyrocni-zprava-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vyrocni-zprava-page__workspace {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .vyrocni-zprava-page__workspace {
+    grid-template-columns: minmax(280px, 0.95fr) minmax(320px, 1.05fr);
+  }
+}
+
+.vyrocni-zprava-setup {
+  padding: 18px 20px;
+}
+
+.vyrocni-zprava-setup__lead {
+  margin: 0 0 14px;
+}
+
+.vyrocni-zprava-setup__grid {
+  display: grid;
+  gap: 12px 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.vyrocni-zprava-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vyrocni-zprava-field__label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section-list {
+  padding: 16px 14px;
+}
+
+.vyrocni-zprava-section-list__lead {
+  margin: 0 0 12px;
+}
+
+.vyrocni-zprava-section-list__root,
+.vyrocni-zprava-section-list__children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.vyrocni-zprava-section-list__children {
+  margin-top: 4px;
+}
+
+.vyrocni-zprava-section-list__item--depth-1 {
+  margin-left: 10px;
+  border-left: 2px solid rgba(99, 102, 241, 0.14);
+  padding-left: 8px;
+}
+
+.vyrocni-zprava-section-list__button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px 10px;
+  align-items: start;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: var(--radius-md);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.vyrocni-zprava-section-list__button:hover {
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.vyrocni-zprava-section-list__button--active {
+  border-color: rgba(79, 70, 229, 0.45);
+  background: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%);
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.1);
+}
+
+.vyrocni-zprava-section-list__item + .vyrocni-zprava-section-list__item {
+  margin-top: 8px;
+}
+
+.vyrocni-zprava-section-list__code {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #4338ca;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section-list__title {
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: #0f172a;
+}
+
+.vyrocni-zprava-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-status-badge--compact {
+  min-height: 22px;
+  padding: 2px 8px;
+  font-size: 0.68rem;
+}
+
+.vyrocni-zprava-status-badge--empty {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.vyrocni-zprava-status-badge--warning {
+  background: #fff7ed;
+  color: #b45309;
+  border-color: rgba(245, 158, 11, 0.22);
+}
+
+.vyrocni-zprava-status-badge--ready {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.22);
+}
+
+.vyrocni-zprava-status-badge--generated {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.18);
+}
+
+.vyrocni-zprava-status-badge--edited {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border-color: rgba(139, 92, 246, 0.22);
+}
+
+.vyrocni-zprava-status-badge--approved {
+  background: #eef2ff;
+  color: #4338ca;
+  border-color: rgba(99, 102, 241, 0.24);
+}
+
+.vyrocni-zprava-detail {
+  padding: 18px 20px;
+}
+
+.vyrocni-zprava-detail--empty {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vyrocni-zprava-detail__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-detail__code {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #4338ca;
+}
+
+.vyrocni-zprava-detail__title {
+  margin: 0;
+}
+
+.vyrocni-zprava-detail__description {
+  margin: 0 0 16px;
+  line-height: 1.5;
+  color: #334155;
+}
+
+.vyrocni-zprava-detail__block + .vyrocni-zprava-detail__block {
+  margin-top: 16px;
+}
+
+.vyrocni-zprava-detail__block-title {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+}
+
+.vyrocni-zprava-detail__placeholder {
+  margin: 0;
+}
+
+.vyrocni-zprava-detail__placeholder-note {
+  margin: 6px 0 0;
+  font-size: 0.86rem;
+}
+
+.vyrocni-zprava-detail__textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.vyrocni-zprava-detail__generated {
+  padding: 14px 16px;
+  min-height: 96px;
+}
+
+.vyrocni-zprava-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (max-width: 640px) {
+  .vyrocni-zprava-section-list__button {
+    grid-template-columns: 1fr;
+  }
+
+  .vyrocni-zprava-detail__actions .btn {
+    flex: 1 1 100%;
+  }
+}
+
+.vyrocni-zprava-page__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 14px 18px;
+}
+
+.vyrocni-zprava-page__progress {
+  flex: 1 1 280px;
+}
+
+.vyrocni-zprava-page__progress-labels {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.vyrocni-zprava-page__progress-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-page__progress-value {
+  font-size: 0.84rem;
+  color: #475569;
+}
+
+.vyrocni-zprava-page__progress-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.vyrocni-zprava-page__progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4f46e5, #6366f1);
+  transition: width 0.2s ease;
+}
+
+.vyrocni-zprava-page__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-detail__warning {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: #fff7ed;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #b45309;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.vyrocni-zprava-detail__missing-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #b45309;
+}
+
+.vyrocni-zprava-detail__ok {
+  margin: 0;
+  color: #047857;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.vyrocni-zprava-detail__generated-text {
+  margin: 0;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.vyrocni-zprava-generated-editor__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.vyrocni-zprava-generated-editor__hint {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.vyrocni-zprava-generated-editor__textarea {
+  min-height: 280px;
+  font-family: inherit;
+  line-height: 1.55;
+}
+
+.vyrocni-zprava-generated-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-calculator-panel {
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.vyrocni-zprava-calculator-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.vyrocni-zprava-calculator-panel__lead {
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-calculator-panel__warnings,
+.vyrocni-zprava-calculator-panel__sources,
+.vyrocni-zprava-calculator-panel__available,
+.vyrocni-zprava-calculator-panel__missing,
+.vyrocni-zprava-calculator-panel__notes {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-calculator-panel__subsection + .vyrocni-zprava-calculator-panel__subsection {
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-calculator-panel__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-calculator-panel__values {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.vyrocni-zprava-calculator-panel__value-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  align-items: baseline;
+  font-size: 0.88rem;
+}
+
+.vyrocni-zprava-calculator-panel__value-row dt {
+  margin: 0;
+  color: #475569;
+}
+
+.vyrocni-zprava-calculator-panel__value-row dd {
+  margin: 0;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-personnel-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-personnel-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-personnel-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-personnel-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-personnel-form__warnings {
+  margin: 0 0 12px;
+  padding: 10px 12px 10px 2rem;
+  border-radius: var(--radius-md);
+  background: #fff7ed;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #b45309;
+  font-size: 0.86rem;
+}
+
+.vyrocni-zprava-personnel-form__missing-note {
+  margin: 0 0 12px;
+}
+
+.vyrocni-zprava-personnel-form__panel {
+  padding: 14px 16px;
+}
+
+.vyrocni-zprava-personnel-form__panel + .vyrocni-zprava-personnel-form__panel {
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-personnel-form__panel-title {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.vyrocni-zprava-personnel-form__table-wrap {
+  overflow-x: auto;
+}
+
+.vyrocni-zprava-personnel-form__table {
+  min-width: 520px;
+}
+
+.vyrocni-zprava-personnel-form__input {
+  width: 100%;
+  min-width: 4.5rem;
+  max-width: 7rem;
+  text-align: right;
+}
+
+.vyrocni-zprava-personnel-form__total-row th,
+.vyrocni-zprava-personnel-form__total-row td {
+  font-weight: 700;
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.vyrocni-zprava-personnel-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-section01-panel {
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.vyrocni-zprava-section01-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.vyrocni-zprava-section01-panel__lead {
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section01-panel__subsection + .vyrocni-zprava-section01-panel__subsection {
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section01-panel__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section01-panel__list,
+.vyrocni-zprava-section01-panel__missing,
+.vyrocni-zprava-section01-panel__recommended {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-section01-panel__actions {
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section01-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-section01-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-section01-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section01-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section01-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-section02-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-section02-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-section02-form__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.vyrocni-zprava-section02-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section02-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section02-form__subsection + .vyrocni-zprava-section02-form__subsection {
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-section02-form__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section02-form__list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-section02-form__missing-note {
+  margin: 10px 0;
+}
+
+.vyrocni-zprava-section02-form__table-wrap {
+  overflow-x: auto;
+  margin: 10px 0 12px;
+}
+
+.vyrocni-zprava-section02-form__table {
+  min-width: 940px;
+}
+
+.vyrocni-zprava-section02-form__table .input {
+  min-width: 8rem;
+}
+
+.vyrocni-zprava-section02-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-section04-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-section04-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-section04-form__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.vyrocni-zprava-section04-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section04-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section04-form__subsection + .vyrocni-zprava-section04-form__subsection {
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-section04-form__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section04-form__list,
+.vyrocni-zprava-section04-form__warnings {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-section04-form__warnings {
+  color: #b45309;
+}
+
+.vyrocni-zprava-section04-form__panel {
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section04-form__panel-title {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.vyrocni-zprava-section04-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 12px;
+}
+
+.vyrocni-zprava-section04-form__table-wrap {
+  overflow-x: auto;
+}
+
+.vyrocni-zprava-section04-form__table {
+  min-width: 760px;
+}
+
+.vyrocni-zprava-section04-form__totals {
+  margin: 12px 0 8px;
+}
+
+.vyrocni-zprava-section04-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-section05-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-section05-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-section05-form__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.vyrocni-zprava-section05-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section05-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section05-form__subsection + .vyrocni-zprava-section05-form__subsection {
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-section05-form__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section05-form__list,
+.vyrocni-zprava-section05-form__warnings {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-section05-form__warnings {
+  color: #b45309;
+}
+
+.vyrocni-zprava-section05-form__panel {
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section05-form__panel-title {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.vyrocni-zprava-section05-form__table-wrap {
+  overflow-x: auto;
+}
+
+.vyrocni-zprava-section05-form__table {
+  min-width: 1260px;
+}
+
+.vyrocni-zprava-section05-form__table-goals {
+  min-width: 1060px;
+}
+
+.vyrocni-zprava-section05-form__row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-section05-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-section06-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-section06-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-section06-form__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.vyrocni-zprava-section06-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section06-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section06-form__subsection + .vyrocni-zprava-section06-form__subsection {
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-section06-form__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section06-form__list,
+.vyrocni-zprava-section06-form__warnings {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-section06-form__warnings {
+  color: #b45309;
+}
+
+.vyrocni-zprava-section06-form__panel {
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section06-form__panel-title {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.vyrocni-zprava-section06-form__table-wrap {
+  overflow-x: auto;
+}
+
+.vyrocni-zprava-section06-form__table {
+  min-width: 1650px;
+}
+
+.vyrocni-zprava-section06-form__measures-group + .vyrocni-zprava-section06-form__measures-group {
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section06-form__subpanel-title {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+}
+
+.vyrocni-zprava-section06-form__measures-grid,
+.vyrocni-zprava-section06-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 12px;
+}
+
+.vyrocni-zprava-section06-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-section07-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-section07-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-section07-form__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.vyrocni-zprava-section07-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section07-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section07-form__subsection + .vyrocni-zprava-section07-form__subsection {
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-section07-form__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section07-form__list,
+.vyrocni-zprava-section07-form__warnings {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-section07-form__warnings {
+  color: #b45309;
+}
+
+.vyrocni-zprava-section07-form__panel {
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section07-form__panel-title {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.vyrocni-zprava-section07-form__table-wrap {
+  overflow-x: auto;
+}
+
+.vyrocni-zprava-section07-form__table {
+  min-width: 1280px;
+}
+
+.vyrocni-zprava-section07-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 12px;
+}
+
+.vyrocni-zprava-section07-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-section08-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-section08-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-section08-form__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.vyrocni-zprava-section08-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section08-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section08-form__subsection + .vyrocni-zprava-section08-form__subsection {
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-section08-form__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section08-form__list,
+.vyrocni-zprava-section08-form__warnings {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-section08-form__warnings {
+  color: #b45309;
+}
+
+.vyrocni-zprava-section08-form__panel {
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section08-form__panel-title {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.vyrocni-zprava-section08-form__table-wrap {
+  overflow-x: auto;
+}
+
+.vyrocni-zprava-section08-form__table {
+  min-width: 1200px;
+}
+
+.vyrocni-zprava-section08-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-section09-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-section09-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-section09-form__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.vyrocni-zprava-section09-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section09-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section09-form__subsection + .vyrocni-zprava-section09-form__subsection {
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-section09-form__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section09-form__list,
+.vyrocni-zprava-section09-form__warnings {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-section09-form__warnings {
+  color: #b45309;
+}
+
+.vyrocni-zprava-section09-form__panel {
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section09-form__panel-title {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.vyrocni-zprava-section09-form__table-wrap {
+  overflow-x: auto;
+}
+
+.vyrocni-zprava-section09-form__table {
+  min-width: 1320px;
+}
+
+.vyrocni-zprava-section09-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-section10-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-section10-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-section10-form__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.vyrocni-zprava-section10-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section10-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section10-form__subsection + .vyrocni-zprava-section10-form__subsection {
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-section10-form__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section10-form__list,
+.vyrocni-zprava-section10-form__warnings {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-section10-form__warnings {
+  color: #b45309;
+}
+
+.vyrocni-zprava-section10-form__panel {
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section10-form__panel-title {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.vyrocni-zprava-section10-form__panel-hint {
+  margin: -4px 0 10px;
+  font-size: 0.82rem;
+}
+
+.vyrocni-zprava-section10-form__table-wrap {
+  overflow-x: auto;
+}
+
+.vyrocni-zprava-section10-form__table {
+  min-width: 1600px;
+}
+
+.vyrocni-zprava-section10-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-section11-form {
+  padding-top: 4px;
+}
+
+.vyrocni-zprava-section11-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-section11-form__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.vyrocni-zprava-section11-form__lead {
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.vyrocni-zprava-section11-form__saved {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.vyrocni-zprava-section11-form__subsection + .vyrocni-zprava-section11-form__subsection {
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-section11-form__subtitle {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vyrocni-zprava-section11-form__list,
+.vyrocni-zprava-section11-form__warnings {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.vyrocni-zprava-section11-form__warnings,
+.vyrocni-zprava-section11-form__warning-inline {
+  color: #b45309;
+}
+
+.vyrocni-zprava-section11-form__panel {
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.vyrocni-zprava-section11-form__panel-title {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.vyrocni-zprava-section11-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 12px;
+}
+
+.vyrocni-zprava-section11-form__table-wrap {
+  overflow-x: auto;
+}
+
+.vyrocni-zprava-section11-form__table {
+  min-width: 1280px;
+}
+
+.vyrocni-zprava-section11-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-preview {
+  margin-top: 14px;
+}
+
+.vyrocni-zprava-preview__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-preview__title {
+  margin: 0 0 4px;
+}
+
+.vyrocni-zprava-preview__meta {
+  margin: 0;
+}
+
+.vyrocni-zprava-preview__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vyrocni-zprava-preview__summary {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-preview__summary p {
+  margin: 0;
+}
+
+.vyrocni-zprava-preview__warning {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: #fffbeb;
+  color: #92400e;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-preview__warning p {
+  margin: 0;
+}
+
+.vyrocni-zprava-preview__toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-preview__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vyrocni-zprava-preview__sections {
+  margin-bottom: 10px;
+}
+
+.vyrocni-zprava-preview__sections-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+
+.vyrocni-zprava-preview__section-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.vyrocni-zprava-preview__section-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 6px;
+}
+
+.vyrocni-zprava-preview__status {
+  font-size: 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 2px 8px;
+  color: #334155;
+}
+
+.vyrocni-zprava-preview__status--approved {
+  border-color: rgba(5, 150, 105, 0.35);
+  color: #065f46;
+}
+
+.vyrocni-zprava-preview__status--warning {
+  border-color: rgba(202, 138, 4, 0.4);
+  color: #92400e;
+}
+
+.vyrocni-zprava-preview__fulltext {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.55;
+  font-family: inherit;
+}
+
+.vyrocni-zprava-preview__copy-note {
+  margin: 8px 0 0;
+}
+
+.vyrocni-zprava-preview__error-note {
+  margin: 8px 0 0;
+  color: #b91c1c;
+}
+
+/* —— Profil školy —— */
+.school-profile-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: calc(100vh - 56px);
+}
+
+.school-profile-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.school-profile-page__brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: min(100%, 20rem);
+}
+
+.school-profile-page__logo {
+  flex: 0 0 auto;
+  border-radius: 8px;
+}
+
+.school-profile-page__title {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.school-profile-page__lead {
+  margin: 0;
+  max-width: 44rem;
+}
+
+.school-profile-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.school-profile-page__section {
+  padding: 18px 20px;
+}
+
+.school-profile-page__warning {
+  padding: 14px 18px;
+  border-left: 4px solid #f59e0b;
+}
+
+.school-profile-page__warning p {
+  margin: 0 0 10px;
+}
+
+.school-profile-page__missing-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #b45309;
+}
+
+.school-profile-page__ok {
+  padding: 14px 18px;
+  color: #047857;
+  font-weight: 600;
+  border-left: 4px solid #10b981;
+}
+
+.school-profile-page__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.school-profile-page__footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.school-profile-page__saved {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.vyrocni-zprava-page__profile-warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-left: 4px solid #f59e0b;
+}
+
+.vyrocni-zprava-page__profile-warning p {
+  margin: 0;
+  color: #b45309;
+  font-weight: 600;
+}
+
+.vyrocni-zprava-applicability-notice {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-left: 4px solid #94a3b8;
+}
+
+.vyrocni-zprava-applicability-notice__title {
+  margin: 0 0 8px;
+  font-size: 0.96rem;
+}
+
+.vyrocni-zprava-applicability-notice__message,
+.vyrocni-zprava-applicability-notice__recommended,
+.vyrocni-zprava-applicability-notice__legal-note {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.vyrocni-zprava-applicability-notice__legal-note {
+  color: #475569;
+}
+
+.vyrocni-zprava-applicability-notice--direct {
+  border-left-color: #10b981;
+}
+
+.vyrocni-zprava-applicability-notice--optional {
+  border-left-color: #f59e0b;
+}
+
+.vyrocni-zprava-applicability-notice--unknown {
+  border-left-color: #94a3b8;
+}
+
+.vyrocni-zprava-legal-panel {
+  margin-top: 10px;
+}
+
+.vyrocni-zprava-legal-panel__summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.vyrocni-zprava-legal-panel__content {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.vyrocni-zprava-legal-panel__note {
+  margin: 0;
+}
+
+.vyrocni-zprava-legal-panel__items {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 7px;
+}
+
+.school-profile-page__applicability {
+  grid-column: 1 / -1;
+}
+
+/* —— Profil školy v kalkulačkách —— */
+.calculator-school-profile-banner {
+  margin-bottom: 14px;
+  padding: 12px 16px;
+}
+
+.calculator-school-profile-banner--empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-left: 4px solid #f59e0b;
+}
+
+.calculator-school-profile-banner__warning {
+  margin: 0;
+  color: #b45309;
+  font-weight: 600;
+  flex: 1 1 280px;
+}
+
+.calculator-school-profile-banner__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.calculator-school-profile-banner__title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #334155;
+}
+
+.calculator-school-profile-banner__grid {
+  display: grid;
+  gap: 8px 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  margin: 0;
+}
+
+.calculator-school-profile-banner__grid > div {
+  min-width: 0;
+}
+
+.calculator-school-profile-banner__grid dt {
+  margin: 0 0 2px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.calculator-school-profile-banner__grid dd {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+  word-break: break-word;
 }

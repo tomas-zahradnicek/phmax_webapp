@@ -1,7 +1,7 @@
 import React from "react";
 import { GlossaryIconButton } from "../GlossaryIconButton";
 import { CalculatorHeroShell } from "../CalculatorHeroShell";
-import { HeroUserGuideTabLink } from "../HeroUserGuideTabLink";
+import { HeroSecondaryNavLinks } from "../HeroSecondaryNavLinks";
 import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorVerdictTone } from "../calculator-verdict-ui";
@@ -84,7 +84,7 @@ export function ZsHeroHeader({
       title="Kalkulačka PHmax, PHAmax a PHPmax – základní škola"
       titleClassName="hero__title hero__title--sd hero__title--zs"
       showMiniLogo
-      tabsAside={<HeroUserGuideTabLink />}
+      tabsAside={<HeroSecondaryNavLinks />}
       kpis={[
         { label: zsTabPrimaryLabel.replace(" celkem", ""), value: zsTabPrimaryValue, variant: "primary" },
         { label: "PHmax", value: totalPhmax, variant: "secondary" },

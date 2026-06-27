@@ -281,6 +281,28 @@ export const PRODUCT_USER_GUIDE_LABEL = "Návod k použití";
 export const PRODUCT_USER_GUIDE_LEAD =
   "Kompletní průvodce aplikací – moduly, postup výpočtu, exporty a limity orientačního nástroje.";
 
+/** Modul výroční zprávy školy – struktura podle § 7 vyhlášky č. 15/2005 Sb. */
+export const VYROCNI_ZPRAVA_PATH = "/vyrocni-zprava";
+export const VYROCNI_ZPRAVA_NAHLED_PATH = "/vyrocni-zprava/nahled";
+
+export const VYROCNI_ZPRAVA_LABEL = "Výroční zpráva";
+export const VYROCNI_ZPRAVA_NAHLED_LABEL = "Náhled zprávy";
+
+export const VYROCNI_ZPRAVA_TITLE = "Výroční zpráva školy";
+
+export const VYROCNI_ZPRAVA_LEAD =
+  "Modul pomáhá ředitelům škol připravit výroční zprávu o činnosti školy po kapitolách, s kontrolou úplnosti údajů a pozdějším exportem do DOCX/PDF.";
+
+/** Centrální profil školy – sdílený napříč moduly aplikace. */
+export const PROFIL_SKOLY_PATH = "/profil-skoly";
+
+export const PROFIL_SKOLY_LABEL = "Profil školy";
+
+export const PROFIL_SKOLY_TITLE = "Profil školy";
+
+export const PROFIL_SKOLY_LEAD =
+  "Identifikační a kontaktní údaje školy zadané jednou pro všechny moduly – výroční zprávu, kalkulačky PHmax a další nástroje.";
+
 /** Logo Ředitelského průvodce (public/). */
 export const APP_BRAND_LOGO_PATH = "/reditelskypruvodce-logo.png";
 

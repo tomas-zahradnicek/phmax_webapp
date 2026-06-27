@@ -12,6 +12,7 @@ import { HeroStatusBar } from "./HeroStatusBar";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorWorkflowDock } from "./CalculatorWorkflowDock";
 import { CalculatorProductShell } from "./CalculatorProductShell";
+import { CalculatorSchoolProfileBanner } from "./CalculatorSchoolProfileBanner";
 import { useCalculatorFocusMode } from "./useCalculatorFocusMode";
 import { SsHumanSummary } from "./SsHumanSummary";
 import { MethodologyStrip } from "./MethodologyStrip";
@@ -1002,6 +1003,8 @@ export function PhmaxSsPage({ productView, setProductView }: PhmaxSsPageProps) {
         />
       ) : null}
       <CalculatorNextActionStrip action={ssNextAction} />
+
+      <CalculatorSchoolProfileBanner />
 
       <CalculatorProductShell
         sticky={{

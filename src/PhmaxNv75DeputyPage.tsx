@@ -54,6 +54,7 @@ import type { ResultAnchorTone } from "./ResultAnchorCard";
 import { IntegerInput } from "./IntegerInput";
 import { CalculatorInputIssueBanner } from "./CalculatorInputIssueBanner";
 import { CalculatorProductShell } from "./CalculatorProductShell";
+import { CalculatorSchoolProfileBanner } from "./CalculatorSchoolProfileBanner";
 import { calculatorShellClassName, type CalculatorViewMode } from "./calculator-view-mode";
 import { FieldWhyPhmaxDetails } from "./FieldWhyPhmax";
 import { NV75_DEPUTY_LEGIS_TOOLTIPS } from "./nv75-deputy-legislativa";
@@ -1158,6 +1159,8 @@ export function PhmaxNv75DeputyPage({ productView, setProductView }: PhmaxNv75De
           />
         ) : null}
         <CalculatorNextActionStrip action={nv75NextAction} />
+
+        <CalculatorSchoolProfileBanner />
 
         <CalculatorProductShell
           sticky={{

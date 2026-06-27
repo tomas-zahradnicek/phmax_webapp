@@ -37,6 +37,7 @@ import { MethodologyStrip } from "./MethodologyStrip";
 import { ProductLegisContextPanel, PvLegisRef } from "./PhmaxProductLegisUi";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { PvHeroHeader } from "./pv/PvHeroHeader";
+import { CalculatorSchoolProfileBanner } from "./CalculatorSchoolProfileBanner";
 import { PvQuickOnboardingGuide } from "./pv/PvQuickOnboardingGuide";
 import { useUiNotice } from "./useUiNotice";
 import { ProductBasicWizard } from "./ProductBasicWizard";
@@ -869,6 +870,8 @@ export function PhmaxPvPage({ productView, setProductView, onOpenRychlyPhmax }: 
           onResetAll: resetPvAll,
         }}
       />
+
+      <CalculatorSchoolProfileBanner />
 
       <PvQuickOnboardingGuide open={guideOpen} onDismiss={dismissGuide} returnFocusRef={helpButtonRef} />
       {pvBasicWizardActive ? (

@@ -3,7 +3,7 @@ import React from "react";
 import { GlossaryIconButton } from "../GlossaryIconButton";
 
 import { CalculatorHeroShell } from "../CalculatorHeroShell";
-import { HeroUserGuideTabLink } from "../HeroUserGuideTabLink";
+import { HeroSecondaryNavLinks } from "../HeroSecondaryNavLinks";
 
 import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 
@@ -160,7 +160,7 @@ export function PvHeroHeader({
       titleClassName="hero__title--sd"
 
       showMiniLogo
-      tabsAside={<HeroUserGuideTabLink />}
+      tabsAside={<HeroSecondaryNavLinks />}
 
       kpis={[
 

@@ -65,6 +65,7 @@ export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
   NV75_QUICK_TOUR_LS_KEY,
   ZS_QUICK_TOUR_LS_KEY,
   PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
+  "reditelsky-pruvodce-school-profile-v1",
 ];
 
 const DASH_VISIT_PREFIX = "phmax-dash-last-visit-";

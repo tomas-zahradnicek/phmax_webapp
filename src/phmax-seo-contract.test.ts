@@ -29,6 +29,8 @@ describe("SEO fáze A contract", () => {
     expect(readSource("public/sitemap.xml")).toContain("app.reditelskypruvodce.cz");
     expect(readSource("public/robots.txt")).toContain("app.reditelskypruvodce.cz/sitemap.xml");
     expect(readSource("public/sitemap.xml")).toContain("/navod");
+    expect(readSource("public/sitemap.xml")).toContain("/vyrocni-zprava");
+    expect(readSource("public/sitemap.xml")).toContain("/profil-skoly");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-zakladni-skola");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-predskolni-vzdelavani/rychly");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-skolni-druzina/rychly");

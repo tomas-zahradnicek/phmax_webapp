@@ -1,7 +1,7 @@
 import React from "react";
 import { GlossaryIconButton } from "../GlossaryIconButton";
 import { CalculatorHeroShell } from "../CalculatorHeroShell";
-import { HeroUserGuideTabLink } from "../HeroUserGuideTabLink";
+import { HeroSecondaryNavLinks } from "../HeroSecondaryNavLinks";
 import { QuickOnboardingHeroButton } from "../QuickOnboarding";
 import type { CalculatorFocusMode } from "../calculator-focus-mode";
 import type { CalculatorViewMode } from "../calculator-view-mode";
@@ -78,7 +78,7 @@ export function SdHeroHeader({
       title="Kalkulačka PHmax školní družiny a model úvazků vychovatele"
       titleClassName="hero__title hero__title--sd"
       showMiniLogo
-      tabsAside={<HeroUserGuideTabLink />}
+      tabsAside={<HeroSecondaryNavLinks />}
       kpis={[
         { label: "PHmax", value: phmaxDisplay, variant: "primary" },
         { label: "Účastníci", value: pupils, variant: "secondary" },

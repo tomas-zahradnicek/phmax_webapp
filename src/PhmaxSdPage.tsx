@@ -39,6 +39,7 @@ import { ProductLegisContextPanel, SdLegisRef } from "./PhmaxProductLegisUi";
 import { SD_LEGIS_ZAKONY_URL } from "./phmax-sd-legislativa";
 import { useQuickOnboarding } from "./useQuickOnboarding";
 import { SdHeroHeader } from "./sd/SdHeroHeader";
+import { CalculatorSchoolProfileBanner } from "./CalculatorSchoolProfileBanner";
 import { SdQuickOnboardingGuide } from "./sd/SdQuickOnboardingGuide";
 import { SdResultsSection } from "./sd/SdResultsSection";
 import { SdBasicWizard } from "./SdBasicWizard";
@@ -1100,6 +1101,8 @@ export function PhmaxSdPage({ productView, setProductView, onOpenRychlyPhmax }: 
           onResetAll: resetSdAll,
         }}
       />
+
+      <CalculatorSchoolProfileBanner />
 
       <SdQuickOnboardingGuide open={guideOpen} onDismiss={dismissGuide} returnFocusRef={helpButtonRef} />
       {sdBasicWizardActive ? (

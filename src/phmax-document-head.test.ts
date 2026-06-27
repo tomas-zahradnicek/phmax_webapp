@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PRODUCT_VIEW_CODES, USER_GUIDE_PATH } from "./calculator-ui-constants";
+import { PRODUCT_VIEW_CODES, PROFIL_SKOLY_PATH, USER_GUIDE_PATH, VYROCNI_ZPRAVA_PATH } from "./calculator-ui-constants";
 import {
   PHMAX_DOCUMENT_HEAD,
   PHMAX_LITE_DOCUMENT_HEAD,
@@ -27,8 +27,10 @@ describe("phmax-document-head", () => {
       "https://example.test/phmax-zakladni-skola",
     );
     const urls = listPhmaxSitemapUrls("https://example.test");
-    expect(urls).toHaveLength(PRODUCT_VIEW_CODES.length + 4);
+    expect(urls).toHaveLength(PRODUCT_VIEW_CODES.length + 6);
     expect(urls).toContain(`https://example.test${USER_GUIDE_PATH}`);
+    expect(urls).toContain(`https://example.test${VYROCNI_ZPRAVA_PATH}`);
+    expect(urls).toContain(`https://example.test${PROFIL_SKOLY_PATH}`);
     expect(urls).toContain(`https://example.test${PHMAX_PV_LITE_PATH}`);
     expect(urls).toContain(`https://example.test${PHMAX_SD_LITE_PATH}`);
     expect(urls).toContain(`https://example.test/phmax-zakladni-skola/rychly`);
@@ -46,6 +48,8 @@ describe("phmax-document-head", () => {
     const xml = buildPhmaxSitemapXml();
     expect(xml).toContain("https://app.reditelskypruvodce.cz/prehled");
     expect(xml).toContain("/navod");
+    expect(xml).toContain("/vyrocni-zprava");
+    expect(xml).toContain("/profil-skoly");
     expect(xml).toContain("/phmax-zakladni-skola/rychly");
     expect(buildPhmaxSitemapEntries()).toHaveLength(listPhmaxSitemapUrls().length);
   });

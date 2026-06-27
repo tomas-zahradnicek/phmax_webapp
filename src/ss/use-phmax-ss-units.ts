@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePrefillExportLabelFromSchoolProfile } from "../school-profile/use-prefill-export-label";
 import { useUiNotice } from "../useUiNotice";
 import {
   MSG_CONFIRM_CLEAR_BROWSER_STORAGE,
@@ -164,6 +165,7 @@ export function usePhmaxSsUnits(
   const [selectedNamedId, setSelectedNamedId] = useState("");
   const [namedSaveName, setNamedSaveName] = useState("");
   const [exportLabel, setExportLabel] = useState("");
+  usePrefillExportLabelFromSchoolProfile(exportLabel, setExportLabel);
   const [uiNotice, setUiNotice] = useUiNotice();
   const [xlsxExportBusy, setXlsxExportBusy] = useState(false);
   const setUiNoticeRef = useRef(setUiNotice);

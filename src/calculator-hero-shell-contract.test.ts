@@ -37,7 +37,7 @@ describe("CalculatorHeroShell contract (variant A)", () => {
     ]) {
       const src = readSource(file);
       expect(src).toContain("CalculatorHeroShell");
-      expect(src).toContain("HeroUserGuideTabLink");
+      expect(src).toContain("HeroSecondaryNavLinks");
       expect(src).toContain("tabsAside");
       expect(src).not.toContain("CalculatorHeroDisplayControls");
       expect(src).not.toContain("HeroExpertStrip");
@@ -64,8 +64,10 @@ describe("CalculatorHeroShell contract (variant A)", () => {
     expect(dash).toContain("CalculatorHeroShell");
     expect(dash).toContain("showDisplaySettings={false}");
     expect(dash).toContain("tabsAside");
-    expect(dash).toContain("HeroUserGuideTabLink");
+    expect(dash).toContain("HeroSecondaryNavLinks");
     expect(readSource("src/HeroUserGuideTabLink.tsx")).toContain("USER_GUIDE_PATH");
+    expect(readSource("src/HeroVyrocniZpravaTabLink.tsx")).toContain("VYROCNI_ZPRAVA_PATH");
+    expect(readSource("src/HeroProfilSkolyTabLink.tsx")).toContain("PROFIL_SKOLY_PATH");
     expect(dash).toContain('label: "Stav"');
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("DashHeroHeader");
     expect(readSource("src/PhmaxDashboardPage.tsx")).not.toMatch(/<header className="hero hero--feature">/);

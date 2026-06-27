@@ -1,7 +1,12 @@
 import type { ProductViewCode } from "./calculator-ui-constants";
 import { PHMAX_SEO_MODULE_CONTENT } from "./phmax-seo-module-content";
 import { APP_BRAND_LOGO_PATH } from "./calculator-ui-constants";
-import { USER_GUIDE_PATH } from "./calculator-ui-constants";
+import {
+  PROFIL_SKOLY_PATH,
+  USER_GUIDE_PATH,
+  VYROCNI_ZPRAVA_NAHLED_PATH,
+  VYROCNI_ZPRAVA_PATH,
+} from "./calculator-ui-constants";
 import { PHMAX_PV_LITE_PATH, PHMAX_SD_LITE_PATH, PHMAX_ZS_LITE_PATH } from "./phmax-lite-paths";
 import { PHMAX_SITE_ORIGIN_FALLBACK } from "./phmax-site-origin";
 import { buildProductViewPageUrl, listProductViewPathUrls } from "./product-view-paths";
@@ -195,12 +200,42 @@ export const PHMAX_USER_GUIDE_DOCUMENT_HEAD: PhmaxDocumentHeadMeta = {
   applicationName: "Ředitelský průvodce – návod k použití",
 };
 
+export const PHMAX_VYROCNI_ZPRAVA_DOCUMENT_HEAD: PhmaxDocumentHeadMeta = {
+  title: "Výroční zpráva školy – příprava po kapitolách | Ředitelský průvodce",
+  description:
+    "Modul pro přípravu výroční zprávy o činnosti školy podle vyhlášky č. 15/2005 Sb. – struktura kapitol, kontrola údajů a budoucí export do DOCX/PDF.",
+  applicationName: "Ředitelský průvodce – výroční zpráva školy",
+};
+
+export const PHMAX_PROFIL_SKOLY_DOCUMENT_HEAD: PhmaxDocumentHeadMeta = {
+  title: "Profil školy – sdílené údaje pro moduly | Ředitelský průvodce",
+  description:
+    "Centrální profil školy pro aplikaci Ředitelský průvodce – identifikační a kontaktní údaje použitelné ve výroční zprávě, kalkulačkách PHmax a dalších modulech.",
+  applicationName: "Ředitelský průvodce – profil školy",
+};
+
 /** Document head pro stránku /navod s vloženým webovým průvodcem. */
 export function applyPhmaxUserGuideDocumentHead(): void {
   if (typeof document === "undefined") return;
   const origin = resolvePhmaxSiteOrigin();
   const canonical = new URL(USER_GUIDE_PATH, origin).href;
   applyPhmaxHeadMeta(PHMAX_USER_GUIDE_DOCUMENT_HEAD, canonical, "dash");
+}
+
+/** Document head pro modul výroční zprávy (/vyrocni-zprava). */
+export function applyVyrocniZpravaDocumentHead(): void {
+  if (typeof document === "undefined") return;
+  const origin = resolvePhmaxSiteOrigin();
+  const canonical = new URL(VYROCNI_ZPRAVA_PATH, origin).href;
+  applyPhmaxHeadMeta(PHMAX_VYROCNI_ZPRAVA_DOCUMENT_HEAD, canonical, "dash");
+}
+
+/** Document head pro profil školy (/profil-skoly). */
+export function applyProfilSkolyDocumentHead(): void {
+  if (typeof document === "undefined") return;
+  const origin = resolvePhmaxSiteOrigin();
+  const canonical = new URL(PROFIL_SKOLY_PATH, origin).href;
+  applyPhmaxHeadMeta(PHMAX_PROFIL_SKOLY_DOCUMENT_HEAD, canonical, "dash");
 }
 
 /** Document head pro režim „Rychlý PHmax“ (/rychly). */
@@ -217,6 +252,9 @@ export function listPhmaxSitemapUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): strin
   return [
     ...listProductViewPathUrls(origin),
     new URL(USER_GUIDE_PATH, origin).href,
+    new URL(VYROCNI_ZPRAVA_PATH, origin).href,
+    new URL(VYROCNI_ZPRAVA_NAHLED_PATH, origin).href,
+    new URL(PROFIL_SKOLY_PATH, origin).href,
     new URL(PHMAX_PV_LITE_PATH, origin).href,
     new URL(PHMAX_SD_LITE_PATH, origin).href,
     new URL(PHMAX_ZS_LITE_PATH, origin).href,
@@ -232,6 +270,9 @@ export type PhmaxSitemapEntry = {
 function phmaxSitemapPriority(pathname: string): { changefreq: PhmaxSitemapEntry["changefreq"]; priority: string } {
   if (pathname === "/prehled") return { changefreq: "weekly", priority: "1.0" };
   if (pathname === "/navod") return { changefreq: "monthly", priority: "0.85" };
+  if (pathname === "/vyrocni-zprava") return { changefreq: "monthly", priority: "0.85" };
+  if (pathname === "/vyrocni-zprava/nahled") return { changefreq: "monthly", priority: "0.8" };
+  if (pathname === "/profil-skoly") return { changefreq: "monthly", priority: "0.85" };
   if (pathname.endsWith("/rychly")) return { changefreq: "monthly", priority: "0.85" };
   if (pathname === "/banka-odpoctu-zastupcu-reditele") return { changefreq: "monthly", priority: "0.8" };
   return { changefreq: "monthly", priority: "0.9" };
