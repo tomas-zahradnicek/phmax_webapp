@@ -7,7 +7,10 @@ import { buildAnnualReportPreview } from "./vyrocni-zprava-report-preview-builde
 import {
   buildDocxExportModel,
   createAnnualReportDocxFileName,
-  getExportablePreviewSections,
+  detectDocxHeadingLevel,
+  getDocxExportSections,
+  parseGeneratedTextForDocx,
+  shouldRenderAsTable,
 } from "./vyrocni-zprava-docx-export-logic";
 
 function setSection(
@@ -52,7 +55,7 @@ describe("vyrocni-zprava-docx-export-logic", () => {
       report: createDefaultAnnualReport("2024/2025"),
       schoolProfile: createDefaultSchoolProfile(),
     });
-    const sections = getExportablePreviewSections(preview.sections, "visible-generated");
+    const sections = getDocxExportSections(preview.sections, "visible-generated");
     expect(sections).toEqual([]);
   });
 
@@ -117,7 +120,46 @@ describe("vyrocni-zprava-docx-export-logic", () => {
       report,
       schoolProfile: createDefaultSchoolProfile(),
     });
-    const sections = getExportablePreviewSections(preview.sections, "visible-generated");
+    const sections = getDocxExportSections(preview.sections, "visible-generated");
     expect(sections.map((section) => section.number)).toEqual(["01", "02", "04"]);
+  });
+
+  it("detekce nadpisu rozlišuje kapitolu a podkapitolu", () => {
+    expect(detectDocxHeadingLevel("09 Údaje o aktivitách školy")).toBe("H2");
+    expect(detectDocxHeadingLevel("9.1 Akce školy")).toBe("H3");
+    expect(detectDocxHeadingLevel("Běžný odstavec textu")).toBeUndefined();
+  });
+
+  it("detekce tabulky je konzervativní a vyžaduje konzistentní sloupce", () => {
+    expect(shouldRenderAsTable(["Název | Částka", "Grant A | 120 000 Kč"])).toBe(true);
+    expect(shouldRenderAsTable(["Název | Částka", "Nejasný řádek bez oddělovače"])).toBe(false);
+    expect(shouldRenderAsTable(["Pouze jeden řádek | 1"])).toBe(false);
+  });
+
+  it("parser generovaného textu vrací heading, table i paragraph bloky", () => {
+    const blocks = parseGeneratedTextForDocx([
+      "9.1 Přehled",
+      "Název | Částka",
+      "Grant A | 120 000 Kč",
+      "",
+      "Souhrnný komentář.",
+    ].join("\n"));
+
+    expect(blocks[0]).toEqual({
+      type: "heading",
+      level: "H3",
+      text: "9.1 Přehled",
+    });
+    expect(blocks[1]).toEqual({
+      type: "table",
+      rows: [
+        ["Název", "Částka"],
+        ["Grant A", "120 000 Kč"],
+      ],
+    });
+    expect(blocks[2]).toEqual({
+      type: "paragraph",
+      text: "Souhrnný komentář.",
+    });
   });
 });
