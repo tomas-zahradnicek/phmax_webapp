@@ -227,7 +227,8 @@ export function normalizeSection07Data(raw: unknown): AnnualReportSection07Data 
       languagePreparationProvided:
         languagePreparationProvided === "ANO" ||
         languagePreparationProvided === "NE" ||
-        languagePreparationProvided === "NERELEVANTNI"
+        languagePreparationProvided === "NERELEVANTNI" ||
+        languagePreparationProvided === "NEUVEDENO"
           ? languagePreparationProvided
           : defaults.languagePreparation.languagePreparationProvided,
       description: sanitizeOptionalText(languageRaw.description) ?? "",

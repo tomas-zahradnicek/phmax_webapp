@@ -29,6 +29,12 @@ const FIELDS: { key: keyof VyrocniZpravaSection01Data; label: string; rows: numb
     placeholder: "Kapacita školy nebo jednotlivých součástí…",
   },
   {
+    key: "materialTechnicalConditions",
+    label: "Materiálně-technické podmínky",
+    rows: 5,
+    placeholder: "Budovy, učebny, vybavení, investice ve školním roce…",
+  },
+  {
     key: "schoolCouncilInfo",
     label: "Údaje o školské radě",
     rows: 4,

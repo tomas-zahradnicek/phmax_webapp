@@ -2,6 +2,7 @@ export type VyrocniZpravaSection01Data = {
   schoolCharacteristic?: string;
   schoolParts?: string;
   schoolCapacity?: string;
+  materialTechnicalConditions?: string;
   schoolCouncilInfo?: string;
   leadershipInfo?: string;
   remoteAccessInfo?: string;

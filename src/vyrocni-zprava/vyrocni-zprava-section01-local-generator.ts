@@ -106,6 +106,13 @@ function buildSection16(input: Section01GeneratorInput): string {
   return lines.join("\n");
 }
 
+function buildSection18(input: Section01GeneratorInput): string {
+  if (input.sectionInputs.materialTechnicalConditions) {
+    return appendSentencePeriod(input.sectionInputs.materialTechnicalConditions);
+  }
+  return "Pro tuto podkapitolu nejsou v podkladech uvedeny doplňující údaje.";
+}
+
 function buildSection17(input: Section01GeneratorInput): string {
   if (input.sectionInputs.schoolCouncilInfo) {
     return appendSentencePeriod(input.sectionInputs.schoolCouncilInfo);
@@ -159,6 +166,9 @@ export function generateSection01Draft(input: Section01GeneratorInput): Section0
     "",
     "1.7 Údaje o školské radě",
     buildSection17(input),
+    "",
+    "1.8 Materiálně-technické podmínky",
+    buildSection18(input),
   ];
 
   return {

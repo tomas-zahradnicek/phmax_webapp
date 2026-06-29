@@ -141,7 +141,6 @@ export function NumberField({
             max={max}
             disabled={disabled}
             value={value}
-            emptyWhenZero
             onChange={onChange}
           />
         ) : (
@@ -151,7 +150,6 @@ export function NumberField({
             max={max}
             disabled={disabled}
             value={value}
-            emptyWhenZero
             onChange={onChange}
           />
         )}

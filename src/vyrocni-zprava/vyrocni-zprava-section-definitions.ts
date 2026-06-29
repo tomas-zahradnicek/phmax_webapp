@@ -81,12 +81,21 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     { parentNumber: "01" },
   ),
   def(
+    "1.8",
+    "1.8",
+    "Materiálně-technické podmínky",
+    "Přehled budov, učeben, vybavení a významných investic.",
+    ["section.userNotes"],
+    9,
+    { parentNumber: "01" },
+  ),
+  def(
     "02",
     "02",
     "Přehled oborů vzdělání, které škola vyučuje v souladu se zápisem ve školském rejstříku",
     "Výčet vzdělávacích programů a oborů vzdělání podle aktuálního zápisu.",
     ["section.userNotes"],
-    9,
+    10,
     { listTitle: "Obory vzdělání dle zápisu ve školském rejstříku" },
   ),
   def(
@@ -95,7 +104,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Rámcový popis personálního zabezpečení činnosti školy",
     "Přehled pracovníků školy podle věku, pohlaví, vzdělání a odborné kvalifikace.",
     ["section.userNotes"],
-    10,
+    11,
     { listTitle: "Personální zabezpečení školy" },
   ),
   def(
@@ -104,7 +113,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Základní údaje o pracovnících školy",
     "Celkový počet pedagogických a nepedagogických pracovníků.",
     ["section.userNotes"],
-    11,
+    12,
     { parentNumber: "03" },
   ),
   def(
@@ -113,7 +122,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Členění pedagogických zaměstnanců podle věku a pohlaví",
     "Věkové a genderové složení pedagogického sboru.",
     ["section.userNotes"],
-    12,
+    14,
     { parentNumber: "03", listTitle: "Pedagogové podle věku a pohlaví" },
   ),
   def(
@@ -122,7 +131,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Členění pedagogických zaměstnanců podle vzdělání a pohlaví",
     "Úroveň dosaženého vzdělání pedagogických pracovníků.",
     ["section.userNotes"],
-    13,
+    15,
     { parentNumber: "03", listTitle: "Pedagogové podle vzdělání a pohlaví" },
   ),
   def(
@@ -131,7 +140,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Členění pedagogických pracovníků podle odborné kvalifikace",
     "Přehled kvalifikace pedagogů vůči vyučovaným předmětům.",
     ["section.userNotes"],
-    14,
+    16,
     { parentNumber: "03", listTitle: "Odborná kvalifikace pedagogů" },
   ),
   def(
@@ -140,7 +149,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Údaje o přijímacím řízení nebo o zápisu k povinné školní docházce a následném přijetí do školy",
     "Statistiky přijatých žáků, zápisů a výsledků přijímacího řízení.",
     ["section.userNotes"],
-    15,
+    17,
     { listTitle: "Přijímací řízení a zápis do školy" },
   ),
   def(
@@ -149,7 +158,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Stručné vyhodnocení naplňování cílů školního vzdělávacího programu",
     "Hodnocení plnění cílů ŠVP v uplynulém školním roce.",
     ["section.userNotes"],
-    16,
+    18,
     { listTitle: "Plnění cílů školního vzdělávacího programu" },
   ),
   def(
@@ -158,7 +167,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Údaje o výsledcích vzdělávání žáků podle cílů stanovených vzdělávacími programy",
     "Výsledky vzdělávání, hodnocení a případné srovnání s předchozím rokem.",
     ["section.userNotes"],
-    17,
+    19,
     { listTitle: "Výsledky vzdělávání žáků" },
   ),
   def(
@@ -167,7 +176,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Údaje o prevenci rizikového chování a zajištění podpory žáků se speciálními vzdělávacími potřebami, nadaných, mimořádně nadaných a s nárokem na poskytování jazykové přípravy",
     "Preventivní programy, inkluze a podpora specifických skupin žáků.",
     ["section.userNotes"],
-    18,
+    20,
     { listTitle: "Prevence rizikového chování a podpora žáků" },
   ),
   def(
@@ -176,7 +185,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Údaje o dalším vzdělávání pedagogických pracovníků a odborném rozvoji nepedagogických pracovníků",
     "Přehled dalšího vzdělávání, kurzů a odborných aktivit zaměstnanců.",
     ["section.userNotes"],
-    19,
+    21,
     { listTitle: "Další vzdělávání a rozvoj pracovníků" },
   ),
   def(
@@ -185,7 +194,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Údaje o aktivitách a prezentaci školy na veřejnosti",
     "Akce, projekty, spolupráce s veřejností a mediální prezentace školy.",
     ["section.userNotes"],
-    20,
+    22,
     { listTitle: "Aktivity a prezentace školy" },
   ),
   def(
@@ -194,7 +203,7 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Údaje o výsledcích inspekční činnosti provedené Českou školní inspekcí",
     "Závěry a doporučení z posledních inspekcí ČŠI.",
     ["section.userNotes"],
-    21,
+    23,
     { listTitle: "Výsledky inspekční činnosti ČŠI" },
   ),
   def(
@@ -203,7 +212,34 @@ export const ANNUAL_REPORT_SECTION_DEFINITIONS: AnnualReportSectionDefinition[] 
     "Základní údaje o hospodaření školy",
     "Stručný přehled hospodaření, rozpočtu a významných ekonomických ukazatelů.",
     ["section.userNotes"],
-    22,
+    24,
     { listTitle: "Hospodaření školy" },
+  ),
+  def(
+    "12",
+    "12",
+    "Projekty a granty",
+    "Přehled projektů, grantů a dalších programů financovaných z veřejných zdrojů.",
+    ["section.userNotes"],
+    25,
+    { listTitle: "Projekty a granty" },
+  ),
+  def(
+    "13",
+    "13",
+    "Spolupráce s rodiči a partnery",
+    "Spolupráce se zákonnými zástupci, zřizovatelem a dalšími partnery školy.",
+    ["section.userNotes"],
+    26,
+    { listTitle: "Spolupráce s rodiči a partnery" },
+  ),
+  def(
+    "14",
+    "14",
+    "Závěr",
+    "Celkové zhodnocení školního roku a plány do dalšího období.",
+    ["section.userNotes"],
+    27,
+    { listTitle: "Závěr výroční zprávy" },
   ),
 ];

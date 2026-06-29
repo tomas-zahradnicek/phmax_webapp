@@ -1,4 +1,5 @@
 import type { SchoolProfile } from "../school-profile/school-profile-types";
+import { formatSchoolTypeForReport } from "./vyrocni-zprava-text-formatting-helpers";
 import type { AnnualReportCalculatorData } from "./vyrocni-zprava-calculator-data-bridge";
 import { getSection03Readiness, type Section03Readiness } from "./vyrocni-zprava-calculator-data-bridge";
 import {
@@ -107,7 +108,7 @@ function buildSchoolIdentification(profile: SchoolProfile): Section03SchoolIdent
   if (ico) identification.ico = ico;
   if (redIzo) identification.redIzo = redIzo;
   if (izo) identification.izo = izo;
-  if (schoolType) identification.schoolType = schoolType;
+  if (schoolType) identification.schoolType = formatSchoolTypeForReport(schoolType) ?? schoolType;
   if (municipality) identification.municipality = municipality;
   if (region) identification.region = region;
 

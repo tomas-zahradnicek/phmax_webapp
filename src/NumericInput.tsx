@@ -15,7 +15,7 @@ type NumericInputProps = Omit<
   onChange: (value: number) => void;
   min?: number;
   max?: number;
-  /** Když true (výchozí), nula se v poli zobrazí prázdně. */
+  /** Když true, nula se v poli zobrazí prázdně. */
   emptyWhenZero?: boolean;
 };
 
@@ -25,7 +25,7 @@ export function NumericInput({
   onChange,
   min,
   max,
-  emptyWhenZero = true,
+  emptyWhenZero = false,
   className,
   disabled,
   onFocus,

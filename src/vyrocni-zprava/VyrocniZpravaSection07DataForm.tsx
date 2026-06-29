@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { VyrocniZpravaStatusBadge } from "./VyrocniZpravaStatusBadge";
+import { formatNumberInputValue, parseCzechNumberInput } from "./vyrocni-zprava-number-input-helpers";
 import {
   createDefaultSection07PreventionProgramme,
   createDefaultSection07RiskBehaviourIncident,
@@ -20,14 +21,11 @@ type VyrocniZpravaSection07DataFormProps = {
 };
 
 function parseOptionalNumber(value: string): number | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  const n = Number(trimmed);
-  return Number.isFinite(n) ? n : undefined;
+  return parseCzechNumberInput(value);
 }
 
 function displayNumber(value: number | undefined): string {
-  return value === undefined ? "" : String(value);
+  return formatNumberInputValue(value);
 }
 
 function PreventionProgrammesTable(props: {
@@ -564,7 +562,7 @@ export function VyrocniZpravaSection07DataForm({
                   ...prev,
                   languagePreparation: {
                     ...prev.languagePreparation,
-                    languagePreparationProvided: event.target.value as "ANO" | "NE" | "NERELEVANTNI",
+                    languagePreparationProvided: event.target.value as "ANO" | "NE" | "NERELEVANTNI" | "NEUVEDENO",
                   },
                 }))
               }
@@ -572,6 +570,7 @@ export function VyrocniZpravaSection07DataForm({
               <option value="ANO">ANO</option>
               <option value="NE">NE</option>
               <option value="NERELEVANTNI">NERELEVANTNÍ</option>
+              <option value="NEUVEDENO">NEUVEDENO</option>
             </select>
           </label>
         </div>

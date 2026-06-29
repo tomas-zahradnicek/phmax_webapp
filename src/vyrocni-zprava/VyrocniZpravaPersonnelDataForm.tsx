@@ -199,6 +199,7 @@ export function VyrocniZpravaPersonnelDataForm({
                     <IntegerInput
                       className="input vyrocni-zprava-personnel-form__input"
                       value={draft.staffCounts[row.personsKey] ?? 0}
+                      emptyWhenZero={false}
                       min={0}
                       aria-label={`${row.label} – fyzické osoby`}
                       onChange={(value) => updateStaff(row.personsKey, value)}
@@ -208,6 +209,7 @@ export function VyrocniZpravaPersonnelDataForm({
                     <NumericInput
                       className="input vyrocni-zprava-personnel-form__input"
                       value={draft.staffCounts[row.fteKey] ?? 0}
+                      emptyWhenZero={false}
                       min={0}
                       aria-label={`${row.label} – úvazky`}
                       onChange={(value) => updateStaff(row.fteKey, value)}
@@ -247,6 +249,7 @@ export function VyrocniZpravaPersonnelDataForm({
                     <IntegerInput
                       className="input vyrocni-zprava-personnel-form__input"
                       value={draft.ageAndGender[row.key].men ?? 0}
+                      emptyWhenZero={false}
                       min={0}
                       aria-label={`${row.label} – muži`}
                       onChange={(value) => updateAgeGender(row.key, "men", value)}
@@ -256,6 +259,7 @@ export function VyrocniZpravaPersonnelDataForm({
                     <IntegerInput
                       className="input vyrocni-zprava-personnel-form__input"
                       value={draft.ageAndGender[row.key].women ?? 0}
+                      emptyWhenZero={false}
                       min={0}
                       aria-label={`${row.label} – ženy`}
                       onChange={(value) => updateAgeGender(row.key, "women", value)}
@@ -297,6 +301,7 @@ export function VyrocniZpravaPersonnelDataForm({
                     <IntegerInput
                       className="input vyrocni-zprava-personnel-form__input"
                       value={draft.educationAndGender[row.key].men ?? 0}
+                      emptyWhenZero={false}
                       min={0}
                       aria-label={`${row.label} – muži`}
                       onChange={(value) => updateEducationGender(row.key, "men", value)}
@@ -306,6 +311,7 @@ export function VyrocniZpravaPersonnelDataForm({
                     <IntegerInput
                       className="input vyrocni-zprava-personnel-form__input"
                       value={draft.educationAndGender[row.key].women ?? 0}
+                      emptyWhenZero={false}
                       min={0}
                       aria-label={`${row.label} – ženy`}
                       onChange={(value) => updateEducationGender(row.key, "women", value)}
@@ -347,6 +353,7 @@ export function VyrocniZpravaPersonnelDataForm({
                     <IntegerInput
                       className="input vyrocni-zprava-personnel-form__input"
                       value={draft.qualification[row.key].qualified ?? 0}
+                      emptyWhenZero={false}
                       min={0}
                       aria-label={`${row.label} – splňuje kvalifikaci`}
                       onChange={(value) => updateQualification(row.key, "qualified", value)}
@@ -356,6 +363,7 @@ export function VyrocniZpravaPersonnelDataForm({
                     <IntegerInput
                       className="input vyrocni-zprava-personnel-form__input"
                       value={draft.qualification[row.key].notQualified ?? 0}
+                      emptyWhenZero={false}
                       min={0}
                       aria-label={`${row.label} – nesplňuje kvalifikaci`}
                       onChange={(value) => updateQualification(row.key, "notQualified", value)}

@@ -1,5 +1,6 @@
 import type { Section05GeneratorInput } from "./vyrocni-zprava-section05-generator-input";
 import type { Section05GoalLevel } from "./vyrocni-zprava-section05-types";
+import { appendSentencePeriod, normalizeOptionalText } from "./vyrocni-zprava-text-formatting-helpers";
 
 export const SECTION05_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 05 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -63,9 +64,11 @@ function buildGoalsList(input: Section05GeneratorInput): string {
 
 function buildClosingParagraph(input: Section05GeneratorInput): string[] {
   const parts: string[] = [];
-  if (input.strengths) parts.push(`Silné stránky: ${input.strengths}.`);
-  if (input.areasForImprovement) parts.push(`Oblasti ke zlepšení: ${input.areasForImprovement}.`);
-  if (input.measuresForNextYear) parts.push(`Opatření pro další školní rok: ${input.measuresForNextYear}.`);
+  if (input.strengths) parts.push(appendSentencePeriod(`Silné stránky: ${normalizeOptionalText(input.strengths) ?? ""}`));
+  if (input.areasForImprovement)
+    parts.push(appendSentencePeriod(`Oblasti ke zlepšení: ${normalizeOptionalText(input.areasForImprovement) ?? ""}`));
+  if (input.measuresForNextYear)
+    parts.push(appendSentencePeriod(`Opatření pro další školní rok: ${normalizeOptionalText(input.measuresForNextYear) ?? ""}`));
   return parts;
 }
 
@@ -86,11 +89,11 @@ export function generateSection05Draft(input: Section05GeneratorInput): Section0
       : "Bylo provedeno vyhodnocení naplňování cílů školního vzdělávacího programu na základě poskytnutých podkladů.",
     "",
     "5.1 Vzdělávací program",
-    `Název školního vzdělávacího programu: ${input.educationProgram.name}.`,
+    appendSentencePeriod(`Název školního vzdělávacího programu: ${input.educationProgram.name}`),
   ];
 
   if (input.educationProgram.applicableClasses) {
-    sections.push(`Zařazené třídy / ročníky: ${input.educationProgram.applicableClasses}.`);
+    sections.push(appendSentencePeriod(`Zařazené třídy / ročníky: ${input.educationProgram.applicableClasses}`));
   }
   if (input.educationProgram.note) {
     sections.push(`Poznámka: ${input.educationProgram.note}`);

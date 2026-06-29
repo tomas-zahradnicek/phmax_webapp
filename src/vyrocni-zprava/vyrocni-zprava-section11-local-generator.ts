@@ -1,5 +1,6 @@
 import { formatCzkAmount } from "./vyrocni-zprava-section11-finance-helpers";
 import type { Section11GeneratorInput } from "./vyrocni-zprava-section11-generator-input";
+import { appendSentencePeriod } from "./vyrocni-zprava-text-formatting-helpers";
 
 export const SECTION11_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 11 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -36,7 +37,7 @@ function buildRevenueSection(input: Section11GeneratorInput): string {
   if (input.suggestedTotals.revenueSubtotal !== undefined) {
     lines.push(`Orientační součet zadaných položek příjmů: ${formatCzkAmount(input.suggestedTotals.revenueSubtotal)}.`);
   }
-  if (r.note) lines.push(`Poznámka k příjmům/výnosům: ${r.note}.`);
+  if (r.note) lines.push(appendSentencePeriod(`Poznámka k příjmům/výnosům: ${r.note}`));
   return lines.join("\n");
 }
 
@@ -57,7 +58,7 @@ function buildExpensesSection(input: Section11GeneratorInput): string {
   if (input.suggestedTotals.expensesSubtotal !== undefined) {
     lines.push(`Orientační součet zadaných položek výdajů: ${formatCzkAmount(input.suggestedTotals.expensesSubtotal)}.`);
   }
-  if (e.note) lines.push(`Poznámka k výdajům/nákladům: ${e.note}.`);
+  if (e.note) lines.push(appendSentencePeriod(`Poznámka k výdajům/nákladům: ${e.note}`));
   return lines.join("\n");
 }
 
@@ -88,11 +89,11 @@ function buildSupplementarySection(input: Section11GeneratorInput): string {
   const statusLabel = s.carriedOut === "ANO" ? "ANO" : s.carriedOut === "NE" ? "NE" : "NEUVEDENO";
   const lines = [
     `Doplňková činnost vykonávána: ${statusLabel}.`,
-    s.description ? `Popis doplňkové činnosti: ${s.description}.` : undefined,
+    s.description ? appendSentencePeriod(`Popis doplňkové činnosti: ${s.description}`) : undefined,
     s.revenue !== undefined ? `Výnosy doplňkové činnosti: ${formatCzkAmount(s.revenue)}.` : undefined,
     s.expenses !== undefined ? `Náklady doplňkové činnosti: ${formatCzkAmount(s.expenses)}.` : undefined,
     s.result !== undefined ? `Výsledek doplňkové činnosti: ${formatCzkAmount(s.result)}.` : undefined,
-    s.note ? `Poznámka: ${s.note}.` : undefined,
+    s.note ? appendSentencePeriod(`Poznámka: ${s.note}`) : undefined,
   ].filter(Boolean);
   return lines.join("\n");
 }
@@ -148,7 +149,7 @@ export function generateSection11Draft(input: Section11GeneratorInput): Section1
     input.suggestedTotals.profitOrLossFromTotals !== undefined
       ? `Orientační výsledek z uvedených celkových příjmů a výdajů: ${formatCzkAmount(input.suggestedTotals.profitOrLossFromTotals)}.`
       : undefined,
-    e.note ? `Poznámka k hospodářskému výsledku: ${e.note}.` : undefined,
+    e.note ? appendSentencePeriod(`Poznámka k hospodářskému výsledku: ${e.note}`) : undefined,
     "",
     "11.3 Dotace, granty a projekty",
     buildGrantsSection(input),

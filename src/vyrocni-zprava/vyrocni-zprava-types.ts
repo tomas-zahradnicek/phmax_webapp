@@ -22,6 +22,16 @@ export type AnnualReportSectionStatus = (typeof ANNUAL_REPORT_SECTION_STATUSES)[
 
 export type AnnualReportStatus = "ROZPRACOVANA" | "SCHVALENA";
 
+export type AnnualReportPublicationBlock = {
+  discussedByPedagogicalCouncilDate?: string;
+  approvedBySchoolCouncilDate?: string;
+  sentToFounderDate?: string;
+  publishedRemotelyDate?: string;
+  placeAndDate?: string;
+  principalSignature?: string;
+  schoolCouncilChairSignature?: string;
+};
+
 
 
 export type { SchoolProfile } from "../school-profile/school-profile-types";
@@ -140,6 +150,8 @@ export type AnnualReport = {
   updatedAt: string;
 
   status: AnnualReportStatus;
+
+  publicationBlock?: AnnualReportPublicationBlock;
 
 };
 

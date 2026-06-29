@@ -3,16 +3,19 @@ import {
   Document,
   Footer,
   HeadingLevel,
+  PageOrientation,
   Packer,
   Paragraph,
   Table,
   TableCell,
+  TableLayoutType,
   TableRow,
   TextRun,
   WidthType,
 } from "docx";
 
 import type { AnnualReportPreviewData } from "./vyrocni-zprava-report-preview-builder";
+import { hasPublicationBlockContent } from "./vyrocni-zprava-report-preview-builder";
 import {
   getStructuredDocxBlocksForSection,
   type AnnualReportDocxStructuredData,
@@ -27,6 +30,7 @@ import {
   type DocxParsedBlock,
   type DocxExportMode,
 } from "./vyrocni-zprava-docx-export-logic";
+import type { AnnualReportPublicationBlock } from "./vyrocni-zprava-types";
 
 function paragraphFromLine(line: string): Paragraph {
   return new Paragraph({
@@ -46,23 +50,40 @@ function headingParagraph(text: string, heading: DocxHeadingName, pageBreakBefor
   });
 }
 
-function buildTable(rows: string[][]): Table {
+function buildTable(
+  rows: string[][],
+  options?: {
+    layout?: "default" | "wide";
+    columnWidthsPercent?: number[];
+    boldBodyRowIndices?: number[];
+  },
+): Table {
+  const isWide = options?.layout === "wide";
+  const fontSize = isWide ? 16 : 22;
+  const columnWidths = options?.columnWidthsPercent;
+  const boldBodyRows = new Set(options?.boldBodyRowIndices ?? []);
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
+    layout: TableLayoutType.FIXED,
     rows: rows.map(
       (row, rowIndex) =>
         new TableRow({
           children: row.map(
-            (cell) =>
+            (cell, cellIndex) =>
               new TableCell({
+                width:
+                  columnWidths && columnWidths[cellIndex] !== undefined
+                    ? { size: columnWidths[cellIndex], type: WidthType.PERCENTAGE }
+                    : undefined,
+                margins: isWide ? { top: 60, bottom: 60, left: 60, right: 60 } : undefined,
                 children: [
                   new Paragraph({
-                    spacing: { after: 120 },
+                    spacing: { after: isWide ? 60 : 120 },
                     children: [
                       new TextRun({
                         text: cell || " ",
-                        bold: rowIndex === 0,
-                        size: 22,
+                        bold: rowIndex === 0 || boldBodyRows.has(rowIndex - 1),
+                        size: fontSize,
                       }),
                     ],
                   }),
@@ -83,9 +104,88 @@ function renderParsedBlock(block: DocxParsedBlock): Paragraph | Table {
     );
   }
   if (block.type === "table") {
-    return buildTable(block.rows);
+    return buildTable(block.rows, {
+      layout: block.layout,
+      columnWidthsPercent: block.columnWidthsPercent,
+      boldBodyRowIndices: block.boldBodyRowIndices,
+    });
   }
   return paragraphFromLine(block.text);
+}
+
+type DocxPageOrientation = "portrait" | "landscape";
+
+type DocxDocumentSectionChunk = {
+  orientation: DocxPageOrientation;
+  children: Array<Paragraph | Table>;
+};
+
+function getBlockPageOrientation(block: DocxParsedBlock): DocxPageOrientation {
+  if (block.type === "table" && block.pageOrientation === "landscape") return "landscape";
+  return "portrait";
+}
+
+function appendToDocumentSection(
+  sections: DocxDocumentSectionChunk[],
+  block: DocxParsedBlock,
+): void {
+  const orientation = getBlockPageOrientation(block);
+  const current = sections[sections.length - 1];
+  if (!current || current.orientation !== orientation) {
+    sections.push({ orientation, children: [renderParsedBlock(block)] });
+    return;
+  }
+  current.children.push(renderParsedBlock(block));
+}
+
+function buildApprovalBlockEndParagraphs(
+  block: AnnualReportPublicationBlock | undefined,
+  schoolYear?: string,
+): Paragraph[] {
+  if (!hasPublicationBlockContent(block) || !block) return [];
+  const paragraphs: Paragraph[] = [
+    new Paragraph({ pageBreakBefore: true, text: " " }),
+    headingParagraph("Schválení výroční zprávy", HeadingLevel.HEADING_2),
+  ];
+
+  if (schoolYear && block.discussedByPedagogicalCouncilDate) {
+    paragraphs.push(
+      paragraphFromLine(
+        `Výroční zpráva o činnosti školy za školní rok ${schoolYear} byla projednána pedagogickou radou dne ${block.discussedByPedagogicalCouncilDate}.`,
+      ),
+    );
+  } else if (block.discussedByPedagogicalCouncilDate) {
+    paragraphs.push(
+      paragraphFromLine(`Výroční zpráva byla projednána pedagogickou radou dne ${block.discussedByPedagogicalCouncilDate}.`),
+    );
+  }
+
+  if (block.approvedBySchoolCouncilDate) {
+    paragraphs.push(
+      paragraphFromLine(`Školská rada výroční zprávu schválila dne ${block.approvedBySchoolCouncilDate}.`),
+    );
+  }
+
+  if (block.placeAndDate) {
+    paragraphs.push(paragraphFromLine(block.placeAndDate));
+  }
+
+  paragraphs.push(paragraphFromLine(""));
+
+  if (block.principalSignature) {
+    paragraphs.push(paragraphFromLine(block.principalSignature));
+    paragraphs.push(paragraphFromLine("ředitel/ka školy"));
+  }
+
+  paragraphs.push(paragraphFromLine(""));
+  paragraphs.push(paragraphFromLine(""));
+
+  if (block.schoolCouncilChairSignature) {
+    paragraphs.push(paragraphFromLine(block.schoolCouncilChairSignature));
+    paragraphs.push(paragraphFromLine("předseda/předsedkyně školské rady"));
+  }
+
+  return paragraphs;
 }
 
 function normalizeHeading(value: string): string {
@@ -98,7 +198,14 @@ function toParsedBlocksFromStructured(blocks: DocxStructuredBlock[]): DocxParsed
       return { type: "heading", text: block.text, level: block.level === 3 ? "H3" : "H2" };
     }
     if (block.type === "table") {
-      return { type: "table", rows: [block.headers, ...block.rows] };
+      return {
+        type: "table",
+        rows: [block.headers, ...block.rows],
+        layout: block.layout,
+        columnWidthsPercent: block.columnWidthsPercent,
+        boldBodyRowIndices: block.boldBodyRowIndices,
+        pageOrientation: block.pageOrientation,
+      };
     }
     return { type: "paragraph", text: block.text };
   });
@@ -127,12 +234,15 @@ function mergeStructuredSubsectionsIntoParsedBlocks(
 
   if (byHeading.size === 0) return parsedBlocks;
 
+  const usedHeadings = new Set<string>();
   const merged: DocxParsedBlock[] = [];
   for (let i = 0; i < parsedBlocks.length; i += 1) {
     const block = parsedBlocks[i]!;
     if (block.type === "heading" && block.level === "H3") {
-      const replacement = byHeading.get(normalizeHeading(block.text));
+      const headingKey = normalizeHeading(block.text);
+      const replacement = byHeading.get(headingKey);
       if (replacement) {
+        usedHeadings.add(headingKey);
         merged.push(...replacement);
         for (let skip = i + 1; skip < parsedBlocks.length; skip += 1) {
           const next = parsedBlocks[skip]!;
@@ -148,33 +258,57 @@ function mergeStructuredSubsectionsIntoParsedBlocks(
     merged.push(block);
   }
 
+  for (const [headingKey, replacement] of byHeading) {
+    if (!usedHeadings.has(headingKey)) {
+      merged.push(...replacement);
+    }
+  }
+
   return merged;
 }
 
-function buildDocxElements(model: AnnualReportDocxExportModel): Array<Paragraph | Table> {
-  const elements: Array<Paragraph | Table> = [
-    headingParagraph(model.title, HeadingLevel.HEADING_1),
-  ];
+function appendParagraphToDocumentSection(
+  sections: DocxDocumentSectionChunk[],
+  paragraph: Paragraph,
+  orientation: DocxPageOrientation = "portrait",
+): void {
+  const current = sections[sections.length - 1];
+  if (!current || current.orientation !== orientation) {
+    sections.push({ orientation, children: [paragraph] });
+    return;
+  }
+  current.children.push(paragraph);
+}
 
-  if (model.schoolName) elements.push(paragraphFromLine(`Škola: ${model.schoolName}`));
-  if (model.schoolYear) elements.push(paragraphFromLine(`Školní rok: ${model.schoolYear}`));
+function buildDocxDocumentSections(model: AnnualReportDocxExportModel): DocxDocumentSectionChunk[] {
+  const sections: DocxDocumentSectionChunk[] = [];
 
-  elements.push(paragraphFromLine("Dokument byl vytvořen v aplikaci Ředitelský průvodce."));
-  elements.push(new Paragraph({ pageBreakBefore: true, text: " " }));
+  appendParagraphToDocumentSection(sections, headingParagraph(model.title, HeadingLevel.HEADING_1));
+  if (model.schoolName) appendParagraphToDocumentSection(sections, paragraphFromLine(`Škola: ${model.schoolName}`));
+  if (model.schoolYear) appendParagraphToDocumentSection(sections, paragraphFromLine(`Školní rok: ${model.schoolYear}`));
+  appendParagraphToDocumentSection(sections, paragraphFromLine("Dokument byl vytvořen v aplikaci Ředitelský průvodce."));
+  appendParagraphToDocumentSection(sections, new Paragraph({ pageBreakBefore: true, text: " " }));
 
   model.sections.forEach((section, index) => {
-    elements.push(headingParagraph(`${section.number} ${section.title}`, HeadingLevel.HEADING_2, index > 0));
+    appendParagraphToDocumentSection(
+      sections,
+      headingParagraph(`${section.number} ${section.title}`, HeadingLevel.HEADING_2, index > 0),
+    );
+
     const sectionTextForRendering = stripDuplicateDocxSectionHeading(section);
     const parsedBlocks = parseGeneratedTextForDocx(sectionTextForRendering);
     const structuredBlocks = getStructuredDocxBlocksForSection(section.number, model.structuredData);
     const mergedBlocks = mergeStructuredSubsectionsIntoParsedBlocks(parsedBlocks, structuredBlocks);
     for (const block of mergedBlocks) {
-      elements.push(renderParsedBlock(block));
+      appendToDocumentSection(sections, block);
     }
-    elements.push(new Paragraph({ spacing: { after: 240 }, text: " " }));
   });
 
-  return elements;
+  for (const paragraph of buildApprovalBlockEndParagraphs(model.publicationBlock, model.schoolYear)) {
+    appendParagraphToDocumentSection(sections, paragraph);
+  }
+
+  return sections.filter((section) => section.children.length > 0);
 }
 
 function triggerDocxDownload(blob: Blob, filename: string): void {
@@ -192,6 +326,16 @@ export async function exportAnnualReportPreviewToDocx(
   preview: AnnualReportPreviewData,
   options?: { mode?: DocxExportMode; structuredData?: AnnualReportDocxStructuredData },
 ): Promise<{ exported: boolean; reason?: "NO_SECTIONS" }> {
+  const built = await buildAnnualReportDocxBlob(preview, options);
+  if (!built.exported) return built;
+  triggerDocxDownload(built.blob, built.filename);
+  return { exported: true };
+}
+
+export async function buildAnnualReportDocxBlob(
+  preview: AnnualReportPreviewData,
+  options?: { mode?: DocxExportMode; structuredData?: AnnualReportDocxStructuredData },
+): Promise<{ exported: boolean; reason?: "NO_SECTIONS"; blob: Blob; filename: string } | { exported: false; reason: "NO_SECTIONS" }> {
   const mode = options?.mode ?? "visible-generated";
   const model = buildDocxExportModel(preview, mode, { structuredData: options?.structuredData });
   if (model.sections.length === 0) {
@@ -214,27 +358,31 @@ export async function exportAnnualReportPreviewToDocx(
         },
       },
     },
-    sections: [
-      {
-        footers: {
-          default: new Footer({
-            children: [
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [new TextRun({ text: "Výroční zpráva o činnosti školy", size: 18 })],
-              }),
-            ],
-          }),
+    sections: buildDocxDocumentSections(model).map((section) => ({
+      properties: {
+        page: {
+          size: {
+            orientation: section.orientation === "landscape" ? PageOrientation.LANDSCAPE : PageOrientation.PORTRAIT,
+          },
         },
-        children: buildDocxElements(model),
       },
-    ],
+      footers: {
+        default: new Footer({
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [new TextRun({ text: "Výroční zpráva o činnosti školy", size: 18 })],
+            }),
+          ],
+        }),
+      },
+      children: section.children,
+    })),
   });
   const blob = await Packer.toBlob(doc);
   const filename = createAnnualReportDocxFileName({
     schoolName: model.schoolName,
     schoolYear: model.schoolYear,
   });
-  triggerDocxDownload(blob, filename);
-  return { exported: true };
+  return { exported: true, blob, filename };
 }

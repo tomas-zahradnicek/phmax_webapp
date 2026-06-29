@@ -1,4 +1,5 @@
 import type { Section02GeneratorInput } from "./vyrocni-zprava-section02-generator-input";
+import { appendSentencePeriod } from "./vyrocni-zprava-text-formatting-helpers";
 
 export const SECTION02_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 02 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -34,8 +35,8 @@ function buildEducationFieldsTable(input: Section02GeneratorInput): string {
 function buildRegistryParagraph(input: Section02GeneratorInput): string | null {
   if (!input.registrySource && !input.registryVerifiedAt) return null;
   const lines = ["Údaje byly ověřeny podle dostupných údajů ve školském rejstříku."];
-  if (input.registrySource) lines.push(`Zdroj ověření: ${input.registrySource}.`);
-  if (input.registryVerifiedAt) lines.push(`Datum ověření: ${input.registryVerifiedAt}.`);
+  if (input.registrySource) lines.push(appendSentencePeriod(`Zdroj ověření: ${input.registrySource}`));
+  if (input.registryVerifiedAt) lines.push(appendSentencePeriod(`Datum ověření: ${input.registryVerifiedAt}`));
   return lines.join("\n");
 }
 
@@ -68,7 +69,7 @@ export function generateSection02Draft(input: Section02GeneratorInput): Section0
   const registryParagraph = buildRegistryParagraph(input);
   if (registryParagraph) sections.push("", registryParagraph);
 
-  if (input.notes) sections.push("", `Poznámka: ${input.notes}`);
+  if (input.notes) sections.push("", appendSentencePeriod(`Poznámka: ${input.notes}`));
 
   return {
     ready: true,

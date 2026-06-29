@@ -231,4 +231,55 @@ describe("vyrocni-zprava-docx-export-logic", () => {
     stripDuplicateDocxSectionHeading(section);
     expect(section.text).toBe(original);
   });
+
+  it("detekuje třístupňové podkapitoly jako H3", () => {
+    expect(detectDocxHeadingLevel("8.1.1 Studium ke splnění kvalifikačních předpokladů")).toBe("H3");
+    expect(detectDocxHeadingLevel("8.1.2 Studium ke splnění dalších kvalifikačních předpokladů")).toBe("H3");
+    expect(detectDocxHeadingLevel("8.1.3 Studium k prohlubování odborné kvalifikace")).toBe("H3");
+  });
+
+  it("parseGeneratedTextForDocx rozpozná 8.1.1–8.1.3 jako nadpisy", () => {
+    const blocks = parseGeneratedTextForDocx(
+      [
+        "8.1 Další vzdělávání pedagogických pracovníků",
+        "Popis DVPP.",
+        "8.1.1 Studium ke splnění kvalifikačních předpokladů",
+        "- Studium A",
+        "8.1.2 Studium ke splnění dalších kvalifikačních předpokladů",
+        "- Studium B",
+        "8.1.3 Studium k prohlubování odborné kvalifikace",
+        "- Workshop",
+      ].join("\n"),
+    );
+    expect(blocks.filter((block) => block.type === "heading").map((block) => (block.type === "heading" ? block.text : ""))).toEqual([
+      "8.1 Další vzdělávání pedagogických pracovníků",
+      "8.1.1 Studium ke splnění kvalifikačních předpokladů",
+      "8.1.2 Studium ke splnění dalších kvalifikačních předpokladů",
+      "8.1.3 Studium k prohlubování odborné kvalifikace",
+    ]);
+  });
+
+  it("model exportu předá volitelný blok schválení včetně podpisu předsedy školské rady", () => {
+    let report = createDefaultAnnualReport("2024/2025");
+    report = {
+      ...report,
+      publicationBlock: {
+        discussedByPedagogicalCouncilDate: "10. 6. 2025",
+        approvedBySchoolCouncilDate: "18. 6. 2025",
+        placeAndDate: "Praha 4, dne 20. 6. 2025",
+        principalSignature: "Mgr. Eva Králová",
+        schoolCouncilChairSignature: "Ing. Petr Novotný",
+      },
+    };
+    const preview = buildAnnualReportPreview({
+      report,
+      schoolProfile: createDefaultSchoolProfile(),
+    });
+    const model = buildDocxExportModel(preview, "visible-generated");
+    expect(model.publicationBlock?.discussedByPedagogicalCouncilDate).toBe("10. 6. 2025");
+    expect(model.publicationBlock?.approvedBySchoolCouncilDate).toBe("18. 6. 2025");
+    expect(model.publicationBlock?.placeAndDate).toBe("Praha 4, dne 20. 6. 2025");
+    expect(model.publicationBlock?.principalSignature).toBe("Mgr. Eva Králová");
+    expect(model.publicationBlock?.schoolCouncilChairSignature).toBe("Ing. Petr Novotný");
+  });
 });

@@ -6,6 +6,7 @@ import {
   calculateRevenueSubtotal,
   formatCzkAmount,
 } from "./vyrocni-zprava-section11-finance-helpers";
+import { formatNumberInputValue, parseCzechNumberInput } from "./vyrocni-zprava-number-input-helpers";
 import {
   createDefaultSection11GrantRow,
   createDefaultSection11InvestmentRow,
@@ -27,21 +28,53 @@ type VyrocniZpravaSection11DataFormProps = {
 };
 
 function parseOptionalNumber(value: string): number | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  const n = Number(trimmed);
-  return Number.isFinite(n) ? n : undefined;
+  return parseCzechNumberInput(value);
 }
 
 function displayNumber(value: number | undefined): string {
-  return value === undefined ? "" : String(value);
+  return formatNumberInputValue(value);
+}
+
+function isTransientNumericDraft(value: string): boolean {
+  return value === "-" || value === "," || value === "." || value === "-," || value === "-.";
 }
 
 function MoneyField(props: { label: string; value: number | undefined; onChange: (value: number | undefined) => void }) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const displayValue = draft ?? displayNumber(props.value);
+
   return (
     <label className="vyrocni-zprava-field">
       <span className="vyrocni-zprava-field__label">{props.label}</span>
-      <input className="input" value={displayNumber(props.value)} onChange={(event) => props.onChange(parseOptionalNumber(event.target.value))} />
+      <input
+        className="input"
+        value={displayValue}
+        onChange={(event) => {
+          const next = event.target.value;
+          if (!/^-?[\d\s\u00A0\u202F]*([,.][\d\s\u00A0\u202F]*)?$/.test(next) && next !== "") return;
+
+          setDraft(next);
+
+          if (next.trim() === "") {
+            props.onChange(undefined);
+            return;
+          }
+          if (isTransientNumericDraft(next.trim())) {
+            return;
+          }
+
+          props.onChange(parseOptionalNumber(next));
+        }}
+        onBlur={() => {
+          if (draft !== null && draft.trim() !== "" && !isTransientNumericDraft(draft.trim())) {
+            props.onChange(parseOptionalNumber(draft));
+          }
+          if (draft !== null && draft.trim() === "") {
+            props.onChange(undefined);
+          }
+          setDraft(null);
+        }}
+      />
     </label>
   );
 }

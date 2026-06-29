@@ -1,6 +1,7 @@
 import type { SchoolProfile } from "../school-profile/school-profile-types";
 import { getSection01Readiness, type Section01Readiness } from "./vyrocni-zprava-section01-data-logic";
 import type { VyrocniZpravaSection01Data } from "./vyrocni-zprava-section01-types";
+import { formatSchoolTypeForReport } from "./vyrocni-zprava-text-formatting-helpers";
 
 export type Section01ProfileInput = {
   name?: string;
@@ -23,6 +24,7 @@ export type Section01OptionalInputs = {
   schoolCharacteristic?: string;
   schoolParts?: string;
   schoolCapacity?: string;
+  materialTechnicalConditions?: string;
   schoolCouncilInfo?: string;
   leadershipInfo?: string;
   remoteAccessInfo?: string;
@@ -72,7 +74,7 @@ function buildProfileInput(profile: SchoolProfile): Section01ProfileInput {
   if (email) input.email = email;
   if (phone) input.phone = phone;
   if (dataBox) input.dataBox = dataBox;
-  if (schoolType) input.schoolType = schoolType;
+  if (schoolType) input.schoolType = formatSchoolTypeForReport(schoolType) ?? schoolType;
 
   return input;
 }
@@ -82,6 +84,7 @@ function buildSectionInputs(section01Data: VyrocniZpravaSection01Data): Section0
   const schoolCharacteristic = pickFilledString(section01Data.schoolCharacteristic);
   const schoolParts = pickFilledString(section01Data.schoolParts);
   const schoolCapacity = pickFilledString(section01Data.schoolCapacity);
+  const materialTechnicalConditions = pickFilledString(section01Data.materialTechnicalConditions);
   const schoolCouncilInfo = pickFilledString(section01Data.schoolCouncilInfo);
   const leadershipInfo = pickFilledString(section01Data.leadershipInfo);
   const remoteAccessInfo = pickFilledString(section01Data.remoteAccessInfo);
@@ -89,6 +92,7 @@ function buildSectionInputs(section01Data: VyrocniZpravaSection01Data): Section0
   if (schoolCharacteristic) input.schoolCharacteristic = schoolCharacteristic;
   if (schoolParts) input.schoolParts = schoolParts;
   if (schoolCapacity) input.schoolCapacity = schoolCapacity;
+  if (materialTechnicalConditions) input.materialTechnicalConditions = materialTechnicalConditions;
   if (schoolCouncilInfo) input.schoolCouncilInfo = schoolCouncilInfo;
   if (leadershipInfo) input.leadershipInfo = leadershipInfo;
   if (remoteAccessInfo) input.remoteAccessInfo = remoteAccessInfo;

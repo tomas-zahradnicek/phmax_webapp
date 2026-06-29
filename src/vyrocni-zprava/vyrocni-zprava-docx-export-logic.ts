@@ -1,6 +1,7 @@
 import { VYROCNI_ZPRAVA_GENERATED_PLACEHOLDER } from "./vyrocni-zprava-types";
 import type { AnnualReportPreviewData, AnnualReportPreviewSection } from "./vyrocni-zprava-report-preview-builder";
 import type { AnnualReportDocxStructuredData } from "./docx/vyrocni-zprava-docx-structured-tables";
+import type { AnnualReportPublicationBlock } from "./vyrocni-zprava-types";
 
 export type DocxExportMode = "visible-generated" | "approved-only";
 
@@ -27,6 +28,10 @@ export type DocxParsedParagraphBlock = {
 export type DocxParsedTableBlock = {
   type: "table";
   rows: string[][];
+  layout?: "default" | "wide";
+  columnWidthsPercent?: number[];
+  boldBodyRowIndices?: number[];
+  pageOrientation?: "portrait" | "landscape";
 };
 
 export type DocxParsedBlock = DocxParsedHeadingBlock | DocxParsedParagraphBlock | DocxParsedTableBlock;
@@ -35,6 +40,7 @@ export type AnnualReportDocxExportModel = {
   title: string;
   schoolName?: string;
   schoolYear?: string;
+  publicationBlock?: AnnualReportPublicationBlock;
   sections: AnnualReportDocxExportSection[];
   fullText: string;
   structuredData?: AnnualReportDocxStructuredData;
@@ -123,6 +129,10 @@ export function shouldRenderAsTable(lines: string[]): boolean {
 export function detectDocxHeadingLevel(line: string): DocxHeadingLevel | undefined {
   const trimmed = line.trim();
   if (!trimmed) return undefined;
+
+  if (/^\d{1,2}\.\d{1,2}\.\d{1,2}\s+\S+/.test(trimmed)) {
+    return "H3";
+  }
 
   if (/^\d{1,2}\.\d{1,2}\s+\S+/.test(trimmed)) {
     return "H3";
@@ -246,6 +256,7 @@ export function buildDocxExportModel(
     title: "Výroční zpráva o činnosti školy",
     schoolName: pickFilledString(preview.schoolName),
     schoolYear: pickFilledString(preview.schoolYear),
+    publicationBlock: preview.publicationBlock,
     sections,
     fullText: sections.map((section) => section.text).join("\n\n\n"),
     structuredData: options?.structuredData,

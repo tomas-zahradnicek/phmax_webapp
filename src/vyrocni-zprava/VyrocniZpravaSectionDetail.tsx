@@ -11,6 +11,9 @@ import type { AnnualReportSection08Data } from "./vyrocni-zprava-section08-types
 import type { AnnualReportSection09Data } from "./vyrocni-zprava-section09-types";
 import type { AnnualReportSection10Data } from "./vyrocni-zprava-section10-types";
 import type { AnnualReportSection11Data } from "./vyrocni-zprava-section11-types";
+import type { AnnualReportSection12Data } from "./vyrocni-zprava-section12-types";
+import type { AnnualReportSection13Data } from "./vyrocni-zprava-section13-types";
+import type { AnnualReportSection14Data } from "./vyrocni-zprava-section14-types";
 import type { SchoolProfile } from "../school-profile/school-profile-types";
 import type { Section01Readiness } from "./vyrocni-zprava-section01-data-logic";
 import type { Section02Readiness } from "./vyrocni-zprava-section02-data-logic";
@@ -22,6 +25,9 @@ import type { Section08Readiness } from "./vyrocni-zprava-section08-data-logic";
 import type { Section09Readiness } from "./vyrocni-zprava-section09-data-logic";
 import type { Section10Readiness } from "./vyrocni-zprava-section10-data-logic";
 import type { Section11Readiness } from "./vyrocni-zprava-section11-data-logic";
+import type { Section12Readiness } from "./vyrocni-zprava-section12-data-logic";
+import type { Section13Readiness } from "./vyrocni-zprava-section13-data-logic";
+import type { Section14Readiness } from "./vyrocni-zprava-section14-data-logic";
 import { VyrocniZpravaStatusBadge } from "./VyrocniZpravaStatusBadge";
 import { VyrocniZpravaCalculatorDataPanel } from "./VyrocniZpravaCalculatorDataPanel";
 import { VyrocniZpravaPersonnelDataForm } from "./VyrocniZpravaPersonnelDataForm";
@@ -36,6 +42,9 @@ import { VyrocniZpravaSection08DataForm } from "./VyrocniZpravaSection08DataForm
 import { VyrocniZpravaSection09DataForm } from "./VyrocniZpravaSection09DataForm";
 import { VyrocniZpravaSection10DataForm } from "./VyrocniZpravaSection10DataForm";
 import { VyrocniZpravaSection11DataForm } from "./VyrocniZpravaSection11DataForm";
+import { VyrocniZpravaSection12DataForm } from "./VyrocniZpravaSection12DataForm";
+import { VyrocniZpravaSection13DataForm } from "./VyrocniZpravaSection13DataForm";
+import { VyrocniZpravaSection14DataForm } from "./VyrocniZpravaSection14DataForm";
 import {
   getAnnualReportCalculatorData,
   getSection03Readiness,
@@ -51,6 +60,9 @@ import { isAnnualReportSection08Family } from "./vyrocni-zprava-section08-genera
 import { isAnnualReportSection09Family } from "./vyrocni-zprava-section09-generator-service";
 import { isAnnualReportSection10Family } from "./vyrocni-zprava-section10-generator-service";
 import { isAnnualReportSection11Family } from "./vyrocni-zprava-section11-generator-service";
+import { isAnnualReportSection12Family } from "./vyrocni-zprava-section12-generator-service";
+import { isAnnualReportSection13Family } from "./vyrocni-zprava-section13-generator-service";
+import { isAnnualReportSection14Family } from "./vyrocni-zprava-section14-generator-service";
 import { hasGeneratedDraft, hasRestorableOriginalDraft } from "./vyrocni-zprava-generated-text-logic";
 
 type VyrocniZpravaSectionDetailProps = {
@@ -107,6 +119,21 @@ type VyrocniZpravaSectionDetailProps = {
   section11Readiness: Section11Readiness;
   onSection11Save: (data: AnnualReportSection11Data) => void;
   onSection11Reset: () => void;
+  section12Data: AnnualReportSection12Data;
+  section12SavedAt: string | null;
+  section12Readiness: Section12Readiness;
+  onSection12Save: (data: AnnualReportSection12Data) => void;
+  onSection12Reset: () => void;
+  section13Data: AnnualReportSection13Data;
+  section13SavedAt: string | null;
+  section13Readiness: Section13Readiness;
+  onSection13Save: (data: AnnualReportSection13Data) => void;
+  onSection13Reset: () => void;
+  section14Data: AnnualReportSection14Data;
+  section14SavedAt: string | null;
+  section14Readiness: Section14Readiness;
+  onSection14Save: (data: AnnualReportSection14Data) => void;
+  onSection14Reset: () => void;
   personnelData: AnnualReportPersonnelData;
   personnelSavedAt: string | null;
   onPersonnelSave: (data: AnnualReportPersonnelData) => void;
@@ -173,6 +200,21 @@ export function VyrocniZpravaSectionDetail({
   section11Readiness,
   onSection11Save,
   onSection11Reset,
+  section12Data,
+  section12SavedAt,
+  section12Readiness,
+  onSection12Save,
+  onSection12Reset,
+  section13Data,
+  section13SavedAt,
+  section13Readiness,
+  onSection13Save,
+  onSection13Reset,
+  section14Data,
+  section14SavedAt,
+  section14Readiness,
+  onSection14Save,
+  onSection14Reset,
   personnelData,
   personnelSavedAt,
   onPersonnelSave,
@@ -205,6 +247,9 @@ export function VyrocniZpravaSectionDetail({
   const showSection09Panel = section ? isAnnualReportSection09Family(section.id) : false;
   const showSection10Panel = section ? isAnnualReportSection10Family(section.id) : false;
   const showSection11Panel = section ? isAnnualReportSection11Family(section.id) : false;
+  const showSection12Panel = section ? isAnnualReportSection12Family(section.id) : false;
+  const showSection13Panel = section ? isAnnualReportSection13Family(section.id) : false;
+  const showSection14Panel = section ? isAnnualReportSection14Family(section.id) : false;
   const showCalculatorPanel = section ? isAnnualReportSection03Family(section.id) : false;
   const calculatorData = useMemo(
     () => (showCalculatorPanel ? getAnnualReportCalculatorData() : null),
@@ -353,6 +398,36 @@ export function VyrocniZpravaSectionDetail({
           readiness={section11Readiness}
           onSave={onSection11Save}
           onReset={onSection11Reset}
+        />
+      ) : null}
+
+      {showSection12Panel ? (
+        <VyrocniZpravaSection12DataForm
+          section12Data={section12Data}
+          savedAt={section12SavedAt}
+          readiness={section12Readiness}
+          onSave={onSection12Save}
+          onReset={onSection12Reset}
+        />
+      ) : null}
+
+      {showSection13Panel ? (
+        <VyrocniZpravaSection13DataForm
+          section13Data={section13Data}
+          savedAt={section13SavedAt}
+          readiness={section13Readiness}
+          onSave={onSection13Save}
+          onReset={onSection13Reset}
+        />
+      ) : null}
+
+      {showSection14Panel ? (
+        <VyrocniZpravaSection14DataForm
+          section14Data={section14Data}
+          savedAt={section14SavedAt}
+          readiness={section14Readiness}
+          onSave={onSection14Save}
+          onReset={onSection14Reset}
         />
       ) : null}
 

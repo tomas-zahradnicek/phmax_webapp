@@ -118,6 +118,8 @@ function buildLanguagePreparation(input: Section07GeneratorInput): string {
       ? "ano"
       : l.languagePreparationProvided === "NE"
         ? "ne"
+        : l.languagePreparationProvided === "NEUVEDENO"
+          ? "neuvedeno"
         : "nerelevantní";
   const lines = [
     `Počet žáků s nárokem na jazykovou přípravu: ${formatNumber(l.pupilsWithLanguagePreparationEntitlement)}.`,

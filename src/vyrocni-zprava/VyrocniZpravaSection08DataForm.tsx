@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { VyrocniZpravaStatusBadge } from "./VyrocniZpravaStatusBadge";
+import { formatNumberInputValue, parseCzechNumberInput } from "./vyrocni-zprava-number-input-helpers";
 import {
   createDefaultSection08NonTeachingStaffDevelopment,
   createDefaultSection08ProfessionalDevelopmentTraining,
@@ -23,14 +24,11 @@ type VyrocniZpravaSection08DataFormProps = {
 };
 
 function parseOptionalNumber(value: string): number | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  const n = Number(trimmed);
-  return Number.isFinite(n) ? n : undefined;
+  return parseCzechNumberInput(value);
 }
 
 function displayNumber(value: number | undefined): string {
-  return value === undefined ? "" : String(value);
+  return formatNumberInputValue(value);
 }
 
 function QualificationStudiesTable(props: {

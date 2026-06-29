@@ -1,5 +1,5 @@
 import React from "react";
-import type { SchoolProfile } from "./vyrocni-zprava-types";
+import type { AnnualReportPublicationBlock, SchoolProfile } from "./vyrocni-zprava-types";
 import { VYROCNI_ZPRAVA_KRAJE } from "./vyrocni-zprava-types";
 import {
   getSchoolTypeSelectValue,
@@ -11,8 +11,10 @@ import {
 type VyrocniZpravaSetupFormProps = {
   schoolYear: string;
   schoolProfile: SchoolProfile;
+  publicationBlock?: AnnualReportPublicationBlock;
   onSchoolYearChange: (value: string) => void;
   onSchoolProfileChange: (patch: Partial<SchoolProfile>) => void;
+  onPublicationBlockChange: (patch: Partial<AnnualReportPublicationBlock>) => void;
 };
 
 function SetupField({
@@ -35,8 +37,10 @@ function SetupField({
 export function VyrocniZpravaSetupForm({
   schoolYear,
   schoolProfile,
+  publicationBlock,
   onSchoolYearChange,
   onSchoolProfileChange,
+  onPublicationBlockChange,
 }: VyrocniZpravaSetupFormProps) {
   return (
     <section className="card section-card section-card--setup vyrocni-zprava-setup" aria-labelledby="vyrocni-zprava-setup-title">
@@ -191,6 +195,82 @@ export function VyrocniZpravaSetupForm({
             onChange={(e) => onSchoolProfileChange({ email: e.target.value })}
           />
         </SetupField>
+      </div>
+
+      <div className="vyrocni-zprava-setup__subsection">
+        <h3 className="vyrocni-zprava-setup__subtitle">Schválení a zveřejnění (volitelné)</h3>
+        <p className="muted-text">
+          Tyto údaje se zobrazí u titulní strany ve Word exportu. Nevyplněná pole se do exportu nepromítnou a neovlivňují připravenost kapitol.
+        </p>
+        <div className="vyrocni-zprava-setup__grid">
+          <SetupField id="vz-projednano-pr" label="Projednáno pedagogickou radou dne">
+            <input
+              id="vz-projednano-pr"
+              className="input"
+              type="text"
+              value={publicationBlock?.discussedByPedagogicalCouncilDate ?? ""}
+              onChange={(e) => onPublicationBlockChange({ discussedByPedagogicalCouncilDate: e.target.value })}
+              placeholder="např. 15. 6. 2025"
+            />
+          </SetupField>
+          <SetupField id="vz-schvaleno-sr" label="Schváleno školskou radou dne">
+            <input
+              id="vz-schvaleno-sr"
+              className="input"
+              type="text"
+              value={publicationBlock?.approvedBySchoolCouncilDate ?? ""}
+              onChange={(e) => onPublicationBlockChange({ approvedBySchoolCouncilDate: e.target.value })}
+            />
+          </SetupField>
+          <SetupField id="vz-zaslano-zrizovateli" label="Zasláno zřizovateli dne">
+            <input
+              id="vz-zaslano-zrizovateli"
+              className="input"
+              type="text"
+              value={publicationBlock?.sentToFounderDate ?? ""}
+              onChange={(e) => onPublicationBlockChange({ sentToFounderDate: e.target.value })}
+            />
+          </SetupField>
+          <SetupField id="vz-zverejneno" label="Zveřejněno způsobem umožňujícím dálkový přístup dne">
+            <input
+              id="vz-zverejneno"
+              className="input"
+              type="text"
+              value={publicationBlock?.publishedRemotelyDate ?? ""}
+              onChange={(e) => onPublicationBlockChange({ publishedRemotelyDate: e.target.value })}
+            />
+          </SetupField>
+          <SetupField id="vz-misto-datum" label="Místo a datum">
+            <input
+              id="vz-misto-datum"
+              className="input"
+              type="text"
+              value={publicationBlock?.placeAndDate ?? ""}
+              onChange={(e) => onPublicationBlockChange({ placeAndDate: e.target.value })}
+              placeholder="např. Praha, 20. 6. 2025"
+            />
+          </SetupField>
+          <SetupField id="vz-reditel-podpis" label="Ředitel/ka školy">
+            <input
+              id="vz-reditel-podpis"
+              className="input"
+              type="text"
+              value={publicationBlock?.principalSignature ?? ""}
+              onChange={(e) => onPublicationBlockChange({ principalSignature: e.target.value })}
+              placeholder="např. Mgr. Jan Novák"
+            />
+          </SetupField>
+          <SetupField id="vz-predseda-sr" label="Předseda/předsedkyně školské rady">
+            <input
+              id="vz-predseda-sr"
+              className="input"
+              type="text"
+              value={publicationBlock?.schoolCouncilChairSignature ?? ""}
+              onChange={(e) => onPublicationBlockChange({ schoolCouncilChairSignature: e.target.value })}
+              placeholder="např. Ing. Alena Králová"
+            />
+          </SetupField>
+        </div>
       </div>
     </section>
   );

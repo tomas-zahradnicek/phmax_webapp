@@ -31,6 +31,13 @@ function pickFilledString(value: string | undefined): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function isMeaningfulExamText(value: string | undefined): boolean {
+  const text = pickFilledString(value);
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  return normalized !== "0" && normalized !== "—" && normalized !== "-" && normalized !== "neuvedeno";
+}
+
 function sanitizeClassRows(rows: AnnualReportSection06ClassResultRow[]): AnnualReportSection06ClassResultRow[] {
   return rows.map((row) => ({
     className: pickFilledString(row.className) ?? "",
@@ -56,14 +63,22 @@ function sanitizeExam(exam?: AnnualReportSection06ExamData): AnnualReportSection
     failed: exam.failed,
     note: pickFilledString(exam.note),
   };
+  const hasMeaningfulNumericValue =
+    (sanitized.pupilsTotal !== undefined && sanitized.pupilsTotal !== 0) ||
+    (sanitized.passed !== undefined && sanitized.passed !== 0) ||
+    (sanitized.failed !== undefined && sanitized.failed !== 0);
+  const hasMeaningfulTextValue = isMeaningfulExamText(sanitized.description) || isMeaningfulExamText(sanitized.note);
   if (
-    !sanitized.description &&
-    sanitized.pupilsTotal === undefined &&
-    sanitized.passed === undefined &&
-    sanitized.failed === undefined &&
-    !sanitized.note
+    !hasMeaningfulTextValue &&
+    !hasMeaningfulNumericValue
   ) {
     return undefined;
+  }
+  if (!isMeaningfulExamText(sanitized.description)) {
+    sanitized.description = undefined;
+  }
+  if (!isMeaningfulExamText(sanitized.note)) {
+    sanitized.note = undefined;
   }
   return sanitized;
 }

@@ -16,7 +16,7 @@ import {
   saveVyrocniZpravaStorage,
 } from "./vyrocni-zprava-storage";
 
-import type { AnnualReport } from "./vyrocni-zprava-types";
+import type { AnnualReport, AnnualReportPublicationBlock } from "./vyrocni-zprava-types";
 import type { SchoolProfile } from "../school-profile/school-profile-types";
 
 import { VYROCNI_ZPRAVA_GENERATED_PLACEHOLDER } from "./vyrocni-zprava-types";
@@ -61,6 +61,18 @@ import { buildSection11GeneratorInput } from "./vyrocni-zprava-section11-generat
 import { generateSection11Draft } from "./vyrocni-zprava-section11-local-generator";
 import { shouldUseSection11Generator } from "./vyrocni-zprava-section11-generator-service";
 import { getSection11StoreSnapshot } from "./vyrocni-zprava-section11-data-storage";
+import { buildSection12GeneratorInput } from "./vyrocni-zprava-section12-generator-input";
+import { generateSection12Draft } from "./vyrocni-zprava-section12-local-generator";
+import { shouldUseSection12Generator } from "./vyrocni-zprava-section12-generator-service";
+import { getSection12StoreSnapshot } from "./vyrocni-zprava-section12-data-storage";
+import { buildSection13GeneratorInput } from "./vyrocni-zprava-section13-generator-input";
+import { generateSection13Draft } from "./vyrocni-zprava-section13-local-generator";
+import { shouldUseSection13Generator } from "./vyrocni-zprava-section13-generator-service";
+import { getSection13StoreSnapshot } from "./vyrocni-zprava-section13-data-storage";
+import { buildSection14GeneratorInput } from "./vyrocni-zprava-section14-generator-input";
+import { generateSection14Draft } from "./vyrocni-zprava-section14-local-generator";
+import { shouldUseSection14Generator } from "./vyrocni-zprava-section14-generator-service";
+import { getSection14StoreSnapshot } from "./vyrocni-zprava-section14-data-storage";
 import { buildSection03GeneratorInput } from "./vyrocni-zprava-section03-generator-input";
 import { generateSection03Draft } from "./vyrocni-zprava-section03-local-generator";
 import { shouldUseSection03Generator } from "./vyrocni-zprava-section03-generator-service";
@@ -124,6 +136,17 @@ export function useVyrocniZpravaReport() {
     },
     [profile],
   );
+
+  const updatePublicationBlock = useCallback((patch: Partial<AnnualReportPublicationBlock>) => {
+    setReport((prev) => ({
+      ...prev,
+      publicationBlock: {
+        ...(prev.publicationBlock ?? {}),
+        ...patch,
+      },
+      updatedAt: new Date().toISOString(),
+    }));
+  }, []);
 
   const updateSectionNotes = useCallback(
     (sectionId: string, userNotes: string) => {
@@ -243,6 +266,30 @@ export function useVyrocniZpravaReport() {
             section11Data,
           });
           generatedText = generateSection11Draft(generatorInput).text;
+        } else if (shouldUseSection12Generator(sectionId)) {
+          const section12Data = getSection12StoreSnapshot().data;
+          const generatorInput = buildSection12GeneratorInput({
+            schoolProfile: profile,
+            schoolYear: prev.schoolYear,
+            section12Data,
+          });
+          generatedText = generateSection12Draft(generatorInput).text;
+        } else if (shouldUseSection13Generator(sectionId)) {
+          const section13Data = getSection13StoreSnapshot().data;
+          const generatorInput = buildSection13GeneratorInput({
+            schoolProfile: profile,
+            schoolYear: prev.schoolYear,
+            section13Data,
+          });
+          generatedText = generateSection13Draft(generatorInput).text;
+        } else if (shouldUseSection14Generator(sectionId)) {
+          const section14Data = getSection14StoreSnapshot().data;
+          const generatorInput = buildSection14GeneratorInput({
+            schoolProfile: profile,
+            schoolYear: prev.schoolYear,
+            section14Data,
+          });
+          generatedText = generateSection14Draft(generatorInput).text;
         } else if (shouldUseSection03Generator(sectionId)) {
           const personnelData = getPersonnelStoreSnapshot().data;
           const generatorInput = buildSection03GeneratorInput({
@@ -340,6 +387,7 @@ export function useVyrocniZpravaReport() {
     setSelectedSectionId,
     patchSchoolProfile,
     setSchoolYear,
+    updatePublicationBlock,
     updateSectionNotes,
     checkSectionData,
     generateSectionDraft,

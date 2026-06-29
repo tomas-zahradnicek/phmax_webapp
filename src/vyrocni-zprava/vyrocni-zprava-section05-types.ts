@@ -13,6 +13,24 @@ export type AnnualReportSection05WeeklyHourRow = {
   grade9?: number;
 };
 
+export type AnnualReportSection05AdvancedCurriculumRow = {
+  educationalArea: string;
+  subject: string;
+  subjectDetails?: string[];
+  grade1?: string;
+  grade2?: string;
+  grade3?: string;
+  grade4?: string;
+  grade5?: string;
+  firstStageAllocation?: string;
+  grade6?: string;
+  grade7?: string;
+  grade8?: string;
+  grade9?: string;
+  secondStageAllocation?: string;
+  isTotalRow?: boolean;
+};
+
 export type AnnualReportSection05GoalEvaluation = {
   goal: string;
   level?: Section05GoalLevel;
@@ -29,6 +47,10 @@ export type AnnualReportSection05Data = {
   schoolCurriculumPlan: {
     description?: string;
     weeklyHourPlan?: AnnualReportSection05WeeklyHourRow[];
+    advancedCurriculumPlan?: {
+      rows: AnnualReportSection05AdvancedCurriculumRow[];
+      note?: string;
+    };
     note?: string;
   };
   goalsEvaluation: AnnualReportSection05GoalEvaluation[];

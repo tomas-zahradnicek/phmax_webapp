@@ -25,6 +25,7 @@ import {
 } from "./vyrocni-zprava-section11-local-generator";
 import { buildAnnualReportPreview } from "./vyrocni-zprava-report-preview-builder";
 import { buildDocxExportModel } from "./vyrocni-zprava-docx-export-logic";
+import { parseCzechNumberInput } from "./vyrocni-zprava-number-input-helpers";
 
 function createSection11Profile() {
   return {
@@ -236,6 +237,37 @@ describe("vyrocni-zprava-section11-generator", () => {
     expect(result.text).toContain("11.4 Doplňková činnost");
     expect(result.text).toContain("11.5 Investice, opravy a větší nákupy");
     expect(result.text).toContain("11.6 Souhrnný komentář k hospodaření školy");
+  });
+
+  it("nevytváří dvojitou tečku při uživatelském komentáři", () => {
+    const data = createCompleteSection11Data();
+    data.summaryCommentary = "Komentář k hospodaření je založen na interních podkladech.";
+    const result = generateSection11Draft(
+      buildSection11GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section11Data: data,
+      }),
+    );
+    expect(result.text).not.toContain("..");
+  });
+
+  it("sekce 11 zachová hodnotu 4 200 000 po parse vstupu", () => {
+    expect(parseCzechNumberInput("4 200 000")).toBe(4200000);
+  });
+
+  it("sekce 11 generuje částku 4 200 000 Kč bez ztráty řádů", () => {
+    const data = createCompleteSection11Data();
+    data.revenue.totalRevenue = parseCzechNumberInput("4 200 000");
+    const result = generateSection11Draft(
+      buildSection11GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section11Data: data,
+      }),
+    );
+
+    expect(result.text).toContain("4 200 000 Kč");
   });
 
   it("preview a DOCX zahrnou sekci 11 po vygenerování", () => {

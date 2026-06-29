@@ -1,4 +1,5 @@
 import type { Section09GeneratorInput } from "./vyrocni-zprava-section09-generator-input";
+import { appendSentencePeriod } from "./vyrocni-zprava-text-formatting-helpers";
 
 export const SECTION09_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 09 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -110,14 +111,14 @@ function buildProjects(projects: Section09GeneratorInput["projectsAndCooperation
 
 function buildPresentationSummary(presentation: Section09GeneratorInput["publicPresentation"]): string {
   const parts = [
-    presentation.description ? `Popis prezentace školy: ${presentation.description}.` : undefined,
-    presentation.website ? `Web školy: ${presentation.website}.` : undefined,
-    presentation.socialMedia ? `Sociální sítě / online komunikace: ${presentation.socialMedia}.` : undefined,
-    presentation.mediaOutputs ? `Mediální výstupy: ${presentation.mediaOutputs}.` : undefined,
+    presentation.description ? appendSentencePeriod(`Popis prezentace školy: ${presentation.description}`) : undefined,
+    presentation.website ? appendSentencePeriod(`Web školy: ${presentation.website}`) : undefined,
+    presentation.socialMedia ? appendSentencePeriod(`Sociální sítě / online komunikace: ${presentation.socialMedia}`) : undefined,
+    presentation.mediaOutputs ? appendSentencePeriod(`Mediální výstupy: ${presentation.mediaOutputs}`) : undefined,
     presentation.cooperationWithCommunity
-      ? `Spolupráce s obcí, zřizovatelem a veřejností: ${presentation.cooperationWithCommunity}.`
+      ? appendSentencePeriod(`Spolupráce s obcí, zřizovatelem a veřejností: ${presentation.cooperationWithCommunity}`)
       : undefined,
-    presentation.note ? `Poznámka: ${presentation.note}.` : undefined,
+    presentation.note ? appendSentencePeriod(`Poznámka: ${presentation.note}`) : undefined,
   ].filter(Boolean);
 
   if (parts.length === 0) {
@@ -156,10 +157,10 @@ export function generateSection09Draft(input: Section09GeneratorInput): Section0
     "",
     "9.4 Mimořádné výsledky a úspěchy žáků",
     input.extraordinaryAchievements
-      ? `Mimořádné výsledky a úspěchy žáků: ${input.extraordinaryAchievements}.`
+      ? appendSentencePeriod(`Mimořádné výsledky a úspěchy žáků: ${input.extraordinaryAchievements}`)
       : "Mimořádné výsledky a úspěchy žáků nejsou v podkladech samostatně uvedeny.",
     "",
-    `Souhrnné vyhodnocení kapitoly: ${input.summaryEvaluation}.`,
+    appendSentencePeriod(`Souhrnné vyhodnocení kapitoly: ${input.summaryEvaluation}`),
   ].filter((item): item is string => Boolean(item));
 
   if (input.notes) {

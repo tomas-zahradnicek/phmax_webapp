@@ -196,6 +196,19 @@ describe("vyrocni-zprava-section07-generator", () => {
     expect(result.text).not.toContain("nad rámec podkladů");
   });
 
+  it("nevytváří dvojitou tečku při uživatelském textu s interpunkcí", () => {
+    const data = createCompleteSection07Data();
+    data.prevention.cooperation = "PPP a rodiče.";
+    const result = generateSection07Draft(
+      buildSection07GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section07Data: data,
+      }),
+    );
+    expect(result.text).not.toContain("..");
+  });
+
   it("kompletní data vygenerují kapitolu 07 se sekcemi 7.1–7.5", () => {
     const result = generateSection07Draft(
       buildSection07GeneratorInput({

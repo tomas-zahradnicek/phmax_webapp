@@ -37,6 +37,23 @@ const SECONDARY_SCHOOL_TYPES = [
   "nehlásí se nikam",
 ] as const;
 
+export function normalizeSecondarySchoolTypeKey(value: string | undefined): string {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function matchKnownSecondarySchoolType(value: string | undefined): string | undefined {
+  const normalized = normalizeSecondarySchoolTypeKey(value);
+  if (!normalized) return undefined;
+  return SECONDARY_SCHOOL_TYPES.find(
+    (item) => normalizeSecondarySchoolTypeKey(item) === normalized,
+  );
+}
+
 function pickFilledString(value: string | undefined): string | undefined {
   const trimmed = (value ?? "").trim();
   return trimmed.length > 0 ? trimmed : undefined;

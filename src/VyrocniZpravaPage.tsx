@@ -32,6 +32,9 @@ import { useVyrocniZpravaSection08Data } from "./vyrocni-zprava/vyrocni-zprava-s
 import { useVyrocniZpravaSection09Data } from "./vyrocni-zprava/vyrocni-zprava-section09-data-storage";
 import { useVyrocniZpravaSection10Data } from "./vyrocni-zprava/vyrocni-zprava-section10-data-storage";
 import { useVyrocniZpravaSection11Data } from "./vyrocni-zprava/vyrocni-zprava-section11-data-storage";
+import { useVyrocniZpravaSection12Data } from "./vyrocni-zprava/vyrocni-zprava-section12-data-storage";
+import { useVyrocniZpravaSection13Data } from "./vyrocni-zprava/vyrocni-zprava-section13-data-storage";
+import { useVyrocniZpravaSection14Data } from "./vyrocni-zprava/vyrocni-zprava-section14-data-storage";
 
 import { VyrocniZpravaSectionDetail } from "./vyrocni-zprava/VyrocniZpravaSectionDetail";
 
@@ -40,6 +43,7 @@ import { VyrocniZpravaSectionList } from "./vyrocni-zprava/VyrocniZpravaSectionL
 import { VyrocniZpravaSetupForm } from "./vyrocni-zprava/VyrocniZpravaSetupForm";
 import { VyrocniZpravaApplicabilityNotice } from "./vyrocni-zprava/VyrocniZpravaApplicabilityNotice";
 import { VyrocniZpravaLegalFrameworkPanel } from "./vyrocni-zprava/VyrocniZpravaLegalFrameworkPanel";
+import { VyrocniZpravaXlsxImportPanel } from "./vyrocni-zprava/import/VyrocniZpravaXlsxImportPanel";
 
 
 
@@ -68,6 +72,8 @@ export function VyrocniZpravaPage() {
     patchSchoolProfile,
 
     setSchoolYear,
+
+    updatePublicationBlock,
 
     updateSectionNotes,
 
@@ -171,6 +177,30 @@ export function VyrocniZpravaPage() {
     resetSection11Data,
     readiness: section11Readiness,
   } = useVyrocniZpravaSection11Data();
+
+  const {
+    section12Data,
+    savedAt: section12SavedAt,
+    saveSection12Data,
+    resetSection12Data,
+    readiness: section12Readiness,
+  } = useVyrocniZpravaSection12Data();
+
+  const {
+    section13Data,
+    savedAt: section13SavedAt,
+    saveSection13Data,
+    resetSection13Data,
+    readiness: section13Readiness,
+  } = useVyrocniZpravaSection13Data();
+
+  const {
+    section14Data,
+    savedAt: section14SavedAt,
+    saveSection14Data,
+    resetSection14Data,
+    readiness: section14Readiness,
+  } = useVyrocniZpravaSection14Data();
 
 
 
@@ -313,10 +343,50 @@ export function VyrocniZpravaPage() {
 
         schoolProfile={schoolProfile}
 
+        publicationBlock={report.publicationBlock}
+
         onSchoolYearChange={setSchoolYear}
 
         onSchoolProfileChange={patchSchoolProfile}
 
+        onPublicationBlockChange={updatePublicationBlock}
+
+      />
+
+      <VyrocniZpravaXlsxImportPanel
+        schoolProfile={schoolProfile}
+        section01Data={section01Data}
+        section02Data={section02Data}
+        section03Data={personnelData}
+        section04Data={section04Data}
+        section05Data={section05Data}
+        section06Data={section06Data}
+        section07Data={section07Data}
+        section08Data={section08Data}
+        section09Data={section09Data}
+        section10Data={section10Data}
+        section11Data={section11Data}
+        section12Data={section12Data}
+        section13Data={section13Data}
+        section14Data={section14Data}
+        publicationBlock={report.publicationBlock}
+        reportSections={report.sections}
+        onApplyProfilePatch={patchSchoolProfile}
+        onApplySection01Data={saveSection01Data}
+        onApplySection02Data={saveSection02Data}
+        onApplySection03Data={savePersonnelData}
+        onApplySection04Data={saveSection04Data}
+        onApplySection05Data={saveSection05Data}
+        onApplySection06Data={saveSection06Data}
+        onApplySection07Data={saveSection07Data}
+        onApplySection08Data={saveSection08Data}
+        onApplySection09Data={saveSection09Data}
+        onApplySection10Data={saveSection10Data}
+        onApplySection11Data={saveSection11Data}
+        onApplySection12Data={saveSection12Data}
+        onApplySection13Data={saveSection13Data}
+        onApplySection14Data={saveSection14Data}
+        onApplyPublicationBlockPatch={updatePublicationBlock}
       />
 
 
@@ -440,6 +510,36 @@ export function VyrocniZpravaPage() {
           onSection11Save={saveSection11Data}
 
           onSection11Reset={resetSection11Data}
+
+          section12Data={section12Data}
+
+          section12SavedAt={section12SavedAt}
+
+          section12Readiness={section12Readiness}
+
+          onSection12Save={saveSection12Data}
+
+          onSection12Reset={resetSection12Data}
+
+          section13Data={section13Data}
+
+          section13SavedAt={section13SavedAt}
+
+          section13Readiness={section13Readiness}
+
+          onSection13Save={saveSection13Data}
+
+          onSection13Reset={resetSection13Data}
+
+          section14Data={section14Data}
+
+          section14SavedAt={section14SavedAt}
+
+          section14Readiness={section14Readiness}
+
+          onSection14Save={saveSection14Data}
+
+          onSection14Reset={resetSection14Data}
 
           personnelData={personnelData}
 

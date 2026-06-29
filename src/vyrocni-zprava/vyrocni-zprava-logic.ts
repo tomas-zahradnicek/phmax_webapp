@@ -20,6 +20,12 @@ import { isSection08IncompleteDraft } from "./vyrocni-zprava-section08-local-gen
 import { isSection09IncompleteDraft } from "./vyrocni-zprava-section09-local-generator";
 import { isSection10IncompleteDraft } from "./vyrocni-zprava-section10-local-generator";
 import { isSection11IncompleteDraft } from "./vyrocni-zprava-section11-local-generator";
+import { isSection12IncompleteDraft } from "./vyrocni-zprava-section12-local-generator";
+import { isSection13IncompleteDraft } from "./vyrocni-zprava-section13-local-generator";
+import { isSection14IncompleteDraft } from "./vyrocni-zprava-section14-local-generator";
+import { isAnnualReportSection12Family } from "./vyrocni-zprava-section12-generator-service";
+import { isAnnualReportSection13Family } from "./vyrocni-zprava-section13-generator-service";
+import { isAnnualReportSection14Family } from "./vyrocni-zprava-section14-generator-service";
 import { isSection03IncompleteDraft } from "./vyrocni-zprava-section03-local-generator";
 import { mergeSavedSectionFields } from "./vyrocni-zprava-generated-text-logic";
 
@@ -295,6 +301,15 @@ export function computeSectionStatus(
       return "CHYBI_UDAJE";
     }
     if (isAnnualReportSection11Family(section.id) && isSection11IncompleteDraft(section.generatedText)) {
+      return "CHYBI_UDAJE";
+    }
+    if (isAnnualReportSection12Family(section.id) && isSection12IncompleteDraft(section.generatedText)) {
+      return "CHYBI_UDAJE";
+    }
+    if (isAnnualReportSection13Family(section.id) && isSection13IncompleteDraft(section.generatedText)) {
+      return "CHYBI_UDAJE";
+    }
+    if (isAnnualReportSection14Family(section.id) && isSection14IncompleteDraft(section.generatedText)) {
       return "CHYBI_UDAJE";
     }
     if (isAnnualReportSection03Family(section.id) && isSection03IncompleteDraft(section.generatedText)) {

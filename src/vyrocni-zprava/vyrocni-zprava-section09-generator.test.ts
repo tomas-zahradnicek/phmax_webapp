@@ -172,6 +172,19 @@ describe("vyrocni-zprava-section09-generator", () => {
     expect(result.text).not.toContain("významné mediální pokrytí");
   });
 
+  it("nevytváří dvojitou tečku při ukončených větách zadaných uživatelem", () => {
+    const data = createCompleteSection09Data();
+    data.publicPresentation.description = "Prezentace školy probíhala kontinuálně.";
+    const result = generateSection09Draft(
+      buildSection09GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section09Data: data,
+      }),
+    );
+    expect(result.text).not.toContain("..");
+  });
+
   it("kompletní data vygenerují kapitolu 09 se sekcemi 9.1–9.4", () => {
     const result = generateSection09Draft(
       buildSection09GeneratorInput({

@@ -26,6 +26,7 @@ const RECOMMENDED_PROFILE_FIELDS: { key: keyof SchoolProfile; label: string }[] 
 const RECOMMENDED_SECTION_FIELDS: { key: keyof VyrocniZpravaSection01Data; label: string }[] = [
   { key: "schoolCouncilInfo", label: "Údaje o školské radě" },
   { key: "schoolCharacteristic", label: "Charakteristika školy" },
+  { key: "materialTechnicalConditions", label: "Materiálně-technické podmínky" },
   { key: "schoolParts", label: "Součásti školy" },
   { key: "schoolCapacity", label: "Kapacita školy" },
 ];
@@ -51,6 +52,7 @@ export function createDefaultSection01Data(): VyrocniZpravaSection01Data {
     schoolCharacteristic: "",
     schoolParts: "",
     schoolCapacity: "",
+    materialTechnicalConditions: "",
     schoolCouncilInfo: "",
     leadershipInfo: "",
     remoteAccessInfo: "",
@@ -64,6 +66,7 @@ export function normalizeSection01Data(raw: unknown): VyrocniZpravaSection01Data
     schoolCharacteristic: sanitizeOptionalText(o.schoolCharacteristic) ?? "",
     schoolParts: sanitizeOptionalText(o.schoolParts) ?? "",
     schoolCapacity: sanitizeOptionalText(o.schoolCapacity) ?? "",
+    materialTechnicalConditions: sanitizeOptionalText(o.materialTechnicalConditions) ?? "",
     schoolCouncilInfo: sanitizeOptionalText(o.schoolCouncilInfo) ?? "",
     leadershipInfo: sanitizeOptionalText(o.leadershipInfo) ?? "",
     remoteAccessInfo: sanitizeOptionalText(o.remoteAccessInfo) ?? "",

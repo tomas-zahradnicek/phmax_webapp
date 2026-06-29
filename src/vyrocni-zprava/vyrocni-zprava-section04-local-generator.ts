@@ -1,5 +1,7 @@
 import type { Section04GeneratorInput } from "./vyrocni-zprava-section04-generator-input";
 import { formatCzechCount, formatCzechInteger } from "./vyrocni-zprava-number-formatting-helpers";
+import { buildPupilCountTableRowOutputs } from "./vyrocni-zprava-section04-pupil-count-summary";
+import { normalizeSecondarySchoolTypeKey } from "./vyrocni-zprava-section04-data-logic";
 
 export const SECTION04_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 04 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -31,16 +33,31 @@ function buildGradeCountList(rows: Section04GeneratorInput["pupilsAdmittedDuring
 }
 
 function buildSecondaryAdmissions(rows: Section04GeneratorInput["secondarySchoolAdmissions"]): string {
-  const filledRows = rows.filter((row) => row.schoolType);
+  const deduped = new Map<string, { label: string; count?: number }>();
+  for (const row of rows) {
+    if (!row.schoolType) continue;
+    const key = normalizeSecondarySchoolTypeKey(row.schoolType);
+    if (!key) continue;
+    const existing = deduped.get(key);
+    if (!existing) {
+      deduped.set(key, { label: row.schoolType, count: row.count });
+      continue;
+    }
+    deduped.set(key, {
+      label: existing.label,
+      count: row.count ?? existing.count,
+    });
+  }
+  const filledRows = [...deduped.values()];
   if (filledRows.length === 0) return "Pro tuto podkapitolu nejsou v podkladech uvedeny doplňující údaje.";
   return filledRows
-    .map((row) => `- ${row.schoolType}: ${formatCzechCount(row.count, { one: "žák", few: "žáci", many: "žáků" })}`)
+    .map((row) => `- ${row.label}: ${formatCzechCount(row.count, { one: "žák", few: "žáci", many: "žáků" })}`)
     .join("\n");
 }
 
 function buildPupilCountTable(title: string, rows: Section04GeneratorInput["pupilCountsSeptember"]): string {
-  const filledRows = rows.filter((row) => row.className);
-  if (filledRows.length === 0) {
+  const tableRows = buildPupilCountTableRowOutputs(rows);
+  if (tableRows.length === 0) {
     return `${title}\nPro tuto tabulku nejsou v podkladech uvedeny údaje.`;
   }
   const lines = [
@@ -48,9 +65,9 @@ function buildPupilCountTable(title: string, rows: Section04GeneratorInput["pupi
     "Třída | Chlapců | Dívek | Celkem | Třídní učitel",
     "--- | --- | --- | --- | ---",
   ];
-  filledRows.forEach((row) => {
+  tableRows.forEach((row) => {
     lines.push(
-      `${row.className} | ${formatCzechInteger(row.boys)} | ${formatCzechInteger(row.girls)} | ${formatCzechInteger(row.total)} | ${row.classTeacher ?? "—"}`,
+      `${row.label} | ${formatCzechInteger(row.boys)} | ${formatCzechInteger(row.girls)} | ${formatCzechInteger(row.total)} | ${row.isSummaryRow ? "" : row.classTeacher ?? "—"}`,
     );
   });
   return lines.join("\n");

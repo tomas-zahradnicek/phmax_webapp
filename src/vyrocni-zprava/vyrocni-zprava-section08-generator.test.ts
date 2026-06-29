@@ -201,6 +201,19 @@ describe("vyrocni-zprava-section08-generator", () => {
     expect(result.text).not.toContain("nad rámec podkladů");
   });
 
+  it("nevytváří dvojitou tečku při uživatelském textu s tečkou na konci", () => {
+    const data = createCompleteSection08Data();
+    data.dvppOverview.evaluation = "Vyhodnocení je doloženo interními podklady.";
+    const result = generateSection08Draft(
+      buildSection08GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section08Data: data,
+      }),
+    );
+    expect(result.text).not.toContain("..");
+  });
+
   it("kompletní data vygenerují kapitolu 08 se sekcemi 8.1–8.3", () => {
     const result = generateSection08Draft(
       buildSection08GeneratorInput({

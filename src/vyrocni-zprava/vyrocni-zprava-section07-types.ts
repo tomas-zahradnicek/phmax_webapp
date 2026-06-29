@@ -44,7 +44,7 @@ export type AnnualReportSection07Data = {
   };
   languagePreparation: {
     pupilsWithLanguagePreparationEntitlement?: number;
-    languagePreparationProvided?: "ANO" | "NE" | "NERELEVANTNI";
+    languagePreparationProvided?: "ANO" | "NE" | "NERELEVANTNI" | "NEUVEDENO";
     description?: string;
     provider?: string;
     note?: string;

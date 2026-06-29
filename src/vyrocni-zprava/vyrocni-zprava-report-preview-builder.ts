@@ -1,5 +1,5 @@
 import type { SchoolProfile } from "../school-profile/school-profile-types";
-import type { AnnualReport, AnnualReportSectionStatus } from "./vyrocni-zprava-types";
+import type { AnnualReport, AnnualReportSectionStatus, AnnualReportPublicationBlock } from "./vyrocni-zprava-types";
 import { VYROCNI_ZPRAVA_GENERATED_PLACEHOLDER } from "./vyrocni-zprava-types";
 
 export type AnnualReportPreviewSection = {
@@ -15,6 +15,7 @@ export type AnnualReportPreviewData = {
   title: string;
   schoolName?: string;
   schoolYear?: string;
+  publicationBlock?: AnnualReportPublicationBlock;
   sections: AnnualReportPreviewSection[];
   fullText: string;
   missingSections: string[];
@@ -41,6 +42,24 @@ function isFinalGeneratedText(value: string): boolean {
 
 function sectionLabel(number: string, title: string): string {
   return `${number} ${title}`;
+}
+
+function normalizePublicationBlock(raw: AnnualReportPublicationBlock | undefined): AnnualReportPublicationBlock | undefined {
+  if (!raw) return undefined;
+  const normalized: AnnualReportPublicationBlock = {
+    discussedByPedagogicalCouncilDate: pickFilledString(raw.discussedByPedagogicalCouncilDate),
+    approvedBySchoolCouncilDate: pickFilledString(raw.approvedBySchoolCouncilDate),
+    sentToFounderDate: pickFilledString(raw.sentToFounderDate),
+    publishedRemotelyDate: pickFilledString(raw.publishedRemotelyDate),
+    placeAndDate: pickFilledString(raw.placeAndDate),
+    principalSignature: pickFilledString(raw.principalSignature),
+    schoolCouncilChairSignature: pickFilledString(raw.schoolCouncilChairSignature),
+  };
+  return Object.values(normalized).some(Boolean) ? normalized : undefined;
+}
+
+export function hasPublicationBlockContent(block: AnnualReportPublicationBlock | undefined): boolean {
+  return normalizePublicationBlock(block) !== undefined;
 }
 
 /** Sestaví náhled výroční zprávy ze současných generatedText kapitol. */
@@ -79,6 +98,7 @@ export function buildAnnualReportPreview(params: {
     title: "Výroční zpráva školy",
     schoolName: pickFilledString(params.schoolProfile.name),
     schoolYear: pickFilledString(params.report.schoolYear),
+    publicationBlock: normalizePublicationBlock(params.report.publicationBlock),
     sections,
     fullText,
     missingSections,

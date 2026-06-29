@@ -18,6 +18,8 @@ import { useVyrocniZpravaSection04Data } from "./vyrocni-zprava/vyrocni-zprava-s
 import { useVyrocniZpravaSection05Data } from "./vyrocni-zprava/vyrocni-zprava-section05-data-storage";
 import { useVyrocniZpravaSection06Data } from "./vyrocni-zprava/vyrocni-zprava-section06-data-storage";
 import { useVyrocniZpravaSection07Data } from "./vyrocni-zprava/vyrocni-zprava-section07-data-storage";
+import { useVyrocniZpravaSection08Data } from "./vyrocni-zprava/vyrocni-zprava-section08-data-storage";
+import { useVyrocniZpravaSection09Data } from "./vyrocni-zprava/vyrocni-zprava-section09-data-storage";
 import { useVyrocniZpravaSection11Data } from "./vyrocni-zprava/vyrocni-zprava-section11-data-storage";
 
 export function VyrocniZpravaPreviewPage() {
@@ -27,6 +29,8 @@ export function VyrocniZpravaPreviewPage() {
   const { section05Data } = useVyrocniZpravaSection05Data();
   const { section06Data } = useVyrocniZpravaSection06Data();
   const { section07Data } = useVyrocniZpravaSection07Data();
+  const { section08Data } = useVyrocniZpravaSection08Data();
+  const { section09Data } = useVyrocniZpravaSection09Data();
   const { section11Data } = useVyrocniZpravaSection11Data();
 
   return (
@@ -59,11 +63,14 @@ export function VyrocniZpravaPreviewPage() {
         report={report}
         schoolProfile={schoolProfile}
         structuredData={{
+          schoolProfileData: schoolProfile,
           section03Data: personnelData,
           section04Data,
           section05Data,
           section06Data,
           section07Data,
+          section08Data,
+          section09Data,
           section11Data,
         }}
       />

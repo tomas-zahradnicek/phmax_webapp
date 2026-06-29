@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import { VyrocniZpravaStatusBadge } from "./VyrocniZpravaStatusBadge";
+import { formatNumberInputValue, parseCzechNumberInput } from "./vyrocni-zprava-number-input-helpers";
 import { createSection05DefaultGoals } from "./vyrocni-zprava-section05-default-goals";
 import {
   createDefaultSection05GoalEvaluation,
@@ -46,14 +47,11 @@ const GRADE_COLUMNS: { key: GradeKey; label: string }[] = [
 ];
 
 function parseOptionalNumber(value: string): number | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  const n = Number(trimmed);
-  return Number.isFinite(n) ? n : undefined;
+  return parseCzechNumberInput(value);
 }
 
 function displayNumber(value: number | undefined): string {
-  return value === undefined ? "" : String(value);
+  return formatNumberInputValue(value);
 }
 
 export function VyrocniZpravaSection05DataForm({

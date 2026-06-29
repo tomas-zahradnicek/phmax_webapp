@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import { VyrocniZpravaStatusBadge } from "./VyrocniZpravaStatusBadge";
+import { formatNumberInputValue, parseCzechNumberInput } from "./vyrocni-zprava-number-input-helpers";
 import {
   createDefaultSection06ClassResultRow,
   type Section06Readiness,
@@ -45,14 +46,60 @@ const MEASURE_FIELDS: { key: keyof AnnualReportSection06EducationalMeasuresTerm;
 ];
 
 function parseOptionalNumber(value: string): number | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  const n = Number(trimmed);
-  return Number.isFinite(n) ? n : undefined;
+  return parseCzechNumberInput(value);
 }
 
 function displayNumber(value: number | undefined): string {
-  return value === undefined ? "" : String(value);
+  return formatNumberInputValue(value);
+}
+
+function isTransientNumberDraft(value: string): boolean {
+  return value === "-" || value === "," || value === "." || value === "-," || value === "-.";
+}
+
+function CzechNumberInput(props: {
+  value: number | undefined;
+  className?: string;
+  onValueChange: (value: number | undefined) => void;
+}) {
+  const { value, className, onValueChange } = props;
+  const [draft, setDraft] = useState<string | null>(null);
+  const displayValue = draft ?? displayNumber(value);
+
+  return (
+    <input
+      className={className ?? "input"}
+      value={displayValue}
+      onChange={(event) => {
+        const next = event.target.value;
+        if (!/^-?[\d\s\u00A0\u202F]*([,.][\d]*)?$/.test(next) && next !== "") return;
+
+        setDraft(next);
+
+        const trimmed = next.trim();
+        if (trimmed === "") {
+          onValueChange(undefined);
+          return;
+        }
+        if (isTransientNumberDraft(trimmed)) return;
+
+        const parsed = parseOptionalNumber(next);
+        if (parsed !== undefined) {
+          onValueChange(parsed);
+        }
+      }}
+      onBlur={() => {
+        if (draft === null) return;
+        const trimmed = draft.trim();
+        if (trimmed === "") {
+          onValueChange(undefined);
+        } else if (!isTransientNumberDraft(trimmed)) {
+          onValueChange(parseOptionalNumber(draft));
+        }
+        setDraft(null);
+      }}
+    />
+  );
 }
 
 function ClassResultsTable(props: {
@@ -61,6 +108,15 @@ function ClassResultsTable(props: {
   onChange: (rows: AnnualReportSection06ClassResultRow[]) => void;
 }) {
   const { title, rows, onChange } = props;
+  const addStageRows = () => {
+    const hasFirstStage = rows.some((row) => row.className.trim().toLowerCase() === "1. stupeň");
+    const hasSecondStage = rows.some((row) => row.className.trim().toLowerCase() === "2. stupeň");
+    const toAdd: AnnualReportSection06ClassResultRow[] = [];
+    if (!hasFirstStage) toAdd.push({ ...createDefaultSection06ClassResultRow(), className: "1. stupeň" });
+    if (!hasSecondStage) toAdd.push({ ...createDefaultSection06ClassResultRow(), className: "2. stupeň" });
+    if (toAdd.length > 0) onChange([...rows, ...toAdd]);
+  };
+
   return (
     <section className="vyrocni-zprava-section06-form__panel card card--elevated">
       <h4 className="vyrocni-zprava-section06-form__panel-title">{title}</h4>
@@ -112,14 +168,14 @@ function ClassResultsTable(props: {
                   </td>
                   {CLASS_NUMERIC_FIELDS.map((field) => (
                     <td key={`${field.key}-${rowIndex}`}>
-                      <input
+                      <CzechNumberInput
                         className="input"
-                        value={displayNumber(row[field.key])}
-                        onChange={(event) =>
+                        value={row[field.key]}
+                        onValueChange={(value) =>
                           onChange(
                             rows.map((item, index) =>
                               index === rowIndex
-                                ? { ...item, [field.key]: parseOptionalNumber(event.target.value) }
+                                ? { ...item, [field.key]: value }
                                 : item,
                             ),
                           )
@@ -149,6 +205,13 @@ function ClassResultsTable(props: {
       >
         Přidat třídu
       </button>
+      <button
+        type="button"
+        className="btn ghost"
+        onClick={addStageRows}
+      >
+        Doplnit řádky 1. a 2. stupeň
+      </button>
     </section>
   );
 }
@@ -167,10 +230,10 @@ function MeasuresGroup(props: {
         {MEASURE_FIELDS.map((field) => (
           <label key={field.key} className="vyrocni-zprava-field">
             <span className="vyrocni-zprava-field__label">{field.label}</span>
-            <input
+            <CzechNumberInput
               className="input"
-              value={displayNumber(current[field.key])}
-              onChange={(event) => onChange({ ...current, [field.key]: parseOptionalNumber(event.target.value) })}
+              value={current[field.key]}
+              onValueChange={(value) => onChange({ ...current, [field.key]: value })}
             />
           </label>
         ))}
@@ -200,26 +263,26 @@ function ExamPanel(props: {
         </label>
         <label className="vyrocni-zprava-field">
           <span className="vyrocni-zprava-field__label">Počet žáků</span>
-          <input
+          <CzechNumberInput
             className="input"
-            value={displayNumber(current.pupilsTotal)}
-            onChange={(event) => onChange({ ...current, pupilsTotal: parseOptionalNumber(event.target.value) })}
+            value={current.pupilsTotal}
+            onValueChange={(value) => onChange({ ...current, pupilsTotal: value })}
           />
         </label>
         <label className="vyrocni-zprava-field">
           <span className="vyrocni-zprava-field__label">Uspěli</span>
-          <input
+          <CzechNumberInput
             className="input"
-            value={displayNumber(current.passed)}
-            onChange={(event) => onChange({ ...current, passed: parseOptionalNumber(event.target.value) })}
+            value={current.passed}
+            onValueChange={(value) => onChange({ ...current, passed: value })}
           />
         </label>
         <label className="vyrocni-zprava-field">
           <span className="vyrocni-zprava-field__label">Neuspěli</span>
-          <input
+          <CzechNumberInput
             className="input"
-            value={displayNumber(current.failed)}
-            onChange={(event) => onChange({ ...current, failed: parseOptionalNumber(event.target.value) })}
+            value={current.failed}
+            onValueChange={(value) => onChange({ ...current, failed: value })}
           />
         </label>
       </div>

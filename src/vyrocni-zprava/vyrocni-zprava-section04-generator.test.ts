@@ -177,6 +177,27 @@ describe("vyrocni-zprava-section04-generator", () => {
     expect(result.text).not.toContain("1 žáků");
   });
 
+  it("4.6 nezdvojuje známé kategorie při duplicitních vstupech", () => {
+    const result = generateSection04Draft(
+      buildSection04GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: "2024/2025",
+        section04Data: {
+          ...createCompleteRequiredSection04Data(),
+          secondarySchoolAdmissions: [
+            { schoolType: "víceleté gymnázium", count: undefined },
+            { schoolType: "Víceleté gymnázium", count: 2 },
+            { schoolType: "Jiná škola", count: 1 },
+          ],
+        },
+      }),
+    );
+    const lines = result.text.split("\n").filter((line) => line.includes("gymnázium"));
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain("2 žáci");
+    expect(result.text).toContain("Jiná škola: 1 žák");
+  });
+
   it("neúplný návrh kapitoly 04 ponechá stav CHYBI_UDAJE", () => {
     const sectionDef = ANNUAL_REPORT_SECTION_DEFINITIONS.find((item) => item.id === "04");
     expect(sectionDef).toBeDefined();

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { VyrocniZpravaStatusBadge } from "./VyrocniZpravaStatusBadge";
+import { formatNumberInputValue, parseCzechNumberInput } from "./vyrocni-zprava-number-input-helpers";
 import {
   createDefaultSection04GradeCountRow,
   createDefaultSection04PupilCountRow,
@@ -31,14 +32,11 @@ const SECONDARY_SCHOOL_ROWS = [
 ];
 
 function parseOptionalNumber(value: string): number | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  const n = Number(trimmed);
-  return Number.isFinite(n) ? n : undefined;
+  return parseCzechNumberInput(value);
 }
 
 function displayNumber(value: number | undefined): string {
-  return value === undefined ? "" : String(value);
+  return formatNumberInputValue(value);
 }
 
 function ensureSecondaryRows(data: AnnualReportSection04Data): AnnualReportSection04Data {

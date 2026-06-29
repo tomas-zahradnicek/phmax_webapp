@@ -82,7 +82,7 @@ describe("vyrocni-zprava-section01-generator", () => {
     expect(result.text).not.toContain("1.1 Název školy");
   });
 
-  it("úplný profil vygeneruje kapitolu 01 s podkapitolami 1.1–1.7", () => {
+  it("úplný profil vygeneruje kapitolu 01 s podkapitolami 1.1–1.8", () => {
     const input = buildSection01GeneratorInput({
       schoolProfile: completeProfile,
       schoolYear: "2024/2025",
@@ -105,10 +105,40 @@ describe("vyrocni-zprava-section01-generator", () => {
     expect(result.text).toContain("1.5 Údaje o vedení školy");
     expect(result.text).toContain("1.6 Adresa pro dálkový přístup");
     expect(result.text).toContain("1.7 Údaje o školské radě");
+    expect(result.text).toContain("1.8 Materiálně-technické podmínky");
     expect(result.text).toContain("ZŠ Ukázková");
     expect(result.text).toContain("Statutární město Praha");
     expect(result.text).toContain("Mgr. Jan Novák");
     expect(result.text).toContain("skola@zsukazkova.cz");
+  });
+
+  it("materialTechnicalConditions se promítne do podkapitoly 1.8", () => {
+    const result = generateSection01Draft(
+      buildSection01GeneratorInput({
+        schoolProfile: completeProfile,
+        schoolYear: "2024/2025",
+        sectionInputs: {
+          ...defaultSection01Data,
+          materialTechnicalConditions: "Škola disponuje modernizovanými učebnami a počítačovou učebnou.",
+        },
+      }),
+    );
+    expect(result.ready).toBe(true);
+    expect(result.text).toContain("1.8 Materiálně-technické podmínky");
+    expect(result.text).toContain("modernizovanými učebnami");
+  });
+
+  it("typ školy se v generovaném textu zobrazí lidsky čitelně", () => {
+    const result = generateSection01Draft(
+      buildSection01GeneratorInput({
+        schoolProfile: { ...completeProfile, schoolType: "ZAKLADNI_SKOLA" },
+        schoolYear: "2024/2025",
+        sectionInputs: defaultSection01Data,
+      }),
+    );
+    expect(result.ready).toBe(true);
+    expect(result.text).toContain("Typ školy: Základní škola.");
+    expect(result.text).not.toContain("ZAKLADNI_SKOLA");
   });
 
   it("doporučené chybějící údaje neblokují generování a jsou uvedeny v readiness", () => {

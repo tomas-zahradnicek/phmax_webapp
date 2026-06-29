@@ -44,7 +44,7 @@ describe("vyrocni-zprava-report-preview-builder", () => {
       report: createDefaultAnnualReport("2024/2025"),
       schoolProfile: createDefaultSchoolProfile(),
     });
-    expect(preview.missingSections.length).toBe(11);
+    expect(preview.missingSections.length).toBe(14);
     expect(preview.missingSections[0]).toContain("01");
   });
 
@@ -121,11 +121,12 @@ describe("vyrocni-zprava-report-preview-builder", () => {
     expect(preview.fullText).toContain("Upravený text kapitoly 03.");
   });
 
-  it("pořadí sekcí v náhledu odpovídá 01 až 11", () => {
+  it("pořadí sekcí v náhledu odpovídá 01 až 14", () => {
     const preview = buildAnnualReportPreview({
       report: createDefaultAnnualReport("2024/2025"),
       schoolProfile: createDefaultSchoolProfile(),
     });
+    expect(preview.totalSectionsCount).toBe(14);
     expect(preview.sections.map((section) => section.number)).toEqual([
       "01",
       "02",
@@ -138,6 +139,9 @@ describe("vyrocni-zprava-report-preview-builder", () => {
       "09",
       "10",
       "11",
+      "12",
+      "13",
+      "14",
     ]);
   });
 });

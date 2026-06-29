@@ -1,5 +1,6 @@
 import type { SchoolProfile } from "../school-profile/school-profile-types";
 import type {
+  AnnualReportSection05AdvancedCurriculumRow,
   AnnualReportSection05Data,
   AnnualReportSection05GoalEvaluation,
   AnnualReportSection05WeeklyHourRow,
@@ -58,6 +59,32 @@ function normalizeWeeklyHourRow(raw: unknown): AnnualReportSection05WeeklyHourRo
   };
 }
 
+function normalizeAdvancedCurriculumRow(raw: unknown): AnnualReportSection05AdvancedCurriculumRow | null {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  return {
+    educationalArea: sanitizeOptionalText(o.educationalArea) ?? "",
+    subject: sanitizeOptionalText(o.subject) ?? "",
+    subjectDetails: Array.isArray(o.subjectDetails)
+      ? o.subjectDetails
+          .map((item) => sanitizeOptionalText(item))
+          .filter((item): item is string => Boolean(item))
+      : [],
+    grade1: sanitizeOptionalText(o.grade1),
+    grade2: sanitizeOptionalText(o.grade2),
+    grade3: sanitizeOptionalText(o.grade3),
+    grade4: sanitizeOptionalText(o.grade4),
+    grade5: sanitizeOptionalText(o.grade5),
+    firstStageAllocation: sanitizeOptionalText(o.firstStageAllocation),
+    grade6: sanitizeOptionalText(o.grade6),
+    grade7: sanitizeOptionalText(o.grade7),
+    grade8: sanitizeOptionalText(o.grade8),
+    grade9: sanitizeOptionalText(o.grade9),
+    secondStageAllocation: sanitizeOptionalText(o.secondStageAllocation),
+    isTotalRow: typeof o.isTotalRow === "boolean" ? o.isTotalRow : undefined,
+  };
+}
+
 function normalizeGoalEvaluation(raw: unknown): AnnualReportSection05GoalEvaluation | null {
   if (!raw || typeof raw !== "object") return null;
   const o = raw as Record<string, unknown>;
@@ -103,6 +130,7 @@ export function createDefaultSection05Data(): AnnualReportSection05Data {
     schoolCurriculumPlan: {
       description: "",
       weeklyHourPlan: [],
+      advancedCurriculumPlan: { rows: [], note: "" },
       note: "",
     },
     goalsEvaluation: [],
@@ -139,6 +167,19 @@ export function normalizeSection05Data(raw: unknown): AnnualReportSection05Data 
               .map(normalizeWeeklyHourRow)
               .filter((row): row is AnnualReportSection05WeeklyHourRow => row !== null)
           : [],
+        advancedCurriculumPlan: (() => {
+          const advanced = po.advancedCurriculumPlan;
+          if (!advanced || typeof advanced !== "object") return { rows: [], note: "" };
+          const ao = advanced as Record<string, unknown>;
+          return {
+            rows: Array.isArray(ao.rows)
+              ? ao.rows
+                  .map(normalizeAdvancedCurriculumRow)
+                  .filter((row): row is AnnualReportSection05AdvancedCurriculumRow => row !== null)
+              : [],
+            note: sanitizeOptionalText(ao.note) ?? "",
+          };
+        })(),
         note: sanitizeOptionalText(po.note) ?? "",
       };
     })(),
@@ -193,9 +234,20 @@ export function getSection05Readiness(params: {
 
   const weeklyPlanRows = d.schoolCurriculumPlan.weeklyHourPlan ?? [];
   const weeklyPlanWithSubject = weeklyPlanRows.filter((row) => pickFilledString(row.subject));
+  const advancedRows = d.schoolCurriculumPlan.advancedCurriculumPlan?.rows ?? [];
+  const advancedRowsWithData = advancedRows.filter(
+    (row) =>
+      pickFilledString(row.educationalArea) ||
+      pickFilledString(row.subject) ||
+      (row.subjectDetails ?? []).some((detail) => pickFilledString(detail)),
+  );
+  if (advancedRowsWithData.length > 0) {
+    availableData.push(`Rozšířený učební plán: ${advancedRowsWithData.length} řádků`);
+  }
   if (weeklyPlanWithSubject.length > 0) {
     availableData.push(`Týdenní hodinový plán: ${weeklyPlanWithSubject.length} předmětů`);
-  } else {
+  }
+  if (weeklyPlanWithSubject.length === 0 && advancedRowsWithData.length === 0) {
     recommendedData.push("Týdenní hodinový plán (tabulka předmětů)");
     warnings.push("Učební plán je prázdný. Doplňte alespoň základní přehled předmětů.");
   }

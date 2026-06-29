@@ -26,7 +26,8 @@
     "docs:handout-pdf": "node scripts/generate-handout-pdf.mjs",
     "docs:sitemap": "npx --yes tsx scripts/generate-sitemap.ts",
     "import:csv-handoff": "npx --yes tsx scripts/csv-to-phmax-handoff.ts",
-    "import:handoff-apply-snippet": "npx --yes tsx scripts/print-phmax-handoff-apply-snippet.ts"
+    "import:handoff-apply-snippet": "npx --yes tsx scripts/print-phmax-handoff-apply-snippet.ts",
+    "vyrocni-zprava:prepare-demo": "npx --yes tsx scripts/_prepare-filled-import-template.mjs"
   },
   "dependencies": {
     "docx": "^9.7.1",

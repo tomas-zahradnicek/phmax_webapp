@@ -1,4 +1,5 @@
 import type { Section08GeneratorInput } from "./vyrocni-zprava-section08-generator-input";
+import { appendSentencePeriod } from "./vyrocni-zprava-text-formatting-helpers";
 
 export const SECTION08_INCOMPLETE_DRAFT_PREFIX =
   "Kapitolu 08 nelze zatím připravit jako finální návrh. Chybí následující údaje:";
@@ -125,9 +126,9 @@ export function generateSection08Draft(input: Section08GeneratorInput): Section0
     intro,
     "",
     "8.1 Další vzdělávání pedagogických pracovníků",
-    `Popis DVPP ve školním roce: ${input.dvppOverview.description ?? "neuvedeno"}.`,
-    input.dvppOverview.priorities ? `Priority DVPP: ${input.dvppOverview.priorities}.` : undefined,
-    input.dvppOverview.evaluation ? `Vyhodnocení DVPP: ${input.dvppOverview.evaluation}.` : undefined,
+    appendSentencePeriod(`Popis DVPP ve školním roce: ${input.dvppOverview.description ?? "neuvedeno"}`),
+    input.dvppOverview.priorities ? appendSentencePeriod(`Priority DVPP: ${input.dvppOverview.priorities}`) : undefined,
+    input.dvppOverview.evaluation ? appendSentencePeriod(`Vyhodnocení DVPP: ${input.dvppOverview.evaluation}`) : undefined,
     "",
     "8.1.1 Studium ke splnění kvalifikačních předpokladů",
     buildQualificationList(
@@ -148,11 +149,11 @@ export function generateSection08Draft(input: Section08GeneratorInput): Section0
     buildNonTeachingDevelopmentList(input.nonTeachingStaffDevelopment),
     "",
     "8.3 Samostudium",
-    `Popis samostudia: ${input.selfStudy.description ?? "neuvedeno"}.`,
-    input.selfStudy.topics ? `Témata samostudia: ${input.selfStudy.topics}.` : undefined,
-    input.selfStudy.note ? `Poznámka k samostudiu: ${input.selfStudy.note}.` : undefined,
+    appendSentencePeriod(`Popis samostudia: ${input.selfStudy.description ?? "neuvedeno"}`),
+    input.selfStudy.topics ? appendSentencePeriod(`Témata samostudia: ${input.selfStudy.topics}`) : undefined,
+    input.selfStudy.note ? appendSentencePeriod(`Poznámka k samostudiu: ${input.selfStudy.note}`) : undefined,
     "",
-    `Souhrnné vyhodnocení kapitoly: ${input.summaryEvaluation}.`,
+    appendSentencePeriod(`Souhrnné vyhodnocení kapitoly: ${input.summaryEvaluation}`),
   ].filter((item): item is string => Boolean(item));
 
   if (input.notes) {
