@@ -27,7 +27,7 @@ describe("phmax-document-head", () => {
       "https://example.test/phmax-zakladni-skola",
     );
     const urls = listPhmaxSitemapUrls("https://example.test");
-    expect(urls).toHaveLength(PRODUCT_VIEW_CODES.length + 6);
+    expect(urls).toHaveLength(PRODUCT_VIEW_CODES.length + 7);
     expect(urls).toContain(`https://example.test${USER_GUIDE_PATH}`);
     expect(urls).toContain(`https://example.test${VYROCNI_ZPRAVA_PATH}`);
     expect(urls).toContain(`https://example.test${PROFIL_SKOLY_PATH}`);
