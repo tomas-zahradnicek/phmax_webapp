@@ -5,3 +5,7 @@ dist/
 /playwright-report/
 /blob-report/
 FAQ_App_TZ/
+
+# Dočasné soubory z Excelu a ručních exportů
+~$*.xlsx
+manual-export-preview.*

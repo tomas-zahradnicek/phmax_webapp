@@ -9,19 +9,19 @@ export const SCHOOL_PROFILE_SCHOOL_TYPES = [
 
 export const SCHOOL_PROFILE_KRAJE = [
   "Hlavní město Praha",
-  "Středočeský",
   "Jihočeský",
-  "Plzeňský",
-  "Karlovarský",
-  "Ústecký",
-  "Liberecký",
-  "Královéhradecký",
-  "Pardubický",
-  "Vysočina",
   "Jihomoravský",
-  "Olomoucký",
-  "Zlínský",
+  "Karlovarský",
+  "Královéhradecký",
+  "Liberecký",
   "Moravskoslezský",
+  "Olomoucký",
+  "Pardubický",
+  "Plzeňský",
+  "Středočeský",
+  "Ústecký",
+  "Vysočina",
+  "Zlínský",
 ] as const;
 
 /** Povinná pole profilu školy pro kapitolu 01 výroční zprávy. */

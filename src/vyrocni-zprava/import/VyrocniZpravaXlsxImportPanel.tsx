@@ -24,6 +24,11 @@ import {
 import { parseVyrocniZpravaImportFile } from "./vyrocni-zprava-xlsx-import-logic";
 import { buildImportPreviewSummary } from "./vyrocni-zprava-xlsx-import-preview";
 import type { AnnualReportXlsxImportResult } from "./vyrocni-zprava-xlsx-import-types";
+import { buildJsonPostImportGuide, buildXlsxPostImportGuide } from "./vyrocni-zprava-post-import-guide";
+import {
+  VyrocniZpravaPostImportGuide,
+  type VyrocniZpravaPostImportGuideData,
+} from "./VyrocniZpravaPostImportGuide";
 
 type VyrocniZpravaXlsxImportPanelProps = {
   schoolProfile: SchoolProfile;
@@ -77,6 +82,9 @@ type AnnualReportBackupV1 = {
   section09Data: AnnualReportSection09Data;
   section10Data: AnnualReportSection10Data;
   section11Data: AnnualReportSection11Data;
+  section12Data?: AnnualReportSection12Data;
+  section13Data?: AnnualReportSection13Data;
+  section14Data?: AnnualReportSection14Data;
 };
 
 type AnnualReportBackupPreview = {
@@ -163,6 +171,7 @@ export function VyrocniZpravaXlsxImportPanel({
   const [overwriteConfirmed, setOverwriteConfirmed] = useState(false);
   const [backupPreview, setBackupPreview] = useState<AnnualReportBackupPreview | null>(null);
   const [backupOverwriteConfirmed, setBackupOverwriteConfirmed] = useState(false);
+  const [postImportGuide, setPostImportGuide] = useState<VyrocniZpravaPostImportGuideData | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusKind, setStatusKind] = useState<"ok" | "warn" | "error" | null>(null);
   const backupInputRef = useRef<HTMLInputElement | null>(null);
@@ -297,10 +306,16 @@ export function VyrocniZpravaXlsxImportPanel({
     if (importResult.section14Data) onApplySection14Data(importResult.section14Data);
     if (importResult.publicationBlockPatch) onApplyPublicationBlockPatch(importResult.publicationBlockPatch);
 
+    if (previewSummary) {
+      setPostImportGuide(buildXlsxPostImportGuide(previewSummary, importResult));
+    }
+    setImportResult(null);
+    setOverwriteConfirmed(false);
     setStatusKind("ok");
-    setStatusMessage("Import byl uložen. Doporučujeme znovu zkontrolovat údaje a vygenerovat dotčené kapitoly.");
+    setStatusMessage("Import byl uložen. Postupujte podle návodu níže.");
   }, [
     importResult,
+    previewSummary,
     onApplyProfilePatch,
     onApplySection01Data,
     onApplySection02Data,
@@ -337,6 +352,9 @@ export function VyrocniZpravaXlsxImportPanel({
       section09Data,
       section10Data,
       section11Data,
+      section12Data,
+      section13Data,
+      section14Data,
     };
     const filenameDate = new Date().toISOString().slice(0, 10);
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -364,6 +382,9 @@ export function VyrocniZpravaXlsxImportPanel({
     section09Data,
     section10Data,
     section11Data,
+    section12Data,
+    section13Data,
+    section14Data,
   ]);
 
   const handleBackupFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -395,6 +416,9 @@ export function VyrocniZpravaXlsxImportPanel({
         { id: "09", payloadData: payload.section09Data, existingData: section09Data },
         { id: "10", payloadData: payload.section10Data, existingData: section10Data },
         { id: "11", payloadData: payload.section11Data, existingData: section11Data },
+        { id: "12", payloadData: payload.section12Data, existingData: section12Data },
+        { id: "13", payloadData: payload.section13Data, existingData: section13Data },
+        { id: "14", payloadData: payload.section14Data, existingData: section14Data },
       ];
       sectionTargets.forEach((item) => {
         if (hasAnySectionData(item.payloadData) && hasAnySectionData(item.existingData)) {
@@ -430,6 +454,9 @@ export function VyrocniZpravaXlsxImportPanel({
     section09Data,
     section10Data,
     section11Data,
+    section12Data,
+    section13Data,
+    section14Data,
   ]);
 
   const handleConfirmBackupRestore = useCallback(() => {
@@ -449,10 +476,14 @@ export function VyrocniZpravaXlsxImportPanel({
     if (payload.section09Data) onApplySection09Data(payload.section09Data);
     if (payload.section10Data) onApplySection10Data(payload.section10Data);
     if (payload.section11Data) onApplySection11Data(payload.section11Data);
+    if (payload.section12Data) onApplySection12Data(payload.section12Data);
+    if (payload.section13Data) onApplySection13Data(payload.section13Data);
+    if (payload.section14Data) onApplySection14Data(payload.section14Data);
+    setPostImportGuide(buildJsonPostImportGuide(payload));
     setBackupPreview(null);
     setBackupOverwriteConfirmed(false);
     setStatusKind("ok");
-    setStatusMessage("JSON záloha byla obnovena.");
+    setStatusMessage("JSON záloha byla obnovena. Postupujte podle návodu níže.");
   }, [
     backupOverwriteConfirmed,
     backupPreview,
@@ -469,6 +500,9 @@ export function VyrocniZpravaXlsxImportPanel({
     onApplySection09Data,
     onApplySection10Data,
     onApplySection11Data,
+    onApplySection12Data,
+    onApplySection13Data,
+    onApplySection14Data,
   ]);
 
   return (
@@ -504,7 +538,7 @@ export function VyrocniZpravaXlsxImportPanel({
           className="btn ghost"
           onClick={handleExportBackup}
         >
-          Export JSON zálohy (§01–11)
+          Export JSON zálohy (§01–14)
         </button>
         <button
           type="button"
@@ -567,6 +601,10 @@ export function VyrocniZpravaXlsxImportPanel({
             Potvrdit obnovu JSON zálohy
           </button>
         </div>
+      ) : null}
+
+      {postImportGuide ? (
+        <VyrocniZpravaPostImportGuide guide={postImportGuide} onDismiss={() => setPostImportGuide(null)} />
       ) : null}
 
       {importResult ? (

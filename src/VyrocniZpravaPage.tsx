@@ -391,7 +391,7 @@ export function VyrocniZpravaPage() {
 
 
 
-      <div className="vyrocni-zprava-page__workspace">
+      <div className="vyrocni-zprava-page__workspace" id="vyrocni-zprava-workspace">
 
         <VyrocniZpravaSectionList
 
