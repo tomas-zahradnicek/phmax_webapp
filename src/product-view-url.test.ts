@@ -20,7 +20,7 @@ describe("product-view-paths", () => {
 });
 
 describe("readInitialProductView", () => {
-  it("default je zs bez path a query", () => {
-    expect(readInitialProductView()).toBe("zs");
+  it("default je dash (přehled) mimo prohlížeč a pro kořenovou URL", () => {
+    expect(readInitialProductView()).toBe("dash");
   });
 });
