@@ -1,3 +1,4 @@
 {
+  "redirects": [{ "source": "/", "destination": "/prehled", "permanent": true }],
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

@@ -15,7 +15,9 @@ export {
 } from "./product-view-paths";
 
 export function readInitialProductView(): ProductView {
-  if (typeof window === "undefined") return "zs";
+  if (typeof window === "undefined") return "dash";
+  const norm = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (norm === "/") return "dash";
   if (isSdLitePathname(window.location.pathname)) return "sd";
   if (isPvLitePathname(window.location.pathname)) return "pv";
   if (isZsLitePathname(window.location.pathname)) return "zs";

@@ -13,6 +13,7 @@ import {
   applyPhmaxUserGuideDocumentHead,
   applyProfilSkolyDocumentHead,
   applyVyrocniZpravaDocumentHead,
+  applyVyrocniZpravaPreviewDocumentHead,
 } from "./phmax-document-head";
 import { isUserGuidePathname } from "./phmax-user-guide-paths";
 import { isProfilSkolyPathname } from "./school-profile-paths";
@@ -89,6 +90,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const norm = window.location.pathname.replace(/\/+$/, "") || "/";
+    if (norm === "/") {
+      window.history.replaceState({ phmaxView: "dash" }, "", "/prehled");
+      setProductViewState("dash");
+    }
+  }, []);
+
+  useEffect(() => {
     if (isLegacyViewQueryUrl()) {
       writeProductViewUrl(readInitialProductView(), "replace");
     }
@@ -113,7 +122,9 @@ export default function App() {
   useEffect(() => {
     if (userGuideActive) {
       applyPhmaxUserGuideDocumentHead();
-    } else if (vyrocniZpravaActive || vyrocniZpravaPreviewActive) {
+    } else if (vyrocniZpravaPreviewActive) {
+      applyVyrocniZpravaPreviewDocumentHead();
+    } else if (vyrocniZpravaActive) {
       applyVyrocniZpravaDocumentHead();
     } else if (profilSkolyActive) {
       applyProfilSkolyDocumentHead();

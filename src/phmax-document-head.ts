@@ -9,7 +9,7 @@ import {
 } from "./calculator-ui-constants";
 import { PHMAX_PV_LITE_PATH, PHMAX_SD_LITE_PATH, PHMAX_ZS_LITE_PATH } from "./phmax-lite-paths";
 import { PHMAX_SITE_ORIGIN_FALLBACK } from "./phmax-site-origin";
-import { buildProductViewPageUrl, listProductViewPathUrls } from "./product-view-paths";
+import { buildProductViewPageUrl, listProductViewPathUrls, PRODUCT_VIEW_PATH } from "./product-view-paths";
 
 export type PhmaxLiteKind = "pv" | "sd" | "zs";
 
@@ -91,6 +91,33 @@ const PHMAX_LITE_PATH: Record<PhmaxLiteKind, string> = {
 
 const PHMAX_JSON_LD_ID = "phmax-software-application-jsonld";
 const PHMAX_FAQ_JSON_LD_ID = "phmax-faq-jsonld";
+const PHMAX_BREADCRUMB_JSON_LD_ID = "phmax-breadcrumb-jsonld";
+const PHMAX_WEBSITE_JSON_LD_ID = "phmax-website-jsonld";
+
+export type PhmaxHeadRenderOptions = {
+  canonical: string;
+  faqView: ProductViewCode;
+  indexable?: boolean;
+  breadcrumbLabel?: string;
+  includeWebSite?: boolean;
+};
+
+export type PhmaxPrerenderRoute = {
+  pathname: string;
+  meta: PhmaxDocumentHeadMeta;
+  faqView: ProductViewCode;
+  indexable: boolean;
+  breadcrumbLabel: string;
+  includeWebSite?: boolean;
+};
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
 export function resolvePhmaxSiteOrigin(): string {
   if (typeof window !== "undefined" && window.location?.origin) {
@@ -124,7 +151,11 @@ function upsertLink(rel: string, href: string): void {
   el.setAttribute("href", href);
 }
 
-function upsertJsonLd(id: string, data: Record<string, unknown>): void {
+function upsertJsonLd(id: string, data: Record<string, unknown> | null): void {
+  if (data === null) {
+    document.getElementById(id)?.remove();
+    return;
+  }
   let el = document.getElementById(id);
   if (!el) {
     el = document.createElement("script");
@@ -135,11 +166,147 @@ function upsertJsonLd(id: string, data: Record<string, unknown>): void {
   el.textContent = JSON.stringify(data);
 }
 
-function applyPhmaxHeadMeta(meta: PhmaxDocumentHeadMeta, canonical: string, faqView: ProductViewCode): void {
+function buildPhmaxOverviewUrl(origin: string): string {
+  return buildProductViewPageUrl("dash", origin);
+}
+
+type PhmaxJsonLdBlockMap = {
+  software: Record<string, unknown>;
+  faq: Record<string, unknown> | null;
+  breadcrumb: Record<string, unknown> | null;
+  website: Record<string, unknown> | null;
+};
+
+function buildPhmaxJsonLdBlocks(
+  meta: PhmaxDocumentHeadMeta,
+  canonical: string,
+  faqView: ProductViewCode,
+  origin: string,
+  options: Pick<PhmaxHeadRenderOptions, "breadcrumbLabel" | "includeWebSite">,
+): PhmaxJsonLdBlockMap {
+  const faq = PHMAX_SEO_MODULE_CONTENT[faqView].faq;
+
+  return {
+    software: {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: meta.applicationName,
+      applicationCategory: "EducationalApplication",
+      operatingSystem: "Web",
+      inLanguage: "cs",
+      description: meta.description,
+      url: canonical,
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "CZK",
+      },
+    },
+    faq:
+      faq.length > 0
+        ? {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faq.map((item) => ({
+              "@type": "Question",
+              name: item.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: item.answer,
+              },
+            })),
+          }
+        : null,
+    breadcrumb: options.breadcrumbLabel
+      ? {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: PHMAX_SITE_NAME,
+              item: buildPhmaxOverviewUrl(origin),
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: options.breadcrumbLabel,
+              item: canonical,
+            },
+          ],
+        }
+      : null,
+    website: options.includeWebSite
+      ? {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: PHMAX_SITE_NAME,
+          url: buildPhmaxOverviewUrl(origin),
+          inLanguage: "cs",
+          description: PHMAX_DOCUMENT_HEAD.dash.description,
+        }
+      : null,
+  };
+}
+
+/** HTML fragment pro statický head (prerender po buildu). */
+export function buildPhmaxHeadHtmlTags(
+  meta: PhmaxDocumentHeadMeta,
+  origin: string,
+  options: PhmaxHeadRenderOptions,
+): string {
+  const { canonical, faqView, indexable = true, breadcrumbLabel, includeWebSite } = options;
+  const ogImage = new URL(APP_BRAND_LOGO_PATH, origin).href;
+  const robots = indexable ? "index, follow, max-image-preview:large" : "noindex, follow";
+  const jsonLdBlocks = buildPhmaxJsonLdBlocks(meta, canonical, faqView, origin, {
+    breadcrumbLabel,
+    includeWebSite,
+  });
+
+  const lines = [
+    `<title>${escapeHtml(meta.title)}</title>`,
+    `<meta name="description" content="${escapeHtml(meta.description)}" />`,
+    `<meta name="robots" content="${robots}" />`,
+    `<link rel="canonical" href="${escapeHtml(canonical)}" />`,
+    `<meta property="og:title" content="${escapeHtml(meta.title)}" />`,
+    `<meta property="og:description" content="${escapeHtml(meta.description)}" />`,
+    `<meta property="og:url" content="${escapeHtml(canonical)}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:locale" content="cs_CZ" />`,
+    `<meta property="og:site_name" content="${escapeHtml(PHMAX_SITE_NAME)}" />`,
+    `<meta property="og:image" content="${escapeHtml(ogImage)}" />`,
+    `<meta property="og:image:alt" content="${escapeHtml(PHMAX_SITE_NAME)}" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${escapeHtml(meta.title)}" />`,
+    `<meta name="twitter:description" content="${escapeHtml(meta.description)}" />`,
+    `<meta name="twitter:image" content="${escapeHtml(ogImage)}" />`,
+  ];
+
+  const jsonLdEntries: [string, Record<string, unknown> | null][] = [
+    [PHMAX_JSON_LD_ID, jsonLdBlocks.software],
+    [PHMAX_FAQ_JSON_LD_ID, jsonLdBlocks.faq],
+    [PHMAX_BREADCRUMB_JSON_LD_ID, jsonLdBlocks.breadcrumb],
+    [PHMAX_WEBSITE_JSON_LD_ID, jsonLdBlocks.website],
+  ];
+  for (const [id, block] of jsonLdEntries) {
+    if (block) {
+      lines.push(`<script id="${id}" type="application/ld+json">${JSON.stringify(block)}</script>`);
+    }
+  }
+
+  return lines.join("\n    ");
+}
+
+function applyPhmaxHeadMeta(meta: PhmaxDocumentHeadMeta, canonical: string, options: PhmaxHeadRenderOptions): void {
   const origin = resolvePhmaxSiteOrigin();
+  const { faqView, indexable = true, breadcrumbLabel, includeWebSite } = options;
+  const ogImage = new URL(APP_BRAND_LOGO_PATH, origin).href;
+  const robots = indexable ? "index, follow, max-image-preview:large" : "noindex, follow";
 
   document.title = meta.title;
   upsertMeta("name", "description", meta.description);
+  upsertMeta("name", "robots", robots);
   upsertLink("canonical", canonical);
 
   upsertMeta("property", "og:title", meta.title);
@@ -148,49 +315,36 @@ function applyPhmaxHeadMeta(meta: PhmaxDocumentHeadMeta, canonical: string, faqV
   upsertMeta("property", "og:type", "website");
   upsertMeta("property", "og:locale", "cs_CZ");
   upsertMeta("property", "og:site_name", PHMAX_SITE_NAME);
-  upsertMeta("property", "og:image", new URL(APP_BRAND_LOGO_PATH, origin).href);
+  upsertMeta("property", "og:image", ogImage);
+  upsertMeta("property", "og:image:alt", PHMAX_SITE_NAME);
 
-  upsertJsonLd(PHMAX_JSON_LD_ID, {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: meta.applicationName,
-    applicationCategory: "EducationalApplication",
-    operatingSystem: "Web",
-    inLanguage: "cs",
-    description: meta.description,
-    url: canonical,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "CZK",
-    },
+  upsertMeta("name", "twitter:card", "summary_large_image");
+  upsertMeta("name", "twitter:title", meta.title);
+  upsertMeta("name", "twitter:description", meta.description);
+  upsertMeta("name", "twitter:image", ogImage);
+
+  const jsonLdBlocks = buildPhmaxJsonLdBlocks(meta, canonical, faqView, origin, {
+    breadcrumbLabel,
+    includeWebSite,
   });
-
-  const faq = PHMAX_SEO_MODULE_CONTENT[faqView].faq;
-  if (faq.length > 0) {
-    upsertJsonLd(PHMAX_FAQ_JSON_LD_ID, {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: faq.map((item) => ({
-        "@type": "Question",
-        name: item.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: item.answer,
-        },
-      })),
-    });
-  } else {
-    document.getElementById(PHMAX_FAQ_JSON_LD_ID)?.remove();
-  }
+  upsertJsonLd(PHMAX_JSON_LD_ID, jsonLdBlocks.software);
+  upsertJsonLd(PHMAX_FAQ_JSON_LD_ID, jsonLdBlocks.faq);
+  upsertJsonLd(PHMAX_BREADCRUMB_JSON_LD_ID, jsonLdBlocks.breadcrumb);
+  upsertJsonLd(PHMAX_WEBSITE_JSON_LD_ID, jsonLdBlocks.website);
 }
 
 /** Nastaví title, meta description, Open Graph, canonical a JSON-LD pro aktivní modul. */
 export function applyPhmaxDocumentHead(view: ProductViewCode): void {
   if (typeof document === "undefined") return;
   const meta = PHMAX_DOCUMENT_HEAD[view];
-  const canonical = buildPhmaxCanonicalUrl(view, resolvePhmaxSiteOrigin());
-  applyPhmaxHeadMeta(meta, canonical, view);
+  const origin = resolvePhmaxSiteOrigin();
+  const canonical = buildPhmaxCanonicalUrl(view, origin);
+  applyPhmaxHeadMeta(meta, canonical, {
+    canonical,
+    faqView: view,
+    breadcrumbLabel: meta.applicationName,
+    includeWebSite: view === "dash",
+  });
 }
 
 export const PHMAX_USER_GUIDE_DOCUMENT_HEAD: PhmaxDocumentHeadMeta = {
@@ -219,7 +373,11 @@ export function applyPhmaxUserGuideDocumentHead(): void {
   if (typeof document === "undefined") return;
   const origin = resolvePhmaxSiteOrigin();
   const canonical = new URL(USER_GUIDE_PATH, origin).href;
-  applyPhmaxHeadMeta(PHMAX_USER_GUIDE_DOCUMENT_HEAD, canonical, "dash");
+  applyPhmaxHeadMeta(PHMAX_USER_GUIDE_DOCUMENT_HEAD, canonical, {
+    canonical,
+    faqView: "dash",
+    breadcrumbLabel: "Návod k použití",
+  });
 }
 
 /** Document head pro modul výroční zprávy (/vyrocni-zprava). */
@@ -227,7 +385,31 @@ export function applyVyrocniZpravaDocumentHead(): void {
   if (typeof document === "undefined") return;
   const origin = resolvePhmaxSiteOrigin();
   const canonical = new URL(VYROCNI_ZPRAVA_PATH, origin).href;
-  applyPhmaxHeadMeta(PHMAX_VYROCNI_ZPRAVA_DOCUMENT_HEAD, canonical, "dash");
+  applyPhmaxHeadMeta(PHMAX_VYROCNI_ZPRAVA_DOCUMENT_HEAD, canonical, {
+    canonical,
+    faqView: "dash",
+    breadcrumbLabel: "Výroční zpráva školy",
+  });
+}
+
+export const PHMAX_VYROCNI_ZPRAVA_PREVIEW_DOCUMENT_HEAD: PhmaxDocumentHeadMeta = {
+  title: "Náhled výroční zprávy – interní kontrola | Ředitelský průvodce",
+  description:
+    "Interní náhled výroční zprávy školy před exportem. Stránka není určena pro vyhledávače – použijte modul výroční zprávy pro přípravu dokumentu.",
+  applicationName: "Ředitelský průvodce – náhled výroční zprávy",
+};
+
+/** Document head pro náhled výroční zprávy (/vyrocni-zprava/nahled) – bez indexace. */
+export function applyVyrocniZpravaPreviewDocumentHead(): void {
+  if (typeof document === "undefined") return;
+  const origin = resolvePhmaxSiteOrigin();
+  const canonical = new URL(VYROCNI_ZPRAVA_NAHLED_PATH, origin).href;
+  applyPhmaxHeadMeta(PHMAX_VYROCNI_ZPRAVA_PREVIEW_DOCUMENT_HEAD, canonical, {
+    canonical,
+    faqView: "dash",
+    indexable: false,
+    breadcrumbLabel: "Náhled výroční zprávy",
+  });
 }
 
 /** Document head pro profil školy (/profil-skoly). */
@@ -235,7 +417,11 @@ export function applyProfilSkolyDocumentHead(): void {
   if (typeof document === "undefined") return;
   const origin = resolvePhmaxSiteOrigin();
   const canonical = new URL(PROFIL_SKOLY_PATH, origin).href;
-  applyPhmaxHeadMeta(PHMAX_PROFIL_SKOLY_DOCUMENT_HEAD, canonical, "dash");
+  applyPhmaxHeadMeta(PHMAX_PROFIL_SKOLY_DOCUMENT_HEAD, canonical, {
+    canonical,
+    faqView: "dash",
+    breadcrumbLabel: "Profil školy",
+  });
 }
 
 /** Document head pro režim „Rychlý PHmax“ (/rychly). */
@@ -244,16 +430,19 @@ export function applyPhmaxLiteDocumentHead(lite: PhmaxLiteKind): void {
   const meta = PHMAX_LITE_DOCUMENT_HEAD[lite];
   const origin = resolvePhmaxSiteOrigin();
   const canonical = new URL(PHMAX_LITE_PATH[lite], origin).href;
-  applyPhmaxHeadMeta(meta, canonical, lite);
+  applyPhmaxHeadMeta(meta, canonical, {
+    canonical,
+    faqView: lite,
+    breadcrumbLabel: meta.applicationName,
+  });
 }
 
-/** Všechny URL pro sitemap (čisté path včetně rychlého PHmax). */
+/** Indexovatelné URL pro sitemap (bez náhledu výroční zprávy). */
 export function listPhmaxSitemapUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): string[] {
   return [
     ...listProductViewPathUrls(origin),
     new URL(USER_GUIDE_PATH, origin).href,
     new URL(VYROCNI_ZPRAVA_PATH, origin).href,
-    new URL(VYROCNI_ZPRAVA_NAHLED_PATH, origin).href,
     new URL(PROFIL_SKOLY_PATH, origin).href,
     new URL(PHMAX_PV_LITE_PATH, origin).href,
     new URL(PHMAX_SD_LITE_PATH, origin).href,
@@ -261,36 +450,95 @@ export function listPhmaxSitemapUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): strin
   ];
 }
 
+/** Trasy pro statický head po buildu (včetně noindex náhledu). */
+export function listPhmaxPrerenderRoutes(_origin = PHMAX_SITE_ORIGIN_FALLBACK): PhmaxPrerenderRoute[] {
+  const productRoutes = (Object.keys(PHMAX_DOCUMENT_HEAD) as ProductViewCode[]).map((view) => ({
+    pathname: PRODUCT_VIEW_PATH[view],
+    meta: PHMAX_DOCUMENT_HEAD[view],
+    faqView: view,
+    indexable: true,
+    breadcrumbLabel: PHMAX_DOCUMENT_HEAD[view].applicationName,
+    includeWebSite: view === "dash",
+  }));
+
+  const liteRoutes = (Object.keys(PHMAX_LITE_DOCUMENT_HEAD) as PhmaxLiteKind[]).map((lite) => ({
+    pathname: PHMAX_LITE_PATH[lite],
+    meta: PHMAX_LITE_DOCUMENT_HEAD[lite],
+    faqView: lite as ProductViewCode,
+    indexable: true,
+    breadcrumbLabel: PHMAX_LITE_DOCUMENT_HEAD[lite].applicationName,
+  }));
+
+  const extraRoutes: PhmaxPrerenderRoute[] = [
+    {
+      pathname: USER_GUIDE_PATH,
+      meta: PHMAX_USER_GUIDE_DOCUMENT_HEAD,
+      faqView: "dash",
+      indexable: true,
+      breadcrumbLabel: "Návod k použití",
+    },
+    {
+      pathname: VYROCNI_ZPRAVA_PATH,
+      meta: PHMAX_VYROCNI_ZPRAVA_DOCUMENT_HEAD,
+      faqView: "dash",
+      indexable: true,
+      breadcrumbLabel: "Výroční zpráva školy",
+    },
+    {
+      pathname: PROFIL_SKOLY_PATH,
+      meta: PHMAX_PROFIL_SKOLY_DOCUMENT_HEAD,
+      faqView: "dash",
+      indexable: true,
+      breadcrumbLabel: "Profil školy",
+    },
+    {
+      pathname: VYROCNI_ZPRAVA_NAHLED_PATH,
+      meta: PHMAX_VYROCNI_ZPRAVA_PREVIEW_DOCUMENT_HEAD,
+      faqView: "dash",
+      indexable: false,
+      breadcrumbLabel: "Náhled výroční zprávy",
+    },
+  ];
+
+  return [...productRoutes, ...extraRoutes, ...liteRoutes];
+}
+
 export type PhmaxSitemapEntry = {
   loc: string;
   changefreq: "weekly" | "monthly";
   priority: string;
+  lastmod: string;
 };
 
 function phmaxSitemapPriority(pathname: string): { changefreq: PhmaxSitemapEntry["changefreq"]; priority: string } {
   if (pathname === "/prehled") return { changefreq: "weekly", priority: "1.0" };
   if (pathname === "/navod") return { changefreq: "monthly", priority: "0.85" };
   if (pathname === "/vyrocni-zprava") return { changefreq: "monthly", priority: "0.85" };
-  if (pathname === "/vyrocni-zprava/nahled") return { changefreq: "monthly", priority: "0.8" };
   if (pathname === "/profil-skoly") return { changefreq: "monthly", priority: "0.85" };
   if (pathname.endsWith("/rychly")) return { changefreq: "monthly", priority: "0.85" };
   if (pathname === "/banka-odpoctu-zastupcu-reditele") return { changefreq: "monthly", priority: "0.8" };
   return { changefreq: "monthly", priority: "0.9" };
 }
 
-export function buildPhmaxSitemapEntries(origin = PHMAX_SITE_ORIGIN_FALLBACK): PhmaxSitemapEntry[] {
+export function buildPhmaxSitemapEntries(
+  origin = PHMAX_SITE_ORIGIN_FALLBACK,
+  lastmod = new Date().toISOString().slice(0, 10),
+): PhmaxSitemapEntry[] {
   return listPhmaxSitemapUrls(origin).map((loc) => {
     const pathname = new URL(loc).pathname.replace(/\/+$/, "") || "/";
     const { changefreq, priority } = phmaxSitemapPriority(pathname);
-    return { loc, changefreq, priority };
+    return { loc, changefreq, priority, lastmod };
   });
 }
 
-export function buildPhmaxSitemapXml(origin = PHMAX_SITE_ORIGIN_FALLBACK): string {
-  const rows = buildPhmaxSitemapEntries(origin)
+export function buildPhmaxSitemapXml(
+  origin = PHMAX_SITE_ORIGIN_FALLBACK,
+  lastmod = new Date().toISOString().slice(0, 10),
+): string {
+  const rows = buildPhmaxSitemapEntries(origin, lastmod)
     .map(
       (entry) =>
-        `  <url><loc>${entry.loc}</loc><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`,
+        `  <url><loc>${entry.loc}</loc><lastmod>${entry.lastmod}</lastmod><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`,
     )
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows}\n</urlset>\n`;

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://app.reditelskypruvodce.cz/prehled</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/phmax-predskolni-vzdelavani</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/phmax-skolni-druzina</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/phmax-zakladni-skola</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/phmax-stredni-skola</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/banka-odpoctu-zastupcu-reditele</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/navod</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/vyrocni-zprava</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/profil-skoly</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/phmax-predskolni-vzdelavani/rychly</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/phmax-skolni-druzina/rychly</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://app.reditelskypruvodce.cz/phmax-zakladni-skola/rychly</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/prehled</loc><lastmod>2026-07-05</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/phmax-predskolni-vzdelavani</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/phmax-skolni-druzina</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/phmax-zakladni-skola</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/phmax-stredni-skola</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/banka-odpoctu-zastupcu-reditele</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/navod</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/vyrocni-zprava</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/profil-skoly</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/phmax-predskolni-vzdelavani/rychly</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/phmax-skolni-druzina/rychly</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://app.reditelskypruvodce.cz/phmax-zakladni-skola/rychly</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
 </urlset>

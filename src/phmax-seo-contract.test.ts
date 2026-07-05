@@ -15,6 +15,10 @@ describe("SEO fáze A contract", () => {
     expect(readSource("src/App.tsx")).toContain("writeProductViewUrl");
     expect(readSource("src/phmax-document-head.ts")).toContain("SoftwareApplication");
     expect(readSource("src/phmax-document-head.ts")).toContain("FAQPage");
+    expect(readSource("src/phmax-document-head.ts")).toContain("BreadcrumbList");
+    expect(readSource("src/phmax-document-head.ts")).toContain("WebSite");
+    expect(readSource("src/phmax-document-head.ts")).toContain("twitter:card");
+    expect(readSource("src/phmax-document-head.ts")).toContain("buildPhmaxHeadHtmlTags");
     expect(readSource("src/phmax-document-head.ts")).toContain("og:description");
   });
 
@@ -36,6 +40,8 @@ describe("SEO fáze A contract", () => {
     expect(readSource("public/sitemap.xml")).toContain("/phmax-skolni-druzina/rychly");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-zakladni-skola/rychly");
     expect(readSource("vercel.json")).toContain("rewrites");
+    expect(readSource("vercel.json")).toContain("redirects");
+    expect(readSource("package.json")).toContain("prerender-route-html");
   });
 
   it("pilotní materiál pro ředitele", () => {
