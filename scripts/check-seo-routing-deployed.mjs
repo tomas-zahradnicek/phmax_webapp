@@ -125,6 +125,15 @@ async function fetchCheck(path, options = {}) {
       reason: "Redirect location does not match expected target path.",
     });
   }
+  if (location && location.includes("view=")) {
+    fail({
+      url: manual.url,
+      expectedStatus: "Location without view query param",
+      actualStatus: String(manual.response.status),
+      location,
+      reason: "Redirect location still contains view query parameter.",
+    });
+  }
 
   const followed = await fetchCheck(sourcePath, { redirect: "follow" });
   const finalPath = new URL(followed.response.url).pathname;
@@ -144,6 +153,16 @@ async function fetchCheck(path, options = {}) {
       actualStatus: String(followed.response.status),
       location: followed.response.headers.get("location"),
       reason: `Final URL path is ${finalPath}.`,
+    });
+  }
+  const finalSearch = new URL(followed.response.url).search;
+  if (finalSearch.includes("view=")) {
+    fail({
+      url: followed.url,
+      expectedStatus: "Final URL without view query param",
+      actualStatus: String(followed.response.status),
+      location: followed.response.headers.get("location"),
+      reason: "Final URL still contains view query parameter.",
     });
   }
 }

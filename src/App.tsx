@@ -98,6 +98,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Dočasná klientská pojistka: primární legacy redirect řeší Vercel middleware (middleware.ts).
+    // Tento efekt sjednotí URL, pokud prohlížeč načte ?view= bez serverového přesměrování.
     if (isLegacyViewQueryUrl()) {
       writeProductViewUrl(readInitialProductView(), "replace");
     }

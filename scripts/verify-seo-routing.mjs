@@ -3,19 +3,11 @@ import { stat } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveLegacyViewRedirect } from "../legacy-view-redirect.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = path.join(repoRoot, "dist");
 let origin = "http://127.0.0.1:4175";
-
-const legacyRedirectMap = new Map([
-  ["pv", "/phmax-predskolni-vzdelavani"],
-  ["sd", "/phmax-skolni-druzina"],
-  ["zs", "/phmax-zakladni-skola"],
-  ["ss", "/phmax-stredni-skola"],
-  ["nv75", "/banka-odpoctu-zastupcu-reditele"],
-  ["dash", "/prehled"],
-]);
 
 const expected200Routes = [
   "/prehled",
@@ -45,11 +37,16 @@ function resolveFile(pathname) {
   return null;
 }
 
-function keepQueryWithoutView(searchParams) {
-  const copy = new URLSearchParams(searchParams);
-  copy.delete("view");
-  const raw = copy.toString();
-  return raw ? `?${raw}` : "";
+function locationMatches(locationHeader, expectedPath, expectedSearch = "") {
+  if (!locationHeader || locationHeader === "-") return false;
+  if (locationHeader === expectedPath || locationHeader === `${expectedPath}${expectedSearch}`) return true;
+  try {
+    const parsed = new URL(locationHeader, origin);
+    const expected = new URL(`${expectedPath}${expectedSearch}`, origin);
+    return parsed.pathname === expected.pathname && parsed.search === expected.search;
+  } catch {
+    return false;
+  }
 }
 
 function startsWithKnownRoute(pathname) {
@@ -61,19 +58,10 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", origin);
   const pathname = url.pathname;
 
-  if (url.searchParams.has("view")) {
-    const target = legacyRedirectMap.get(url.searchParams.get("view"));
-    if (target) {
-      res.statusCode = 308;
-      res.setHeader("Location", `${target}${keepQueryWithoutView(url.searchParams)}`);
-      res.end("Redirect");
-      return;
-    }
-  }
-
-  if (pathname === "/") {
+  const legacyRedirect = resolveLegacyViewRedirect(url.href);
+  if (legacyRedirect) {
     res.statusCode = 308;
-    res.setHeader("Location", "/prehled");
+    res.setHeader("Location", legacyRedirect);
     res.end("Redirect");
     return;
   }
@@ -111,7 +99,16 @@ async function fetchOne(pathname, { redirect = "manual" } = {}) {
   const text = await response.text();
   const robots = text.match(/name="robots"\s+content="([^"]+)"/i)?.[1] ?? "-";
   const canonical = text.match(/rel="canonical"\s+href="([^"]+)"/i)?.[1] ?? "-";
-  return { status: response.status, location: response.headers.get("location") ?? "-", robots, canonical, text };
+  const finalUrl = new URL(response.url);
+  return {
+    status: response.status,
+    location: response.headers.get("location") ?? "-",
+    robots,
+    canonical,
+    text,
+    finalPath: finalUrl.pathname,
+    finalSearch: finalUrl.search,
+  };
 }
 
 const checks = [];
@@ -141,31 +138,71 @@ checks.push({
 });
 
 const legacyChecks = [
-  ["/?view=zs", "/phmax-zakladni-skola"],
-  ["/prehled?view=zs", "/phmax-zakladni-skola"],
-  ["/?view=pv", "/phmax-predskolni-vzdelavani"],
-  ["/?view=sd", "/phmax-skolni-druzina"],
-  ["/?view=ss", "/phmax-stredni-skola"],
-  ["/?view=nv75", "/banka-odpoctu-zastupcu-reditele"],
-  ["/?view=dash", "/prehled"],
+  ["/?view=zs", "/phmax-zakladni-skola", ""],
+  ["/prehled?view=zs", "/phmax-zakladni-skola", ""],
+  ["/?view=pv", "/phmax-predskolni-vzdelavani", ""],
+  ["/?view=sd", "/phmax-skolni-druzina", ""],
+  ["/?view=ss", "/phmax-stredni-skola", ""],
+  ["/?view=nv75", "/banka-odpoctu-zastupcu-reditele", ""],
+  ["/?view=dash", "/prehled", ""],
+  ["/?view=zs&utm_source=test", "/phmax-zakladni-skola", "?utm_source=test"],
+  ["/?utm_source=test", "/prehled", "?utm_source=test"],
 ];
 
-for (const [source, destination] of legacyChecks) {
+for (const [source, destination, destinationSearch] of legacyChecks) {
   const redirectResult = await fetchOne(source, { redirect: "manual" });
   checks.push({
     url: source,
     expectedStatus: "308/301",
-    expectedLocation: destination,
+    expectedLocation: `${destination}${destinationSearch}`,
+    forbidViewInLocation: true,
     ...redirectResult,
   });
-  const target = await fetchOne(destination);
+  const followed = await fetchOne(source, { redirect: "follow" });
   checks.push({
-    url: `${destination} (target)`,
+    url: `${source} (follow)`,
     expectedStatus: "200",
     expectedLocation: "-",
-    ...target,
+    expectedFinalPath: destination,
+    expectedFinalSearch: destinationSearch,
+    forbidViewInFinalUrl: true,
+    ...followed,
   });
 }
+
+const unknownViewRedirect = await fetchOne("/?view=unknown", { redirect: "manual" });
+checks.push({
+  url: "/?view=unknown",
+  expectedStatus: "308/301",
+  expectedLocation: "/prehled",
+  ...unknownViewRedirect,
+});
+
+const unknownViewFollow = await fetchOne("/?view=unknown", { redirect: "follow" });
+checks.push({
+  url: "/?view=unknown (follow)",
+  expectedStatus: "200",
+  expectedLocation: "-",
+  expectedFinalPath: "/prehled",
+  forbidViewInFinalUrl: true,
+  ...unknownViewFollow,
+});
+
+const prehled = await fetchOne("/prehled");
+checks.push({
+  url: "/prehled",
+  expectedStatus: "200",
+  expectedLocation: "-",
+  ...prehled,
+});
+
+const prehledUnknownView = await fetchOne("/prehled?view=unknown", { redirect: "manual" });
+checks.push({
+  url: "/prehled?view=unknown",
+  expectedStatus: "200",
+  expectedLocation: "-",
+  ...prehledUnknownView,
+});
 
 server.close();
 
@@ -178,13 +215,30 @@ for (const check of checks) {
         ? check.status === 404
         : check.status === 308 || check.status === 301;
   const locationOk =
-    check.expectedLocation === "-" ? true : check.location.startsWith(check.expectedLocation);
+    check.expectedLocation === "-"
+      ? true
+      : locationMatches(check.location, check.expectedLocation.split("?")[0], check.expectedLocation.includes("?") ? `?${check.expectedLocation.split("?")[1]}` : "");
+  const finalPathOk = check.expectedFinalPath ? check.finalPath === check.expectedFinalPath : true;
+  const finalSearchOk = check.expectedFinalSearch !== undefined ? check.finalSearch === check.expectedFinalSearch : true;
+  const noViewInLocation =
+    check.forbidViewInLocation && check.location !== "-"
+      ? !String(check.location).includes("view=")
+      : true;
+  const noViewInFinalUrl = check.forbidViewInFinalUrl ? !String(check.finalSearch).includes("view=") : true;
   const noCanonicalToPrehled = check.url.includes("neexistuje") ? !check.canonical.includes("/prehled") : true;
   const noindexOn404 =
     check.url.includes("neexistuje") || check.url === "/vyrocni-zprava/nahled"
       ? check.robots.includes("noindex")
       : true;
-  const pass = statusOk && locationOk && noCanonicalToPrehled && noindexOn404;
+  const pass =
+    statusOk &&
+    locationOk &&
+    finalPathOk &&
+    finalSearchOk &&
+    noViewInLocation &&
+    noViewInFinalUrl &&
+    noCanonicalToPrehled &&
+    noindexOn404;
   hasFailure ||= !pass;
   console.log(
     [
