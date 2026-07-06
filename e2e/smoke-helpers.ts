@@ -77,6 +77,15 @@ export async function confirmDashboardExportDisclaimer(page: Page): Promise<void
   await checkbox.check();
 }
 
+/** Modul – na úzkém displeji skryje plovoucí souhrn, který překrývá hero ovládací prvky. */
+export async function dismissMobileFloatingSummaryIfVisible(page: Page): Promise<void> {
+  const dismiss = page.locator(".calculator-mobile-scroll-results__dismiss");
+  if (await dismiss.isVisible()) {
+    await dismiss.click();
+    await expect(page.locator(".calculator-mobile-scroll-results")).toHaveCount(0);
+  }
+}
+
 /** Modul – na úzkém displeji otevře panel akcí před exportem. */
 export async function openHeroActionsDrawerIfNeeded(page: Page): Promise<void> {
   const toggle = page.getByRole("button", { name: /Akce, tisk, uložení a export/i });

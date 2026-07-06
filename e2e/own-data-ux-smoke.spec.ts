@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { clearLocalStorageKeys, gotoProductView } from "./smoke-helpers";
+import { clearLocalStorageKeys, dismissMobileFloatingSummaryIfVisible, gotoProductView } from "./smoke-helpers";
 import { CROSS_PHMAX_LS } from "./cross-phmax-seed";
 
 const EMPTY_DASHBOARD_LS_KEYS = [
@@ -14,6 +14,7 @@ const EMPTY_DASHBOARD_LS_KEYS = [
 test.describe("UX: vlastní údaje a režimy", () => {
   test("PV – nápověda vlastních údajů a vysvětlení režimu", async ({ page }) => {
     await gotoProductView(page, "pv");
+    await dismissMobileFloatingSummaryIfVisible(page);
     const hintPanel = page.locator(".calculator-hero-collapsible-hint--workspace");
     await expect(hintPanel.getByText("Jak modul funguje")).toBeVisible();
     await hintPanel.locator("summary").click();
