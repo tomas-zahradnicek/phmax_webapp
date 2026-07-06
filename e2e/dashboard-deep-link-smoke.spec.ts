@@ -3,6 +3,7 @@ import { applyCrossPhmaxSeed, CROSS_PHMAX_LS, defaultCrossPhmaxSeedKeys } from "
 import {
   confirmDashboardExportDisclaimer,
   expectDashboardExportButton,
+  openDashboardAdvancedToolsSection,
   openDashboardAttentionModule,
   openDashboardKpiModule,
   gotoProductView,
@@ -424,8 +425,12 @@ test.describe("Dashboard deep-link", () => {
 
     await gotoProductView(page, "dash");
     await expect(page.getByRole("heading", { name: /Souhrnný PHmax/ })).toBeVisible();
+    await openDashboardAdvancedToolsSection(page);
+    await expect(page.getByRole("heading", { name: "Export a scénář školy" })).toBeVisible();
+    await page.getByLabel(/URL endpoint IS/i).fill(E2E_IS_HANDOFF_URL);
     await confirmDashboardExportDisclaimer(page);
     const postBtn = page.getByRole("button", { name: "Odeslat export na IS (POST)" });
+    await expect(postBtn).toBeVisible();
     await postBtn.scrollIntoViewIfNeeded();
     await postBtn.click();
     await expect(page.locator(".ui-toast").filter({ hasText: /Handoff odeslán \(HTTP 200\)/i })).toBeVisible({
