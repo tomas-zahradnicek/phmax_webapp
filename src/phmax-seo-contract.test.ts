@@ -46,7 +46,12 @@ describe("SEO fáze A contract", () => {
     expect(readSource("package.json")).toContain("prerender-route-html");
     expect(readSource("package.json")).toContain("check:seo-routing");
     expect(readSource("package.json")).toContain("check:seo-routing:deployed");
+    expect(readSource("package.json")).toContain("check:seo-content");
     expect(readSource("scripts/prerender-route-html.ts")).toContain("404.html");
+    expect(readSource("scripts/prerender-route-html.ts")).toContain("renderRouteSeoHtml");
+    expect(readSource("src/phmax-route-seo-content.ts")).toContain("PHASE_C_SEO_CONTENT_PATHS");
+    expect(readSource("src/render-route-seo-html.ts")).toContain("renderRouteSeoHtml");
+    expect(readSource("src/main.tsx")).toContain("removePrerenderFallbackWhenReady");
     expect(readSource("scripts/verify-seo-routing.mjs")).toContain("neexistuje-seo-route-404");
   });
 

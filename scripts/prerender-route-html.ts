@@ -1,6 +1,5 @@
 /**
- * Po `vite build` vloží route-specific SEO head do dist podadresářů.
- * Crawlery tak dostanou správný title, meta, canonical a JSON-LD bez čekání na JS.
+ * Po `vite build` vloží route-specific SEO head a (pro fázi C) body obsah do dist.
  *
  *   npm run build
  */
@@ -12,8 +11,10 @@ import {
   listPhmaxPrerenderRoutes,
   PHMAX_DOCUMENT_HEAD,
 } from "../src/phmax-document-head";
+import { getRouteSeoContent, isPhaseCSeoContentPath } from "../src/phmax-route-seo-content";
 import { PHMAX_SITE_ORIGIN_FALLBACK } from "../src/phmax-site-origin";
 import { PRODUCT_VIEW_PATH } from "../src/product-view-paths";
+import { renderRouteSeoHtml, SEO_PRERENDER_NOSCRIPT_HTML } from "../src/render-route-seo-html";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = path.join(repoRoot, "dist");
@@ -30,19 +31,7 @@ function stripExistingSeoHead(html: string): string {
     .replace(/<script[^>]*id="phmax-[^"]*"[^>]*>[\s\S]*?<\/script>\s*/gi, "");
 }
 
-function injectSeoHead(html: string, headTags: string, noscriptHtml: string): string {
-  const cleaned = stripExistingSeoHead(html);
-  const withHead = cleaned.replace(
-    /(<meta\s+name="viewport"[^>]*>)/i,
-    `$1\n    ${headTags}`,
-  );
-  return withHead.replace(
-    /<div id="root"><\/div>/,
-    `${noscriptHtml}\n    <div id="root"></div>`,
-  );
-}
-
-function buildNoscript(metaDescription: string, canonical: string): string {
+function buildLegacyNoscript(metaDescription: string, canonical: string): string {
   const safeDescription = metaDescription
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -55,6 +44,22 @@ function buildNoscript(metaDescription: string, canonical: string): string {
         <p><a href="${canonical}">Pokračovat na stránku</a> · <a href="/prehled">Přehled modulů</a> · <a href="/navod">Návod</a></p>
       </main>
     </noscript>`;
+}
+
+function injectSeoHtml(
+  html: string,
+  headTags: string,
+  options: { pathname: string; metaDescription: string; canonical: string },
+): string {
+  const cleaned = stripExistingSeoHead(html);
+  const withHead = cleaned.replace(/(<meta\s+name="viewport"[^>]*>)/i, `$1\n    ${headTags}`);
+
+  const routeContent = isPhaseCSeoContentPath(options.pathname) ? getRouteSeoContent(options.pathname) : null;
+  const noscriptHtml = routeContent ? SEO_PRERENDER_NOSCRIPT_HTML : buildLegacyNoscript(options.metaDescription, options.canonical);
+  const prerenderHtml = routeContent ? renderRouteSeoHtml(routeContent) : "";
+
+  const bodyInjection = [noscriptHtml, prerenderHtml, '<div id="root"></div>'].filter(Boolean).join("\n    ");
+  return withHead.replace(/<div id="root"><\/div>/, bodyInjection);
 }
 
 function build404Html(template: string, origin: string): string {
@@ -104,7 +109,11 @@ for (const route of routes) {
     breadcrumbLabel: route.breadcrumbLabel,
     includeWebSite: route.includeWebSite,
   });
-  const html = injectSeoHead(template, headTags, buildNoscript(route.meta.description, canonical));
+  const html = injectSeoHtml(template, headTags, {
+    pathname: route.pathname,
+    metaDescription: route.meta.description,
+    canonical,
+  });
   const outDir = path.join(distDir, route.pathname.replace(/^\//, ""));
   mkdirSync(outDir, { recursive: true });
   writeFileSync(path.join(outDir, "index.html"), html, "utf8");
@@ -120,10 +129,16 @@ const overviewHead = buildPhmaxHeadHtmlTags(overview, origin, {
 });
 writeFileSync(
   templatePath,
-  injectSeoHead(template, overviewHead, buildNoscript(overview.description, overviewCanonical)),
+  injectSeoHtml(template, overviewHead, {
+    pathname: "/prehled",
+    metaDescription: overview.description,
+    canonical: overviewCanonical,
+  }),
   "utf8",
 );
 writeFileSync(path.join(distDir, "404.html"), build404Html(template, origin), "utf8");
 
+const phaseCCount = routes.filter((route) => isPhaseCSeoContentPath(route.pathname)).length;
 console.log(`Prerender SEO head: ${routes.length} routes + dist/index.html`);
+console.log(`Prerender SEO body (fáze C): ${phaseCCount} routes`);
 console.log(`Origin: ${origin}`);
