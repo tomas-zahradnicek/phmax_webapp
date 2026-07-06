@@ -49,6 +49,7 @@ describe("E2E smoke contract", () => {
     expect(readSource("e2e/dashboard-ux-013.spec.ts")).toContain('aria-live", "assertive"');
     expect(readSource("src/phmax-sd-dashboard-focus.ts")).toContain("findFirstSdDashboardFocusHint");
     expect(readSource("playwright.config.ts")).toContain("own-data-ux-smoke");
+    expect(readSource("playwright.config.ts")).toContain("seo-prerender-content");
     expect(readSource("package.json")).toContain('"test:e2e"');
     expect(readSource(".github/workflows/ci.yml")).toContain("npm run test:e2e");
     expect(readSource(".github/workflows/ci.yml")).toContain("npm run lint");

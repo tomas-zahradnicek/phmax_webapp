@@ -21,7 +21,7 @@ export default defineConfig({
   projects: [
     {
       name: "mobile-chrome",
-      testIgnore: /desktop-toc-smoke\.spec\.ts/,
+      testIgnore: /desktop-toc-smoke\.spec\.ts|seo-prerender-content\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 390, height: 844 },
