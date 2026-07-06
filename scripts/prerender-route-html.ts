@@ -13,6 +13,7 @@ import {
   PHMAX_DOCUMENT_HEAD,
 } from "../src/phmax-document-head";
 import { PHMAX_SITE_ORIGIN_FALLBACK } from "../src/phmax-site-origin";
+import { PRODUCT_VIEW_PATH } from "../src/product-view-paths";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = path.join(repoRoot, "dist");
@@ -56,6 +57,40 @@ function buildNoscript(metaDescription: string, canonical: string): string {
     </noscript>`;
 }
 
+function build404Html(template: string, origin: string): string {
+  const canonical = new URL("/404", origin).href;
+  const headTags = [
+    `<title>Stránka nebyla nalezena | Ředitelský průvodce</title>`,
+    `<meta name="description" content="Požadovaná stránka nebyla nalezena. Pokračujte na přehled modulů kalkulaček PHmax." />`,
+    `<meta name="robots" content="noindex, follow" />`,
+    `<link rel="canonical" href="${canonical}" />`,
+    `<meta property="og:title" content="Stránka nebyla nalezena | Ředitelský průvodce" />`,
+    `<meta property="og:description" content="Požadovaná stránka nebyla nalezena. Pokračujte na přehled modulů kalkulaček PHmax." />`,
+    `<meta property="og:url" content="${canonical}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:locale" content="cs_CZ" />`,
+    `<meta property="og:site_name" content="Ředitelský průvodce" />`,
+  ].join("\n    ");
+
+  const notFoundBody = `<main class="container" style="max-width:900px;margin:40px auto;padding:0 16px;">
+      <h1>Stránka nebyla nalezena</h1>
+      <p>Požadovaná adresa v aplikaci Ředitelský průvodce neexistuje nebo byla změněna.</p>
+      <p><a href="/prehled">Přejít na přehled modulů</a></p>
+      <h2>Hlavní kalkulačky</h2>
+      <ul>
+        <li><a href="${PRODUCT_VIEW_PATH.pv}">PHmax předškolní vzdělávání</a></li>
+        <li><a href="${PRODUCT_VIEW_PATH.sd}">PHmax školní družina</a></li>
+        <li><a href="${PRODUCT_VIEW_PATH.zs}">PHmax základní škola</a></li>
+        <li><a href="${PRODUCT_VIEW_PATH.ss}">PHmax střední škola</a></li>
+        <li><a href="${PRODUCT_VIEW_PATH.nv75}">Banka odpočtů NV75</a></li>
+      </ul>
+    </main>`;
+
+  const cleaned = stripExistingSeoHead(template);
+  const withHead = cleaned.replace(/(<meta\s+name="viewport"[^>]*>)/i, `$1\n    ${headTags}`);
+  return withHead.replace(/<div id="root"><\/div>/, notFoundBody);
+}
+
 const template = readFileSync(templatePath, "utf8");
 const origin = PHMAX_SITE_ORIGIN_FALLBACK;
 const routes = listPhmaxPrerenderRoutes(origin);
@@ -88,6 +123,7 @@ writeFileSync(
   injectSeoHead(template, overviewHead, buildNoscript(overview.description, overviewCanonical)),
   "utf8",
 );
+writeFileSync(path.join(distDir, "404.html"), build404Html(template, origin), "utf8");
 
 console.log(`Prerender SEO head: ${routes.length} routes + dist/index.html`);
 console.log(`Origin: ${origin}`);
