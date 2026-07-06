@@ -23,7 +23,6 @@ import { buildSection13GeneratorInput } from "./vyrocni-zprava-section13-generat
 import {
   SECTION13_INCOMPLETE_DRAFT_PREFIX,
   generateSection13Draft,
-  isSection13IncompleteDraft,
 } from "./vyrocni-zprava-section13-local-generator";
 import { shouldUseSection13Generator } from "./vyrocni-zprava-section13-generator-service";
 import {

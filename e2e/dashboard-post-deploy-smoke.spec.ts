@@ -56,7 +56,9 @@ test.describe("Post-deploy smoke – Přehled → modul → export", () => {
 
   test("návod k použití je v řádku záložek modulu PV", async ({ page }) => {
     await gotoProductView(page, "pv");
-    const guide = page.locator(".calculator-hero-shell__nav-trailing .calculator-hero-shell__guide-btn");
+    const guide = page
+      .locator(".calculator-hero-shell__nav-trailing")
+      .getByRole("link", { name: "Návod k použití" });
     await expect(guide).toBeVisible();
     await expect(guide).toHaveAttribute("href", "/navod");
   });

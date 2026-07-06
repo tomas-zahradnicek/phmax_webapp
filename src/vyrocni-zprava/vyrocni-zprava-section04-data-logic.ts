@@ -133,7 +133,7 @@ function hasAnySecondaryData(rows: AnnualReportSection04SecondaryAdmission[]): b
   return rows.some((row) => pickFilledString(row.schoolType) || row.count !== undefined);
 }
 
-function hasAnyPupilCountData(rows: AnnualReportSection04PupilCountRow[]): boolean {
+function _hasAnyPupilCountData(rows: AnnualReportSection04PupilCountRow[]): boolean {
   return rows.some(
     (row) =>
       pickFilledString(row.className) ||

@@ -233,7 +233,7 @@ export function VyrocniZpravaSectionDetail({
     if (!section) return;
     setGeneratedDraft(section.generatedText);
     setGeneratedDirty(false);
-  }, [section?.id, section?.generatedText, section?.updatedAt]);
+  }, [section]);
 
   const hasMissing = section ? section.missingFields.length > 0 : false;
   const showMissingPanel = showMissingCheck && hasMissing;
@@ -253,7 +253,7 @@ export function VyrocniZpravaSectionDetail({
   const showCalculatorPanel = section ? isAnnualReportSection03Family(section.id) : false;
   const calculatorData = useMemo(
     () => (showCalculatorPanel ? getAnnualReportCalculatorData() : null),
-    [showCalculatorPanel, section?.id],
+    [showCalculatorPanel],
   );
   const section03Readiness = useMemo(
     () =>

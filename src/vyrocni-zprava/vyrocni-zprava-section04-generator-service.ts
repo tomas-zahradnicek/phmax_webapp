@@ -2,7 +2,6 @@ import type { SchoolProfile } from "../school-profile/school-profile-types";
 import { buildSection04GeneratorInput } from "./vyrocni-zprava-section04-generator-input";
 import {
   generateSection04Draft,
-  isSection04IncompleteDraft,
   type Section04DraftResult,
 } from "./vyrocni-zprava-section04-local-generator";
 import type { AnnualReportSection04Data } from "./vyrocni-zprava-section04-types";

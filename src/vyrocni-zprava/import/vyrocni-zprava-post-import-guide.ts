@@ -3,7 +3,21 @@ import type { AnnualReportImportPreviewSummary } from "./vyrocni-zprava-xlsx-imp
 import type { AnnualReportXlsxImportResult } from "./vyrocni-zprava-xlsx-import-types";
 import type { VyrocniZpravaPostImportGuideData } from "./VyrocniZpravaPostImportGuide";
 
-const SECTION_IDS = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14"] as const;
+type AnnualReportSectionId =
+  | "01"
+  | "02"
+  | "03"
+  | "04"
+  | "05"
+  | "06"
+  | "07"
+  | "08"
+  | "09"
+  | "10"
+  | "11"
+  | "12"
+  | "13"
+  | "14";
 
 function hasAnyText(value?: string): boolean {
   return (value ?? "").trim().length > 0;
@@ -70,7 +84,7 @@ export function buildJsonPostImportGuide(payload: JsonBackupPayload): VyrocniZpr
     setupItems.push("Schválení a zveřejnění");
   }
 
-  const sectionTargets: Array<{ id: (typeof SECTION_IDS)[number]; data: unknown }> = [
+  const sectionTargets: Array<{ id: AnnualReportSectionId; data: unknown }> = [
     { id: "01", data: payload.section01Data },
     { id: "02", data: payload.section02Data },
     { id: "03", data: payload.section03Data },

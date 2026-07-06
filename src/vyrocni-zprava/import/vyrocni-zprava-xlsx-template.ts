@@ -1,8 +1,5 @@
 import type ExcelJSNamespace from "exceljs";
-import {
-  assertAnnualReportXlsxTemplateConfig,
-  VYROCNI_ZPRAVA_XLSX_TEMPLATE_FILENAME,
-} from "./vyrocni-zprava-xlsx-template-config";
+import { assertAnnualReportXlsxTemplateConfig } from "./vyrocni-zprava-xlsx-template-config";
 import { createEmptyExcelJsWorkbook } from "./vyrocni-zprava-xlsx-exceljs";
 
 export {

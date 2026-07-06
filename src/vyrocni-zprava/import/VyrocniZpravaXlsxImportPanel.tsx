@@ -332,7 +332,6 @@ export function VyrocniZpravaXlsxImportPanel({
     onApplySection13Data,
     onApplySection14Data,
     onApplyPublicationBlockPatch,
-    previewSummary?.canConfirm,
   ]);
 
   const handleExportBackup = useCallback(() => {
