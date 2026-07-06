@@ -39,9 +39,13 @@ describe("SEO fáze A contract", () => {
     expect(readSource("public/sitemap.xml")).toContain("/phmax-predskolni-vzdelavani/rychly");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-skolni-druzina/rychly");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-zakladni-skola/rychly");
-    expect(readSource("vercel.json")).toContain("rewrites");
     expect(readSource("vercel.json")).toContain("redirects");
+    expect(readSource("vercel.json")).not.toContain('"rewrites"');
+    expect(readSource("vercel.json")).toContain('"view"');
     expect(readSource("package.json")).toContain("prerender-route-html");
+    expect(readSource("package.json")).toContain("check:seo-routing");
+    expect(readSource("scripts/prerender-route-html.ts")).toContain("404.html");
+    expect(readSource("scripts/verify-seo-routing.mjs")).toContain("neexistuje-seo-route-404");
   });
 
   it("pilotní materiál pro ředitele", () => {
