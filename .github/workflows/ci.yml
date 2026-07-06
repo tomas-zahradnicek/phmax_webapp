@@ -17,6 +17,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run check:seo-routing
+      - run: npm run check:seo-content
       - run: npm run check:ci-guards-manifest
       - run: npm run check:release-manifest
       - run: npm run check:no-legacy-root-pages

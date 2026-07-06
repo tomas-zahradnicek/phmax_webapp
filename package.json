@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build && npx --yes tsx scripts/prerender-route-html.ts",
     "check:seo-routing": "node scripts/verify-seo-routing.mjs",
-    "check:seo-routing:deployed": "node scripts/check-seo-routing-deployed.mjs",
+    "check:seo-routing:deployed": "node scripts/verify-seo-routing-deployed.mjs",
     "check:seo-content": "npx --yes tsx scripts/check-seo-content.ts",
     "preview": "vite preview",
     "test": "vitest run",
