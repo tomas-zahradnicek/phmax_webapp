@@ -95,6 +95,7 @@ const PHMAX_JSON_LD_ID = "phmax-software-application-jsonld";
 const PHMAX_FAQ_JSON_LD_ID = "phmax-faq-jsonld";
 const PHMAX_BREADCRUMB_JSON_LD_ID = "phmax-breadcrumb-jsonld";
 const PHMAX_WEBSITE_JSON_LD_ID = "phmax-website-jsonld";
+const PHMAX_WEBPAGE_JSON_LD_ID = "phmax-webpage-jsonld";
 
 export type PhmaxFaqItem = {
   question: string;
@@ -108,6 +109,7 @@ export type PhmaxHeadRenderOptions = {
   breadcrumbRootPath?: string;
   breadcrumbRootLabel?: string;
   includeWebSite?: boolean;
+  includeWebPage?: boolean;
   includeSoftwareApplication?: boolean;
   /** Explicit FAQ pro JSON-LD; `null` = žádné FAQ; `undefined` = použít faqView. */
   faqItems?: PhmaxFaqItem[] | null;
@@ -192,6 +194,7 @@ type PhmaxJsonLdBlockMap = {
   faq: Record<string, unknown> | null;
   breadcrumb: Record<string, unknown> | null;
   website: Record<string, unknown> | null;
+  webpage: Record<string, unknown> | null;
 };
 
 function buildPhmaxJsonLdBlocks(
@@ -269,6 +272,21 @@ function buildPhmaxJsonLdBlocks(
           description: options.websiteDescription ?? meta.description,
         }
       : null,
+    webpage: options.includeWebPage
+      ? {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: meta.title,
+          description: meta.description,
+          url: canonical,
+          inLanguage: "cs",
+          isPartOf: {
+            "@type": "WebSite",
+            name: PHMAX_SITE_NAME,
+            url: buildPhmaxPublicHubUrl(origin),
+          },
+        }
+      : null,
   };
 }
 
@@ -307,6 +325,7 @@ export function buildPhmaxHeadHtmlTags(
     [PHMAX_FAQ_JSON_LD_ID, jsonLdBlocks.faq],
     [PHMAX_BREADCRUMB_JSON_LD_ID, jsonLdBlocks.breadcrumb],
     [PHMAX_WEBSITE_JSON_LD_ID, jsonLdBlocks.website],
+    [PHMAX_WEBPAGE_JSON_LD_ID, jsonLdBlocks.webpage],
   ];
   for (const [id, block] of jsonLdEntries) {
     if (block) {
@@ -347,6 +366,7 @@ function applyPhmaxHeadMeta(meta: PhmaxDocumentHeadMeta, canonical: string, opti
   upsertJsonLd(PHMAX_FAQ_JSON_LD_ID, jsonLdBlocks.faq);
   upsertJsonLd(PHMAX_BREADCRUMB_JSON_LD_ID, jsonLdBlocks.breadcrumb);
   upsertJsonLd(PHMAX_WEBSITE_JSON_LD_ID, jsonLdBlocks.website);
+  upsertJsonLd(PHMAX_WEBPAGE_JSON_LD_ID, jsonLdBlocks.webpage);
 }
 
 /** Nastaví title, meta description, Open Graph, canonical a JSON-LD pro aktivní modul. */
@@ -399,6 +419,8 @@ export function applyPhmaxUserGuideDocumentHead(): void {
   applyPhmaxHeadMeta(PHMAX_USER_GUIDE_DOCUMENT_HEAD, canonical, {
     canonical,
     faqView: "dash",
+    includeSoftwareApplication: false,
+    includeWebPage: true,
     breadcrumbLabel: "Návod k použití",
   });
 }
@@ -549,6 +571,8 @@ export function listPhmaxPrerenderRoutes(_origin = PHMAX_SITE_ORIGIN_FALLBACK): 
       meta: PHMAX_USER_GUIDE_DOCUMENT_HEAD,
       head: {
         faqView: "dash",
+        includeSoftwareApplication: false,
+        includeWebPage: true,
         indexable: true,
         breadcrumbLabel: "Návod k použití",
       },
