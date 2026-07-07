@@ -3,14 +3,20 @@ import {
   PRODUCT_USER_GUIDE_LABEL,
   PRODUCT_USER_GUIDE_LEAD,
   USER_GUIDE_PATH,
+  VYROCNI_ZPRAVA_LABEL,
+  VYROCNI_ZPRAVA_PATH,
 } from "./calculator-ui-constants";
 import type { PhmaxLiteKind } from "./phmax-document-head";
 import {
   PHMAX_DOCUMENT_HEAD,
   PHMAX_LITE_DOCUMENT_HEAD,
-  PHMAX_SITE_NAME,
   PHMAX_USER_GUIDE_DOCUMENT_HEAD,
 } from "./phmax-document-head";
+import {
+  KALKULACKY_PHMAX_PATH,
+  KALKULACKY_PHMAX_SEO_H1,
+  PHMAX_PUBLIC_HUB_LABEL,
+} from "./phmax-landing-paths";
 import {
   PHMAX_PV_LITE_PATH,
   PHMAX_SD_LITE_PATH,
@@ -18,6 +24,11 @@ import {
 } from "./phmax-lite-paths";
 import { PHMAX_SEO_MODULE_CONTENT } from "./phmax-seo-module-content";
 import { PRODUCT_VIEW_PATH } from "./product-view-paths";
+import {
+  VYROCNI_ZPRAVA_SEO_FAQ,
+  VYROCNI_ZPRAVA_SEO_H1,
+  VYROCNI_ZPRAVA_SEO_LEAD,
+} from "./vyrocni-zprava-seo-content";
 
 export type RouteSeoSection = {
   heading: string;
@@ -60,6 +71,15 @@ export const PHASE_C_SEO_CONTENT_PATHS = [
 
 export type PhaseCSeoContentPath = (typeof PHASE_C_SEO_CONTENT_PATHS)[number];
 
+/** Routy s prerenderovaným SEO obsahem (fáze C + D2). */
+export const SEO_PRERENDER_CONTENT_PATHS = [
+  ...PHASE_C_SEO_CONTENT_PATHS,
+  VYROCNI_ZPRAVA_PATH,
+  KALKULACKY_PHMAX_PATH,
+] as const;
+
+export type SeoPrerenderContentPath = (typeof SEO_PRERENDER_CONTENT_PATHS)[number];
+
 const ROUTE_SEO_H1: Record<ProductViewCode, string> = {
   dash: PHMAX_DOCUMENT_HEAD.dash.applicationName,
   pv: "Kalkulačka PHmax a PHAmax pro mateřskou školu",
@@ -93,18 +113,16 @@ const LITE_PATH: Record<PhmaxLiteKind, string> = {
   zs: PHMAX_ZS_LITE_PATH,
 };
 
-function buildBreadcrumbs(path: string, currentLabel: string): RouteSeoLink[] {
+function buildPublicBreadcrumbs(path: string, currentLabel: string): RouteSeoLink[] {
   return [
-    { href: PRODUCT_VIEW_PATH.dash, label: PHMAX_SITE_NAME },
+    { href: KALKULACKY_PHMAX_PATH, label: PHMAX_PUBLIC_HUB_LABEL },
     { href: path, label: currentLabel },
   ];
 }
 
 function buildModuleRelatedLinks(view: ProductViewCode): RouteSeoLink[] {
   const module = PHMAX_SEO_MODULE_CONTENT[view];
-  const links: RouteSeoLink[] = [
-    { href: USER_GUIDE_PATH, label: PRODUCT_USER_GUIDE_LABEL },
-  ];
+  const links: RouteSeoLink[] = [{ href: USER_GUIDE_PATH, label: PRODUCT_USER_GUIDE_LABEL }];
 
   if (view === "pv" || view === "sd" || view === "zs") {
     links.push({
@@ -161,7 +179,7 @@ function buildModuleRouteContent(view: ProductViewCode): RouteSeoContent {
     ],
     faq: module.faq.map((item) => ({ question: item.question, answer: item.answer })),
     relatedLinks: buildModuleRelatedLinks(view),
-    breadcrumbs: buildBreadcrumbs(path, meta.applicationName),
+    breadcrumbs: buildPublicBreadcrumbs(path, meta.applicationName),
   };
 }
 
@@ -186,7 +204,7 @@ function buildLiteRouteContent(lite: PhmaxLiteKind): RouteSeoContent {
     ],
     faq: module.faq.map((item) => ({ question: item.question, answer: item.answer })),
     relatedLinks: buildLiteRelatedLinks(lite),
-    breadcrumbs: buildBreadcrumbs(path, meta.applicationName),
+    breadcrumbs: buildPublicBreadcrumbs(path, meta.applicationName),
   };
 }
 
@@ -209,13 +227,106 @@ function buildUserGuideRouteContent(): RouteSeoContent {
     ],
     faq: dash.faq.map((item) => ({ question: item.question, answer: item.answer })),
     relatedLinks: [
-      { href: USER_GUIDE_PATH, label: "Webový návod k aplikaci" },
-      { href: PRODUCT_VIEW_PATH.dash, label: "Přehled modulů školy" },
+      { href: KALKULACKY_PHMAX_PATH, label: PHMAX_PUBLIC_HUB_LABEL },
       { href: PRODUCT_VIEW_PATH.zs, label: "PHmax základní škola" },
       { href: PRODUCT_VIEW_PATH.pv, label: "PHmax mateřská škola" },
       { href: PHMAX_ZS_LITE_PATH, label: FULL_LITE_LABEL.zs },
+      { href: VYROCNI_ZPRAVA_PATH, label: VYROCNI_ZPRAVA_LABEL },
     ],
-    breadcrumbs: buildBreadcrumbs(USER_GUIDE_PATH, PRODUCT_USER_GUIDE_LABEL),
+    breadcrumbs: buildPublicBreadcrumbs(USER_GUIDE_PATH, PRODUCT_USER_GUIDE_LABEL),
+  };
+}
+
+function buildVyrocniZpravaRouteContent(): RouteSeoContent {
+  return {
+    path: VYROCNI_ZPRAVA_PATH,
+    h1: VYROCNI_ZPRAVA_SEO_H1,
+    lead: VYROCNI_ZPRAVA_SEO_LEAD,
+    sections: [
+      {
+        heading: "Co nástroj umožňuje",
+        items: [
+          "Přípravu výroční zprávy po jednotlivých kapitolách podle struktury v aplikaci.",
+          "Průběžnou kontrolu vyplnění a stavu jednotlivých částí.",
+          "Import podkladů ze souboru XLSX, pokud máte připravenou šablonu.",
+          "Náhled sestavené zprávy před exportem.",
+          "Export výsledného dokumentu ve formátu DOCX.",
+        ],
+      },
+      {
+        heading: "Jak při přípravě postupovat",
+        items: [
+          "Doplňte profil školy – identifikační údaje se použijí v příslušných kapitolách.",
+          "Vyplňte jednotlivé části zprávy v modulu po kapitolách.",
+          "Zkontrolujte úplnost a stav vyplnění u jednotlivých sekcí.",
+          "Otevřete náhled zprávy a ověřte obsah před exportem.",
+          "Exportujte dokument ve formátu DOCX.",
+        ],
+      },
+      {
+        heading: "Jak jsou data ukládána",
+        paragraphs: [
+          "Údaje o výroční zprávě a jednotlivých kapitolách zůstávají v tomto prohlížeči. Aplikace je automaticky neodesílá na server.",
+          "Pro přenos mezi zařízeními použijte export a import v pokročilých nástrojích aplikace (role IT).",
+        ],
+      },
+      {
+        heading: "Co nástroj nenahrazuje",
+        paragraphs: [
+          "Jde o pomůcku pro přípravu zprávy. Za správnost, úplnost a schválení výsledného dokumentu odpovídá škola – před odesláním zřizovateli a zveřejněním vždy zkontrolujte obsah.",
+        ],
+      },
+    ],
+    faq: VYROCNI_ZPRAVA_SEO_FAQ.map((item) => ({ question: item.question, answer: item.answer })),
+    relatedLinks: [
+      { href: KALKULACKY_PHMAX_PATH, label: PHMAX_PUBLIC_HUB_LABEL },
+      { href: USER_GUIDE_PATH, label: PRODUCT_USER_GUIDE_LABEL },
+      { href: VYROCNI_ZPRAVA_PATH, label: "Modul výroční zprávy" },
+    ],
+    breadcrumbs: buildPublicBreadcrumbs(VYROCNI_ZPRAVA_PATH, VYROCNI_ZPRAVA_LABEL),
+  };
+}
+
+function buildKalkulackyPhmaxRouteContent(): RouteSeoContent {
+  return {
+    path: KALKULACKY_PHMAX_PATH,
+    h1: KALKULACKY_PHMAX_SEO_H1,
+    lead:
+      "Ředitelský průvodce nabízí orientační kalkulačky PHmax pro jednotlivé typy škol, banku odpočtů zástupců ředitele, webový návod a modul pro přípravu výroční zprávy. Nástroje jsou dostupné z prohlížeče bez registrace.",
+    sections: [
+      {
+        heading: "Kalkulačky PHmax podle typu školy",
+        items: [
+          "Mateřská škola a předškolní vzdělávání – orientační PHmax a PHAmax.",
+          "Základní škola – PHmax, PHAmax a PHPmax včetně detailní metodiky.",
+          "Střední škola – výpočet podle oborů a tříd.",
+          "Školní družina – orientační PHmax pro družinu.",
+        ],
+      },
+      {
+        heading: "Další nástroje",
+        items: [
+          "Banka odpočtů zástupců ředitele (NV75) – orientační výpočet odpočtů.",
+          "Rychlé kalkulačky pro mateřskou školu, základní školu a školní družinu.",
+          "Webový návod k použití kalkulaček a doporučený postup.",
+          "Modul pro přípravu výroční zprávy školy po kapitolách.",
+        ],
+      },
+    ],
+    faq: [],
+    relatedLinks: [
+      { href: PRODUCT_VIEW_PATH.pv, label: PHMAX_DOCUMENT_HEAD.pv.applicationName },
+      { href: PRODUCT_VIEW_PATH.zs, label: PHMAX_DOCUMENT_HEAD.zs.applicationName },
+      { href: PRODUCT_VIEW_PATH.ss, label: PHMAX_DOCUMENT_HEAD.ss.applicationName },
+      { href: PRODUCT_VIEW_PATH.sd, label: PHMAX_DOCUMENT_HEAD.sd.applicationName },
+      { href: PRODUCT_VIEW_PATH.nv75, label: PHMAX_DOCUMENT_HEAD.nv75.applicationName },
+      { href: PHMAX_PV_LITE_PATH, label: FULL_LITE_LABEL.pv },
+      { href: PHMAX_SD_LITE_PATH, label: FULL_LITE_LABEL.sd },
+      { href: PHMAX_ZS_LITE_PATH, label: FULL_LITE_LABEL.zs },
+      { href: USER_GUIDE_PATH, label: PRODUCT_USER_GUIDE_LABEL },
+      { href: VYROCNI_ZPRAVA_PATH, label: VYROCNI_ZPRAVA_LABEL },
+    ],
+    breadcrumbs: [{ href: KALKULACKY_PHMAX_PATH, label: KALKULACKY_PHMAX_SEO_H1 }],
   };
 }
 
@@ -234,9 +345,16 @@ export function isPhaseCSeoContentPath(pathname: string): pathname is PhaseCSeoC
   return (PHASE_C_SEO_CONTENT_PATHS as readonly string[]).includes(norm);
 }
 
+export function isSeoPrerenderContentPath(pathname: string): pathname is SeoPrerenderContentPath {
+  const norm = pathname.replace(/\/+$/, "") || "/";
+  return (SEO_PRERENDER_CONTENT_PATHS as readonly string[]).includes(norm);
+}
+
 export function getRouteSeoContent(pathname: string): RouteSeoContent | null {
   const norm = pathname.replace(/\/+$/, "") || "/";
 
+  if (norm === KALKULACKY_PHMAX_PATH) return buildKalkulackyPhmaxRouteContent();
+  if (norm === VYROCNI_ZPRAVA_PATH) return buildVyrocniZpravaRouteContent();
   if (norm === USER_GUIDE_PATH) return buildUserGuideRouteContent();
 
   const lite = PATH_TO_LITE.get(norm);
@@ -250,6 +368,14 @@ export function getRouteSeoContent(pathname: string): RouteSeoContent | null {
 
 export function listPhaseCSeoContentRoutes(): RouteSeoContent[] {
   return PHASE_C_SEO_CONTENT_PATHS.map((routePath) => {
+    const content = getRouteSeoContent(routePath);
+    if (!content) throw new Error(`Missing route SEO content for ${routePath}`);
+    return content;
+  });
+}
+
+export function listSeoPrerenderContentRoutes(): RouteSeoContent[] {
+  return SEO_PRERENDER_CONTENT_PATHS.map((routePath) => {
     const content = getRouteSeoContent(routePath);
     if (!content) throw new Error(`Missing route SEO content for ${routePath}`);
     return content;

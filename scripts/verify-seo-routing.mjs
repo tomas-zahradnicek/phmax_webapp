@@ -11,6 +11,7 @@ let origin = "http://127.0.0.1:4175";
 
 const expected200Routes = [
   "/prehled",
+  "/kalkulacky-phmax",
   "/phmax-predskolni-vzdelavani",
   "/phmax-skolni-druzina",
   "/phmax-zakladni-skola",
@@ -227,7 +228,10 @@ for (const check of checks) {
   const noViewInFinalUrl = check.forbidViewInFinalUrl ? !String(check.finalSearch).includes("view=") : true;
   const noCanonicalToPrehled = check.url.includes("neexistuje") ? !check.canonical.includes("/prehled") : true;
   const noindexOn404 =
-    check.url.includes("neexistuje") || check.url === "/vyrocni-zprava/nahled"
+    check.url.includes("neexistuje") ||
+    check.url === "/vyrocni-zprava/nahled" ||
+    check.url === "/prehled" ||
+    check.url === "/profil-skoly"
       ? check.robots.includes("noindex")
       : true;
   const pass =

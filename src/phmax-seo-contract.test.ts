@@ -34,7 +34,9 @@ describe("SEO fáze A contract", () => {
     expect(readSource("public/robots.txt")).toContain("app.reditelskypruvodce.cz/sitemap.xml");
     expect(readSource("public/sitemap.xml")).toContain("/navod");
     expect(readSource("public/sitemap.xml")).toContain("/vyrocni-zprava");
-    expect(readSource("public/sitemap.xml")).toContain("/profil-skoly");
+    expect(readSource("public/sitemap.xml")).toContain("/kalkulacky-phmax");
+    expect(readSource("public/sitemap.xml")).not.toContain("/profil-skoly");
+    expect(readSource("public/sitemap.xml")).not.toContain("/prehled");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-zakladni-skola");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-predskolni-vzdelavani/rychly");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-skolni-druzina/rychly");
@@ -49,7 +51,9 @@ describe("SEO fáze A contract", () => {
     expect(readSource("package.json")).toContain("check:seo-content");
     expect(readSource("scripts/prerender-route-html.ts")).toContain("404.html");
     expect(readSource("scripts/prerender-route-html.ts")).toContain("renderRouteSeoHtml");
-    expect(readSource("src/phmax-route-seo-content.ts")).toContain("PHASE_C_SEO_CONTENT_PATHS");
+    expect(readSource("src/phmax-route-seo-content.ts")).toContain("SEO_PRERENDER_CONTENT_PATHS");
+    expect(readSource("src/phmax-landing-paths.ts")).toContain("/kalkulacky-phmax");
+    expect(readSource("src/KalkulackyPhmaxPage.tsx")).toContain("KalkulackyPhmaxPage");
     expect(readSource("src/render-route-seo-html.ts")).toContain("renderRouteSeoHtml");
     expect(readSource("src/main.tsx")).toContain("removePrerenderFallbackWhenReady");
     expect(readSource("scripts/verify-seo-routing.mjs")).toContain("neexistuje-seo-route-404");

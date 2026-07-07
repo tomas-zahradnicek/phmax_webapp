@@ -1,16 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { PRODUCT_VIEW_CODES, PROFIL_SKOLY_PATH, USER_GUIDE_PATH, VYROCNI_ZPRAVA_PATH } from "./calculator-ui-constants";
+import { PROFIL_SKOLY_PATH, USER_GUIDE_PATH, VYROCNI_ZPRAVA_PATH } from "./calculator-ui-constants";
 import {
   PHMAX_DOCUMENT_HEAD,
   PHMAX_LITE_DOCUMENT_HEAD,
-  buildPhmaxCanonicalUrl,
   buildPhmaxHeadHtmlTags,
   buildPhmaxSitemapEntries,
   buildPhmaxSitemapXml,
   listPhmaxPrerenderRoutes,
   listPhmaxSitemapUrls,
 } from "./phmax-document-head";
+import { KALKULACKY_PHMAX_PATH } from "./phmax-landing-paths";
 import { PHMAX_PV_LITE_PATH, PHMAX_SD_LITE_PATH } from "./phmax-lite-paths";
+import { PRODUCT_VIEW_CODES } from "./calculator-ui-constants";
 
 describe("phmax-document-head", () => {
   it("má meta pro každý produktový view", () => {
@@ -25,14 +26,13 @@ describe("phmax-document-head", () => {
   });
 
   it("canonical URL používá parametr view", () => {
-    expect(buildPhmaxCanonicalUrl("zs", "https://example.test")).toBe(
-      "https://example.test/phmax-zakladni-skola",
-    );
     const urls = listPhmaxSitemapUrls("https://example.test");
-    expect(urls).toHaveLength(PRODUCT_VIEW_CODES.length + 6);
+    expect(urls).toHaveLength(PRODUCT_VIEW_CODES.length + 5);
+    expect(urls).toContain(`https://example.test${KALKULACKY_PHMAX_PATH}`);
     expect(urls).toContain(`https://example.test${USER_GUIDE_PATH}`);
     expect(urls).toContain(`https://example.test${VYROCNI_ZPRAVA_PATH}`);
-    expect(urls).toContain(`https://example.test${PROFIL_SKOLY_PATH}`);
+    expect(urls).not.toContain(`https://example.test${PROFIL_SKOLY_PATH}`);
+    expect(urls).not.toContain("https://example.test/prehled");
     expect(urls).toContain(`https://example.test${PHMAX_PV_LITE_PATH}`);
     expect(urls).toContain(`https://example.test${PHMAX_SD_LITE_PATH}`);
     expect(urls).toContain(`https://example.test/phmax-zakladni-skola/rychly`);
@@ -46,23 +46,28 @@ describe("phmax-document-head", () => {
     }
   });
 
-  it("sitemap XML obsahuje všechny veřejné cesty na produkční doméně", () => {
+  it("sitemap XML obsahuje veřejné cesty bez dashboardu a profilu", () => {
     const xml = buildPhmaxSitemapXml();
-    expect(xml).toContain("https://app.reditelskypruvodce.cz/prehled");
+    expect(xml).toContain(`https://app.reditelskypruvodce.cz${KALKULACKY_PHMAX_PATH}`);
+    expect(xml).not.toContain("https://app.reditelskypruvodce.cz/prehled");
+    expect(xml).not.toContain("/profil-skoly");
     expect(xml).toContain("<lastmod>");
     expect(xml).not.toContain("/vyrocni-zprava/nahled");
     expect(xml).toContain("/navod");
     expect(xml).toContain("/vyrocni-zprava");
-    expect(xml).toContain("/profil-skoly");
     expect(xml).toContain("/phmax-zakladni-skola/rychly");
     expect(buildPhmaxSitemapEntries()).toHaveLength(listPhmaxSitemapUrls().length);
   });
 
-  it("prerender routes mají statický head a noindex náhled", () => {
+  it("prerender routes mají statický head a noindex interní stránky", () => {
     const routes = listPhmaxPrerenderRoutes("https://example.test");
     expect(routes.length).toBeGreaterThan(listPhmaxSitemapUrls("https://example.test").length);
     const preview = routes.find((route) => route.pathname === "/vyrocni-zprava/nahled");
-    expect(preview?.indexable).toBe(false);
+    expect(preview?.head.indexable).toBe(false);
+    const dash = routes.find((route) => route.pathname === "/prehled");
+    expect(dash?.head.indexable).toBe(false);
+    const profile = routes.find((route) => route.pathname === "/profil-skoly");
+    expect(profile?.head.indexable).toBe(false);
     const head = buildPhmaxHeadHtmlTags(PHMAX_DOCUMENT_HEAD.zs, "https://example.test", {
       canonical: "https://example.test/phmax-zakladni-skola",
       faqView: "zs",
@@ -71,5 +76,6 @@ describe("phmax-document-head", () => {
     expect(head).toContain("twitter:card");
     expect(head).toContain("BreadcrumbList");
     expect(head).toContain('name="robots" content="index, follow');
+    expect(head).toContain("/kalkulacky-phmax");
   });
 });

@@ -7,9 +7,11 @@ import {
   VYROCNI_ZPRAVA_NAHLED_PATH,
   VYROCNI_ZPRAVA_PATH,
 } from "./calculator-ui-constants";
+import { KALKULACKY_PHMAX_PATH, KALKULACKY_PHMAX_SEO_H1, PHMAX_PUBLIC_HUB_LABEL } from "./phmax-landing-paths";
 import { PHMAX_PV_LITE_PATH, PHMAX_SD_LITE_PATH, PHMAX_ZS_LITE_PATH } from "./phmax-lite-paths";
 import { PHMAX_SITE_ORIGIN_FALLBACK } from "./phmax-site-origin";
-import { buildProductViewPageUrl, listProductViewPathUrls, PRODUCT_VIEW_PATH } from "./product-view-paths";
+import { buildProductViewPageUrl, PRODUCT_VIEW_PATH } from "./product-view-paths";
+import { VYROCNI_ZPRAVA_SEO_FAQ, VYROCNI_ZPRAVA_SEO_LEAD } from "./vyrocni-zprava-seo-content";
 
 export type PhmaxLiteKind = "pv" | "sd" | "zs";
 
@@ -94,21 +96,29 @@ const PHMAX_FAQ_JSON_LD_ID = "phmax-faq-jsonld";
 const PHMAX_BREADCRUMB_JSON_LD_ID = "phmax-breadcrumb-jsonld";
 const PHMAX_WEBSITE_JSON_LD_ID = "phmax-website-jsonld";
 
+export type PhmaxFaqItem = {
+  question: string;
+  answer: string;
+};
+
 export type PhmaxHeadRenderOptions = {
   canonical: string;
-  faqView: ProductViewCode;
   indexable?: boolean;
   breadcrumbLabel?: string;
+  breadcrumbRootPath?: string;
+  breadcrumbRootLabel?: string;
   includeWebSite?: boolean;
+  includeSoftwareApplication?: boolean;
+  /** Explicit FAQ pro JSON-LD; `null` = žádné FAQ; `undefined` = použít faqView. */
+  faqItems?: PhmaxFaqItem[] | null;
+  faqView?: ProductViewCode;
+  websiteDescription?: string;
 };
 
 export type PhmaxPrerenderRoute = {
   pathname: string;
   meta: PhmaxDocumentHeadMeta;
-  faqView: ProductViewCode;
-  indexable: boolean;
-  breadcrumbLabel: string;
-  includeWebSite?: boolean;
+  head: Omit<PhmaxHeadRenderOptions, "canonical">;
 };
 
 function escapeHtml(text: string): string {
@@ -166,12 +176,19 @@ function upsertJsonLd(id: string, data: Record<string, unknown> | null): void {
   el.textContent = JSON.stringify(data);
 }
 
-function buildPhmaxOverviewUrl(origin: string): string {
-  return buildProductViewPageUrl("dash", origin);
+function buildPhmaxPublicHubUrl(origin: string): string {
+  return new URL(KALKULACKY_PHMAX_PATH, origin).href;
+}
+
+function resolveFaqItems(options: PhmaxHeadRenderOptions): PhmaxFaqItem[] {
+  if (options.faqItems === null) return [];
+  if (options.faqItems !== undefined) return options.faqItems;
+  if (options.faqView) return [...PHMAX_SEO_MODULE_CONTENT[options.faqView].faq];
+  return [];
 }
 
 type PhmaxJsonLdBlockMap = {
-  software: Record<string, unknown>;
+  software: Record<string, unknown> | null;
   faq: Record<string, unknown> | null;
   breadcrumb: Record<string, unknown> | null;
   website: Record<string, unknown> | null;
@@ -180,28 +197,33 @@ type PhmaxJsonLdBlockMap = {
 function buildPhmaxJsonLdBlocks(
   meta: PhmaxDocumentHeadMeta,
   canonical: string,
-  faqView: ProductViewCode,
   origin: string,
-  options: Pick<PhmaxHeadRenderOptions, "breadcrumbLabel" | "includeWebSite">,
+  options: PhmaxHeadRenderOptions,
 ): PhmaxJsonLdBlockMap {
-  const faq = PHMAX_SEO_MODULE_CONTENT[faqView].faq;
+  const faq = resolveFaqItems(options);
+  const includeSoftware = options.includeSoftwareApplication !== false;
+  const rootPath = options.breadcrumbRootPath ?? KALKULACKY_PHMAX_PATH;
+  const rootLabel = options.breadcrumbRootLabel ?? PHMAX_PUBLIC_HUB_LABEL;
+  const rootUrl = new URL(rootPath, origin).href;
 
   return {
-    software: {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: meta.applicationName,
-      applicationCategory: "EducationalApplication",
-      operatingSystem: "Web",
-      inLanguage: "cs",
-      description: meta.description,
-      url: canonical,
-      offers: {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "CZK",
-      },
-    },
+    software: includeSoftware
+      ? {
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: meta.applicationName,
+          applicationCategory: "EducationalApplication",
+          operatingSystem: "Web",
+          inLanguage: "cs",
+          description: meta.description,
+          url: canonical,
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "CZK",
+          },
+        }
+      : null,
     faq:
       faq.length > 0
         ? {
@@ -225,8 +247,8 @@ function buildPhmaxJsonLdBlocks(
             {
               "@type": "ListItem",
               position: 1,
-              name: PHMAX_SITE_NAME,
-              item: buildPhmaxOverviewUrl(origin),
+              name: rootLabel,
+              item: rootUrl,
             },
             {
               "@type": "ListItem",
@@ -242,9 +264,9 @@ function buildPhmaxJsonLdBlocks(
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: PHMAX_SITE_NAME,
-          url: buildPhmaxOverviewUrl(origin),
+          url: buildPhmaxPublicHubUrl(origin),
           inLanguage: "cs",
-          description: PHMAX_DOCUMENT_HEAD.dash.description,
+          description: options.websiteDescription ?? meta.description,
         }
       : null,
   };
@@ -256,13 +278,10 @@ export function buildPhmaxHeadHtmlTags(
   origin: string,
   options: PhmaxHeadRenderOptions,
 ): string {
-  const { canonical, faqView, indexable = true, breadcrumbLabel, includeWebSite } = options;
+  const { canonical, indexable = true } = options;
   const ogImage = new URL(APP_BRAND_LOGO_PATH, origin).href;
   const robots = indexable ? "index, follow, max-image-preview:large" : "noindex, follow";
-  const jsonLdBlocks = buildPhmaxJsonLdBlocks(meta, canonical, faqView, origin, {
-    breadcrumbLabel,
-    includeWebSite,
-  });
+  const jsonLdBlocks = buildPhmaxJsonLdBlocks(meta, canonical, origin, options);
 
   const lines = [
     `<title>${escapeHtml(meta.title)}</title>`,
@@ -300,7 +319,7 @@ export function buildPhmaxHeadHtmlTags(
 
 function applyPhmaxHeadMeta(meta: PhmaxDocumentHeadMeta, canonical: string, options: PhmaxHeadRenderOptions): void {
   const origin = resolvePhmaxSiteOrigin();
-  const { faqView, indexable = true, breadcrumbLabel, includeWebSite } = options;
+  const { indexable = true } = options;
   const ogImage = new URL(APP_BRAND_LOGO_PATH, origin).href;
   const robots = indexable ? "index, follow, max-image-preview:large" : "noindex, follow";
 
@@ -323,10 +342,7 @@ function applyPhmaxHeadMeta(meta: PhmaxDocumentHeadMeta, canonical: string, opti
   upsertMeta("name", "twitter:description", meta.description);
   upsertMeta("name", "twitter:image", ogImage);
 
-  const jsonLdBlocks = buildPhmaxJsonLdBlocks(meta, canonical, faqView, origin, {
-    breadcrumbLabel,
-    includeWebSite,
-  });
+  const jsonLdBlocks = buildPhmaxJsonLdBlocks(meta, canonical, origin, options);
   upsertJsonLd(PHMAX_JSON_LD_ID, jsonLdBlocks.software);
   upsertJsonLd(PHMAX_FAQ_JSON_LD_ID, jsonLdBlocks.faq);
   upsertJsonLd(PHMAX_BREADCRUMB_JSON_LD_ID, jsonLdBlocks.breadcrumb);
@@ -342,8 +358,9 @@ export function applyPhmaxDocumentHead(view: ProductViewCode): void {
   applyPhmaxHeadMeta(meta, canonical, {
     canonical,
     faqView: view,
+    indexable: view !== "dash",
     breadcrumbLabel: meta.applicationName,
-    includeWebSite: view === "dash",
+    includeWebSite: false,
   });
 }
 
@@ -354,10 +371,16 @@ export const PHMAX_USER_GUIDE_DOCUMENT_HEAD: PhmaxDocumentHeadMeta = {
   applicationName: "Ředitelský průvodce – návod k použití",
 };
 
-export const PHMAX_VYROCNI_ZPRAVA_DOCUMENT_HEAD: PhmaxDocumentHeadMeta = {
-  title: "Výroční zpráva školy – příprava po kapitolách | Ředitelský průvodce",
+export const PHMAX_LANDING_DOCUMENT_HEAD: PhmaxDocumentHeadMeta = {
+  title: "Kalkulačky PHmax a nástroje pro ředitele škol | Ředitelský průvodce",
   description:
-    "Modul pro přípravu výroční zprávy o činnosti školy podle vyhlášky č. 15/2005 Sb. – struktura kapitol, kontrola údajů a budoucí export do DOCX/PDF.",
+    "Orientační kalkulačky PHmax pro mateřskou, základní a střední školu, školní družinu, banku odpočtů NV75, webový návod a modul výroční zprávy. Nástroje pro ředitele škol z prohlížeče.",
+  applicationName: "Kalkulačky PHmax – Ředitelský průvodce",
+};
+
+export const PHMAX_VYROCNI_ZPRAVA_DOCUMENT_HEAD: PhmaxDocumentHeadMeta = {
+  title: "Generátor výroční zprávy školy | Ředitelský průvodce",
+  description: VYROCNI_ZPRAVA_SEO_LEAD,
   applicationName: "Ředitelský průvodce – výroční zpráva školy",
 };
 
@@ -380,6 +403,23 @@ export function applyPhmaxUserGuideDocumentHead(): void {
   });
 }
 
+/** Document head pro veřejnou landing page (/kalkulacky-phmax). */
+export function applyKalkulackyPhmaxDocumentHead(): void {
+  if (typeof document === "undefined") return;
+  const origin = resolvePhmaxSiteOrigin();
+  const canonical = new URL(KALKULACKY_PHMAX_PATH, origin).href;
+  applyPhmaxHeadMeta(PHMAX_LANDING_DOCUMENT_HEAD, canonical, {
+    canonical,
+    faqItems: null,
+    includeSoftwareApplication: false,
+    includeWebSite: true,
+    websiteDescription: PHMAX_LANDING_DOCUMENT_HEAD.description,
+    breadcrumbLabel: KALKULACKY_PHMAX_SEO_H1,
+    breadcrumbRootPath: KALKULACKY_PHMAX_PATH,
+    breadcrumbRootLabel: KALKULACKY_PHMAX_SEO_H1,
+  });
+}
+
 /** Document head pro modul výroční zprávy (/vyrocni-zprava). */
 export function applyVyrocniZpravaDocumentHead(): void {
   if (typeof document === "undefined") return;
@@ -387,7 +427,7 @@ export function applyVyrocniZpravaDocumentHead(): void {
   const canonical = new URL(VYROCNI_ZPRAVA_PATH, origin).href;
   applyPhmaxHeadMeta(PHMAX_VYROCNI_ZPRAVA_DOCUMENT_HEAD, canonical, {
     canonical,
-    faqView: "dash",
+    faqItems: VYROCNI_ZPRAVA_SEO_FAQ,
     breadcrumbLabel: "Výroční zpráva školy",
   });
 }
@@ -406,9 +446,9 @@ export function applyVyrocniZpravaPreviewDocumentHead(): void {
   const canonical = new URL(VYROCNI_ZPRAVA_NAHLED_PATH, origin).href;
   applyPhmaxHeadMeta(PHMAX_VYROCNI_ZPRAVA_PREVIEW_DOCUMENT_HEAD, canonical, {
     canonical,
-    faqView: "dash",
     indexable: false,
-    breadcrumbLabel: "Náhled výroční zprávy",
+    faqItems: null,
+    includeSoftwareApplication: false,
   });
 }
 
@@ -419,8 +459,9 @@ export function applyProfilSkolyDocumentHead(): void {
   const canonical = new URL(PROFIL_SKOLY_PATH, origin).href;
   applyPhmaxHeadMeta(PHMAX_PROFIL_SKOLY_DOCUMENT_HEAD, canonical, {
     canonical,
-    faqView: "dash",
-    breadcrumbLabel: "Profil školy",
+    indexable: false,
+    faqItems: null,
+    includeSoftwareApplication: false,
   });
 }
 
@@ -437,66 +478,107 @@ export function applyPhmaxLiteDocumentHead(lite: PhmaxLiteKind): void {
   });
 }
 
-/** Indexovatelné URL pro sitemap (bez náhledu výroční zprávy). */
+/** Indexovatelné URL pro sitemap (bez pracovního přehledu, profilu a náhledu výroční zprávy). */
 export function listPhmaxSitemapUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): string[] {
+  const moduleUrls = (Object.keys(PHMAX_DOCUMENT_HEAD) as ProductViewCode[])
+    .filter((view) => view !== "dash")
+    .map((view) => buildProductViewPageUrl(view, origin));
+
   return [
-    ...listProductViewPathUrls(origin),
+    new URL(KALKULACKY_PHMAX_PATH, origin).href,
+    ...moduleUrls,
     new URL(USER_GUIDE_PATH, origin).href,
     new URL(VYROCNI_ZPRAVA_PATH, origin).href,
-    new URL(PROFIL_SKOLY_PATH, origin).href,
     new URL(PHMAX_PV_LITE_PATH, origin).href,
     new URL(PHMAX_SD_LITE_PATH, origin).href,
     new URL(PHMAX_ZS_LITE_PATH, origin).href,
   ];
 }
 
-/** Trasy pro statický head po buildu (včetně noindex náhledu). */
+/** Trasy pro statický head po buildu (včetně noindex stránek). */
 export function listPhmaxPrerenderRoutes(_origin = PHMAX_SITE_ORIGIN_FALLBACK): PhmaxPrerenderRoute[] {
-  const productRoutes = (Object.keys(PHMAX_DOCUMENT_HEAD) as ProductViewCode[]).map((view) => ({
-    pathname: PRODUCT_VIEW_PATH[view],
-    meta: PHMAX_DOCUMENT_HEAD[view],
-    faqView: view,
-    indexable: true,
-    breadcrumbLabel: PHMAX_DOCUMENT_HEAD[view].applicationName,
-    includeWebSite: view === "dash",
-  }));
+  const productRoutes: PhmaxPrerenderRoute[] = (Object.keys(PHMAX_DOCUMENT_HEAD) as ProductViewCode[]).map(
+    (view) => ({
+      pathname: PRODUCT_VIEW_PATH[view],
+      meta: PHMAX_DOCUMENT_HEAD[view],
+      head:
+        view === "dash"
+          ? {
+              faqView: "dash",
+              indexable: false,
+              breadcrumbLabel: PHMAX_DOCUMENT_HEAD.dash.applicationName,
+              includeWebSite: false,
+            }
+          : {
+              faqView: view,
+              indexable: true,
+              breadcrumbLabel: PHMAX_DOCUMENT_HEAD[view].applicationName,
+            },
+    }),
+  );
 
-  const liteRoutes = (Object.keys(PHMAX_LITE_DOCUMENT_HEAD) as PhmaxLiteKind[]).map((lite) => ({
-    pathname: PHMAX_LITE_PATH[lite],
-    meta: PHMAX_LITE_DOCUMENT_HEAD[lite],
-    faqView: lite as ProductViewCode,
-    indexable: true,
-    breadcrumbLabel: PHMAX_LITE_DOCUMENT_HEAD[lite].applicationName,
-  }));
+  const liteRoutes: PhmaxPrerenderRoute[] = (Object.keys(PHMAX_LITE_DOCUMENT_HEAD) as PhmaxLiteKind[]).map(
+    (lite) => ({
+      pathname: PHMAX_LITE_PATH[lite],
+      meta: PHMAX_LITE_DOCUMENT_HEAD[lite],
+      head: {
+        faqView: lite,
+        indexable: true,
+        breadcrumbLabel: PHMAX_LITE_DOCUMENT_HEAD[lite].applicationName,
+      },
+    }),
+  );
 
   const extraRoutes: PhmaxPrerenderRoute[] = [
     {
+      pathname: KALKULACKY_PHMAX_PATH,
+      meta: PHMAX_LANDING_DOCUMENT_HEAD,
+      head: {
+        faqItems: null,
+        includeSoftwareApplication: false,
+        includeWebSite: true,
+        websiteDescription: PHMAX_LANDING_DOCUMENT_HEAD.description,
+        indexable: true,
+        breadcrumbLabel: KALKULACKY_PHMAX_SEO_H1,
+        breadcrumbRootPath: KALKULACKY_PHMAX_PATH,
+        breadcrumbRootLabel: KALKULACKY_PHMAX_SEO_H1,
+      },
+    },
+    {
       pathname: USER_GUIDE_PATH,
       meta: PHMAX_USER_GUIDE_DOCUMENT_HEAD,
-      faqView: "dash",
-      indexable: true,
-      breadcrumbLabel: "Návod k použití",
+      head: {
+        faqView: "dash",
+        indexable: true,
+        breadcrumbLabel: "Návod k použití",
+      },
     },
     {
       pathname: VYROCNI_ZPRAVA_PATH,
       meta: PHMAX_VYROCNI_ZPRAVA_DOCUMENT_HEAD,
-      faqView: "dash",
-      indexable: true,
-      breadcrumbLabel: "Výroční zpráva školy",
+      head: {
+        faqItems: VYROCNI_ZPRAVA_SEO_FAQ,
+        indexable: true,
+        breadcrumbLabel: "Výroční zpráva školy",
+      },
     },
     {
       pathname: PROFIL_SKOLY_PATH,
       meta: PHMAX_PROFIL_SKOLY_DOCUMENT_HEAD,
-      faqView: "dash",
-      indexable: true,
-      breadcrumbLabel: "Profil školy",
+      head: {
+        indexable: false,
+        faqItems: null,
+        includeSoftwareApplication: false,
+      },
     },
     {
       pathname: VYROCNI_ZPRAVA_NAHLED_PATH,
       meta: PHMAX_VYROCNI_ZPRAVA_PREVIEW_DOCUMENT_HEAD,
-      faqView: "dash",
-      indexable: false,
-      breadcrumbLabel: "Náhled výroční zprávy",
+      head: {
+        indexable: false,
+        faqItems: null,
+        includeSoftwareApplication: false,
+      },
     },
   ];
 
@@ -511,10 +593,9 @@ export type PhmaxSitemapEntry = {
 };
 
 function phmaxSitemapPriority(pathname: string): { changefreq: PhmaxSitemapEntry["changefreq"]; priority: string } {
-  if (pathname === "/prehled") return { changefreq: "weekly", priority: "1.0" };
+  if (pathname === KALKULACKY_PHMAX_PATH) return { changefreq: "weekly", priority: "1.0" };
   if (pathname === "/navod") return { changefreq: "monthly", priority: "0.85" };
   if (pathname === "/vyrocni-zprava") return { changefreq: "monthly", priority: "0.85" };
-  if (pathname === "/profil-skoly") return { changefreq: "monthly", priority: "0.85" };
   if (pathname.endsWith("/rychly")) return { changefreq: "monthly", priority: "0.85" };
   if (pathname === "/banka-odpoctu-zastupcu-reditele") return { changefreq: "monthly", priority: "0.8" };
   return { changefreq: "monthly", priority: "0.9" };

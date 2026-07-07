@@ -11,10 +11,12 @@ import {
   applyPhmaxDocumentHead,
   applyPhmaxLiteDocumentHead,
   applyPhmaxUserGuideDocumentHead,
+  applyKalkulackyPhmaxDocumentHead,
   applyProfilSkolyDocumentHead,
   applyVyrocniZpravaDocumentHead,
   applyVyrocniZpravaPreviewDocumentHead,
 } from "./phmax-document-head";
+import { isKalkulackyPhmaxPathname } from "./phmax-landing-paths";
 import { isUserGuidePathname } from "./phmax-user-guide-paths";
 import { isProfilSkolyPathname } from "./school-profile-paths";
 import { isVyrocniZpravaPathname, isVyrocniZpravaPreviewPathname } from "./vyrocni-zprava-paths";
@@ -44,6 +46,9 @@ const VyrocniZpravaPreviewPage = lazy(() =>
   import("./VyrocniZpravaPreviewPage").then((m) => ({ default: m.VyrocniZpravaPreviewPage })),
 );
 const ProfilSkolyPage = lazy(() => import("./ProfilSkolyPage").then((m) => ({ default: m.ProfilSkolyPage })));
+const KalkulackyPhmaxPage = lazy(() =>
+  import("./KalkulackyPhmaxPage").then((m) => ({ default: m.KalkulackyPhmaxPage })),
+);
 
 export default function App() {
   const [productView, setProductViewState] = useState<ProductView>(() => readInitialProductView());
@@ -71,11 +76,15 @@ export default function App() {
   const [profilSkolyActive, setProfilSkolyActive] = useState(
     () => typeof window !== "undefined" && isProfilSkolyPathname(window.location.pathname),
   );
+  const [kalkulackyLandingActive, setKalkulackyLandingActive] = useState(
+    () => typeof window !== "undefined" && isKalkulackyPhmaxPathname(window.location.pathname),
+  );
   const setProductView = useCallback((v: ProductView) => {
     setUserGuideActive(false);
     setVyrocniZpravaActive(false);
     setVyrocniZpravaPreviewActive(false);
     setProfilSkolyActive(false);
+    setKalkulackyLandingActive(false);
     setSdLiteActive(false);
     setPvLiteActive(false);
     setZsLiteActive(false);
@@ -112,6 +121,7 @@ export default function App() {
       setVyrocniZpravaPreviewActive(isPreview);
       setVyrocniZpravaActive(isVyrocniZpravaPathname(window.location.pathname) && !isPreview);
       setProfilSkolyActive(isProfilSkolyPathname(window.location.pathname));
+      setKalkulackyLandingActive(isKalkulackyPhmaxPathname(window.location.pathname));
       setProductViewState(readInitialProductView());
       setSdLiteActive(isSdLitePathname(window.location.pathname));
       setPvLiteActive(isPvLitePathname(window.location.pathname));
@@ -124,6 +134,8 @@ export default function App() {
   useEffect(() => {
     if (userGuideActive) {
       applyPhmaxUserGuideDocumentHead();
+    } else if (kalkulackyLandingActive) {
+      applyKalkulackyPhmaxDocumentHead();
     } else if (vyrocniZpravaPreviewActive) {
       applyVyrocniZpravaPreviewDocumentHead();
     } else if (vyrocniZpravaActive) {
@@ -153,6 +165,7 @@ export default function App() {
     vyrocniZpravaActive,
     vyrocniZpravaPreviewActive,
     profilSkolyActive,
+    kalkulackyLandingActive,
   ]);
 
   const openSdLite = useCallback(() => {
@@ -197,7 +210,9 @@ export default function App() {
   );
 
   let page: React.ReactNode;
-  if (userGuideActive) {
+  if (kalkulackyLandingActive) {
+    page = shell(<KalkulackyPhmaxPage />, "standalone");
+  } else if (userGuideActive) {
     page = shell(<PhmaxUserGuidePage />, "standalone");
   } else if (vyrocniZpravaPreviewActive) {
     page = shell(<VyrocniZpravaPreviewPage />, "standalone");

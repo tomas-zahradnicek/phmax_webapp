@@ -11,7 +11,7 @@ import {
   listPhmaxPrerenderRoutes,
   PHMAX_DOCUMENT_HEAD,
 } from "../src/phmax-document-head";
-import { getRouteSeoContent, isPhaseCSeoContentPath } from "../src/phmax-route-seo-content";
+import { getRouteSeoContent, isSeoPrerenderContentPath } from "../src/phmax-route-seo-content";
 import { PHMAX_SITE_ORIGIN_FALLBACK } from "../src/phmax-site-origin";
 import { PRODUCT_VIEW_PATH } from "../src/product-view-paths";
 import { renderRouteSeoHtml, SEO_PRERENDER_NOSCRIPT_HTML } from "../src/render-route-seo-html";
@@ -54,7 +54,7 @@ function injectSeoHtml(
   const cleaned = stripExistingSeoHead(html);
   const withHead = cleaned.replace(/(<meta\s+name="viewport"[^>]*>)/i, `$1\n    ${headTags}`);
 
-  const routeContent = isPhaseCSeoContentPath(options.pathname) ? getRouteSeoContent(options.pathname) : null;
+  const routeContent = isSeoPrerenderContentPath(options.pathname) ? getRouteSeoContent(options.pathname) : null;
   const noscriptHtml = routeContent ? SEO_PRERENDER_NOSCRIPT_HTML : buildLegacyNoscript(options.metaDescription, options.canonical);
   const prerenderHtml = routeContent ? renderRouteSeoHtml(routeContent) : "";
 
@@ -104,10 +104,7 @@ for (const route of routes) {
   const canonical = new URL(route.pathname, origin).href;
   const headTags = buildPhmaxHeadHtmlTags(route.meta, origin, {
     canonical,
-    faqView: route.faqView,
-    indexable: route.indexable,
-    breadcrumbLabel: route.breadcrumbLabel,
-    includeWebSite: route.includeWebSite,
+    ...route.head,
   });
   const html = injectSeoHtml(template, headTags, {
     pathname: route.pathname,
@@ -124,8 +121,9 @@ const overviewCanonical = new URL("/prehled", origin).href;
 const overviewHead = buildPhmaxHeadHtmlTags(overview, origin, {
   canonical: overviewCanonical,
   faqView: "dash",
+  indexable: false,
   breadcrumbLabel: overview.applicationName,
-  includeWebSite: true,
+  includeWebSite: false,
 });
 writeFileSync(
   templatePath,
@@ -138,7 +136,7 @@ writeFileSync(
 );
 writeFileSync(path.join(distDir, "404.html"), build404Html(template, origin), "utf8");
 
-const phaseCCount = routes.filter((route) => isPhaseCSeoContentPath(route.pathname)).length;
+const phaseCCount = routes.filter((route) => isSeoPrerenderContentPath(route.pathname)).length;
 console.log(`Prerender SEO head: ${routes.length} routes + dist/index.html`);
-console.log(`Prerender SEO body (fáze C): ${phaseCCount} routes`);
+console.log(`Prerender SEO body: ${phaseCCount} routes`);
 console.log(`Origin: ${origin}`);

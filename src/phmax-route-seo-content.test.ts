@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { getRouteSeoContent, listPhaseCSeoContentRoutes } from "./phmax-route-seo-content";
+import { getRouteSeoContent, listPhaseCSeoContentRoutes, listSeoPrerenderContentRoutes } from "./phmax-route-seo-content";
+import { VYROCNI_ZPRAVA_PATH } from "./calculator-ui-constants";
+import { KALKULACKY_PHMAX_PATH } from "./phmax-landing-paths";
 import { renderRouteSeoHtml } from "./render-route-seo-html";
 
 describe("phmax-route-seo-content", () => {
-  it("pokrývá všech 9 rout fáze C", () => {
+  it("pokrývá fázi C a D2 prerender routy", () => {
     expect(listPhaseCSeoContentRoutes()).toHaveLength(9);
+    expect(listSeoPrerenderContentRoutes()).toHaveLength(11);
+    expect(getRouteSeoContent(VYROCNI_ZPRAVA_PATH)?.sections.length).toBeGreaterThanOrEqual(4);
+    expect(getRouteSeoContent(KALKULACKY_PHMAX_PATH)?.relatedLinks.length).toBeGreaterThanOrEqual(8);
   });
 
   it("každá route má H1, FAQ a alespoň tři interní odkazy", () => {

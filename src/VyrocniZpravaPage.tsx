@@ -11,10 +11,8 @@ import {
   PROFIL_SKOLY_PATH,
 
   VYROCNI_ZPRAVA_LEAD,
-
-  VYROCNI_ZPRAVA_TITLE,
-
 } from "./calculator-ui-constants";
+import { VYROCNI_ZPRAVA_SEO_H1 } from "./vyrocni-zprava-seo-content";
 
 import { PRODUCT_VIEW_PATH } from "./product-view-paths";
 
@@ -236,7 +234,7 @@ export function VyrocniZpravaPage() {
 
           <div>
 
-            <h1 className="vyrocni-zprava-page__title">{VYROCNI_ZPRAVA_TITLE}</h1>
+            <h1 className="vyrocni-zprava-page__title">{VYROCNI_ZPRAVA_SEO_H1}</h1>
 
             <p className="muted-text vyrocni-zprava-page__lead">{VYROCNI_ZPRAVA_LEAD}</p>
 
