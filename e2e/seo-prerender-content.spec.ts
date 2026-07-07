@@ -98,5 +98,16 @@ test.describe("SEO indexační politika D2", () => {
 
     await page.goto(VYROCNI_PATH);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /index,\s*follow/i);
+
+    await page.goto("/navod");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /index,\s*follow/i);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      /\/navod$/,
+    );
+    const navodHead = await page.content();
+    expect(navodHead).not.toMatch(/"@type"\s*:\s*"SoftwareApplication"/);
+    expect(navodHead).toMatch(/"@type"\s*:\s*"WebPage"/);
+    expect(navodHead).toMatch(/"@type"\s*:\s*"BreadcrumbList"/);
   });
 });

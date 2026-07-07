@@ -3,12 +3,14 @@ import { PROFIL_SKOLY_PATH, USER_GUIDE_PATH, VYROCNI_ZPRAVA_PATH } from "./calcu
 import {
   PHMAX_DOCUMENT_HEAD,
   PHMAX_LITE_DOCUMENT_HEAD,
+  PHMAX_USER_GUIDE_DOCUMENT_HEAD,
   buildPhmaxHeadHtmlTags,
   buildPhmaxSitemapEntries,
   buildPhmaxSitemapXml,
   listPhmaxPrerenderRoutes,
   listPhmaxSitemapUrls,
 } from "./phmax-document-head";
+import { getRouteSeoContent } from "./phmax-route-seo-content";
 import { KALKULACKY_PHMAX_PATH } from "./phmax-landing-paths";
 import { PHMAX_PV_LITE_PATH, PHMAX_SD_LITE_PATH } from "./phmax-lite-paths";
 import { PRODUCT_VIEW_CODES } from "./calculator-ui-constants";
@@ -77,5 +79,47 @@ describe("phmax-document-head", () => {
     expect(head).toContain("BreadcrumbList");
     expect(head).toContain('name="robots" content="index, follow');
     expect(head).toContain("/kalkulacky-phmax");
+  });
+
+  it("/navod používá WebPage místo SoftwareApplication a FAQ odpovídá prerenderu", () => {
+    const origin = "https://example.test";
+    const canonical = `${origin}${USER_GUIDE_PATH}`;
+    const guideRoute = listPhmaxPrerenderRoutes(origin).find((route) => route.pathname === USER_GUIDE_PATH);
+    expect(guideRoute?.head.includeSoftwareApplication).toBe(false);
+    expect(guideRoute?.head.includeWebPage).toBe(true);
+
+    const head = buildPhmaxHeadHtmlTags(PHMAX_USER_GUIDE_DOCUMENT_HEAD, origin, {
+      canonical,
+      ...guideRoute!.head,
+      breadcrumbLabel: guideRoute!.head.breadcrumbLabel ?? "Návod k použití",
+    });
+
+    expect(head).not.toContain('"@type":"SoftwareApplication"');
+    expect(head).not.toContain('"@type": "SoftwareApplication"');
+    expect(head).toContain('"@type":"WebPage"');
+    expect(head).toContain('"@type":"BreadcrumbList"');
+    expect(head).toContain('"@type":"FAQPage"');
+    expect(head).toContain('name="robots" content="index, follow');
+    expect(head).toContain(`href="${canonical}"`);
+
+    const jsonLdBlocks = [...head.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)].map(
+      (match) => JSON.parse(match[1]!),
+    );
+    expect(jsonLdBlocks.length).toBeGreaterThanOrEqual(3);
+    expect(jsonLdBlocks.some((block) => block["@type"] === "WebPage")).toBe(true);
+    expect(jsonLdBlocks.some((block) => block["@type"] === "BreadcrumbList")).toBe(true);
+    expect(jsonLdBlocks.some((block) => block["@type"] === "SoftwareApplication")).toBe(false);
+
+    const faqBlock = jsonLdBlocks.find((block) => block["@type"] === "FAQPage");
+    const routeFaq = getRouteSeoContent(USER_GUIDE_PATH)?.faq ?? [];
+    expect(faqBlock?.mainEntity).toHaveLength(routeFaq.length);
+    for (const item of routeFaq) {
+      const entity = faqBlock?.mainEntity.find(
+        (entry: { name: string }) => entry.name === item.question,
+      );
+      expect(entity?.acceptedAnswer?.text).toBe(item.answer);
+    }
+
+    expect(listPhmaxSitemapUrls(origin)).toContain(canonical);
   });
 });

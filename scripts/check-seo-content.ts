@@ -12,7 +12,7 @@ import {
   SEO_PRERENDER_CONTENT_PATHS,
 } from "../src/phmax-route-seo-content";
 import { VYROCNI_ZPRAVA_SEO_FAQ, VYROCNI_ZPRAVA_SEO_H1 } from "../src/vyrocni-zprava-seo-content";
-import { VYROCNI_ZPRAVA_PATH } from "../src/calculator-ui-constants";
+import { USER_GUIDE_PATH, VYROCNI_ZPRAVA_PATH } from "../src/calculator-ui-constants";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = path.join(repoRoot, "dist");
@@ -45,6 +45,19 @@ function hasJsonLdType(html: string, type: string): boolean {
 
 function hasDashFaqQuestion(html: string): boolean {
   return html.includes("Proč se liší součet a modul ZŠ?");
+}
+
+function extractCanonical(html: string): string {
+  const match = html.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i);
+  return match?.[1] ?? "";
+}
+
+function parseJsonLdBlocks(html: string): Record<string, unknown>[] {
+  const blocks: Record<string, unknown>[] = [];
+  for (const match of html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)) {
+    blocks.push(JSON.parse(match[1]!));
+  }
+  return blocks;
 }
 
 let failures = 0;
@@ -184,6 +197,44 @@ if (!vyrocniHtml.includes(`<h1>${escapeHtml(VYROCNI_ZPRAVA_SEO_H1)}</h1>`)) {
 
 if (!vyrocniHtml.includes(PHMAX_VYROCNI_ZPRAVA_DOCUMENT_HEAD.title.replace(/&/g, "&amp;"))) {
   fail("vyrocni-zprava | title mismatch");
+}
+
+const navodHtml = readBuiltHtml(USER_GUIDE_PATH);
+const navodCanonical = `https://app.reditelskypruvodce.cz${USER_GUIDE_PATH}`;
+const navodContent = getRouteSeoContent(USER_GUIDE_PATH);
+const navodJsonLd = parseJsonLdBlocks(navodHtml);
+
+const navodChecks: [string, boolean][] = [
+  ["no SoftwareApplication", !hasJsonLdType(navodHtml, "SoftwareApplication")],
+  ["WebPage schema", hasJsonLdType(navodHtml, "WebPage")],
+  ["BreadcrumbList schema", hasJsonLdType(navodHtml, "BreadcrumbList")],
+  ["robots index,follow", extractRobots(navodHtml).includes("index, follow")],
+  ["canonical /navod", extractCanonical(navodHtml) === navodCanonical],
+  ["in sitemap", sitemapUrls.some((url) => new URL(url).pathname.replace(/\/+$/, "") === USER_GUIDE_PATH)],
+  ["valid JSON-LD blocks", navodJsonLd.length >= 2],
+];
+
+for (const [label, pass] of navodChecks) {
+  if (!pass) fail(`/navod | ${label}`);
+  else ok(`/navod | ${label}`);
+}
+
+const navodFaqBlock = navodJsonLd.find((block) => block["@type"] === "FAQPage") as
+  | { mainEntity?: Array<{ name: string; acceptedAnswer?: { text: string } }> }
+  | undefined;
+
+if (navodContent?.faq.length) {
+  if (!navodFaqBlock?.mainEntity?.length) {
+    fail("/navod | missing FAQPage JSON-LD");
+  } else {
+    for (const item of navodContent.faq) {
+      const visible = navodHtml.includes(`<summary>${escapeHtml(item.question)}</summary>`);
+      const inJsonLd = navodFaqBlock.mainEntity.some((entry) => entry.name === item.question);
+      if (!visible) fail(`/navod | visible FAQ missing: ${item.question}`);
+      if (!inJsonLd) fail(`/navod | FAQ JSON-LD missing: ${item.question}`);
+      else ok(`/navod | FAQ matched: ${item.question}`);
+    }
+  }
 }
 
 if (failures > 0) {
