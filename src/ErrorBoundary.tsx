@@ -10,6 +10,16 @@ type State = {
   error: Error | null;
 };
 
+type SafeErrorBoundaryLogPayload = {
+  name: string;
+};
+
+export function toSafeErrorBoundaryLogPayload(error: Error, _componentStack: string): SafeErrorBoundaryLogPayload {
+  return {
+    name: typeof error?.name === "string" && error.name.trim().length > 0 ? error.name : "Error",
+  };
+}
+
 /**
  * Zachytí pád vnořeného stromu a zobrazí srozumitelnou náhradu (ZŠ má velký strom komponent).
  */
@@ -21,7 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("ErrorBoundary:", error, info.componentStack);
+    console.error("ErrorBoundary:", toSafeErrorBoundaryLogPayload(error, info.componentStack));
   }
 
   render() {
