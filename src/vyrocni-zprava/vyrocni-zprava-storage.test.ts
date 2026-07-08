@@ -75,4 +75,56 @@ describe("vyrocni-zprava-storage", () => {
     expect(backupKey).toBeTruthy();
   });
 
+  it("vrátí saveIssue quota_exceeded při překročení kvóty", () => {
+    vi.stubGlobal("localStorage", {
+      store: {} as Record<string, string>,
+      getItem(key: string) {
+        return this.store[key] ?? null;
+      },
+      setItem() {
+        throw { name: "QuotaExceededError" };
+      },
+      removeItem(key: string) {
+        delete this.store[key];
+      },
+    });
+    const profile = createDefaultSchoolProfile();
+    const report = refreshAllSections({ ...createDefaultAnnualReport("2023/2024") }, profile);
+
+    const result = saveVyrocniZpravaStorage({
+      version: 1,
+      report,
+      selectedSectionId: "01",
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.saveIssue?.code).toBe("quota_exceeded");
+  });
+
+  it("vrátí saveIssue other_dom_exception pro jinou DOM chybu", () => {
+    vi.stubGlobal("localStorage", {
+      store: {} as Record<string, string>,
+      getItem(key: string) {
+        return this.store[key] ?? null;
+      },
+      setItem() {
+        throw { name: "SecurityError" };
+      },
+      removeItem(key: string) {
+        delete this.store[key];
+      },
+    });
+    const profile = createDefaultSchoolProfile();
+    const report = refreshAllSections({ ...createDefaultAnnualReport("2023/2024") }, profile);
+
+    const result = saveVyrocniZpravaStorage({
+      version: 1,
+      report,
+      selectedSectionId: "01",
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.saveIssue?.code).toBe("other_dom_exception");
+  });
+
 });

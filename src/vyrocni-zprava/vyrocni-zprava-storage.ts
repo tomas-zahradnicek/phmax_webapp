@@ -41,6 +41,20 @@ export type VyrocniZpravaStorageLoadIssue = {
   backupKey?: string;
 };
 
+export type VyrocniZpravaStorageSaveIssueCode =
+  | "storage_unavailable"
+  | "quota_exceeded"
+  | "other_dom_exception"
+  | "unknown_error";
+
+export type VyrocniZpravaStorageSaveIssue = {
+  code: VyrocniZpravaStorageSaveIssueCode;
+};
+
+export type VyrocniZpravaStorageSaveResult =
+  | { ok: true }
+  | { ok: false; saveIssue: VyrocniZpravaStorageSaveIssue };
+
 
 
 type LegacyAnnualReport = AnnualReport & {
@@ -85,6 +99,21 @@ function writeDiagnosticBackup(raw: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+function classifySaveIssue(error: unknown): VyrocniZpravaStorageSaveIssue {
+  if (typeof localStorage === "undefined") {
+    return { code: "storage_unavailable" };
+  }
+  const domErrorName =
+    typeof error === "object" && error !== null && "name" in error ? String((error as { name?: unknown }).name) : "";
+  if (domErrorName === "QuotaExceededError") {
+    return { code: "quota_exceeded" };
+  }
+  if (domErrorName.length > 0) {
+    return { code: "other_dom_exception" };
+  }
+  return { code: "unknown_error" };
 }
 
 
@@ -201,15 +230,18 @@ export function loadVyrocniZpravaStorage(): VyrocniZpravaStorageV1 {
 
 
 
-export function saveVyrocniZpravaStorage(payload: VyrocniZpravaStorageV1): void {
-  if (typeof localStorage === "undefined") return;
+export function saveVyrocniZpravaStorage(payload: VyrocniZpravaStorageV1): VyrocniZpravaStorageSaveResult {
+  if (typeof localStorage === "undefined") {
+    return { ok: false, saveIssue: { code: "storage_unavailable" } };
+  }
 
   try {
 
     localStorage.setItem(VYROCNI_ZPRAVA_LS_KEY, JSON.stringify(payload));
+    return { ok: true };
 
-  } catch {
-    /* ignore quota / privacy mode */
+  } catch (error) {
+    return { ok: false, saveIssue: classifySaveIssue(error) };
   }
 
 }

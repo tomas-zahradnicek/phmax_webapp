@@ -15,6 +15,7 @@ import {
   loadVyrocniZpravaStorage,
   saveVyrocniZpravaStorage,
   type VyrocniZpravaStorageLoadIssue,
+  type VyrocniZpravaStorageSaveIssue,
 } from "./vyrocni-zprava-storage";
 
 import type { AnnualReport, AnnualReportPublicationBlock } from "./vyrocni-zprava-types";
@@ -98,18 +99,24 @@ export function useVyrocniZpravaReport() {
 
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [loadIssue] = useState<VyrocniZpravaStorageLoadIssue | undefined>(initial.current.loadIssue);
+  const [saveIssue, setSaveIssue] = useState<VyrocniZpravaStorageSaveIssue | undefined>(undefined);
 
   const [checkVisibleForSectionId, setCheckVisibleForSectionId] = useState<string | null>(null);
 
   const skipNextSave = useRef(false);
 
   const persist = useCallback((nextReport: AnnualReport, nextSelectedId: string) => {
-    saveVyrocniZpravaStorage({
+    const result = saveVyrocniZpravaStorage({
       version: 1,
       report: nextReport,
       selectedSectionId: nextSelectedId,
     });
-    setSavedAt(new Date().toLocaleString("cs-CZ"));
+    if (result.ok) {
+      setSavedAt(new Date().toLocaleString("cs-CZ"));
+      setSaveIssue(undefined);
+      return;
+    }
+    setSaveIssue(result.saveIssue);
   }, []);
 
   useEffect(() => {
@@ -384,6 +391,7 @@ export function useVyrocniZpravaReport() {
     selectedSection,
     savedAt,
     loadIssue,
+    saveIssue,
     progress,
     missingProfileFields: missingRequiredFields,
     checkVisibleForSectionId,

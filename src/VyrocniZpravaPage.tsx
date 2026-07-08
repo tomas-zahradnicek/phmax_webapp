@@ -56,6 +56,14 @@ export function VyrocniZpravaPage() {
     storage_unavailable:
       "Prohlížeč neposkytuje úložiště localStorage. Rozpracovaná data se nyní neukládají.",
   } as const;
+  const saveIssueMessage = {
+    storage_unavailable: "Uložení do prohlížeče není dostupné. Změny po zavření okna zmizí.",
+    quota_exceeded:
+      "Nepodařilo se uložit změny: úložiště prohlížeče je plné. Uvolněte místo nebo exportujte zálohu a zkuste uložení znovu.",
+    other_dom_exception:
+      "Nepodařilo se uložit změny kvůli omezení prohlížeče (např. privacy/security režim). Zkontrolujte nastavení úložiště pro tuto stránku.",
+    unknown_error: "Nepodařilo se uložit změny do prohlížeče z neznámého důvodu.",
+  } as const;
 
   const {
 
@@ -69,6 +77,7 @@ export function VyrocniZpravaPage() {
 
     savedAt,
     loadIssue,
+    saveIssue,
 
     progress,
 
@@ -343,6 +352,9 @@ export function VyrocniZpravaPage() {
         {savedAt ? <p className="vyrocni-zprava-page__saved muted-text">Uloženo v prohlížeči: {savedAt}</p> : null}
         {loadIssue ? (
           <p className="vyrocni-zprava-section04-form__warnings">{loadIssueMessage[loadIssue.code]}</p>
+        ) : null}
+        {saveIssue ? (
+          <p className="vyrocni-zprava-section04-form__warnings">{saveIssueMessage[saveIssue.code]}</p>
         ) : null}
 
       </div>
