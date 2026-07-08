@@ -14,7 +14,10 @@ type SafeErrorBoundaryLogPayload = {
   name: string;
 };
 
-export function toSafeErrorBoundaryLogPayload(error: Error, _componentStack: string): SafeErrorBoundaryLogPayload {
+export function toSafeErrorBoundaryLogPayload(
+  error: Error,
+  _componentStack?: string | null,
+): SafeErrorBoundaryLogPayload {
   return {
     name: typeof error?.name === "string" && error.name.trim().length > 0 ? error.name : "Error",
   };
