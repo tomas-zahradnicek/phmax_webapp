@@ -234,7 +234,7 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
         </p>
       </div>
       {staleVisibleSections.length > 0 ? (
-        <div className="vyrocni-zprava-preview__warning" role="status">
+        <div className="vyrocni-zprava-preview__warning" role="status" aria-live="polite" data-testid="annual-report-stale-warning">
           <p>
             Pozor: část textu vznikla podle starší verze údajů ({staleVisibleSections.length}). Před exportem text
             aktualizujte v kapitolách.
@@ -244,6 +244,11 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
             Aktualizovat text
           </a>
         </div>
+      ) : null}
+      {staleVisibleSections.length === 0 && preview.generatedSectionsCount > 0 ? (
+        <p className="muted-text" role="status" aria-live="polite">
+          Text je aktuální
+        </p>
       ) : null}
 
       {preview.missingSections.length > 0 ? (

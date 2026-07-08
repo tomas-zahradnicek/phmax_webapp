@@ -1,10 +1,12 @@
+const IGNORED_FINGERPRINT_KEYS = new Set(["__expanded", "__selected", "__uiState"]);
+
 function normalizeValue(value: unknown): unknown {
   if (value === null || typeof value !== "object") return value;
   if (Array.isArray(value)) return value.map((item) => normalizeValue(item));
   const input = value as Record<string, unknown>;
   const output: Record<string, unknown> = {};
   for (const key of Object.keys(input).sort()) {
-    if (key.startsWith("__")) continue;
+    if (IGNORED_FINGERPRINT_KEYS.has(key)) continue;
     output[key] = normalizeValue(input[key]);
   }
   return output;

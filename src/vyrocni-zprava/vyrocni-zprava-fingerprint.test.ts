@@ -14,10 +14,22 @@ describe("vyrocni-zprava-fingerprint", () => {
     expect(a).not.toBe(b);
   });
 
-  it("prezentační pole s prefixem __ fingerprint nezmění", () => {
+  it("známé prezentační klíče z denylistu fingerprint nezmění", () => {
     const a = buildAnnualReportInputFingerprint({ schoolYear: "2024/2025", notes: "A" });
-    const b = buildAnnualReportInputFingerprint({ schoolYear: "2024/2025", notes: "A", __ui: { expanded: true } });
+    const b = buildAnnualReportInputFingerprint({
+      schoolYear: "2024/2025",
+      notes: "A",
+      __expanded: true,
+      __selected: "01",
+      __uiState: { panel: "left" },
+    });
     expect(a).toBe(b);
+  });
+
+  it("neznámý klíč s prefixem __ není automaticky ignorován", () => {
+    const a = buildAnnualReportInputFingerprint({ schoolYear: "2024/2025", notes: "A", __contentVersion: "v1" });
+    const b = buildAnnualReportInputFingerprint({ schoolYear: "2024/2025", notes: "A", __contentVersion: "v2" });
+    expect(a).not.toBe(b);
   });
 
   it("pořadí klíčů objektu fingerprint nezmění", () => {
