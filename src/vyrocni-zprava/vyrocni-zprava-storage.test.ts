@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach, vi } from "vitest";
 import { createDefaultAnnualReport, refreshAllSections } from "./vyrocni-zprava-logic";
 import { createDefaultSchoolProfile } from "../school-profile/school-profile-logic";
 import {
+  VYROCNI_ZPRAVA_DIAGNOSTIC_BACKUP_KEY_PREFIX,
   VYROCNI_ZPRAVA_LS_KEY,
   clearVyrocniZpravaStorage,
   loadVyrocniZpravaStorage,
@@ -40,4 +41,38 @@ describe("vyrocni-zprava-storage", () => {
     expect("schoolProfile" in loaded.report).toBe(false);
     expect(VYROCNI_ZPRAVA_LS_KEY).toBe("vyrocni-zprava-state-v1");
   });
+
+  it("při neplatném JSON zachová diagnostickou zálohu a vrátí loadIssue", () => {
+    localStorage.setItem(VYROCNI_ZPRAVA_LS_KEY, "{invalid-json");
+
+    const loaded = loadVyrocniZpravaStorage();
+
+    expect(loaded.loadIssue?.code).toBe("invalid_json");
+    expect(loaded.report.sections.length).toBeGreaterThan(0);
+    const backupKey = Object.keys((localStorage as { store: Record<string, string> }).store).find((key) =>
+      key.startsWith(VYROCNI_ZPRAVA_DIAGNOSTIC_BACKUP_KEY_PREFIX),
+    );
+    expect(backupKey).toBeTruthy();
+  });
+
+  it("při nekompatibilní verzi zachová diagnostickou zálohu a vrátí loadIssue", () => {
+    localStorage.setItem(
+      VYROCNI_ZPRAVA_LS_KEY,
+      JSON.stringify({
+        version: 2,
+        report: {},
+        selectedSectionId: "01",
+      }),
+    );
+
+    const loaded = loadVyrocniZpravaStorage();
+
+    expect(loaded.loadIssue?.code).toBe("incompatible_version");
+    expect(loaded.report.sections.length).toBeGreaterThan(0);
+    const backupKey = Object.keys((localStorage as { store: Record<string, string> }).store).find((key) =>
+      key.startsWith(VYROCNI_ZPRAVA_DIAGNOSTIC_BACKUP_KEY_PREFIX),
+    );
+    expect(backupKey).toBeTruthy();
+  });
+
 });

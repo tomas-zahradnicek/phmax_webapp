@@ -46,6 +46,16 @@ import { VyrocniZpravaXlsxImportPanel } from "./vyrocni-zprava/import/VyrocniZpr
 
 
 export function VyrocniZpravaPage() {
+  const loadIssueMessage = {
+    invalid_json:
+      "V prohlížeči byla nalezena poškozená rozpracovaná data výroční zprávy. Aplikace načetla bezpečný výchozí stav a původní hodnotu ponechala v diagnostické záloze.",
+    incompatible_version:
+      "V prohlížeči byla nalezena nekompatibilní verze rozpracované výroční zprávy. Aplikace načetla bezpečný výchozí stav.",
+    invalid_shape:
+      "V prohlížeči byla nalezena neplatná struktura rozpracované výroční zprávy. Aplikace načetla bezpečný výchozí stav.",
+    storage_unavailable:
+      "Prohlížeč neposkytuje úložiště localStorage. Rozpracovaná data se nyní neukládají.",
+  } as const;
 
   const {
 
@@ -58,6 +68,7 @@ export function VyrocniZpravaPage() {
     selectedSection,
 
     savedAt,
+    loadIssue,
 
     progress,
 
@@ -330,6 +341,9 @@ export function VyrocniZpravaPage() {
         </div>
 
         {savedAt ? <p className="vyrocni-zprava-page__saved muted-text">Uloženo v prohlížeči: {savedAt}</p> : null}
+        {loadIssue ? (
+          <p className="vyrocni-zprava-section04-form__warnings">{loadIssueMessage[loadIssue.code]}</p>
+        ) : null}
 
       </div>
 

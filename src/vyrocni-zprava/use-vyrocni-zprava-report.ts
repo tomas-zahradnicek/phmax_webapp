@@ -14,6 +14,7 @@ import {
   createFreshVyrocniZpravaStorage,
   loadVyrocniZpravaStorage,
   saveVyrocniZpravaStorage,
+  type VyrocniZpravaStorageLoadIssue,
 } from "./vyrocni-zprava-storage";
 
 import type { AnnualReport, AnnualReportPublicationBlock } from "./vyrocni-zprava-types";
@@ -96,6 +97,7 @@ export function useVyrocniZpravaReport() {
   const [selectedSectionId, setSelectedSectionId] = useState(initial.current.selectedSectionId);
 
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [loadIssue] = useState<VyrocniZpravaStorageLoadIssue | undefined>(initial.current.loadIssue);
 
   const [checkVisibleForSectionId, setCheckVisibleForSectionId] = useState<string | null>(null);
 
@@ -381,6 +383,7 @@ export function useVyrocniZpravaReport() {
     selectedSectionId,
     selectedSection,
     savedAt,
+    loadIssue,
     progress,
     missingProfileFields: missingRequiredFields,
     checkVisibleForSectionId,

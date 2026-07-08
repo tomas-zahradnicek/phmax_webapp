@@ -15,6 +15,7 @@ import { loadSchoolProfileFromStorage, migrateLegacySchoolProfileIfNeeded } from
 
 
 export const VYROCNI_ZPRAVA_LS_KEY = "vyrocni-zprava-state-v1";
+export const VYROCNI_ZPRAVA_DIAGNOSTIC_BACKUP_KEY_PREFIX = "vyrocni-zprava-diagnostic-backup-v1:";
 
 
 
@@ -25,7 +26,19 @@ export type VyrocniZpravaStorageV1 = {
   report: AnnualReport;
 
   selectedSectionId: string;
+  loadIssue?: VyrocniZpravaStorageLoadIssue;
 
+};
+
+export type VyrocniZpravaStorageLoadIssueCode =
+  | "invalid_json"
+  | "incompatible_version"
+  | "invalid_shape"
+  | "storage_unavailable";
+
+export type VyrocniZpravaStorageLoadIssue = {
+  code: VyrocniZpravaStorageLoadIssueCode;
+  backupKey?: string;
 };
 
 
@@ -53,6 +66,27 @@ function stripLegacySchoolProfile(report: LegacyAnnualReport): AnnualReport {
   return rest;
 
 }
+
+function createDefaultStorage(schoolProfile = loadSchoolProfileFromStorage()): VyrocniZpravaStorageV1 {
+  const report = refreshAllSections(createDefaultAnnualReport(), schoolProfile);
+  return { version: 1, report, selectedSectionId: report.sections[0]?.id ?? "01" };
+}
+
+function createDiagnosticBackupKey(): string {
+  return `${VYROCNI_ZPRAVA_DIAGNOSTIC_BACKUP_KEY_PREFIX}${new Date().toISOString()}`;
+}
+
+function writeDiagnosticBackup(raw: string): string | undefined {
+  if (typeof localStorage === "undefined") return undefined;
+  try {
+    const backupKey = createDiagnosticBackupKey();
+    localStorage.setItem(backupKey, raw);
+    return backupKey;
+  } catch {
+    return undefined;
+  }
+}
+
 
 
 
@@ -111,10 +145,10 @@ export function loadVyrocniZpravaStorage(): VyrocniZpravaStorageV1 {
 
 
   if (typeof localStorage === "undefined") {
-
-    const report = refreshAllSections(createDefaultAnnualReport(), schoolProfile);
-
-    return { version: 1, report, selectedSectionId: report.sections[0]?.id ?? "01" };
+    return {
+      ...createDefaultStorage(schoolProfile),
+      loadIssue: { code: "storage_unavailable" },
+    };
 
   }
 
@@ -125,30 +159,41 @@ export function loadVyrocniZpravaStorage(): VyrocniZpravaStorageV1 {
     const raw = localStorage.getItem(VYROCNI_ZPRAVA_LS_KEY);
 
     if (!raw) {
+      return createDefaultStorage(schoolProfile);
 
-      const report = refreshAllSections(createDefaultAnnualReport(), schoolProfile);
+    }
 
-      return { version: 1, report, selectedSectionId: report.sections[0]?.id ?? "01" };
-
+    try {
+      JSON.parse(raw);
+    } catch {
+      const backupKey = writeDiagnosticBackup(raw);
+      return {
+        ...createDefaultStorage(schoolProfile),
+        loadIssue: { code: "invalid_json", backupKey },
+      };
     }
 
     const loaded = parseStorage(raw);
 
     if (!loaded) {
-
-      const report = refreshAllSections(createDefaultAnnualReport(), schoolProfile);
-
-      return { version: 1, report, selectedSectionId: report.sections[0]?.id ?? "01" };
+      const parsed = JSON.parse(raw) as { version?: unknown };
+      const code: VyrocniZpravaStorageLoadIssueCode =
+        parsed?.version !== 1 ? "incompatible_version" : "invalid_shape";
+      const backupKey = writeDiagnosticBackup(raw);
+      return {
+        ...createDefaultStorage(schoolProfile),
+        loadIssue: { code, backupKey },
+      };
 
     }
 
     return loaded;
 
   } catch {
-
-    const report = refreshAllSections(createDefaultAnnualReport(), schoolProfile);
-
-    return { version: 1, report, selectedSectionId: report.sections[0]?.id ?? "01" };
+    return {
+      ...createDefaultStorage(schoolProfile),
+      loadIssue: { code: "storage_unavailable" },
+    };
 
   }
 
@@ -157,7 +202,6 @@ export function loadVyrocniZpravaStorage(): VyrocniZpravaStorageV1 {
 
 
 export function saveVyrocniZpravaStorage(payload: VyrocniZpravaStorageV1): void {
-
   if (typeof localStorage === "undefined") return;
 
   try {
@@ -165,9 +209,7 @@ export function saveVyrocniZpravaStorage(payload: VyrocniZpravaStorageV1): void 
     localStorage.setItem(VYROCNI_ZPRAVA_LS_KEY, JSON.stringify(payload));
 
   } catch {
-
     /* ignore quota / privacy mode */
-
   }
 
 }
