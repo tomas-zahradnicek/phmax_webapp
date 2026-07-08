@@ -3,6 +3,7 @@ import { DashHeroHeader } from "./dashboard/DashHeroHeader";
 import { DashboardNewUserChecklist } from "./dashboard/DashboardNewUserChecklist";
 import { DashboardQuickTour } from "./dashboard/DashboardQuickTour";
 import { DashboardSchoolProfile } from "./dashboard/DashboardSchoolProfile";
+import { DashboardBackupExportCard } from "./dashboard/DashboardBackupExportCard";
 import { DashboardZsScenariosCard } from "./dashboard/DashboardZsScenariosCard";
 import { buildDashboardSchoolProfile } from "./dashboard/build-dashboard-school-profile";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
@@ -1125,6 +1126,7 @@ export function PhmaxDashboardPage({
           namedBackupCount={zsNamedBackupCount}
           onCompare={() => setProductView("zs")}
         />
+        <DashboardBackupExportCard />
         <DashboardQuickTour />
 
         <div
