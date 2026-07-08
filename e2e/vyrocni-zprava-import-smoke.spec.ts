@@ -72,4 +72,5 @@ test.describe("Výroční zpráva XLSX import smoke", () => {
 
     await expect(confirmButton).toBeEnabled();
   });
+
 });

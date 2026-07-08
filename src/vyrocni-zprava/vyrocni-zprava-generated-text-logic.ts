@@ -20,6 +20,7 @@ export function hasRestorableOriginalDraft(section: AnnualReportSection): boolea
 export function applyGeneratedDraft(
   section: AnnualReportSection,
   generatedText: string,
+  generatedInputFingerprint?: string,
   now = new Date().toISOString(),
 ): AnnualReportSection {
   return {
@@ -27,6 +28,7 @@ export function applyGeneratedDraft(
     generatedText,
     originalGeneratedText: generatedText,
     editedByUser: false,
+    generatedInputFingerprint,
     approved: false,
     approvedAt: null,
     updatedAt: now,
@@ -89,6 +91,7 @@ export function mergeSavedSectionFields(
     generatedText: saved.generatedText ?? base.generatedText,
     originalGeneratedText: saved.originalGeneratedText ?? base.originalGeneratedText,
     editedByUser: saved.editedByUser ?? base.editedByUser,
+    generatedInputFingerprint: saved.generatedInputFingerprint ?? base.generatedInputFingerprint,
     approved: saved.approved ?? base.approved,
     approvedAt: saved.approvedAt ?? base.approvedAt,
     updatedAt: saved.updatedAt ?? base.updatedAt,

@@ -24,6 +24,7 @@ import {
 import {
   buildDocxExportModel,
   createAnnualReportDocxFileName,
+  getDocxExportGuard,
   parseGeneratedTextForDocx,
   stripDuplicateDocxSectionHeading,
   type AnnualReportDocxExportModel,
@@ -325,7 +326,7 @@ function triggerDocxDownload(blob: Blob, filename: string): void {
 export async function exportAnnualReportPreviewToDocx(
   preview: AnnualReportPreviewData,
   options?: { mode?: DocxExportMode; structuredData?: AnnualReportDocxStructuredData },
-): Promise<{ exported: boolean; reason?: "NO_SECTIONS" }> {
+): Promise<{ exported: boolean; reason?: "NO_SECTIONS" | "STALE_GENERATED_TEXT"; staleSections?: string[] }> {
   const built = await buildAnnualReportDocxBlob(preview, options);
   if (!built.exported) return built;
   triggerDocxDownload(built.blob, built.filename);
@@ -335,8 +336,15 @@ export async function exportAnnualReportPreviewToDocx(
 export async function buildAnnualReportDocxBlob(
   preview: AnnualReportPreviewData,
   options?: { mode?: DocxExportMode; structuredData?: AnnualReportDocxStructuredData },
-): Promise<{ exported: boolean; reason?: "NO_SECTIONS"; blob: Blob; filename: string } | { exported: false; reason: "NO_SECTIONS" }> {
+): Promise<
+  | { exported: boolean; reason?: "NO_SECTIONS" | "STALE_GENERATED_TEXT"; staleSections?: string[]; blob: Blob; filename: string }
+  | { exported: false; reason: "NO_SECTIONS" | "STALE_GENERATED_TEXT"; staleSections?: string[] }
+> {
   const mode = options?.mode ?? "visible-generated";
+  const guard = getDocxExportGuard(preview, mode);
+  if (!guard.ok) {
+    return { exported: false, reason: "STALE_GENERATED_TEXT", staleSections: guard.staleSections };
+  }
   const model = buildDocxExportModel(preview, mode, { structuredData: options?.structuredData });
   if (model.sections.length === 0) {
     return { exported: false, reason: "NO_SECTIONS" };

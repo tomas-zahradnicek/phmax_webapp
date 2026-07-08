@@ -79,6 +79,7 @@ import { buildSection03GeneratorInput } from "./vyrocni-zprava-section03-generat
 import { generateSection03Draft } from "./vyrocni-zprava-section03-local-generator";
 import { shouldUseSection03Generator } from "./vyrocni-zprava-section03-generator-service";
 import { getPersonnelStoreSnapshot } from "./vyrocni-zprava-personnel-storage";
+import { buildAnnualReportInputFingerprint } from "./vyrocni-zprava-fingerprint";
 import {
   REGENERATE_EDITED_SECTION_CONFIRM,
   applyGeneratedDraft,
@@ -194,6 +195,7 @@ export function useVyrocniZpravaReport() {
         if (!current) return prev;
 
         let generatedText = VYROCNI_ZPRAVA_GENERATED_PLACEHOLDER;
+        let generatedInputFingerprint: string | undefined = undefined;
 
         if (shouldUseSection01Generator(sectionId)) {
           const section01Data = getSection01StoreSnapshot().data;
@@ -202,6 +204,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             sectionInputs: section01Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection01Draft(generatorInput).text;
         } else if (shouldUseSection02Generator(sectionId)) {
           const section02Data = getSection02StoreSnapshot().data;
@@ -210,6 +213,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section02Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection02Draft(generatorInput).text;
         } else if (shouldUseSection04Generator(sectionId)) {
           const section04Data = getSection04StoreSnapshot().data;
@@ -218,6 +222,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section04Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection04Draft(generatorInput).text;
         } else if (shouldUseSection05Generator(sectionId)) {
           const section05Data = getSection05StoreSnapshot().data;
@@ -226,6 +231,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section05Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection05Draft(generatorInput).text;
         } else if (shouldUseSection06Generator(sectionId)) {
           const section06Data = getSection06StoreSnapshot().data;
@@ -234,6 +240,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section06Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection06Draft(generatorInput).text;
         } else if (shouldUseSection07Generator(sectionId)) {
           const section07Data = getSection07StoreSnapshot().data;
@@ -242,6 +249,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section07Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection07Draft(generatorInput).text;
         } else if (shouldUseSection08Generator(sectionId)) {
           const section08Data = getSection08StoreSnapshot().data;
@@ -250,6 +258,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section08Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection08Draft(generatorInput).text;
         } else if (shouldUseSection09Generator(sectionId)) {
           const section09Data = getSection09StoreSnapshot().data;
@@ -258,6 +267,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section09Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection09Draft(generatorInput).text;
         } else if (shouldUseSection10Generator(sectionId)) {
           const section10Data = getSection10StoreSnapshot().data;
@@ -266,6 +276,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section10Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection10Draft(generatorInput).text;
         } else if (shouldUseSection11Generator(sectionId)) {
           const section11Data = getSection11StoreSnapshot().data;
@@ -274,6 +285,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section11Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection11Draft(generatorInput).text;
         } else if (shouldUseSection12Generator(sectionId)) {
           const section12Data = getSection12StoreSnapshot().data;
@@ -282,6 +294,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section12Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection12Draft(generatorInput).text;
         } else if (shouldUseSection13Generator(sectionId)) {
           const section13Data = getSection13StoreSnapshot().data;
@@ -290,6 +303,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section13Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection13Draft(generatorInput).text;
         } else if (shouldUseSection14Generator(sectionId)) {
           const section14Data = getSection14StoreSnapshot().data;
@@ -298,6 +312,7 @@ export function useVyrocniZpravaReport() {
             schoolYear: prev.schoolYear,
             section14Data,
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection14Draft(generatorInput).text;
         } else if (shouldUseSection03Generator(sectionId)) {
           const personnelData = getPersonnelStoreSnapshot().data;
@@ -307,10 +322,11 @@ export function useVyrocniZpravaReport() {
             personnelData,
             calculatorData: getAnnualReportCalculatorData(),
           });
+          generatedInputFingerprint = buildAnnualReportInputFingerprint(generatorInput);
           generatedText = generateSection03Draft(generatorInput).text;
         }
 
-        const nextSection = applyGeneratedDraft(current, generatedText);
+        const nextSection = applyGeneratedDraft(current, generatedText, generatedInputFingerprint);
         const sections = updateAnnualReportSection(prev.sections, sectionId, nextSection);
         return refreshAllSections({ ...prev, sections }, profile);
       });

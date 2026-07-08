@@ -5,10 +5,11 @@ import { showUiToast } from "../ui-toast";
 import type { AnnualReportSectionStatus } from "./vyrocni-zprava-types";
 import { ANNUAL_REPORT_SECTION_STATUS_LABELS } from "./vyrocni-zprava-types";
 import { exportAnnualReportPreviewToDocx } from "./vyrocni-zprava-docx-export";
-import { buildDocxExportModel } from "./vyrocni-zprava-docx-export-logic";
+import { buildDocxExportModel, getDocxExportGuard } from "./vyrocni-zprava-docx-export-logic";
 import type { AnnualReportDocxStructuredData } from "./docx/vyrocni-zprava-docx-structured-tables";
 import type { AnnualReportPreviewData, AnnualReportPreviewSection } from "./vyrocni-zprava-report-preview-builder";
 import { buildAnnualReportPreview } from "./vyrocni-zprava-report-preview-builder";
+import { resolveGeneratedTextStatus } from "./vyrocni-zprava-generated-text-status";
 
 type VyrocniZpravaReportPreviewProps = {
   report: Parameters<typeof buildAnnualReportPreview>[0]["report"];
@@ -50,7 +51,17 @@ function statusBadgeClass(status: AnnualReportSectionStatus): string {
 
 export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredData }: VyrocniZpravaReportPreviewProps) {
   const preview = useMemo<AnnualReportPreviewData>(
-    () => buildAnnualReportPreview({ report, schoolProfile }),
+    () =>
+      buildAnnualReportPreview({
+        report,
+        schoolProfile,
+        generatedTextStatuses: Object.fromEntries(
+          report.sections.map((section) => [
+            section.id,
+            resolveGeneratedTextStatus({ section, schoolProfile, schoolYear: report.schoolYear }),
+          ]),
+        ),
+      }),
     [report, schoolProfile],
   );
   const [onlyApproved, setOnlyApproved] = useState(false);
@@ -58,6 +69,7 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
   const [copyNotice, setCopyNotice] = useState<string>("");
   const [exportNotice, setExportNotice] = useState<string>("");
   const [exportError, setExportError] = useState<string>("");
+  const [staleGuardMessage, setStaleGuardMessage] = useState<string>("");
 
   const visibleSections = useMemo(
     () => buildVisibleSections(preview.sections, { onlyApproved, includeUnapproved }),
@@ -71,6 +83,10 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
       .filter((section) => !visibleSet.has(`${section.number}|${section.title}`))
       .map((section) => `${section.number} ${section.title}`);
   }, [preview.sections, visibleSections]);
+  const staleVisibleSections = useMemo(
+    () => visibleSections.filter((section) => section.generatedTextStatus === "stale").map((section) => `${section.number} ${section.title}`),
+    [visibleSections],
+  );
 
   async function copyAnnualReportPreviewToClipboard() {
     if (!visibleFullText.trim()) {
@@ -105,6 +121,15 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
       sections: visibleSections,
       fullText: visibleFullText,
     };
+    const guard = getDocxExportGuard(visiblePreview, "visible-generated");
+    if (!guard.ok) {
+      const msg =
+        "Export je pozastaven: některé kapitoly byly vytvořeny ze starších údajů. Nejprve prosím aktualizujte text kapitol.";
+      setExportError(msg);
+      setStaleGuardMessage(`K aktualizaci: ${guard.staleSections.join(", ")}`);
+      showUiToast(msg, { assertive: true });
+      return;
+    }
     const unapprovedVisible = visibleSections.filter((section) => section.status !== "SCHVALENO" && section.generatedText);
     if (unapprovedVisible.length > 0) {
       const warning = `Pozor: export zahrnuje i neschválené kapitoly (${unapprovedVisible.length}).`;
@@ -117,6 +142,14 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
         structuredData,
       });
       if (!result.exported) {
+        if (result.reason === "STALE_GENERATED_TEXT") {
+          const msg =
+            "Export je pozastaven: některé kapitoly byly vytvořeny ze starších údajů. Nejprve prosím aktualizujte text kapitol.";
+          setExportError(msg);
+          setStaleGuardMessage(result.staleSections ? `K aktualizaci: ${result.staleSections.join(", ")}` : "");
+          showUiToast(msg, { assertive: true });
+          return;
+        }
         const msg = "Nejsou k dispozici žádné kapitoly k exportu.";
         setExportError(msg);
         showUiToast(msg, { assertive: true });
@@ -136,6 +169,15 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
     setExportNotice("");
     setExportError("");
     try {
+      const guard = getDocxExportGuard(preview, "approved-only");
+      if (!guard.ok) {
+        const msg =
+          "Export je pozastaven: některé schválené kapitoly mají text vytvořený ze starších údajů. Nejprve prosím aktualizujte text.";
+        setExportError(msg);
+        setStaleGuardMessage(`K aktualizaci: ${guard.staleSections.join(", ")}`);
+        showUiToast(msg, { assertive: true });
+        return;
+      }
       const model = buildDocxExportModel(preview, "approved-only", { structuredData });
       if (model.sections.length === 0) {
         const msg = "Nejsou k dispozici žádné kapitoly k exportu.";
@@ -191,6 +233,18 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
           Chybějící kapitoly: <strong>{preview.missingSections.length}</strong>
         </p>
       </div>
+      {staleVisibleSections.length > 0 ? (
+        <div className="vyrocni-zprava-preview__warning" role="status">
+          <p>
+            Pozor: část textu vznikla podle starší verze údajů ({staleVisibleSections.length}). Před exportem text
+            aktualizujte v kapitolách.
+          </p>
+          <p>Kapitoly: {staleVisibleSections.join(", ")}.</p>
+          <a className="btn primary" href={VYROCNI_ZPRAVA_PATH}>
+            Aktualizovat text
+          </a>
+        </div>
+      ) : null}
 
       {preview.missingSections.length > 0 ? (
         <div className="vyrocni-zprava-preview__warning" role="status">
@@ -268,6 +322,7 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
       {copyNotice ? <p className="muted-text vyrocni-zprava-preview__copy-note">{copyNotice}</p> : null}
       {exportNotice ? <p className="muted-text vyrocni-zprava-preview__copy-note">{exportNotice}</p> : null}
       {exportError ? <p className="vyrocni-zprava-preview__error-note">{exportError}</p> : null}
+      {staleGuardMessage ? <p className="vyrocni-zprava-preview__error-note">{staleGuardMessage}</p> : null}
     </div>
   );
 }

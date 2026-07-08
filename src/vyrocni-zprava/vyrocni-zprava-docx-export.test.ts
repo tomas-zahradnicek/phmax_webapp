@@ -9,6 +9,7 @@ import {
   buildDocxExportModel,
   createAnnualReportDocxFileName,
   detectDocxHeadingLevel,
+  getDocxExportGuard,
   getDocxExportSections,
   parseGeneratedTextForDocx,
   stripDuplicateDocxSectionHeading,
@@ -42,6 +43,26 @@ describe("vyrocni-zprava-docx-export-logic", () => {
     const model = buildDocxExportModel(preview, "visible-generated");
     expect(model.fullText).toContain("Aktuální upravený text.");
     expect(model.fullText).not.toContain("Původní text.");
+  });
+
+  it("blokuje export, pokud je text kapitoly zastaralý", () => {
+    let report = createDefaultAnnualReport("2024/2025");
+    report = setSection(report, "01", {
+      generatedText: "Text kapitoly.",
+      status: "VYGENEROVANO",
+      approved: false,
+    });
+    const preview = buildAnnualReportPreview({
+      report,
+      schoolProfile: createDefaultSchoolProfile(),
+      generatedTextStatuses: { "01": "stale" },
+    });
+    const guard = getDocxExportGuard(preview, "visible-generated");
+    expect(guard.ok).toBe(false);
+    if (!guard.ok) {
+      expect(guard.reason).toBe("STALE_GENERATED_TEXT");
+      expect(guard.staleSections).toEqual(["01 Základní údaje o škole"]);
+    }
   });
 
   it("generování názvu souboru funguje pro české znaky", () => {

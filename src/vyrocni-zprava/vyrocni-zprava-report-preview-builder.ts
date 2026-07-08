@@ -1,5 +1,10 @@
 import type { SchoolProfile } from "../school-profile/school-profile-types";
-import type { AnnualReport, AnnualReportSectionStatus, AnnualReportPublicationBlock } from "./vyrocni-zprava-types";
+import type {
+  AnnualReport,
+  AnnualReportSectionStatus,
+  AnnualReportPublicationBlock,
+  GeneratedTextStatus,
+} from "./vyrocni-zprava-types";
 import { VYROCNI_ZPRAVA_GENERATED_PLACEHOLDER } from "./vyrocni-zprava-types";
 
 export type AnnualReportPreviewSection = {
@@ -8,6 +13,7 @@ export type AnnualReportPreviewSection = {
   status: AnnualReportSectionStatus;
   approved: boolean;
   generatedText?: string;
+  generatedTextStatus: GeneratedTextStatus;
   missingText: boolean;
 };
 
@@ -66,6 +72,7 @@ export function hasPublicationBlockContent(block: AnnualReportPublicationBlock |
 export function buildAnnualReportPreview(params: {
   report: AnnualReport;
   schoolProfile: SchoolProfile;
+  generatedTextStatuses?: Record<string, GeneratedTextStatus>;
 }): AnnualReportPreviewData {
   const topLevelSections = [...params.report.sections]
     .filter((section) => isTopLevelSection(section.number))
@@ -80,6 +87,7 @@ export function buildAnnualReportPreview(params: {
       status: section.status,
       approved: section.approved,
       generatedText: hasFinalText ? generatedText : undefined,
+      generatedTextStatus: params.generatedTextStatuses?.[section.id] ?? "not_generated",
       missingText: !hasFinalText,
     };
   });

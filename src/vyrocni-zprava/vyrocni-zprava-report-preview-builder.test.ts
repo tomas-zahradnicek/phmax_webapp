@@ -121,6 +121,17 @@ describe("vyrocni-zprava-report-preview-builder", () => {
     expect(preview.fullText).toContain("Upravený text kapitoly 03.");
   });
 
+  it("promítne status aktuálnosti textu do náhledu", () => {
+    let report = createDefaultAnnualReport("2024/2025");
+    report = withSectionText(report, "01", { generatedText: "Text 01", status: "VYGENEROVANO" });
+    const preview = buildAnnualReportPreview({
+      report,
+      schoolProfile: createDefaultSchoolProfile(),
+      generatedTextStatuses: { "01": "stale" },
+    });
+    expect(preview.sections.find((section) => section.number === "01")?.generatedTextStatus).toBe("stale");
+  });
+
   it("pořadí sekcí v náhledu odpovídá 01 až 14", () => {
     const preview = buildAnnualReportPreview({
       report: createDefaultAnnualReport("2024/2025"),

@@ -663,7 +663,8 @@ export function VyrocniZpravaXlsxImportPanel({
           ) : null}
 
           <p className="muted-text">
-            Import neupravuje automaticky generatedText. Po importu doporučujeme znovu zkontrolovat údaje a regenerovat dotčené kapitoly.
+            Import neupravuje automaticky text kapitol. Po importu doporučujeme znovu zkontrolovat údaje a vytvořit text
+            dotčených kapitol znovu.
           </p>
 
           <button

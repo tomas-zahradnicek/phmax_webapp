@@ -46,6 +46,10 @@ export type AnnualReportDocxExportModel = {
   structuredData?: AnnualReportDocxStructuredData;
 };
 
+export type DocxExportGuardResult =
+  | { ok: true }
+  | { ok: false; reason: "STALE_GENERATED_TEXT"; staleSections: string[] };
+
 function normalizeTextForComparison(value: string): string {
   return value.replace(/\r?\n/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
 }
@@ -264,3 +268,20 @@ export function buildDocxExportModel(
 }
 
 export const getExportablePreviewSections = getDocxExportSections;
+
+export function getDocxExportGuard(preview: AnnualReportPreviewData, mode: DocxExportMode): DocxExportGuardResult {
+  const candidateSections = getDocxExportSections(preview.sections, mode);
+  const staleSections = candidateSections
+    .filter((exportSection) => {
+      const source = preview.sections.find(
+        (section) => section.number === exportSection.number && section.title === exportSection.title,
+      );
+      return source?.generatedTextStatus === "stale";
+    })
+    .map((section) => `${section.number} ${section.title}`);
+
+  if (staleSections.length > 0) {
+    return { ok: false, reason: "STALE_GENERATED_TEXT", staleSections };
+  }
+  return { ok: true };
+}

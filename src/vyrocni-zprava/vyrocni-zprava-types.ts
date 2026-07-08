@@ -120,6 +120,9 @@ export type AnnualReportSection = {
   /** True po ruční úpravě uloženého generatedText. */
   editedByUser?: boolean;
 
+  /** Deterministický fingerprint vstupních dat použitých při posledním generování textu. */
+  generatedInputFingerprint?: string;
+
   status: AnnualReportSectionStatus;
 
   missingFields: string[];
@@ -196,6 +199,8 @@ export const ANNUAL_REPORT_SECTION_STATUS_LABELS: Record<AnnualReportSectionStat
   SCHVALENO: "Schváleno",
 
 };
+
+export type GeneratedTextStatus = "not_generated" | "current" | "stale";
 
 
 
