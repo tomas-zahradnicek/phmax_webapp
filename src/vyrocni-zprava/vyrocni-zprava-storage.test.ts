@@ -1,6 +1,10 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
 import { createDefaultAnnualReport, refreshAllSections } from "./vyrocni-zprava-logic";
 import { createDefaultSchoolProfile } from "../school-profile/school-profile-logic";
+import { buildAnnualReportInputFingerprint } from "./vyrocni-zprava-fingerprint";
+import { resolveGeneratedTextStatus } from "./vyrocni-zprava-generated-text-status";
+import { buildSection01GeneratorInput } from "./vyrocni-zprava-section01-generator-input";
+import { getSection01StoreSnapshot } from "./vyrocni-zprava-section01-data-storage";
 import {
   VYROCNI_ZPRAVA_DIAGNOSTIC_BACKUP_KEY_PREFIX,
   VYROCNI_ZPRAVA_LS_KEY,
@@ -125,6 +129,63 @@ describe("vyrocni-zprava-storage", () => {
 
     expect(result.ok).toBe(false);
     expect(result.saveIssue?.code).toBe("other_dom_exception");
+  });
+
+  it("starší payload bez generatedInputFingerprint se načte a bezpečně přejde stale -> current po regeneraci", () => {
+    const profile = createDefaultSchoolProfile();
+    const report = refreshAllSections({ ...createDefaultAnnualReport("2023/2024") }, profile);
+    const withLegacyGeneratedText = {
+      ...report,
+      sections: report.sections.map((section) =>
+        section.id === "01"
+          ? {
+              ...section,
+              generatedText: "01 Základní údaje o škole\n\nLegacy text",
+              status: "VYGENEROVANO",
+              generatedInputFingerprint: undefined,
+            }
+          : section,
+      ),
+    };
+    const legacyPayload = {
+      version: 1,
+      report: withLegacyGeneratedText,
+      selectedSectionId: "01",
+    };
+    localStorage.setItem(VYROCNI_ZPRAVA_LS_KEY, JSON.stringify(legacyPayload));
+
+    const loaded = loadVyrocniZpravaStorage();
+    const loadedSection = loaded.report.sections.find((section) => section.id === "01");
+    expect(loadedSection).toBeTruthy();
+    expect(loadedSection?.generatedText).toContain("Legacy text");
+    expect(resolveGeneratedTextStatus({ section: loadedSection!, schoolProfile: profile, schoolYear: loaded.report.schoolYear })).toBe(
+      "stale",
+    );
+
+    const fingerprint = buildAnnualReportInputFingerprint(
+      buildSection01GeneratorInput({
+        schoolProfile: profile,
+        schoolYear: loaded.report.schoolYear,
+        sectionInputs: getSection01StoreSnapshot().data,
+      }),
+    );
+    const regenerated = {
+      ...loaded.report,
+      sections: loaded.report.sections.map((section) =>
+        section.id === "01" ? { ...section, generatedInputFingerprint: fingerprint } : section,
+      ),
+    };
+    saveVyrocniZpravaStorage({
+      version: 1,
+      report: regenerated,
+      selectedSectionId: loaded.selectedSectionId,
+    });
+    const reloaded = loadVyrocniZpravaStorage();
+    const reloadedSection = reloaded.report.sections.find((section) => section.id === "01");
+    expect(reloadedSection?.generatedInputFingerprint).toBe(fingerprint);
+    expect(
+      resolveGeneratedTextStatus({ section: reloadedSection!, schoolProfile: profile, schoolYear: reloaded.report.schoolYear }),
+    ).toBe("current");
   });
 
 });

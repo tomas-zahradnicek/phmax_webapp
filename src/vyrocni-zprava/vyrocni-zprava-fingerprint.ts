@@ -4,6 +4,7 @@ function normalizeValue(value: unknown): unknown {
   const input = value as Record<string, unknown>;
   const output: Record<string, unknown> = {};
   for (const key of Object.keys(input).sort()) {
+    if (key.startsWith("__")) continue;
     output[key] = normalizeValue(input[key]);
   }
   return output;
