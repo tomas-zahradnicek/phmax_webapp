@@ -300,7 +300,8 @@ a:focus-visible {
   margin-bottom: 14px;
 }
 
-button.pill--hero-toggle {
+button.pill--hero-toggle,
+a.pill--hero-toggle {
   appearance: none;
   cursor: pointer;
   font: inherit;
@@ -313,6 +314,10 @@ button.pill--hero-toggle {
   border: 1px solid rgba(255, 255, 255, 0.42);
   text-transform: none;
   letter-spacing: normal;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
@@ -320,18 +325,21 @@ button.pill--hero-toggle {
     color 160ms ease;
 }
 
-button.pill--hero-toggle:hover {
+button.pill--hero-toggle:hover,
+a.pill--hero-toggle:hover {
   background: rgba(255, 255, 255, 0.32);
   border-color: rgba(255, 255, 255, 0.55);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
-button.pill--hero-toggle:focus-visible {
+button.pill--hero-toggle:focus-visible,
+a.pill--hero-toggle:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 3px;
 }
 
-button.pill--hero-toggle--active {
+button.pill--hero-toggle--active,
+a.pill--hero-toggle--active {
   background: rgba(255, 255, 255, 0.94);
   color: #0f172a;
   border-color: rgba(255, 255, 255, 0.98);
@@ -1394,6 +1402,7 @@ button.pill--hero-toggle--active {
   border-radius: 12px;
   cursor: pointer;
   text-align: center;
+  text-decoration: none;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
   backdrop-filter: blur(8px);
   transition:
@@ -9924,26 +9933,30 @@ select:focus {
   margin-bottom: 0;
 }
 
-.calculator-hero-shell--pro button.pill--hero-toggle {
+.calculator-hero-shell--pro button.pill--hero-toggle,
+.calculator-hero-shell--pro a.pill--hero-toggle {
   color: #334155;
   background: #fff;
   border: 1px solid #cbd5e1;
   box-shadow: none;
 }
 
-.calculator-hero-shell--pro button.pill--hero-toggle:hover {
+.calculator-hero-shell--pro button.pill--hero-toggle:hover,
+.calculator-hero-shell--pro a.pill--hero-toggle:hover {
   background: #f8fafc;
   border-color: #94a3b8;
 }
 
-.calculator-hero-shell--pro button.pill--hero-toggle--active {
+.calculator-hero-shell--pro button.pill--hero-toggle--active,
+.calculator-hero-shell--pro a.pill--hero-toggle--active {
   background: #2563eb;
   color: #fff;
   border-color: #2563eb;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
 }
 
-.calculator-hero-shell--pro button.pill--hero-toggle--active:hover {
+.calculator-hero-shell--pro button.pill--hero-toggle--active:hover,
+.calculator-hero-shell--pro a.pill--hero-toggle--active:hover {
   background: #fff;
   color: #2563eb;
   border-color: #2563eb;
@@ -11386,6 +11399,19 @@ select:focus {
 .phmax-module-seo__related-list {
   margin: 0;
   padding-left: 1.25rem;
+}
+
+.phmax-calculator-nav__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.phmax-calculator-nav__list a {
+  font-weight: 650;
 }
 
 .phmax-module-seo__related-link {

@@ -120,6 +120,8 @@ export type PhmaxHeadRenderOptions = {
 export type PhmaxPrerenderRoute = {
   pathname: string;
   meta: PhmaxDocumentHeadMeta;
+  /** Pokud je nastaveno, canonical ≠ pathname (např. /rychly → plná kalkulačka). */
+  canonicalPath?: string;
   head: Omit<PhmaxHeadRenderOptions, "canonical">;
 };
 
@@ -487,20 +489,26 @@ export function applyProfilSkolyDocumentHead(): void {
   });
 }
 
-/** Document head pro režim „Rychlý PHmax“ (/rychly). */
+/** Document head pro režim „Rychlý PHmax“ (/rychly) — noindex, canonical na plnou kalkulačku. */
 export function applyPhmaxLiteDocumentHead(lite: PhmaxLiteKind): void {
   if (typeof document === "undefined") return;
   const meta = PHMAX_LITE_DOCUMENT_HEAD[lite];
   const origin = resolvePhmaxSiteOrigin();
-  const canonical = new URL(PHMAX_LITE_PATH[lite], origin).href;
+  const parentPath = PRODUCT_VIEW_PATH[lite];
+  const canonical = new URL(parentPath, origin).href;
   applyPhmaxHeadMeta(meta, canonical, {
     canonical,
     faqView: lite,
+    indexable: false,
+    includeSoftwareApplication: false,
     breadcrumbLabel: meta.applicationName,
   });
 }
 
-/** Indexovatelné URL pro sitemap (bez pracovního přehledu, profilu a náhledu výroční zprávy). */
+/**
+ * Indexovatelné URL pro sitemap.
+ * Bez dashboardu, profilu, náhledu výroční zprávy a bez /rychly (near-duplicate režimy).
+ */
 export function listPhmaxSitemapUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): string[] {
   const moduleUrls = (Object.keys(PHMAX_DOCUMENT_HEAD) as ProductViewCode[])
     .filter((view) => view !== "dash")
@@ -511,9 +519,6 @@ export function listPhmaxSitemapUrls(origin = PHMAX_SITE_ORIGIN_FALLBACK): strin
     ...moduleUrls,
     new URL(USER_GUIDE_PATH, origin).href,
     new URL(VYROCNI_ZPRAVA_PATH, origin).href,
-    new URL(PHMAX_PV_LITE_PATH, origin).href,
-    new URL(PHMAX_SD_LITE_PATH, origin).href,
-    new URL(PHMAX_ZS_LITE_PATH, origin).href,
   ];
 }
 
@@ -543,9 +548,12 @@ export function listPhmaxPrerenderRoutes(_origin = PHMAX_SITE_ORIGIN_FALLBACK): 
     (lite) => ({
       pathname: PHMAX_LITE_PATH[lite],
       meta: PHMAX_LITE_DOCUMENT_HEAD[lite],
+      /** Canonical míří na plnou kalkulačku — /rychly zůstává funkční, ale není indexovatelné. */
+      canonicalPath: PRODUCT_VIEW_PATH[lite],
       head: {
         faqView: lite,
-        indexable: true,
+        indexable: false,
+        includeSoftwareApplication: false,
         breadcrumbLabel: PHMAX_LITE_DOCUMENT_HEAD[lite].applicationName,
       },
     }),
@@ -613,7 +621,6 @@ export type PhmaxSitemapEntry = {
   loc: string;
   changefreq: "weekly" | "monthly";
   priority: string;
-  lastmod: string;
 };
 
 function phmaxSitemapPriority(pathname: string): { changefreq: PhmaxSitemapEntry["changefreq"]; priority: string } {
@@ -627,23 +634,20 @@ function phmaxSitemapPriority(pathname: string): { changefreq: PhmaxSitemapEntry
 
 export function buildPhmaxSitemapEntries(
   origin = PHMAX_SITE_ORIGIN_FALLBACK,
-  lastmod = new Date().toISOString().slice(0, 10),
 ): PhmaxSitemapEntry[] {
   return listPhmaxSitemapUrls(origin).map((loc) => {
     const pathname = new URL(loc).pathname.replace(/\/+$/, "") || "/";
     const { changefreq, priority } = phmaxSitemapPriority(pathname);
-    return { loc, changefreq, priority, lastmod };
+    return { loc, changefreq, priority };
   });
 }
 
-export function buildPhmaxSitemapXml(
-  origin = PHMAX_SITE_ORIGIN_FALLBACK,
-  lastmod = new Date().toISOString().slice(0, 10),
-): string {
-  const rows = buildPhmaxSitemapEntries(origin, lastmod)
+export function buildPhmaxSitemapXml(origin = PHMAX_SITE_ORIGIN_FALLBACK): string {
+  // lastmod záměrně vynechán — bez spolehlivého data významné obsahové změny.
+  const rows = buildPhmaxSitemapEntries(origin)
     .map(
       (entry) =>
-        `  <url><loc>${entry.loc}</loc><lastmod>${entry.lastmod}</lastmod><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`,
+        `  <url><loc>${entry.loc}</loc><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`,
     )
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows}\n</urlset>\n`;

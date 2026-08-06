@@ -140,6 +140,9 @@ const indexingChecks: [string, string, { robots: string; inSitemap: boolean; noD
     ["/vyrocni-zprava", "index vyrocni", { robots: "index, follow", inSitemap: true, noDashFaq: true }],
     ["/vyrocni-zprava/nahled", "noindex preview", { robots: "noindex, follow", inSitemap: false, noSoftware: true, noDashFaq: true }],
     [KALKULACKY_PHMAX_PATH, "index landing", { robots: "index, follow", inSitemap: true }],
+    ["/phmax-zakladni-skola/rychly", "noindex zs lite", { robots: "noindex, follow", inSitemap: false, noSoftware: true }],
+    ["/phmax-predskolni-vzdelavani/rychly", "noindex pv lite", { robots: "noindex, follow", inSitemap: false, noSoftware: true }],
+    ["/phmax-skolni-druzina/rychly", "noindex sd lite", { robots: "noindex, follow", inSitemap: false, noSoftware: true }],
   ];
 
 const sitemapXml = buildPhmaxSitemapXml();
@@ -170,6 +173,16 @@ for (const [routePath, label, expected] of indexingChecks) {
   if (expected.noSoftware && hasJsonLdType(html, "SoftwareApplication")) {
     fail(`${label} | must not contain SoftwareApplication JSON-LD`);
   }
+
+  if (routePath.endsWith("/rychly")) {
+    const parentPath = routePath.replace(/\/rychly$/, "");
+    const canonical = extractCanonical(html);
+    if (!canonical.endsWith(parentPath)) {
+      fail(`${label} | canonical should point to ${parentPath}, got ${canonical}`);
+    } else {
+      ok(`${label} | canonical → ${parentPath}`);
+    }
+  }
 }
 
 if (!sitemapXml.includes(KALKULACKY_PHMAX_PATH)) {
@@ -178,10 +191,15 @@ if (!sitemapXml.includes(KALKULACKY_PHMAX_PATH)) {
   ok("sitemap | contains landing page");
 }
 
-if (sitemapXml.includes("/prehled") || sitemapXml.includes("/profil-skoly") || sitemapXml.includes("/vyrocni-zprava/nahled")) {
+if (
+  sitemapXml.includes("/prehled") ||
+  sitemapXml.includes("/profil-skoly") ||
+  sitemapXml.includes("/vyrocni-zprava/nahled") ||
+  sitemapXml.includes("/rychly")
+) {
   fail("sitemap | contains excluded URLs");
 } else {
-  ok("sitemap | excludes dashboard, profile and preview");
+  ok("sitemap | excludes dashboard, profile, preview and /rychly");
 }
 
 const vyrocniHtml = readBuiltHtml(VYROCNI_ZPRAVA_PATH);

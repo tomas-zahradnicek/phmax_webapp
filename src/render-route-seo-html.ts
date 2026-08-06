@@ -1,3 +1,8 @@
+import {
+  PHMAX_CALCULATOR_NAV_ARIA_LABEL,
+  PHMAX_CALCULATOR_NAV_LINKS,
+  shouldIncludePhmaxCalculatorNav,
+} from "./phmax-calculator-nav";
 import type { RouteSeoContent } from "./phmax-route-seo-content";
 
 const INTERNAL_PATH_PATTERN = /^\/[a-z0-9\-/]*$/;
@@ -83,6 +88,17 @@ function renderRelatedLinks(links: RouteSeoContent["relatedLinks"]): string {
       </nav>`;
 }
 
+function renderCalculatorNav(path: string): string {
+  if (!shouldIncludePhmaxCalculatorNav(path)) return "";
+  const items = PHMAX_CALCULATOR_NAV_LINKS.map((link) => {
+    const href = assertInternalHref(link.href);
+    return `<a href="${escapeHtmlAttr(href)}">${escapeHtml(link.label)}</a>`;
+  }).join("\n    ");
+  return `<nav aria-label="${escapeHtmlAttr(PHMAX_CALCULATOR_NAV_ARIA_LABEL)}">
+    ${items}
+  </nav>`;
+}
+
 /** Vygeneruje statický route-specific obsah pro #seo-prerender-content. */
 export function renderRouteSeoHtml(content: RouteSeoContent): string {
   const path = assertInternalHref(content.path);
@@ -109,6 +125,8 @@ export function renderRouteSeoHtml(content: RouteSeoContent): string {
     ${renderFaq(content.faq)}
 
     ${renderRelatedLinks(content.relatedLinks)}
+
+    ${renderCalculatorNav(path)}
   </main>
 </div>`;
 }

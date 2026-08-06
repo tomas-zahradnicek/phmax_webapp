@@ -26,6 +26,8 @@ describe("SEO fáze A contract", () => {
     expect(readSource("src/product-view-paths.ts")).toContain("/phmax-zakladni-skola");
     expect(readSource("src/PhmaxZsPage.tsx")).toContain("PhmaxModuleSeoSection");
     expect(readSource("src/PhmaxModuleSeoSection.tsx")).toContain("Nejčastější dotazy");
+    expect(readSource("src/ProductViewPills.tsx")).toContain('href={PRODUCT_VIEW_PATH[view]}');
+    expect(readSource("src/phmax-calculator-nav.ts")).toContain("PHMAX_CALCULATOR_NAV_LINKS");
   });
 
   it("robots a sitemap ve public", () => {
@@ -38,10 +40,13 @@ describe("SEO fáze A contract", () => {
     expect(readSource("public/sitemap.xml")).not.toContain("/profil-skoly");
     expect(readSource("public/sitemap.xml")).not.toContain("/prehled");
     expect(readSource("public/sitemap.xml")).toContain("/phmax-zakladni-skola");
-    expect(readSource("public/sitemap.xml")).toContain("/phmax-predskolni-vzdelavani/rychly");
-    expect(readSource("public/sitemap.xml")).toContain("/phmax-skolni-druzina/rychly");
-    expect(readSource("public/sitemap.xml")).toContain("/phmax-zakladni-skola/rychly");
-    expect(readSource("vercel.json")).not.toContain('"rewrites"');
+    expect(readSource("public/sitemap.xml")).not.toContain("/phmax-predskolni-vzdelavani/rychly");
+    expect(readSource("public/sitemap.xml")).not.toContain("/phmax-skolni-druzina/rychly");
+    expect(readSource("public/sitemap.xml")).not.toContain("/phmax-zakladni-skola/rychly");
+    expect(readSource("src/seo-routes.ts")).toContain("SEO_ROUTES");
+    expect(readSource("docs/post-deploy-checklist.md")).toContain("vercel.json");
+    // Prázdný vercel.json = žádný SPA catch-all rewrite (hard 404).
+    expect(readSource("vercel.json").trim()).toBe("{}");
     expect(readSource("middleware.ts")).toContain("LEGACY_VIEW_PATHS");
     expect(readSource("middleware.ts")).toContain('matcher: ["/", "/prehled"]');
     expect(readSource("legacy-view-redirect.mjs")).toContain("resolveLegacyViewRedirect");

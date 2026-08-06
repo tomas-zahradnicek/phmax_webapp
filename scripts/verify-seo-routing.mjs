@@ -231,9 +231,14 @@ for (const check of checks) {
     check.url.includes("neexistuje") ||
     check.url === "/vyrocni-zprava/nahled" ||
     check.url === "/prehled" ||
-    check.url === "/profil-skoly"
+    check.url === "/profil-skoly" ||
+    check.url.endsWith("/rychly")
       ? check.robots.includes("noindex")
       : true;
+  const liteCanonicalOk = check.url.endsWith("/rychly")
+    ? check.canonical === `https://app.reditelskypruvodce.cz${check.url.replace(/\/rychly$/, "")}` ||
+      check.canonical.endsWith(check.url.replace(/\/rychly$/, ""))
+    : true;
   const pass =
     statusOk &&
     locationOk &&
@@ -242,7 +247,8 @@ for (const check of checks) {
     noViewInLocation &&
     noViewInFinalUrl &&
     noCanonicalToPrehled &&
-    noindexOn404;
+    noindexOn404 &&
+    liteCanonicalOk;
   hasFailure ||= !pass;
   console.log(
     [

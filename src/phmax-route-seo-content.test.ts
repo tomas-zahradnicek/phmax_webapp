@@ -31,6 +31,9 @@ describe("renderRouteSeoHtml", () => {
     expect(html).toContain("<main");
     expect(html.match(/<h1\b/gi)).toHaveLength(1);
     expect(html).not.toContain("<script");
+    expect(html).toContain('aria-label="Kalkulačky PHmax"');
+    expect(html).toContain('href="/phmax-stredni-skola"');
+    expect(html).toContain('href="/phmax-predskolni-vzdelavani"');
   });
 
   it("odmítne externí URL v odkazech", () => {

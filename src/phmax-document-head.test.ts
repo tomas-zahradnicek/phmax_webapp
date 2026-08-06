@@ -27,17 +27,17 @@ describe("phmax-document-head", () => {
     }
   });
 
-  it("canonical URL používá parametr view", () => {
+  it("canonical URL používá čisté path bez /rychly", () => {
     const urls = listPhmaxSitemapUrls("https://example.test");
-    expect(urls).toHaveLength(PRODUCT_VIEW_CODES.length + 5);
+    expect(urls).toHaveLength(PRODUCT_VIEW_CODES.length + 2);
     expect(urls).toContain(`https://example.test${KALKULACKY_PHMAX_PATH}`);
     expect(urls).toContain(`https://example.test${USER_GUIDE_PATH}`);
     expect(urls).toContain(`https://example.test${VYROCNI_ZPRAVA_PATH}`);
     expect(urls).not.toContain(`https://example.test${PROFIL_SKOLY_PATH}`);
     expect(urls).not.toContain("https://example.test/prehled");
-    expect(urls).toContain(`https://example.test${PHMAX_PV_LITE_PATH}`);
-    expect(urls).toContain(`https://example.test${PHMAX_SD_LITE_PATH}`);
-    expect(urls).toContain(`https://example.test/phmax-zakladni-skola/rychly`);
+    expect(urls).not.toContain(`https://example.test${PHMAX_PV_LITE_PATH}`);
+    expect(urls).not.toContain(`https://example.test${PHMAX_SD_LITE_PATH}`);
+    expect(urls).not.toContain(`https://example.test/phmax-zakladni-skola/rychly`);
   });
 
   it("má meta pro rychlé PHmax režimy", () => {
@@ -48,20 +48,20 @@ describe("phmax-document-head", () => {
     }
   });
 
-  it("sitemap XML obsahuje veřejné cesty bez dashboardu a profilu", () => {
+  it("sitemap XML obsahuje veřejné cesty bez dashboardu, profilu a /rychly", () => {
     const xml = buildPhmaxSitemapXml();
     expect(xml).toContain(`https://app.reditelskypruvodce.cz${KALKULACKY_PHMAX_PATH}`);
     expect(xml).not.toContain("https://app.reditelskypruvodce.cz/prehled");
     expect(xml).not.toContain("/profil-skoly");
-    expect(xml).toContain("<lastmod>");
+    expect(xml).not.toContain("<lastmod>");
     expect(xml).not.toContain("/vyrocni-zprava/nahled");
     expect(xml).toContain("/navod");
     expect(xml).toContain("/vyrocni-zprava");
-    expect(xml).toContain("/phmax-zakladni-skola/rychly");
+    expect(xml).not.toContain("/phmax-zakladni-skola/rychly");
     expect(buildPhmaxSitemapEntries()).toHaveLength(listPhmaxSitemapUrls().length);
   });
 
-  it("prerender routes mají statický head a noindex interní stránky", () => {
+  it("prerender routes mají /rychly noindex s canonical na plnou verzi", () => {
     const routes = listPhmaxPrerenderRoutes("https://example.test");
     expect(routes.length).toBeGreaterThan(listPhmaxSitemapUrls("https://example.test").length);
     const preview = routes.find((route) => route.pathname === "/vyrocni-zprava/nahled");
@@ -70,6 +70,9 @@ describe("phmax-document-head", () => {
     expect(dash?.head.indexable).toBe(false);
     const profile = routes.find((route) => route.pathname === "/profil-skoly");
     expect(profile?.head.indexable).toBe(false);
+    const zsLite = routes.find((route) => route.pathname === "/phmax-zakladni-skola/rychly");
+    expect(zsLite?.head.indexable).toBe(false);
+    expect(zsLite?.canonicalPath).toBe("/phmax-zakladni-skola");
     const head = buildPhmaxHeadHtmlTags(PHMAX_DOCUMENT_HEAD.zs, "https://example.test", {
       canonical: "https://example.test/phmax-zakladni-skola",
       faqView: "zs",
