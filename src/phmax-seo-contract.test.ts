@@ -49,7 +49,13 @@ describe("SEO fáze A contract", () => {
     expect(readSource("vercel.json").trim()).toBe("{}");
     expect(readSource("middleware.ts")).toContain("LEGACY_VIEW_PATHS");
     expect(readSource("middleware.ts")).toContain('matcher: ["/", "/prehled"]');
+    expect(readSource("middleware.ts")).toContain('from "@vercel/functions"');
+    expect(readSource("middleware.ts")).toContain("return next()");
     expect(readSource("legacy-view-redirect.mjs")).toContain("resolveLegacyViewRedirect");
+    expect(readSource("legacy-view-redirect.mjs")).toContain('ROOT_REDIRECT_PATH = "/kalkulacky-phmax"');
+    expect(readSource("package.json")).toContain('"tsx"');
+    expect(readSource("package.json")).toContain('"@vercel/functions"');
+    expect(readSource("package.json")).not.toContain("npx --yes tsx");
     expect(readSource("package.json")).toContain("prerender-route-html");
     expect(readSource("package.json")).toContain("check:seo-routing");
     expect(readSource("package.json")).toContain("check:seo-routing:deployed");

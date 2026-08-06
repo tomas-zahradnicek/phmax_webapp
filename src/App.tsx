@@ -101,8 +101,9 @@ export default function App() {
   useEffect(() => {
     const norm = window.location.pathname.replace(/\/+$/, "") || "/";
     if (norm === "/") {
-      window.history.replaceState({ phmaxView: "dash" }, "", "/prehled");
-      setProductViewState("dash");
+      // Pojistka bez middleware: kořen → veřejná landing (shoda se serverovým 308).
+      window.history.replaceState({}, "", "/kalkulacky-phmax");
+      setKalkulackyLandingActive(true);
     }
   }, []);
 

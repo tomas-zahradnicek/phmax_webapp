@@ -117,7 +117,7 @@ const checks = [];
 checks.push({
   url: "/",
   expectedStatus: "308/301",
-  expectedLocation: "/prehled",
+  expectedLocation: "/kalkulacky-phmax",
   ...(await fetchOne("/", { redirect: "manual" })),
 });
 
@@ -147,7 +147,7 @@ const legacyChecks = [
   ["/?view=nv75", "/banka-odpoctu-zastupcu-reditele", ""],
   ["/?view=dash", "/prehled", ""],
   ["/?view=zs&utm_source=test", "/phmax-zakladni-skola", "?utm_source=test"],
-  ["/?utm_source=test", "/prehled", "?utm_source=test"],
+  ["/?utm_source=test", "/kalkulacky-phmax", "?utm_source=test"],
 ];
 
 for (const [source, destination, destinationSearch] of legacyChecks) {
@@ -175,7 +175,7 @@ const unknownViewRedirect = await fetchOne("/?view=unknown", { redirect: "manual
 checks.push({
   url: "/?view=unknown",
   expectedStatus: "308/301",
-  expectedLocation: "/prehled",
+  expectedLocation: "/kalkulacky-phmax",
   ...unknownViewRedirect,
 });
 
@@ -184,7 +184,7 @@ checks.push({
   url: "/?view=unknown (follow)",
   expectedStatus: "200",
   expectedLocation: "-",
-  expectedFinalPath: "/prehled",
+  expectedFinalPath: "/kalkulacky-phmax",
   forbidViewInFinalUrl: true,
   ...unknownViewFollow,
 });
@@ -195,6 +195,23 @@ checks.push({
   expectedStatus: "200",
   expectedLocation: "-",
   ...prehled,
+});
+
+const rootFollow = await fetchOne("/", { redirect: "follow" });
+checks.push({
+  url: "/ (follow)",
+  expectedStatus: "200",
+  expectedLocation: "-",
+  expectedFinalPath: "/kalkulacky-phmax",
+  ...rootFollow,
+});
+
+const prehledNoQuery = await fetchOne("/prehled", { redirect: "manual" });
+checks.push({
+  url: "/prehled (no query, no redirect)",
+  expectedStatus: "200",
+  expectedLocation: "-",
+  ...prehledNoQuery,
 });
 
 const prehledUnknownView = await fetchOne("/prehled?view=unknown", { redirect: "manual" });

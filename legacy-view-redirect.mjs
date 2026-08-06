@@ -8,6 +8,9 @@ export const LEGACY_VIEW_PATHS = {
   dash: "/prehled",
 };
 
+/** Veřejná landing page – cíl přesměrování z kořenové `/` bez `?view=`. */
+export const ROOT_REDIRECT_PATH = "/kalkulacky-phmax";
+
 /**
  * @param {string} requestUrl
  * @returns {string | null} Cílová URL (path + search + hash) nebo null = bez redirectu.
@@ -27,17 +30,20 @@ export function resolveLegacyViewRedirect(requestUrl) {
       return `${url.pathname}${url.search}${url.hash}`;
     }
     if (pathname === "/") {
-      url.pathname = "/prehled";
+      // Neznámý ?view= na kořeni → landing (jeden hop, ne přes /prehled).
+      url.pathname = ROOT_REDIRECT_PATH;
       url.searchParams.delete("view");
       return `${url.pathname}${url.search}${url.hash}`;
     }
+    // /prehled?view=unknown → bez redirectu (zůstane přehled).
     return null;
   }
 
   if (pathname === "/") {
-    url.pathname = "/prehled";
+    url.pathname = ROOT_REDIRECT_PATH;
     return `${url.pathname}${url.search}${url.hash}`;
   }
 
+  // /prehled bez query → žádný redirect (pokračování ke statickému souboru).
   return null;
 }
