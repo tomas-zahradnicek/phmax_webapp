@@ -47,6 +47,7 @@ test.describe("Centrální záloha dat – export", () => {
     await expect(page.getByRole("heading", { name: "Záloha a obnova dat" })).toBeVisible();
 
     await expect(page.getByTestId("dash-backup-module-school-profile")).toContainText("Obsahuje data");
+    await expect(page.getByTestId("dash-backup-module-identity-registry")).toContainText("Bez uložených dat");
     await expect(page.getByTestId("dash-backup-module-phmax-scenario-label")).toContainText("Obsahuje data");
     await expect(page.getByTestId("dash-backup-export-summary")).toContainText(/zahrnuto 2 modul/);
 
@@ -72,6 +73,8 @@ test.describe("Centrální záloha dat – export", () => {
     expect(typeof json.exportedAt).toBe("string");
     expect(json.modules["school-profile"]?.data).toMatchObject({ name: "ZŠ Záloha E2E" });
     expect(json.modules["phmax-scenario-label"]?.data).toBe("E2E záloha scénář");
+    expect(json.modules["identity-registry"]).toBeUndefined();
+    expect(Object.keys(json.modules)).not.toContain("app-context");
 
     expect(raw).not.toContain("vyrocni-zprava-diagnostic-backup-v1:");
     expect(raw).not.toContain("unknown-e2e-key");

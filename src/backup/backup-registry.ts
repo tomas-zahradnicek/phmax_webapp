@@ -17,6 +17,11 @@ import { VYROCNI_ZPRAVA_SECTION11_LS_KEY } from "../vyrocni-zprava/vyrocni-zprav
 import { VYROCNI_ZPRAVA_SECTION12_LS_KEY } from "../vyrocni-zprava/vyrocni-zprava-section12-data-logic";
 import { VYROCNI_ZPRAVA_SECTION13_LS_KEY } from "../vyrocni-zprava/vyrocni-zprava-section13-data-logic";
 import { VYROCNI_ZPRAVA_SECTION14_LS_KEY } from "../vyrocni-zprava/vyrocni-zprava-section14-data-logic";
+import {
+  IDENTITY_REGISTRY_LS_KEY,
+  IDENTITY_REGISTRY_SCHEMA_VERSION,
+} from "../data/identity/identity-registry-types";
+import { parseIdentityRegistry, readIdentityRegistry } from "../data/identity/identity-registry-storage";
 import type { BackupModuleAdapter, BackupModuleReadResult } from "./backup-types";
 import {
   collectRecordValues,
@@ -128,6 +133,40 @@ function createSchoolProfileAdapter(): BackupModuleAdapter {
     storageKeys: [SCHOOL_PROFILE_LS_KEY],
     read: () => readJsonKey(SCHOOL_PROFILE_LS_KEY),
     validateForExport: validateSchoolProfileExport,
+  };
+}
+
+/**
+ * Read-only Identity Registry adapter for central backup.
+ * Missing → no module payload. Corrupted → module-level error (export continues).
+ * Never bootstraps or writes identity storage.
+ */
+function readIdentityRegistryModule(): BackupModuleReadResult {
+  const result = readIdentityRegistry();
+  if (!result.ok) {
+    if (result.code === "corrupted") {
+      const code = result.detail === "invalid_json" ? "invalid_json" : "invalid_shape";
+      return { ok: false, hasData: false, error: { ok: false, code } };
+    }
+    return { ok: false, hasData: false, error: { ok: false, code: "storage_unavailable" } };
+  }
+  if (!result.registry) {
+    return { ok: true, hasData: false, data: null };
+  }
+  return { ok: true, hasData: true, data: result.registry };
+}
+
+function createIdentityRegistryAdapter(): BackupModuleAdapter {
+  return {
+    id: "identity-registry",
+    label: "Identita školy a školních roků",
+    schemaVersion: IDENTITY_REGISTRY_SCHEMA_VERSION,
+    storageKeys: [IDENTITY_REGISTRY_LS_KEY],
+    read: readIdentityRegistryModule,
+    validateForExport: (data) => {
+      if (data == null) return { ok: true };
+      return parseIdentityRegistry(data) ? { ok: true } : { ok: false, code: "invalid_shape" };
+    },
   };
 }
 
@@ -284,6 +323,7 @@ function createScenarioLabelAdapter(): BackupModuleAdapter {
 
 export const BACKUP_MODULE_ADAPTERS: readonly BackupModuleAdapter[] = [
   createSchoolProfileAdapter(),
+  createIdentityRegistryAdapter(),
   createAnnualReportAdapter(),
   createPhmaxPvAdapter(),
   createPhmaxSdAdapter(),
