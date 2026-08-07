@@ -1,0 +1,20 @@
+name: Production smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: Read-only production SEO smoke
+        env:
+          SEO_SMOKE_BASE_URL: https://app.reditelskypruvodce.cz
+        run: npm run check:seo-routing:deployed

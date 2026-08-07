@@ -13,18 +13,10 @@ export default defineConfig({
   },
   plugins: [react()],
   optimizeDeps: {
+    // Dev prebundle only. Do NOT force exceljs into a manual production chunk:
+    // that co-locates Vite's CJS interop helper with exceljs and makes the entry
+    // statically import the ~900 kB chunk (modulepreload on every route).
     include: ["exceljs"],
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules/exceljs")) {
-            return "exceljs";
-          }
-        },
-      },
-    },
   },
   test: {
     environment: "node",

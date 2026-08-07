@@ -45,8 +45,12 @@ describe("SEO fáze A contract", () => {
     expect(readSource("public/sitemap.xml")).not.toContain("/phmax-zakladni-skola/rychly");
     expect(readSource("src/seo-routes.ts")).toContain("SEO_ROUTES");
     expect(readSource("docs/post-deploy-checklist.md")).toContain("vercel.json");
-    // Prázdný vercel.json = žádný SPA catch-all rewrite (hard 404).
-    expect(readSource("vercel.json").trim()).toBe("{}");
+    // Žádný SPA catch-all rewrite — neznámé URL musí zůstat hard 404 (ne index.html).
+    // Headers/cache v vercel.json jsou povolené; rewrite na index.html ne.
+    const vercelJson = JSON.parse(readSource("vercel.json"));
+    expect(vercelJson.rewrites ?? []).toEqual([]);
+    const rewriteTargets = JSON.stringify(vercelJson.rewrites ?? []);
+    expect(rewriteTargets).not.toMatch(/index\.html/);
     expect(readSource("middleware.ts")).toContain("LEGACY_VIEW_PATHS");
     expect(readSource("middleware.ts")).toContain('matcher: ["/", "/prehled"]');
     expect(readSource("middleware.ts")).toContain('from "@vercel/functions"');

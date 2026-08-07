@@ -4,7 +4,6 @@ import { VYROCNI_ZPRAVA_PATH } from "../calculator-ui-constants";
 import { showUiToast } from "../ui-toast";
 import type { AnnualReportSectionStatus } from "./vyrocni-zprava-types";
 import { ANNUAL_REPORT_SECTION_STATUS_LABELS } from "./vyrocni-zprava-types";
-import { exportAnnualReportPreviewToDocx } from "./vyrocni-zprava-docx-export";
 import { buildDocxExportModel, getDocxExportGuard } from "./vyrocni-zprava-docx-export-logic";
 import type { AnnualReportDocxStructuredData } from "./docx/vyrocni-zprava-docx-structured-tables";
 import type { AnnualReportPreviewData, AnnualReportPreviewSection } from "./vyrocni-zprava-report-preview-builder";
@@ -137,6 +136,7 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
       showUiToast(warning, { assertive: true });
     }
     try {
+      const { exportAnnualReportPreviewToDocx } = await import("./vyrocni-zprava-docx-export");
       const result = await exportAnnualReportPreviewToDocx(visiblePreview, {
         mode: "visible-generated",
         structuredData,
@@ -185,6 +185,7 @@ export function VyrocniZpravaReportPreview({ report, schoolProfile, structuredDa
         showUiToast(msg, { assertive: true });
         return;
       }
+      const { exportAnnualReportPreviewToDocx } = await import("./vyrocni-zprava-docx-export");
       await exportAnnualReportPreviewToDocx(preview, { mode: "approved-only", structuredData });
       const msg = "Export schválených kapitol do Wordu byl dokončen.";
       setExportNotice(msg);
