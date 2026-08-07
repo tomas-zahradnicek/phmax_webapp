@@ -108,10 +108,14 @@ describe("Export contract", () => {
     }
   });
 
-  it("exceljs zůstává lazy import mimo synchronní bundle", () => {
+  it("exceljs zůstává lazy import mimo synchronní entry preload", () => {
     const src = readSource("src/export-xlsx.ts");
     expect(src).toMatch(/await import\("exceljs"\)/);
-    expect(readSource("vite.config.ts")).toMatch(/exceljs/);
+    const viteConfig = readSource("vite.config.ts");
+    expect(viteConfig).toMatch(/exceljs/);
+    // manualChunks for exceljs co-locates CJS interop into the exceljs chunk and
+    // forces a static entry import → modulepreload of ~900 kB on every route.
+    expect(viteConfig).not.toMatch(/manualChunks[\s\S]*exceljs/);
   });
 
   it("SŠ audit export drží contract pole a orientační výsledek", () => {
