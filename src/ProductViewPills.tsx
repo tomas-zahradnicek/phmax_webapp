@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import { PRODUCT_CALCULATOR_TITLES, type ProductViewCode } from "./calculator-ui-constants";
+import { PRODUCT_VIEW_PATH } from "./product-view-paths";
 
 export type ProductView = ProductViewCode;
 
@@ -48,86 +49,35 @@ export function ProductViewPills({ productView, setProductView }: ProductViewPil
     [moveSelection, setProductView],
   );
 
+  const onNavClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, view: ProductView) => {
+      e.preventDefault();
+      setProductView(view);
+    },
+    [setProductView],
+  );
+
   return (
-    <div className="hero__product-pills" role="tablist" aria-label="Výběr kalkulačky">
-      <button
-        type="button"
-        role="tab"
-        tabIndex={productView === "dash" ? 0 : -1}
-        aria-selected={productView === "dash"}
-        title={PRODUCT_CALCULATOR_TITLES.dash}
-        aria-label={PRODUCT_CALCULATOR_TITLES.dash}
-        className={`pill pill--hero pill--hero-toggle${productView === "dash" ? " pill--hero-toggle--active" : ""}`}
-        onClick={() => setProductView("dash")}
-        onKeyDown={(e) => onTabListKeyDown(e, "dash")}
-      >
-        {PILL_SHORT.dash}
-      </button>
-      <button
-        type="button"
-        role="tab"
-        tabIndex={productView === "pv" ? 0 : -1}
-        aria-selected={productView === "pv"}
-        title={PRODUCT_CALCULATOR_TITLES.pv}
-        aria-label={PRODUCT_CALCULATOR_TITLES.pv}
-        className={`pill pill--hero pill--hero-toggle${productView === "pv" ? " pill--hero-toggle--active" : ""}`}
-        onClick={() => setProductView("pv")}
-        onKeyDown={(e) => onTabListKeyDown(e, "pv")}
-      >
-        {PILL_SHORT.pv}
-      </button>
-      <button
-        type="button"
-        role="tab"
-        tabIndex={productView === "sd" ? 0 : -1}
-        aria-selected={productView === "sd"}
-        title={PRODUCT_CALCULATOR_TITLES.sd}
-        aria-label={PRODUCT_CALCULATOR_TITLES.sd}
-        className={`pill pill--hero pill--hero-toggle${productView === "sd" ? " pill--hero-toggle--active" : ""}`}
-        onClick={() => setProductView("sd")}
-        onKeyDown={(e) => onTabListKeyDown(e, "sd")}
-      >
-        {PILL_SHORT.sd}
-      </button>
-      <button
-        type="button"
-        role="tab"
-        tabIndex={productView === "zs" ? 0 : -1}
-        aria-selected={productView === "zs"}
-        title={PRODUCT_CALCULATOR_TITLES.zs}
-        aria-label={PRODUCT_CALCULATOR_TITLES.zs}
-        className={`pill pill--hero pill--hero-toggle${productView === "zs" ? " pill--hero-toggle--active" : ""}`}
-        onClick={() => setProductView("zs")}
-        onKeyDown={(e) => onTabListKeyDown(e, "zs")}
-      >
-        {PILL_SHORT.zs}
-      </button>
-      <button
-        type="button"
-        role="tab"
-        tabIndex={productView === "ss" ? 0 : -1}
-        aria-selected={productView === "ss"}
-        title={PRODUCT_CALCULATOR_TITLES.ss}
-        aria-label={PRODUCT_CALCULATOR_TITLES.ss}
-        className={`pill pill--hero pill--hero-toggle${productView === "ss" ? " pill--hero-toggle--active" : ""}`}
-        onClick={() => setProductView("ss")}
-        onKeyDown={(e) => onTabListKeyDown(e, "ss")}
-      >
-        {PILL_SHORT.ss}
-      </button>
-      <button
-        type="button"
-        role="tab"
-        tabIndex={productView === "nv75" ? 0 : -1}
-        aria-selected={productView === "nv75"}
-        title={PRODUCT_CALCULATOR_TITLES.nv75}
-        aria-label={PRODUCT_CALCULATOR_TITLES.nv75}
-        className={`pill pill--hero pill--hero-toggle${productView === "nv75" ? " pill--hero-toggle--active" : ""}`}
-        onClick={() => setProductView("nv75")}
-        onKeyDown={(e) => onTabListKeyDown(e, "nv75")}
-      >
-        {PILL_SHORT.nv75}
-      </button>
-    </div>
+    <nav className="hero__product-pills" role="tablist" aria-label="Výběr kalkulačky">
+      {TAB_ORDER.map((view) => {
+        const active = productView === view;
+        return (
+          <a
+            key={view}
+            href={PRODUCT_VIEW_PATH[view]}
+            role="tab"
+            tabIndex={active ? 0 : -1}
+            aria-selected={active}
+            title={PRODUCT_CALCULATOR_TITLES[view]}
+            aria-label={PRODUCT_CALCULATOR_TITLES[view]}
+            className={`pill pill--hero pill--hero-toggle${active ? " pill--hero-toggle--active" : ""}`}
+            onClick={(e) => onNavClick(e, view)}
+            onKeyDown={(e) => onTabListKeyDown(e, view)}
+          >
+            {PILL_SHORT[view]}
+          </a>
+        );
+      })}
+    </nav>
   );
 }

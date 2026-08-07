@@ -25,7 +25,8 @@ export function readInitialProductView(): ProductView {
   if (fromPath) return fromPath;
   const q = new URLSearchParams(window.location.search).get(LEGACY_VIEW_QUERY);
   if (q && (PRODUCT_VIEW_CODES as readonly string[]).includes(q)) return q as ProductView;
-  return "zs";
+  // Neznámá cesta → přehled (ne ZŠ), aby nevznikal soft-404 jako kalkulačka ZŠ.
+  return "dash";
 }
 
 /** Synchronizuje adresu s aktivním modulem (čisté path, bez `?view=`). */

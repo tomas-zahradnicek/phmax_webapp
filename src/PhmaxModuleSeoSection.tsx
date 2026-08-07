@@ -1,6 +1,10 @@
 import React from "react";
 import type { ProductViewCode } from "./calculator-ui-constants";
 import type { ProductView } from "./ProductViewPills";
+import {
+  PHMAX_CALCULATOR_NAV_ARIA_LABEL,
+  PHMAX_CALCULATOR_NAV_LINKS,
+} from "./phmax-calculator-nav";
 import { PHMAX_SEO_MODULE_CONTENT } from "./phmax-seo-module-content";
 import { PRODUCT_VIEW_PATH } from "./product-view-paths";
 
@@ -35,6 +39,29 @@ export function PhmaxModuleSeoSection({ view, setProductView }: PhmaxModuleSeoSe
           {p}
         </p>
       ))}
+
+      <nav aria-label={PHMAX_CALCULATOR_NAV_ARIA_LABEL} className="phmax-calculator-nav">
+        <h3 className="phmax-module-seo__subtitle">Kalkulačky PHmax</h3>
+        <ul className="phmax-calculator-nav__list">
+          {PHMAX_CALCULATOR_NAV_LINKS.map((link) => (
+            <li key={link.href}>
+              <a
+                href={link.href}
+                onClick={(e) => {
+                  const matched = (Object.entries(PRODUCT_VIEW_PATH) as [ProductViewCode, string][]).find(
+                    ([, path]) => path === link.href,
+                  );
+                  if (!matched) return;
+                  e.preventDefault();
+                  setProductView(matched[0]);
+                }}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       {content.related.length > 0 ? (
         <div className="phmax-module-seo__related">

@@ -101,7 +101,7 @@ const origin = PHMAX_SITE_ORIGIN_FALLBACK;
 const routes = listPhmaxPrerenderRoutes(origin);
 
 for (const route of routes) {
-  const canonical = new URL(route.pathname, origin).href;
+  const canonical = new URL(route.canonicalPath ?? route.pathname, origin).href;
   const headTags = buildPhmaxHeadHtmlTags(route.meta, origin, {
     canonical,
     ...route.head,

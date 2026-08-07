@@ -1,8 +1,8 @@
 /**
  * Vytiskne JS pro DevTools konzoli – zápis handoff JSON do localStorage.
  *
- *   npx --yes tsx scripts/print-phmax-handoff-apply-snippet.ts
- *   npx --yes tsx scripts/print-phmax-handoff-apply-snippet.ts --in ./handoff.json --no-reload
+ *   tsx scripts/print-phmax-handoff-apply-snippet.ts
+ *   tsx scripts/print-phmax-handoff-apply-snippet.ts --in ./handoff.json --no-reload
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";

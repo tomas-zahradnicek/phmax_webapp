@@ -1,8 +1,8 @@
 /**
  * Transformace CSV šablony PV+ZŠ → JSON phmax-is-handoff-v1 (ukázka pro IT).
  *
- *   npx --yes tsx scripts/csv-to-phmax-handoff.ts
- *   npx --yes tsx scripts/csv-to-phmax-handoff.ts --out ./handoff.json
+ *   tsx scripts/csv-to-phmax-handoff.ts
+ *   tsx scripts/csv-to-phmax-handoff.ts --out ./handoff.json
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";

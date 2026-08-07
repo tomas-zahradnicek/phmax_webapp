@@ -1,10 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { ProductView } from "./ProductViewPills";
+import { PRODUCT_VIEW_PATH } from "./product-view-paths";
 
 type ProductFloatingNavProps = {
   active: ProductView;
   setProductView: (v: ProductView) => void;
 };
+
+const FLOAT_ITEMS: { view: ProductView; label: string; title: string }[] = [
+  { view: "dash", label: "Σ", title: "Souhrnný přehled kalkulaček" },
+  { view: "pv", label: "PV", title: "Kalkulačka pro předškolní vzdělávání" },
+  { view: "sd", label: "ŠD", title: "Kalkulačka pro školní družiny" },
+  { view: "zs", label: "ZŠ", title: "Kalkulačka pro základní školy" },
+  { view: "ss", label: "SŠ", title: "Kalkulačka pro střední školy" },
+  { view: "nv75", label: "NV75", title: "Kalkulačka NV75 – banka odpočtů zástupců" },
+];
 
 export function ProductFloatingNav({ active, setProductView }: ProductFloatingNavProps) {
   const [show, setShow] = useState(false);
@@ -16,6 +26,14 @@ export function ProductFloatingNav({ active, setProductView }: ProductFloatingNa
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const onNavClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, view: ProductView) => {
+      e.preventDefault();
+      setProductView(view);
+    },
+    [setProductView],
+  );
+
   if (!show) return null;
 
   return (
@@ -23,56 +41,19 @@ export function ProductFloatingNav({ active, setProductView }: ProductFloatingNa
       <button type="button" className="scroll-tools__btn" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
         Nahoru
       </button>
-      <div className="scroll-tools__product-btns" role="group" aria-label="Přepnout typ kalkulačky">
-        <button
-          type="button"
-          className={`scroll-tools__btn${active === "dash" ? " scroll-tools__btn--active" : ""}`}
-          title="Souhrnný přehled kalkulaček"
-          onClick={() => setProductView("dash")}
-        >
-          Σ
-        </button>
-        <button
-          type="button"
-          className={`scroll-tools__btn${active === "pv" ? " scroll-tools__btn--active" : ""}`}
-          title="Kalkulačka pro předškolní vzdělávání"
-          onClick={() => setProductView("pv")}
-        >
-          PV
-        </button>
-        <button
-          type="button"
-          className={`scroll-tools__btn${active === "sd" ? " scroll-tools__btn--active" : ""}`}
-          title="Kalkulačka pro školní družiny"
-          onClick={() => setProductView("sd")}
-        >
-          ŠD
-        </button>
-        <button
-          type="button"
-          className={`scroll-tools__btn${active === "zs" ? " scroll-tools__btn--active" : ""}`}
-          title="Kalkulačka pro základní školy"
-          onClick={() => setProductView("zs")}
-        >
-          ZŠ
-        </button>
-        <button
-          type="button"
-          className={`scroll-tools__btn${active === "ss" ? " scroll-tools__btn--active" : ""}`}
-          title="Kalkulačka pro střední školy"
-          onClick={() => setProductView("ss")}
-        >
-          SŠ
-        </button>
-        <button
-          type="button"
-          className={`scroll-tools__btn${active === "nv75" ? " scroll-tools__btn--active" : ""}`}
-          title="Kalkulačka NV75 – banka odpočtů zástupců"
-          onClick={() => setProductView("nv75")}
-        >
-          NV75
-        </button>
-      </div>
+      <nav className="scroll-tools__product-btns" aria-label="Přepnout typ kalkulačky">
+        {FLOAT_ITEMS.map((item) => (
+          <a
+            key={item.view}
+            href={PRODUCT_VIEW_PATH[item.view]}
+            className={`scroll-tools__btn${active === item.view ? " scroll-tools__btn--active" : ""}`}
+            title={item.title}
+            onClick={(e) => onNavClick(e, item.view)}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
     </div>
   );
 }

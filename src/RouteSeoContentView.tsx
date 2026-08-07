@@ -1,4 +1,9 @@
 import React from "react";
+import {
+  PHMAX_CALCULATOR_NAV_ARIA_LABEL,
+  PHMAX_CALCULATOR_NAV_LINKS,
+  shouldIncludePhmaxCalculatorNav,
+} from "./phmax-calculator-nav";
 import type { RouteSeoContent } from "./phmax-route-seo-content";
 
 type RouteSeoContentViewProps = {
@@ -66,6 +71,18 @@ export function RouteSeoContentView({ content, className = "seo-prerender-conten
             <h2 className="section-title">Související nástroje</h2>
             <ul>
               {content.relatedLinks.map((link) => (
+                <li key={link.href}>
+                  <a href={link.href}>{link.label}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
+
+        {shouldIncludePhmaxCalculatorNav(content.path) ? (
+          <nav aria-label={PHMAX_CALCULATOR_NAV_ARIA_LABEL} className="card section-card phmax-calculator-nav">
+            <ul className="phmax-calculator-nav__list">
+              {PHMAX_CALCULATOR_NAV_LINKS.map((link) => (
                 <li key={link.href}>
                   <a href={link.href}>{link.label}</a>
                 </li>
