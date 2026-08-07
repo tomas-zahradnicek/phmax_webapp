@@ -2,6 +2,8 @@
 
 Tento dokument popisuje centrální zálohu dat aplikace. **Fáze 1** (aktuální) podporuje pouze **export** JSON zálohy. Import, validace při obnově, výběr modulů a rollback jsou plánovány ve **fázi 2**.
 
+Lifecycle platformových klíčů Identity Registry a AppContext (záloha, clear levels, restore kontrakt) je popsán v **[platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md)**.
+
 ## Formát zálohy
 
 ```json
@@ -58,6 +60,8 @@ Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní
 | `phmax-dash-last-active-product`, `phmax-dash-last-visit-*` | Dashboard | Cache / metadata | Časové značky návštěv |
 | `phmax-dash-last-export-v1` | Dashboard | Cache / metadata | Poslední export — neobsah |
 | `phmax-is-handoff-endpoint` | Integrace IS | Konfigurace | URL endpointu — citlivá integrační konfigurace mimo běžnou zálohu |
+| `reditelsky-pruvodce-identity-registry-v1` | Platforma | Platformová identita | Zatím neexportováno; **cíl** = optional module v envelope v1 — viz [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md) |
+| `reditelsky-pruvodce-app-context-v1` | Platforma | Device / workspace | Záměrně mimo běžnou zálohu; po restore bootstrap |
 | Neznámé klíče v `localStorage` | — | — | Bez explicitní registrace se neexportují |
 
 ## Registry storage klíčů (audit)
@@ -89,6 +93,8 @@ Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní
 | `phmax-dash-*` (role, tour, visits, last-export) | Dashboard | různé | UI / cache | — | **Ne** | — | |
 | `phmax-is-handoff-endpoint` | Integrace IS | URL string | Konfigurace | Střední | **Ne** | — | Mimo běžnou zálohu |
 | `phmax-display-density`, `phmax-calculator-focus`, `phmax-toc-open` | Globální | preference | UI | — | **Ne** | — | |
+| `reditelsky-pruvodce-identity-registry-v1` | Platforma | JSON Identity Registry | Platformová identita | Střední | **Ne (zatím)** — cíl: ano jako optional module `identity-registry` | `parseIdentityRegistry` | Viz [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md); v exportu fáze 1 ještě není |
+| `reditelsky-pruvodce-app-context-v1` | Platforma | JSON AppContext | Device / workspace | Nízká | **Ne** (záměrně; po restore bootstrap) | `parseAppContext` | Viz [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md) |
 
 ## Bezpečnostní upozornění
 
@@ -106,6 +112,7 @@ Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní
 4. **Rollback** — automatická záloha stavu před importem pro jednorázové vrácení.
 5. **Migrace verzí** — mapování starších `schemaVersion` na aktuální strukturu modulů.
 6. **Lite moduly** — po sjednocení storage kontraktu zvážit zařazení lite draftů.
+7. **Platform metadata** — optional export Identity Registry ve envelope v1; restore conflict policy a post-restore AppContext bootstrap dle [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md). Envelope `schemaVersion` se jen kvůli aditivnímu modulu nezvyšuje.
 
 ## Implementace (fáze 1)
 
