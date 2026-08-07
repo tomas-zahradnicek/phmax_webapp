@@ -7,7 +7,6 @@ import type { DataRepository } from "../repository/data-repository";
 import { DataRepositoryError } from "../repository/data-repository";
 import { readAppContext, writeAppContext } from "./app-context-storage";
 import {
-  APP_CONTEXT_LS_KEY,
   APP_CONTEXT_SCHEMA_VERSION,
   type AppContext,
 } from "./app-context-types";
