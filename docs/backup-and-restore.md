@@ -34,6 +34,7 @@ Centrální export zahrnuje pouze moduly explicitně registrované v `src/backup
 | Modul ID | Popis | Storage klíče |
 |----------|-------|---------------|
 | `school-profile` | Profil školy | `reditelsky-pruvodce-school-profile-v1` |
+| `identity-registry` | Stabilní identita školy a školních roků (platforma) | `reditelsky-pruvodce-identity-registry-v1` |
 | `annual-report` | Výroční zpráva (hlavní stav, personál, kapitoly 01–14) | `vyrocni-zprava-state-v1`, `vyrocni-zprava-personnel-data-v1`, `vyrocni-zprava-section{01,02,04–14}-data-v1` |
 | `phmax-pv` | Kalkulačka předškolního vzdělávání | `edu-cz-pv-calculator-state`, `edu-cz-pv-named-snapshots-v1` |
 | `phmax-sd` | Kalkulačka školní družiny | `edu-cz-sd-calculator-state`, `edu-cz-sd-named-snapshots-v1` |
@@ -42,7 +43,7 @@ Centrální export zahrnuje pouze moduly explicitně registrované v `src/backup
 | `phmax-nv75` | Banka odpočtů zástupců ředitele | `edu-cz-nv75-deputy-bank-state`, `edu-cz-nv75-deputy-bank-named-snapshots` |
 | `phmax-scenario-label` | Pojmenování scénáře školy (metadata) | `phmax-school-scenario-label` |
 
-Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní s prázdným `modules`).
+Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní s prázdným `modules`). Corrupted Identity Registry se neexportuje jako validní data — modul ohlásí chybu čtení, export ostatních modulů pokračuje (stejný kontrakt jako u ostatních adapterů).
 
 ## Co se nezálohuje
 
@@ -60,7 +61,7 @@ Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní
 | `phmax-dash-last-active-product`, `phmax-dash-last-visit-*` | Dashboard | Cache / metadata | Časové značky návštěv |
 | `phmax-dash-last-export-v1` | Dashboard | Cache / metadata | Poslední export — neobsah |
 | `phmax-is-handoff-endpoint` | Integrace IS | Konfigurace | URL endpointu — citlivá integrační konfigurace mimo běžnou zálohu |
-| `reditelsky-pruvodce-identity-registry-v1` | Platforma | Platformová identita | Zatím neexportováno; **cíl** = optional module v envelope v1 — viz [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md) |
+| `reditelsky-pruvodce-identity-registry-v1` | Platforma | Platformová identita | Exportováno jako optional module `identity-registry` (0E-2); chybějící registry export nepřeruší |
 | `reditelsky-pruvodce-app-context-v1` | Platforma | Device / workspace | Záměrně mimo běžnou zálohu; po restore bootstrap |
 | Neznámé klíče v `localStorage` | — | — | Bez explicitní registrace se neexportují |
 
@@ -93,7 +94,7 @@ Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní
 | `phmax-dash-*` (role, tour, visits, last-export) | Dashboard | různé | UI / cache | — | **Ne** | — | |
 | `phmax-is-handoff-endpoint` | Integrace IS | URL string | Konfigurace | Střední | **Ne** | — | Mimo běžnou zálohu |
 | `phmax-display-density`, `phmax-calculator-focus`, `phmax-toc-open` | Globální | preference | UI | — | **Ne** | — | |
-| `reditelsky-pruvodce-identity-registry-v1` | Platforma | JSON Identity Registry | Platformová identita | Střední | **Ne (zatím)** — cíl: ano jako optional module `identity-registry` | `parseIdentityRegistry` | Viz [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md); v exportu fáze 1 ještě není |
+| `reditelsky-pruvodce-identity-registry-v1` | Platforma | JSON Identity Registry | Platformová identita | Střední | Ano (`identity-registry`) | `parseIdentityRegistry` / `readIdentityRegistry` | Optional; missing = bez payloadu; corrupted = module error bez overwrite |
 | `reditelsky-pruvodce-app-context-v1` | Platforma | JSON AppContext | Device / workspace | Nízká | **Ne** (záměrně; po restore bootstrap) | `parseAppContext` | Viz [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md) |
 
 ## Bezpečnostní upozornění
@@ -112,7 +113,7 @@ Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní
 4. **Rollback** — automatická záloha stavu před importem pro jednorázové vrácení.
 5. **Migrace verzí** — mapování starších `schemaVersion` na aktuální strukturu modulů.
 6. **Lite moduly** — po sjednocení storage kontraktu zvážit zařazení lite draftů.
-7. **Platform metadata** — optional export Identity Registry ve envelope v1; restore conflict policy a post-restore AppContext bootstrap dle [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md). Envelope `schemaVersion` se jen kvůli aditivnímu modulu nezvyšuje.
+7. **Platform metadata** — Identity Registry je v exportu jako optional module `identity-registry` (0E-2). Restore conflict policy a post-restore AppContext bootstrap dle [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md). Envelope `schemaVersion` zůstává 1.
 
 ## Implementace (fáze 1)
 

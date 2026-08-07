@@ -18,6 +18,11 @@ import {
   listRegisteredBackupStorageKeys,
   VYROCNI_ZPRAVA_DIAGNOSTIC_BACKUP_KEY_PREFIX,
 } from "./backup-registry";
+import {
+  IDENTITY_REGISTRY_LS_KEY,
+  IDENTITY_REGISTRY_SCHEMA_VERSION,
+} from "../data/identity/identity-registry-types";
+import { APP_CONTEXT_LS_KEY } from "../data/app-context/app-context-types";
 
 const downloadTextFileMock = vi.fn();
 
@@ -195,5 +200,117 @@ describe("backup-export", () => {
   it("buildAppBackupFilename používá lokální datum", () => {
     const noonLocal = new Date(2026, 11, 31, 12, 0, 0);
     expect(buildAppBackupFilename(noonLocal)).toBe("reditelsky-pruvodce-zaloha-2026-12-31.json");
+  });
+
+  it("validní Identity Registry je v exportu jako module identity-registry", () => {
+    const schoolId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    const yearId = "11111111-1111-4111-8111-111111111111";
+    const registry = {
+      schemaVersion: IDENTITY_REGISTRY_SCHEMA_VERSION,
+      schoolId,
+      schoolYears: [{ id: yearId, schoolId, startYear: 2026 }],
+      updatedAt: "2026-07-08T12:00:00.000Z",
+    };
+    localStorage.setItem(IDENTITY_REGISTRY_LS_KEY, JSON.stringify(registry));
+
+    const result = buildAppBackupEnvelope();
+    const module = result.envelope.modules["identity-registry"];
+    expect(module).toBeDefined();
+    expect(module?.schemaVersion).toBe(IDENTITY_REGISTRY_SCHEMA_VERSION);
+    expect(result.envelope.schemaVersion).toBe(1);
+
+    const data = module?.data as {
+      schemaVersion: number;
+      schoolId: string;
+      schoolYears: Array<{ id: string; schoolId: string; startYear: number }>;
+      updatedAt: string;
+    };
+    expect(data.schemaVersion).toBe(IDENTITY_REGISTRY_SCHEMA_VERSION);
+    expect(data.schoolId).toBe(schoolId);
+    expect(data.schoolYears).toEqual([{ id: yearId, schoolId, startYear: 2026 }]);
+    expect(data.updatedAt).toBe("2026-07-08T12:00:00.000Z");
+  });
+
+  it("chybějící Identity Registry: export projde bez identity module a bez side effectu", () => {
+    const profile = { ...createDefaultSchoolProfile(), name: "Bez identity" };
+    localStorage.setItem(SCHOOL_PROFILE_LS_KEY, JSON.stringify(profile));
+    expect(localStorage.getItem(IDENTITY_REGISTRY_LS_KEY)).toBeNull();
+
+    const keysBefore = Object.keys((localStorage as unknown as { store: Record<string, string> }).store).sort();
+    const result = buildAppBackupEnvelope();
+    const keysAfter = Object.keys((localStorage as unknown as { store: Record<string, string> }).store).sort();
+
+    expect(result.envelope.modules["identity-registry"]).toBeUndefined();
+    expect(result.envelope.modules["school-profile"]).toBeDefined();
+    expect(localStorage.getItem(IDENTITY_REGISTRY_LS_KEY)).toBeNull();
+    expect(keysAfter).toEqual(keysBefore);
+  });
+
+  it("corrupted Identity Registry: module-level error, localStorage nezměněn, export pokračuje", () => {
+    const broken = "{broken-identity";
+    localStorage.setItem(IDENTITY_REGISTRY_LS_KEY, broken);
+    localStorage.setItem("phmax-school-scenario-label", "Scénář");
+
+    const result = buildAppBackupEnvelope();
+    const status = result.moduleStatuses.find((item) => item.id === "identity-registry");
+    expect(status?.error).toBe("invalid_json");
+    expect(result.envelope.modules["identity-registry"]).toBeUndefined();
+    expect(result.envelope.modules["phmax-scenario-label"]).toBeDefined();
+    expect(localStorage.getItem(IDENTITY_REGISTRY_LS_KEY)).toBe(broken);
+  });
+
+  it("AppContext není exportován", () => {
+    localStorage.setItem(
+      APP_CONTEXT_LS_KEY,
+      JSON.stringify({
+        schemaVersion: 1,
+        activeSchoolId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+        activeSchoolYearId: null,
+      }),
+    );
+    const schoolId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    localStorage.setItem(
+      IDENTITY_REGISTRY_LS_KEY,
+      JSON.stringify({
+        schemaVersion: IDENTITY_REGISTRY_SCHEMA_VERSION,
+        schoolId,
+        schoolYears: [],
+        updatedAt: "2026-07-08T12:00:00.000Z",
+      }),
+    );
+
+    const result = buildAppBackupEnvelope();
+    const serialized = serializeAppBackupEnvelope(result.envelope);
+
+    expect(result.envelope.modules["identity-registry"]).toBeDefined();
+    expect(Object.keys(result.envelope.modules)).not.toContain("app-context");
+    expect(listRegisteredBackupStorageKeys()).not.toContain(APP_CONTEXT_LS_KEY);
+    expect(serialized).not.toContain(APP_CONTEXT_LS_KEY);
+    expect(serialized).not.toContain("activeSchoolId");
+  });
+
+  it("export nezapisuje žádný nový storage key", () => {
+    const schoolId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    localStorage.setItem(SCHOOL_PROFILE_LS_KEY, JSON.stringify({ ...createDefaultSchoolProfile(), name: "RO" }));
+    localStorage.setItem(
+      IDENTITY_REGISTRY_LS_KEY,
+      JSON.stringify({
+        schemaVersion: IDENTITY_REGISTRY_SCHEMA_VERSION,
+        schoolId,
+        schoolYears: [],
+        updatedAt: "2026-07-08T12:00:00.000Z",
+      }),
+    );
+    const snapshot = { ...(localStorage as unknown as { store: Record<string, string> }).store };
+
+    buildAppBackupEnvelope();
+
+    expect((localStorage as unknown as { store: Record<string, string> }).store).toEqual(snapshot);
+  });
+
+  it("registrované klíče zahrnují Identity Registry a ne AppContext", () => {
+    const registered = new Set(listRegisteredBackupStorageKeys());
+    expect(registered.has(IDENTITY_REGISTRY_LS_KEY)).toBe(true);
+    expect(registered.has(APP_CONTEXT_LS_KEY)).toBe(false);
   });
 });
