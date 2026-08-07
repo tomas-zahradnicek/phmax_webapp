@@ -1,7 +1,7 @@
 import type { EntityId } from "../shared/entity-id";
 import type { DataSchemaVersion } from "../shared/data-schema-version";
 
-export type SchoolYearStatus = "planned" | "active" | "closed";
+export type SchoolYearStatus = "planned" | "active" | "closed" | "unknown";
 
 /**
  * School year entity. Identity is `id` + `startYear` (not a display label).
