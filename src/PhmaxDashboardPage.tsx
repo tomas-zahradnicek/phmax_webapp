@@ -61,7 +61,10 @@ import { countPar16MarkedRows, PHMAX_SS_PAR16_DOCK_HINT } from "./ss/phmax-ss-pa
 import { parseSsDraftRowsFromSnapshot } from "./ss/ss-draft-storage";
 import { sumPracticalSchoolPhaMaxFromRows } from "./ss/phmax-ss-practical-phamax";
 import { formatDashboardProductVisit, readLastActiveProduct } from "./phmax-dashboard-visits";
-import { clearAllPhmaxLocalStorage } from "./phmax-local-storage-clear";
+import {
+  clearAllPhmaxLocalStorage,
+  clearSchoolScenarioExportWorkingLocalStorage,
+} from "./phmax-local-storage-clear";
 import { PHMAX_DASHBOARD_MAIN_ID } from "./phmax-main-landmarks";
 import { requestFocusExampleSelect } from "./phmax-focus-example-hint";
 import { requestFocusModuleInputs, type ModuleInputsFocusHint } from "./phmax-focus-inputs-hint";
@@ -72,7 +75,7 @@ import {
   parseDashboardKpiPhmax,
 } from "./phmax-dashboard-cross-phmax";
 import { coherenceWarningFocusHint } from "./phmax-cross-phmax-coherence-nav";
-import { offerClearBrowserDataAfterDashboardExport } from "./phmax-dashboard-export-followup";
+import { offerClearWorkingDataAfterSchoolScenarioExport } from "./phmax-dashboard-export-followup";
 import {
   buildCrossPhmaxExportPayload,
   crossPhmaxAttentionMismatches,
@@ -705,27 +708,46 @@ export function PhmaxDashboardPage({
     setRefreshAt(new Date());
     publishNotice(
       removed > 0
-        ? `Smazáno ${removed} uložených položek z prohlížeče.`
+        ? `Smazáno ${removed} uložených položek kalkulaček z prohlížeče.`
         : "V prohlížeči nebyla nalezena uložená data kalkulaček.",
+    );
+  }, [publishNotice]);
+
+  const clearSchoolScenarioWorkingDataNow = useCallback(() => {
+    const removed = clearSchoolScenarioExportWorkingLocalStorage();
+    setRefreshAt(new Date());
+    publishNotice(
+      removed > 0
+        ? `Smazáno ${removed} exportovaných pracovních položek kalkulaček.`
+        : "Nebyla nalezena exportovaná pracovní data kalkulaček ke smazání.",
     );
   }, [publishNotice]);
 
   const handleClearLocalData = useCallback(() => {
     const confirmed = window.confirm(
-      "Opravdu smazat všechna uložená data kalkulaček v tomto prohlížeči? Tuto akci nelze vrátit.",
+      [
+        "Vymazat data kalkulaček?",
+        "",
+        "Odstraněny budou zejména rozpracované výpočty, uložené varianty / snapshoty a související lokální nastavení kalkulaček.",
+        "",
+        "Profil školy a výroční zpráva zůstanou zachovány.",
+      ].join("\n"),
     );
     if (!confirmed) return;
     clearLocalDataNow();
   }, [clearLocalDataNow]);
 
+  /** Po JSON exportu: clear jen pokud export nese obnovitelná pracovní data (moduleSnapshots). */
   const afterDashboardJsonExport = useCallback(
-    (notice: string, exportKind: string) => {
+    (notice: string, exportKind: string, options?: { offerSchoolScenarioWorkingClear?: boolean }) => {
       recordDashboardLastExport(exportKind);
       setRefreshAt(new Date());
       publishNotice(notice, { assertive: true });
-      offerClearBrowserDataAfterDashboardExport(clearLocalDataNow);
+      if (options?.offerSchoolScenarioWorkingClear) {
+        offerClearWorkingDataAfterSchoolScenarioExport(clearSchoolScenarioWorkingDataNow);
+      }
     },
-    [clearLocalDataNow, publishNotice],
+    [clearSchoolScenarioWorkingDataNow, publishNotice],
   );
 
   useEffect(() => {
@@ -1008,6 +1030,7 @@ export function PhmaxDashboardPage({
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
+    // Cross-PHmax JSON nese jen souhrn — nemá obnovitelná autosave data → clear nenabízíme.
     afterDashboardJsonExport("Stažen orientační JSON součtu PHmax.", "JSON součtu PHmax");
   }, [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, afterDashboardJsonExport]);
 
@@ -1033,7 +1056,9 @@ export function PhmaxDashboardPage({
       JSON.stringify(payload, null, 2),
       "application/json;charset=utf-8",
     );
-    afterDashboardJsonExport("Stažen scénář celá škola (JSON + autosave modulů).", "Scénář celá škola");
+    afterDashboardJsonExport("Stažen scénář celá škola (JSON + autosave modulů).", "Scénář celá škola", {
+      offerSchoolScenarioWorkingClear: true,
+    });
   }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, afterDashboardJsonExport]);
 
   const downloadIsHandoffJson = useCallback(() => {
@@ -1064,6 +1089,7 @@ export function PhmaxDashboardPage({
     afterDashboardJsonExport(
       "Stažen export JSON pro IS školy – viz docs/phmax-is-integration.md.",
       "Handoff JSON",
+      { offerSchoolScenarioWorkingClear: true },
     );
   }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, afterDashboardJsonExport]);
 

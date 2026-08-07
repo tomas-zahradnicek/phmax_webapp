@@ -24,9 +24,15 @@ import {
   SS_QUICK_TOUR_LS_KEY,
   ZS_QUICK_TOUR_LS_KEY,
 } from "./phmax-module-quick-tour";
-import { PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY } from "./phmax-school-scenario-export";
+import {
+  PHMAX_MODULE_AUTOSAVE_LS_KEYS,
+  PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
+} from "./phmax-school-scenario-export";
 
-/** Všechna klíče kalkulačky v localStorage (včetně preferencí a návštěv). */
+/**
+ * Level B — Calculator Clear inventář.
+ * Neobsahuje SchoolProfile, Identity Registry, AppContext ani klíče výroční zprávy.
+ */
 export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
   "edu-cz-pv-calculator-state",
   "edu-cz-pv-named-snapshots-v1",
@@ -65,22 +71,44 @@ export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
   NV75_QUICK_TOUR_LS_KEY,
   ZS_QUICK_TOUR_LS_KEY,
   PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
-  "reditelsky-pruvodce-school-profile-v1",
 ];
 
 const DASH_VISIT_PREFIX = "phmax-dash-last-visit-";
 
-/** Smaže uložená data kalkulaček v tomto prohlížeči. Vrací počet odstraněných klíčů. */
-export function clearAllPhmaxLocalStorage(): number {
+/**
+ * Klíče, které školní scénář / IS handoff JSON skutečně nese v `moduleSnapshots` + label.
+ * Post-export clear smí mazat jen tuto množinu (CLEAR_SCOPE ⊆ export).
+ */
+export const PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS: readonly string[] = [
+  PHMAX_MODULE_AUTOSAVE_LS_KEYS.pv,
+  PHMAX_MODULE_AUTOSAVE_LS_KEYS.sd,
+  PHMAX_MODULE_AUTOSAVE_LS_KEYS.zs,
+  PHMAX_MODULE_AUTOSAVE_LS_KEYS.ss,
+  PHMAX_MODULE_AUTOSAVE_LS_KEYS.nv75,
+  PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
+];
+
+function removeListedKeys(keys: readonly string[]): number {
   if (typeof localStorage === "undefined") return 0;
   let removed = 0;
   try {
-    for (const key of PHMAX_APP_LOCAL_STORAGE_KEYS) {
+    for (const key of keys) {
       if (localStorage.getItem(key) != null) {
         localStorage.removeItem(key);
         removed += 1;
       }
     }
+  } catch {
+    /* ignore */
+  }
+  return removed;
+}
+
+/** Level B: smaže data kalkulaček. SchoolProfile / Identity / AppContext / VZ nezapisuje ani nemaže. */
+export function clearAllPhmaxLocalStorage(): number {
+  if (typeof localStorage === "undefined") return 0;
+  let removed = removeListedKeys(PHMAX_APP_LOCAL_STORAGE_KEYS);
+  try {
     const toDrop: string[] = [];
     for (let i = 0; i < localStorage.length; i += 1) {
       const key = localStorage.key(i);
@@ -94,4 +122,12 @@ export function clearAllPhmaxLocalStorage(): number {
     /* ignore */
   }
   return removed;
+}
+
+/**
+ * Úzký post-export clear po exportu, který obsahuje autosave modulů + scenario label
+ * (školní scénář JSON / IS handoff). Named snapshots ani SchoolProfile nemaže.
+ */
+export function clearSchoolScenarioExportWorkingLocalStorage(): number {
+  return removeListedKeys(PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS);
 }

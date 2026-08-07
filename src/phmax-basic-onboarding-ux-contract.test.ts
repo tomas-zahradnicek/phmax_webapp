@@ -143,6 +143,8 @@ describe("UX contract: basic onboarding steps + CTA", () => {
     expect(readSource("src/phmax-dashboard-cross-phmax.ts")).toContain("formatCrossPhmaxSliceLabel");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("coherenceWarningFocusHint");
     expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("Přejít k opravě");
-    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain("offerClearBrowserDataAfterDashboardExport");
+    expect(readSource("src/PhmaxDashboardPage.tsx")).toContain(
+      "offerClearWorkingDataAfterSchoolScenarioExport",
+    );
   });
 });
