@@ -187,6 +187,8 @@ describe("LocalStorageRepository", () => {
     expect(years[0]?.startYear).toBe(2026);
     expect(years[0]?.status).toBe(SCHOOL_YEAR_PROJECTION_STATUS);
     expect(isUuid(years[0]!.id)).toBe(true);
+    expect(years[0]?.createdAt).toBeUndefined();
+    expect(years[0]?.updatedAt).toBeUndefined();
 
     expect(localStorage.getItem(SCHOOL_PROFILE_LS_KEY)).toBe(profileBefore);
     expect(localStorage.getItem(LEGACY_ANNUAL_REPORT_STATE_LS_KEY)).toBe(vzBefore);
