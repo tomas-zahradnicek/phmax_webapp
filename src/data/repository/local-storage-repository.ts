@@ -23,15 +23,14 @@ import { DataRepositoryError, type DataRepository } from "./data-repository";
  */
 export const SCHOOL_YEAR_PROJECTION_STATUS: SchoolYearStatus = "unknown";
 
-function projectSchoolYear(entry: SchoolYearIdentityEntry, registry: IdentityRegistry): SchoolYear {
+function projectSchoolYear(entry: SchoolYearIdentityEntry): SchoolYear {
   return {
     id: entry.id,
     schemaVersion: DOMAIN_DATA_SCHEMA_VERSION,
     schoolId: entry.schoolId,
     startYear: entry.startYear,
     status: SCHOOL_YEAR_PROJECTION_STATUS,
-    createdAt: registry.updatedAt,
-    updatedAt: registry.updatedAt,
+    // Timestamps omitted — registry.updatedAt is not a SchoolYear business date.
   };
 }
 
@@ -107,7 +106,7 @@ export class LocalStorageRepository implements DataRepository {
 
     const entry = registry.schoolYears.find((item) => item.id === normalizeUuid(id));
     if (!entry) return null;
-    return projectSchoolYear(entry, registry);
+    return projectSchoolYear(entry);
   }
 
   /**
@@ -151,7 +150,7 @@ export class LocalStorageRepository implements DataRepository {
 
     return registry.schoolYears
       .filter((entry) => entry.schoolId === resolvedSchoolId)
-      .map((entry) => projectSchoolYear(entry, registry));
+      .map((entry) => projectSchoolYear(entry));
   }
 }
 
