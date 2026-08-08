@@ -55,9 +55,14 @@ export type RestorePreviewParseErrorStatus =
   | "invalid_envelope"
   | "unsupported_schema";
 
+export type RestorePreviewReady = {
+  validated: ValidatedAppBackupEnvelope;
+  preview: RestorePreviewModel;
+};
+
 export type RestorePreviewFromTextResult =
   | { status: "parse_error"; parseStatus: RestorePreviewParseErrorStatus; message: string; schemaVersion?: unknown }
-  | { status: "preview"; preview: RestorePreviewModel };
+  | { status: "preview"; validated: ValidatedAppBackupEnvelope; preview: RestorePreviewModel };
 
 const UNKNOWN_MODULE_WARNING =
   "Záloha obsahuje data z novější verze aplikace, která tato verze neumí obnovit.";
@@ -212,9 +217,26 @@ export function buildRestorePreviewModel(
   };
 }
 
-export type BuildRestorePreviewFromTextOptions = {
+export type BuildRestorePreviewOptions = {
   readEnvironment?: () => RestoreEnvironment;
 };
+
+/**
+ * Read-only replan from an already validated envelope (T1 refresh, no reparse).
+ * Never writes storage.
+ */
+export function buildRestorePreviewFromValidated(
+  validated: ValidatedAppBackupEnvelope,
+  options: BuildRestorePreviewOptions = {},
+): RestorePreviewReady {
+  const readEnvironment = options.readEnvironment ?? readCurrentRestoreEnvironment;
+  const env = readEnvironment();
+  const plan = buildAppBackupRestorePlan(validated, env);
+  return {
+    validated,
+    preview: buildRestorePreviewModel(plan, validated),
+  };
+}
 
 /**
  * Read-only pipeline: backup file text → validated plan → preview model.
@@ -222,7 +244,7 @@ export type BuildRestorePreviewFromTextOptions = {
  */
 export function buildRestorePreviewFromBackupText(
   text: string,
-  options: BuildRestorePreviewFromTextOptions = {},
+  options: BuildRestorePreviewOptions = {},
 ): RestorePreviewFromTextResult {
   const validated = validateAppBackupEnvelope(text);
   if (validated.status === "invalid_json") {
@@ -248,11 +270,10 @@ export function buildRestorePreviewFromBackupText(
     };
   }
 
-  const readEnvironment = options.readEnvironment ?? readCurrentRestoreEnvironment;
-  const env = readEnvironment();
-  const plan = buildAppBackupRestorePlan(validated, env);
+  const ready = buildRestorePreviewFromValidated(validated, options);
   return {
     status: "preview",
-    preview: buildRestorePreviewModel(plan, validated),
+    validated: ready.validated,
+    preview: ready.preview,
   };
 }

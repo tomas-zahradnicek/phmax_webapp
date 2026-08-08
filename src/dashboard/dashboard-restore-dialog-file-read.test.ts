@@ -47,10 +47,25 @@ function validBackupJson(label: string): string {
 }
 
 describe("dashboard restore dialog file read orchestration", () => {
-  it("C: loading phase is not closable", () => {
+  it("C: loading and applying phases are not closable", () => {
     expect(restoreDialogCanClose({ status: "loading" })).toBe(false);
     expect(restoreDialogCanClose({ status: "idle" })).toBe(true);
     expect(restoreDialogCanClose({ status: "file_error", message: "x" })).toBe(true);
+  });
+
+  it("preview phase retains validated envelope atomically with preview", async () => {
+    const generationRef = { current: 0 };
+    const gen = beginRestoreFileReadGeneration(generationRef);
+    const result = await processRestoreFileRead(
+      { text: async () => validBackupJson("Scénář") },
+      gen,
+      generationRef,
+      buildRestorePreviewFromBackupText,
+    );
+    expect(result.applied).toBe(true);
+    if (!result.applied || result.phase.status !== "preview") return;
+    expect(result.phase.validated.status).toBe("validated");
+    expect(result.phase.preview.restoreModules[0]?.label).toBe("Scénář školy");
   });
 
   it("A: stale file A cannot overwrite current file B when B starts after A", async () => {

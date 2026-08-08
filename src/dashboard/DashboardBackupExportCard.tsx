@@ -155,6 +155,13 @@ export function DashboardBackupExportCard() {
         open={restoreOpen}
         onClose={() => setRestoreOpen(false)}
         triggerRef={restoreTriggerRef}
+        onNavigateToFullReset={() => {
+          document.getElementById("sprava-dat-prohlizece")?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+          fullResetTriggerRef.current?.focus();
+        }}
       />
 
       <DashboardFullResetDialog
