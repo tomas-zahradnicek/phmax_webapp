@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AuthorCreditFooter } from "./AuthorCreditFooter";
 import {
   APP_BRAND_LOGO_PATH,
@@ -23,6 +23,7 @@ import {
   MSG_SCHOOL_PROFILE_PERSIST_FAILED,
   readIdentityRegistryPresence,
 } from "./school-profile/school-profile-identity-policy";
+import { createSerializedPlatformBindingRunner } from "./school-profile/profile-save-platform-binding";
 import type { SchoolProfile, SchoolProfileFieldKey } from "./school-profile/school-profile-types";
 import { useSchoolProfile } from "./school-profile/use-school-profile";
 import { VyrocniZpravaApplicabilityNotice } from "./vyrocni-zprava/VyrocniZpravaApplicabilityNotice";
@@ -65,7 +66,11 @@ export function ProfilSkolyPage() {
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [identityGuardNotice, setIdentityGuardNotice] = useState<string | null>(null);
   const [persistError, setPersistError] = useState<string | null>(null);
+  const [platformBindingNotice, setPlatformBindingNotice] = useState<string | null>(null);
+  const [isBinding, setIsBinding] = useState(false);
   const identityRegistryStatus = readIdentityRegistryPresence();
+  const bindingRunnerRef = useRef(createSerializedPlatformBindingRunner());
+  const bindingGenerationRef = useRef(0);
 
   useEffect(() => {
     setDraft(profile);
@@ -75,16 +80,31 @@ export function ProfilSkolyPage() {
     setDraft((prev) => ({ ...prev, ...patch }));
   }, []);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     const result = saveProfile(draft);
     setIdentityGuardNotice(messageForIdentityBlockReason(result.identityBlockReason));
-    if (result.persistence.ok) {
-      setSavedAt(new Date().toLocaleString("cs-CZ"));
-      setPersistError(null);
+    if (!result.persistence.ok) {
+      // Draft stays edited for retry; shared cache/storage unchanged. No platform binding.
+      setPersistError(MSG_SCHOOL_PROFILE_PERSIST_FAILED);
       return;
     }
-    // Draft stays edited for retry; shared cache/storage unchanged.
-    setPersistError(MSG_SCHOOL_PROFILE_PERSIST_FAILED);
+
+    // Business save succeeded independently of platform metadata binding.
+    setSavedAt(new Date().toLocaleString("cs-CZ"));
+    setPersistError(null);
+
+    const generation = ++bindingGenerationRef.current;
+    setIsBinding(true);
+    try {
+      const outcome = await bindingRunnerRef.current.afterPersist(result.persistence);
+      if (generation !== bindingGenerationRef.current) return;
+      if (!outcome.bindingAttempted) return;
+      setPlatformBindingNotice(outcome.metadataNotice);
+    } finally {
+      if (generation === bindingGenerationRef.current) {
+        setIsBinding(false);
+      }
+    }
   }, [draft, saveProfile]);
 
   const handleReset = useCallback(() => {
@@ -95,6 +115,7 @@ export function ProfilSkolyPage() {
       setSavedAt(null);
       setIdentityGuardNotice(null);
       setPersistError(null);
+      setPlatformBindingNotice(null);
       return;
     }
     // Reset did not persist — keep draft aligned with last shared profile.
@@ -180,6 +201,11 @@ export function ProfilSkolyPage() {
             {persistError}
           </p>
         ) : null}
+        {platformBindingNotice ? (
+          <p className="school-profile-page__warning card" role="status">
+            {platformBindingNotice}
+          </p>
+        ) : null}
         <ProfileField id="sp-schoolType" label={SCHOOL_PROFILE_FIELD_LABELS.schoolType}>
           <select
             id="sp-schoolType"
@@ -230,7 +256,14 @@ export function ProfilSkolyPage() {
 
       <div className="school-profile-page__footer card">
         <div className="school-profile-page__footer-actions">
-          <button type="button" className="btn primary" onClick={handleSave}>
+          <button
+            type="button"
+            className="btn primary"
+            onClick={() => {
+              void handleSave();
+            }}
+            disabled={isBinding}
+          >
             Uložit profil školy
           </button>
           <button type="button" className="btn ghost" onClick={handleReset}>
