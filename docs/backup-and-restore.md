@@ -45,6 +45,22 @@ Centrální export zahrnuje pouze moduly explicitně registrované v `src/backup
 
 Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní s prázdným `modules`). Corrupted Identity Registry ani corrupted SchoolProfile se neexportují jako validní data — modul ohlásí chybu čtení, export ostatních modulů pokračuje (stejný kontrakt jako u ostatních adapterů). Runtime politika poškozeného profilu (write guard + recovery UI, bez force overwrite) je v **[platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md)** (0F-3A / 0F-3B).
 
+### Platform metadata a VZ `schoolYear` (0G)
+
+Centrální záloha nese **business** year label v modulu `annual-report`:
+
+- `vyrocni-zprava-state-v1` → `report.schoolYear` je write source of truth labelu.
+
+Stabilní SchoolYear identity metadata jsou v optional modulu `identity-registry`:
+
+- `schoolYears[]` (`schoolYearId`, `startYear`, …).
+
+`AppContext` (`activeSchoolYearId`) se **nezálohuje**. Po budoucím restore se workspace pointer znovu
+bootstrapne / reconcile podle obnoveného SchoolProfile a persistovaného VZ year labelu — viz
+[platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md) (Restore policy, sekce 0G).
+
+0G nezavádí žádná nová business data mimo současný backup envelope.
+
 ## Co se nezálohuje
 
 | Storage klíč / skupina | Modul | Typ | Důvod vyloučení |
