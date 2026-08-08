@@ -3688,6 +3688,30 @@ input[type="radio"] {
   margin-top: 18px;
 }
 
+.dashboard-restore-dialog__actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.dashboard-restore-dialog__recovery {
+  padding: 4px 0;
+}
+
+.dashboard-restore-dialog__confirmation {
+  margin-top: 8px;
+}
+
+.dashboard-restore-dialog__current-backup,
+.dashboard-restore-dialog__safety {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.9);
+  padding: 14px;
+}
+
 .dash-school-import__steps {
   margin: 10px 0 0;
   padding-left: 1.35rem;

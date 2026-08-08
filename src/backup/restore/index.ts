@@ -1,15 +1,17 @@
 export {
   buildRestorePreviewFromBackupText,
+  buildRestorePreviewFromValidated,
   buildRestorePreviewModel,
   RESTORE_UI_MODULE_LABELS,
 } from "./restore-preview-model";
 export type {
-  BuildRestorePreviewFromTextOptions,
+  BuildRestorePreviewOptions,
   RestorePreviewConflictCategory,
   RestorePreviewFromTextResult,
   RestorePreviewModel,
   RestorePreviewModuleItem,
   RestorePreviewParseErrorStatus,
+  RestorePreviewReady,
 } from "./restore-preview-model";
 export { parseAppBackup } from "./parse-app-backup";
 export { validateAppBackupEnvelope } from "./validate-app-backup";

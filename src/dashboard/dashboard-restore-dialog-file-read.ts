@@ -1,22 +1,14 @@
 import type { RestorePreviewFromTextResult } from "../backup/restore/restore-preview-model";
-import type { RestorePreviewModel } from "../backup/restore/restore-preview-model";
+import type { RestoreDialogPhase } from "./dashboard-restore-dialog-apply";
+
+export { restoreDialogCanClose } from "./dashboard-restore-dialog-apply";
+export type { RestoreDialogPhase } from "./dashboard-restore-dialog-apply";
 
 export const RESTORE_FILE_READ_ERROR = "Soubor zálohy se nepodařilo načíst.";
-
-export type RestoreDialogPhase =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "file_error"; message: string }
-  | { status: "parse_error"; message: string; schemaVersion?: unknown }
-  | { status: "preview"; preview: RestorePreviewModel };
 
 export type RestoreFileReadGenerationRef = {
   current: number;
 };
-
-export function restoreDialogCanClose(phase: RestoreDialogPhase): boolean {
-  return phase.status !== "loading";
-}
 
 export function beginRestoreFileReadGeneration(
   generationRef: RestoreFileReadGenerationRef,
@@ -77,5 +69,12 @@ export async function processRestoreFileRead(
     };
   }
 
-  return { applied: true, phase: { status: "preview", preview: result.preview } };
+  return {
+    applied: true,
+    phase: {
+      status: "preview",
+      validated: result.validated,
+      preview: result.preview,
+    },
+  };
 }

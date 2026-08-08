@@ -159,12 +159,13 @@ describe("Restore preview model (Restore-3A)", () => {
     expect(result.schemaVersion).toBe(99);
   });
 
-  it("D: valid partial backup → restore vs preserve groups", () => {
+  it("D: valid partial backup → restore vs preserve groups with validated envelope", () => {
     const result = previewFromEnvelope({
       "phmax-scenario-label": modulePayload("Label", "Scénář A"),
     });
     expect(result.status).toBe("preview");
     if (result.status !== "preview") return;
+    expect(result.validated.status).toBe("validated");
     expect(result.preview.restoreModules.map((m) => m.label)).toEqual(["Scénář školy"]);
     expect(result.preview.preserveModules.map((m) => m.label)).toEqual([
       "Profil školy",
