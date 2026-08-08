@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { exportAppBackup, previewBackupModuleStatuses } from "../backup/backup-export";
 import type { BackupModuleStatus } from "../backup/backup-types";
 import { DashboardFullResetDialog } from "./DashboardFullResetDialog";
+import { DashboardRestoreDialog } from "./DashboardRestoreDialog";
 
 const BACKUP_STATUS_MESSAGES = {
   storage_unavailable:
@@ -21,7 +22,9 @@ export function DashboardBackupExportCard() {
   const [exportBusy, setExportBusy] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [fullResetOpen, setFullResetOpen] = useState(false);
+  const [restoreOpen, setRestoreOpen] = useState(false);
   const fullResetTriggerRef = useRef<HTMLButtonElement>(null);
+  const restoreTriggerRef = useRef<HTMLButtonElement>(null);
 
   const refreshStatuses = useCallback(() => {
     setModuleStatuses(previewBackupModuleStatuses());
@@ -110,12 +113,21 @@ export function DashboardBackupExportCard() {
         {statusMessage}
       </div>
 
-      <div className="dash-backup-export__import-placeholder" data-testid="dash-backup-import-placeholder">
+      <div className="dash-backup-export__restore" data-testid="dash-backup-restore-entry">
         <h3 className="dash-backup-export__subtitle">Obnova ze zálohy</h3>
         <p className="muted-text">
-          Import a výběr modulů pro obnovu připravujeme v další verzi. Zatím použijte export pro bezpečné uložení
-          dat mimo prohlížeč.
+          Vyberte JSON soubor centrální zálohy a zkontrolujte náhled obnovy. Data se změní až po explicitním
+          potvrzení v dalším kroku.
         </p>
+        <button
+          ref={restoreTriggerRef}
+          type="button"
+          className="btn primary"
+          onClick={() => setRestoreOpen(true)}
+          data-testid="restore-open"
+        >
+          Obnovit ze zálohy
+        </button>
       </div>
 
       <div
@@ -138,6 +150,12 @@ export function DashboardBackupExportCard() {
           Odstranit všechna data aplikace
         </button>
       </div>
+
+      <DashboardRestoreDialog
+        open={restoreOpen}
+        onClose={() => setRestoreOpen(false)}
+        triggerRef={restoreTriggerRef}
+      />
 
       <DashboardFullResetDialog
         open={fullResetOpen}

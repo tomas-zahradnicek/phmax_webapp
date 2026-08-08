@@ -51,7 +51,8 @@ test.describe("Centrální záloha dat – export", () => {
     await expect(page.getByTestId("dash-backup-module-phmax-scenario-label")).toContainText("Obsahuje data");
     await expect(page.getByTestId("dash-backup-export-summary")).toContainText(/zahrnuto 2 modul/);
 
-    await expect(page.getByTestId("dash-backup-import-placeholder")).toContainText(/připravujeme/i);
+    await expect(page.getByTestId("dash-backup-restore-entry")).toBeVisible();
+    await expect(page.getByTestId("restore-open")).toContainText(/Obnovit ze zálohy/i);
     await expect(page.getByRole("button", { name: /importovat/i })).toHaveCount(0);
 
     const downloadPromise = page.waitForEvent("download");
