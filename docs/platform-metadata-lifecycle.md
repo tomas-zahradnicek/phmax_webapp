@@ -105,17 +105,22 @@ Rozlišujeme:
 
 **Legacy mismatch odstraněn:** dřívější `resetProfile` volalo `createDefaultSchoolProfile()` (nové `id`) + remove/rewrite — to 0E-3B1 nahrazuje.
 
-### D. Full application reset
+### D. Full application reset — low-level storage kontrakt (0E-3C1)
 
-Odstraní (dle explicitního inventáře v implementačním PR):
+`src/application-storage-registry.ts` obsahuje samostatný **delete registry** a raw API
+`clearAllApplicationStorage()`. Whitelist maže vlastněné:
 
-- business / modulová data (PHmax, NV75, VZ, …),
-- SchoolProfile,
-- Identity Registry,
-- AppContext,
-- relevantní diagnostická data (např. VZ diagnostic backup klíče), pokud jsou v inventáři full resetu.
+- business / modulová data (PHmax, NV75, VZ, named snapshots, scénář a lite drafty),
+- SchoolProfile, Identity Registry a AppContext,
+- UI / workspace stav, integrační konfiguraci IS a VZ diagnostické zálohy,
+- dočasné session hints.
 
-V aplikaci zatím **neexistuje** kompletní factory-reset API — toto je cílový kontrakt.
+API nepoužívá `localStorage.clear()` ani `sessionStorage.clear()`, neparsuje payloady a zachovává
+cizí klíče. Umí proto odstranit i corrupted owned data. Výsledek uvádí počet odstraněných položek
+a jednotlivá selhání; po chybě pokračuje dalšími klíči.
+
+**0E-3C1 neimplementuje UI ani reload.** Bezpečný uživatelský flow (confirm, backup CTA a hard reload)
+zůstává pro 0E-3C2. Remove / Replace School zůstává pro 0E-3B2.
 
 ---
 
@@ -129,7 +134,7 @@ V aplikaci zatím **neexistuje** kompletní factory-reset API — toto je cílov
 | **Edit Profile (0E-3B1)** | Zachovat | Zachovat | Aktualizace atributů | Stejná School; id zachováno |
 | **Reset Profile Fields (0E-3B1)** | Zachovat | Zachovat | Vyčistit atributy; zachovat id + IČO/RED IZO/IZO | Ne remove school |
 | **Remove / Replace School** | **TBD 0E-3B2 / 0E-3C** | Sanitize / smazat | Smazat / nahradit | Nesmí tiše mapovat školu B na ID školy A |
-| **Full application reset** | **Smazat** | **Smazat** | **Smazat** | Včetně business dat dle inventáře |
+| **Full application reset (low-level 0E-3C1)** | **Smazat** | **Smazat** | **Smazat** | Whitelist delete registry; UI/reload až 0E-3C2 |
 
 ---
 

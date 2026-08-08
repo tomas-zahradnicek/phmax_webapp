@@ -65,6 +65,16 @@ Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní
 | `reditelsky-pruvodce-app-context-v1` | Platforma | Device / workspace | Záměrně mimo běžnou zálohu; po restore bootstrap |
 | Neznámé klíče v `localStorage` | — | — | Bez explicitní registrace se neexportují |
 
+### Centrální záloha není obrazem browser storage
+
+Low-level Full Reset kontrakt (0E-3C1) maže podle samostatného delete registry také data, která
+centrální záloha neobsahuje: lite drafty, AppContext, UI a dashboard preference, VZ diagnostické
+zálohy, konfiguraci IS endpointu a dočasné session hints. Centrální backup proto není byte-for-byte
+kopie `localStorage` / `sessionStorage` a nelze z něj obnovit úplně vše, co Full Reset odstraní.
+
+Delete registry v `src/application-storage-registry.ts` a backup registry v
+`src/backup/backup-registry.ts` mají rozdílné lifecycle účely a nejsou záměrně sloučené.
+
 ## Registry storage klíčů (audit)
 
 | Storage klíč | Modul | Typ dat | Kategorie | Citlivost | Export v běžné záloze | Validátor / parser | Poznámka |
