@@ -1,11 +1,16 @@
 # Platform metadata lifecycle — Identity Registry & AppContext
 
 Tento dokument formalizuje lifecycle platformových persistence klíčů zavedených ve Fázi 0
-(PR 0B–0E) a **Profile-scoped runtime wiring uzavřený v 0F** (0F-1 … 0F-3B).
+(PR 0B–0E) a runtime wiring uzavřený ve **0F** (Profile) a **0G** (SchoolYear / VZ metadata).
 
-**Stav:** Profile runtime safety pro současnou single-school architekturu je **COMPLETE**.
-Binding je zatím Profile-scoped; druhý runtime consumer, React provider ani App.tsx global
-bootstrap nejsou součástí 0F.
+**Stav:**
+
+- **Profile runtime safety** (0F): **COMPLETE** pro současnou single-school architekturu.
+- **SchoolYear / VZ metadata runtime** (0G): **COMPLETE** pro současnou single-school /
+  single-flat-VZ architekturu.
+
+Profil školy a Výroční zpráva jsou dva lokální runtime consumery School / SchoolYear metadata.
+React App-level provider ani App.tsx global bootstrap nejsou součástí 0F ani 0G.
 
 Související: [Záloha a obnova dat](./backup-and-restore.md).
 
@@ -235,25 +240,31 @@ Restore centrální zálohy zatím **není implementován** (fáze 2 v [backup-a
 
 ---
 
-## Source of truth (po 0F)
+## Source of truth (po 0F / 0G)
 
 | Vrstva | Role |
 |--------|------|
 | **SchoolProfile** (`reditelsky-pruvodce-school-profile-v1`) | **Write source of truth** profilových polí (edit přes Profile / VZ prefill writers) |
+| **VZ main state** (`vyrocni-zprava-state-v1` → `report.schoolYear`) | **Write source of truth** year labelu výroční zprávy |
 | **Identity Registry** | Stabilní School / SchoolYear **identity metadata** (`schoolId`, `schoolYearId`) |
 | **AppContext** | Device / workspace **pointer** (`activeSchoolId`, `activeSchoolYearId`) — ne business data |
-| **Domain School** | Read-only **projekce** z legacy SchoolProfile + Identity |
+| **Domain School / SchoolYear** | Read-only **projekce** z legacy dat + Identity |
 | **DataRepository** | Read boundary; **žádné domain School write API** |
 
-Profilová pole se neukládají paralelním zápisem do Identity Registry. Identity se při bindingu
-vytváří / reuseuje z persistovaného SchoolProfile (a volitelně SchoolYear z validního VZ year hintu).
+Profilová pole se neukládají paralelním zápisem do Identity Registry. SchoolYear **label**
+se neukládá druhým write source of truth — metadata helper čte persistovaný VZ label a
+propojuje ho se stabilní `schoolYearId`.
+
+Identity se při Profile bindingu vytváří / reuseuje z persistovaného SchoolProfile
+(a volitelně SchoolYear z validního VZ year hintu při prvním bootstrapu AppContext).
+Po 0G-2 SchoolYear metadata sync navíc reaguje na každý **úspěšný VZ persist** validního roku.
 
 ---
 
 ## 0F — Profile platform runtime (COMPLETE)
 
-0F zapojilo Identity / AppContext do **Profil školy**. Ostatní moduly (Dashboard, VZ, PHmax / NV75)
-platform binding **nevolají**.
+0F zapojilo Identity / AppContext do **Profil školy**. PHmax / NV75 a Dashboard platform binding
+**nevolají**. VZ (0G) je druhý runtime consumer SchoolYear metadata — viz sekce 0G níže.
 
 ### Implementované řezy
 
@@ -321,19 +332,191 @@ PROFILE RUNTIME SAFETY = COMPLETE
 (pro současnou single-school architekturu)
 ```
 
-**Limity (záměrné):**
+**Limity (záměrné, platí i po 0G):**
 
-- binding je Profile-scoped,
-- žádný druhý runtime consumer `activeSchoolId` / domain School,
+- School binding zůstává Profile-scoped (0F),
 - žádný React Platform / ActiveSchool provider,
 - žádný App.tsx global bootstrap,
-- SchoolYear metadata vzniká jen z validního VZ year hintu při bindingu (bez inventování aktuálního roku).
+- SchoolYear metadata z validního VZ hintu / persistu (bez inventování aktuálního roku).
+
+---
+
+## 0G — SchoolYear / VZ metadata runtime (COMPLETE)
+
+0G uzavírá SchoolYear platform metadata pro současnou single-school / single-flat-VZ architekturu.
+
+### Implementované řezy
+
+| Řez | Kontrakt |
+|-----|----------|
+| **0G-0** | Fresh VZ default `schoolYear = ""` — žádný fake authoritative year, žádný current-date fallback |
+| **0G-1** | `ensureVzSchoolYearPlatformBinding()` — school-first helper; žádné produkční call sites samostatně |
+| **0G-2** | Successful VZ persist → serialized SchoolYear metadata sync v `useVyrocniZpravaReport.persist()` |
+
+### 0G-0 — Fresh vs legacy year label
+
+**Fresh VZ** (chybí LS nebo nový default shell):
+
+```text
+schoolYear = ""
+```
+
+Důvod: žádný fake authoritative year, žádný current-date fallback, žádná SchoolYear identity jen
+kvůli defaultu.
+
+**Legacy / existující persistovaný validní label** (např. `2024/2025`):
+
+```text
+zůstává authoritative
+→ žádná migrace na empty
+→ žádná heuristika podle konkrétního roku
+```
+
+### Jediný SchoolYear metadata runtime trigger (0G-2)
+
+```text
+saveVyrocniZpravaStorage(...) FAIL
+→ ensureVzSchoolYearPlatformBinding() = 0×
+
+saveVyrocniZpravaStorage(...) OK
+→ serialized metadata sync smí běžet
+```
+
+**Není** samostatný mount binding pro SchoolYear. First-mount reconcile vzniká přes existující
+first autosave VZ (`useEffect` na `report` / `selectedSectionId`).
+
+Production path:
+
+```text
+useVyrocniZpravaReport.persist()
+→ createSerializedVzSchoolYearBindingRunner().afterPersist({ ok: true })
+→ ensureVzSchoolYearPlatformBinding()
+```
+
+### Helper result semantics
+
+| Result | Význam | UI |
+|--------|--------|-----|
+| `ready` | Metadata synchronized (`schoolYearId`, `startYear`) | žádný warning |
+| `noop` / `no_valid_year` | School ready, persisted year empty/invalid | žádný warning; **active pointer se nemaže** |
+| `empty` | Missing SchoolProfile | žádný blocking warning; VZ může dál fungovat |
+| `error` | Metadata sync failure | soft `schoolYearMetadataNotice`; **VZ business save zůstává success** |
+
+### Business vs metadata failure (oddělené domény)
+
+```text
+VZ persistence OK + metadata ERROR
+→ savedAt = success
+→ saveIssue = cleared
+→ schoolYearMetadataNotice = soft warning
+→ VZ report / schoolYear string beze změny
+```
+
+Metadata failure **nesmí** rollbackovat VZ, vytvářet `saveIssue`, rušit úspěšný `savedAt` ani měnit
+`report.schoolYear`.
+
+### Year A → B
+
+```text
+persisted VZ year A (valid) + successful persist
+→ SchoolYear identity A
+→ activeSchoolYearId = A
+
+změna na validní B + successful persist
+→ create/reuse SchoolYear B
+→ activeSchoolYearId = B
+→ A zůstává v Identity Registry (nemaže se)
+```
+
+VZ sections / personnel / flat storage keys se nemění.
+
+### Invalid intermediate label
+
+Při psaní roku může autosave persistovat mezistavy (`2026/`, `2026/2`, …):
+
+```text
+successful persist invalid label
+→ helper noop
+→ activeSchoolYearId zůstává na posledním validním year A
+→ žádný current-date fallback
+
+successful persist valid "2026/2027"
+→ helper ready
+→ active B
+```
+
+### KRITICKÝ LIMIT — activeSchoolYearId ≠ dataset switch
+
+VZ business storage je stále **flat** (není `schoolYearId`-scoped):
+
+- `vyrocni-zprava-state-v1` (main)
+- `vyrocni-zprava-personnel-data-v1`
+- `vyrocni-zprava-section*-data-v1`
+
+Proto v této fázi:
+
+```text
+activeSchoolYearId
+= platform identity odpovídající aktuálnímu persistovanému VZ year labelu
+
+≠ přepínání mezi samostatnými výročními zprávami za více školních roků
+```
+
+### Dva runtime consumery (bez provideru)
+
+| Consumer | Scope | Binding |
+|----------|-------|---------|
+| **Profil školy** | School identity | `ensureSchoolPlatformBinding()` — mount + Save |
+| **Výroční zpráva** | SchoolYear metadata | `ensureVzSchoolYearPlatformBinding()` — po successful VZ persist |
+
+Žádný App-level provider. Lokální lazy orchestration (serialized runner + generation guard) je
+dostačující.
+
+VZ reuseuje `ensureSchoolPlatformBinding()` uvnitř SchoolYear helperu (school-first); nemá vlastní
+School bootstrap.
+
+### Full Reset po 0G
+
+Full Reset maže SchoolProfile, Identity Registry, AppContext, VZ i ostatní owned business data.
+
+Po resetu:
+
+```text
+fresh VZ schoolYear = ""
+→ successful first autosave
+→ helper noop
+→ žádná SchoolYear metadata
+```
+
+### Known limitations / debt (0G closure)
+
+| ID | Finding | Status |
+|----|---------|--------|
+| A | Každý successful VZ autosave může vyvolat redundantní metadata sync / AppContext rewrite | Correctness OK; performance optimization deferred |
+| B | Po failed VZ save může zůstat starý `savedAt` vedle nového `saveIssue` | Existing UX debt; mimo 0G |
+| C | Po pozdějším VZ save failure může zůstat starý `schoolYearMetadataNotice` z předchozího metadata pokusu | Known UX debt; ne correctness issue |
+| D | Flat VZ storage — žádné multi-year dataset switching | Záměrný architektonický limit |
+
+### SCHOOLYEAR / VZ METADATA RUNTIME status
+
+```text
+SCHOOLYEAR / VZ METADATA RUNTIME = COMPLETE
+(pro současnou single-school / single-flat-VZ architekturu)
+```
 
 ---
 
 ## Co tento dokument záměrně neřeší
 
-- Implementaci restore (fáze 2)
+- Implementaci restore (fáze 2) — **doporučená nejbližší fáze** po 0G (viz níže)
 - Budoucí multi-school / `schoolId`-scoped Remove School
-- Druhý runtime consumer (VZ SchoolYear wiring, Dashboard Active School, PHmax namespaced storage)
-- App-level provider / global bootstrap (až ≥2 consumery)
+- Dashboard Active School consumer, PHmax namespaced storage
+- App-level provider / global bootstrap (zatím není potřeba)
+- Multi-year VZ dataset switching / namespaced section storage
+- SchoolYear selector redesign
+
+### Doporučené pořadí po 0G
+
+**Restore (fáze 2)** má prioritu před migrací business storage na `schoolId`-`schoolYearId`-scoped
+klíče. Od 0G už platform metadata aktivně řídíme ve dvou runtime oblastech (Profile + VZ); restore
+musí respektovat Identity Registry, VZ `schoolYear` label a post-restore AppContext bootstrap.
