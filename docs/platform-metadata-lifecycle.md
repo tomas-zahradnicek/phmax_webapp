@@ -1,8 +1,11 @@
 # Platform metadata lifecycle — Identity Registry & AppContext
 
-Tento dokument formalizuje lifecycle dvou platformových persistence klíčů zavedených ve Fázi 0 (PR 0B–0D), **před** jejich runtime wiringem do Page komponent.
+Tento dokument formalizuje lifecycle dvou platformových persistence klíčů zavedených ve Fázi 0
+(PR 0B–0D) a navazující bezpečnostní kontrakty uzavřené před jejich runtime wiringem do Page
+komponent.
 
-Stav k PR 0E-1: dokumentace a kontrakt. **Žádná změna runtime behavior** v tomto PR.
+Stav po 0E-3B2: lifecycle rozhodnutí Fáze 0 jsou uzavřena; dalším krokem je 0F — runtime wiring
+nové platformové vrstvy.
 
 Související: [Záloha a obnova dat](./backup-and-restore.md).
 
@@ -50,16 +53,17 @@ Aktuální centrální envelope: `format = reditelsky-pruvodce-backup`, `schemaV
 
 Problém: pokud je SchoolProfile odstraněn a do stejného browseru je později zadána **jiná škola**, zachovaná Identity Registry by mohla nové škole přiřadit **původní `schoolId`**. To by smíchalo logickou identitu školy A se školou B.
 
-Rozlišujeme tři koncepty:
+Rozlišujeme čtyři koncepty:
 
 | Koncept | Význam | Identity lifecycle |
 |---------|--------|--------------------|
 | **1. Edit profile** | Stejná logická škola; uživatel mění údaje profilu | Identity se **zachovává** (0E-3B1) |
 | **2. Reset Profile Fields** | Vyčištění formulářových atributů stejné školy | Identity + IČO/RED IZO/IZO **zachovány** (0E-3B1) |
-| **3. Remove / Replace School** | Odstranění nebo výměna logické školy | Identity **smazat** (TBD 0E-3B2); nesmí reuse schoolId A → B |
+| **3. Replace School (single-school)** | Odstranění školy A a zahájení práce se školou B | **Full Application Reset → hard reload → nový SchoolProfile → nová Identity Registry / nové `schoolId`** (policy uzavřena 0E-3B2) |
 | **4. Full Application Reset** | Factory reset všech vlastněných dat aplikace | Identity **smazat** (implementováno 0E-3C1 + 0E-3C2) |
 
-Runtime funkce „nahradit školu“ zatím není implementována.
+Samostatná runtime operace Remove / Replace School se v současné single-school architektuře
+neimplementuje.
 
 ---
 
@@ -92,7 +96,7 @@ Runtime funkce „nahradit školu“ zatím není implementována.
 - **Zachovává** SchoolProfile, Identity Registry, AppContext a výroční zprávu.
 - **Post-export clear** po úzkém JSON (školní scénář / IS handoff) maže jen `PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS` (autosave modulů + scenario label). Cross-PHmax JSON clear nenabízí. Centrální záloha clear po exportu nenabízí.
 
-### C. School profile — **Edit / Reset Fields (0E-3B1)** vs Remove (TBD)
+### C. School profile — **Edit / Reset Fields (0E-3B1)** a Replace policy (0E-3B2)
 
 Rozlišujeme:
 
@@ -100,7 +104,7 @@ Rozlišujeme:
 |---------|------|---------|
 | **Edit Profile** | **Implementováno** | Úprava atributů stejné školy; `profile.id` a Identity Registry beze změny. Běžné atributy (adresa, web, ředitel, …) volně. |
 | **Reset Profile Fields** | **Safe semantics implementována (0E-3B1)** | UI „Vymazat údaje profilu“. Zachová `profile.id`, `createdAt`, IČO / RED IZO / IZO. Vyčistí ostatní formulářová pole. **Nemaže** Identity Registry, AppContext, PHmax, VZ. |
-| **Remove / Replace School** | **TBD 0E-3B2** | Explicitní destruktivní operace; nesmí tiše mapovat školu B na `schoolId` A. |
+| **Replace School** | **Decision complete (0E-3B2); bez samostatné runtime implementace** | V single-school architektuře použít Full Application Reset, hard reload a poté vytvořit nový profil školy. |
 
 **Identity-sensitive guard (0E-3B1):** `readIdentityRegistryPresence()` rozlišuje `missing` | `valid` | `corrupted` | `storage_unavailable`. **missing** → legacy edit identifikátorů povolen. **valid** → změna již vyplněných IČO / RED IZO / IZO se blokuje. **corrupted** / **storage_unavailable** → fail-closed (jakákoli změna identifikátorů se blokuje; registry se neopravuje ani nepřepisuje). Běžné atributy zůstávají editovatelné. Oprava překlepu vs. nahrazení školy se nerozlišuje heuristikou.
 
@@ -128,7 +132,54 @@ Full Reset je záměrně dostupný jen na Dashboardu, kde nejsou mountované PHm
 stránky. Pokud by se někdy zpřístupnil na stránce s aktivním autosave, musí se autosave komponenty
 před clear odmountovat nebo respektovat explicitní reset-in-progress guard.
 
-Remove / Replace School zůstává pro 0E-3B2.
+Full Reset je současně jedinou podporovanou cestou pro bezpečnou náhradu školy v single-school
+architektuře.
+
+### E. Remove / Replace School — policy closure (0E-3B2)
+
+**Stav 0E-3B2: DECISION COMPLETE — NO RUNTIME IMPLEMENTATION REQUIRED FOR CURRENT SINGLE-SCHOOL
+ARCHITECTURE.**
+
+Současný kontrakt je:
+
+```text
+Replace School
+=
+Full Application Reset
+→ hard reload
+→ vytvoření nového SchoolProfile
+→ nová Identity Registry / nové schoolId
+```
+
+Samostatná runtime operace Remove School, samostatný storage registry ani další destruktivní UI se
+nyní neimplementují. Full Reset již poskytuje bezpečnou cestu škola A → škola B: odstraní profil,
+Identity Registry, AppContext i business data školy A, takže nevzniknou orphan data a `schoolId`
+školy A se nemůže tiše použít pro školu B. Současně nevzniká druhý paralelní destruktivní registry
+a flow. Není doložený produktový požadavek na časté přepínání škol.
+
+#### Vědomě přijatý UX trade-off
+
+Full Reset je širší než hypotetický school-scoped Remove. Maže:
+
+- 66 exact `localStorage` keys,
+- 2 `localStorage` prefixes,
+- 6 `sessionStorage` keys.
+
+Hypotetický Remove School by mohl zachovat přibližně 33 device / UI preference keys, například view
+modes, onboarding state, tours, wizard steps, display density a dashboard preferences. Současný
+single-school kontrakt vědomě upřednostňuje bezpečnost a jednoznačnost identity před zachováním
+device / UI preferencí při změně školy.
+
+`phmax-is-handoff-endpoint` se automaticky nepovažuje za device-global preference. Může jít o
+school-specific integrační konfiguraci; její lifecycle by proto před případným school-scoped Remove
+vyžadoval samostatné produktové rozhodnutí.
+
+#### Kdy rozhodnutí znovu otevřít
+
+Samostatný Remove / Replace School se znovu posoudí, pokud vznikne konkrétní požadavek „změnit školu
+a zachovat nastavení zařízení“ nebo multi-school architektura, například User → School A + School B.
+V multi-school modelu Remove School nesmí být alias Full Resetu: musí jít o `schoolId`-scoped operaci,
+která zachová ostatní školy, uživatelský účet a odpovídající device stav.
 
 ---
 
@@ -141,7 +192,7 @@ Remove / Replace School zůstává pro 0E-3B2.
 | **Calculator clear (0E-3A)** | Zachovat | Zachovat | Zachovat | Inventář bez SchoolProfile; post-export jen working autosave |
 | **Edit Profile (0E-3B1)** | Zachovat | Zachovat | Aktualizace atributů | Stejná School; id zachováno |
 | **Reset Profile Fields (0E-3B1)** | Zachovat | Zachovat | Vyčistit atributy; zachovat id + IČO/RED IZO/IZO | Ne remove school |
-| **Remove / Replace School** | **TBD 0E-3B2** | Sanitize / smazat | Smazat / nahradit | Nesmí tiše mapovat školu B na ID školy A |
+| **Replace School (0E-3B2 policy)** | **Smazat přes Full Reset** | **Smazat přes Full Reset** | **Smazat; po reloadu vytvořit nový** | Bez samostatné runtime operace v single-school architektuře |
 | **Full application reset (0E-3C1 / 0E-3C2)** | **Smazat** | **Smazat** | **Smazat** | Whitelist delete registry + Dashboard confirm/backup/reload flow |
 
 ---
@@ -188,7 +239,20 @@ Restore centrální zálohy zatím **není implementován** (fáze 2 v [backup-a
 
 - Runtime wiring Identity / AppContext do Pages
 - Implementaci restore
-- Runtime „replace school“ / Remove School identity wipe (0E-3B2)
-- Full application reset (0E-3C)
+- Budoucí multi-school / `schoolId`-scoped Remove School
 
-Ty patří do pozdějších PR (0E-3B2/C, 0F, restore fáze).
+## Přechod na 0F
+
+Před 0F jsou uzavřeny:
+
+- stable identity,
+- AppContext,
+- repository read layer,
+- backup lifecycle,
+- calculator clear,
+- profile reset semantics,
+- Full Application Reset,
+- Replace School policy.
+
+Dalším krokem je **0F — runtime wiring nové platformové vrstvy**. Preferovaným prvním wiringem je
+School Profile.
