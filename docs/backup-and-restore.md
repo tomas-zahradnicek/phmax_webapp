@@ -43,7 +43,7 @@ Centrální export zahrnuje pouze moduly explicitně registrované v `src/backup
 | `phmax-nv75` | Banka odpočtů zástupců ředitele | `edu-cz-nv75-deputy-bank-state`, `edu-cz-nv75-deputy-bank-named-snapshots` |
 | `phmax-scenario-label` | Pojmenování scénáře školy (metadata) | `phmax-school-scenario-label` |
 
-Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní s prázdným `modules`). Corrupted Identity Registry se neexportuje jako validní data — modul ohlásí chybu čtení, export ostatních modulů pokračuje (stejný kontrakt jako u ostatních adapterů).
+Modul bez uložených dat se do zálohy nezahrnuje (envelope zůstává validní s prázdným `modules`). Corrupted Identity Registry ani corrupted SchoolProfile se neexportují jako validní data — modul ohlásí chybu čtení, export ostatních modulů pokračuje (stejný kontrakt jako u ostatních adapterů). Runtime politika poškozeného profilu (write guard + recovery UI, bez force overwrite) je v **[platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md)** (0F-3A / 0F-3B).
 
 ## Co se nezálohuje
 

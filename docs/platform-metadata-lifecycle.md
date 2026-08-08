@@ -1,11 +1,11 @@
 # Platform metadata lifecycle — Identity Registry & AppContext
 
-Tento dokument formalizuje lifecycle dvou platformových persistence klíčů zavedených ve Fázi 0
-(PR 0B–0D) a navazující bezpečnostní kontrakty uzavřené před jejich runtime wiringem do Page
-komponent.
+Tento dokument formalizuje lifecycle platformových persistence klíčů zavedených ve Fázi 0
+(PR 0B–0E) a **Profile-scoped runtime wiring uzavřený v 0F** (0F-1 … 0F-3B).
 
-Stav po 0E-3B2: lifecycle rozhodnutí Fáze 0 jsou uzavřena; dalším krokem je 0F — runtime wiring
-nové platformové vrstvy.
+**Stav:** Profile runtime safety pro současnou single-school architekturu je **COMPLETE**.
+Binding je zatím Profile-scoped; druhý runtime consumer, React provider ani App.tsx global
+bootstrap nejsou součástí 0F.
 
 Související: [Záloha a obnova dat](./backup-and-restore.md).
 
@@ -235,24 +235,105 @@ Restore centrální zálohy zatím **není implementován** (fáze 2 v [backup-a
 
 ---
 
+## Source of truth (po 0F)
+
+| Vrstva | Role |
+|--------|------|
+| **SchoolProfile** (`reditelsky-pruvodce-school-profile-v1`) | **Write source of truth** profilových polí (edit přes Profile / VZ prefill writers) |
+| **Identity Registry** | Stabilní School / SchoolYear **identity metadata** (`schoolId`, `schoolYearId`) |
+| **AppContext** | Device / workspace **pointer** (`activeSchoolId`, `activeSchoolYearId`) — ne business data |
+| **Domain School** | Read-only **projekce** z legacy SchoolProfile + Identity |
+| **DataRepository** | Read boundary; **žádné domain School write API** |
+
+Profilová pole se neukládají paralelním zápisem do Identity Registry. Identity se při bindingu
+vytváří / reuseuje z persistovaného SchoolProfile (a volitelně SchoolYear z validního VZ year hintu).
+
+---
+
+## 0F — Profile platform runtime (COMPLETE)
+
+0F zapojilo Identity / AppContext do **Profil školy**. Ostatní moduly (Dashboard, VZ, PHmax / NV75)
+platform binding **nevolají**.
+
+### Implementované řezy
+
+| Řez | Kontrakt |
+|-----|----------|
+| **0F-1** | `ensureSchoolPlatformBinding()` — empty / ready / typed error; no ghost identity bez profilu |
+| **0F-2A** | Truthful SchoolProfile persistence (`persistence.ok`); cache+emit až po úspěšném `setItem` |
+| **0F-2B** | Explicitní úspěšný Save → platform binding (soft metadata warning při chybě; profil zůstává uložen) |
+| **0F-2C** | Mount / legacy persistovaný profil → lazy binding (empty = bez warningu; error = mount-specific copy) |
+| **0F-3A** | Shared corrupted-profile **write guard** — Save / update / reset / migrace nepřepisují corrupted bytes |
+| **0F-3B** | Corrupted / storage-unavailable **recovery UI** na ProfilSkolyPage; žádný force overwrite |
+
+### Production binding triggers
+
+Jediné produkční volání `ensureSchoolPlatformBinding` (přes serialized runner na ProfilSkolyPage):
+
+1. **Mount** — již persistovaný SchoolProfile (legacy / reload)
+2. **Explicitní úspěšný Save** — po `persistence.ok === true`
+
+**Není** binding v: Dashboard, Výroční zpráva, PHmax / NV75, App.tsx global bootstrap.
+
+### Empty / new School
+
+```text
+missing SchoolProfile
+→ mount ensure = empty
+→ žádná Identity Registry
+→ žádný school-bound AppContext
+
+první successful Save
+→ Identity Registry + activeSchoolId
+```
+
+### Legacy persistovaný profil
+
+```text
+mount → lazy binding
+valid UUID profile.id → reuse jako schoolId
+non-UUID profile.id → nový canonical UUID schoolId; profile.id se nepřepisuje
+```
+
+### Corrupted SchoolProfile
+
+```text
+corrupted persisted SchoolProfile
+→ běžné Save / updateProfile / resetProfile blokovány (profile_corrupted)
+→ raw bytes se nepřepisují
+→ shared cache / emit se necommitují
+→ platform binding nevzniká
+→ Profile page: recovery state (ne falešný prázdný formulář)
+→ žádný force overwrite / „Přepsat poškozený profil“
+→ bezpečná Replace School cesta = Full Application Reset
+```
+
+`storage_unavailable` **≠** `profile_corrupted`. Storage unavailable má samostatnou UI copy a
+**nepředstírá**, že Full Reset tento stav jistě opraví.
+
+Centrální backup: corrupted SchoolProfile se do envelope jako validní data **nezahrnuje**
+(module-level read error; ostatní moduly pokračují) — viz [backup-and-restore.md](./backup-and-restore.md).
+
+### PROFILE RUNTIME SAFETY status
+
+```text
+PROFILE RUNTIME SAFETY = COMPLETE
+(pro současnou single-school architekturu)
+```
+
+**Limity (záměrné):**
+
+- binding je Profile-scoped,
+- žádný druhý runtime consumer `activeSchoolId` / domain School,
+- žádný React Platform / ActiveSchool provider,
+- žádný App.tsx global bootstrap,
+- SchoolYear metadata vzniká jen z validního VZ year hintu při bindingu (bez inventování aktuálního roku).
+
+---
+
 ## Co tento dokument záměrně neřeší
 
-- Runtime wiring Identity / AppContext do Pages
-- Implementaci restore
+- Implementaci restore (fáze 2)
 - Budoucí multi-school / `schoolId`-scoped Remove School
-
-## Přechod na 0F
-
-Před 0F jsou uzavřeny:
-
-- stable identity,
-- AppContext,
-- repository read layer,
-- backup lifecycle,
-- calculator clear,
-- profile reset semantics,
-- Full Application Reset,
-- Replace School policy.
-
-Dalším krokem je **0F — runtime wiring nové platformové vrstvy**. Preferovaným prvním wiringem je
-School Profile.
+- Druhý runtime consumer (VZ SchoolYear wiring, Dashboard Active School, PHmax namespaced storage)
+- App-level provider / global bootstrap (až ≥2 consumery)
