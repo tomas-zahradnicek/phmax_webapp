@@ -9,11 +9,16 @@ export {
   applyRestoreStorageTransaction,
   prepareFreshRestorePlan,
 } from "./apply-restore-storage-transaction";
+export { applyAppBackupRestore } from "./apply-app-backup-restore";
 export { applyRestoreStorageOperations } from "./apply-restore-storage-operations";
 export { rollbackRestoreTouchedKeys } from "./rollback-restore-touched-keys";
 export { snapshotRestoreTouchedKeys } from "./snapshot-restore-touched-keys";
 export { validateRestorePlanForApply } from "./validate-restore-plan-for-apply";
 export { allRestoreOperationKeys } from "./restore-owned-key-allowlist";
+export {
+  derivePostRestorePlatformExpectations,
+  verifyPostRestorePlatformState,
+} from "./verify-post-restore-platform-state";
 export {
   validateKnownModuleDataForRestore,
   validateSchoolProfileForRestore,
@@ -40,7 +45,9 @@ export type {
   ValidatedBackupModule,
 } from "./restore-types";
 export type {
+  RestoreFailurePhase,
   RestorePlanRejectReason,
+  RestoreResult,
   RestoreRollbackSnapshot,
   RestoreRollbackSnapshotEntry,
   RestoreStorageFailurePhase,
