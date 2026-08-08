@@ -1,3 +1,16 @@
+export {
+  buildRestorePreviewFromBackupText,
+  buildRestorePreviewModel,
+  RESTORE_UI_MODULE_LABELS,
+} from "./restore-preview-model";
+export type {
+  BuildRestorePreviewFromTextOptions,
+  RestorePreviewConflictCategory,
+  RestorePreviewFromTextResult,
+  RestorePreviewModel,
+  RestorePreviewModuleItem,
+  RestorePreviewParseErrorStatus,
+} from "./restore-preview-model";
 export { parseAppBackup } from "./parse-app-backup";
 export { validateAppBackupEnvelope } from "./validate-app-backup";
 export { readCurrentRestoreEnvironment } from "./read-restore-environment";

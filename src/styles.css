@@ -3635,6 +3635,59 @@ input[type="radio"] {
   padding-top: 16px;
 }
 
+.dash-backup-export__restore {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.dashboard-restore-dialog {
+  max-width: 680px;
+}
+
+.dashboard-restore-dialog__file {
+  margin-top: 18px;
+}
+
+.dashboard-restore-dialog__section {
+  margin-top: 18px;
+}
+
+.dashboard-restore-dialog__subtitle {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.dashboard-restore-dialog__list {
+  margin: 8px 0 0;
+  padding-left: 1.35rem;
+}
+
+.dashboard-restore-dialog__list li + li {
+  margin-top: 4px;
+}
+
+.dashboard-restore-dialog__note {
+  margin: 0 0 8px;
+}
+
+.dashboard-restore-dialog__error {
+  color: #991b1b;
+  font-weight: 700;
+}
+
+.dashboard-restore-dialog__warnings,
+.dashboard-restore-dialog__blocked {
+  border: 1px solid rgba(185, 28, 28, 0.24);
+  border-radius: 14px;
+  background: rgba(254, 242, 242, 0.76);
+  padding: 14px;
+}
+
+.dashboard-restore-dialog__next-step {
+  margin-top: 18px;
+}
+
 .dash-school-import__steps {
   margin: 10px 0 0;
   padding-left: 1.35rem;
