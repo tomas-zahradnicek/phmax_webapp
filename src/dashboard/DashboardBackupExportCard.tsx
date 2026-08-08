@@ -118,7 +118,11 @@ export function DashboardBackupExportCard() {
         </p>
       </div>
 
-      <div className="dash-backup-export__full-reset" data-testid="dash-full-reset-entry">
+      <div
+        id="sprava-dat-prohlizece"
+        className="dash-backup-export__full-reset"
+        data-testid="dash-full-reset-entry"
+      >
         <h3 className="dash-backup-export__subtitle">Správa dat v tomto prohlížeči</h3>
         <p className="muted-text">
           Full Reset odstraní data Ředitelského průvodce uložená v tomto prohlížeči. Netýká se jiného zařízení ani

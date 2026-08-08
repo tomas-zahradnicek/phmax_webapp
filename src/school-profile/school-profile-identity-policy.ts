@@ -93,3 +93,27 @@ export const MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED =
  */
 export const MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED =
   "Nepodařilo se připravit propojení profilu školy s dalšími částmi aplikace. Zobrazené údaje před uložením zkontrolujte.";
+
+/** Corrupted persisted SchoolProfile recovery UI (0F-3B). No technical storage jargon. */
+export const MSG_SCHOOL_PROFILE_CORRUPTED_TITLE = "Profil školy se nepodařilo načíst";
+
+export const MSG_SCHOOL_PROFILE_CORRUPTED_BODY =
+  "Uložená data profilu školy jsou poškozená nebo je nelze bezpečně načíst. Aby nedošlo k jejich nechtěnému přepsání, nelze nyní profil běžně upravit ani uložit.";
+
+export const MSG_SCHOOL_PROFILE_CORRUPTED_OTHER_DATA =
+  "Data kalkulaček, výroční zprávy a další uložená data mohou v tomto prohlížeči stále existovat.";
+
+export const MSG_SCHOOL_PROFILE_CORRUPTED_BACKUP_HINT =
+  "Pokud je to možné, před odstraněním dat si na Dashboardu stáhněte centrální zálohu. Poškozená část dat nemusí být do zálohy zahrnuta.";
+
+export const MSG_SCHOOL_PROFILE_CORRUPTED_CTA = "Přejít ke správě dat";
+
+/** Storage API unavailable — distinct from corrupted persisted data (0F-3B). */
+export const MSG_SCHOOL_PROFILE_STORAGE_UNAVAILABLE_TITLE =
+  "Profil školy nyní nelze načíst";
+
+export const MSG_SCHOOL_PROFILE_STORAGE_UNAVAILABLE_BODY =
+  "Data profilu školy nyní nelze bezpečně načíst ani uložit v tomto prohlížeči. Zkuste stránku znovu načíst. Pokud problém přetrvá, zkontrolujte, zda prohlížeč neblokuje ukládání dat webu.";
+
+/** Dashboard deep-link target for Full Reset / backup card section. */
+export const SCHOOL_PROFILE_DATA_MANAGEMENT_HASH = "sprava-dat-prohlizece";
