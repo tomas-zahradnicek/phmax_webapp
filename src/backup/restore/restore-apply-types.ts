@@ -18,6 +18,13 @@ export type RestoreTransactionContext = {
 
 export type RestoreStorageFailurePhase = "set" | "remove" | "app_context_reset";
 
+/** Includes Restore-2A storage phases + Restore-2B platform phases. */
+export type RestoreFailurePhase =
+  | RestoreStorageFailurePhase
+  | "school_reconcile"
+  | "vz_reconcile"
+  | "verification";
+
 export type RestorePlanRejectReason =
   | "can_apply_false"
   | "conflict_present"
@@ -30,7 +37,8 @@ export type RestorePlanRejectReason =
   | "platform_side_effect_key_missing"
   | "unsupported_storage_target"
   | "fresh_plan_blocked"
-  | "storage_unavailable";
+  | "storage_unavailable"
+  | "inconsistent_no_storage_changes";
 
 export type RestoreStoragePhaseResult =
   | { status: "storage_applied"; transaction: RestoreTransactionContext }
@@ -49,6 +57,32 @@ export type RestoreStoragePhaseResult =
       failedRollbackKeys: string[];
       cause?: string;
       transaction: RestoreTransactionContext;
+    };
+
+/**
+ * Final Restore-2B result.
+ * `storage_applied` alone is never success — platform phase must complete.
+ *
+ * Known v1 limitations (documented, not mitigated here):
+ * - Dashboard-only apply invariant enforced by Restore-3 UI, not this engine.
+ * - Residual multi-tab race during async reconcile; rollback may overwrite other-tab writes.
+ * - In-memory snapshot is not crash-atomic between storage_applied and final success.
+ */
+export type RestoreResult =
+  | { status: "success" }
+  | { status: "no_changes" }
+  | { status: "rejected_plan"; reason: RestorePlanRejectReason; detail?: string }
+  | { status: "snapshot_failed"; detail?: string }
+  | {
+      status: "rolled_back";
+      failurePhase: RestoreFailurePhase;
+      cause?: string;
+    }
+  | {
+      status: "fatal_partial";
+      failurePhase: RestoreFailurePhase;
+      failedRollbackKeys: string[];
+      cause?: string;
     };
 
 /** Restricted storage surface for restore transaction (no clear()). */
