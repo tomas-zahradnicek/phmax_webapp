@@ -1,10 +1,14 @@
 import { confirmDestructive } from "./confirm-destructive";
 
-export const MSG_CONFIRM_CLEAR_AFTER_DASHBOARD_EXPORT =
-  "Export byl uložen. Na sdíleném počítači doporučujeme smazat lokální data kalkulaček v tomto prohlížeči. Smazat nyní?";
+/** Po exportu školního scénáře / IS handoff — jen pracovní autosave + label ze souboru. */
+export const MSG_CONFIRM_CLEAR_AFTER_SCHOOL_SCENARIO_EXPORT =
+  "Export byl uložen. Na sdíleném počítači doporučujeme smazat právě exportovaná pracovní data kalkulaček (rozpracované autosave modulů a pojmenování scénáře). Named snapshoty, profil školy a výroční zpráva zůstanou. Smazat nyní?";
 
-/** Volitelná připomínka po stažení JSON z dashboardu (bez druhého potvrzení u samotného mazání). */
-export function offerClearBrowserDataAfterDashboardExport(clearLocalData: () => void): void {
-  if (!confirmDestructive(MSG_CONFIRM_CLEAR_AFTER_DASHBOARD_EXPORT)) return;
-  clearLocalData();
+/**
+ * Volitelná připomínka po stažení JSON, který obsahuje `moduleSnapshots` + scenario label.
+ * `clearWorkingData` musí mazat jen CLEAR_SCOPE ⊆ data v právě vytvořeném exportu.
+ */
+export function offerClearWorkingDataAfterSchoolScenarioExport(clearWorkingData: () => void): void {
+  if (!confirmDestructive(MSG_CONFIRM_CLEAR_AFTER_SCHOOL_SCENARIO_EXPORT)) return;
+  clearWorkingData();
 }

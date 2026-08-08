@@ -22,7 +22,7 @@ export function DashHeroToolbar({ lastRefreshLabel, onRefresh, onClearLocalData 
             Obnovit z prohlížeče
           </button>
           <button type="button" className="btn ghost" onClick={onClearLocalData}>
-            Vymazat lokální data
+            Vymazat data kalkulaček
           </button>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 Tento dokument popisuje centrální zálohu dat aplikace. **Fáze 1** (aktuální) podporuje pouze **export** JSON zálohy. Import, validace při obnově, výběr modulů a rollback jsou plánovány ve **fázi 2**.
 
-Lifecycle platformových klíčů Identity Registry a AppContext (záloha, clear levels, restore kontrakt) je popsán v **[platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md)**.
+Lifecycle platformových klíčů Identity Registry a AppContext (záloha, clear levels, restore kontrakt) je popsán v **[platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md)**. Calculator clear (level B, 0E-3A) **nemění** centrální zálohu; `DashboardBackupExportCard` po exportu automatický clear nenabízí.
 
 ## Formát zálohy
 

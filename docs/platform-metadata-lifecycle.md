@@ -84,11 +84,12 @@ V tomto PR se **nevytváří** runtime funkce „nahradit školu“.
 - Zachovává Identity Registry.
 - Zachovává AppContext.
 
-### B. Calculator clear
+### B. Calculator clear — **implementováno (0E-3A)**
 
-- Maže PHmax / NV75 relevantní data.
-- **Nemá** se tvářit jako full reset.
-- **Legacy mismatch (současný kód):** dashboard akce přes `clearAllPhmaxLocalStorage()` maže i `reditelsky-pruvodce-school-profile-v1`, zatímco UI text mluví o „datech kalkulaček“. Označeno k opravě v pozdějším clear-policy PR — v 0E-1 se behavior **nemění**.
+- Maže PHmax / NV75 relevantní data (`PHMAX_APP_LOCAL_STORAGE_KEYS` + prefix `phmax-dash-last-visit-`).
+- **Nemá** se tvářit jako full reset (UI: „Vymazat data kalkulaček“).
+- **Zachovává** SchoolProfile, Identity Registry, AppContext a výroční zprávu.
+- **Post-export clear** po úzkém JSON (školní scénář / IS handoff) maže jen `PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS` (autosave modulů + scenario label). Cross-PHmax JSON clear nenabízí. Centrální záloha clear po exportu nenabízí.
 
 ### C. School profile reset
 
@@ -116,7 +117,7 @@ V aplikaci zatím **neexistuje** kompletní factory-reset API — toto je cílov
 |---------|-------------------|------------|---------------|----------|
 | **Centrální backup (cíl)** | **Ano** (optional module `identity-registry`) | **Ne** | Ano (již dnes jako `school-profile`) | Envelope v1 aditivně; AppContext jen re-bootstrap po restore |
 | **Module clear** | Zachovat | Zachovat | Zachovat | Jen data daného modulu |
-| **Calculator clear (cíl)** | Zachovat | Zachovat | Zachovat | Dnešní clear i SchoolProfile = legacy mismatch |
+| **Calculator clear (0E-3A)** | Zachovat | Zachovat | Zachovat | Inventář bez SchoolProfile; post-export jen working autosave |
 | **Profile reset (edit)** | Zachovat | Zachovat / sanitize | Aktualizace dat | Stejná logická škola |
 | **Profile reset (remove)** | **TBD 0E-3 / 0F** | Sanitize / TBD | Smazat | Nesmí tiše mapovat školu B na ID školy A |
 | **Full application reset** | **Smazat** | **Smazat** | **Smazat** | Včetně business dat dle inventáře |
@@ -168,6 +169,7 @@ Restore centrální zálohy zatím **není implementován** (fáze 2 v [backup-a
 - Implementaci restore
 - Implementaci full factory reset
 - Runtime „replace school“
-- Opravu legacy calculator clear (SchoolProfile)
+- School profile remove / Identity policy (0E-3B)
+- Full application reset (0E-3C)
 
-Ty patří do pozdějších PR (0E-2+, 0F, restore fáze).
+Ty patří do pozdějších PR (0E-3B/C, 0F, restore fáze).
