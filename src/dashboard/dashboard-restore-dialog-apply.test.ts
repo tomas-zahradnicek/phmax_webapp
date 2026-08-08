@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 import type { RestorePreviewModel } from "../backup/restore/restore-preview-model";
 import type { RestoreResult } from "../backup/restore/restore-apply-types";
 import type { ValidatedAppBackupEnvelope } from "../backup/restore/restore-types";
@@ -20,7 +22,7 @@ import {
 } from "./dashboard-restore-dialog-apply";
 import { validateAppBackupEnvelope } from "../backup/restore/validate-app-backup";
 
-function validBackupJson(): string {
+function validBackupJson(scenario = "x"): string {
   return JSON.stringify({
     format: APP_BACKUP_FORMAT,
     schemaVersion: APP_BACKUP_SCHEMA_VERSION,
@@ -30,18 +32,22 @@ function validBackupJson(): string {
         label: "Scénář",
         schemaVersion: 1,
         exportedAt: "2026-08-08T12:00:00.000Z",
-        data: "x",
+        data: scenario,
       },
     },
   });
 }
 
-function sampleValidated(): ValidatedAppBackupEnvelope {
-  const result = validateAppBackupEnvelope(validBackupJson());
+function validatedFromScenario(scenario: string): ValidatedAppBackupEnvelope {
+  const result = validateAppBackupEnvelope(validBackupJson(scenario));
   if (result.status !== "validated") {
     throw new Error("expected validated backup fixture");
   }
   return result;
+}
+
+function sampleValidated(): ValidatedAppBackupEnvelope {
+  return validatedFromScenario("x");
 }
 
 function applyReadyPreview(overrides: Partial<RestorePreviewModel> = {}): RestorePreviewModel {
@@ -112,6 +118,20 @@ describe("restore dialog apply orchestration", () => {
       expect(canEnableRestoreApply(phase, "obnovit", false)).toBe(false);
     });
 
+    it("F/G: whitespace variants of OBNOVIT are disabled", () => {
+      const phase = {
+        status: "preview" as const,
+        validated: sampleValidated(),
+        preview: applyReadyPreview(),
+      };
+      expect(isExactRestoreConfirmationToken("OBNOVIT ")).toBe(false);
+      expect(isExactRestoreConfirmationToken(" OBNOVIT")).toBe(false);
+      expect(isExactRestoreConfirmationToken(" OBNOVIT ")).toBe(false);
+      expect(canEnableRestoreApply(phase, "OBNOVIT ", false)).toBe(false);
+      expect(canEnableRestoreApply(phase, " OBNOVIT", false)).toBe(false);
+      expect(canEnableRestoreApply(phase, " OBNOVIT ", false)).toBe(false);
+    });
+
     it("blocked conflict never enables apply", () => {
       const phase = {
         status: "preview" as const,
@@ -131,6 +151,32 @@ describe("restore dialog apply orchestration", () => {
       const lockRef = { current: false };
       expect(acquireRestoreApplyLock(lockRef)).toBe(true);
       expect(acquireRestoreApplyLock(lockRef)).toBe(false);
+    });
+
+    it("H: concurrent apply attempts invoke engine once while first is pending", async () => {
+      const lockRef = { current: false };
+      const validated = sampleValidated();
+      const preview = applyReadyPreview();
+      let resolveApply!: (value: RestoreResult) => void;
+      const applyRestore = vi.fn(
+        () =>
+          new Promise<RestoreResult>((resolve) => {
+            resolveApply = resolve;
+          }),
+      );
+
+      const attemptApply = async () => {
+        if (!acquireRestoreApplyLock(lockRef)) return "blocked";
+        return executeRestoreApply(validated, preview, { applyRestore, reload: vi.fn() });
+      };
+
+      const first = attemptApply();
+      expect(await attemptApply()).toBe("blocked");
+      resolveApply({ status: "no_changes" });
+      await first;
+
+      expect(applyRestore).toHaveBeenCalledTimes(1);
+      expect(applyRestore).toHaveBeenCalledWith(validated);
     });
 
     it("H: double invocation still calls apply once when second sees lock externally", async () => {
@@ -260,6 +306,36 @@ describe("restore dialog apply orchestration", () => {
     it("Z: storage unavailable hides soft CTA", () => {
       expect(shouldShowFullResetSoftCta("storage_unavailable")).toBe(false);
     });
+  });
+
+  it("A→B: apply receives validated B after preview switch", async () => {
+    const validatedA = validatedFromScenario("scenario-A");
+    const validatedB = validatedFromScenario("scenario-B");
+    const applyRestore = vi.fn(async (): Promise<RestoreResult> => ({ status: "no_changes" }));
+
+    await executeRestoreApply(validatedB, applyReadyPreview(), {
+      applyRestore,
+      reload: vi.fn(),
+    });
+
+    expect(applyRestore).toHaveBeenCalledTimes(1);
+    expect(applyRestore).toHaveBeenCalledWith(validatedB);
+    expect(applyRestore).not.toHaveBeenCalledWith(validatedA);
+
+    const scenarioModule = validatedB.modules.find(
+      (module) => module.moduleId === "phmax-scenario-label" && module.status === "present_valid",
+    );
+    expect(scenarioModule?.status === "present_valid" ? scenarioModule.data : null).toBe("scenario-B");
+  });
+
+  it("redaction: recovery UI source excludes internal failure details", () => {
+    const dialogSource = fs.readFileSync(
+      path.join(path.resolve(__dirname), "DashboardRestoreDialog.tsx"),
+      "utf8",
+    );
+    expect(dialogSource).not.toContain("failedRollbackKeys");
+    expect(dialogSource).not.toContain("failurePhase");
+    expect(dialogSource).not.toContain("reditelsky-pruvodce-secret-key");
   });
 
   it("result mapping ignores internal failure details for phase selection", () => {

@@ -212,8 +212,8 @@ export function DashboardFullResetDialog({
                 <p className="muted-text">
                   Centrální záloha obsahuje hlavní data aplikace, například
                   profil školy, identitu, data kalkulaček, uložené varianty a
-                  výroční zprávu. Import a obnova z této zálohy zatím nejsou v
-                  aplikaci dostupné.
+                  výroční zprávu. Obnovu ze zálohy lze provést v části
+                  Záloha a obnova dat na Dashboardu.
                 </p>
               </details>
             </div>
