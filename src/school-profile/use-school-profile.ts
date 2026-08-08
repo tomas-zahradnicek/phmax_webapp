@@ -15,7 +15,7 @@ import {
 } from "./school-profile-identity-policy";
 import {
   loadSchoolProfileFromStorage,
-  saveSchoolProfileToStorage,
+  persistSchoolProfileToStorage,
   type SchoolProfileStorageSaveResult,
 } from "./school-profile-storage";
 import type { SchoolProfile } from "./school-profile-types";
@@ -25,7 +25,10 @@ type SchoolProfileListener = () => void;
 export type SaveSchoolProfileResult = {
   identityChangeBlocked: boolean;
   identityBlockReason: SchoolProfileIdentityBlockReason | null;
-  /** Truthful storage outcome — binding (0F-2B) may run only when persistence.ok. */
+  /**
+   * Truthful storage outcome — binding (0F-2B) may run only when persistence.ok.
+   * `profile_corrupted` (0F-3A) rejects overwrite; no cache/emit/binding.
+   */
   persistence: SchoolProfileStorageSaveResult;
 };
 
@@ -52,7 +55,8 @@ export function getSchoolProfileSnapshot(): SchoolProfile {
  * Update shared school-profile state.
  *
  * persist=true (Save / Reset / updateProfile):
- *   persist-first → cache+emit only when storage write succeeds.
+ *   persist-first via {@link persistSchoolProfileToStorage} (0F-3A corruption guard)
+ *   → cache+emit only when storage write succeeds.
  *
  * persist=false:
  *   cache-only (test / non-user paths). Not a storage persist success for Save/Reset.
@@ -67,7 +71,7 @@ export function replaceSchoolProfileState(
     return { ok: true };
   }
 
-  const result = saveSchoolProfileToStorage(profile);
+  const result = persistSchoolProfileToStorage(profile);
   if (!result.ok) {
     return result;
   }

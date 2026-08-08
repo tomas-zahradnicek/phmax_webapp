@@ -1,3 +1,4 @@
+import { readLegacySchoolProfile } from "../data/legacy/legacy-school-profile";
 import { SCHOOL_PROFILE_LS_KEY } from "./school-profile-constants";
 import { createDefaultSchoolProfile, normalizeSchoolProfile } from "./school-profile-logic";
 import type { SchoolProfile } from "./school-profile-types";
@@ -5,12 +6,15 @@ import type { SchoolProfile } from "./school-profile-types";
 export { SCHOOL_PROFILE_LS_KEY };
 
 /**
- * Truthful SchoolProfile persistence result (0F-2A).
+ * Truthful SchoolProfile persistence result (0F-2A / 0F-3A).
  * Success = setItem completed without throwing. No read-back verification.
+ *
+ * `profile_corrupted` = data-safety rejection (storage may work; overwrite blocked).
+ * Distinct from `storage_unavailable`.
  */
 export type SchoolProfileStorageSaveResult =
   | { ok: true }
-  | { ok: false; reason: "storage_unavailable" };
+  | { ok: false; reason: "storage_unavailable" | "profile_corrupted" };
 
 /** Safe access — `globalThis.localStorage` getter may throw (e.g. SecurityError). */
 function resolveLocalStorage(): Storage | null {
@@ -40,8 +44,10 @@ export function loadSchoolProfileFromStorage(): SchoolProfile {
 }
 
 /**
- * Persist SchoolProfile. Maps all storage / stringify failures to storage_unavailable.
- * Does not throw DOMExceptions to callers.
+ * Low-level persist primitive. Does not apply corruption write guard.
+ * Production writers must use {@link persistSchoolProfileToStorage}.
+ * Left open for a future explicit recovery API (0F-3B+) that may overwrite
+ * corrupted bytes after a conscious user action / Full Reset path.
  */
 export function saveSchoolProfileToStorage(profile: SchoolProfile): SchoolProfileStorageSaveResult {
   const storage = resolveLocalStorage();
@@ -56,6 +62,28 @@ export function saveSchoolProfileToStorage(profile: SchoolProfile): SchoolProfil
   } catch {
     return { ok: false, reason: "storage_unavailable" };
   }
+}
+
+/**
+ * Production SchoolProfile write orchestration (0F-3A).
+ *
+ * Uses canonical {@link readLegacySchoolProfile} (no duplicated JSON validation):
+ * - missing → first write allowed
+ * - valid → normal update allowed
+ * - corrupted → reject; raw bytes unchanged
+ * - storage unavailable → reject as storage_unavailable
+ */
+export function persistSchoolProfileToStorage(
+  profile: SchoolProfile,
+): SchoolProfileStorageSaveResult {
+  const existing = readLegacySchoolProfile();
+  if (!existing.ok) {
+    if (existing.code === "corrupted") {
+      return { ok: false, reason: "profile_corrupted" };
+    }
+    return { ok: false, reason: "storage_unavailable" };
+  }
+  return saveSchoolProfileToStorage(profile);
 }
 
 export function clearSchoolProfileStorage(): void {
@@ -74,16 +102,26 @@ export function clearSchoolProfileStorage(): void {
  * Returns normalized profile only when it was successfully written to storage.
  * Persist failure → null (in-memory candidate is not claimed as migrated).
  * Caller must reload from storage; do not treat a prior non-null return as persistence proof.
+ *
+ * 0F-3A: never overwrites a persisted profile that the canonical reader treats as corrupted.
  */
 export function migrateLegacySchoolProfileIfNeeded(legacy: unknown): SchoolProfile | null {
   const normalized = normalizeSchoolProfile(legacy);
   if (!normalized) return null;
 
-  const current = loadSchoolProfileFromStorage();
-  const currentEmpty = !current.name.trim() && !current.ico.trim() && !current.redIzo.trim();
-  if (!currentEmpty) return null;
+  const existing = readLegacySchoolProfile();
+  if (!existing.ok) {
+    // corrupted / storage_unavailable — do not overwrite or claim migration
+    return null;
+  }
 
-  const persisted = saveSchoolProfileToStorage(normalized);
+  if (existing.profile != null) {
+    const current = existing.profile;
+    const currentEmpty = !current.name.trim() && !current.ico.trim() && !current.redIzo.trim();
+    if (!currentEmpty) return null;
+  }
+
+  const persisted = persistSchoolProfileToStorage(normalized);
   if (!persisted.ok) return null;
 
   return normalized;
