@@ -78,6 +78,7 @@ export function VyrocniZpravaPage() {
     savedAt,
     loadIssue,
     saveIssue,
+    schoolYearMetadataNotice,
 
     progress,
 
@@ -355,6 +356,11 @@ export function VyrocniZpravaPage() {
         ) : null}
         {saveIssue ? (
           <p className="vyrocni-zprava-section04-form__warnings">{saveIssueMessage[saveIssue.code]}</p>
+        ) : null}
+        {schoolYearMetadataNotice ? (
+          <p className="vyrocni-zprava-section04-form__warnings" role="status">
+            {schoolYearMetadataNotice}
+          </p>
         ) : null}
 
       </div>

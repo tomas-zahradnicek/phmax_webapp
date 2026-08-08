@@ -88,6 +88,10 @@ import {
   saveGeneratedTextEdits,
   shouldConfirmRegenerate,
 } from "./vyrocni-zprava-generated-text-logic";
+import {
+  createSerializedVzSchoolYearBindingRunner,
+  shouldApplyVzSchoolYearBindingUiOutcome,
+} from "./vz-school-year-persist-binding";
 
 export function useVyrocniZpravaReport() {
   const { profile, updateProfile, missingRequiredFields } = useSchoolProfile();
@@ -101,10 +105,26 @@ export function useVyrocniZpravaReport() {
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [loadIssue] = useState<VyrocniZpravaStorageLoadIssue | undefined>(initial.current.loadIssue);
   const [saveIssue, setSaveIssue] = useState<VyrocniZpravaStorageSaveIssue | undefined>(undefined);
+  const [schoolYearMetadataNotice, setSchoolYearMetadataNotice] = useState<string | null>(null);
 
   const [checkVisibleForSectionId, setCheckVisibleForSectionId] = useState<string | null>(null);
 
   const skipNextSave = useRef(false);
+  const bindingRunnerRef = useRef<ReturnType<typeof createSerializedVzSchoolYearBindingRunner> | null>(
+    null,
+  );
+  if (bindingRunnerRef.current == null) {
+    bindingRunnerRef.current = createSerializedVzSchoolYearBindingRunner();
+  }
+  const bindingGenerationRef = useRef(0);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const persist = useCallback((nextReport: AnnualReport, nextSelectedId: string) => {
     const result = saveVyrocniZpravaStorage({
@@ -112,12 +132,31 @@ export function useVyrocniZpravaReport() {
       report: nextReport,
       selectedSectionId: nextSelectedId,
     });
-    if (result.ok) {
-      setSavedAt(new Date().toLocaleString("cs-CZ"));
-      setSaveIssue(undefined);
+    if (!result.ok) {
+      setSaveIssue(result.saveIssue);
       return;
     }
-    setSaveIssue(result.saveIssue);
+
+    // Business persistence succeeded independently of SchoolYear metadata sync.
+    setSavedAt(new Date().toLocaleString("cs-CZ"));
+    setSaveIssue(undefined);
+
+    const generation = ++bindingGenerationRef.current;
+    const runner = bindingRunnerRef.current;
+    if (!runner) return;
+    void runner.afterPersist(result).then((outcome) => {
+      if (
+        !shouldApplyVzSchoolYearBindingUiOutcome({
+          mounted: mountedRef.current,
+          generation,
+          currentGeneration: bindingGenerationRef.current,
+          outcome,
+        })
+      ) {
+        return;
+      }
+      setSchoolYearMetadataNotice(outcome.metadataNotice);
+    });
   }, []);
 
   useEffect(() => {
@@ -408,6 +447,7 @@ export function useVyrocniZpravaReport() {
     savedAt,
     loadIssue,
     saveIssue,
+    schoolYearMetadataNotice,
     progress,
     missingProfileFields: missingRequiredFields,
     checkVisibleForSectionId,
