@@ -79,3 +79,10 @@ export const MSG_CONFIRM_RESET_SCHOOL_PROFILE_FIELDS = [
 /** User-facing persistence failure (0F-2A). No technical storage details. */
 export const MSG_SCHOOL_PROFILE_PERSIST_FAILED =
   "Profil školy se nepodařilo uložit do tohoto prohlížeče.";
+
+/**
+ * Soft metadata notice after successful business save (0F-2B).
+ * Distinct from persistence failure — profile remains saved.
+ */
+export const MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED =
+  "Profil školy byl uložen, ale nepodařilo se připravit jeho propojení s dalšími částmi aplikace. Zkuste uložení zopakovat.";
