@@ -59,7 +59,7 @@ export function VyrocniZpravaSetupForm({
             type="text"
             value={schoolYear}
             onChange={(e) => onSchoolYearChange(e.target.value)}
-            placeholder="např. 2024/2025"
+            placeholder="např. 2026/2027"
           />
         </SetupField>
 

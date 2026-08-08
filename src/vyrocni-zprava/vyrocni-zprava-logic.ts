@@ -111,7 +111,8 @@ export function createSectionFromDefinition(
 
 
 
-export function createDefaultAnnualReport(schoolYear = "2024/2025"): AnnualReport {
+/** Fresh VZ schoolYear is empty until the user sets a canonical label (0G-0). */
+export function createDefaultAnnualReport(schoolYear = ""): AnnualReport {
 
   const now = new Date().toISOString();
 

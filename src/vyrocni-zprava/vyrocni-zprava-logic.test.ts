@@ -4,6 +4,15 @@ import { createDefaultSchoolProfile } from "../school-profile/school-profile-log
 import { VYROCNI_ZPRAVA_GENERATED_PLACEHOLDER } from "./vyrocni-zprava-types";
 
 describe("vyrocni-zprava-logic", () => {
+  it("0G-0: createDefaultAnnualReport() má prázdný schoolYear", () => {
+    expect(createDefaultAnnualReport().schoolYear).toBe("");
+  });
+
+  it("0G-0: explicitní schoolYear argument zůstává beze změny", () => {
+    expect(createDefaultAnnualReport("2024/2025").schoolYear).toBe("2024/2025");
+    expect(createDefaultAnnualReport("2025/2026").schoolYear).toBe("2025/2026");
+  });
+
   it("vrátí NEVYPLNENO pro prázdnou kapitolu", () => {
     const profile = createDefaultSchoolProfile();
     const report = createDefaultAnnualReport();
