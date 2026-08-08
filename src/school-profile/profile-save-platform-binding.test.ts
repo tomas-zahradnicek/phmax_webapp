@@ -95,6 +95,22 @@ describe("profile save → platform binding gate (0F-2B)", () => {
     });
   });
 
+  it("A2 (0F-3A): persistence.ok === false profile_corrupted → ensure NOT called", async () => {
+    const ensure = vi.fn(async () => ({
+      status: "ready" as const,
+      schoolId: "x",
+      activeSchoolId: "x",
+      activeSchoolYearId: null,
+      staleActiveSchoolId: false,
+      staleActiveSchoolYearId: false,
+    }));
+    const persistence = { ok: false as const, reason: "profile_corrupted" as const };
+    expect(mayBindPlatformAfterProfilePersist(persistence)).toBe(false);
+    const outcome = await runPlatformBindingAfterProfilePersist(persistence, ensure);
+    expect(ensure).not.toHaveBeenCalled();
+    expect(outcome.bindingAttempted).toBe(false);
+  });
+
   it("B: persistence.ok === true → ensure called exactly once", async () => {
     const profileId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
     expect(saveSchoolProfileToStorage(sampleProfile(profileId))).toEqual({ ok: true });

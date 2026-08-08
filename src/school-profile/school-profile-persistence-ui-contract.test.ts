@@ -57,6 +57,18 @@ describe("SchoolProfile persistence UI contract (0F-2A)", () => {
     expect(hookSource).toContain("const persistence = replaceSchoolProfileState(next)");
     expect(hookSource).toContain("const persistence = replaceSchoolProfileState(cleared)");
   });
+
+  it("0F-3A: shared writers use guarded persistSchoolProfileToStorage", () => {
+    const storageSource = readSource("src/school-profile/school-profile-storage.ts");
+    expect(hookSource).toContain("persistSchoolProfileToStorage");
+    expect(hookSource).toContain("const result = persistSchoolProfileToStorage(profile)");
+    expect(hookSource).not.toMatch(
+      /persist\s*=\s*true[\s\S]*?saveSchoolProfileToStorage\(profile\)/,
+    );
+    expect(storageSource).toContain("export function persistSchoolProfileToStorage");
+    expect(storageSource).toContain('reason: "profile_corrupted"');
+    expect(storageSource).toContain("readLegacySchoolProfile");
+  });
 });
 
 describe("SchoolProfile save → platform binding UI contract (0F-2B)", () => {
