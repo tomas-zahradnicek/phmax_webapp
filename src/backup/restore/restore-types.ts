@@ -148,3 +148,9 @@ export type RestorePlan = {
 export type BuildRestorePlanResult =
   | Exclude<ValidateAppBackupResult, { status: "validated" }>
   | { status: "planned"; plan: RestorePlan };
+
+/** Validated central-backup envelope ready for restore planning / apply. */
+export type ValidatedAppBackupEnvelope = Extract<
+  ValidateAppBackupResult,
+  { status: "validated" }
+>;
