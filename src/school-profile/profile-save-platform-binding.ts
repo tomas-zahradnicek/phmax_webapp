@@ -3,10 +3,16 @@ import {
   type EnsureSchoolPlatformBindingDependencies,
   type EnsureSchoolPlatformBindingResult,
 } from "./ensure-school-platform-binding";
-import { MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED } from "./school-profile-identity-policy";
+import {
+  MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED,
+  MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED,
+} from "./school-profile-identity-policy";
 import type { SchoolProfileStorageSaveResult } from "./school-profile-storage";
 
-export { MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED };
+export {
+  MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED,
+  MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED,
+};
 
 /**
  * 0F-2B gate: platform binding is allowed only after truthful persist success.
@@ -22,13 +28,14 @@ export type ProfileSaveBindingUiOutcome =
   | {
       bindingAttempted: true;
       binding: EnsureSchoolPlatformBindingResult;
-      /** Soft warning when binding is not ready; null on ready. */
+      /** Soft warning when binding is not ready; null on ready / mount-empty. */
       metadataNotice: string | null;
     };
 
 /**
  * After SchoolProfile persist: call ensure only when persistence.ok.
  * Business save success is independent — callers must not rollback profile on binding error.
+ * empty after successful persist is unexpected → soft metadata notice.
  */
 export async function runPlatformBindingAfterProfilePersist(
   persistence: SchoolProfileStorageSaveResult,
@@ -53,17 +60,55 @@ export async function runPlatformBindingAfterProfilePersist(
   };
 }
 
+/**
+ * Mount / legacy binding (0F-2C).
+ * Always calls ensure (0F-1 missing-profile gate → empty, no platform write).
+ * empty = no persisted school → NOT a metadata warning (unlike Save path).
+ */
+export async function runPlatformBindingOnMount(
+  ensure: (
+    dependencies?: EnsureSchoolPlatformBindingDependencies,
+  ) => Promise<EnsureSchoolPlatformBindingResult> = ensureSchoolPlatformBinding,
+): Promise<ProfileSaveBindingUiOutcome> {
+  const binding = await ensure();
+  if (binding.status === "ready" || binding.status === "empty") {
+    return { bindingAttempted: true, binding, metadataNotice: null };
+  }
+  return {
+    bindingAttempted: true,
+    binding,
+    metadataNotice: MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED,
+  };
+}
+
 type EnsureFn = (
   dependencies?: EnsureSchoolPlatformBindingDependencies,
 ) => Promise<EnsureSchoolPlatformBindingResult>;
 
 /**
- * Serializes ensure calls so concurrent Saves never overlap ensure invocations.
- * Each successful persist still gets its own ensure (sequential, idempotent).
+ * Serializes ensure calls so mount + Save never overlap ensure invocations.
+ * Each successful persist / mount still gets its own ensure (sequential, idempotent).
  */
 export function createSerializedPlatformBindingRunner(ensure: EnsureFn = ensureSchoolPlatformBinding) {
   let chain: Promise<unknown> = Promise.resolve();
   let inFlightCount = 0;
+
+  function enqueue(run: () => Promise<ProfileSaveBindingUiOutcome>): Promise<ProfileSaveBindingUiOutcome> {
+    const wrapped = async (): Promise<ProfileSaveBindingUiOutcome> => {
+      inFlightCount += 1;
+      try {
+        return await run();
+      } finally {
+        inFlightCount -= 1;
+      }
+    };
+    const result = chain.then(wrapped, wrapped);
+    chain = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  }
 
   return {
     isInFlight(): boolean {
@@ -80,22 +125,12 @@ export function createSerializedPlatformBindingRunner(ensure: EnsureFn = ensureS
           metadataNotice: null,
         });
       }
+      return enqueue(() => runPlatformBindingAfterProfilePersist({ ok: true }, ensure));
+    },
 
-      const run = async (): Promise<ProfileSaveBindingUiOutcome> => {
-        inFlightCount += 1;
-        try {
-          return await runPlatformBindingAfterProfilePersist({ ok: true }, ensure);
-        } finally {
-          inFlightCount -= 1;
-        }
-      };
-
-      const result = chain.then(run, run);
-      chain = result.then(
-        () => undefined,
-        () => undefined,
-      );
-      return result;
+    /** Lazy mount / legacy binding — empty is not a user-facing error. */
+    onMount(): Promise<ProfileSaveBindingUiOutcome> {
+      return enqueue(() => runPlatformBindingOnMount(ensure));
     },
   };
 }

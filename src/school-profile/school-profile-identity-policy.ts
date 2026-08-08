@@ -86,3 +86,10 @@ export const MSG_SCHOOL_PROFILE_PERSIST_FAILED =
  */
 export const MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED =
   "Profil školy byl uložen, ale nepodařilo se připravit jeho propojení s dalšími částmi aplikace. Zkuste uložení zopakovat.";
+
+/**
+ * Soft metadata notice after mount/legacy binding failure (0F-2C).
+ * Must not claim that a save just succeeded — no business persist occurred on mount.
+ */
+export const MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED =
+  "Nepodařilo se připravit propojení profilu školy s dalšími částmi aplikace. Zobrazené údaje před uložením zkontrolujte.";
