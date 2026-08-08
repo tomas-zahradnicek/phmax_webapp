@@ -75,3 +75,7 @@ export const MSG_CONFIRM_RESET_SCHOOL_PROFILE_FIELDS = [
   "Data kalkulaček a výroční zprávy zůstanou zachována.",
   "Nejde o odstranění školy ze systému.",
 ].join("\n");
+
+/** User-facing persistence failure (0F-2A). No technical storage details. */
+export const MSG_SCHOOL_PROFILE_PERSIST_FAILED =
+  "Profil školy se nepodařilo uložit do tohoto prohlížeče.";
