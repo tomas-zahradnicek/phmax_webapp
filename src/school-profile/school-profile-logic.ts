@@ -116,3 +116,97 @@ export function patchSchoolProfile(
     updatedAt: new Date().toISOString(),
   };
 }
+
+/**
+ * Oficiální identifikátory logické školy (ne běžné kontaktní atributy).
+ * Změna při existující Identity Registry vyžaduje budoucí Replace School — ne tichý edit.
+ */
+export const SCHOOL_PROFILE_IDENTITY_SENSITIVE_FIELDS = ["ico", "redIzo", "izo"] as const;
+
+export type SchoolProfileIdentitySensitiveField =
+  (typeof SCHOOL_PROFILE_IDENTITY_SENSITIVE_FIELDS)[number];
+
+/**
+ * Reset Profile Fields: stejná School.
+ * Zachová profile.id, createdAt a identity-sensitive identifikátory (IČO / RED IZO / IZO).
+ * Vyčistí běžně editovatelné atributy formuláře.
+ */
+export function resetSchoolProfileFields(profile: SchoolProfile): SchoolProfile {
+  const defaults = createDefaultSchoolProfile();
+  return {
+    ...defaults,
+    id: profile.id,
+    createdAt: profile.createdAt,
+    ico: profile.ico,
+    redIzo: profile.redIzo,
+    izo: profile.izo,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Prázdné → vyplnění = první ustavení identifikátoru (povoleno jen v režimu established_only).
+ * Jakákoli jiná změna neprázdné hodnoty = blokovat.
+ * Režim `all` = fail-closed: jakákoli odchylka od current je blokována.
+ */
+export function reconcileIdentitySensitiveField(
+  currentValue: string,
+  nextValue: string,
+  mode: "established_only" | "all" = "established_only",
+): { value: string; blocked: boolean } {
+  const current = currentValue.trim();
+  const next = nextValue.trim();
+  if (current === next) return { value: currentValue, blocked: false };
+  if (mode === "established_only" && current === "" && next !== "") {
+    return { value: nextValue, blocked: false };
+  }
+  return { value: currentValue, blocked: true };
+}
+
+export type ApplySchoolProfileEditsResult = {
+  profile: SchoolProfile;
+  /** True when IČO / RED IZO / IZO change was refused. */
+  identityChangeBlocked: boolean;
+};
+
+/**
+ * Aplikuje editaci profilu stejné školy.
+ * Vždy zachová profile.id a createdAt.
+ * Identity-sensitive lock dle Identity Registry presence (fail-closed při corrupted/unavailable).
+ */
+export function applySchoolProfileEdits(
+  current: SchoolProfile,
+  next: SchoolProfile,
+  options: { identityLockMode: "none" | "established_only" | "all" },
+): ApplySchoolProfileEditsResult {
+  const base: SchoolProfile = {
+    ...next,
+    id: current.id,
+    createdAt: current.createdAt,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (options.identityLockMode === "none") {
+    return { profile: base, identityChangeBlocked: false };
+  }
+
+  let identityChangeBlocked = false;
+  const ico = reconcileIdentitySensitiveField(current.ico, next.ico, options.identityLockMode);
+  const redIzo = reconcileIdentitySensitiveField(
+    current.redIzo,
+    next.redIzo,
+    options.identityLockMode,
+  );
+  const izo = reconcileIdentitySensitiveField(current.izo, next.izo, options.identityLockMode);
+  if (ico.blocked || redIzo.blocked || izo.blocked) identityChangeBlocked = true;
+
+  return {
+    profile: {
+      ...base,
+      ico: ico.value,
+      redIzo: redIzo.value,
+      izo: izo.value,
+    },
+    identityChangeBlocked,
+  };
+}
