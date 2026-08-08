@@ -91,7 +91,7 @@ export function shouldShowFullResetSoftCta(
 }
 
 export function mapRestoreResultToPhase(
-  result: RestoreResult,
+  result: Exclude<RestoreResult, { status: "success" }>,
   validated: ValidatedAppBackupEnvelope,
   preview: RestorePreviewModel,
 ): Exclude<

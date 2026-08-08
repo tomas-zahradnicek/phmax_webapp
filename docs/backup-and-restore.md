@@ -1,8 +1,63 @@
 # Záloha a obnova dat — Ředitelský průvodce
 
-Tento dokument popisuje centrální zálohu dat aplikace. **Fáze 1** (aktuální) podporuje pouze **export** JSON zálohy. Import, validace při obnově, výběr modulů a rollback jsou plánovány ve **fázi 2**.
+Tento dokument popisuje centrální **export** a **obnovu** JSON zálohy dat aplikace z Dashboardu (`/prehled` → **Záloha a obnova dat**).
 
-Lifecycle platformových klíčů Identity Registry a AppContext (záloha, clear levels, restore kontrakt) je popsán v **[platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md)**. Calculator clear (level B, 0E-3A) **nemění** centrální zálohu; `DashboardBackupExportCard` po exportu automatický clear nenabízí.
+Lifecycle platformových klíčů Identity Registry a AppContext je popsán v **[platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md)**. Calculator clear (level B, 0E-3A) **nemění** centrální zálohu; export po stažení automaticky maže data v prohlížeči nenabízí.
+
+## Obnova ze zálohy (aktuální stav)
+
+Obnova je dostupná pouze z Dashboardu. Uživatel:
+
+1. vybere JSON soubor centrální zálohy,
+2. zkontroluje **read-only náhled** (T1),
+3. volitelně stáhne současnou zálohu,
+4. potvrdí přesně token **OBNOVIT**,
+5. spustí obnovu — engine provede fresh plán (T2), zápis, platform reconcile, verifikaci,
+6. při úspěchu následuje **hard reload** stránky.
+
+**Preview (T1) není autorita pro zápis.** Při Apply engine znovu načte current environment a vytvoří fresh T2 plán. Preview může být validní, ale Apply později vrátí `rejected_plan`, pokud se mezitím změnil stav aplikace.
+
+### Semantika modulů při obnově
+
+| Situace v záloze | Chování |
+|------------------|---------|
+| Modul **present** a validní | Nahradí odpovídající lokální snapshot modulu |
+| Modul **celý chybí** v záloze | Lokální modul **zůstane beze změny** (preserve) |
+| **Neznámý** modul v záloze | Varování; modul se při obnově **přeskočí** |
+| **Known invalid** modul | Obnova **zablokována** |
+| **Cross-school** (`schoolId` ≠ lokální) | Obnova **zablokována** |
+| Legacy záloha bez identity | Policy dle [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md) |
+
+`AppContext` (`activeSchoolId`, `activeSchoolYearId`) **není** součástí standardního importu zálohy. Po raw apply proběhne **platform reconcile** a AppContext se znovu vytvoří / sladí podle obnoveného SchoolProfile, Identity Registry a VZ year labelu.
+
+### Výsledky obnovy (UI)
+
+| Stav engine | Význam pro uživatele |
+|-------------|----------------------|
+| `success` | Obnova a verifikace OK → okamžitý reload stránky |
+| `no_changes` | V záloze nebylo co měnit; reload se neprovádí |
+| `rejected_plan` | Fresh T2 plán není bezpečně aplikovatelný; nabídka „Načíst náhled znovu“ |
+| `snapshot_failed` | Snapshot se nepodařilo dokončit; **žádný restore write** |
+| `rolled_back` | Obnova selhala; dotčené klíče vráceny; blocking recovery + explicitní reload |
+| `fatal_partial` | Obnova selhala a rollback nebyl úplný; konzistence **není garantována**; blocking recovery + reload |
+| Neočekávaná výjimka v UI | Konzervativní blocking recovery; reload; **bez** tvrzení o stavu dat |
+
+### Omezení v1
+
+1. **Dashboard-only apply** — minimalizace souběžných mounted autosave writerů na jiných stránkách.
+2. **Žádný cross-tab lock** — jiný panel/okno může během obnovy měnit storage.
+3. **Rollback snapshot je pouze in-memory** — crash nebo zavření tabu během obnovy může zanechat partial state.
+4. UI proto varuje: zavřete ostatní panely a během obnovy stránku nezavírejte.
+5. **Žádný persistent transaction journal** ani BroadcastChannel.
+6. Centrální záloha **není** bitová kopie celého browser storage (viz níže).
+7. **File-size limit** není v aplikaci vynucen — případné budoucí hardening.
+
+### Budoucí hardening (mimo aktuální scope)
+
+- per-modul výběr obnovy v UI (dnes obnova řídí presence/absence modulů v souboru),
+- migrace starších `schemaVersion` envelope,
+- lite moduly v centrální záloze,
+- volitelný file-size policy po měření reálných backupů.
 
 ## Formát zálohy
 
@@ -27,7 +82,7 @@ Lifecycle platformových klíčů Identity Registry a AppContext (záloha, clear
 - **Verze formátu:** `schemaVersion: 1`
 - **Identifikátor formátu:** `format: "reditelsky-pruvodce-backup"`
 
-## Co se zálohuje (fáze 1)
+## Co se zálohuje
 
 Centrální export zahrnuje pouze moduly explicitně registrované v `src/backup/backup-registry.ts`. Data se čtou přes adaptery modulů, nikoli slepým procházením celého `localStorage`.
 
@@ -55,9 +110,9 @@ Stabilní SchoolYear identity metadata jsou v optional modulu `identity-registry
 
 - `schoolYears[]` (`schoolYearId`, `startYear`, …).
 
-`AppContext` (`activeSchoolYearId`) se **nezálohuje**. Po budoucím restore se workspace pointer znovu
+`AppContext` (`activeSchoolYearId`) se **nezálohuje**. Po obnově se workspace pointer znovu
 bootstrapne / reconcile podle obnoveného SchoolProfile a persistovaného VZ year labelu — viz
-[platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md) (Restore policy, sekce 0G).
+[platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md) (Restore, sekce 0G).
 
 0G nezavádí žádná nová business data mimo současný backup envelope.
 
@@ -131,17 +186,7 @@ Delete registry v `src/application-storage-registry.ts` a backup registry v
 - Obsah zálohy se **nevypisuje** do konzole ani do logů.
 - Diagnostické zálohy poškozených dat se do běžného exportu **nezahrnují**.
 
-## Plán fáze 2
-
-1. **Validace importu** — ověření `format`, `schemaVersion`, struktury modulů před zápisem.
-2. **Výběr modulů** — uživatel zvolí, které moduly obnovit (částečný import).
-3. **Náhled před obnovou** — souhrn toho, co bude přepsáno.
-4. **Rollback** — automatická záloha stavu před importem pro jednorázové vrácení.
-5. **Migrace verzí** — mapování starších `schemaVersion` na aktuální strukturu modulů.
-6. **Lite moduly** — po sjednocení storage kontraktu zvážit zařazení lite draftů.
-7. **Platform metadata** — Identity Registry je v exportu jako optional module `identity-registry` (0E-2). Restore conflict policy a post-restore AppContext bootstrap dle [platform-metadata-lifecycle.md](./platform-metadata-lifecycle.md). Envelope `schemaVersion` zůstává 1.
-
-## Implementace (fáze 1)
+## Implementace
 
 | Soubor | Účel |
 |--------|------|
@@ -149,4 +194,7 @@ Delete registry v `src/application-storage-registry.ts` a backup registry v
 | `src/backup/backup-registry.ts` | Explicitní registry modulů a adapterů |
 | `src/backup/backup-validation.ts` | Validace JSON a tvaru dat modulů |
 | `src/backup/backup-export.ts` | Sestavení envelope a stažení souboru |
-| `src/dashboard/DashboardBackupExportCard.tsx` | UI exportu na `/prehled` |
+| `src/backup/restore/*` | Parse, validate, plan, apply, rollback, reconcile |
+| `src/dashboard/DashboardBackupExportCard.tsx` | UI exportu a vstup obnovy na `/prehled` |
+| `src/dashboard/DashboardRestoreDialog.tsx` | UI náhledu, potvrzení a obnovy |
+| `e2e/backup-restore.spec.ts` | Browser-level closure testy obnovy |

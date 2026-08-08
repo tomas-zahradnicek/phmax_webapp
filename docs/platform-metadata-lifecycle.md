@@ -79,7 +79,7 @@ neimplementuje.
 - Je **device / workspace state** (ukazatele aktivní školy a roku).
 - **Není** autoritativní business data.
 - Běžná centrální uživatelská záloha jej **nebude exportovat**.
-- Po budoucím restore se vždy znovu **validuje / bootstrapuje** (stale / orphan pointery dle invariantů 0D).
+- Po obnově ze zálohy se vždy znovu **validuje / bootstrapuje** (stale / orphan pointery dle invariantů 0D).
 - Module-specific clear jej standardně **zachová**.
 - Full application / factory reset jej **odstraní**.
 
@@ -223,18 +223,34 @@ Identity Registry je v centrálním backupu od 0E-2. AppContext se do exportu ne
 
 ---
 
-## Restore policy (kontrakt pro budoucí implementaci)
+## Restore (implementováno)
 
-Restore centrální zálohy zatím **není implementován** (fáze 2 v [backup-and-restore.md](./backup-and-restore.md)). Následující pravidla jsou kontrakt, ne kód:
+Centrální obnova ze zálohy je dostupná z Dashboardu. Detailní semantics modulů, preview T1 vs apply T2, výsledky UI a v1 limitations jsou v **[backup-and-restore.md](./backup-and-restore.md)**.
 
-| Scénář | Požadované chování |
-|--------|-------------------|
-| Prázdný browser + backup s identity | Identity lze obnovit (replace do prázdného úložiště), poté moduly |
-| Stejné `schoolId` v browseru i backupu | Explicitní **replace** policy (uživatelské potvrzení); žádný tichý částečný merge |
-| Jiné `schoolId` | **Žádný silent merge**; reject / hard stop (schema v1 = jedna škola) |
-| Legacy backup bez identity | Obnovit moduly → bootstrap identity z obnoveného SchoolProfile (bez fake profilu, bez date fallback roku) |
-| Corrupted identity v backupu | Neoverwrite lokální validní registry; reportovat chybu |
-| AppContext po restore | Vždy validate / bootstrap; neaplikovat slepě pointery ze zálohy (záloha AppContext ani neobsahuje) |
+Stručný runtime flow po potvrzení uživatele:
+
+```text
+validated backup envelope
+→ fresh RestorePlan (T2) z current environment
+→ snapshot touched owned keys
+→ raw storage apply (module snapshots)
+→ platform reconcile (School / SchoolYear / AppContext)
+→ read-only post-restore verification
+→ success → hard reload | failure → rollback / fatal_partial dle engine
+```
+
+| Scénář | Chování |
+|--------|---------|
+| Prázdný browser + backup s identity | Identity lze obnovit, poté moduly; AppContext reconcile |
+| Stejné `schoolId` v browseru i backupu | Explicitní replace policy; partial = chybějící modul preserve |
+| Jiné `schoolId` | Hard block v UI; žádný silent merge |
+| Legacy backup bez identity | Obnovit moduly → bootstrap identity z obnoveného SchoolProfile |
+| Corrupted identity v backupu | Block; neoverwrite lokální validní registry |
+| AppContext po restore | Vždy reconcile; záloha AppContext neobsahuje |
+
+AppContext se **neimportuje raw** ze zálohy. Po úspěšné obnově business dat proběhne reconcile podle obnoveného profilu, Identity Registry a VZ `schoolYear` labelu.
+
+Při selhání: engine může vrátit `rolled_back` (touched keys obnoveny) nebo `fatal_partial` (rollback neúplný). UI v obou případech vyžaduje explicitní reload; u `fatal_partial` konzistence není garantována.
 
 Žádný silent conflict resolution bez explicitní policy a UI.
 
@@ -508,7 +524,7 @@ SCHOOLYEAR / VZ METADATA RUNTIME = COMPLETE
 
 ## Co tento dokument záměrně neřeší
 
-- Implementaci restore (fáze 2) — **doporučená nejbližší fáze** po 0G (viz níže)
+- Migrace business storage na `schoolId`-`schoolYearId`-scoped klíče (Restore je implementován)
 - Budoucí multi-school / `schoolId`-scoped Remove School
 - Dashboard Active School consumer, PHmax namespaced storage
 - App-level provider / global bootstrap (zatím není potřeba)
@@ -517,6 +533,6 @@ SCHOOLYEAR / VZ METADATA RUNTIME = COMPLETE
 
 ### Doporučené pořadí po 0G
 
-**Restore (fáze 2)** má prioritu před migrací business storage na `schoolId`-`schoolYearId`-scoped
+**Restore** je implementován. Další priorita: migrace business storage na `schoolId`-`schoolYearId`-scoped
 klíče. Od 0G už platform metadata aktivně řídíme ve dvou runtime oblastech (Profile + VZ); restore
 musí respektovat Identity Registry, VZ `schoolYear` label a post-restore AppContext bootstrap.
