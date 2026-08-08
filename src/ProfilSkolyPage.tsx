@@ -17,6 +17,11 @@ import {
   SCHOOL_TYPE_SELECT_OPTIONS,
   toSchoolTypeStorageValue,
 } from "./school-profile/school-profile-school-type";
+import {
+  messageForIdentityBlockReason,
+  MSG_CONFIRM_RESET_SCHOOL_PROFILE_FIELDS,
+  readIdentityRegistryPresence,
+} from "./school-profile/school-profile-identity-policy";
 import type { SchoolProfile, SchoolProfileFieldKey } from "./school-profile/school-profile-types";
 import { useSchoolProfile } from "./school-profile/use-school-profile";
 import { VyrocniZpravaApplicabilityNotice } from "./vyrocni-zprava/VyrocniZpravaApplicabilityNotice";
@@ -57,6 +62,8 @@ export function ProfilSkolyPage() {
   const { profile, saveProfile, resetProfile, missingRequiredFields } = useSchoolProfile();
   const [draft, setDraft] = useState<SchoolProfile>(profile);
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [identityGuardNotice, setIdentityGuardNotice] = useState<string | null>(null);
+  const identityRegistryStatus = readIdentityRegistryPresence();
 
   useEffect(() => {
     setDraft(profile);
@@ -67,17 +74,17 @@ export function ProfilSkolyPage() {
   }, []);
 
   const handleSave = useCallback(() => {
-    saveProfile(draft);
+    const result = saveProfile(draft);
     setSavedAt(new Date().toLocaleString("cs-CZ"));
+    setIdentityGuardNotice(messageForIdentityBlockReason(result.identityBlockReason));
   }, [draft, saveProfile]);
 
   const handleReset = useCallback(() => {
-    const confirmed = window.confirm(
-      "Opravdu chcete vymazat profil školy v tomto prohlížeči? Údaje se odstraní ze všech modulů.",
-    );
+    const confirmed = window.confirm(MSG_CONFIRM_RESET_SCHOOL_PROFILE_FIELDS);
     if (!confirmed) return;
     resetProfile();
     setSavedAt(null);
+    setIdentityGuardNotice(null);
   }, [resetProfile]);
 
   const renderInput = (field: SchoolProfileFieldKey, type: string = "text") => (
@@ -136,6 +143,23 @@ export function ProfilSkolyPage() {
         {renderInput("ico")}
         {renderInput("redIzo")}
         {renderInput("izo")}
+        {identityRegistryStatus === "valid" ? (
+          <p className="muted-text school-profile-page__identity-note" role="note">
+            IČO, RED IZO a IZO patří k identitě školy. Jejich změna na jinou školu vyžaduje samostatnou
+            operaci nahrazení školy (zatím není k dispozici). Opravy překlepů v těchto polích zatím
+            nejsou oddělené od nahrazení školy.
+          </p>
+        ) : null}
+        {identityRegistryStatus === "corrupted" || identityRegistryStatus === "storage_unavailable" ? (
+          <p className="muted-text school-profile-page__identity-note" role="note">
+            Identifikační údaje školy nyní nelze bezpečně změnit. Ostatní údaje profilu můžete upravit.
+          </p>
+        ) : null}
+        {identityGuardNotice ? (
+          <p className="school-profile-page__warning card" role="status">
+            {identityGuardNotice}
+          </p>
+        ) : null}
         <ProfileField id="sp-schoolType" label={SCHOOL_PROFILE_FIELD_LABELS.schoolType}>
           <select
             id="sp-schoolType"
@@ -190,9 +214,13 @@ export function ProfilSkolyPage() {
             Uložit profil školy
           </button>
           <button type="button" className="btn ghost" onClick={handleReset}>
-            Vymazat profil školy
+            Vymazat údaje profilu
           </button>
         </div>
+        <p className="muted-text school-profile-page__reset-hint">
+          „Vymazat údaje profilu“ vyčistí formulář stejné školy. Data kalkulaček a výroční zprávy zůstanou
+          zachována. Nejde o odstranění školy a jejích dat.
+        </p>
         {savedAt ? <p className="muted-text school-profile-page__saved">Profil školy uložen v tomto prohlížeči: {savedAt}</p> : null}
       </div>
 

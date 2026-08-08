@@ -1,18 +1,30 @@
 import { useCallback, useSyncExternalStore } from "react";
 import {
+  applySchoolProfileEdits,
   createDefaultSchoolProfile,
   detectMissingSchoolProfileFields,
   hasAnySchoolProfileData,
   patchSchoolProfile,
+  resetSchoolProfileFields,
 } from "./school-profile-logic";
 import {
-  clearSchoolProfileStorage,
+  identityBlockReasonForStatus,
+  identitySensitiveLockMode,
+  readIdentityRegistryPresence,
+  type SchoolProfileIdentityBlockReason,
+} from "./school-profile-identity-policy";
+import {
   loadSchoolProfileFromStorage,
   saveSchoolProfileToStorage,
 } from "./school-profile-storage";
 import type { SchoolProfile } from "./school-profile-types";
 
 type SchoolProfileListener = () => void;
+
+export type SaveSchoolProfileResult = {
+  identityChangeBlocked: boolean;
+  identityBlockReason: SchoolProfileIdentityBlockReason | null;
+};
 
 let cachedProfile = loadSchoolProfileFromStorage();
 const listeners = new Set<SchoolProfileListener>();
@@ -38,6 +50,23 @@ export function replaceSchoolProfileState(profile: SchoolProfile, persist = true
   emitSchoolProfileChange();
 }
 
+function applyGuardedProfileEdits(nextProfile: SchoolProfile): ApplyGuardedResult {
+  const status = readIdentityRegistryPresence();
+  const lockMode = identitySensitiveLockMode(status);
+  const { profile, identityChangeBlocked } = applySchoolProfileEdits(cachedProfile, nextProfile, {
+    identityLockMode: lockMode,
+  });
+  const identityBlockReason =
+    identityChangeBlocked ? identityBlockReasonForStatus(status) : null;
+  return { profile, identityChangeBlocked, identityBlockReason };
+}
+
+type ApplyGuardedResult = {
+  profile: SchoolProfile;
+  identityChangeBlocked: boolean;
+  identityBlockReason: SchoolProfileIdentityBlockReason | null;
+};
+
 export function useSchoolProfile() {
   const profile = useSyncExternalStore(
     subscribeSchoolProfile,
@@ -46,21 +75,22 @@ export function useSchoolProfile() {
   );
 
   const updateProfile = useCallback((patch: Partial<SchoolProfile>) => {
-    replaceSchoolProfileState(patchSchoolProfile(cachedProfile, patch));
+    const patched = patchSchoolProfile(cachedProfile, patch);
+    const { profile: next } = applyGuardedProfileEdits(patched);
+    replaceSchoolProfileState(next);
   }, []);
 
-  const saveProfile = useCallback((nextProfile: SchoolProfile) => {
-    replaceSchoolProfileState({
-      ...nextProfile,
-      updatedAt: new Date().toISOString(),
-    });
+  const saveProfile = useCallback((nextProfile: SchoolProfile): SaveSchoolProfileResult => {
+    const { profile: next, identityChangeBlocked, identityBlockReason } =
+      applyGuardedProfileEdits(nextProfile);
+    replaceSchoolProfileState(next);
+    return { identityChangeBlocked, identityBlockReason };
   }, []);
 
+  /** Reset Profile Fields — stejná School; nemaže Identity / AppContext / business data. */
   const resetProfile = useCallback(() => {
-    const fresh = createDefaultSchoolProfile();
-    clearSchoolProfileStorage();
-    replaceSchoolProfileState(fresh, false);
-    saveSchoolProfileToStorage(fresh);
+    const cleared = resetSchoolProfileFields(cachedProfile);
+    replaceSchoolProfileState(cleared);
   }, []);
 
   const missingRequiredFields = detectMissingSchoolProfileFields(profile);

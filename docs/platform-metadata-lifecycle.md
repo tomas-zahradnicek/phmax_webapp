@@ -54,9 +54,9 @@ Rozlišujeme tři koncepty:
 
 | Koncept | Význam | Identity lifecycle |
 |---------|--------|--------------------|
-| **1. Edit profile** | Stejná logická škola; uživatel mění údaje profilu | Identity se **zachovává** |
-| **2. Reset / remove school profile** | Současný legacy `clearSchoolProfileStorage()` / UI „vymazat profil“ | Nemá dost kontextu k bezpečnému rozhodnutí (stejná škola vs. výměna školy). **Bod k řešení v PR 0E-3 / 0F** — zatím žádná runtime „replace school“ funkce |
-| **3. Full application / factory reset** | Úplný reset aplikace v browseru | Odstraní SchoolProfile, Identity Registry, AppContext i business/modulová data dle full-reset inventáře |
+| **1. Edit profile** | Stejná logická škola; uživatel mění údaje profilu | Identity se **zachovává** (0E-3B1) |
+| **2. Reset Profile Fields** | Vyčištění formulářových atributů stejné školy | Identity + IČO/RED IZO/IZO **zachovány** (0E-3B1) |
+| **3. Remove / Replace School / Full reset** | Odstranění nebo výměna logické školy / factory reset | Identity **smazat** (TBD 0E-3B2 / 0E-3C); nesmí reuse schoolId A → B |
 
 V tomto PR se **nevytváří** runtime funkce „nahradit školu“.
 
@@ -91,11 +91,19 @@ V tomto PR se **nevytváří** runtime funkce „nahradit školu“.
 - **Zachovává** SchoolProfile, Identity Registry, AppContext a výroční zprávu.
 - **Post-export clear** po úzkém JSON (školní scénář / IS handoff) maže jen `PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS` (autosave modulů + scenario label). Cross-PHmax JSON clear nenabízí. Centrální záloha clear po exportu nenabízí.
 
-### C. School profile reset
+### C. School profile — **Edit / Reset Fields (0E-3B1)** vs Remove (TBD)
 
-- Vyžaduje **explicitní identity policy** před runtime wiringem EntityId do modulů.
-- Nesmí tiše převést identitu školy A na školu B (viz výše).
-- Do řešení v 0E-3 / 0F: legacy clear profilu zůstává; identity lifecycle při resetu profilu není v runtime bezpečně uzavřen.
+Rozlišujeme:
+
+| Operace | Stav | Chování |
+|---------|------|---------|
+| **Edit Profile** | **Implementováno** | Úprava atributů stejné školy; `profile.id` a Identity Registry beze změny. Běžné atributy (adresa, web, ředitel, …) volně. |
+| **Reset Profile Fields** | **Safe semantics implementována (0E-3B1)** | UI „Vymazat údaje profilu“. Zachová `profile.id`, `createdAt`, IČO / RED IZO / IZO. Vyčistí ostatní formulářová pole. **Nemaže** Identity Registry, AppContext, PHmax, VZ. |
+| **Remove / Replace School** | **TBD 0E-3B2 / 0E-3C** | Explicitní destruktivní operace; nesmí tiše mapovat školu B na `schoolId` A. |
+
+**Identity-sensitive guard (0E-3B1):** `readIdentityRegistryPresence()` rozlišuje `missing` | `valid` | `corrupted` | `storage_unavailable`. **missing** → legacy edit identifikátorů povolen. **valid** → změna již vyplněných IČO / RED IZO / IZO se blokuje. **corrupted** / **storage_unavailable** → fail-closed (jakákoli změna identifikátorů se blokuje; registry se neopravuje ani nepřepisuje). Běžné atributy zůstávají editovatelné. Oprava překlepu vs. nahrazení školy se nerozlišuje heuristikou.
+
+**Legacy mismatch odstraněn:** dřívější `resetProfile` volalo `createDefaultSchoolProfile()` (nové `id`) + remove/rewrite — to 0E-3B1 nahrazuje.
 
 ### D. Full application reset
 
@@ -118,8 +126,9 @@ V aplikaci zatím **neexistuje** kompletní factory-reset API — toto je cílov
 | **Centrální backup (cíl)** | **Ano** (optional module `identity-registry`) | **Ne** | Ano (již dnes jako `school-profile`) | Envelope v1 aditivně; AppContext jen re-bootstrap po restore |
 | **Module clear** | Zachovat | Zachovat | Zachovat | Jen data daného modulu |
 | **Calculator clear (0E-3A)** | Zachovat | Zachovat | Zachovat | Inventář bez SchoolProfile; post-export jen working autosave |
-| **Profile reset (edit)** | Zachovat | Zachovat / sanitize | Aktualizace dat | Stejná logická škola |
-| **Profile reset (remove)** | **TBD 0E-3 / 0F** | Sanitize / TBD | Smazat | Nesmí tiše mapovat školu B na ID školy A |
+| **Edit Profile (0E-3B1)** | Zachovat | Zachovat | Aktualizace atributů | Stejná School; id zachováno |
+| **Reset Profile Fields (0E-3B1)** | Zachovat | Zachovat | Vyčistit atributy; zachovat id + IČO/RED IZO/IZO | Ne remove school |
+| **Remove / Replace School** | **TBD 0E-3B2 / 0E-3C** | Sanitize / smazat | Smazat / nahradit | Nesmí tiše mapovat školu B na ID školy A |
 | **Full application reset** | **Smazat** | **Smazat** | **Smazat** | Včetně business dat dle inventáře |
 
 ---
@@ -165,11 +174,8 @@ Restore centrální zálohy zatím **není implementován** (fáze 2 v [backup-a
 ## Co tento dokument záměrně neřeší
 
 - Runtime wiring Identity / AppContext do Pages
-- Změnu `backup-registry.ts` / exportu
 - Implementaci restore
-- Implementaci full factory reset
-- Runtime „replace school“
-- School profile remove / Identity policy (0E-3B)
+- Runtime „replace school“ / Remove School identity wipe (0E-3B2)
 - Full application reset (0E-3C)
 
-Ty patří do pozdějších PR (0E-3B/C, 0F, restore fáze).
+Ty patří do pozdějších PR (0E-3B2/C, 0F, restore fáze).
