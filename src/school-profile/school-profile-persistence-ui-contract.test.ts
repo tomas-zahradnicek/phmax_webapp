@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   MSG_SCHOOL_PROFILE_PERSIST_FAILED,
   MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED,
+  MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED,
 } from "./school-profile-identity-policy";
 
 const root = path.resolve(__dirname, "../..");
@@ -63,24 +64,17 @@ describe("SchoolProfile save → platform binding UI contract (0F-2B)", () => {
   const hookSource = readSource("src/school-profile/use-school-profile.ts");
   const vzReportSource = readSource("src/vyrocni-zprava/use-vyrocni-zprava-report.ts");
 
-  it("jediný produkční ensure entrypoint je explicitní Save na ProfilSkolyPage", () => {
+  it("produkční ensure entrypointy jsou pouze na ProfilSkolyPage (Save + mount)", () => {
     expect(pageSource).toContain("createSerializedPlatformBindingRunner");
     expect(pageSource).toContain("afterPersist(result.persistence)");
     expect(pageSource).toContain("const handleSave = useCallback(async () => {");
     expect(pageSource).not.toContain("ensureSchoolPlatformBinding(");
-    // Mount effect only syncs draft — no binding call inside useEffect bodies.
-    const effectBodies = [...pageSource.matchAll(/useEffect\(\(\) => \{([\s\S]*?)\},/g)].map(
-      (m) => m[1] ?? "",
-    );
-    expect(effectBodies.length).toBeGreaterThan(0);
-    for (const body of effectBodies) {
-      expect(body).not.toContain("afterPersist");
-      expect(body).not.toContain("ensureSchoolPlatformBinding");
-    }
     expect(hookSource).not.toContain("ensureSchoolPlatformBinding");
     expect(hookSource).not.toContain("afterPersist");
+    expect(hookSource).not.toContain("onMount");
     expect(vzReportSource).not.toContain("ensureSchoolPlatformBinding");
     expect(vzReportSource).not.toContain("afterPersist");
+    expect(vzReportSource).not.toContain("onMount");
   });
 
   it("resetProfile path nevolá platform binding", () => {
@@ -89,6 +83,7 @@ describe("SchoolProfile save → platform binding UI contract (0F-2B)", () => {
     );
     expect(resetBlock?.[0]).toBeTruthy();
     expect(resetBlock?.[0]).not.toContain("afterPersist");
+    expect(resetBlock?.[0]).not.toContain("onMount");
     expect(resetBlock?.[0]).not.toContain("ensureSchoolPlatformBinding");
   });
 
@@ -98,6 +93,14 @@ describe("SchoolProfile save → platform binding UI contract (0F-2B)", () => {
     expect(pageSource).toContain("{platformBindingNotice ? (");
     expect(MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED).toContain("byl uložen");
     expect(MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED).not.toBe(MSG_SCHOOL_PROFILE_PERSIST_FAILED);
+  });
+
+  it("Save binding failure copy zůstává save-specific", () => {
+    const bindingSource = readSource("src/school-profile/profile-save-platform-binding.ts");
+    expect(bindingSource).toMatch(
+      /runPlatformBindingAfterProfilePersist[\s\S]*?MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED/,
+    );
+    expect(MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED).toContain("byl uložen");
   });
 
   it("metadata warning používá status/polite pattern (role=status)", () => {
@@ -115,9 +118,48 @@ describe("SchoolProfile save → platform binding UI contract (0F-2B)", () => {
     );
     expect(failBranch?.[0]).not.toContain("afterPersist");
   });
+});
 
-  it("mount binding stále není implementován", () => {
+describe("SchoolProfile mount → platform binding UI contract (0F-2C)", () => {
+  const pageSource = readSource("src/ProfilSkolyPage.tsx");
+  const appSource = readSource("src/App.tsx");
+  const dashboardSource = readSource("src/PhmaxDashboardPage.tsx");
+
+  it("mount effect volá shared runner.onMount s generation + cancel guard", () => {
+    expect(pageSource).toContain("bindingRunnerRef.current.onMount()");
+    expect(pageSource).toContain("let cancelled = false");
+    expect(pageSource).toContain("generation !== bindingGenerationRef.current");
+    expect(pageSource).toMatch(/useEffect\(\(\) => \{[\s\S]*?onMount\(\)[\s\S]*?\}, \[\]\);/);
+  });
+
+  it("mount a Save sdílejí stejný serialized runner a generation counter", () => {
+    expect(pageSource).toContain("bindingRunnerRef");
+    expect(pageSource).toContain("bindingGenerationRef");
+    expect(pageSource).toContain("afterPersist(result.persistence)");
+    expect(pageSource).toContain("onMount()");
+  });
+
+  it("mount binding není v App.tsx ani Dashboard", () => {
+    expect(appSource).not.toContain("ensureSchoolPlatformBinding");
+    expect(appSource).not.toContain("onMount()");
+    expect(appSource).not.toContain("createSerializedPlatformBindingRunner");
+    expect(dashboardSource).not.toContain("ensureSchoolPlatformBinding");
+    expect(dashboardSource).not.toContain("createSerializedPlatformBindingRunner");
+  });
+
+  it("draft-sync effect zůstává oddělený od mount binding", () => {
     expect(pageSource).toMatch(/useEffect\(\(\) => \{\s*setDraft\(profile\);\s*\}, \[profile\]\);/);
-    expect(pageSource).not.toContain("ensureSchoolPlatformBinding(");
+  });
+
+  it("mount binding failure copy není save-specific a netvrdí uložení", () => {
+    const bindingSource = readSource("src/school-profile/profile-save-platform-binding.ts");
+    expect(bindingSource).toMatch(
+      /runPlatformBindingOnMount[\s\S]*?MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED/,
+    );
+    expect(MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED).not.toContain("byl uložen");
+    expect(MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED).not.toBe(
+      MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED,
+    );
+    expect(MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED).toContain("propojení profilu školy");
   });
 });

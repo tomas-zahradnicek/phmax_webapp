@@ -76,6 +76,24 @@ export function ProfilSkolyPage() {
     setDraft(profile);
   }, [profile]);
 
+  // 0F-2C: lazy mount binding for already-persisted SchoolProfile (no ghost identity on empty).
+  // Shares serialized runner + generation with Save path to avoid race / stale warnings.
+  useEffect(() => {
+    let cancelled = false;
+    const generation = ++bindingGenerationRef.current;
+    void (async () => {
+      const outcome = await bindingRunnerRef.current.onMount();
+      if (cancelled) return;
+      if (generation !== bindingGenerationRef.current) return;
+      if (!outcome.bindingAttempted) return;
+      // empty = no persisted school → no warning; ready clears; error soft-warns
+      setPlatformBindingNotice(outcome.metadataNotice);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const patchDraft = useCallback((patch: Partial<SchoolProfile>) => {
     setDraft((prev) => ({ ...prev, ...patch }));
   }, []);
