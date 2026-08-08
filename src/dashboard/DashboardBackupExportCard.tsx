@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { exportAppBackup, previewBackupModuleStatuses } from "../backup/backup-export";
 import type { BackupModuleStatus } from "../backup/backup-types";
+import { DashboardFullResetDialog } from "./DashboardFullResetDialog";
 
 const BACKUP_STATUS_MESSAGES = {
   storage_unavailable:
@@ -19,6 +20,8 @@ export function DashboardBackupExportCard() {
   const [moduleStatuses, setModuleStatuses] = useState<BackupModuleStatus[]>(() => previewBackupModuleStatuses());
   const [exportBusy, setExportBusy] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [fullResetOpen, setFullResetOpen] = useState(false);
+  const fullResetTriggerRef = useRef<HTMLButtonElement>(null);
 
   const refreshStatuses = useCallback(() => {
     setModuleStatuses(previewBackupModuleStatuses());
@@ -114,6 +117,29 @@ export function DashboardBackupExportCard() {
           dat mimo prohlížeč.
         </p>
       </div>
+
+      <div className="dash-backup-export__full-reset" data-testid="dash-full-reset-entry">
+        <h3 className="dash-backup-export__subtitle">Správa dat v tomto prohlížeči</h3>
+        <p className="muted-text">
+          Full Reset odstraní data Ředitelského průvodce uložená v tomto prohlížeči. Netýká se jiného zařízení ani
+          případného serverového účtu.
+        </p>
+        <button
+          ref={fullResetTriggerRef}
+          type="button"
+          className="btn danger"
+          onClick={() => setFullResetOpen(true)}
+          data-testid="full-reset-open"
+        >
+          Odstranit všechna data aplikace
+        </button>
+      </div>
+
+      <DashboardFullResetDialog
+        open={fullResetOpen}
+        onClose={() => setFullResetOpen(false)}
+        triggerRef={fullResetTriggerRef}
+      />
     </section>
   );
 }
