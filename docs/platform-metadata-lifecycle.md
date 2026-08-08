@@ -38,7 +38,7 @@ Aktuální centrální envelope: `format = reditelsky-pruvodce-backup`, `schemaV
 `reditelsky-pruvodce-identity-registry-v1`
 
 - Je **platformová identita**, nikoli UI preference.
-- Musí být součástí **centrální uživatelské zálohy** (budoucí optional module `identity-registry` ve envelope v1).
+- Je součástí **centrální uživatelské zálohy** od 0E-2 jako optional module `identity-registry` ve envelope v1.
 - **Nesmí** být součástí module-specific clear.
 - **Full application / factory reset** ji odstraní.
 - Restore **nesmí** silent-merge různá `schoolId`.
@@ -56,9 +56,10 @@ Rozlišujeme tři koncepty:
 |---------|--------|--------------------|
 | **1. Edit profile** | Stejná logická škola; uživatel mění údaje profilu | Identity se **zachovává** (0E-3B1) |
 | **2. Reset Profile Fields** | Vyčištění formulářových atributů stejné školy | Identity + IČO/RED IZO/IZO **zachovány** (0E-3B1) |
-| **3. Remove / Replace School / Full reset** | Odstranění nebo výměna logické školy / factory reset | Identity **smazat** (TBD 0E-3B2 / 0E-3C); nesmí reuse schoolId A → B |
+| **3. Remove / Replace School** | Odstranění nebo výměna logické školy | Identity **smazat** (TBD 0E-3B2); nesmí reuse schoolId A → B |
+| **4. Full Application Reset** | Factory reset všech vlastněných dat aplikace | Identity **smazat** (implementováno 0E-3C1 + 0E-3C2) |
 
-V tomto PR se **nevytváří** runtime funkce „nahradit školu“.
+Runtime funkce „nahradit školu“ zatím není implementována.
 
 ---
 
@@ -99,13 +100,13 @@ Rozlišujeme:
 |---------|------|---------|
 | **Edit Profile** | **Implementováno** | Úprava atributů stejné školy; `profile.id` a Identity Registry beze změny. Běžné atributy (adresa, web, ředitel, …) volně. |
 | **Reset Profile Fields** | **Safe semantics implementována (0E-3B1)** | UI „Vymazat údaje profilu“. Zachová `profile.id`, `createdAt`, IČO / RED IZO / IZO. Vyčistí ostatní formulářová pole. **Nemaže** Identity Registry, AppContext, PHmax, VZ. |
-| **Remove / Replace School** | **TBD 0E-3B2 / 0E-3C** | Explicitní destruktivní operace; nesmí tiše mapovat školu B na `schoolId` A. |
+| **Remove / Replace School** | **TBD 0E-3B2** | Explicitní destruktivní operace; nesmí tiše mapovat školu B na `schoolId` A. |
 
 **Identity-sensitive guard (0E-3B1):** `readIdentityRegistryPresence()` rozlišuje `missing` | `valid` | `corrupted` | `storage_unavailable`. **missing** → legacy edit identifikátorů povolen. **valid** → změna již vyplněných IČO / RED IZO / IZO se blokuje. **corrupted** / **storage_unavailable** → fail-closed (jakákoli změna identifikátorů se blokuje; registry se neopravuje ani nepřepisuje). Běžné atributy zůstávají editovatelné. Oprava překlepu vs. nahrazení školy se nerozlišuje heuristikou.
 
 **Legacy mismatch odstraněn:** dřívější `resetProfile` volalo `createDefaultSchoolProfile()` (nové `id`) + remove/rewrite — to 0E-3B1 nahrazuje.
 
-### D. Full application reset — low-level storage kontrakt (0E-3C1)
+### D. Full application reset — storage kontrakt a Dashboard UI (0E-3C1 / 0E-3C2)
 
 `src/application-storage-registry.ts` obsahuje samostatný **delete registry** a raw API
 `clearAllApplicationStorage()`. Whitelist maže vlastněné:
@@ -119,8 +120,15 @@ API nepoužívá `localStorage.clear()` ani `sessionStorage.clear()`, neparsuje 
 cizí klíče. Umí proto odstranit i corrupted owned data. Výsledek uvádí počet odstraněných položek
 a jednotlivá selhání; po chybě pokračuje dalšími klíči.
 
-**0E-3C1 neimplementuje UI ani reload.** Bezpečný uživatelský flow (confirm, backup CTA a hard reload)
-zůstává pro 0E-3C2. Remove / Replace School zůstává pro 0E-3B2.
+0E-3C2 přidává jediné canonical UI na Dashboardu: doporučený centrální backup, potvrzení tokenem
+`SMAZAT`, vyhodnocení výhradně podle `result.ok` a bezprostřední hard reload při úspěchu. Při
+partial failure zůstává blokující recovery dialog s volbou retry nebo explicitního reloadu.
+
+Full Reset je záměrně dostupný jen na Dashboardu, kde nejsou mountované PHmax / VZ / lite autosave
+stránky. Pokud by se někdy zpřístupnil na stránce s aktivním autosave, musí se autosave komponenty
+před clear odmountovat nebo respektovat explicitní reset-in-progress guard.
+
+Remove / Replace School zůstává pro 0E-3B2.
 
 ---
 
@@ -128,17 +136,17 @@ zůstává pro 0E-3C2. Remove / Replace School zůstává pro 0E-3B2.
 
 | Operace | Identity Registry | AppContext | SchoolProfile | Poznámka |
 |---------|-------------------|------------|---------------|----------|
-| **Centrální backup (cíl)** | **Ano** (optional module `identity-registry`) | **Ne** | Ano (již dnes jako `school-profile`) | Envelope v1 aditivně; AppContext jen re-bootstrap po restore |
+| **Centrální backup (0E-2)** | **Ano** (optional module `identity-registry`) | **Ne** | Ano (`school-profile`) | Envelope v1 aditivně; AppContext jen re-bootstrap po restore |
 | **Module clear** | Zachovat | Zachovat | Zachovat | Jen data daného modulu |
 | **Calculator clear (0E-3A)** | Zachovat | Zachovat | Zachovat | Inventář bez SchoolProfile; post-export jen working autosave |
 | **Edit Profile (0E-3B1)** | Zachovat | Zachovat | Aktualizace atributů | Stejná School; id zachováno |
 | **Reset Profile Fields (0E-3B1)** | Zachovat | Zachovat | Vyčistit atributy; zachovat id + IČO/RED IZO/IZO | Ne remove school |
-| **Remove / Replace School** | **TBD 0E-3B2 / 0E-3C** | Sanitize / smazat | Smazat / nahradit | Nesmí tiše mapovat školu B na ID školy A |
-| **Full application reset (low-level 0E-3C1)** | **Smazat** | **Smazat** | **Smazat** | Whitelist delete registry; UI/reload až 0E-3C2 |
+| **Remove / Replace School** | **TBD 0E-3B2** | Sanitize / smazat | Smazat / nahradit | Nesmí tiše mapovat školu B na ID školy A |
+| **Full application reset (0E-3C1 / 0E-3C2)** | **Smazat** | **Smazat** | **Smazat** | Whitelist delete registry + Dashboard confirm/backup/reload flow |
 
 ---
 
-## Backup policy (budoucí implementace — ne 0E-1)
+## Backup policy (implementováno od 0E-2)
 
 Envelope zůstává:
 
@@ -147,15 +155,15 @@ format = reditelsky-pruvodce-backup
 schemaVersion = 1
 ```
 
-Doporučená budoucí změna (samostatný PR, např. 0E-3):
+Současný kontrakt:
 
-1. Přidat **optional** backup module `identity-registry`.
-2. **Nepřidávat** AppContext do běžné zálohy.
-3. Envelope `schemaVersion` **nezvyšovat** jen kvůli aditivnímu modulu.
+1. Identity Registry je exportována jako **optional** backup module `identity-registry`.
+2. AppContext zůstává záměrně mimo běžnou zálohu.
+3. Aditivní modul nezvýšil envelope `schemaVersion`.
 
 Staré zálohy bez identity zůstávají validní `schemaVersion: 1`.
 
-**V PR 0E-1 se backup kód nemění** — Identity Registry ani AppContext se dnes do exportu nezapisují.
+Identity Registry je v centrálním backupu od 0E-2. AppContext se do exportu nezapisuje.
 
 ---
 

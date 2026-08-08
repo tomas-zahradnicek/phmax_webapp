@@ -1185,6 +1185,17 @@ a.pill--hero-toggle--active {
 
 .btn:active { transform: translateY(0); }
 
+.btn.danger {
+  background: #b91c1c;
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(185, 28, 28, 0.16);
+}
+
+.btn.danger:hover:not(:disabled) {
+  background: #991b1b;
+  box-shadow: 0 14px 26px rgba(185, 28, 28, 0.2);
+}
+
 .btn.ghost {
   background: rgba(255, 255, 255, 0.96);
   color: var(--text);
@@ -3556,6 +3567,72 @@ input[type="radio"] {
   gap: 12px;
   align-items: flex-start;
   margin-bottom: 16px;
+}
+
+.dashboard-full-reset-dialog {
+  max-width: 680px;
+}
+
+.dashboard-full-reset-dialog .btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+.dashboard-full-reset-dialog__scope,
+.dashboard-full-reset-dialog__backup,
+.dashboard-full-reset-dialog__confirmation,
+.dashboard-full-reset-dialog__recovery {
+  margin-top: 18px;
+}
+
+.dashboard-full-reset-dialog__scope,
+.dashboard-full-reset-dialog__recovery {
+  border: 1px solid rgba(185, 28, 28, 0.24);
+  border-radius: 14px;
+  background: rgba(254, 242, 242, 0.76);
+  padding: 14px;
+}
+
+.dashboard-full-reset-dialog__scope p {
+  margin: 0 0 10px;
+}
+
+.dashboard-full-reset-dialog__scope p:last-of-type {
+  margin-bottom: 0;
+}
+
+.dashboard-full-reset-dialog__scope details {
+  margin-top: 12px;
+}
+
+.dashboard-full-reset-dialog__scope summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.dashboard-full-reset-dialog__subtitle {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.dashboard-full-reset-dialog__error {
+  color: #991b1b;
+  font-weight: 700;
+}
+
+.dashboard-full-reset-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dash-backup-export__full-reset {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
 }
 
 .dash-school-import__steps {
