@@ -20,6 +20,7 @@ import {
 import {
   messageForIdentityBlockReason,
   MSG_CONFIRM_RESET_SCHOOL_PROFILE_FIELDS,
+  MSG_SCHOOL_PROFILE_PERSIST_FAILED,
   readIdentityRegistryPresence,
 } from "./school-profile/school-profile-identity-policy";
 import type { SchoolProfile, SchoolProfileFieldKey } from "./school-profile/school-profile-types";
@@ -63,6 +64,7 @@ export function ProfilSkolyPage() {
   const [draft, setDraft] = useState<SchoolProfile>(profile);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [identityGuardNotice, setIdentityGuardNotice] = useState<string | null>(null);
+  const [persistError, setPersistError] = useState<string | null>(null);
   const identityRegistryStatus = readIdentityRegistryPresence();
 
   useEffect(() => {
@@ -75,17 +77,30 @@ export function ProfilSkolyPage() {
 
   const handleSave = useCallback(() => {
     const result = saveProfile(draft);
-    setSavedAt(new Date().toLocaleString("cs-CZ"));
     setIdentityGuardNotice(messageForIdentityBlockReason(result.identityBlockReason));
+    if (result.persistence.ok) {
+      setSavedAt(new Date().toLocaleString("cs-CZ"));
+      setPersistError(null);
+      return;
+    }
+    // Draft stays edited for retry; shared cache/storage unchanged.
+    setPersistError(MSG_SCHOOL_PROFILE_PERSIST_FAILED);
   }, [draft, saveProfile]);
 
   const handleReset = useCallback(() => {
     const confirmed = window.confirm(MSG_CONFIRM_RESET_SCHOOL_PROFILE_FIELDS);
     if (!confirmed) return;
-    resetProfile();
-    setSavedAt(null);
-    setIdentityGuardNotice(null);
-  }, [resetProfile]);
+    const result = resetProfile();
+    if (result.persistence.ok) {
+      setSavedAt(null);
+      setIdentityGuardNotice(null);
+      setPersistError(null);
+      return;
+    }
+    // Reset did not persist — keep draft aligned with last shared profile.
+    setDraft(profile);
+    setPersistError(MSG_SCHOOL_PROFILE_PERSIST_FAILED);
+  }, [profile, resetProfile]);
 
   const renderInput = (field: SchoolProfileFieldKey, type: string = "text") => (
     <ProfileField id={`sp-${field}`} label={SCHOOL_PROFILE_FIELD_LABELS[field]}>
@@ -158,6 +173,11 @@ export function ProfilSkolyPage() {
         {identityGuardNotice ? (
           <p className="school-profile-page__warning card" role="status">
             {identityGuardNotice}
+          </p>
+        ) : null}
+        {persistError ? (
+          <p className="school-profile-page__warning card" role="status">
+            {persistError}
           </p>
         ) : null}
         <ProfileField id="sp-schoolType" label={SCHOOL_PROFILE_FIELD_LABELS.schoolType}>

@@ -4,13 +4,33 @@ import type { SchoolProfile } from "./school-profile-types";
 
 export { SCHOOL_PROFILE_LS_KEY };
 
+/**
+ * Truthful SchoolProfile persistence result (0F-2A).
+ * Success = setItem completed without throwing. No read-back verification.
+ */
+export type SchoolProfileStorageSaveResult =
+  | { ok: true }
+  | { ok: false; reason: "storage_unavailable" };
+
+/** Safe access — `globalThis.localStorage` getter may throw (e.g. SecurityError). */
+function resolveLocalStorage(): Storage | null {
+  try {
+    const storage = globalThis.localStorage;
+    if (storage == null) return null;
+    return storage;
+  } catch {
+    return null;
+  }
+}
+
 export function loadSchoolProfileFromStorage(): SchoolProfile {
-  if (typeof localStorage === "undefined") {
+  const storage = resolveLocalStorage();
+  if (!storage) {
     return createDefaultSchoolProfile();
   }
 
   try {
-    const raw = localStorage.getItem(SCHOOL_PROFILE_LS_KEY);
+    const raw = storage.getItem(SCHOOL_PROFILE_LS_KEY);
     if (!raw) return createDefaultSchoolProfile();
     const parsed: unknown = JSON.parse(raw);
     return normalizeSchoolProfile(parsed) ?? createDefaultSchoolProfile();
@@ -19,25 +39,42 @@ export function loadSchoolProfileFromStorage(): SchoolProfile {
   }
 }
 
-export function saveSchoolProfileToStorage(profile: SchoolProfile): void {
-  if (typeof localStorage === "undefined") return;
+/**
+ * Persist SchoolProfile. Maps all storage / stringify failures to storage_unavailable.
+ * Does not throw DOMExceptions to callers.
+ */
+export function saveSchoolProfileToStorage(profile: SchoolProfile): SchoolProfileStorageSaveResult {
+  const storage = resolveLocalStorage();
+  if (!storage) {
+    return { ok: false, reason: "storage_unavailable" };
+  }
+
   try {
-    localStorage.setItem(SCHOOL_PROFILE_LS_KEY, JSON.stringify(profile));
+    const serialized = JSON.stringify(profile);
+    storage.setItem(SCHOOL_PROFILE_LS_KEY, serialized);
+    return { ok: true };
   } catch {
-    /* ignore quota / privacy mode */
+    return { ok: false, reason: "storage_unavailable" };
   }
 }
 
 export function clearSchoolProfileStorage(): void {
-  if (typeof localStorage === "undefined") return;
+  const storage = resolveLocalStorage();
+  if (!storage) return;
   try {
-    localStorage.removeItem(SCHOOL_PROFILE_LS_KEY);
+    storage.removeItem(SCHOOL_PROFILE_LS_KEY);
   } catch {
     /* ignore */
   }
 }
 
-/** Jednorázová migrace profilu z výroční zprávy (starší verze ukládala profil uvnitř reportu). */
+/**
+ * One-shot migration of a profile embedded in an older AnnualReport payload.
+ *
+ * Returns normalized profile only when it was successfully written to storage.
+ * Persist failure → null (in-memory candidate is not claimed as migrated).
+ * Caller must reload from storage; do not treat a prior non-null return as persistence proof.
+ */
 export function migrateLegacySchoolProfileIfNeeded(legacy: unknown): SchoolProfile | null {
   const normalized = normalizeSchoolProfile(legacy);
   if (!normalized) return null;
@@ -46,6 +83,8 @@ export function migrateLegacySchoolProfileIfNeeded(legacy: unknown): SchoolProfi
   const currentEmpty = !current.name.trim() && !current.ico.trim() && !current.redIzo.trim();
   if (!currentEmpty) return null;
 
-  saveSchoolProfileToStorage(normalized);
+  const persisted = saveSchoolProfileToStorage(normalized);
+  if (!persisted.ok) return null;
+
   return normalized;
 }
