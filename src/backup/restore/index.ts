@@ -6,6 +6,15 @@ export {
   planAppBackupRestore,
 } from "./build-app-backup-restore-plan";
 export {
+  applyRestoreStorageTransaction,
+  prepareFreshRestorePlan,
+} from "./apply-restore-storage-transaction";
+export { applyRestoreStorageOperations } from "./apply-restore-storage-operations";
+export { rollbackRestoreTouchedKeys } from "./rollback-restore-touched-keys";
+export { snapshotRestoreTouchedKeys } from "./snapshot-restore-touched-keys";
+export { validateRestorePlanForApply } from "./validate-restore-plan-for-apply";
+export { allRestoreOperationKeys } from "./restore-owned-key-allowlist";
+export {
   validateKnownModuleDataForRestore,
   validateSchoolProfileForRestore,
 } from "./restore-module-validators";
@@ -27,5 +36,15 @@ export type {
   RestoreStorageOperation,
   RestoreWarning,
   ValidateAppBackupResult,
+  ValidatedAppBackupEnvelope,
   ValidatedBackupModule,
 } from "./restore-types";
+export type {
+  RestorePlanRejectReason,
+  RestoreRollbackSnapshot,
+  RestoreRollbackSnapshotEntry,
+  RestoreStorageFailurePhase,
+  RestoreStoragePhaseResult,
+  RestoreTransactionContext,
+  RestoreTransactionStorage,
+} from "./restore-apply-types";
