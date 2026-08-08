@@ -84,9 +84,11 @@ describe("SchoolProfile save → platform binding UI contract (0F-2B)", () => {
     expect(hookSource).not.toContain("ensureSchoolPlatformBinding");
     expect(hookSource).not.toContain("afterPersist");
     expect(hookSource).not.toContain("onMount");
+    // Profile School binding must not be wired into VZ; 0G-2 adds a separate VZ year runner.
     expect(vzReportSource).not.toContain("ensureSchoolPlatformBinding");
-    expect(vzReportSource).not.toContain("afterPersist");
-    expect(vzReportSource).not.toContain("onMount");
+    expect(vzReportSource).not.toContain("createSerializedPlatformBindingRunner");
+    expect(vzReportSource).not.toContain("onMount()");
+    expect(vzReportSource).not.toContain("afterPersist(result.persistence)");
   });
 
   it("resetProfile path nevolá platform binding", () => {
