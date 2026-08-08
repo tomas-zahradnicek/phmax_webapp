@@ -23,7 +23,7 @@ describe("SchoolProfile persistence UI contract (0F-2A)", () => {
     expect(pageSource).toContain("setPersistError(MSG_SCHOOL_PROFILE_PERSIST_FAILED)");
     expect(pageSource).toContain("setSavedAt(new Date().toLocaleString(\"cs-CZ\"))");
     expect(pageSource).toMatch(
-      /if \(!result\.persistence\.ok\) \{[\s\S]*?setPersistError\(MSG_SCHOOL_PROFILE_PERSIST_FAILED\)/,
+      /if \(!result\.persistence\.ok\) \{[\s\S]*?profile_corrupted[\s\S]*?setPersistError\(MSG_SCHOOL_PROFILE_PERSIST_FAILED\)/,
     );
     expect(MSG_SCHOOL_PROFILE_PERSIST_FAILED).toBe(
       "Profil školy se nepodařilo uložit do tohoto prohlížeče.",
@@ -91,7 +91,7 @@ describe("SchoolProfile save → platform binding UI contract (0F-2B)", () => {
 
   it("resetProfile path nevolá platform binding", () => {
     const resetBlock = pageSource.match(
-      /const handleReset = useCallback\(\(\) => \{[\s\S]*?\}, \[profile, resetProfile\]\);/,
+      /const handleReset = useCallback\(\(\) => \{[\s\S]*?\}, \[clearTransientNotices, profile, resetProfile\]\);/,
     );
     expect(resetBlock?.[0]).toBeTruthy();
     expect(resetBlock?.[0]).not.toContain("afterPersist");
@@ -122,13 +122,25 @@ describe("SchoolProfile save → platform binding UI contract (0F-2B)", () => {
   });
 
   it("failed persist path nevolá afterPersist / binding", () => {
-    expect(pageSource).toMatch(
-      /if \(!result\.persistence\.ok\) \{[\s\S]*?setPersistError\(MSG_SCHOOL_PROFILE_PERSIST_FAILED\);[\s\S]*?return;[\s\S]*\}/,
-    );
     const failBranch = pageSource.match(
-      /if \(!result\.persistence\.ok\) \{[\s\S]*?return;[\s\S]*?\}/,
+      /if \(!result\.persistence\.ok\) \{[\s\S]*?setPersistError\(MSG_SCHOOL_PROFILE_PERSIST_FAILED\);[\s\S]*?return;[\s\S]*?\}/,
     );
+    expect(failBranch?.[0]).toBeTruthy();
     expect(failBranch?.[0]).not.toContain("afterPersist");
+  });
+
+  it("0F-3B: profile_corrupted Save rejection přepne recovery state, ne obecný persistError", () => {
+    expect(pageSource).toContain('result.persistence.reason === "profile_corrupted"');
+    expect(pageSource).toContain('setPersistenceStatus(');
+    expect(pageSource).toMatch(
+      /profile_corrupted[\s\S]*?setPersistenceStatus\([\s\S]*?corrupted/,
+    );
+    const corruptedBranch = pageSource.match(
+      /if \(result\.persistence\.reason === "profile_corrupted"\) \{[\s\S]*?return;/,
+    );
+    expect(corruptedBranch?.[0]).toBeTruthy();
+    expect(corruptedBranch?.[0]).not.toContain("MSG_SCHOOL_PROFILE_PERSIST_FAILED");
+    expect(corruptedBranch?.[0]).not.toContain("afterPersist");
   });
 });
 
@@ -160,7 +172,10 @@ describe("SchoolProfile mount → platform binding UI contract (0F-2C)", () => {
   });
 
   it("draft-sync effect zůstává oddělený od mount binding", () => {
-    expect(pageSource).toMatch(/useEffect\(\(\) => \{\s*setDraft\(profile\);\s*\}, \[profile\]\);/);
+    expect(pageSource).toMatch(
+      /useEffect\(\(\) => \{\s*if \(blocksNormalEdit\) return;\s*setDraft\(profile\);\s*\}, \[profile, blocksNormalEdit\]\);/,
+    );
+    expect(pageSource).toContain("bindingRunnerRef.current.onMount()");
   });
 
   it("mount binding failure copy není save-specific a netvrdí uložení", () => {
