@@ -1,5 +1,11 @@
 import type { VyrocniZpravaStorageSaveResult } from "./vyrocni-zprava-storage";
 import {
+  isScenarioLabelEstablishmentSoftFailure,
+  runScenarioLabelEstablishmentAfterSchoolReady,
+  type RunScenarioLabelEstablishmentAfterSchoolReadyInput,
+  type RunScenarioLabelEstablishmentAfterSchoolReadyResult,
+} from "../data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime";
+import {
   ensureVzSchoolYearPlatformBinding,
   type EnsureVzSchoolYearPlatformBindingDependencies,
   type EnsureVzSchoolYearPlatformBindingResult,
@@ -11,6 +17,14 @@ import {
  */
 export const MSG_VZ_SCHOOL_YEAR_METADATA_BINDING_FAILED =
   "Výroční zpráva byla uložena, ale nepodařilo se aktualizovat propojení školního roku s dalšími částmi aplikace. Zkontrolujte Profil školy a zkuste uložení zopakovat.";
+
+/**
+ * Soft metadata notice when VZ SchoolYear binding succeeded but scenario
+ * school-shadow establishment degraded (N2-ADOPT-WRITE). Must not claim
+ * SchoolYear binding itself failed.
+ */
+export const MSG_VZ_SCENARIO_SHADOW_METADATA_SOFT =
+  "Výroční zpráva byla uložena, ale nepodařilo se dokončit propojení metadat scénáře. Zobrazené údaje zůstávají v pořádku; zkuste uložení zopakovat nebo otevřít Profil školy.";
 
 /**
  * 0G-2 gate: SchoolYear metadata binding only after truthful VZ persist success.
@@ -26,7 +40,7 @@ export type VzSchoolYearPersistBindingUiOutcome =
   | {
       bindingAttempted: true;
       binding: EnsureVzSchoolYearPlatformBindingResult;
-      /** Soft warning on metadata error only; null on ready / noop / empty. */
+      /** Soft warning on metadata error / soft establishment degrade; null on success. */
       metadataNotice: string | null;
     };
 
@@ -34,14 +48,20 @@ type EnsureFn = (
   dependencies?: EnsureVzSchoolYearPlatformBindingDependencies,
 ) => Promise<EnsureVzSchoolYearPlatformBindingResult>;
 
+export type EstablishAfterSchoolReadyFn = (
+  binding: RunScenarioLabelEstablishmentAfterSchoolReadyInput | { readonly status: string },
+) => RunScenarioLabelEstablishmentAfterSchoolReadyResult;
+
 /**
  * After VZ persist: call ensure only when persistence.ok.
  * Business save success is independent — callers must not rollback VZ on binding error.
- * empty / noop are legitimate (no Profile / no valid year) → no metadata warning.
+ * empty / noop are legitimate (no Profile / no valid year) → no SchoolYear metadata warning.
+ * Scenario establishment runs only after ready/noop (schoolId available); soft-fail only.
  */
 export async function runVzSchoolYearBindingAfterPersist(
   persistence: VyrocniZpravaStorageSaveResult,
   ensure: EnsureFn = ensureVzSchoolYearPlatformBinding,
+  establishAfterReady: EstablishAfterSchoolReadyFn = runScenarioLabelEstablishmentAfterSchoolReady,
 ): Promise<VzSchoolYearPersistBindingUiOutcome> {
   if (!mayBindVzSchoolYearAfterPersist(persistence)) {
     return { bindingAttempted: false, binding: null, metadataNotice: null };
@@ -56,7 +76,23 @@ export async function runVzSchoolYearBindingAfterPersist(
     };
   }
 
-  // ready | noop | empty → silent
+  if (binding.status === "ready" || binding.status === "noop") {
+    let establishment: ReturnType<EstablishAfterSchoolReadyFn>;
+    try {
+      establishment = establishAfterReady(binding);
+    } catch {
+      establishment = { status: "storage_unavailable" };
+    }
+    if (isScenarioLabelEstablishmentSoftFailure(establishment)) {
+      return {
+        bindingAttempted: true,
+        binding,
+        metadataNotice: MSG_VZ_SCENARIO_SHADOW_METADATA_SOFT,
+      };
+    }
+  }
+
+  // ready | noop | empty → silent when establishment OK / skipped
   return { bindingAttempted: true, binding, metadataNotice: null };
 }
 
@@ -82,6 +118,7 @@ export function shouldApplyVzSchoolYearBindingUiOutcome(options: {
  */
 export function createSerializedVzSchoolYearBindingRunner(
   ensure: EnsureFn = ensureVzSchoolYearPlatformBinding,
+  establishAfterReady: EstablishAfterSchoolReadyFn = runScenarioLabelEstablishmentAfterSchoolReady,
 ) {
   let chain: Promise<unknown> = Promise.resolve();
   let inFlightCount = 0;
@@ -120,7 +157,9 @@ export function createSerializedVzSchoolYearBindingRunner(
           metadataNotice: null,
         });
       }
-      return enqueue(() => runVzSchoolYearBindingAfterPersist({ ok: true }, ensure));
+      return enqueue(() =>
+        runVzSchoolYearBindingAfterPersist({ ok: true }, ensure, establishAfterReady),
+      );
     },
   };
 }

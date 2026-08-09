@@ -6,6 +6,11 @@ import {
   ensureVzSchoolYearPlatformBinding,
   type EnsureVzSchoolYearPlatformBindingResult,
 } from "../../vyrocni-zprava/ensure-vz-school-year-platform-binding";
+import { readIdentityRegistryFromStorage } from "../../data/identity/identity-registry-storage";
+import {
+  establishScenarioLabelSchoolShadowFromLegacy,
+  type ScenarioLabelEstablishmentStorage,
+} from "../../data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime";
 import {
   applyRestoreStorageTransaction,
   type ApplyRestoreStorageTransactionDependencies,
@@ -33,6 +38,11 @@ export type ApplyAppBackupRestoreDependencies = {
   ensureVzYear?: () => Promise<EnsureVzSchoolYearPlatformBindingResult>;
   verify?: typeof verifyPostRestorePlatformState;
   verifyDependencies?: VerifyPostRestorePlatformStateDependencies;
+  /** Injectable for tests — post-verify scenario school-shadow establishment. */
+  establishScenarioSchoolShadow?: (
+    schoolId: unknown,
+    deps: { storage: ScenarioLabelEstablishmentStorage },
+  ) => ReturnType<typeof establishScenarioLabelSchoolShadowFromLegacy>;
 };
 
 function resolveDefaultStorage(): RestoreTransactionStorage | null {
@@ -261,6 +271,20 @@ export async function applyAppBackupRestore(
       "verification",
       verification.detail,
     );
+  }
+
+  // N2-ADOPT-WRITE: post-verification best-effort school-shadow establishment.
+  // Past rollback boundary — soft failure / throw MUST NOT downgrade Restore success.
+  try {
+    const identity = readIdentityRegistryFromStorage(storage);
+    if (identity.ok && identity.registry != null) {
+      const establish =
+        dependencies.establishScenarioSchoolShadow ??
+        establishScenarioLabelSchoolShadowFromLegacy;
+      establish(identity.registry.schoolId, { storage });
+    }
+  } catch {
+    // Soft metadata only — verified business Restore remains successful.
   }
 
   return { status: "success" };

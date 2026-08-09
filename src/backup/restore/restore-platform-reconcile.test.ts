@@ -654,4 +654,96 @@ describe("Restore-2B platform reconcile + verification", () => {
     expect(source).toMatch(/crash|in-memory snapshot/i);
   });
 
+  it("Z: failure before verification success → establishment 0×", async () => {
+    const establish = vi.fn(() => ({ status: "established" as const }));
+    const result = await applyAppBackupRestore(
+      validatedBackup({
+        "school-profile": modulePayload("Profil", sampleProfile(SCHOOL_A)),
+        "identity-registry": modulePayload("Identita", sampleIdentity(SCHOOL_A)),
+      }),
+      {
+        ensureSchool: async () => ({
+          status: "error",
+          reason: "platform_failure",
+        }),
+        establishScenarioSchoolShadow: establish,
+      },
+    );
+    expect(result.status).toBe("rolled_back");
+    expect(establish).not.toHaveBeenCalled();
+  });
+
+  it("AA/AB: successful Restore → establishment once; soft fail still success", async () => {
+    const establish = vi.fn(() => ({ status: "shadow_dirty" as const }));
+    const result = await applyAppBackupRestore(
+      validatedBackup({
+        "school-profile": modulePayload("Profil", sampleProfile(SCHOOL_A)),
+        "identity-registry": modulePayload("Identita", sampleIdentity(SCHOOL_A)),
+      }),
+      {
+        ensureSchool: async () => ({
+          status: "ready",
+          schoolId: SCHOOL_A,
+          activeSchoolId: SCHOOL_A,
+          activeSchoolYearId: null,
+          staleActiveSchoolId: false,
+          staleActiveSchoolYearId: false,
+        }),
+        verify: () => ({ ok: true }),
+        establishScenarioSchoolShadow: establish,
+      },
+    );
+    expect(result.status).toBe("success");
+    expect(establish).toHaveBeenCalledTimes(1);
+    expect(establish.mock.calls[0]?.[0]).toBe(SCHOOL_A);
+  });
+
+  it("AC: establishment THROWS → Restore still success", async () => {
+    const establish = vi.fn(() => {
+      throw new Error("unexpected establishment boom");
+    });
+    const result = await applyAppBackupRestore(
+      validatedBackup({
+        "school-profile": modulePayload("Profil", sampleProfile(SCHOOL_A)),
+        "identity-registry": modulePayload("Identita", sampleIdentity(SCHOOL_A)),
+      }),
+      {
+        ensureSchool: async () => ({
+          status: "ready",
+          schoolId: SCHOOL_A,
+          activeSchoolId: SCHOOL_A,
+          activeSchoolYearId: null,
+          staleActiveSchoolId: false,
+          staleActiveSchoolYearId: false,
+        }),
+        verify: () => ({ ok: true }),
+        establishScenarioSchoolShadow: establish,
+      },
+    );
+    expect(result.status).toBe("success");
+  });
+
+  it("AG: verification fail rolled_back → zero establishment orphan", async () => {
+    const establish = vi.fn(() => ({ status: "established" as const }));
+    const result = await applyAppBackupRestore(
+      validatedBackup({
+        "school-profile": modulePayload("Profil", sampleProfile(SCHOOL_A)),
+        "identity-registry": modulePayload("Identita", sampleIdentity(SCHOOL_A)),
+      }),
+      {
+        ensureSchool: async () => ({
+          status: "ready",
+          schoolId: SCHOOL_A,
+          activeSchoolId: SCHOOL_A,
+          activeSchoolYearId: null,
+          staleActiveSchoolId: false,
+          staleActiveSchoolYearId: false,
+        }),
+        verify: () => ({ ok: false, detail: "verify_failed" }),
+        establishScenarioSchoolShadow: establish,
+      },
+    );
+    expect(result.status).toBe("rolled_back");
+    expect(establish).not.toHaveBeenCalled();
+  });
 });

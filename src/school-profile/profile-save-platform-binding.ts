@@ -1,4 +1,10 @@
 import {
+  isScenarioLabelEstablishmentSoftFailure,
+  runScenarioLabelEstablishmentAfterSchoolReady,
+  type RunScenarioLabelEstablishmentAfterSchoolReadyInput,
+  type RunScenarioLabelEstablishmentAfterSchoolReadyResult,
+} from "../data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime";
+import {
   ensureSchoolPlatformBinding,
   type EnsureSchoolPlatformBindingDependencies,
   type EnsureSchoolPlatformBindingResult,
@@ -32,16 +38,24 @@ export type ProfileSaveBindingUiOutcome =
       metadataNotice: string | null;
     };
 
+type EnsureFn = (
+  dependencies?: EnsureSchoolPlatformBindingDependencies,
+) => Promise<EnsureSchoolPlatformBindingResult>;
+
+export type EstablishAfterSchoolReadyFn = (
+  binding: RunScenarioLabelEstablishmentAfterSchoolReadyInput | { readonly status: string },
+) => RunScenarioLabelEstablishmentAfterSchoolReadyResult;
+
 /**
  * After SchoolProfile persist: call ensure only when persistence.ok.
  * Business save success is independent — callers must not rollback profile on binding error.
  * empty after successful persist is unexpected → soft metadata notice.
+ * After ready: N2-ADOPT school-shadow establishment (fail-soft).
  */
 export async function runPlatformBindingAfterProfilePersist(
   persistence: SchoolProfileStorageSaveResult,
-  ensure: (
-    dependencies?: EnsureSchoolPlatformBindingDependencies,
-  ) => Promise<EnsureSchoolPlatformBindingResult> = ensureSchoolPlatformBinding,
+  ensure: EnsureFn = ensureSchoolPlatformBinding,
+  establishAfterReady: EstablishAfterSchoolReadyFn = runScenarioLabelEstablishmentAfterSchoolReady,
 ): Promise<ProfileSaveBindingUiOutcome> {
   if (!mayBindPlatformAfterProfilePersist(persistence)) {
     return { bindingAttempted: false, binding: null, metadataNotice: null };
@@ -49,6 +63,19 @@ export async function runPlatformBindingAfterProfilePersist(
 
   const binding = await ensure();
   if (binding.status === "ready") {
+    let establishment: ReturnType<EstablishAfterSchoolReadyFn>;
+    try {
+      establishment = establishAfterReady(binding);
+    } catch {
+      establishment = { status: "storage_unavailable" };
+    }
+    if (isScenarioLabelEstablishmentSoftFailure(establishment)) {
+      return {
+        bindingAttempted: true,
+        binding,
+        metadataNotice: MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED,
+      };
+    }
     return { bindingAttempted: true, binding, metadataNotice: null };
   }
 
@@ -64,14 +91,30 @@ export async function runPlatformBindingAfterProfilePersist(
  * Mount / legacy binding (0F-2C).
  * Always calls ensure (0F-1 missing-profile gate → empty, no platform write).
  * empty = no persisted school → NOT a metadata warning (unlike Save path).
+ * After ready: N2-ADOPT school-shadow establishment (fail-soft).
  */
 export async function runPlatformBindingOnMount(
-  ensure: (
-    dependencies?: EnsureSchoolPlatformBindingDependencies,
-  ) => Promise<EnsureSchoolPlatformBindingResult> = ensureSchoolPlatformBinding,
+  ensure: EnsureFn = ensureSchoolPlatformBinding,
+  establishAfterReady: EstablishAfterSchoolReadyFn = runScenarioLabelEstablishmentAfterSchoolReady,
 ): Promise<ProfileSaveBindingUiOutcome> {
   const binding = await ensure();
-  if (binding.status === "ready" || binding.status === "empty") {
+  if (binding.status === "ready") {
+    let establishment: ReturnType<EstablishAfterSchoolReadyFn>;
+    try {
+      establishment = establishAfterReady(binding);
+    } catch {
+      establishment = { status: "storage_unavailable" };
+    }
+    if (isScenarioLabelEstablishmentSoftFailure(establishment)) {
+      return {
+        bindingAttempted: true,
+        binding,
+        metadataNotice: MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED,
+      };
+    }
+    return { bindingAttempted: true, binding, metadataNotice: null };
+  }
+  if (binding.status === "empty") {
     return { bindingAttempted: true, binding, metadataNotice: null };
   }
   return {
@@ -81,15 +124,14 @@ export async function runPlatformBindingOnMount(
   };
 }
 
-type EnsureFn = (
-  dependencies?: EnsureSchoolPlatformBindingDependencies,
-) => Promise<EnsureSchoolPlatformBindingResult>;
-
 /**
  * Serializes ensure calls so mount + Save never overlap ensure invocations.
  * Each successful persist / mount still gets its own ensure (sequential, idempotent).
  */
-export function createSerializedPlatformBindingRunner(ensure: EnsureFn = ensureSchoolPlatformBinding) {
+export function createSerializedPlatformBindingRunner(
+  ensure: EnsureFn = ensureSchoolPlatformBinding,
+  establishAfterReady: EstablishAfterSchoolReadyFn = runScenarioLabelEstablishmentAfterSchoolReady,
+) {
   let chain: Promise<unknown> = Promise.resolve();
   let inFlightCount = 0;
 
@@ -125,12 +167,14 @@ export function createSerializedPlatformBindingRunner(ensure: EnsureFn = ensureS
           metadataNotice: null,
         });
       }
-      return enqueue(() => runPlatformBindingAfterProfilePersist({ ok: true }, ensure));
+      return enqueue(() =>
+        runPlatformBindingAfterProfilePersist({ ok: true }, ensure, establishAfterReady),
+      );
     },
 
     /** Lazy mount / legacy binding — empty is not a user-facing error. */
     onMount(): Promise<ProfileSaveBindingUiOutcome> {
-      return enqueue(() => runPlatformBindingOnMount(ensure));
+      return enqueue(() => runPlatformBindingOnMount(ensure, establishAfterReady));
     },
   };
 }

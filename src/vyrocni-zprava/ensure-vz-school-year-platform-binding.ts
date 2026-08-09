@@ -50,7 +50,12 @@ export type EnsureVzSchoolYearPlatformBindingReason =
  */
 export type EnsureVzSchoolYearPlatformBindingResult =
   | { status: "empty" }
-  | { status: "noop"; reason: "no_valid_year" }
+  | {
+      /** School ready; year not bindable. schoolId from nested ensureSchool. */
+      status: "noop";
+      reason: "no_valid_year";
+      schoolId: EntityId;
+    }
   | {
       status: "ready";
       schoolId: EntityId;
@@ -156,7 +161,8 @@ export async function ensureVzSchoolYearPlatformBinding(
 
   if (hint.startYear == null) {
     // Empty / whitespace / invalid label: do not invent a year and do not clear active pointer.
-    return { status: "noop", reason: "no_valid_year" };
+    // Propagate nested schoolId for post-ready scenario-shadow orchestration (N2-ADOPT-WRITE).
+    return { status: "noop", reason: "no_valid_year", schoolId: school.schoolId };
   }
 
   const startYear = hint.startYear;

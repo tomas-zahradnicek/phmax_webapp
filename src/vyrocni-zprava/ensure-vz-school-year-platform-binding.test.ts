@@ -212,7 +212,7 @@ describe("ensureVzSchoolYearPlatformBinding (0G-1)", () => {
 
     persistVzSchoolYear("");
     const result = await ensureVzSchoolYearPlatformBinding();
-    expect(result).toEqual({ status: "noop", reason: "no_valid_year" });
+    expect(result).toEqual({ status: "noop", reason: "no_valid_year", schoolId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" });
     expect(readActiveSchoolYearId()).toBe(yearA);
     expect(readSchoolYears()).toHaveLength(1);
     expect(localStorage.getItem(IDENTITY_REGISTRY_LS_KEY)).toBe(registryRaw);
@@ -229,7 +229,7 @@ describe("ensureVzSchoolYearPlatformBinding (0G-1)", () => {
 
     persistVzSchoolYear("not-a-year");
     const result = await ensureVzSchoolYearPlatformBinding();
-    expect(result).toEqual({ status: "noop", reason: "no_valid_year" });
+    expect(result).toEqual({ status: "noop", reason: "no_valid_year", schoolId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" });
     expect(readActiveSchoolYearId()).toBe(yearA);
 
     const years = readSchoolYears();
@@ -352,7 +352,7 @@ describe("ensureVzSchoolYearPlatformBinding (0G-1)", () => {
     persistVzSchoolYear("");
 
     const result = await ensureVzSchoolYearPlatformBinding();
-    expect(result).toEqual({ status: "noop", reason: "no_valid_year" });
+    expect(result).toEqual({ status: "noop", reason: "no_valid_year", schoolId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" });
 
     const registry = readIdentityRegistry();
     expect(registry.ok).toBe(true);
@@ -379,7 +379,7 @@ describe("ensureVzSchoolYearPlatformBinding (0G-1)", () => {
     persistVzSchoolYear("   ");
 
     const result = await ensureVzSchoolYearPlatformBinding();
-    expect(result).toEqual({ status: "noop", reason: "no_valid_year" });
+    expect(result).toEqual({ status: "noop", reason: "no_valid_year", schoolId: profileId });
     expect(readSchoolYears()).toEqual([]);
     expect(readActiveSchoolYearId()).toBeNull();
   });
