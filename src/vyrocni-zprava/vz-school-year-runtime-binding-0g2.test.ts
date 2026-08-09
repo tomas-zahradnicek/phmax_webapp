@@ -124,7 +124,7 @@ describe("VZ SchoolYear runtime binding (0G-2 integration)", () => {
     expect(persistence).toEqual({ ok: true });
     expect(outcome).toEqual({
       bindingAttempted: true,
-      binding: { status: "noop", reason: "no_valid_year" },
+      binding: { status: "noop", reason: "no_valid_year", schoolId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" },
       metadataNotice: null,
     });
     expect(readSchoolYears()).toEqual([]);
@@ -174,7 +174,7 @@ describe("VZ SchoolYear runtime binding (0G-2 integration)", () => {
       expect(step.persistence).toEqual({ ok: true });
       expect(step.outcome).toEqual({
         bindingAttempted: true,
-        binding: { status: "noop", reason: "no_valid_year" },
+        binding: { status: "noop", reason: "no_valid_year", schoolId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" },
         metadataNotice: null,
       });
       expect(readActiveSchoolYearId()).toBe(yearA);

@@ -358,4 +358,64 @@ describe("profile save → platform binding gate (0F-2B)", () => {
       false,
     );
   });
+
+  it("P: Profile Save ready → establish 1×", async () => {
+    const profileId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    const ensure = vi.fn(async () => ({
+      status: "ready" as const,
+      schoolId: profileId,
+      activeSchoolId: profileId,
+      activeSchoolYearId: null,
+      staleActiveSchoolId: false,
+      staleActiveSchoolYearId: false,
+    }));
+    const establish = vi.fn(() => ({ status: "established" as const }));
+    const outcome = await runPlatformBindingAfterProfilePersist({ ok: true }, ensure, establish);
+    expect(establish).toHaveBeenCalledTimes(1);
+    expect(outcome.metadataNotice).toBeNull();
+  });
+
+  it("Q: establishment soft fail → Profile business success + soft warning", async () => {
+    const profileId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    const ensure = vi.fn(async () => ({
+      status: "ready" as const,
+      schoolId: profileId,
+      activeSchoolId: profileId,
+      activeSchoolYearId: null,
+      staleActiveSchoolId: false,
+      staleActiveSchoolYearId: false,
+    }));
+    const establish = vi.fn(() => ({ status: "shadow_dirty" as const }));
+    const outcome = await runPlatformBindingAfterProfilePersist({ ok: true }, ensure, establish);
+    expect(outcome.bindingAttempted).toBe(true);
+    expect(outcome.metadataNotice).toBe(MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED);
+  });
+
+  it("Q2: establishment throws → Profile business success + soft warning", async () => {
+    const profileId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    const ensure = vi.fn(async () => ({
+      status: "ready" as const,
+      schoolId: profileId,
+      activeSchoolId: profileId,
+      activeSchoolYearId: null,
+      staleActiveSchoolId: false,
+      staleActiveSchoolYearId: false,
+    }));
+    const establish = vi.fn(() => {
+      throw new Error("boom");
+    });
+    const outcome = await runPlatformBindingAfterProfilePersist({ ok: true }, ensure, establish);
+    expect(outcome.bindingAttempted).toBe(true);
+    expect(outcome.metadataNotice).toBe(MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED);
+  });
+
+  it("T: binding not ready → no establishment", async () => {
+    const ensure = vi.fn(async () => ({
+      status: "error" as const,
+      reason: "platform_failure" as const,
+    }));
+    const establish = vi.fn(() => ({ status: "established" as const }));
+    await runPlatformBindingAfterProfilePersist({ ok: true }, ensure, establish);
+    expect(establish).not.toHaveBeenCalled();
+  });
 });

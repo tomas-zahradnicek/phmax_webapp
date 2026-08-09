@@ -387,4 +387,53 @@ describe("profile mount → platform binding (0F-2C)", () => {
     expect(outcome.binding.schoolId).toBe(profileId);
     expect(localStorage.getItem(IDENTITY_REGISTRY_LS_KEY)).toBe(registryBefore);
   });
+
+  it("R: Profile mount ready → establish 1×", async () => {
+    const profileId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    const ensure = vi.fn(async () => ({
+      status: "ready" as const,
+      schoolId: profileId,
+      activeSchoolId: profileId,
+      activeSchoolYearId: null,
+      staleActiveSchoolId: false,
+      staleActiveSchoolYearId: false,
+    }));
+    const establish = vi.fn(() => ({ status: "already_ready" as const }));
+    const outcome = await runPlatformBindingOnMount(ensure, establish);
+    expect(establish).toHaveBeenCalledTimes(1);
+    expect(outcome.metadataNotice).toBeNull();
+  });
+
+  it("S: already_ready → zero establishment writes (silent)", async () => {
+    const profileId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    const ensure = vi.fn(async () => ({
+      status: "ready" as const,
+      schoolId: profileId,
+      activeSchoolId: profileId,
+      activeSchoolYearId: null,
+      staleActiveSchoolId: false,
+      staleActiveSchoolYearId: false,
+    }));
+    const establish = vi.fn(() => ({ status: "already_ready" as const }));
+    const outcome = await runPlatformBindingOnMount(ensure, establish);
+    expect(establish).toHaveBeenCalledTimes(1);
+    expect(outcome.metadataNotice).toBeNull();
+  });
+
+  it("mount establishment throw → soft warning only", async () => {
+    const profileId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    const ensure = vi.fn(async () => ({
+      status: "ready" as const,
+      schoolId: profileId,
+      activeSchoolId: profileId,
+      activeSchoolYearId: null,
+      staleActiveSchoolId: false,
+      staleActiveSchoolYearId: false,
+    }));
+    const establish = vi.fn(() => {
+      throw new Error("boom");
+    });
+    const outcome = await runPlatformBindingOnMount(ensure, establish);
+    expect(outcome.metadataNotice).toBe(MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED);
+  });
 });

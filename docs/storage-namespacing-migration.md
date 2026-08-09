@@ -1,4 +1,4 @@
-# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT-PROTO)
+# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT-PROTO / N2-ADOPT-WRITE)
 
 Pilot resource: `phmax-scenario-label` / `value`  
 Legacy authoritative key: `phmax-school-scenario-label`
@@ -129,15 +129,38 @@ Future WRITE phase order (documented; not executed in PROTO):
 
 Healthy synced marker may be persisted only if **final** fresh legacy equals verified school shadow (cross-tab change ⇒ not ready / dirty — marker must not lie).
 
-### N2-ADOPT-WRITE stop conditions (must resolve before WRITE)
+### N2-ADOPT-WRITE stop conditions (resolved)
 
-1. **Restore rollback ordering** — establishment must not write school shadow outside Restore rollback protection in a way that survives a failed Restore.
-2. **Lifecycle ownership** — choose **one** post-ensure ownership site; avoid redundant double hooks on nested `ensureVzSchoolYearPlatformBinding` → `ensureSchoolPlatformBinding` without an explicit policy.
-3. **Soft UX** — Profile/VZ business persistence must not fail solely because establishment metadata failed (`marker_incomplete` / soft `shadow_dirty`).
+1. **Restore rollback ordering** — establishment runs **only after** verification success (past rollback boundary). Soft failure / throw does **not** invalidate verified Restore success; no orphan from failed reconcile/verify.
+2. **Lifecycle ownership** — establishment is **not** inside `ensureSchoolPlatformBinding` / `ensureVzSchoolYearPlatformBinding`. Owned by post-ready runners (`runPlatformBindingAfterProfilePersist`, `runPlatformBindingOnMount`, `runVzSchoolYearBindingAfterPersist`) + Restore post-verify phase. Nested VZ→school ensure does not double-fire.
+3. **Soft UX** — Profile/VZ business persistence must not fail solely because establishment metadata failed (`marker_incomplete` / soft `shadow_dirty` / throw).
 
-## Next phases (not in this PROTO)
+## N2-ADOPT-WRITE (school-shadow establishment runtime)
 
-- **N2-ADOPT-WRITE:** first automatic school-shadow establishment executor (after stop conditions above).
+First automatic school-shadow establishment after valid Identity is available.
+
+| Contract | Rule |
+|----------|------|
+| Executor | `establishScenarioLabelSchoolShadowFromLegacy` |
+| Source | Fresh **LEGACY** raw only |
+| Unbound | **PRESERVE** (never source; never written) |
+| `ensureSchool` / `ensureVz` | Remain free of scenario establishment side effects (`noop` may expose nested `schoolId` only) |
+| Profile Save / mount | After binding `ready` → establishment; soft metadata warning on degrade |
+| VZ afterPersist | After `ready` / `noop` → establishment once; SchoolYear error MSG precedence; soft generic notice on establishment degrade |
+| Restore | **Post-verification** best-effort, before `{status:"success"}`; failure/throw still returns success |
+| Authority | **No N3 cutover** — legacy remains sole business authority |
+| Cross-tab | Residual limitation; final legacy re-read blocks false synced markers |
+| Rollback to PROTO | Safe — legacy authoritative; school shadow/marker become inert residue |
+
+Production automatic write call sites:
+
+1. Profile Save ready
+2. Profile mount ready
+3. VZ afterPersist ready/noop
+4. Restore post-success
+
+## Next phases
+
 - **N3:** namespaced authority only after readiness; browsers that skipped N2 must bootstrap legacy→v2 before cutover.
 - **N4:** legacy cleanup (later).
 
@@ -147,9 +170,10 @@ Because N2 keeps legacy authoritative and reads remain legacy, rolling the app b
 
 N2-ADOPT-PROTO adds **no runtime hooks**, so rolling back a PROTO-only deploy cannot start automatic school-shadow establishment.
 
+Rolling N2-ADOPT-WRITE back to PROTO leaves legacy authoritative; any school shadow/marker written by WRITE become inert residue until Full Reset / N4.
+
 ## Not implemented
 
-- N2-ADOPT-WRITE automatic establishment executor / lifecycle hooks
 - N3 namespaced-authoritative read / cutover
 - N4 legacy cleanup
 - Cross-module namespacing
