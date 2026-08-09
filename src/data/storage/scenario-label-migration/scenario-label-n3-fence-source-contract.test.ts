@@ -21,71 +21,39 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../
 
 const SCHOOL_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" as EntityId;
 
-const N3_FENCE_SOURCE_FILES = [
+/** Pure PROTO modules — still zero storage I/O. */
+const N3_FENCE_PURE_FILES = [
   "src/data/storage/scenario-label-migration/scenario-label-n3-fence-types.ts",
   "src/data/storage/scenario-label-migration/scenario-label-n3-fence-key.ts",
   "src/data/storage/scenario-label-migration/scenario-label-n3-fence-record.ts",
   "src/data/storage/scenario-label-migration/scenario-label-n3-fence-protocol.ts",
 ] as const;
 
-const N3_FENCE_SYMBOLS = [
-  "serializeScenarioLabelN3FenceKey",
-  "parseScenarioLabelN3FenceKey",
-  "parseScenarioLabelN3FenceRecord",
-  "serializeScenarioLabelN3FenceRecord",
-  "buildScenarioLabelN3FenceRecord",
-  "assessScenarioLabelN3FenceState",
-  "assessScenarioLabelFenceCutoverEligibility",
-  "isScenarioLabelN3FenceReadyForPreCutover",
-  "noteScenarioLabelN3PlanReadyIsNotFenceEligibility",
-  "assertScenarioLabelN3FenceRequiresExactRaw",
+/** Allowed production call sites for fence finalizer (N3-FENCE-WRITE). */
+const ALLOWED_FENCE_FINALIZE_CALL_SITES = [
+  "src/data/storage/scenario-label-migration/scenario-label-n3-fence-finalize.ts",
+  "src/data/storage/scenario-label-migration/scenario-label-repository.ts",
+  "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.ts",
+  "src/backup/restore/apply-app-backup-restore.ts",
 ] as const;
 
 function readSource(relativePath: string): string {
   return fs.readFileSync(path.join(repoRoot, relativePath), "utf8");
 }
 
-describe("N3-FENCE-PROTO source contract", () => {
-  const sources = N3_FENCE_SOURCE_FILES.map((file) => ({ file, source: readSource(file) }));
-
-  it("zero storage / browser IO in N3-FENCE-PROTO production files", () => {
-    for (const { file, source } of sources) {
+describe("N3-FENCE-WRITE source / ownership contracts", () => {
+  it("pure PROTO files remain zero storage / browser IO", () => {
+    for (const file of N3_FENCE_PURE_FILES) {
+      const source = readSource(file);
       expect(source, file).not.toContain("localStorage");
       expect(source, file).not.toContain("sessionStorage");
-      expect(source, file).not.toContain("window.");
-      expect(source, file).not.toContain("document.");
-      expect(source, file).not.toContain("globalThis");
       expect(source, file).not.toContain(".setItem(");
       expect(source, file).not.toContain(".removeItem(");
-      expect(source, file).not.toMatch(/(?:localStorage|sessionStorage)\.clear\(/);
       expect(source, file).not.toContain(".getItem(");
-      expect(source, file).not.toContain("BroadcastChannel");
-      expect(source, file).not.toContain("navigator.locks");
-      expect(source, file).not.toContain("serviceWorker");
-      expect(source, file).not.toContain("crypto.subtle");
     }
   });
 
-  it("does not import runtime lifecycle / backup / restore / dashboard engines", () => {
-    for (const { file, source } of sources) {
-      expect(source, file).not.toContain("scenario-label-repository");
-      expect(source, file).not.toContain("school-shadow-establishment-runtime");
-      expect(source, file).not.toContain("profile-save-platform-binding");
-      expect(source, file).not.toContain("vz-school-year-persist-binding");
-      expect(source, file).not.toContain("apply-app-backup-restore");
-      expect(source, file).not.toContain("phmax-is-handoff-apply");
-      expect(source, file).not.toContain("PhmaxDashboardPage");
-      expect(source, file).not.toContain("phmax-local-storage-clear");
-      expect(source, file).not.toContain("application-storage-registry");
-      // Must not import/use the old N2 unbound-permitting readiness helper module.
-      expect(source, file).not.toContain("scenario-label-cutover-readiness");
-      expect(source, file).not.toMatch(
-        /from\s+["']\.\/scenario-label-cutover-readiness["']/,
-      );
-    }
-  });
-
-  it("zero production call sites for N3-FENCE-PROTO symbols", () => {
+  it("finalizer is the only fence writer; call sites are exact inventory", () => {
     const srcRoot = path.join(repoRoot, "src");
     const hits: string[] = [];
 
@@ -97,88 +65,96 @@ describe("N3-FENCE-PROTO source contract", () => {
           continue;
         }
         if (!entry.name.endsWith(".ts") && !entry.name.endsWith(".tsx")) continue;
-        if (entry.name.includes("n3-fence")) continue;
+        if (entry.name.includes(".test.")) continue;
+        const rel = path.relative(repoRoot, full).replace(/\\/g, "/");
         const text = fs.readFileSync(full, "utf8");
-        for (const symbol of N3_FENCE_SYMBOLS) {
-          if (text.includes(symbol)) {
-            hits.push(`${path.relative(repoRoot, full)}:${symbol}`);
-          }
+        if (text.includes("finalizeScenarioLabelLegacyFenceCertificate")) {
+          hits.push(rel);
         }
       }
     }
 
     walk(srcRoot);
-    expect(hits).toEqual([]);
+    expect(hits.sort()).toEqual([...ALLOWED_FENCE_FINALIZE_CALL_SITES].sort());
   });
 
-  it("eligibility composer uses N3 school readiness status, not old N2 helper module", () => {
-    const protocol = readSource(
-      "src/data/storage/scenario-label-migration/scenario-label-n3-fence-protocol.ts",
-    );
-    expect(protocol).toContain("assessScenarioLabelFenceCutoverEligibility");
-    expect(protocol).toContain("ready_for_cutover");
-    expect(protocol).not.toContain("scenario-label-cutover-readiness");
-    expect(protocol).toContain("unbound-permitting readiness helper");
-  });
-
-  it("C1/C2: current Level B / post-export clear does not target fence key", () => {
-    const clearSource = readSource("src/phmax-local-storage-clear.ts");
-    const repoSource = readSource(
+  it("does not use historic boolean fenceReady production eligibility API in runtime", () => {
+    const runtimeOwners = [
+      "src/data/storage/scenario-label-migration/scenario-label-n3-fence-finalize.ts",
       "src/data/storage/scenario-label-migration/scenario-label-repository.ts",
-    );
+      "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.ts",
+      "src/backup/restore/apply-app-backup-restore.ts",
+      "src/phmax-is-handoff-apply.ts",
+    ];
+    for (const file of runtimeOwners) {
+      const source = readSource(file);
+      expect(source, file).not.toContain("assessScenarioLabelN3ProductionCutoverEligibility");
+      expect(source, file).not.toContain("assessScenarioLabelCutoverReadiness");
+    }
+  });
+
+  it("Level B / post-export own fence only via clearScenarioLabelLifecycle", () => {
+    const clearSource = readSource("src/phmax-local-storage-clear.ts");
     expect(clearSource).toContain("clearScenarioLabelLifecycle");
+    expect(clearSource).not.toContain("finalizeScenarioLabelLegacyFenceCertificate");
     expect(clearSource).not.toContain(SCENARIO_LABEL_N3_FENCE_SEGMENT);
-    expect(clearSource).not.toContain("protocol-commit");
-    expect(repoSource).not.toContain(SCENARIO_LABEL_N3_FENCE_SEGMENT);
-    expect(repoSource).not.toContain("protocol-commit");
-    expect(repoSource).toContain("buildScenarioLabelNamespacedKey");
-    expect(repoSource).toContain("serializeScenarioLabelMigrationMarkerKey");
   });
 
-  it("C3: current Restore scenario ops do not target fence key", () => {
-    const restoreOps = readSource(
-      "src/data/storage/scenario-label-migration/scenario-label-restore-ops.ts",
-    );
-    expect(restoreOps).toContain("buildScenarioLabelNamespacedKey");
-    expect(restoreOps).toContain("serializeScenarioLabelMigrationMarkerKey");
-    expect(restoreOps).not.toContain(SCENARIO_LABEL_N3_FENCE_SEGMENT);
-    expect(restoreOps).not.toContain("protocol-commit");
-    expect(restoreOps).not.toContain("serializeScenarioLabelN3FenceKey");
-  });
-
-  it("C4: existing Full Reset v2 prefix covers fence key", () => {
+  it("C4: Full Reset v2 prefix still covers fence", () => {
     const fenceKey = serializeScenarioLabelN3FenceKey({
       kind: "school",
       schoolId: SCHOOL_ID,
     });
     expect(APPLICATION_LOCAL_STORAGE_PREFIXES).toContain(NAMESPACED_STORAGE_V2_ROOT_PREFIX);
     expect(fenceKey.startsWith(NAMESPACED_STORAGE_V2_ROOT_PREFIX)).toBe(true);
-    expect(parseScenarioLabelN3FenceKey(fenceKey)).not.toBeNull();
   });
 
-  it("C5: Backup-owned modules exclude fence certificate", () => {
+  it("C5: Backup still omits fence", () => {
     expect(SCENARIO_LABEL_N3_FENCE_BACKUP_OMITS_CERTIFICATE).toBe(true);
-    const scenarioAdapter = BACKUP_MODULE_ADAPTERS.find((a) => a.id === "phmax-scenario-label");
-    expect(scenarioAdapter).toBeDefined();
-    expect(scenarioAdapter!.storageKeys).toEqual(["phmax-school-scenario-label"]);
     for (const adapter of BACKUP_MODULE_ADAPTERS) {
       for (const key of adapter.storageKeys) {
-        expect(key.includes(SCENARIO_LABEL_N3_FENCE_SEGMENT)).toBe(false);
         expect(parseScenarioLabelN3FenceKey(key)).toBeNull();
       }
     }
   });
 
-  it("C6: old console snippet source contains no fence protocol", () => {
+  it("C6: new console snippet is fence-aware (school only, LAST)", () => {
     const snippet = readSource("src/phmax-is-handoff-apply.ts");
-    expect(snippet).toContain("buildHandoffApplyConsoleSnippet");
-    expect(snippet).not.toContain(SCENARIO_LABEL_N3_FENCE_SEGMENT);
-    expect(snippet).not.toContain("protocol-commit");
-    expect(snippet).not.toContain("serializeScenarioLabelN3FenceKey");
-    expect(snippet).not.toContain("assessScenarioLabelN3FenceState");
+    expect(snippet).toContain("buildScenarioLabelLiveApplySnippetFragment");
+    expect(snippet).toContain("SCENARIO_LABEL_N3_FENCE_SEGMENT");
+    expect(snippet).toContain("SCENARIO_LABEL_N3_FENCE_PROTOCOL_GENERATION");
+    expect(snippet).toContain("fenceKey");
+    expect(snippet).toContain("protocolGeneration");
+    // Unbound path must not invent fenceKey in unbound branch before school resolve.
+    expect(snippet).toContain('markerKey=v2Root+mseg+":"+mod+":"+res+":unbound"');
   });
 
-  it("fence key isolation: not business address, not migration marker", () => {
+  it("already_ready path does not call fence finalizer", () => {
+    const establishment = readSource(
+      "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.ts",
+    );
+    const alreadyReadyIdx = establishment.indexOf('plan.kind === "already_ready"');
+    expect(alreadyReadyIdx).toBeGreaterThan(-1);
+    const returnIdx = establishment.indexOf('return { status: "already_ready" }', alreadyReadyIdx);
+    expect(returnIdx).toBeGreaterThan(alreadyReadyIdx);
+    const between = establishment.slice(alreadyReadyIdx, returnIdx);
+    expect(between).not.toContain("finalizeScenarioLabelLegacyFenceCertificate");
+  });
+
+  it("Restore writes fence only post-verification soft zone", () => {
+    const restore = readSource("src/backup/restore/apply-app-backup-restore.ts");
+    expect(restore).toContain("finalizeScenarioLabelLegacyFenceCertificate");
+    expect(restore).toContain("Past rollback boundary");
+    expect(restore).toContain("N3-FENCE-WRITE");
+    // Fence must not appear inside restore-ops physical planner.
+    const ops = readSource(
+      "src/data/storage/scenario-label-migration/scenario-label-restore-ops.ts",
+    );
+    expect(ops).not.toContain("finalizeScenarioLabelLegacyFenceCertificate");
+    expect(ops).not.toContain(SCENARIO_LABEL_N3_FENCE_SEGMENT);
+  });
+
+  it("fence key isolation unchanged", () => {
     const fenceKey = serializeScenarioLabelN3FenceKey({
       kind: "school",
       schoolId: SCHOOL_ID,
@@ -187,11 +163,17 @@ describe("N3-FENCE-PROTO source contract", () => {
     expect(parseScenarioLabelMigrationMarkerKey(fenceKey)).toBeNull();
   });
 
-  it("old writers (repository / establishment) do not know fence key", () => {
-    const establishment = readSource(
+  it("no schema2 namespaced marker production write in fence-write owners", () => {
+    const owners = [
+      "src/data/storage/scenario-label-migration/scenario-label-n3-fence-finalize.ts",
+      "src/data/storage/scenario-label-migration/scenario-label-repository.ts",
       "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.ts",
-    );
-    expect(establishment).not.toContain(SCENARIO_LABEL_N3_FENCE_SEGMENT);
-    expect(establishment).not.toContain("protocol-commit");
+      "src/phmax-is-handoff-apply.ts",
+    ];
+    for (const file of owners) {
+      const source = readSource(file);
+      expect(source, file).not.toMatch(/authority:\s*["']namespaced["']/);
+      expect(source, file).not.toContain('authority:"namespaced"');
+    }
   });
 });

@@ -51,9 +51,28 @@ export type ScenarioLabelMigrationMarkerPayload = {
 /** Runtime shadow outcome for a successful authoritative write (N2-WRITE). */
 export type ScenarioLabelShadowOutcome = "synced" | "dirty" | "skipped";
 
+/**
+ * Soft fence metadata outcome attached to successful business writes.
+ * Never turns an authoritative legacy success into failure.
+ */
+export type ScenarioLabelFenceWriteOutcome =
+  | "committed"
+  | "already_committed"
+  | "skipped"
+  | "not_certifiable"
+  | "incomplete"
+  | "verify_failed"
+  | "concurrent_drift"
+  | "storage_unavailable";
+
 export type ScenarioLabelWriteResult =
   | { readonly status: "authoritative_failed"; readonly code: "legacy_write_failed" | "storage_unavailable" }
-  | { readonly status: "success"; readonly shadow: ScenarioLabelShadowOutcome };
+  | {
+      readonly status: "success";
+      readonly shadow: ScenarioLabelShadowOutcome;
+      /** Present when a school fence finalization was attempted or skipped. */
+      readonly fence?: ScenarioLabelFenceWriteOutcome;
+    };
 
 /** Pure write-order contract: authoritative legacy must succeed before any shadow step. */
 export type ScenarioLabelWritePhase =

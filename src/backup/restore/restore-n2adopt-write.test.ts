@@ -5,6 +5,8 @@ import { IDENTITY_REGISTRY_LS_KEY } from "../../data/identity/identity-registry-
 import { buildScenarioLabelNamespacedKey } from "../../data/storage/scenario-label-migration/scenario-label-migration-protocol";
 import { serializeScenarioLabelMigrationMarkerKey } from "../../data/storage/scenario-label-migration/scenario-label-migration-marker-key";
 import { parseScenarioLabelMigrationMarkerPayloadJson } from "../../data/storage/scenario-label-migration/scenario-label-migration-marker-payload";
+import { serializeScenarioLabelN3FenceKey } from "../../data/storage/scenario-label-migration/scenario-label-n3-fence-key";
+import { parseScenarioLabelN3FenceRecordJson } from "../../data/storage/scenario-label-migration/scenario-label-n3-fence-record";
 import { establishScenarioLabelSchoolShadowFromLegacy } from "../../data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime";
 import { SCHOOL_PROFILE_LS_KEY } from "../../school-profile/school-profile-constants";
 import {
@@ -172,5 +174,193 @@ describe("N2-ADOPT-WRITE Restore post-success establishment", () => {
       status: "already_ready",
     });
     expect(JSON.stringify(ls.store)).toBe(before);
+  });
+
+  it("N3-FENCE-WRITE: successful school Restore → fence LAST + LEGACY_COMMITTED payload", async () => {
+    const fenceKey = serializeScenarioLabelN3FenceKey({
+      kind: "school",
+      schoolId: SCHOOL_A,
+    });
+    const result = await applyAppBackupRestore(
+      validatedBackup({
+        "school-profile": modulePayload("Profil", sampleProfile(SCHOOL_A)),
+        "identity-registry": modulePayload("Identita", sampleIdentity(SCHOOL_A)),
+        "phmax-scenario-label": modulePayload("Label", "RESTORED-L"),
+      }),
+      {
+        ensureSchool: async () => ({
+          status: "ready",
+          schoolId: SCHOOL_A,
+          activeSchoolId: SCHOOL_A,
+          activeSchoolYearId: null,
+          staleActiveSchoolId: false,
+          staleActiveSchoolYearId: false,
+        }),
+        verify: () => ({ ok: true }),
+      },
+    );
+    expect(result.status).toBe("success");
+    expect(ls.store[PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY]).toBe("RESTORED-L");
+    const parsed = parseScenarioLabelN3FenceRecordJson(ls.store[fenceKey] ?? null);
+    expect(parsed).toMatchObject({
+      status: "valid",
+      record: {
+        authority: "legacy",
+        protocolGeneration: 3,
+        markerSchemaVersion: 1,
+        committedRaw: { exists: true, value: "RESTORED-L" },
+      },
+    });
+  });
+
+  it("N3-FENCE-WRITE: verification fail → rolled_back + zero fence orphan", async () => {
+    const fenceKey = serializeScenarioLabelN3FenceKey({
+      kind: "school",
+      schoolId: SCHOOL_A,
+    });
+    const result = await applyAppBackupRestore(
+      validatedBackup({
+        "school-profile": modulePayload("Profil", sampleProfile(SCHOOL_A)),
+        "identity-registry": modulePayload("Identita", sampleIdentity(SCHOOL_A)),
+        "phmax-scenario-label": modulePayload("Label", "SHOULD-ROLLBACK"),
+      }),
+      {
+        ensureSchool: async () => ({
+          status: "ready",
+          schoolId: SCHOOL_A,
+          activeSchoolId: SCHOOL_A,
+          activeSchoolYearId: null,
+          staleActiveSchoolId: false,
+          staleActiveSchoolYearId: false,
+        }),
+        verify: () => ({ ok: false, detail: "forced_verification_fail" }),
+      },
+    );
+    expect(result).toEqual({
+      status: "rolled_back",
+      failurePhase: "verification",
+      cause: "forced_verification_fail",
+    });
+    expect(ls.store[fenceKey]).toBeUndefined();
+    expect(
+      Object.keys(ls.store).some((k) => k.includes("protocol-commit")),
+    ).toBe(false);
+  });
+
+  it("N3-FENCE-WRITE O8: establishment + Restore finalizer → at most one fence setItem", async () => {
+    const fenceKey = serializeScenarioLabelN3FenceKey({
+      kind: "school",
+      schoolId: SCHOOL_A,
+    });
+    let fenceSetCount = 0;
+    const storage = {
+      getItem: (key: string) => ls.getItem(key),
+      setItem: (key: string, value: string) => {
+        if (key === fenceKey) fenceSetCount += 1;
+        ls.setItem(key, value);
+      },
+      removeItem: (key: string) => ls.removeItem(key),
+    };
+    const result = await applyAppBackupRestore(
+      validatedBackup({
+        "school-profile": modulePayload("Profil", sampleProfile(SCHOOL_A)),
+        "identity-registry": modulePayload("Identita", sampleIdentity(SCHOOL_A)),
+        "phmax-scenario-label": modulePayload("Label", "ONCE"),
+      }),
+      {
+        storage,
+        ensureSchool: async () => ({
+          status: "ready",
+          schoolId: SCHOOL_A,
+          activeSchoolId: SCHOOL_A,
+          activeSchoolYearId: null,
+          staleActiveSchoolId: false,
+          staleActiveSchoolYearId: false,
+        }),
+        verify: () => ({ ok: true }),
+      },
+    );
+    expect(result.status).toBe("success");
+    // Establishment mutates → writes fence; Restore finalizer then already_committed (0 extra).
+    expect(fenceSetCount).toBe(1);
+  });
+
+  it("N3-FENCE-WRITE S5: fence throw after verify → Restore still success", async () => {
+    const fenceKey = serializeScenarioLabelN3FenceKey({
+      kind: "school",
+      schoolId: SCHOOL_A,
+    });
+    const storage = {
+      getItem: (key: string) => ls.getItem(key),
+      setItem: (key: string, value: string) => {
+        if (key === fenceKey) throw new Error("fence_blocked");
+        ls.setItem(key, value);
+      },
+      removeItem: (key: string) => ls.removeItem(key),
+    };
+    const result = await applyAppBackupRestore(
+      validatedBackup({
+        "school-profile": modulePayload("Profil", sampleProfile(SCHOOL_A)),
+        "identity-registry": modulePayload("Identita", sampleIdentity(SCHOOL_A)),
+        "phmax-scenario-label": modulePayload("Label", "SOFT-FENCE"),
+      }),
+      {
+        storage,
+        ensureSchool: async () => ({
+          status: "ready",
+          schoolId: SCHOOL_A,
+          activeSchoolId: SCHOOL_A,
+          activeSchoolYearId: null,
+          staleActiveSchoolId: false,
+          staleActiveSchoolYearId: false,
+        }),
+        verify: () => ({ ok: true }),
+      },
+    );
+    expect(result.status).toBe("success");
+    expect(ls.store[PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY]).toBe("SOFT-FENCE");
+    expect(ls.store[fenceKey]).toBeUndefined();
+  });
+
+  it("N3-FENCE-WRITE: scenario module absent + already_ready → no PREP fence invent", async () => {
+    const fenceKey = serializeScenarioLabelN3FenceKey({
+      kind: "school",
+      schoolId: SCHOOL_A,
+    });
+    // Healthy synced school tuple already present (no Restore scenario mutation).
+    ls.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "PRESERVED");
+    ls.setItem(
+      buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_A }),
+      "PRESERVED",
+    );
+    ls.setItem(
+      serializeScenarioLabelMigrationMarkerKey({ kind: "school", schoolId: SCHOOL_A }),
+      JSON.stringify({
+        schemaVersion: 1,
+        authority: "legacy",
+        mirrorHealth: "synced",
+        authoritativePresence: "present",
+      }),
+    );
+    const result = await applyAppBackupRestore(
+      validatedBackup({
+        "school-profile": modulePayload("Profil", sampleProfile(SCHOOL_A)),
+        "identity-registry": modulePayload("Identita", sampleIdentity(SCHOOL_A)),
+      }),
+      {
+        ensureSchool: async () => ({
+          status: "ready",
+          schoolId: SCHOOL_A,
+          activeSchoolId: SCHOOL_A,
+          activeSchoolYearId: null,
+          staleActiveSchoolId: false,
+          staleActiveSchoolYearId: false,
+        }),
+        verify: () => ({ ok: true }),
+        establishScenarioSchoolShadow: () => ({ status: "already_ready" }),
+      },
+    );
+    expect(result.status).toBe("success");
+    expect(ls.store[fenceKey]).toBeUndefined();
   });
 });

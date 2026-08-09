@@ -19,6 +19,12 @@ import {
 } from "./data/storage/scenario-label-migration/scenario-label-migration-types";
 import { SCENARIO_LABEL_MIGRATION_MARKER_SEGMENT } from "./data/storage/scenario-label-migration/scenario-label-migration-marker-key";
 import { NAMESPACED_STORAGE_V2_ROOT_PREFIX } from "./data/storage/namespaced-storage-schema";
+import {
+  SCENARIO_LABEL_N3_FENCE_PROTOCOL_GENERATION,
+  SCENARIO_LABEL_N3_FENCE_RESOURCE,
+  SCENARIO_LABEL_N3_FENCE_SCHEMA_VERSION,
+  SCENARIO_LABEL_N3_FENCE_SEGMENT,
+} from "./data/storage/scenario-label-migration/scenario-label-n3-fence-types";
 
 export type PhmaxModuleId = keyof typeof PHMAX_MODULE_AUTOSAVE_LS_KEYS;
 
@@ -92,9 +98,11 @@ function incomingScenarioLabel(payload: PhmaxIsHandoffPayload): string | null {
  *
  * Does NOT embed generation-time schoolId. Target is resolved when the snippet runs.
  * Missing Identity → unbound; corrupted/unavailable → legacy only (shadow skipped).
+ * School target: legacy → v2 → verify → v1 marker → FENCE LAST (protocolGeneration 3).
+ * Unbound: no fence certificate.
  */
 export function buildScenarioLabelLiveApplySnippetFragment(label: string): string {
-  // Keep key grammar aligned with N1/N2 serializers; resolve schoolId only at apply time.
+  // Keep key grammar aligned with N1/N2/N3 serializers; resolve schoolId only at apply time.
   const legacyKey = JSON.stringify(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY);
   const identityKey = JSON.stringify(IDENTITY_REGISTRY_LS_KEY);
   const labelLit = JSON.stringify(label);
@@ -102,6 +110,10 @@ export function buildScenarioLabelLiveApplySnippetFragment(label: string): strin
   const moduleId = JSON.stringify(SCENARIO_LABEL_MIGRATION_MODULE_ID);
   const resourceId = JSON.stringify(SCENARIO_LABEL_MIGRATION_RESOURCE_ID);
   const markerSeg = JSON.stringify(SCENARIO_LABEL_MIGRATION_MARKER_SEGMENT);
+  const fenceSeg = JSON.stringify(SCENARIO_LABEL_N3_FENCE_SEGMENT);
+  const fenceResource = JSON.stringify(SCENARIO_LABEL_N3_FENCE_RESOURCE);
+  const fenceSchema = String(SCENARIO_LABEL_N3_FENCE_SCHEMA_VERSION);
+  const fenceGen = String(SCENARIO_LABEL_N3_FENCE_PROTOCOL_GENERATION);
   return [
     `(function(label){`,
     `localStorage.setItem(${legacyKey},label);`,
@@ -111,8 +123,12 @@ export function buildScenarioLabelLiveApplySnippetFragment(label: string): strin
     `var mod=${moduleId};`,
     `var res=${resourceId};`,
     `var mseg=${markerSeg};`,
+    `var fseg=${fenceSeg};`,
+    `var fres=${fenceResource};`,
     `var v2Key=null;`,
     `var markerKey=null;`,
+    `var fenceKey=null;`,
+    `var schoolSid=null;`,
     `if(idRaw==null||!String(idRaw).trim()){`,
     `v2Key=v2Root+"unbound:module:"+mod+":resource:"+res;`,
     `markerKey=v2Root+mseg+":"+mod+":"+res+":unbound";`,
@@ -121,14 +137,24 @@ export function buildScenarioLabelLiveApplySnippetFragment(label: string): strin
     `var sid=reg&&reg.schoolId;`,
     `var uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;`,
     `if(typeof sid==="string"&&uuid.test(sid)&&sid===sid.toLowerCase()&&reg.schemaVersion===1){`,
+    `schoolSid=sid;`,
     `v2Key=v2Root+"school:"+sid+":module:"+mod+":resource:"+res;`,
     `markerKey=v2Root+mseg+":"+mod+":"+res+":school:"+sid;`,
+    `fenceKey=v2Root+fseg+":"+mod+":"+res+":school:"+sid;`,
     `}`,
     `}`,
     `if(v2Key&&markerKey){`,
     `localStorage.setItem(v2Key,label);`,
     `if(localStorage.getItem(v2Key)===label){`,
     `localStorage.setItem(markerKey,JSON.stringify({schemaVersion:1,authority:"legacy",mirrorHealth:"synced",authoritativePresence:"present"}));`,
+    `if(fenceKey&&schoolSid){`,
+    `try{`,
+    `var fencePayload={schemaVersion:${fenceSchema},protocolGeneration:${fenceGen},authority:"legacy",markerSchemaVersion:1,schoolId:schoolSid,resource:fres,committedRaw:{exists:true,value:label}};`,
+    `localStorage.setItem(fenceKey,JSON.stringify(fencePayload));`,
+    `var rb=localStorage.getItem(fenceKey);`,
+    `if(!rb||JSON.parse(rb).protocolGeneration!==${fenceGen}){/* soft fence verify fail — legacy already written */}`,
+    `}catch(_fe){/* soft fence failure */}`,
+    `}`,
     `}`,
     `}`,
     `}catch(_e){}`,

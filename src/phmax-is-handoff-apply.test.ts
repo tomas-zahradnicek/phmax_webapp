@@ -162,6 +162,22 @@ describe("phmax-is-handoff-apply", () => {
     expect(
       store.has(buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_A })),
     ).toBe(false);
+    // N3-FENCE-WRITE: school snippet writes fence LAST with protocolGeneration 3.
+    const fenceKey = `reditelsky-pruvodce:v2:protocol-commit:phmax-scenario-label:value:school:${SCHOOL_B}`;
+    const fenceRaw = store.get(fenceKey);
+    expect(fenceRaw).toBeTruthy();
+    const fence = JSON.parse(fenceRaw!) as {
+      protocolGeneration: number;
+      authority: string;
+      committedRaw: { exists: boolean; value?: string };
+    };
+    expect(fence.protocolGeneration).toBe(3);
+    expect(fence.authority).toBe("legacy");
+    expect(fence.committedRaw).toEqual({ exists: true, value: "NEW" });
+    // Fence setItem comes after marker setItem in the generated fragment.
+    expect(fragment.indexOf("localStorage.setItem(fenceKey")).toBeGreaterThan(
+      fragment.indexOf("localStorage.setItem(markerKey"),
+    );
   });
 
   it("C: missing destination Identity → unbound", () => {

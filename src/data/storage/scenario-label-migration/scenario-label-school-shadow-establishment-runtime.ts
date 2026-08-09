@@ -25,6 +25,7 @@ import {
   type SchoolShadowEstablishmentMarkerState,
   type SchoolShadowEstablishmentResult,
 } from "./scenario-label-school-shadow-establishment";
+import { finalizeScenarioLabelLegacyFenceCertificate } from "./scenario-label-n3-fence-finalize";
 
 export type ScenarioLabelEstablishmentStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -220,13 +221,28 @@ export function establishScenarioLabelSchoolShadowFromLegacy(
     finalLegacyRaw,
   );
 
-  return classifySchoolShadowEstablishmentOutcome({
+  const outcome = classifySchoolShadowEstablishmentOutcome({
     plan,
     schoolWriteSucceeded: true,
     schoolVerifyMatched: true,
     finalLegacyMatchesVerifiedSchool: true,
     markerPersistSucceeded,
   });
+
+  // Fence LAST only after a real mutation produced a certifiable synced tuple.
+  // already_ready returns earlier with ZERO fence writes (PREP owns bootstrap).
+  if (outcome.status === "established") {
+    try {
+      finalizeScenarioLabelLegacyFenceCertificate({
+        storage,
+        schoolId: canonical.schoolId,
+      });
+    } catch {
+      // Soft metadata only — establishment business outcome unchanged.
+    }
+  }
+
+  return outcome;
 }
 
 export type RunScenarioLabelEstablishmentAfterSchoolReadyInput =

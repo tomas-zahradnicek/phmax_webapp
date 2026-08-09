@@ -11,6 +11,7 @@ import {
   establishScenarioLabelSchoolShadowFromLegacy,
   type ScenarioLabelEstablishmentStorage,
 } from "../../data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime";
+import { finalizeScenarioLabelLegacyFenceCertificate } from "../../data/storage/scenario-label-migration/scenario-label-n3-fence-finalize";
 import {
   applyRestoreStorageTransaction,
   type ApplyRestoreStorageTransactionDependencies,
@@ -275,13 +276,30 @@ export async function applyAppBackupRestore(
 
   // N2-ADOPT-WRITE: post-verification best-effort school-shadow establishment.
   // Past rollback boundary — soft failure / throw MUST NOT downgrade Restore success.
+  // N3-FENCE-WRITE: fence LAST also only here (never inside raw txn / pre-verify).
   try {
     const identity = readIdentityRegistryFromStorage(storage);
     if (identity.ok && identity.registry != null) {
       const establish =
         dependencies.establishScenarioSchoolShadow ??
         establishScenarioLabelSchoolShadowFromLegacy;
-      establish(identity.registry.schoolId, { storage });
+      const establishResult = establish(identity.registry.schoolId, { storage });
+
+      // Fence follows Restore scenario school mutation OR establishment mutation.
+      // already_ready + module-absent + no school Restore mutation → PREP (0 fence).
+      const restoreTouchedSchool =
+        plan.expectedScenarioLabelTarget?.kind === "school";
+      const establishmentMutated = establishResult.status === "established";
+      if (restoreTouchedSchool || establishmentMutated) {
+        try {
+          finalizeScenarioLabelLegacyFenceCertificate({
+            storage,
+            schoolId: identity.registry.schoolId,
+          });
+        } catch {
+          // Soft fence metadata only.
+        }
+      }
     }
   } catch {
     // Soft metadata only — verified business Restore remains successful.

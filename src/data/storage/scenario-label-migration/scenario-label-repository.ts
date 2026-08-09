@@ -1,3 +1,4 @@
+import type { EntityId } from "../../../domain/shared/entity-id";
 import {
   readIdentityRegistry,
   readIdentityRegistryFromStorage,
@@ -19,9 +20,12 @@ import { rawStoredTextEqual, rawStoredTextFromNullable } from "./scenario-label-
 import { resolveScenarioLabelMigrationTarget } from "./scenario-label-migration-target";
 import type {
   RawStoredText,
+  ScenarioLabelFenceWriteOutcome,
   ScenarioLabelMigrationTarget,
   ScenarioLabelWriteResult,
 } from "./scenario-label-migration-types";
+import { finalizeScenarioLabelLegacyFenceCertificate } from "./scenario-label-n3-fence-finalize";
+import type { ScenarioLabelFenceFinalizeResult } from "./scenario-label-n3-fence-finalize";
 
 /** Minimal storage surface used by the N2 scenario-label executor. */
 export type ScenarioLabelStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -99,6 +103,51 @@ function persistMarker(
     return true;
   } catch {
     return false;
+  }
+}
+
+function mapFenceFinalizeResult(
+  result: ScenarioLabelFenceFinalizeResult,
+): ScenarioLabelFenceWriteOutcome {
+  switch (result.status) {
+    case "already_committed":
+      return "already_committed";
+    case "committed":
+      return "committed";
+    case "skipped":
+      return "skipped";
+    case "not_certifiable":
+      return "not_certifiable";
+    case "incomplete":
+      return "incomplete";
+    case "verify_failed":
+      return "verify_failed";
+    case "concurrent_drift":
+      return "concurrent_drift";
+    case "storage_unavailable":
+      return "storage_unavailable";
+    default: {
+      const exhaustive: never = result;
+      void exhaustive;
+      return "incomplete";
+    }
+  }
+}
+
+/**
+ * Soft fence finalization after a school-synced mutation.
+ * Fence failure never overturns business success.
+ */
+function finalizeSchoolFenceSoft(
+  storage: ScenarioLabelStorage,
+  schoolId: EntityId,
+): ScenarioLabelFenceWriteOutcome {
+  try {
+    return mapFenceFinalizeResult(
+      finalizeScenarioLabelLegacyFenceCertificate({ storage, schoolId }),
+    );
+  } catch {
+    return "incomplete";
   }
 }
 
@@ -210,13 +259,16 @@ export function writeScenarioLabelRaw(
   const targetResolution = resolveScenarioLabelMigrationTarget(readIdentity());
 
   if (targetResolution.status === "skipped") {
-    return planScenarioLabelShadowOutcome({
+    const planned = planScenarioLabelShadowOutcome({
       targetResolution,
       authoritativeWriteSucceeded: true,
       shadowWriteSucceeded: false,
       authoritativeRaw: desiredRaw,
       shadowRaw: { exists: false },
     });
+    return planned.status === "success"
+      ? { ...planned, fence: "skipped" }
+      : planned;
   }
 
   const shadow = applyShadowPipeline(storage, targetResolution.target, desiredRaw);
@@ -231,6 +283,24 @@ export function writeScenarioLabelRaw(
 
   // Marker persist failure after verified shadow → still success + synced
   // (PROTO: shadow synced = data mirror health; marker missing remains N3 fail-closed).
+  // Fence LAST only when school target + shadow synced (marker may still be incomplete → not_certifiable).
+  if (
+    planned.status === "success" &&
+    planned.shadow === "synced" &&
+    targetResolution.target.kind === "school"
+  ) {
+    const fence = finalizeSchoolFenceSoft(storage, targetResolution.target.schoolId);
+    return { ...planned, fence };
+  }
+
+  if (planned.status === "success" && targetResolution.target.kind === "unbound") {
+    return { ...planned, fence: "skipped" };
+  }
+
+  if (planned.status === "success" && planned.shadow !== "synced") {
+    return { ...planned, fence: "not_certifiable" };
+  }
+
   return planned;
 }
 
@@ -323,16 +393,19 @@ export function clearScenarioLabelLifecycle(
     return {
       status: "success",
       shadow: unboundOutcome === "synced" ? "skipped" : "dirty",
+      fence: "skipped",
     };
   }
 
   if (targetResolution.target.kind === "unbound") {
-    return { status: "success", shadow: unboundOutcome };
+    return { status: "success", shadow: unboundOutcome, fence: "skipped" };
   }
 
   const schoolOutcome = clearOneTargetShadow(storage, targetResolution.target);
   if (unboundOutcome === "dirty" || schoolOutcome === "dirty") {
-    return { status: "success", shadow: "dirty" };
+    return { status: "success", shadow: "dirty", fence: "not_certifiable" };
   }
-  return { status: "success", shadow: "synced" };
+
+  const fence = finalizeSchoolFenceSoft(storage, targetResolution.target.schoolId);
+  return { status: "success", shadow: "synced", fence };
 }
