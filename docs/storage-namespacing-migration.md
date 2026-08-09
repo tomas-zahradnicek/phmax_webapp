@@ -1,4 +1,4 @@
-# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO)
+# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO / N3-FENCE-PROTO)
 
 Pilot resource: `phmax-scenario-label` / `value`  
 Legacy authoritative key: `phmax-school-scenario-label`
@@ -228,9 +228,142 @@ Backup **omits** authority metadata; logical value only.
 
 ### Roadmap after N3-PROTO
 
-`N3-FENCE` → `N3-PREP` → `N3-AWARE` → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
+`N3-PROTO` ✅ → `N3-FENCE-PROTO` → `N3-FENCE-WRITE` → `N3-PREP` → `N3-AWARE` → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
 
 N3-PROTO must not jump into any of these runtime phases.
+
+## N3-FENCE-PROTO (persistent commit certificate — pure protocol)
+
+Pilot remains: `phmax-scenario-label` / `value` on `school:<canonicalUuid>` only.
+
+**Purpose:** a persistent per-target commit certificate so a future N3 runtime can recognize whether the current raw + marker state was completed by a fence-aware writer.
+
+**Threat model:** already-open old N2 tab, saved console handoff snippet, other stale same-origin writers. Not a hostile attacker.
+
+**Client-only hard revocation of already-running old JS is impossible.** Safety bar is detect → fail closed → recover — not impossible write denial. Tab registry / BroadcastChannel alone cannot provide correctness (saved snippets survive after all old tabs are gone).
+
+### Fence ≠ business authority
+
+| Concern | Owner |
+|---------|--------|
+| legacy vs namespaced **business** authority | migration marker |
+| whether current physical state + marker was committed by a compatible protocol | **fence certificate** |
+
+Fence `committedRaw` is **verification metadata only** — never an alternate business read source. Fence must not become a source of business value.
+
+### Fence key
+
+```
+reditelsky-pruvodce:v2:protocol-commit:phmax-scenario-label:value:school:<canonicalUuid>
+```
+
+- under `reditelsky-pruvodce:v2:` root
+- outside business `StorageAddress` grammar
+- outside `migration-state`
+- per school / module / resource
+- canonical UUID only (no unbound / schoolYear)
+
+Ownership facts (current runtimes unchanged):
+
+| Surface | Fence key |
+|---------|-----------|
+| Level B / post-export clear | **does not** target it |
+| Restore scenario physical ops | **do not** touch it |
+| Full Reset v2-prefix clear | **removes** it |
+| Central Backup | **omits** it (local protocol metadata) |
+
+Old N2 repository / handoff / snippet / Profile/VZ establishment / Level B / Restore must not know or remove the fence key. Full Reset is the intended exception.
+
+### Fence record schema (independent versions)
+
+```json
+{
+  "schemaVersion": 1,
+  "protocolGeneration": 3,
+  "authority": "legacy" | "namespaced",
+  "markerSchemaVersion": 1 | 2,
+  "schoolId": "<canonicalUuid>",
+  "resource": "phmax-scenario-label/value",
+  "committedRaw": { "exists": false } | { "exists": true, "value": "..." }
+}
+```
+
+- `schemaVersion` = fence serialization version
+- `protocolGeneration` = compatible writer generation
+- exact `RawStoredText` only (missing ≠ present `""`; no trim / hash / digest)
+- authority/markerSchema coherence required (`legacy`↔v1, `namespaced`↔v2)
+- payload `schoolId` / `resource` must bind to key/target
+
+**Revision/generation alone is invalid proof** — an old N2 writer can change raw without changing generation. Fence readiness requires exact `committedRaw` comparison.
+
+### State machine
+
+`UNESTABLISHED` | `LEGACY_COMMITTED` | `NAMESPACED_COMMITTED` | `VIOLATED` | `INVALID` | `UNAVAILABLE`
+
+| State | Meaning |
+|-------|---------|
+| `UNESTABLISHED` | fence missing + legacy/pre-cutover → business legacy may continue; cutover **not** fence-ready |
+| `LEGACY_COMMITTED` | exact legacy cert + synced v1 marker + exact raw equality → material `fenceReady` for pre-cutover |
+| `NAMESPACED_COMMITTED` | exact namespaced cert + synced v2 marker + exact raw equality |
+| `VIOLATED` | valid cert exists but certified tuple changed (raw / authority / presence / equal-copy downgrade / divergent write) |
+| `INVALID` | malformed fence / target mismatch / payload↔key mismatch |
+| `UNAVAILABLE` | storage/read unavailable (distinct from `UNESTABLISHED`) |
+
+Namespaced marker + no valid fence → **never** `NAMESPACED_COMMITTED` (blocked/violated).
+
+Old writer examples (all → `VIOLATED`, no silent recertification):
+
+- cert namespaced A + old N2 writes B/B + v1 legacy marker
+- cert namespaced A + raw still A/A but marker downgraded to v1 legacy
+- cert A + legacy B while v2 shadow remains A
+
+Recovery is **deferred**: equal-copy may later allow explicit re-certification; divergent must block / manual recovery. No automatic recovery in PROTO.
+
+### Fence written LAST
+
+Future FENCE-WRITE order:
+
+- **legacy:** legacy data → school v2 shadow → verify → v1 legacy marker → **fence last**
+- **namespaced:** school v2 → legacy mirror → verify → v2 namespaced marker → **fence last**
+
+Fence-first is forbidden. Marker changes with stale/missing fence → next aware runtime must **not** accept state as committed.
+
+### Data + fence eligibility (not full production cutover)
+
+`planScenarioLabelAuthorityCutover.status === "ready"` remains **lower-level DATA PLANE** readiness.
+
+N3-FENCE-PROTO composes:
+
+- N3 school-only cutover readiness (`ready_for_cutover`)
+- fence assessment `LEGACY_COMMITTED`
+- same school target
+
+→ `eligible` at **data+fence** layer only.
+
+Does **not** use old N2 `assessScenarioLabelCutoverReadiness` (historically permits unbound READY).
+Does **not** claim entire production system is ready — full cutover also requires **N3-AWARE** completion.
+
+BroadcastChannel / storage events may be an optional secondary live UX layer later — **not** a correctness prerequisite.
+
+### N3-FENCE-PROTO status
+
+- **0 production call sites**, **0 storage I/O**, **0 runtime lifecycle wiring**
+- production cutover remains **impossible** after this phase
+- **next = N3-FENCE-WRITE**
+
+### N3-FENCE-WRITE stop conditions (next audit)
+
+Before FENCE-WRITE:
+
+1. exact writer inventory
+2. certificate update LAST semantics
+3. raw transaction / failure behavior
+4. Restore certificate transaction
+5. clear certificate update
+6. handoff / snippet new generation
+7. N2-ADOPT establishment certificate update
+8. business authority stays legacy
+9. no routing through fence
 
 ## Rollback / deploy safety
 
@@ -242,11 +375,16 @@ Rolling N2-ADOPT-WRITE back to PROTO leaves legacy authoritative; any school sha
 
 N3-PROTO likewise adds **no runtime hooks**; production remains N2-ADOPT-WRITE business behavior after merge.
 
+N3-FENCE-PROTO likewise adds **no runtime hooks**; production remains N2-ADOPT-WRITE business behavior. Fence certificates are defined/tested only — not written.
+
+**Deployment rollback** (strict legacy==v2 mirror) remains distinct from **already-open old tab / saved snippet** (detected by fence certificate mismatch).
+
 ## Not implemented
 
 - N3 namespaced-authoritative production read / write / cutover
-- N3-FENCE / PREP / AWARE / CUTOVER-WRITE / HARDEN
+- N3-FENCE-WRITE / PREP / AWARE / CUTOVER-WRITE / HARDEN
 - N4 legacy cleanup
 - Cross-module namespacing
 - Copy-on-read / mount ensure / N3 bootstrap-on-read
-- BroadcastChannel / cross-tab lock implementation
+- BroadcastChannel / cross-tab lock / tab registry / service worker implementation
+- Automatic fence recovery UX
