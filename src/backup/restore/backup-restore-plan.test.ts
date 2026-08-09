@@ -390,8 +390,10 @@ describe("Restore-1 parse / validate / plan (NO WRITES)", () => {
     );
     if (validated.status !== "validated") return;
     const plan = buildAppBackupRestorePlan(validated, emptyEnv());
-    expect(plan.operations).toHaveLength(1);
-    expect(plan.operations[0]?.action).toBe("set");
+    // N2-WRITE: legacy + unbound v2 + unbound marker
+    expect(plan.operations).toHaveLength(3);
+    expect(plan.operations.every((op) => op.action === "set")).toBe(true);
+    expect(plan.expectedScenarioLabelTarget).toEqual({ kind: "unbound" });
     expect(plan.modules.filter((m) => m.kind === "present_valid")).toHaveLength(1);
   });
 

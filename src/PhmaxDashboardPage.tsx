@@ -82,9 +82,9 @@ import {
 } from "./phmax-dashboard-cross-phmax-export";
 import {
   buildSchoolScenarioExportPayload,
-  PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
   readSchoolScenarioLabel,
 } from "./phmax-school-scenario-export";
+import { writeScenarioLabelFromUiInputOrThrow } from "./data/storage/scenario-label-migration/scenario-label-repository";
 import { buildPhmaxIsHandoffPayload, type PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import type { HandoffApplyResult, PhmaxModuleId } from "./phmax-is-handoff-apply";
 import { parseImportHandoffFileList } from "./phmax-import-handoff-file";
@@ -808,10 +808,10 @@ export function PhmaxDashboardPage({
 
   const handleImportApplied = useCallback(
     (payload: PhmaxIsHandoffPayload, result: HandoffApplyResult) => {
-      const label = payload.schoolScenario.scenarioLabel?.trim();
-      if (label) {
-        localStorage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, label);
-        setScenarioLabel(label);
+      // Storage write is owned by applyPhmaxIsHandoffToLocalStorage (N2-WRITE).
+      // Refresh React state only — never dual-write scenario label here.
+      if (result.scenarioLabel) {
+        setScenarioLabel(result.scenarioLabel);
       }
       setRefreshAt(new Date());
       dispatchPhmaxImportApplied();
@@ -1005,12 +1005,8 @@ export function PhmaxDashboardPage({
   }, [crossPhmax, rows, scenarioLabel, auditCoherenceWarnings, publishNotice]);
 
   const persistScenarioLabel = useCallback((label: string) => {
-    const trimmed = label.trim();
-    if (typeof localStorage !== "undefined") {
-      if (trimmed) localStorage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, trimmed);
-      else localStorage.removeItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY);
-    }
-    setScenarioLabel(trimmed);
+    writeScenarioLabelFromUiInputOrThrow(label);
+    setScenarioLabel(label.trim());
   }, []);
 
   const downloadCrossPhmaxJson = useCallback(() => {

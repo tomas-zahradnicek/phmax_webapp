@@ -28,6 +28,7 @@ import {
   PHMAX_MODULE_AUTOSAVE_LS_KEYS,
   PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
 } from "./phmax-school-scenario-export";
+import { clearScenarioLabelLifecycle } from "./data/storage/scenario-label-migration/scenario-label-repository";
 
 /**
  * Level B — Calculator Clear inventář.
@@ -78,6 +79,7 @@ const DASH_VISIT_PREFIX = "phmax-dash-last-visit-";
 /**
  * Klíče, které školní scénář / IS handoff JSON skutečně nese v `moduleSnapshots` + label.
  * Post-export clear smí mazat jen tuto množinu (CLEAR_SCOPE ⊆ export).
+ * Scenario label legacy key is cleared via {@link clearScenarioLabelLifecycle} (shadow-aware).
  */
 export const PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS: readonly string[] = [
   PHMAX_MODULE_AUTOSAVE_LS_KEYS.pv,
@@ -85,7 +87,6 @@ export const PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS: readonly string[] = [
   PHMAX_MODULE_AUTOSAVE_LS_KEYS.zs,
   PHMAX_MODULE_AUTOSAVE_LS_KEYS.ss,
   PHMAX_MODULE_AUTOSAVE_LS_KEYS.nv75,
-  PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
 ];
 
 function removeListedKeys(keys: readonly string[]): number {
@@ -104,10 +105,27 @@ function removeListedKeys(keys: readonly string[]): number {
   return removed;
 }
 
+function clearScenarioLabelShadowAwareCounted(): number {
+  if (typeof localStorage === "undefined") return 0;
+  const before = localStorage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY) != null ? 1 : 0;
+  try {
+    clearScenarioLabelLifecycle();
+  } catch {
+    /* ignore — Level B / post-export historically swallow storage errors */
+  }
+  const after = localStorage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY) != null ? 1 : 0;
+  return before > after ? 1 : 0;
+}
+
 /** Level B: smaže data kalkulaček. SchoolProfile / Identity / AppContext / VZ nezapisuje ani nemaže. */
 export function clearAllPhmaxLocalStorage(): number {
   if (typeof localStorage === "undefined") return 0;
-  let removed = removeListedKeys(PHMAX_APP_LOCAL_STORAGE_KEYS);
+  // Scenario label is handled by shadow-aware lifecycle (legacy + unbound [+ school]).
+  const keysWithoutScenario = PHMAX_APP_LOCAL_STORAGE_KEYS.filter(
+    (key) => key !== PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
+  );
+  let removed = removeListedKeys(keysWithoutScenario);
+  removed += clearScenarioLabelShadowAwareCounted();
   try {
     const toDrop: string[] = [];
     for (let i = 0; i < localStorage.length; i += 1) {
@@ -129,5 +147,7 @@ export function clearAllPhmaxLocalStorage(): number {
  * (školní scénář JSON / IS handoff). Named snapshots ani SchoolProfile nemaže.
  */
 export function clearSchoolScenarioExportWorkingLocalStorage(): number {
-  return removeListedKeys(PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS);
+  let removed = removeListedKeys(PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS);
+  removed += clearScenarioLabelShadowAwareCounted();
+  return removed;
 }

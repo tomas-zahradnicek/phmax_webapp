@@ -1,4 +1,7 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { NAMESPACED_STORAGE_V2_ROOT_PREFIX } from "./data/storage/namespaced-storage-schema";
 import {
   APPLICATION_LOCAL_STORAGE_EXACT_KEYS,
   APPLICATION_LOCAL_STORAGE_PREFIXES,
@@ -65,6 +68,7 @@ describe("application storage delete registry", () => {
     expect(APPLICATION_LOCAL_STORAGE_PREFIXES).toEqual([
       "phmax-dash-last-visit-",
       "vyrocni-zprava-diagnostic-backup-v1:",
+      NAMESPACED_STORAGE_V2_ROOT_PREFIX,
     ]);
     expect(APPLICATION_SESSION_STORAGE_EXACT_KEYS).toHaveLength(6);
     expect(APPLICATION_SESSION_STORAGE_PREFIXES).toEqual([]);
@@ -334,9 +338,45 @@ describe("application storage delete registry", () => {
       key: "vyrocni-zprava-diagnostic-backup-v1:*",
       operation: "enumerate",
     });
+    expect(result.failed).toContainEqual({
+      storage: "localStorage",
+      key: "reditelsky-pruvodce:v2:*",
+      operation: "enumerate",
+    });
     expect(local.getItem(exactKey)).toBeNull();
     expect(local.getItem(prefixKey)).toBe("2026-08-08T10:00:00Z");
     expect(local.getItem("third-party-example")).toBe("KEEP");
     expect(local.removeAttempts).not.toContain("third-party-example");
+  });
+
+  it("Full Reset removes v2 scenario keys and markers; preserves foreign key", () => {
+    const local = new MemoryStorage({
+      "phmax-school-scenario-label": "LEGACY",
+      "reditelsky-pruvodce:v2:unbound:module:phmax-scenario-label:resource:value": "U",
+      "reditelsky-pruvodce:v2:school:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa:module:phmax-scenario-label:resource:value":
+        "S",
+      "reditelsky-pruvodce:v2:migration-state:phmax-scenario-label:value:unbound": '{"schemaVersion":1}',
+      "foreign-test-key": "KEEP",
+    });
+    const result = clearAllApplicationStorage({
+      localStorage: local,
+      sessionStorage: new MemoryStorage(),
+    });
+    expect(result.ok).toBe(true);
+    expect(local.getItem("phmax-school-scenario-label")).toBeNull();
+    expect(
+      local.getItem("reditelsky-pruvodce:v2:unbound:module:phmax-scenario-label:resource:value"),
+    ).toBeNull();
+    expect(
+      local.getItem(
+        "reditelsky-pruvodce:v2:school:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa:module:phmax-scenario-label:resource:value",
+      ),
+    ).toBeNull();
+    expect(
+      local.getItem("reditelsky-pruvodce:v2:migration-state:phmax-scenario-label:value:unbound"),
+    ).toBeNull();
+    expect(local.getItem("foreign-test-key")).toBe("KEEP");
+    const src = readFileSync(fileURLToPath(new URL("./application-storage-registry.ts", import.meta.url)), "utf8");
+    expect(src).not.toContain("localStorage.clear()");
   });
 });

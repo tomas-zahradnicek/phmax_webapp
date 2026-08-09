@@ -144,14 +144,13 @@ describe("clearSchoolScenarioExportWorkingLocalStorage (post-export scope)", () 
     vi.unstubAllGlobals();
   });
 
-  it("scope je přesně autosave modulů + scenario label ze školního scénáře", () => {
+  it("scope je přesně autosave modulů; scenario label clearí shadow-aware lifecycle", () => {
     expect(PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS).toEqual([
       PHMAX_MODULE_AUTOSAVE_LS_KEYS.pv,
       PHMAX_MODULE_AUTOSAVE_LS_KEYS.sd,
       PHMAX_MODULE_AUTOSAVE_LS_KEYS.zs,
       PHMAX_MODULE_AUTOSAVE_LS_KEYS.ss,
       PHMAX_MODULE_AUTOSAVE_LS_KEYS.nv75,
-      PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
     ]);
   });
 
@@ -189,6 +188,7 @@ describe("clearSchoolScenarioExportWorkingLocalStorage (post-export scope)", () 
       }
       expect(localStorage.getItem(key)).toBeNull();
     }
+    expect(localStorage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeNull();
 
     expect(localStorage.getItem(SCHOOL_PROFILE_LS_KEY)).toBe(profile);
     expect(localStorage.getItem(NAMED_SNAPSHOTS_LS_KEY)).toBe(named);
@@ -202,7 +202,10 @@ describe("clearSchoolScenarioExportWorkingLocalStorage (post-export scope)", () 
       Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i)!),
     );
     for (const key of beforeKeys) {
-      if ((PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS as readonly string[]).includes(key)) {
+      if (
+        (PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS as readonly string[]).includes(key) ||
+        key === PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY
+      ) {
         expect(afterKeys.has(key)).toBe(false);
       } else {
         expect(afterKeys.has(key)).toBe(true);
