@@ -1,4 +1,4 @@
-# Storage namespacing migration (N2 / N2-HARDEN)
+# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT-PROTO)
 
 Pilot resource: `phmax-scenario-label` / `value`  
 Legacy authoritative key: `phmax-school-scenario-label`
@@ -13,8 +13,9 @@ Legacy authoritative key: `phmax-school-scenario-label`
 - **No copy-on-read.** Reads never create v2 keys.
 - **No cutover.** UI and Backup continue to read legacy only.
 - **No Dashboard mount ensure.** Opening Dashboard without an edit does not create v2 keys or markers.
-- **No adoption.** Unbound data is not moved to school scope in N2 (see N2-ADOPT later).
+- **No unbound→school value copy.** Unbound is never the source of school shadow desired state (see N2-ADOPT-PROTO).
 - **N2-HARDEN** does **not** switch authority and does **not** bootstrap on read.
+- **N2-ADOPT-PROTO** types/tests the school-shadow establishment protocol only — **0 production hooks**.
 
 ## Raw semantics
 
@@ -103,9 +104,40 @@ Removes all v2 business keys and migration markers. Foreign keys preserved. No `
 
 READY only when: target resolved, marker valid + `authority=legacy` + `mirrorHealth=synced`, fresh legacy/v2 raw equality, and marker presence matches fresh legacy presence.
 
-## Next phases (not in N2-HARDEN)
+## N2-ADOPT-PROTO (school-shadow establishment)
 
-- **N2-ADOPT:** unbound→school when Identity becomes known (explicit; no cutover).
+Roadmap label remains **N2-ADOPT**. Actual semantics are **school-shadow establishment** (not “unbound adoption” / move / migration copy).
+
+| Contract | Rule |
+|----------|------|
+| Source of truth | **Fresh LEGACY raw** only |
+| Unbound value | **Never copied** into school shadow (no resurrection from unbound) |
+| Unbound key / marker | **PRESERVE** (PROTO declares school-only ops) |
+| Target | `school:<canonical lowercase UUID>` only — never `unbound` / `schoolYear` |
+| Authority | **No cutover** — legacy remains authoritative |
+| Runtime | **0 production hooks** in PROTO (Profile / VZ / Restore / Dashboard / Backup untouched) |
+| Rollback | Trivial: PROTO has no runtime wiring, so deploy rollback cannot auto-establish shadows |
+
+Desired school state examples:
+
+- legacy `L2`, unbound `L1` → desired school = `L2`
+- legacy missing, unbound stale `U` → desired school = **missing** (synchronized absence)
+
+Future WRITE phase order (documented; not executed in PROTO):
+
+`legacy_read_initial` → `target_inspect` → `marker_invalidate` → `school_shadow_write` → `school_shadow_verify` → `legacy_read_final` → `marker_persist`
+
+Healthy synced marker may be persisted only if **final** fresh legacy equals verified school shadow (cross-tab change ⇒ not ready / dirty — marker must not lie).
+
+### N2-ADOPT-WRITE stop conditions (must resolve before WRITE)
+
+1. **Restore rollback ordering** — establishment must not write school shadow outside Restore rollback protection in a way that survives a failed Restore.
+2. **Lifecycle ownership** — choose **one** post-ensure ownership site; avoid redundant double hooks on nested `ensureVzSchoolYearPlatformBinding` → `ensureSchoolPlatformBinding` without an explicit policy.
+3. **Soft UX** — Profile/VZ business persistence must not fail solely because establishment metadata failed (`marker_incomplete` / soft `shadow_dirty`).
+
+## Next phases (not in this PROTO)
+
+- **N2-ADOPT-WRITE:** first automatic school-shadow establishment executor (after stop conditions above).
 - **N3:** namespaced authority only after readiness; browsers that skipped N2 must bootstrap legacy→v2 before cutover.
 - **N4:** legacy cleanup (later).
 
@@ -113,10 +145,12 @@ READY only when: target resolved, marker valid + `authority=legacy` + `mirrorHea
 
 Because N2 keeps legacy authoritative and reads remain legacy, rolling the app back to pre-N2 / pre-HARDEN code leaves users on the same legacy values. Orphan v2 keys may remain until a later Full Reset / N4 cleanup.
 
+N2-ADOPT-PROTO adds **no runtime hooks**, so rolling back a PROTO-only deploy cannot start automatic school-shadow establishment.
+
 ## Not implemented
 
+- N2-ADOPT-WRITE automatic establishment executor / lifecycle hooks
 - N3 namespaced-authoritative read / cutover
 - N4 legacy cleanup
 - Cross-module namespacing
-- Adoption unbound→school
 - Copy-on-read / mount ensure / N3 bootstrap-on-read
