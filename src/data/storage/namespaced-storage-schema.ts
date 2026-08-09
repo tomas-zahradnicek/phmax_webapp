@@ -21,6 +21,8 @@ export const NAMESPACED_STORAGE_VERSION_SEGMENT = `v${NAMESPACED_STORAGE_SCHEMA_
  *
  * Not used for storage scanning or deletion in N1: Full Reset integration
  * starts in N2, when the first real namespaced write exists.
+ * N2-WRITE registers `NAMESPACED_STORAGE_V2_ROOT_PREFIX` in
+ * `APPLICATION_LOCAL_STORAGE_PREFIXES` for Full Application Reset.
  */
 export const NAMESPACED_STORAGE_V2_ROOT_PREFIX =
   `${NAMESPACED_STORAGE_NAMESPACE}${NAMESPACED_STORAGE_SEPARATOR}${NAMESPACED_STORAGE_VERSION_SEGMENT}${NAMESPACED_STORAGE_SEPARATOR}` as const;

@@ -1,6 +1,12 @@
 import { isRecord } from "../backup-validation";
 import { parseSchoolYearLabel } from "../../domain/school-year/school-year-label";
 import type { IdentityRegistry } from "../../data/identity/identity-registry-types";
+import type { ScenarioLabelMigrationTarget } from "../../data/storage/scenario-label-migration/scenario-label-migration-types";
+import { buildScenarioLabelRestorePhysicalOps } from "../../data/storage/scenario-label-migration/scenario-label-restore-ops";
+import {
+  resolveScenarioLabelRestoreShadowPlan,
+  type ScenarioLabelRestoreShadowPlan,
+} from "../../data/storage/scenario-label-migration/scenario-label-restore-target";
 import { validateAppBackupEnvelope } from "./validate-app-backup";
 import {
   ANNUAL_REPORT_SECTION_KEYS,
@@ -8,7 +14,6 @@ import {
   NV75_AUTOSAVE_KEY,
   NV75_NAMED_SNAPSHOTS_KEY,
   ownedKeysForModule,
-  PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
   PHMAX_SS_FRAMEWORK_PHASE1_NOTES_LS_KEY,
   PHMAX_SS_NAMED_SNAPSHOTS_LS_KEY,
   PHMAX_SS_UNITS_STORAGE_KEY,
@@ -138,10 +143,12 @@ function planAnnualReport(
 
 function planPresentValidModule(
   module: Extract<ValidatedBackupModule, { status: "present_valid" }>,
+  scenarioShadowPlan: ScenarioLabelRestoreShadowPlan | null,
 ): {
   operations: RestoreStorageOperation[];
   item: RestoreModulePlanItem;
   vzStartYear: number | null;
+  expectedScenarioLabelTarget: ScenarioLabelMigrationTarget | null;
 } {
   const { moduleId, data, label } = module;
 
@@ -155,6 +162,7 @@ function planPresentValidModule(
         keySemantics: [{ key: SCHOOL_PROFILE_LS_KEY, effect: "set" }],
       },
       vzStartYear: null,
+      expectedScenarioLabelTarget: null,
     };
   }
 
@@ -168,6 +176,7 @@ function planPresentValidModule(
         keySemantics: [{ key: RESTORE_IDENTITY_KEY, effect: "set" }],
       },
       vzStartYear: null,
+      expectedScenarioLabelTarget: null,
     };
   }
 
@@ -182,19 +191,33 @@ function planPresentValidModule(
         keySemantics: planned.keySemantics,
       },
       vzStartYear: planned.vzStartYear,
+      expectedScenarioLabelTarget: null,
     };
   }
 
   if (moduleId === "phmax-scenario-label") {
+    const shadowPlan =
+      scenarioShadowPlan ??
+      resolveScenarioLabelRestoreShadowPlan({
+        backupIdentity: null,
+        identityModuleStatus: "missing",
+        backupProfileId: null,
+      });
+    const planned = buildScenarioLabelRestorePhysicalOps(String(data), shadowPlan);
     return {
-      operations: [setOp(moduleId, PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, data)],
+      operations: planned.operations.map((op) =>
+        op.action === "set"
+          ? setOp(moduleId, op.key, op.serializedValue)
+          : removeOp(moduleId, op.key),
+      ),
       item: {
         moduleId,
         label,
         kind: "present_valid",
-        keySemantics: [{ key: PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, effect: "set" }],
+        keySemantics: planned.keySemantics,
       },
       vzStartYear: null,
+      expectedScenarioLabelTarget: planned.expectedTarget,
     };
   }
 
@@ -223,6 +246,7 @@ function planPresentValidModule(
       keySemantics: planned.keySemantics,
     },
     vzStartYear: null,
+    expectedScenarioLabelTarget: null,
   };
 }
 
@@ -335,10 +359,12 @@ export function buildAppBackupRestorePlan(
   const warnings: RestoreWarning[] = [];
   let vzStartYear: number | null = null;
   let hasSchoolProfile = false;
+  let backupProfileId: string | null = null;
   let backupIdentity: IdentityRegistry | null = null;
   let identityModuleStatus: "missing" | "present_valid" | "present_invalid" = "missing";
   let missingKnownCount = 0;
   const invalidModuleIds: string[] = [];
+  let expectedScenarioLabelTarget: ScenarioLabelMigrationTarget | null = null;
 
   for (const module of validated.modules) {
     if (module.status === "missing") {
@@ -390,16 +416,34 @@ export function buildAppBackupRestorePlan(
     }
 
     // present_valid
-    if (module.moduleId === "school-profile") hasSchoolProfile = true;
+    if (module.moduleId === "school-profile") {
+      hasSchoolProfile = true;
+      const profileData = module.data;
+      if (isRecord(profileData) && typeof profileData.id === "string") {
+        backupProfileId = profileData.id;
+      }
+    }
     if (module.moduleId === "identity-registry") {
       identityModuleStatus = "present_valid";
       backupIdentity = module.data as IdentityRegistry;
     }
 
-    const planned = planPresentValidModule(module);
+    const scenarioShadowPlan =
+      module.moduleId === "phmax-scenario-label"
+        ? resolveScenarioLabelRestoreShadowPlan({
+            backupIdentity,
+            identityModuleStatus,
+            backupProfileId,
+          })
+        : null;
+
+    const planned = planPresentValidModule(module, scenarioShadowPlan);
     operations.push(...planned.operations);
     modules.push(planned.item);
     if (planned.vzStartYear != null) vzStartYear = planned.vzStartYear;
+    if (planned.expectedScenarioLabelTarget != null) {
+      expectedScenarioLabelTarget = planned.expectedScenarioLabelTarget;
+    }
   }
 
   if (missingKnownCount > 0) {
@@ -443,6 +487,7 @@ export function buildAppBackupRestorePlan(
     !blockedByModules && !classification.identityConflictBlocks && conflict == null;
 
   const finalOperations = finalCanApply ? operations : [];
+  const finalExpectedScenarioLabelTarget = finalCanApply ? expectedScenarioLabelTarget : null;
 
   // touchedKeys ⊇ operation keys ∪ keys mutable by post-restore platform side effects.
   // Only meaningful for apply-ready plans (blocked plans keep operations=[]).
@@ -480,6 +525,7 @@ export function buildAppBackupRestorePlan(
     touchedKeys: [...touched].sort(),
     sameSchool: classification.sameSchool,
     canApply: finalCanApply,
+    expectedScenarioLabelTarget: finalExpectedScenarioLabelTarget,
   };
 }
 

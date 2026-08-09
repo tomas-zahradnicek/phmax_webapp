@@ -1,3 +1,4 @@
+import { isAllowedScenarioLabelRestoreDynamicKey } from "../../data/storage/scenario-label-migration/scenario-label-restore-ops";
 import { RESTORE_APP_CONTEXT_KEY, RESTORE_IDENTITY_KEY } from "./restore-owned-keys";
 import { allRestoreOperationKeys } from "./restore-owned-key-allowlist";
 import type { RestorePlan, RestoreStorageOperation } from "./restore-types";
@@ -75,7 +76,12 @@ export function validateRestorePlanForApply(plan: RestorePlan): ValidateRestoreP
     }
     seenOpKeys.add(op.key);
 
-    if (!allowedOpKeys.has(op.key)) {
+    const staticallyOwned = allowedOpKeys.has(op.key);
+    const dynamicallyOwned = isAllowedScenarioLabelRestoreDynamicKey(
+      op.key,
+      plan.expectedScenarioLabelTarget,
+    );
+    if (!staticallyOwned && !dynamicallyOwned) {
       return { ok: false, reason: "unowned_operation_key", detail: op.key };
     }
 

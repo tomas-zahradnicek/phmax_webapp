@@ -557,6 +557,7 @@ describe("Restore-2A storage transaction kernel", () => {
       touchedKeys: [],
       sameSchool: null,
       canApply: true,
+      expectedScenarioLabelTarget: null,
     };
 
     const validation = validateRestorePlanForApply(plan);
@@ -589,6 +590,7 @@ describe("Restore-2A storage transaction kernel", () => {
       touchedKeys: [FOREIGN_KEY],
       sameSchool: null,
       canApply: true,
+      expectedScenarioLabelTarget: null,
     };
 
     const validation = validateRestorePlanForApply(plan);
@@ -647,6 +649,7 @@ describe("Restore-2A storage transaction kernel", () => {
       touchedKeys: [],
       sameSchool: null,
       canApply: true,
+      expectedScenarioLabelTarget: null,
     };
 
     const validation = validateRestorePlanForApply(plan);
@@ -679,6 +682,7 @@ describe("Restore-2A storage transaction kernel", () => {
       touchedKeys: [RESTORE_APP_CONTEXT_KEY],
       sameSchool: null,
       canApply: true,
+      expectedScenarioLabelTarget: null,
     };
 
     const validation = validateRestorePlanForApply(plan);

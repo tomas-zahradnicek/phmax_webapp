@@ -88,6 +88,7 @@ export const APPLICATION_LOCAL_STORAGE_EXACT_KEYS = [
 export const APPLICATION_LOCAL_STORAGE_PREFIXES = [
   "phmax-dash-last-visit-",
   "vyrocni-zprava-diagnostic-backup-v1:",
+  "reditelsky-pruvodce:v2:",
 ] as const;
 
 export const APPLICATION_SESSION_STORAGE_EXACT_KEYS = [

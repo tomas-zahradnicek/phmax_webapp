@@ -3,6 +3,7 @@ import {
   APP_BACKUP_SCHEMA_VERSION,
   type AppBackupEnvelope,
 } from "../backup-types";
+import type { ScenarioLabelMigrationTarget } from "../../data/storage/scenario-label-migration/scenario-label-migration-types";
 
 export { APP_BACKUP_FORMAT, APP_BACKUP_SCHEMA_VERSION };
 
@@ -143,6 +144,11 @@ export type RestorePlan = {
   touchedKeys: string[];
   sameSchool: boolean | null;
   canApply: boolean;
+  /**
+   * Expected physical scenario-label v2/marker target for this plan.
+   * Null when no dynamic scenario keys are allowed (missing module, legacy-only, blocked).
+   */
+  expectedScenarioLabelTarget: ScenarioLabelMigrationTarget | null;
 };
 
 export type BuildRestorePlanResult =

@@ -49,6 +49,36 @@ describe("phmax-is-handoff-apply", () => {
     expect(mem.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("Import z IS 2026-05");
   });
 
+  it("S: missing/empty incoming scenario label is NO-OP (does not clear)", () => {
+    const raw = readFileSync(generatedHandoff, "utf8");
+    const payload = JSON.parse(raw) as PhmaxIsHandoffPayload;
+    payload.schoolScenario.scenarioLabel = "   ";
+    const mem = new MemoryStorage();
+    mem.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "KEEP-ME");
+    const result = applyPhmaxIsHandoffToStorage(mem, payload);
+    expect(result.scenarioLabel).toBeNull();
+    expect(mem.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("KEEP-ME");
+  });
+
+  it("buildHandoffLocalStorageWrites excludes scenario label (owned by repository)", () => {
+    const raw = readFileSync(generatedHandoff, "utf8");
+    const payload = JSON.parse(raw) as PhmaxIsHandoffPayload;
+    const writes = buildHandoffLocalStorageWrites(payload);
+    expect(writes.every((w) => w.key !== PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe(true);
+  });
+
+  it("R: handleImportApplied must not contain second scenario storage write", () => {
+    const page = readFileSync(path.join(repoRoot, "src/PhmaxDashboardPage.tsx"), "utf8");
+    const start = page.indexOf("const handleImportApplied = useCallback(");
+    const end = page.indexOf("const openModuleWithInputsFocus", start);
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+    const fn = page.slice(start, end);
+    expect(fn).not.toContain("localStorage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY");
+    expect(fn).not.toContain("writeScenarioLabel");
+    expect(fn).toContain("setScenarioLabel(result.scenarioLabel)");
+  });
+
   it("konfigurovatelný konzolový snippet obsahuje klíče autosave", () => {
     const raw = readFileSync(generatedHandoff, "utf8");
     const payload = JSON.parse(raw) as PhmaxIsHandoffPayload;

@@ -462,6 +462,7 @@ describe("Restore-2B platform reconcile + verification", () => {
       touchedKeys: [],
       sameSchool: null,
       canApply: true,
+      expectedScenarioLabelTarget: null,
     };
     const transaction: RestoreTransactionContext = { plan: fakePlan, snapshot: {} };
 
