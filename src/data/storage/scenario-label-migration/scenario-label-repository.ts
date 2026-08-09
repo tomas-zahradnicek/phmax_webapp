@@ -1,4 +1,7 @@
-import { readIdentityRegistry } from "../../identity/identity-registry-storage";
+import {
+  readIdentityRegistry,
+  readIdentityRegistryFromStorage,
+} from "../../identity/identity-registry-storage";
 import type { IdentityRegistryReadResult } from "../../identity/identity-registry-types";
 import { PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY } from "../../../phmax-school-scenario-export";
 import {
@@ -20,7 +23,7 @@ import type {
   ScenarioLabelWriteResult,
 } from "./scenario-label-migration-types";
 
-/** Minimal storage surface used by the N2-WRITE scenario-label executor. */
+/** Minimal storage surface used by the N2 scenario-label executor. */
 export type ScenarioLabelStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
 export type ScenarioLabelRepositoryDependencies = {
@@ -36,6 +39,18 @@ function resolveStorage(deps: ScenarioLabelRepositoryDependencies): ScenarioLabe
   } catch {
     return null;
   }
+}
+
+function resolveReadIdentity(
+  storage: ScenarioLabelStorage,
+  deps: ScenarioLabelRepositoryDependencies,
+): () => IdentityRegistryReadResult {
+  if (deps.readIdentity) return deps.readIdentity;
+  // Align Identity with the same destination storage used for scenario writes.
+  if (deps.storage) {
+    return () => readIdentityRegistryFromStorage(storage);
+  }
+  return readIdentityRegistry;
 }
 
 function readRaw(storage: ScenarioLabelStorage, key: string): RawStoredText {
@@ -68,15 +83,16 @@ function invalidateMarkerBestEffort(
   }
 }
 
-function persistSyncedMarker(
+function persistMarker(
   storage: ScenarioLabelStorage,
   target: ScenarioLabelMigrationTarget,
+  mirrorHealth: "synced" | "dirty",
   authoritativeRaw: RawStoredText,
 ): boolean {
   try {
     const key = serializeScenarioLabelMigrationMarkerKey(target);
     const payload = buildScenarioLabelMigrationMarkerPayload({
-      mirrorHealth: "synced",
+      mirrorHealth,
       authoritativeRaw,
     });
     storage.setItem(key, serializeScenarioLabelMigrationMarkerPayload(payload));
@@ -90,9 +106,14 @@ function applyShadowPipeline(
   storage: ScenarioLabelStorage,
   target: ScenarioLabelMigrationTarget,
   desiredRaw: RawStoredText,
-): { shadowWriteSucceeded: boolean; shadowRaw: RawStoredText; markerPersisted: boolean } {
+): {
+  shadowWriteSucceeded: boolean;
+  shadowRaw: RawStoredText;
+  markerPersisted: boolean;
+  markerInvalidationSucceeded: boolean;
+} {
   // Invalidate any prior healthy marker before mutating shadow for this target.
-  invalidateMarkerBestEffort(storage, target);
+  const markerInvalidationSucceeded = invalidateMarkerBestEffort(storage, target);
 
   const shadowKey = buildScenarioLabelNamespacedKey(target);
   let shadowWriteSucceeded = false;
@@ -117,11 +138,24 @@ function applyShadowPipeline(
   if (!verified) {
     // Ensure a stale synced marker cannot claim health for the new authoritative value.
     invalidateMarkerBestEffort(storage, target);
-    return { shadowWriteSucceeded: false, shadowRaw, markerPersisted: false };
+    // Fail-closed metadata: PROTO-compatible dirty marker (best-effort).
+    persistMarker(storage, target, "dirty", desiredRaw);
+    return {
+      shadowWriteSucceeded: false,
+      shadowRaw,
+      markerPersisted: false,
+      markerInvalidationSucceeded,
+    };
   }
 
-  const markerPersisted = persistSyncedMarker(storage, target, desiredRaw);
-  return { shadowWriteSucceeded: true, shadowRaw, markerPersisted };
+  // Invalidation may have failed, but a fresh synced overwrite after verify re-establishes health.
+  const markerPersisted = persistMarker(storage, target, "synced", desiredRaw);
+  return {
+    shadowWriteSucceeded: true,
+    shadowRaw,
+    markerPersisted,
+    markerInvalidationSucceeded,
+  };
 }
 
 /**
@@ -154,6 +188,8 @@ export function readScenarioLabelUi(deps: ScenarioLabelRepositoryDependencies = 
  * Legacy-first dual-write for exact desired raw state.
  *
  * Shadow failure / marker failure never overturns an authoritative legacy success.
+ * Legacy write success is determined by storage API throw only — not post-write equality
+ * (concurrent tabs may overwrite between write and a later observation).
  */
 export function writeScenarioLabelRaw(
   desiredRaw: RawStoredText,
@@ -170,18 +206,7 @@ export function writeScenarioLabelRaw(
     return { status: "authoritative_failed", code: "legacy_write_failed" };
   }
 
-  let authoritativeRaw: RawStoredText;
-  try {
-    authoritativeRaw = readRaw(storage, PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY);
-  } catch {
-    return { status: "authoritative_failed", code: "legacy_write_failed" };
-  }
-
-  if (!rawStoredTextEqual(desiredRaw, authoritativeRaw)) {
-    return { status: "authoritative_failed", code: "legacy_write_failed" };
-  }
-
-  const readIdentity = deps.readIdentity ?? readIdentityRegistry;
+  const readIdentity = resolveReadIdentity(storage, deps);
   const targetResolution = resolveScenarioLabelMigrationTarget(readIdentity());
 
   if (targetResolution.status === "skipped") {
@@ -204,15 +229,8 @@ export function writeScenarioLabelRaw(
     shadowRaw: shadow.shadowRaw,
   });
 
-  // Marker persist failure after verified shadow → still success + synced (PROTO contract).
-  if (
-    planned.status === "success" &&
-    planned.shadow === "synced" &&
-    !shadow.markerPersisted
-  ) {
-    return { status: "success", shadow: "synced" };
-  }
-
+  // Marker persist failure after verified shadow → still success + synced
+  // (PROTO: shadow synced = data mirror health; marker missing remains N3 fail-closed).
   return planned;
 }
 
@@ -293,19 +311,12 @@ export function clearScenarioLabelLifecycle(
     return { status: "authoritative_failed", code: "legacy_write_failed" };
   }
 
-  let authoritativeRaw: RawStoredText;
-  try {
-    authoritativeRaw = readRaw(storage, PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY);
-  } catch {
-    return { status: "authoritative_failed", code: "legacy_write_failed" };
-  }
-  if (authoritativeRaw.exists) {
-    return { status: "authoritative_failed", code: "legacy_write_failed" };
-  }
+  // H4: successful removeItem without throw is authoritative clear success.
+  // Do not treat a concurrent re-write as legacy_write_failed.
 
   const unboundOutcome = clearOneTargetShadow(storage, { kind: "unbound" });
 
-  const readIdentity = deps.readIdentity ?? readIdentityRegistry;
+  const readIdentity = resolveReadIdentity(storage, deps);
   const targetResolution = resolveScenarioLabelMigrationTarget(readIdentity());
 
   if (targetResolution.status === "skipped") {

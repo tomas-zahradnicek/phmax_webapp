@@ -1,16 +1,20 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import {
   applyPhmaxIsHandoffToStorage,
   buildHandoffApplyConsoleSnippet,
   buildHandoffLocalStorageWrites,
+  buildScenarioLabelLiveApplySnippetFragment,
 } from "./phmax-is-handoff-apply";
 import { PHMAX_MODULE_AUTOSAVE_LS_KEYS, PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY } from "./phmax-school-scenario-export";
 import { PV_BASIC_WIZARD_LS_KEY } from "./pv-basic-wizard";
 import { ZS_BASIC_WIZARD_LS_KEY } from "./zs-basic-wizard";
+import { IDENTITY_REGISTRY_LS_KEY } from "./data/identity/identity-registry-types";
+import { buildScenarioLabelNamespacedKey } from "./data/storage/scenario-label-migration/scenario-label-migration-protocol";
+import { serializeScenarioLabelMigrationMarkerKey } from "./data/storage/scenario-label-migration/scenario-label-migration-marker-key";
 
 class MemoryStorage {
   private store = new Map<string, string>();
@@ -25,11 +29,23 @@ class MemoryStorage {
   }
 }
 
+const SCHOOL_A = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+const SCHOOL_B = "bbbbbbbb-cccc-4ddd-8eee-ffffffffffff";
+
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const generatedHandoff = path.join(
   repoRoot,
   "docs/import-templates/phmax-is-handoff.generated.json",
 );
+
+function identityJson(schoolId: string): string {
+  return JSON.stringify({
+    schemaVersion: 1,
+    schoolId,
+    schoolYears: [],
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  });
+}
 
 describe("phmax-is-handoff-apply", () => {
   it("zapíše PV/ZŠ snapshoty, scénář a wizard krok 2", () => {
@@ -53,6 +69,17 @@ describe("phmax-is-handoff-apply", () => {
     const raw = readFileSync(generatedHandoff, "utf8");
     const payload = JSON.parse(raw) as PhmaxIsHandoffPayload;
     payload.schoolScenario.scenarioLabel = "   ";
+    const mem = new MemoryStorage();
+    mem.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "KEEP-ME");
+    const result = applyPhmaxIsHandoffToStorage(mem, payload);
+    expect(result.scenarioLabel).toBeNull();
+    expect(mem.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("KEEP-ME");
+  });
+
+  it("F: incoming missing scenario label is NO-OP", () => {
+    const raw = readFileSync(generatedHandoff, "utf8");
+    const payload = JSON.parse(raw) as PhmaxIsHandoffPayload;
+    delete (payload.schoolScenario as { scenarioLabel?: string }).scenarioLabel;
     const mem = new MemoryStorage();
     mem.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "KEEP-ME");
     const result = applyPhmaxIsHandoffToStorage(mem, payload);
@@ -86,6 +113,75 @@ describe("phmax-is-handoff-apply", () => {
     expect(snippet).toContain(PHMAX_MODULE_AUTOSAVE_LS_KEYS.pv);
     expect(snippet).toContain(PHMAX_MODULE_AUTOSAVE_LS_KEYS.zs);
     expect(snippet).not.toContain("location.reload()");
+  });
+
+  it("B: snippet does NOT embed generation-time school:A key", () => {
+    const raw = readFileSync(generatedHandoff, "utf8");
+    const payload = JSON.parse(raw) as PhmaxIsHandoffPayload;
+    payload.schoolScenario.scenarioLabel = "LABEL";
+    const snippet = buildHandoffApplyConsoleSnippet(payload, { reload: false });
+    expect(snippet).not.toContain(
+      buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_A }),
+    );
+    expect(snippet).not.toContain(
+      serializeScenarioLabelMigrationMarkerKey({ kind: "school", schoolId: SCHOOL_A }),
+    );
+    expect(snippet).toContain("resolved LIVE from destination Identity");
+    expect(snippet).toContain(IDENTITY_REGISTRY_LS_KEY);
+  });
+
+  it("A: generation concept A + destination Identity B → writes school:B", () => {
+    const fragment = buildScenarioLabelLiveApplySnippetFragment("NEW");
+    expect(fragment).not.toContain(SCHOOL_A);
+
+    const store = new Map<string, string>();
+    store.set(IDENTITY_REGISTRY_LS_KEY, identityJson(SCHOOL_B));
+    const localStorageMock = {
+      getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
+      setItem: (k: string, v: string) => {
+        store.set(k, String(v));
+      },
+      removeItem: (k: string) => {
+        store.delete(k);
+      },
+    };
+    vi.stubGlobal("localStorage", localStorageMock);
+    try {
+      new Function(fragment)();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+
+    expect(store.get(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("NEW");
+    expect(
+      store.get(buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_B })),
+    ).toBe("NEW");
+    expect(
+      store.has(serializeScenarioLabelMigrationMarkerKey({ kind: "school", schoolId: SCHOOL_B })),
+    ).toBe(true);
+    expect(
+      store.has(buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_A })),
+    ).toBe(false);
+  });
+
+  it("C: missing destination Identity → unbound", () => {
+    const mem = new MemoryStorage();
+    const raw = readFileSync(generatedHandoff, "utf8");
+    const payload = JSON.parse(raw) as PhmaxIsHandoffPayload;
+    payload.schoolScenario.scenarioLabel = "UNBOUND-LABEL";
+    applyPhmaxIsHandoffToStorage(mem, payload);
+    expect(mem.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBe("UNBOUND-LABEL");
+  });
+
+  it("D: corrupted destination Identity → skipped (no guessed unbound)", () => {
+    const mem = new MemoryStorage();
+    mem.setItem(IDENTITY_REGISTRY_LS_KEY, "{not-json");
+    const raw = readFileSync(generatedHandoff, "utf8");
+    const payload = JSON.parse(raw) as PhmaxIsHandoffPayload;
+    payload.schoolScenario.scenarioLabel = "SKIP-LABEL";
+    applyPhmaxIsHandoffToStorage(mem, payload);
+    expect(mem.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("SKIP-LABEL");
+    expect(mem.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBeNull();
   });
 
   it("buildHandoffLocalStorageWrites respektuje skipWizardReset", () => {

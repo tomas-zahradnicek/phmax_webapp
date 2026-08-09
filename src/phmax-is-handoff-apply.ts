@@ -11,13 +11,14 @@ import {
   writeScenarioLabelFromUiInput,
   type ScenarioLabelStorage,
 } from "./data/storage/scenario-label-migration/scenario-label-repository";
-import { readIdentityRegistry } from "./data/identity/identity-registry-storage";
-import type { IdentityRegistryReadResult } from "./data/identity/identity-registry-types";
-import { resolveScenarioLabelMigrationTarget } from "./data/storage/scenario-label-migration/scenario-label-migration-target";
-import { buildScenarioLabelNamespacedKey } from "./data/storage/scenario-label-migration/scenario-label-migration-protocol";
-import { serializeScenarioLabelMigrationMarkerKey } from "./data/storage/scenario-label-migration/scenario-label-migration-marker-key";
-import { serializeScenarioLabelMigrationMarkerPayload } from "./data/storage/scenario-label-migration/scenario-label-migration-marker-payload";
-import { buildScenarioLabelMigrationMarkerPayload } from "./data/storage/scenario-label-migration/scenario-label-migration-protocol";
+import { readIdentityRegistryFromStorage } from "./data/identity/identity-registry-storage";
+import { IDENTITY_REGISTRY_LS_KEY } from "./data/identity/identity-registry-types";
+import {
+  SCENARIO_LABEL_MIGRATION_MODULE_ID,
+  SCENARIO_LABEL_MIGRATION_RESOURCE_ID,
+} from "./data/storage/scenario-label-migration/scenario-label-migration-types";
+import { SCENARIO_LABEL_MIGRATION_MARKER_SEGMENT } from "./data/storage/scenario-label-migration/scenario-label-migration-marker-key";
+import { NAMESPACED_STORAGE_V2_ROOT_PREFIX } from "./data/storage/namespaced-storage-schema";
 
 export type PhmaxModuleId = keyof typeof PHMAX_MODULE_AUTOSAVE_LS_KEYS;
 
@@ -61,7 +62,7 @@ export function assertPhmaxIsHandoffPayload(payload: unknown): asserts payload i
  * Seznam zápisů do localStorage (klíč + serializovaná hodnota).
  *
  * Scenario label is intentionally excluded: missing/empty incoming label must be a
- * no-op (not clear), and non-empty labels use the N2-WRITE dual-write repository.
+ * no-op (not clear), and non-empty labels use the N2 dual-write repository.
  */
 export function buildHandoffLocalStorageWrites(
   payload: PhmaxIsHandoffPayload,
@@ -87,32 +88,52 @@ function incomingScenarioLabel(payload: PhmaxIsHandoffPayload): string | null {
 }
 
 /**
- * Build console-snippet physical writes for a non-empty scenario label.
- * Resolves Identity at snippet-generation time (browser context).
+ * Build DevTools JS that applies a scenario label using LIVE destination Identity.
+ *
+ * Does NOT embed generation-time schoolId. Target is resolved when the snippet runs.
+ * Missing Identity → unbound; corrupted/unavailable → legacy only (shadow skipped).
  */
-function buildScenarioLabelConsoleWrites(
-  label: string,
-  readIdentity: () => IdentityRegistryReadResult = readIdentityRegistry,
-): { key: string; value: string }[] {
-  const writes: { key: string; value: string }[] = [
-    { key: PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, value: label },
-  ];
-  const resolution = resolveScenarioLabelMigrationTarget(readIdentity());
-  if (resolution.status === "skipped") {
-    return writes;
-  }
-  const target = resolution.target;
-  writes.push({ key: buildScenarioLabelNamespacedKey(target), value: label });
-  writes.push({
-    key: serializeScenarioLabelMigrationMarkerKey(target),
-    value: serializeScenarioLabelMigrationMarkerPayload(
-      buildScenarioLabelMigrationMarkerPayload({
-        mirrorHealth: "synced",
-        authoritativeRaw: { exists: true, value: label },
-      }),
-    ),
-  });
-  return writes;
+export function buildScenarioLabelLiveApplySnippetFragment(label: string): string {
+  // Keep key grammar aligned with N1/N2 serializers; resolve schoolId only at apply time.
+  const legacyKey = JSON.stringify(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY);
+  const identityKey = JSON.stringify(IDENTITY_REGISTRY_LS_KEY);
+  const labelLit = JSON.stringify(label);
+  const v2Root = JSON.stringify(NAMESPACED_STORAGE_V2_ROOT_PREFIX);
+  const moduleId = JSON.stringify(SCENARIO_LABEL_MIGRATION_MODULE_ID);
+  const resourceId = JSON.stringify(SCENARIO_LABEL_MIGRATION_RESOURCE_ID);
+  const markerSeg = JSON.stringify(SCENARIO_LABEL_MIGRATION_MARKER_SEGMENT);
+  return [
+    `(function(label){`,
+    `localStorage.setItem(${legacyKey},label);`,
+    `try{`,
+    `var idRaw=localStorage.getItem(${identityKey});`,
+    `var v2Root=${v2Root};`,
+    `var mod=${moduleId};`,
+    `var res=${resourceId};`,
+    `var mseg=${markerSeg};`,
+    `var v2Key=null;`,
+    `var markerKey=null;`,
+    `if(idRaw==null||!String(idRaw).trim()){`,
+    `v2Key=v2Root+"unbound:module:"+mod+":resource:"+res;`,
+    `markerKey=v2Root+mseg+":"+mod+":"+res+":unbound";`,
+    `}else{`,
+    `var reg=JSON.parse(idRaw);`,
+    `var sid=reg&&reg.schoolId;`,
+    `var uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;`,
+    `if(typeof sid==="string"&&uuid.test(sid)&&sid===sid.toLowerCase()&&reg.schemaVersion===1){`,
+    `v2Key=v2Root+"school:"+sid+":module:"+mod+":resource:"+res;`,
+    `markerKey=v2Root+mseg+":"+mod+":"+res+":school:"+sid;`,
+    `}`,
+    `}`,
+    `if(v2Key&&markerKey){`,
+    `localStorage.setItem(v2Key,label);`,
+    `if(localStorage.getItem(v2Key)===label){`,
+    `localStorage.setItem(markerKey,JSON.stringify({schemaVersion:1,authority:"legacy",mirrorHealth:"synced",authoritativePresence:"present"}));`,
+    `}`,
+    `}`,
+    `}catch(_e){}`,
+    `})(${labelLit});`,
+  ].join("");
 }
 
 export function applyPhmaxIsHandoffToStorage(
@@ -131,17 +152,11 @@ export function applyPhmaxIsHandoffToStorage(
 
   const label = incomingScenarioLabel(payload);
   if (label) {
-    // Canonical single pipeline — never clear on missing/empty incoming label.
+    // Canonical single pipeline — Identity from the same destination storage.
+    // Missing → unbound; corrupted/unavailable → skipped (never catch→unbound).
     const result = writeScenarioLabelFromUiInput(label, {
       storage,
-      // Identity lives on the real browser storage; MemoryStorage tests → unbound.
-      readIdentity: () => {
-        try {
-          return readIdentityRegistry();
-        } catch {
-          return { ok: true, registry: null };
-        }
-      },
+      readIdentity: () => readIdentityRegistryFromStorage(storage),
     });
     if (result.status === "authoritative_failed") {
       throw new Error(
@@ -178,18 +193,21 @@ export function buildHandoffApplyConsoleSnippet(
 ): string {
   const { reload = true, ...applyOpts } = options;
   const writes = [...buildHandoffLocalStorageWrites(payload, applyOpts)];
-  const label = incomingScenarioLabel(payload);
-  if (label) {
-    writes.push(...buildScenarioLabelConsoleWrites(label));
-  }
-  const body = writes
+  const moduleBody = writes
     .map((w) => `localStorage.setItem(${JSON.stringify(w.key)},${JSON.stringify(w.value)});`)
     .join("");
+  const label = incomingScenarioLabel(payload);
+  const scenarioBody = label ? buildScenarioLabelLiveApplySnippetFragment(label) : "";
+  const appliedKeys = [
+    ...writes.map((w) => w.key),
+    ...(label ? [PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "(v2+marker resolved at apply)"] : []),
+  ];
   const tail = reload ? "location.reload();" : "";
   return [
-    "/* PHmax: apply phmax-is-handoff-v1 → localStorage. Spusťte na stejném originu jako aplikace. */",
-    `(function(){try{${body}console.log("PHmax handoff applied.",${JSON.stringify(
-      writes.map((w) => w.key),
+    "/* PHmax: apply phmax-is-handoff-v1 → localStorage. Spusťte na stejném originu jako aplikace.",
+    "   Scenario v2/marker target is resolved LIVE from destination Identity (not generation-time). */",
+    `(function(){try{${moduleBody}${scenarioBody}console.log("PHmax handoff applied.",${JSON.stringify(
+      appliedKeys,
     )});${tail}}catch(e){console.error("PHmax handoff apply failed",e);}})();`,
   ].join("\n");
 }

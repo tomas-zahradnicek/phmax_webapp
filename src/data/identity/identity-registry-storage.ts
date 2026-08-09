@@ -65,18 +65,16 @@ export function parseIdentityRegistry(value: unknown): IdentityRegistry | null {
 }
 
 /**
- * Read the identity registry from localStorage.
+ * Read the identity registry from an explicit storage surface (DI-friendly).
  * Missing/empty key → ok with registry null.
  * Invalid JSON or invalid shape → corrupted (does NOT write / clear the key).
  */
-export function readIdentityRegistry(): IdentityRegistryReadResult {
-  if (typeof localStorage === "undefined") {
-    return { ok: false, code: "storage_unavailable" };
-  }
-
+export function readIdentityRegistryFromStorage(
+  storage: Pick<Storage, "getItem">,
+): IdentityRegistryReadResult {
   let raw: string | null;
   try {
-    raw = localStorage.getItem(IDENTITY_REGISTRY_LS_KEY);
+    raw = storage.getItem(IDENTITY_REGISTRY_LS_KEY);
   } catch {
     return { ok: false, code: "storage_unavailable" };
   }
@@ -98,6 +96,22 @@ export function readIdentityRegistry(): IdentityRegistryReadResult {
   }
 
   return { ok: true, registry };
+}
+
+/**
+ * Read the identity registry from localStorage.
+ * Missing/empty key → ok with registry null.
+ * Invalid JSON or invalid shape → corrupted (does NOT write / clear the key).
+ */
+export function readIdentityRegistry(): IdentityRegistryReadResult {
+  if (typeof localStorage === "undefined") {
+    return { ok: false, code: "storage_unavailable" };
+  }
+  try {
+    return readIdentityRegistryFromStorage(localStorage);
+  } catch {
+    return { ok: false, code: "storage_unavailable" };
+  }
 }
 
 /**

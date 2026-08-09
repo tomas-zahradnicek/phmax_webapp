@@ -148,7 +148,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
     expect(storage.getItem(v2)).toBe("OLD");
   });
 
-  it("H: clear shadow fail → success dirty + no healthy marker", () => {
+  it("H: clear shadow fail → success dirty + no healthy synced marker", () => {
     storage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "OLD");
     const v2 = buildScenarioLabelNamespacedKey({ kind: "unbound" });
     const markerKey = serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" });
@@ -169,7 +169,9 @@ describe("scenario-label repository (N2-WRITE)", () => {
     });
     expect(result).toEqual({ status: "success", shadow: "dirty" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeNull();
-    expect(storage.getItem(markerKey)).toBeNull();
+    const marker = parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(markerKey));
+    // Fail-closed: either absent or PROTO dirty — never leftover healthy synced.
+    expect(marker == null || marker.mirrorHealth === "dirty").toBe(true);
   });
 
   it("I: clear all OK → synced absent marker", () => {
@@ -193,7 +195,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
     });
   });
 
-  it("J: existing healthy marker + new shadow failure → old marker invalidated", () => {
+  it("J: existing healthy marker + new shadow failure → old synced invalidated / dirty", () => {
     storage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "A");
     const v2 = buildScenarioLabelNamespacedKey({ kind: "unbound" });
     const markerKey = serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" });
@@ -214,7 +216,217 @@ describe("scenario-label repository (N2-WRITE)", () => {
     });
     expect(result).toEqual({ status: "success", shadow: "dirty" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("B");
-    expect(storage.getItem(markerKey)).toBeNull();
+    const marker = parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(markerKey));
+    expect(marker?.mirrorHealth).toBe("dirty");
+    expect(marker?.authoritativePresence).toBe("present");
+  });
+
+  it("I-harden: marker invalidation fail + shadow fail → dirty, not synced", () => {
+    storage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "A");
+    const v2 = buildScenarioLabelNamespacedKey({ kind: "unbound" });
+    const markerKey = serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" });
+    storage.setItem(v2, "A");
+    storage.setItem(
+      markerKey,
+      JSON.stringify({
+        schemaVersion: 1,
+        authority: "legacy",
+        mirrorHealth: "synced",
+        authoritativePresence: "present",
+      }),
+    );
+    storage.failRemoveKeys.add(markerKey);
+    storage.failSetKeys.add(v2);
+    // Dirty overwrite may still succeed via setItem on marker key.
+    const result = writeScenarioLabelFromUiInput("B", {
+      storage,
+      readIdentity: () => ({ ok: true, registry: null }),
+    });
+    expect(result).toEqual({ status: "success", shadow: "dirty" });
+    expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("B");
+    const marker = parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(markerKey));
+    expect(marker?.mirrorHealth).not.toBe("synced");
+  });
+
+  it("J2: invalidation fail + verified shadow + new synced marker → synced allowed", () => {
+    const markerKey = serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" });
+    storage.setItem(
+      markerKey,
+      JSON.stringify({
+        schemaVersion: 1,
+        authority: "legacy",
+        mirrorHealth: "synced",
+        authoritativePresence: "present",
+      }),
+    );
+    storage.failRemoveKeys.add(markerKey);
+    const result = writeScenarioLabelFromUiInput("B", {
+      storage,
+      readIdentity: () => ({ ok: true, registry: null }),
+    });
+    expect(result).toEqual({ status: "success", shadow: "synced" });
+    expect(parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(markerKey))).toEqual({
+      schemaVersion: 1,
+      authority: "legacy",
+      mirrorHealth: "synced",
+      authoritativePresence: "present",
+    });
+  });
+
+  it("M: concurrent legacy overwrite after successful set is NOT authoritative_failed", () => {
+    const originalSet = storage.setItem.bind(storage);
+    storage.setItem = (key: string, value: string) => {
+      originalSet(key, value);
+      if (key === PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY && value === "A") {
+        // Concurrent tab overwrites after our write succeeded.
+        originalSet(key, "B");
+      }
+    };
+    const result = writeScenarioLabelFromUiInput("A", {
+      storage,
+      readIdentity: () => ({ ok: true, registry: null }),
+    });
+    // Legacy API write did not throw — business success (last-writer-wins on storage).
+    expect(result.status).toBe("success");
+    expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("B");
+  });
+
+  it("N: shadow read mismatch → dirty", () => {
+    const v2 = buildScenarioLabelNamespacedKey({ kind: "unbound" });
+    const originalSet = storage.setItem.bind(storage);
+    storage.setItem = (key: string, value: string) => {
+      if (key === v2) {
+        originalSet(key, "OTHER");
+        return;
+      }
+      originalSet(key, value);
+    };
+    const result = writeScenarioLabelFromUiInput("A", {
+      storage,
+      readIdentity: () => ({ ok: true, registry: null }),
+    });
+    expect(result).toEqual({ status: "success", shadow: "dirty" });
+  });
+
+  it("O: corrupted Identity clear — school residue untouched; unbound synced+absent", () => {
+    storage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "L");
+    storage.setItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }), "U");
+    storage.setItem(
+      serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" }),
+      JSON.stringify({
+        schemaVersion: 1,
+        authority: "legacy",
+        mirrorHealth: "synced",
+        authoritativePresence: "present",
+      }),
+    );
+    storage.setItem(
+      buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_A }),
+      "SCHOOL-OLD",
+    );
+    storage.setItem(
+      serializeScenarioLabelMigrationMarkerKey({ kind: "school", schoolId: SCHOOL_A }),
+      "SCHOOL-M-raw",
+    );
+
+    const result = clearScenarioLabelLifecycle({
+      storage,
+      readIdentity: () => ({ ok: false, code: "corrupted", detail: "invalid_json" }),
+    });
+    expect(result).toEqual({ status: "success", shadow: "skipped" });
+    expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeNull();
+    expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBeNull();
+    expect(
+      parseScenarioLabelMigrationMarkerPayloadJson(
+        storage.getItem(serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" })),
+      ),
+    ).toEqual({
+      schemaVersion: 1,
+      authority: "legacy",
+      mirrorHealth: "synced",
+      authoritativePresence: "absent",
+    });
+    expect(
+      storage.getItem(buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_A })),
+    ).toBe("SCHOOL-OLD");
+    expect(
+      storage.getItem(serializeScenarioLabelMigrationMarkerKey({ kind: "school", schoolId: SCHOOL_A })),
+    ).toBe("SCHOOL-M-raw");
+  });
+
+  it("P: valid Identity clear — RAW final state both markers synced+absent", () => {
+    storage.setItem(IDENTITY_REGISTRY_LS_KEY, identityJson(SCHOOL_A));
+    storage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "L");
+    storage.setItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }), "U");
+    storage.setItem(
+      buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_A }),
+      "S",
+    );
+    storage.setItem(
+      buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_B }),
+      "OTHER",
+    );
+
+    const result = clearScenarioLabelLifecycle({ storage });
+    expect(result).toEqual({ status: "success", shadow: "synced" });
+    expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeNull();
+    expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBeNull();
+    expect(
+      storage.getItem(buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_A })),
+    ).toBeNull();
+    expect(
+      parseScenarioLabelMigrationMarkerPayloadJson(
+        storage.getItem(serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" })),
+      ),
+    ).toEqual({
+      schemaVersion: 1,
+      authority: "legacy",
+      mirrorHealth: "synced",
+      authoritativePresence: "absent",
+    });
+    expect(
+      parseScenarioLabelMigrationMarkerPayloadJson(
+        storage.getItem(
+          serializeScenarioLabelMigrationMarkerKey({ kind: "school", schoolId: SCHOOL_A }),
+        ),
+      ),
+    ).toEqual({
+      schemaVersion: 1,
+      authority: "legacy",
+      mirrorHealth: "synced",
+      authoritativePresence: "absent",
+    });
+    expect(
+      storage.getItem(buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_B })),
+    ).toBe("OTHER");
+  });
+
+  it("R: synced absence even if no prior v2 value", () => {
+    expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBeNull();
+    const result = clearScenarioLabelLifecycle({
+      storage,
+      readIdentity: () => ({ ok: true, registry: null }),
+    });
+    expect(result).toEqual({ status: "success", shadow: "synced" });
+    expect(
+      parseScenarioLabelMigrationMarkerPayloadJson(
+        storage.getItem(serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" })),
+      ),
+    ).toEqual({
+      schemaVersion: 1,
+      authority: "legacy",
+      mirrorHealth: "synced",
+      authoritativePresence: "absent",
+    });
+  });
+
+  it("DI: Identity is read from injected storage (not global)", () => {
+    storage.setItem(IDENTITY_REGISTRY_LS_KEY, identityJson(SCHOOL_A));
+    writeScenarioLabelFromUiInput("X", { storage });
+    expect(
+      storage.getItem(buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_A })),
+    ).toBe("X");
+    expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBeNull();
   });
 
   it("K: Identity missing → unbound", () => {
