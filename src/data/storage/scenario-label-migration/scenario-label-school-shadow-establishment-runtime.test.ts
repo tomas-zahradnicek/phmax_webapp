@@ -87,6 +87,12 @@ describe("N2-ADOPT-WRITE establishScenarioLabelSchoolShadowFromLegacy", () => {
       mirrorHealth: "synced",
       authoritativePresence: "present",
     });
+    // N3-FENCE-WRITE: establishment mutation finalizes fence LAST.
+    expect(
+      storage.getItem(
+        `reditelsky-pruvodce:v2:protocol-commit:phmax-scenario-label:value:school:${SCHOOL_A}`,
+      ),
+    ).toBeTruthy();
   });
 
   it("B: unbound U, legacy L → school L; unbound unchanged", () => {
@@ -160,6 +166,12 @@ describe("N2-ADOPT-WRITE establishScenarioLabelSchoolShadowFromLegacy", () => {
     expect(storage.setCount).toBe(beforeSet);
     expect(storage.removeCount).toBe(beforeRemove);
     expect(storage.writeCount).toBe(0);
+    // N3-FENCE-WRITE: already_ready remains ZERO fence writes (PREP owns bootstrap).
+    expect(
+      storage.getItem(
+        `reditelsky-pruvodce:v2:protocol-commit:phmax-scenario-label:value:school:${SCHOOL_A}`,
+      ),
+    ).toBeNull();
   });
 
   it("G: marker missing → establish marker", () => {

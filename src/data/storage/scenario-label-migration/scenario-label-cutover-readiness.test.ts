@@ -171,6 +171,7 @@ describe("assessScenarioLabelCutoverReadiness (pure N2-HARDEN)", () => {
           continue;
         }
         if (!entry.name.endsWith(".ts") && !entry.name.endsWith(".tsx")) continue;
+        if (entry.name.includes(".test.")) continue;
         if (entry.name.includes("cutover-readiness")) continue;
         const text = fs.readFileSync(full, "utf8");
         if (text.includes("assessScenarioLabelCutoverReadiness")) {

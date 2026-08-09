@@ -1,4 +1,4 @@
-# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO / N3-FENCE-PROTO)
+# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO / N3-FENCE-PROTO / N3-FENCE-WRITE)
 
 Pilot resource: `phmax-scenario-label` / `value`  
 Legacy authoritative key: `phmax-school-scenario-label`
@@ -228,7 +228,7 @@ Backup **omits** authority metadata; logical value only.
 
 ### Roadmap after N3-PROTO
 
-`N3-PROTO` ✅ → `N3-FENCE-PROTO` → `N3-FENCE-WRITE` → `N3-PREP` → `N3-AWARE` → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
+`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` → `N3-PREP` → `N3-AWARE` → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
 
 N3-PROTO must not jump into any of these runtime phases.
 
@@ -347,23 +347,57 @@ BroadcastChannel / storage events may be an optional secondary live UX layer lat
 
 ### N3-FENCE-PROTO status
 
-- **0 production call sites**, **0 storage I/O**, **0 runtime lifecycle wiring**
-- production cutover remains **impossible** after this phase
-- **next = N3-FENCE-WRITE**
+- Pure protocol delivered (types/key/record/assessor/eligibility composer)
+- **next runtime phase = N3-FENCE-WRITE** (below)
 
-### N3-FENCE-WRITE stop conditions (next audit)
+## N3-FENCE-WRITE (persistent commit certificate — runtime)
 
-Before FENCE-WRITE:
+**ACTIVE metadata write phase.** Legacy remains the **sole business source of truth**.
 
-1. exact writer inventory
-2. certificate update LAST semantics
-3. raw transaction / failure behavior
-4. Restore certificate transaction
-5. clear certificate update
-6. handoff / snippet new generation
-7. N2-ADOPT establishment certificate update
-8. business authority stays legacy
-9. no routing through fence
+### What it does
+
+Compatible school-target scenario mutations finish by writing an N3 fence certificate **LAST**:
+
+legacy → school v2 → verify → v1 legacy marker → **fence last** → read-back + full pure assessment.
+
+`committed` means post-write assessment === `LEGACY_COMMITTED` — `setItem` alone is insufficient.
+
+### What it does not do
+
+- no schemaVersion 2 / namespaced marker production writes
+- no namespaced business reads / routing through fence
+- no authority cutover
+- no PREP bootstrap for already-ready fence-less states
+- no passive fence write on Dashboard mount/read
+- no unbound fence
+- Backup still omits fence; Full Reset still clears via `reditelsky-pruvodce:v2:`
+
+### Soft failure
+
+Legacy authoritative success + fence failure → **business success** + fence metadata degraded (`incomplete` / `verify_failed` / …).
+Same soft rule for Profile/VZ establishment metadata and Restore post-verify.
+
+### Ownership
+
+| Surface | Fence owner |
+|---------|-------------|
+| Dashboard / handoff UI | repository finalizer |
+| Level B / post-export | `clearScenarioLabelLifecycle` only |
+| Profile/VZ | establishment only when it **mutates** (`already_ready` = 0 fence writes) |
+| Restore | post-verification soft zone only (never pre-verify / never in raw txn) |
+| Console snippet | inline school fence LAST (controlled duplication + contract tests) |
+
+### Old writers
+
+Old N2 tabs/snippets still mutate without updating fence → certificate becomes **VIOLATED**. Detection exists; **enforcement awaits N3-AWARE**. Between FENCE-WRITE and AWARE, UI continues legacy business reads.
+
+### Explicit mutation may supersede INVALID/VIOLATED
+
+A new compatible fence-aware mutation that fully re-verifies the tuple may issue a fresh certificate. Mount/read/`already_ready` must **not** passively recertify.
+
+### Next
+
+**N3-PREP** — bootstrap certificates for already-stable healthy school states without a new business mutation.
 
 ## Rollback / deploy safety
 
@@ -375,16 +409,18 @@ Rolling N2-ADOPT-WRITE back to PROTO leaves legacy authoritative; any school sha
 
 N3-PROTO likewise adds **no runtime hooks**; production remains N2-ADOPT-WRITE business behavior after merge.
 
-N3-FENCE-PROTO likewise adds **no runtime hooks**; production remains N2-ADOPT-WRITE business behavior. Fence certificates are defined/tested only — not written.
+N3-FENCE-PROTO defined pure certificates only.
+
+N3-FENCE-WRITE adds runtime fence finalization after compatible mutations; **business authority remains legacy**. Rolling back FENCE-WRITE leaves legacy authoritative; fence keys become inert residue under v2 root until Full Reset / N4.
 
 **Deployment rollback** (strict legacy==v2 mirror) remains distinct from **already-open old tab / saved snippet** (detected by fence certificate mismatch).
 
 ## Not implemented
 
 - N3 namespaced-authoritative production read / write / cutover
-- N3-FENCE-WRITE / PREP / AWARE / CUTOVER-WRITE / HARDEN
+- N3-PREP / AWARE / CUTOVER-WRITE / HARDEN
 - N4 legacy cleanup
 - Cross-module namespacing
 - Copy-on-read / mount ensure / N3 bootstrap-on-read
 - BroadcastChannel / cross-tab lock / tab registry / service worker implementation
-- Automatic fence recovery UX
+- Automatic fence recovery UX / passive PREP on mount

@@ -4,6 +4,8 @@ import { PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY } from "../../../phmax-school-scenar
 import { serializeScenarioLabelMigrationMarkerKey } from "./scenario-label-migration-marker-key";
 import { parseScenarioLabelMigrationMarkerPayloadJson } from "./scenario-label-migration-marker-payload";
 import { buildScenarioLabelNamespacedKey } from "./scenario-label-migration-protocol";
+import { serializeScenarioLabelN3FenceKey } from "./scenario-label-n3-fence-key";
+import { parseScenarioLabelN3FenceRecordJson } from "./scenario-label-n3-fence-record";
 import {
   clearScenarioLabelLifecycle,
   readScenarioLabelRaw,
@@ -73,7 +75,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "dirty" });
+    expect(result).toMatchObject({ status: "success", shadow: "dirty" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("NEW");
   });
 
@@ -91,7 +93,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "dirty" });
+    expect(result).toMatchObject({ status: "success", shadow: "dirty" });
   });
 
   it("D: legacy+v2+verify+marker OK → success synced", () => {
@@ -99,7 +101,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "synced" });
+    expect(result).toMatchObject({ status: "success", shadow: "synced" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("NEW");
     expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBe("NEW");
     const marker = storage.getItem(
@@ -120,7 +122,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "synced" });
+    expect(result).toMatchObject({ status: "success", shadow: "synced" });
     expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBe("NEW");
     expect(storage.getItem(markerKey)).toBeNull();
   });
@@ -130,7 +132,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: false, code: "corrupted", detail: "invalid_json" }),
     });
-    expect(result).toEqual({ status: "success", shadow: "skipped" });
+    expect(result).toMatchObject({ status: "success", shadow: "skipped" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("NEW");
     expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBeNull();
   });
@@ -167,7 +169,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "dirty" });
+    expect(result).toMatchObject({ status: "success", shadow: "dirty" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeNull();
     const marker = parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(markerKey));
     // Fail-closed: either absent or PROTO dirty — never leftover healthy synced.
@@ -181,7 +183,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "synced" });
+    expect(result).toMatchObject({ status: "success", shadow: "synced" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeNull();
     expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBeNull();
     const marker = parseScenarioLabelMigrationMarkerPayloadJson(
@@ -214,7 +216,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "dirty" });
+    expect(result).toMatchObject({ status: "success", shadow: "dirty" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("B");
     const marker = parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(markerKey));
     expect(marker?.mirrorHealth).toBe("dirty");
@@ -242,7 +244,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "dirty" });
+    expect(result).toMatchObject({ status: "success", shadow: "dirty" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("B");
     const marker = parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(markerKey));
     expect(marker?.mirrorHealth).not.toBe("synced");
@@ -264,7 +266,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "synced" });
+    expect(result).toMatchObject({ status: "success", shadow: "synced" });
     expect(parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(markerKey))).toEqual({
       schemaVersion: 1,
       authority: "legacy",
@@ -305,7 +307,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "dirty" });
+    expect(result).toMatchObject({ status: "success", shadow: "dirty" });
   });
 
   it("O: corrupted Identity clear — school residue untouched; unbound synced+absent", () => {
@@ -333,7 +335,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: false, code: "corrupted", detail: "invalid_json" }),
     });
-    expect(result).toEqual({ status: "success", shadow: "skipped" });
+    expect(result).toMatchObject({ status: "success", shadow: "skipped" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeNull();
     expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBeNull();
     expect(
@@ -368,7 +370,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
     );
 
     const result = clearScenarioLabelLifecycle({ storage });
-    expect(result).toEqual({ status: "success", shadow: "synced" });
+    expect(result).toMatchObject({ status: "success", shadow: "synced" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeNull();
     expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBeNull();
     expect(
@@ -407,7 +409,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: true, registry: null }),
     });
-    expect(result).toEqual({ status: "success", shadow: "synced" });
+    expect(result).toMatchObject({ status: "success", shadow: "synced" });
     expect(
       parseScenarioLabelMigrationMarkerPayloadJson(
         storage.getItem(serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" })),
@@ -454,7 +456,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
       storage,
       readIdentity: () => ({ ok: false, code: "corrupted", detail: "x" }),
     });
-    expect(result).toEqual({ status: "success", shadow: "skipped" });
+    expect(result).toMatchObject({ status: "success", shadow: "skipped" });
   });
 
   it("N: Profile-only runtime → unbound (no Profile fallback)", () => {
@@ -508,7 +510,7 @@ describe("scenario-label repository (N2-WRITE)", () => {
     );
 
     const result = clearScenarioLabelLifecycle({ storage });
-    expect(result).toEqual({ status: "success", shadow: "synced" });
+    expect(result).toMatchObject({ status: "success", shadow: "synced" });
     expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeNull();
     expect(storage.getItem(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBeNull();
     expect(
@@ -517,5 +519,83 @@ describe("scenario-label repository (N2-WRITE)", () => {
     expect(
       storage.getItem(buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_B })),
     ).toBe("OTHER");
+  });
+
+  it("N3-FENCE-WRITE O1: school synced write finalizes fence LAST (one set)", () => {
+    const storage = new MemoryStorage();
+    storage.setItem(IDENTITY_REGISTRY_LS_KEY, identityJson(SCHOOL_A));
+    const fenceKey = serializeScenarioLabelN3FenceKey({
+      kind: "school",
+      schoolId: SCHOOL_A,
+    });
+    const result = writeScenarioLabelFromUiInput("LABEL", { storage });
+    expect(result).toMatchObject({ status: "success", shadow: "synced", fence: "committed" });
+    expect(storage.setCalls.filter((k) => k === fenceKey)).toHaveLength(1);
+    expect(storage.setCalls.at(-1)).toBe(fenceKey);
+    const parsed = parseScenarioLabelN3FenceRecordJson(storage.getItem(fenceKey));
+    expect(parsed).toEqual({
+      status: "valid",
+      record: expect.objectContaining({
+        committedRaw: { exists: true, value: "LABEL" },
+        authority: "legacy",
+      }),
+    });
+  });
+
+  it("N3-FENCE-WRITE: unbound write skips fence", () => {
+    const storage = new MemoryStorage();
+    const result = writeScenarioLabelFromUiInput("U", { storage });
+    expect(result).toMatchObject({ status: "success", shadow: "synced", fence: "skipped" });
+    expect(storage.setCalls.some((k) => k.includes("protocol-commit"))).toBe(false);
+  });
+
+  it("N3-FENCE-WRITE: school clear finalizes absent fence", () => {
+    const storage = new MemoryStorage();
+    storage.setItem(IDENTITY_REGISTRY_LS_KEY, identityJson(SCHOOL_A));
+    writeScenarioLabelFromUiInput("X", { storage });
+    storage.setCalls = [];
+    const result = clearScenarioLabelLifecycle({ storage });
+    expect(result).toMatchObject({ status: "success", shadow: "synced", fence: "committed" });
+    const fenceKey = serializeScenarioLabelN3FenceKey({
+      kind: "school",
+      schoolId: SCHOOL_A,
+    });
+    expect(storage.setCalls.filter((k) => k === fenceKey)).toHaveLength(1);
+    const parsed = parseScenarioLabelN3FenceRecordJson(storage.getItem(fenceKey));
+    expect(parsed).toEqual({
+      status: "valid",
+      record: expect.objectContaining({
+        committedRaw: { exists: false },
+      }),
+    });
+  });
+
+  it("N3-FENCE-WRITE S1: fence failure does not overturn business success", () => {
+    const storage = new MemoryStorage();
+    storage.setItem(IDENTITY_REGISTRY_LS_KEY, identityJson(SCHOOL_A));
+    const fenceKey = serializeScenarioLabelN3FenceKey({
+      kind: "school",
+      schoolId: SCHOOL_A,
+    });
+    storage.failSetKeys.add(fenceKey);
+    const result = writeScenarioLabelFromUiInput("OK", { storage });
+    expect(result.status).toBe("success");
+    expect(result).toMatchObject({ shadow: "synced", fence: "incomplete" });
+    expect(storage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("OK");
+  });
+
+  it("N3-FENCE-WRITE: business read remains legacy-only", () => {
+    const storage = new MemoryStorage();
+    storage.setItem(IDENTITY_REGISTRY_LS_KEY, identityJson(SCHOOL_A));
+    writeScenarioLabelFromUiInput("LEGACY-VALUE", { storage });
+    storage.setItem(
+      buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_A }),
+      "SHADOW-ONLY",
+    );
+    expect(readScenarioLabelUi({ storage })).toBe("LEGACY-VALUE");
+    expect(readScenarioLabelRaw({ storage })).toEqual({
+      exists: true,
+      value: "LEGACY-VALUE",
+    });
   });
 });
