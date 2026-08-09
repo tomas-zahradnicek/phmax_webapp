@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { applyAppBackupRestore } from "../../../backup/restore/apply-app-backup-restore";
 import { buildAppBackupRestorePlan } from "../../../backup/restore/build-app-backup-restore-plan";
 import { validateAppBackupEnvelope } from "../../../backup/restore/validate-app-backup";
 import { validateRestorePlanForApply } from "../../../backup/restore/validate-restore-plan-for-apply";
@@ -359,5 +360,93 @@ describe("scenario-label Restore N2-WRITE", () => {
     expect(store.get(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("Round");
     expect(store.get(buildScenarioLabelNamespacedKey({ kind: "unbound" }))).toBe("Round");
     expect(store.has(serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" }))).toBe(true);
+  });
+});
+
+describe("scenario-label Restore N2-HARDEN transaction rollback", () => {
+  function createStorage(initial: Record<string, string> = {}) {
+    const store = new Map<string, string>(Object.entries(initial));
+    return {
+      store,
+      getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
+      setItem: (k: string, v: string) => {
+        store.set(k, v);
+      },
+      removeItem: (k: string) => {
+        store.delete(k);
+      },
+      key: (i: number) => [...store.keys()][i] ?? null,
+      get length() {
+        return store.size;
+      },
+    };
+  }
+
+  beforeEach(() => {
+    vi.stubGlobal("sessionStorage", createStorage());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("S: applyAppBackupRestore post-apply failure restores exact raw×3", async () => {
+    const legacy = PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY;
+    const v2 = buildScenarioLabelNamespacedKey({ kind: "unbound" });
+    const marker = serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" });
+    const storage = createStorage({
+      [legacy]: "OLD-L",
+      [v2]: "OLD-V",
+      [marker]: "OLD-M",
+    });
+    vi.stubGlobal("localStorage", storage);
+
+    const validated = validateAppBackupEnvelope(
+      envelope({ "phmax-scenario-label": modulePayload("Label", "NEW-L") }),
+    );
+    if (validated.status !== "validated") throw new Error("expected validated");
+
+    const result = await applyAppBackupRestore(validated, {
+      storage,
+      verify: () => ({ ok: false, detail: "forced_verification_fail" }),
+    });
+
+    expect(result.status).toBe("rolled_back");
+    expect(storage.getItem(legacy)).toBe("OLD-L");
+    expect(storage.getItem(v2)).toBe("OLD-V");
+    expect(storage.getItem(marker)).toBe("OLD-M");
+  });
+
+  it("T: pre-missing v2/marker restored to missing after post-apply failure", async () => {
+    const legacy = PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY;
+    const v2 = buildScenarioLabelNamespacedKey({ kind: "unbound" });
+    const marker = serializeScenarioLabelMigrationMarkerKey({ kind: "unbound" });
+    const storage = createStorage({
+      [legacy]: "OLD-L",
+    });
+    vi.stubGlobal("localStorage", storage);
+
+    expect(storage.getItem(v2)).toBeNull();
+    expect(storage.getItem(marker)).toBeNull();
+
+    const validated = validateAppBackupEnvelope(
+      envelope({ "phmax-scenario-label": modulePayload("Label", "NEW-L") }),
+    );
+    if (validated.status !== "validated") throw new Error("expected validated");
+
+    const result = await applyAppBackupRestore(validated, {
+      storage,
+      verify: () => ({ ok: false, detail: "forced_verification_fail" }),
+    });
+
+    expect(result.status).toBe("rolled_back");
+    expect(storage.getItem(legacy)).toBe("OLD-L");
+    expect(storage.getItem(v2)).toBeNull();
+    expect(storage.getItem(marker)).toBeNull();
+    expect(Object.prototype.hasOwnProperty.call(Object.fromEntries(storage.store), v2)).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(Object.fromEntries(storage.store), marker)).toBe(
+      false,
+    );
   });
 });

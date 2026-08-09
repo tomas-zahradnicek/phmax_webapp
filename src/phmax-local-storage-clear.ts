@@ -33,6 +33,10 @@ import { clearScenarioLabelLifecycle } from "./data/storage/scenario-label-migra
 /**
  * Level B — Calculator Clear inventář.
  * Neobsahuje SchoolProfile, Identity Registry, AppContext ani klíče výroční zprávy.
+ *
+ * Includes the legacy scenario label key for inventory/documentation completeness.
+ * Runtime Level B MUST filter it out and clear via {@link clearScenarioLabelLifecycle}
+ * (shadow-aware). Do not call generic removeListedKeys on this full list for scenario.
  */
 export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
   "edu-cz-pv-calculator-state",
@@ -77,9 +81,11 @@ export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
 const DASH_VISIT_PREFIX = "phmax-dash-last-visit-";
 
 /**
- * Klíče, které školní scénář / IS handoff JSON skutečně nese v `moduleSnapshots` + label.
- * Post-export clear smí mazat jen tuto množinu (CLEAR_SCOPE ⊆ export).
- * Scenario label legacy key is cleared via {@link clearScenarioLabelLifecycle} (shadow-aware).
+ * Klíče, které školní scénář / IS handoff JSON skutečně nese v `moduleSnapshots`
+ * (autosave modulů). Scenario label NENÍ v tomto seznamu — clear musí jít přes
+ * {@link clearScenarioLabelLifecycle} (legacy + shadow + markers), ne generic remove-list.
+ *
+ * Post-export clear = these autosave keys + shadow-aware scenario lifecycle.
  */
 export const PHMAX_SCHOOL_SCENARIO_EXPORT_WORKING_LS_KEYS: readonly string[] = [
   PHMAX_MODULE_AUTOSAVE_LS_KEYS.pv,
