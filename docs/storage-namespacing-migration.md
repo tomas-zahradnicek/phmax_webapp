@@ -1,4 +1,4 @@
-# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT-PROTO / N2-ADOPT-WRITE)
+# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO)
 
 Pilot resource: `phmax-scenario-label` / `value`  
 Legacy authoritative key: `phmax-school-scenario-label`
@@ -159,10 +159,78 @@ Production automatic write call sites:
 3. VZ afterPersist ready/noop
 4. Restore post-success
 
-## Next phases
+## N3-PROTO (authority cutover pure protocol)
 
-- **N3:** namespaced authority only after readiness; browsers that skipped N2 must bootstrap legacy→v2 before cutover.
-- **N4:** legacy cleanup (later).
+Pilot remains: `phmax-scenario-label` / `value` on `school:<canonicalUuid>` only.
+
+**Production authority is unchanged:** legacy key remains the sole business authority.
+N3-PROTO adds **pure** types/planners/tests only — **0 production call sites**, **0 storage I/O**, **0 runtime lifecycle wiring**.
+
+### Marker schema v2
+
+Do **not** silently widen v1 `authority`. Semantic referents change under namespaced authority:
+
+| Field | v1 (`schemaVersion: 1`, `authority: "legacy"`) | v2 (`schemaVersion: 2`, `authority: "namespaced"`) |
+|-------|-----------------------------------------------|-----------------------------------------------------|
+| `authoritativePresence` | legacy existence | **v2** authoritative existence |
+| `mirrorHealth` | v2 shadow vs legacy | **legacy compatibility mirror** vs v2 |
+
+Dual parser: valid v1 legacy **or** valid v2 namespaced. Mixed pairs (`v1+namespaced`, `v2+legacy`) are invalid.
+
+**Old N2 compatibility fact:** current N2 v1 parser rejects schema v2 → `null` → establishment treats marker as invalid and would **repair/downgrade to legacy**. This is why **N3-FENCE + N3-AWARE** are mandatory before cutover.
+
+### Authority scope
+
+- Per **resource** + per **physical school target** (`school:<canonical lowercase UUID>`).
+- **No** global cutover flag.
+- **Unbound never cut over** (may remain N2 shadow state only).
+- Uppercase / mixed-case / whitespace schoolId: reject (no normalization into keys).
+
+### State model
+
+`LEGACY_UNPREPARED` → `LEGACY_PREPARED` → (metadata-last cutover) → `NAMESPACED_ACTIVE`
+(`NAMESPACED_DEGRADED` when namespaced marker exists but mirror/equality/presence is unhealthy)
+Malformed / ambiguous marker loss → `AUTHORITY_BLOCKED`.
+No persistent cutover-in-progress state.
+
+### Cutover (planned; not executed in PROTO)
+
+1. Fresh legacy/v2 equality **before** marker write
+2. Replace marker only: v1 legacy/synced → v2 namespaced/synced
+3. Marker read-back (strict parse)
+4. Fresh equality **after** marker read-back
+
+Crash before marker commit → legacy remains. Marker v2 persisted → namespaced begins.
+
+Bootstrap/repair from **fresh legacy** is a **separate** phase (reuse N2-ADOPT semantics; never from unbound). Skip-N2 browsers must bootstrap before cutover.
+
+### Strict compatibility mirror + rollback-to-N2
+
+During the N3 compatibility window, every **successful** namespaced business write must finish with exact `v2 raw == legacy raw`.
+That makes **deployment rollback** to current N2-ADOPT-WRITE expose the same logical value via legacy reads.
+
+**Distinct hazard:** an already-open old N2 tab can still legacy-write / repair-downgrade markers. Deployment rollback ≠ mixed-version concurrent tabs. **Production cutover is blocked until N3-FENCE.**
+
+### Read routing (pure decision only)
+
+- v1 legacy marker → legacy
+- v2 namespaced + school → school v2 (even if legacy diverges → degraded signal; **no silent legacy substitute**)
+- unbound → legacy
+- malformed / namespaced v2 unavailable / presence inconsistent / marker-loss divergence → **blocked**
+- **No unsafe silent fallback.**
+
+### Future writers / hooks (inventory only in PROTO)
+
+Before cutover, all must become authority-aware: repository, handoff, console snippet, Level B / post-export clear, Restore ops, Profile/VZ/Restore establishment hooks.
+Under namespaced authority, N2-ADOPT establishment must **NO-OP** (prevent downgrade).
+Restore/clear planners preserve current authority (namespaced restore must not emit legacy marker).
+Backup **omits** authority metadata; logical value only.
+
+### Roadmap after N3-PROTO
+
+`N3-FENCE` → `N3-PREP` → `N3-AWARE` → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
+
+N3-PROTO must not jump into any of these runtime phases.
 
 ## Rollback / deploy safety
 
@@ -172,9 +240,13 @@ N2-ADOPT-PROTO adds **no runtime hooks**, so rolling back a PROTO-only deploy ca
 
 Rolling N2-ADOPT-WRITE back to PROTO leaves legacy authoritative; any school shadow/marker written by WRITE become inert residue until Full Reset / N4.
 
+N3-PROTO likewise adds **no runtime hooks**; production remains N2-ADOPT-WRITE business behavior after merge.
+
 ## Not implemented
 
-- N3 namespaced-authoritative read / cutover
+- N3 namespaced-authoritative production read / write / cutover
+- N3-FENCE / PREP / AWARE / CUTOVER-WRITE / HARDEN
 - N4 legacy cleanup
 - Cross-module namespacing
 - Copy-on-read / mount ensure / N3 bootstrap-on-read
+- BroadcastChannel / cross-tab lock implementation
