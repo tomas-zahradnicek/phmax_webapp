@@ -25,9 +25,8 @@ const N3_PROTO_FORBIDDEN_RUNTIME_SYMBOLS = [
 ] as const;
 
 /**
- * Marker parse is needed by N3-FENCE-WRITE finalizer and N3-PREP admission
- * to refuse schema2 / certify or prepare v1. Still forbidden everywhere else
- * (no namespaced authority routing).
+ * Marker parse is needed by N3-FENCE-WRITE finalizer, N3-PREP admission,
+ * and N3-AWARE-CORE inert executors (still 0 production business consumers).
  */
 const N3_PROTO_MARKER_PARSE_SYMBOLS = [
   "parseScenarioLabelN3AuthorityMarker",
@@ -37,6 +36,10 @@ const N3_PROTO_MARKER_PARSE_SYMBOLS = [
 const N3_MARKER_PARSE_RUNTIME_ALLOWLIST = new Set([
   "src/data/storage/scenario-label-migration/scenario-label-n3-fence-finalize.ts",
   "src/data/storage/scenario-label-migration/scenario-label-n3-prep.ts",
+  "src/data/storage/scenario-label-migration/scenario-label-n3-aware-assessment.ts",
+  "src/data/storage/scenario-label-migration/scenario-label-n3-aware-write.ts",
+  "src/data/storage/scenario-label-migration/scenario-label-n3-aware-clear.ts",
+  "src/data/storage/scenario-label-migration/scenario-label-n3-namespaced-fence-finalize.ts",
 ]);
 
 function readSource(relativePath: string): string {
@@ -74,7 +77,7 @@ describe("N3-PROTO source contract", () => {
     }
   });
 
-  it("zero production call sites for N3-PROTO cutover/routing symbols; marker parse only in fence finalizer + PREP", () => {
+  it("zero production call sites for N3-PROTO cutover/routing symbols; marker parse only in fence/PREP/AWARE-CORE", () => {
     const srcRoot = path.join(repoRoot, "src");
     const hits: string[] = [];
 

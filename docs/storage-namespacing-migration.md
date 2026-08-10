@@ -1,4 +1,4 @@
-# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO / N3-FENCE-PROTO / N3-FENCE-WRITE)
+# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO / N3-FENCE-PROTO / N3-FENCE-WRITE / N3-PREP / N3-AWARE-CORE)
 
 Pilot resource: `phmax-scenario-label` / `value`  
 Legacy authoritative key: `phmax-school-scenario-label`
@@ -228,7 +228,7 @@ Backup **omits** authority metadata; logical value only.
 
 ### Roadmap after N3-PROTO
 
-`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` ✅ → `N3-PREP` ✅ → `N3-AWARE` → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
+`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` ✅ → `N3-PREP` ✅ → `N3-AWARE-CORE` ✅ (inert) → `N3-AWARE-WIRING` → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
 
 N3-PROTO must not jump into any of these runtime phases.
 
@@ -457,7 +457,52 @@ Mutation finalizer may still supersede `INVALID`/`VIOLATED` after an explicit co
 
 ### Next
 
-**N3-AWARE** — fence-aware business enforcement / routing design (not started).
+**N3-AWARE-CORE** — IMPLEMENTED / INERT (below).
+
+## N3-AWARE-CORE (inert authority-aware runtime primitives)
+
+**IMPLEMENTED / INERT.** Production behavior remains **N3-PREP** (legacy sole business authority).
+
+### What it provides
+
+Inert, fully tested authority-aware primitives for the pilot `phmax-scenario-label` / `value`:
+
+| Primitive | Role |
+|-----------|------|
+| `assessScenarioLabelRuntimeAuthority` | Canonical assessor (legacy + namespaced + blocked/degraded) |
+| `readScenarioLabelAwareLogical` | Logical read (RawStoredText; 0 writes; never `fence.committedRaw`) |
+| `writeScenarioLabelAwareLogical` / `writeScenarioLabelNamespacedRaw` | Dispatcher + namespaced v2-first writer |
+| `finalizeScenarioLabelNamespacedFenceCertificate` | Namespaced fence LAST (`NAMESPACED_COMMITTED` required) |
+| `clearScenarioLabelAwareLogical` / `clearScenarioLabelNamespaced` | Authority-aware clear (schema2 preserved; no v1 downgrade) |
+| `decideScenarioLabelAwareEstablishment` | Pure establishment gate for future WIRING |
+
+### What it does NOT do
+
+- **0 production consumers** outside CORE implementation / unit / source-contract tests
+- no Dashboard / Backup / Restore / handoff / console snippet / Level B / Profile-VZ wiring
+- no cutover (`planScenarioLabelAuthorityCutover` unused in CORE mutation)
+- no legacy → schema2 marker write (schema2 only inside already-namespaced executors)
+- no namespaced → legacy fallback
+- no PREP-on-read / write-on-read
+- no partial wiring — **WIRING is a separate atomic PR**
+
+### Authority states
+
+`UNBOUND` | `LEGACY_READY` | `LEGACY_COMPAT_UNPREPARED` | `LEGACY_VIOLATED_RECOVERABLE` | `NAMESPACED_READY` | `NAMESPACED_DEGRADED` | `AUTHORITY_BLOCKED` | `STORAGE_UNAVAILABLE`
+
+- Healthy legacy + missing fence → **`LEGACY_COMPAT_UNPREPARED`** (not blocked)
+- Stale legacy fence with unambiguous v1 world → **`LEGACY_VIOLATED_RECOVERABLE`** (not generic “allow legacy”)
+- Any namespaced evidence conflict / namespaced marker without fence → **`AUTHORITY_BLOCKED`**
+
+### Namespaced writer (preservation only)
+
+Order: fresh gate → snapshot → **school-v2** → legacy mirror → verify → schema2 marker → fence LAST → full assessment `NAMESPACED_READY`.
+
+Fence failure after settled data → explicit **`fence_incomplete`** (no false success; no blind full rollback).
+
+### Next
+
+**N3-AWARE-WIRING** — atomically wire CORE into production surfaces (forbidden to land partially).
 
 ## Rollback / deploy safety
 
@@ -477,11 +522,12 @@ N3-FENCE-WRITE adds runtime fence finalization after compatible mutations; **bus
 
 ## Not implemented
 
-- N3 namespaced-authoritative production read / write / cutover
-- N3-AWARE / CUTOVER-WRITE / HARDEN
+- N3-AWARE-WIRING (production consumers of AWARE-CORE)
+- N3 namespaced-authoritative production read / write / cutover (WIRING + CUTOVER-WRITE)
+- N3-CUTOVER-WRITE / HARDEN
 - N4 legacy cleanup
 - Cross-module namespacing
 - Copy-on-read / mount ensure / N3 bootstrap-on-read
 - BroadcastChannel / cross-tab lock / tab registry / service worker implementation
-- Automatic fence recovery UX for VIOLATED/INVALID (deferred to AWARE)
+- Automatic fence recovery UX for VIOLATED/INVALID (deferred)
 - Dashboard / app-bootstrap PREP owners (intentionally not implemented)
