@@ -1,8 +1,12 @@
 import { isRecord } from "../backup-validation";
 import { parseSchoolYearLabel } from "../../domain/school-year/school-year-label";
 import type { IdentityRegistry } from "../../data/identity/identity-registry-types";
+import type { EntityId } from "../../domain/shared/entity-id";
+import { isUuid, normalizeUuid } from "../../data/identity/identity-uuid";
 import type { ScenarioLabelMigrationTarget } from "../../data/storage/scenario-label-migration/scenario-label-migration-types";
 import { buildScenarioLabelRestorePhysicalOps } from "../../data/storage/scenario-label-migration/scenario-label-restore-ops";
+import { buildScenarioLabelRestoreAuthorityOps } from "../../data/storage/scenario-label-migration/scenario-label-restore-authority-ops";
+import type { ScenarioLabelAwareStorage } from "../../data/storage/scenario-label-migration/scenario-label-n3-aware-types";
 import {
   resolveScenarioLabelRestoreShadowPlan,
   type ScenarioLabelRestoreShadowPlan,
@@ -39,6 +43,10 @@ import type {
   RestoreWarning,
   ValidatedBackupModule,
 } from "./restore-types";
+
+function isCanonicalSchoolId(value: unknown): value is EntityId {
+  return typeof value === "string" && isUuid(value) && value === normalizeUuid(value);
+}
 
 function setOp(
   moduleId: RestoreStorageOperation["moduleId"],
@@ -144,11 +152,18 @@ function planAnnualReport(
 function planPresentValidModule(
   module: Extract<ValidatedBackupModule, { status: "present_valid" }>,
   scenarioShadowPlan: ScenarioLabelRestoreShadowPlan | null,
+  authorityContext: {
+    storage: ScenarioLabelAwareStorage | null;
+    currentSchoolId: EntityId | null;
+  } | null,
 ): {
   operations: RestoreStorageOperation[];
   item: RestoreModulePlanItem;
   vzStartYear: number | null;
   expectedScenarioLabelTarget: ScenarioLabelMigrationTarget | null;
+  scenarioLabelRequiresNamespacedFence: boolean;
+  scenarioLabelFenceSnapshotKey: string | null;
+  scenarioAuthorityBlockedReason: string | null;
 } {
   const { moduleId, data, label } = module;
 
@@ -163,6 +178,9 @@ function planPresentValidModule(
       },
       vzStartYear: null,
       expectedScenarioLabelTarget: null,
+      scenarioLabelRequiresNamespacedFence: false,
+      scenarioLabelFenceSnapshotKey: null,
+      scenarioAuthorityBlockedReason: null,
     };
   }
 
@@ -177,6 +195,9 @@ function planPresentValidModule(
       },
       vzStartYear: null,
       expectedScenarioLabelTarget: null,
+      scenarioLabelRequiresNamespacedFence: false,
+      scenarioLabelFenceSnapshotKey: null,
+      scenarioAuthorityBlockedReason: null,
     };
   }
 
@@ -192,6 +213,9 @@ function planPresentValidModule(
       },
       vzStartYear: planned.vzStartYear,
       expectedScenarioLabelTarget: null,
+      scenarioLabelRequiresNamespacedFence: false,
+      scenarioLabelFenceSnapshotKey: null,
+      scenarioAuthorityBlockedReason: null,
     };
   }
 
@@ -203,6 +227,57 @@ function planPresentValidModule(
         identityModuleStatus: "missing",
         backupProfileId: null,
       });
+
+    // T2 apply passes storage → fresh authority assessment. T1 preview without storage
+    // keeps legacy physical ops (T2 wins; preview never grants mutation permission).
+    if (authorityContext?.storage != null) {
+      const authorityPlan = buildScenarioLabelRestoreAuthorityOps({
+        storage: authorityContext.storage,
+        logicalLabel: String(data),
+        shadowPlan,
+        currentSchoolId: authorityContext.currentSchoolId,
+      });
+      if (authorityPlan.status === "blocked") {
+        return {
+          operations: [],
+          item: {
+            moduleId,
+            label,
+            kind: "present_invalid",
+            keySemantics: ownedKeysForModule(moduleId).map((key) => ({
+              key,
+              effect: "preserve",
+            })),
+            reason: `scenario_authority_blocked:${authorityPlan.reason}`,
+          },
+          vzStartYear: null,
+          expectedScenarioLabelTarget: null,
+          scenarioLabelRequiresNamespacedFence: false,
+          scenarioLabelFenceSnapshotKey: null,
+          scenarioAuthorityBlockedReason: authorityPlan.reason,
+        };
+      }
+      const planned = authorityPlan.ops;
+      return {
+        operations: planned.operations.map((op) =>
+          op.action === "set"
+            ? setOp(moduleId, op.key, op.serializedValue)
+            : removeOp(moduleId, op.key),
+        ),
+        item: {
+          moduleId,
+          label,
+          kind: "present_valid",
+          keySemantics: planned.keySemantics,
+        },
+        vzStartYear: null,
+        expectedScenarioLabelTarget: planned.expectedTarget,
+        scenarioLabelRequiresNamespacedFence: authorityPlan.requiresNamespacedFenceCommit,
+        scenarioLabelFenceSnapshotKey: authorityPlan.fenceSnapshotKey,
+        scenarioAuthorityBlockedReason: null,
+      };
+    }
+
     const planned = buildScenarioLabelRestorePhysicalOps(String(data), shadowPlan);
     return {
       operations: planned.operations.map((op) =>
@@ -218,6 +293,9 @@ function planPresentValidModule(
       },
       vzStartYear: null,
       expectedScenarioLabelTarget: planned.expectedTarget,
+      scenarioLabelRequiresNamespacedFence: false,
+      scenarioLabelFenceSnapshotKey: null,
+      scenarioAuthorityBlockedReason: null,
     };
   }
 
@@ -247,6 +325,9 @@ function planPresentValidModule(
     },
     vzStartYear: null,
     expectedScenarioLabelTarget: null,
+    scenarioLabelRequiresNamespacedFence: false,
+    scenarioLabelFenceSnapshotKey: null,
+    scenarioAuthorityBlockedReason: null,
   };
 }
 
@@ -348,11 +429,17 @@ function classifyConflict(params: {
 
 /**
  * Build a read-only RestorePlan from a validated backup + explicit local environment.
- * Pure — never writes storage.
+ * Never writes storage.
+ *
+ * Optional `options.storage` enables fresh T2 scenario authority assessment (AWARE-WIRING).
+ * T1 preview may omit storage — scenario ops stay legacy-shaped; T2 apply must pass storage.
  */
 export function buildAppBackupRestorePlan(
   validated: Extract<ReturnType<typeof validateAppBackupEnvelope>, { status: "validated" }>,
   env: RestoreEnvironment,
+  options: {
+    storage?: ScenarioLabelAwareStorage | null;
+  } = {},
 ): RestorePlan {
   const operations: RestoreStorageOperation[] = [];
   const modules: RestoreModulePlanItem[] = [];
@@ -365,6 +452,17 @@ export function buildAppBackupRestorePlan(
   let missingKnownCount = 0;
   const invalidModuleIds: string[] = [];
   let expectedScenarioLabelTarget: ScenarioLabelMigrationTarget | null = null;
+  let scenarioLabelRequiresNamespacedFence = false;
+  let scenarioLabelFenceSnapshotKey: string | null = null;
+
+  const currentSchoolId =
+    env.identity.status === "valid" && isCanonicalSchoolId(env.identity.schoolId)
+      ? env.identity.schoolId
+      : null;
+  const authorityContext =
+    options.storage != null
+      ? { storage: options.storage, currentSchoolId }
+      : null;
 
   for (const module of validated.modules) {
     if (module.status === "missing") {
@@ -437,12 +535,19 @@ export function buildAppBackupRestorePlan(
           })
         : null;
 
-    const planned = planPresentValidModule(module, scenarioShadowPlan);
+    const planned = planPresentValidModule(module, scenarioShadowPlan, authorityContext);
+    if (planned.scenarioAuthorityBlockedReason != null) {
+      invalidModuleIds.push(module.moduleId);
+    }
     operations.push(...planned.operations);
     modules.push(planned.item);
     if (planned.vzStartYear != null) vzStartYear = planned.vzStartYear;
     if (planned.expectedScenarioLabelTarget != null) {
       expectedScenarioLabelTarget = planned.expectedScenarioLabelTarget;
+    }
+    if (planned.scenarioLabelRequiresNamespacedFence) {
+      scenarioLabelRequiresNamespacedFence = true;
+      scenarioLabelFenceSnapshotKey = planned.scenarioLabelFenceSnapshotKey;
     }
   }
 
@@ -488,6 +593,10 @@ export function buildAppBackupRestorePlan(
 
   const finalOperations = finalCanApply ? operations : [];
   const finalExpectedScenarioLabelTarget = finalCanApply ? expectedScenarioLabelTarget : null;
+  const finalRequiresNamespacedFence =
+    finalCanApply && scenarioLabelRequiresNamespacedFence;
+  const finalFenceSnapshotKey =
+    finalRequiresNamespacedFence ? scenarioLabelFenceSnapshotKey : null;
 
   // touchedKeys ⊇ operation keys ∪ keys mutable by post-restore platform side effects.
   // Only meaningful for apply-ready plans (blocked plans keep operations=[]).
@@ -506,6 +615,10 @@ export function buildAppBackupRestorePlan(
     if (platform.requiresVzSchoolYearReconcile) {
       touched.add(RESTORE_IDENTITY_KEY);
       touched.add(RESTORE_APP_CONTEXT_KEY);
+    }
+    // Namespaced fence prior bytes must be in snapshot for §23 rollback.
+    if (finalFenceSnapshotKey != null) {
+      touched.add(finalFenceSnapshotKey);
     }
   }
 
@@ -526,6 +639,7 @@ export function buildAppBackupRestorePlan(
     sameSchool: classification.sameSchool,
     canApply: finalCanApply,
     expectedScenarioLabelTarget: finalExpectedScenarioLabelTarget,
+    scenarioLabelRequiresNamespacedFence: finalRequiresNamespacedFence,
   };
 }
 

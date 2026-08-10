@@ -23,7 +23,8 @@ export type RestoreFailurePhase =
   | RestoreStorageFailurePhase
   | "school_reconcile"
   | "vz_reconcile"
-  | "verification";
+  | "verification"
+  | "namespaced_fence";
 
 export type RestorePlanRejectReason =
   | "can_apply_false"

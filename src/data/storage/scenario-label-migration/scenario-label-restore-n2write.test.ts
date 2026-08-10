@@ -276,6 +276,8 @@ describe("scenario-label Restore N2-WRITE", () => {
       sameSchool: null,
       canApply: true,
       expectedScenarioLabelTarget: expected,
+      scenarioLabelRequiresNamespacedFence: false,
+      scenarioLabelRequiresNamespacedFence: false,
     };
     const validation = validateRestorePlanForApply(plan);
     expect(validation.ok).toBe(false);

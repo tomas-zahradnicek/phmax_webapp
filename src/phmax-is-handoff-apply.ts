@@ -8,9 +8,10 @@ import { SD_BASIC_WIZARD_LS_KEY } from "./sd-basic-wizard";
 import { SS_BASIC_WIZARD_LS_KEY } from "./ss-basic-wizard";
 import { ZS_BASIC_WIZARD_LS_KEY } from "./zs-basic-wizard";
 import {
-  writeScenarioLabelFromUiInput,
-  type ScenarioLabelStorage,
-} from "./data/storage/scenario-label-migration/scenario-label-repository";
+  preflightScenarioLabelAwareAuthority,
+  writeScenarioLabelAwareFromUiInput,
+  type ScenarioLabelAwareRuntimeStorage,
+} from "./data/storage/scenario-label-migration/scenario-label-aware-runtime";
 import { readIdentityRegistryFromStorage } from "./data/identity/identity-registry-storage";
 import { IDENTITY_REGISTRY_LS_KEY } from "./data/identity/identity-registry-types";
 import {
@@ -102,6 +103,8 @@ function incomingScenarioLabel(payload: PhmaxIsHandoffPayload): string | null {
  * Unbound: no fence certificate.
  */
 export function buildScenarioLabelLiveApplySnippetFragment(label: string): string {
+  // Full namespaced console-snippet writes are a future CUTOVER-readiness requirement.
+  // Previously saved snippets remain an operational hazard until manually replaced.
   // Keep key grammar aligned with N1/N2/N3 serializers; resolve schoolId only at apply time.
   const legacyKey = JSON.stringify(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY);
   const identityKey = JSON.stringify(IDENTITY_REGISTRY_LS_KEY);
@@ -116,7 +119,6 @@ export function buildScenarioLabelLiveApplySnippetFragment(label: string): strin
   const fenceGen = String(SCENARIO_LABEL_N3_FENCE_PROTOCOL_GENERATION);
   return [
     `(function(label){`,
-    `localStorage.setItem(${legacyKey},label);`,
     `try{`,
     `var idRaw=localStorage.getItem(${identityKey});`,
     `var v2Root=${v2Root};`,
@@ -142,7 +144,25 @@ export function buildScenarioLabelLiveApplySnippetFragment(label: string): strin
     `markerKey=v2Root+mseg+":"+mod+":"+res+":school:"+sid;`,
     `fenceKey=v2Root+fseg+":"+mod+":"+res+":school:"+sid;`,
     `}`,
+    `else{console.error("PHmax handoff refused: identity scénáře nelze bezpečně ověřit.");return false;}`,
     `}`,
+    `if(markerKey){`,
+    `var markerRaw=localStorage.getItem(markerKey);`,
+    `if(markerRaw!=null){`,
+    `var marker=JSON.parse(markerRaw);`,
+    `if(!marker||typeof marker!=="object"||(marker.schemaVersion!==1&&marker.schemaVersion!==2)||(marker.schemaVersion===1&&marker.authority!=="legacy")||(marker.schemaVersion===2&&marker.authority!=="namespaced")){console.error("PHmax handoff refused: stav scénáře je poškozený.");return false;}`,
+    `if(marker.schemaVersion===2&&marker.authority==="namespaced"){console.error("PHmax handoff refused: scénář má namespaced autoritu; konzolový import jej nesmí měnit.");return false;}`,
+    `}`,
+    `}`,
+    `if(fenceKey){`,
+    `var fenceRaw=localStorage.getItem(fenceKey);`,
+    `if(fenceRaw!=null){`,
+    `var fence=JSON.parse(fenceRaw);`,
+    `if(!fence||typeof fence!=="object"||(fence.authority!=="legacy"&&fence.authority!=="namespaced")){console.error("PHmax handoff refused: stav scénáře je poškozený.");return false;}`,
+    `if(fence.authority==="namespaced"){console.error("PHmax handoff refused: scénář má namespaced autoritu; konzolový import jej nesmí měnit.");return false;}`,
+    `}`,
+    `}`,
+    `localStorage.setItem(${legacyKey},label);`,
     `if(v2Key&&markerKey){`,
     `localStorage.setItem(v2Key,label);`,
     `if(localStorage.getItem(v2Key)===label){`,
@@ -157,17 +177,83 @@ export function buildScenarioLabelLiveApplySnippetFragment(label: string): strin
     `}`,
     `}`,
     `}`,
-    `}catch(_e){}`,
+    `return true;`,
+    `}catch(_e){console.error("PHmax handoff refused: stav scénáře nelze bezpečně ověřit.",_e);return false;}`,
     `})(${labelLit});`,
   ].join("");
 }
 
+function assertScenarioLabelHandoffAuthority(storage: ScenarioLabelAwareRuntimeStorage): void {
+  const preflight = preflightScenarioLabelAwareAuthority({
+    storage,
+    readIdentity: () => readIdentityRegistryFromStorage(storage),
+  });
+  if (preflight.kind === "STORAGE_UNAVAILABLE") {
+    throw new Error("Data scénáře v tomto prohlížeči nyní nelze načíst; handoff nebyl použit.");
+  }
+  if (preflight.kind === "AUTHORITY_BLOCKED") {
+    throw new Error("Stav uložených dat scénáře nelze bezpečně ověřit; handoff nebyl použit.");
+  }
+}
+
+function applyScenarioLabelHandoffWrite(
+  label: string,
+  storage: ScenarioLabelAwareRuntimeStorage,
+  warnings: string[],
+): void {
+  const outcome = writeScenarioLabelAwareFromUiInput({
+    label,
+    storage,
+    readIdentity: () => readIdentityRegistryFromStorage(storage),
+  });
+  const result = outcome.writeResult;
+  switch (result.status) {
+    case "success":
+      return;
+    case "marker_incomplete":
+      if (result.business === "data_ok_metadata_incomplete") {
+        warnings.push("Scénář byl uložen, ale doplňkový stav úložiště se nepodařilo plně potvrdit.");
+        return;
+      }
+      throw new Error("Uložení názvu scénáře se nezdařilo.");
+    case "blocked_authority":
+      throw new Error("Stav uložených dat scénáře nelze bezpečně ověřit; handoff nebyl použit.");
+    case "storage_unavailable":
+      throw new Error("Data scénáře v tomto prohlížeči nyní nelze načíst; handoff nebyl použit.");
+    case "fatal_partial":
+      throw new Error(
+        "Uložení scénáře nebylo možné bezpečně dokončit. Obnovte stránku a zkontrolujte uložená data.",
+      );
+    case "fence_incomplete":
+      throw new Error(
+        "Hodnota scénáře byla zapsána, ale stav úložiště nelze plně potvrdit. Handoff nebyl bezpečně dokončen.",
+      );
+    case "authoritative_failed":
+      throw new Error(
+        result.code === "storage_unavailable"
+          ? "localStorage není k dispozici (spusťte v prohlížeči na originu aplikace)."
+          : "Uložení názvu scénáře se nezdařilo.",
+      );
+    case "rollback_succeeded":
+      throw new Error("Uložení scénáře se nezdařilo; provedený dílčí zápis byl vrácen.");
+    default: {
+      const _exhaustive: never = result;
+      void _exhaustive;
+      throw new Error("Uložení názvu scénáře se nezdařilo.");
+    }
+  }
+}
+
 export function applyPhmaxIsHandoffToStorage(
-  storage: ScenarioLabelStorage,
+  storage: ScenarioLabelAwareRuntimeStorage,
   payload: PhmaxIsHandoffPayload,
   options: HandoffApplyOptions = {},
 ): HandoffApplyResult {
   assertPhmaxIsHandoffPayload(payload);
+  const label = incomingScenarioLabel(payload);
+  // When a scenario is supplied, authority must be proven before any module write.
+  if (label) assertScenarioLabelHandoffAuthority(storage);
+
   const appliedModules: PhmaxModuleId[] = [];
   for (const id of MODULE_IDS) {
     if (payload.schoolScenario.moduleSnapshots[id] != null) appliedModules.push(id);
@@ -176,24 +262,12 @@ export function applyPhmaxIsHandoffToStorage(
     storage.setItem(key, value);
   }
 
-  const label = incomingScenarioLabel(payload);
+  const warnings = [...(payload.schoolScenario.coherenceWarnings ?? [])];
   if (label) {
-    // Canonical single pipeline — Identity from the same destination storage.
-    // Missing → unbound; corrupted/unavailable → skipped (never catch→unbound).
-    const result = writeScenarioLabelFromUiInput(label, {
-      storage,
-      readIdentity: () => readIdentityRegistryFromStorage(storage),
-    });
-    if (result.status === "authoritative_failed") {
-      throw new Error(
-        result.code === "storage_unavailable"
-          ? "localStorage není k dispozici (spusťte v prohlížeči na originu aplikace)."
-          : "Uložení názvu scénáře se nezdařilo.",
-      );
-    }
+    // Fresh assessment is repeated by the dispatcher immediately before mutation.
+    applyScenarioLabelHandoffWrite(label, storage, warnings);
   }
 
-  const warnings = [...(payload.schoolScenario.coherenceWarnings ?? [])];
   return { appliedModules, scenarioLabel: label, warnings };
 }
 
@@ -231,8 +305,9 @@ export function buildHandoffApplyConsoleSnippet(
   const tail = reload ? "location.reload();" : "";
   return [
     "/* PHmax: apply phmax-is-handoff-v1 → localStorage. Spusťte na stejném originu jako aplikace.",
-    "   Scenario v2/marker target is resolved LIVE from destination Identity (not generation-time). */",
-    `(function(){try{${moduleBody}${scenarioBody}console.log("PHmax handoff applied.",${JSON.stringify(
+    "   Scenario target is resolved LIVE from destination Identity and preflighted before any storage mutation; namespaced or malformed authority is refused.",
+    "   Full namespaced snippet writes are future cutover-readiness work; old saved snippets remain hazardous. */",
+    `(function(){try{${label ? `if(!${scenarioBody})return;` : ""}${moduleBody}console.log("PHmax handoff applied.",${JSON.stringify(
       appliedKeys,
     )});${tail}}catch(e){console.error("PHmax handoff apply failed",e);}})();`,
   ].join("\n");

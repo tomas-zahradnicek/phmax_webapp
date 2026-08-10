@@ -93,9 +93,9 @@ describe("N3-FENCE-WRITE source / ownership contracts", () => {
     }
   });
 
-  it("Level B / post-export own fence only via clearScenarioLabelLifecycle", () => {
+  it("Level B / post-export own fence only via aware clear (dispatcher → lifecycle)", () => {
     const clearSource = readSource("src/phmax-local-storage-clear.ts");
-    expect(clearSource).toContain("clearScenarioLabelLifecycle");
+    expect(clearSource).toContain("clearScenarioLabelAwareRuntime");
     expect(clearSource).not.toContain("finalizeScenarioLabelLegacyFenceCertificate");
     expect(clearSource).not.toContain(SCENARIO_LABEL_N3_FENCE_SEGMENT);
   });
@@ -141,17 +141,18 @@ describe("N3-FENCE-WRITE source / ownership contracts", () => {
     expect(between).not.toContain("finalizeScenarioLabelLegacyFenceCertificate");
   });
 
-  it("Restore writes fence only post-verification soft zone", () => {
+  it("Restore writes legacy fence only post-verification soft zone", () => {
     const restore = readSource("src/backup/restore/apply-app-backup-restore.ts");
     expect(restore).toContain("finalizeScenarioLabelLegacyFenceCertificate");
-    expect(restore).toContain("Past rollback boundary");
-    expect(restore).toContain("N3-FENCE-WRITE");
-    // Fence must not appear inside restore-ops physical planner.
+    expect(restore).toContain("Past rollback boundary for LEGACY fence");
+    expect(restore).toContain("N3-AWARE-WIRING");
+    // Fence must not appear inside restore-ops physical planner as a SET op helper.
     const ops = readSource(
       "src/data/storage/scenario-label-migration/scenario-label-restore-ops.ts",
     );
     expect(ops).not.toContain("finalizeScenarioLabelLegacyFenceCertificate");
-    expect(ops).not.toContain(SCENARIO_LABEL_N3_FENCE_SEGMENT);
+    // Allowlist may parse fence keys for touchedKeys; finalizer must stay out of ops builder.
+    expect(ops).not.toContain("finalizeScenarioLabelNamespacedFenceCertificate");
   });
 
   it("fence key isolation unchanged", () => {

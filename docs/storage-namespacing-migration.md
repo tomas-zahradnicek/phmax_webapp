@@ -1,4 +1,4 @@
-# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO / N3-FENCE-PROTO / N3-FENCE-WRITE / N3-PREP / N3-AWARE-CORE)
+# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO / N3-FENCE-PROTO / N3-FENCE-WRITE / N3-PREP / N3-AWARE-CORE / N3-AWARE-WIRING)
 
 Pilot resource: `phmax-scenario-label` / `value`  
 Legacy authoritative key: `phmax-school-scenario-label`
@@ -228,7 +228,7 @@ Backup **omits** authority metadata; logical value only.
 
 ### Roadmap after N3-PROTO
 
-`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` ✅ → `N3-PREP` ✅ → `N3-AWARE-CORE` ✅ (inert) → `N3-AWARE-WIRING` → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
+`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` ✅ → `N3-PREP` ✅ → `N3-AWARE-CORE` ✅ → `N3-AWARE-WIRING` ✅ → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
 
 N3-PROTO must not jump into any of these runtime phases.
 
@@ -459,9 +459,9 @@ Mutation finalizer may still supersede `INVALID`/`VIOLATED` after an explicit co
 
 **N3-AWARE-CORE** — IMPLEMENTED / INERT (below).
 
-## N3-AWARE-CORE (inert authority-aware runtime primitives)
+## N3-AWARE-CORE (authority-aware runtime primitives)
 
-**IMPLEMENTED / INERT.** Production behavior remains **N3-PREP** (legacy sole business authority).
+**IMPLEMENTED.** Wired into production by **N3-AWARE-WIRING** (below). Core primitives remain the single authority assessor / namespaced executor layer.
 
 ### What it provides
 
@@ -502,7 +502,46 @@ Fence failure after settled data → explicit **`fence_incomplete`** (no false s
 
 ### Next
 
-**N3-AWARE-WIRING** — atomically wire CORE into production surfaces (forbidden to land partially).
+**N3-AWARE-WIRING** — ACTIVE (below).
+
+## N3-AWARE-WIRING ACTIVE
+
+**ACTIVE.** Normal production authority remains **legacy**. This release does **not** perform cutover.
+
+### What it does
+
+Atomically wires N3-AWARE-CORE into all authority-impacting production surfaces for `phmax-scenario-label` / `value`:
+
+| Surface | Behavior |
+|---------|----------|
+| Dashboard read/write | Facade `readScenarioLabelAwareUi` / `writeScenarioLabelAwareFromUiInput*` |
+| JSON / school scenario export | Fresh aware logical read; blocked → do not export stale React memory |
+| Backup adapter | Authority-aware logical value only; blocked → module omitted + error |
+| Restore T2 | Fresh authority assessment; preserves namespaced; empty defaults legacy |
+| Level B / post-export clear | `clearScenarioLabelAwareRuntime` |
+| Establishment / Profile / VZ | `decideScenarioLabelAwareEstablishment` gate before N2 |
+| Handoff UI / Excel import | Preflight + aware write; empty label remains NO-OP |
+| Console snippet | Runtime preflight; **refuses** namespaced/blocked scenario mutation |
+
+### Guarantees
+
+- normal production authority remains **legacy**
+- **no cutover** (`planScenarioLabelAuthorityCutover` unused)
+- runtime can **preserve** seeded/already-namespaced authority
+- namespaced reads use **school-v2** (never `fence.committedRaw`)
+- **no silent namespaced → legacy fallback**
+- Backup logical read follows authority; schema unchanged; no marker/fence metadata exported
+- Restore preserves current authority; backup never dictates legacy vs namespaced
+- namespaced clear preserves schema2 namespaced authority (absent value)
+- establishment cannot downgrade namespaced via N2 repair
+- new console snippet **refuses** namespaced scenario mutation rather than risk downgrade
+- old saved snippets remain a compatibility hazard
+- blocked states are **detected, not auto-repaired**
+- namespaced Restore success requires valid `NAMESPACED_COMMITTED` fence; fence failure → rollback / `fatal_partial`
+
+### Next
+
+**N3-CUTOVER-WRITE** audit / readiness (first production creation of namespaced authority).
 
 ## Rollback / deploy safety
 
@@ -522,9 +561,8 @@ N3-FENCE-WRITE adds runtime fence finalization after compatible mutations; **bus
 
 ## Not implemented
 
-- N3-AWARE-WIRING (production consumers of AWARE-CORE)
-- N3 namespaced-authoritative production read / write / cutover (WIRING + CUTOVER-WRITE)
-- N3-CUTOVER-WRITE / HARDEN
+- N3-CUTOVER-WRITE / HARDEN (first production namespaced authority creation)
+- Full namespaced console-snippet write support (refused safely in AWARE-WIRING)
 - N4 legacy cleanup
 - Cross-module namespacing
 - Copy-on-read / mount ensure / N3 bootstrap-on-read

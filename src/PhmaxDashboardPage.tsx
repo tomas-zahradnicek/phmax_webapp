@@ -82,9 +82,13 @@ import {
 } from "./phmax-dashboard-cross-phmax-export";
 import {
   buildSchoolScenarioExportPayload,
-  readSchoolScenarioLabel,
 } from "./phmax-school-scenario-export";
-import { writeScenarioLabelFromUiInputOrThrow } from "./data/storage/scenario-label-migration/scenario-label-repository";
+import {
+  logicalScenarioLabelDisplayOrNull,
+  readScenarioLabelAwareLogicalForBusiness,
+  readScenarioLabelAwareUi,
+  writeScenarioLabelAwareFromUiInputOrThrow,
+} from "./data/storage/scenario-label-migration/scenario-label-aware-runtime";
 import { buildPhmaxIsHandoffPayload, type PhmaxIsHandoffPayload } from "./phmax-is-export-adapter";
 import type { HandoffApplyResult, PhmaxModuleId } from "./phmax-is-handoff-apply";
 import { parseImportHandoffFileList } from "./phmax-import-handoff-file";
@@ -670,7 +674,10 @@ export function PhmaxDashboardPage({
 }: PhmaxDashboardPageProps) {
   const [refreshAt, setRefreshAt] = useState(() => new Date());
   const [notice, publishNotice] = useUiNotice();
-  const [scenarioLabel, setScenarioLabel] = useState(() => readSchoolScenarioLabel());
+  const [scenarioLabel, setScenarioLabel] = useState("");
+  const [scenarioInputEnabled, setScenarioInputEnabled] = useState(false);
+  const [scenarioMutationLocked, setScenarioMutationLocked] = useState(false);
+  const [scenarioNoticeText, setScenarioNoticeText] = useState<string | null>(null);
   const [isEndpoint, setIsEndpoint] = useState(() => readPhmaxIsEndpoint());
   const [exportDisclaimerConfirmed, setExportDisclaimerConfirmed] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -691,20 +698,37 @@ export function PhmaxDashboardPage({
     }
   }, []);
 
+  const refreshScenarioLabelAwareUi = useCallback(() => {
+    const state = readScenarioLabelAwareUi();
+    setScenarioLabel(state.displayValue ?? "");
+    setScenarioInputEnabled(state.inputEnabled);
+    setScenarioMutationLocked(false);
+    setScenarioNoticeText(state.notice?.text ?? null);
+  }, []);
+
   const refresh = useCallback(() => {
     setRefreshAt(new Date());
-    setScenarioLabel(readSchoolScenarioLabel());
+    refreshScenarioLabelAwareUi();
     setIsEndpoint(readPhmaxIsEndpoint());
     publishNotice("Souhrnný přehled byl znovu načten z prohlížeče.");
-  }, [publishNotice]);
+  }, [publishNotice, refreshScenarioLabelAwareUi]);
 
   useEffect(() => {
-    setScenarioLabel(readSchoolScenarioLabel());
+    refreshScenarioLabelAwareUi();
     setIsEndpoint(readPhmaxIsEndpoint());
-  }, [refreshAt]);
+  }, [refreshAt, refreshScenarioLabelAwareUi]);
 
   const clearLocalDataNow = useCallback(() => {
-    const removed = clearAllPhmaxLocalStorage();
+    let removed = 0;
+    try {
+      removed = clearAllPhmaxLocalStorage();
+    } catch (error) {
+      setRefreshAt(new Date());
+      publishNotice(error instanceof Error ? error.message : "Název scénáře nebylo možné bezpečně vymazat.", {
+        assertive: true,
+      });
+      return;
+    }
     setRefreshAt(new Date());
     publishNotice(
       removed > 0
@@ -714,7 +738,16 @@ export function PhmaxDashboardPage({
   }, [publishNotice]);
 
   const clearSchoolScenarioWorkingDataNow = useCallback(() => {
-    const removed = clearSchoolScenarioExportWorkingLocalStorage();
+    let removed = 0;
+    try {
+      removed = clearSchoolScenarioExportWorkingLocalStorage();
+    } catch (error) {
+      setRefreshAt(new Date());
+      publishNotice(error instanceof Error ? error.message : "Název scénáře nebylo možné bezpečně vymazat.", {
+        assertive: true,
+      });
+      return;
+    }
     setRefreshAt(new Date());
     publishNotice(
       removed > 0
@@ -809,10 +842,8 @@ export function PhmaxDashboardPage({
   const handleImportApplied = useCallback(
     (payload: PhmaxIsHandoffPayload, result: HandoffApplyResult) => {
       // Storage write is owned by applyPhmaxIsHandoffToLocalStorage (N2-WRITE).
-      // Refresh React state only — never dual-write scenario label here.
-      if (result.scenarioLabel) {
-        setScenarioLabel(result.scenarioLabel);
-      }
+      // Re-assess storage after import — never trust the import result as persisted authority.
+      refreshScenarioLabelAwareUi();
       setRefreshAt(new Date());
       dispatchPhmaxImportApplied();
       setImportFollowUpModule(result.appliedModules[0] ?? null);
@@ -824,7 +855,7 @@ export function PhmaxDashboardPage({
       publishNotice(msg, { assertive: true });
       requestAnimationFrame(() => document.getElementById("dash-import-followup")?.scrollIntoView({ behavior: "smooth" }));
     },
-    [publishNotice],
+    [publishNotice, refreshScenarioLabelAwareUi],
   );
 
   const openModuleWithInputsFocus = useCallback(
@@ -955,7 +986,9 @@ export function PhmaxDashboardPage({
         auditCoherenceWarnings,
         exportDisclaimerConfirmed,
         appVersion: APP_VERSION,
-        scenarioLabel: scenarioLabel.trim() || "Celá škola (autosave)",
+        scenarioLabel: scenarioInputEnabled
+          ? scenarioLabel.trim() || "Celá škola (autosave)"
+          : "Název scénáře nelze bezpečně ověřit",
       }),
     [
       crossPhmax,
@@ -963,6 +996,7 @@ export function PhmaxDashboardPage({
       auditCoherenceWarnings,
       exportDisclaimerConfirmed,
       scenarioLabel,
+      scenarioInputEnabled,
     ],
   );
 
@@ -1004,10 +1038,32 @@ export function PhmaxDashboardPage({
     publishNotice("Otevřeno okno pro tisk kontroly před jednáním.");
   }, [crossPhmax, rows, scenarioLabel, auditCoherenceWarnings, publishNotice]);
 
-  const persistScenarioLabel = useCallback((label: string) => {
-    writeScenarioLabelFromUiInputOrThrow(label);
-    setScenarioLabel(label.trim());
-  }, []);
+  const persistScenarioLabel = useCallback(
+    (label: string) => {
+      if (!scenarioInputEnabled || scenarioMutationLocked) return;
+      try {
+        const outcome = writeScenarioLabelAwareFromUiInputOrThrow({ label });
+        setScenarioLabel(outcome.displayValue ?? "");
+        setScenarioMutationLocked(outcome.mutationLocked);
+        setScenarioInputEnabled(!outcome.mutationLocked);
+        setScenarioNoticeText(outcome.notice?.text ?? null);
+        if (outcome.notice) publishNotice(outcome.notice.text, { assertive: outcome.notice.severity === "hard" });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Uložení názvu scénáře se nezdařilo.";
+        setScenarioNoticeText(message);
+        publishNotice(message, { assertive: true });
+      }
+    },
+    [publishNotice, scenarioInputEnabled, scenarioMutationLocked],
+  );
+
+  const readScenarioLabelForExport = useCallback((): string | null => {
+    const label = logicalScenarioLabelDisplayOrNull(readScenarioLabelAwareLogicalForBusiness());
+    if (label == null) {
+      publishNotice("Název scénáře nelze bezpečně ověřit; export scénáře nebyl vytvořen.", { assertive: true });
+    }
+    return label;
+  }, [publishNotice]);
 
   const downloadCrossPhmaxJson = useCallback(() => {
     const payload = {
@@ -1031,10 +1087,12 @@ export function PhmaxDashboardPage({
   }, [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, afterDashboardJsonExport]);
 
   const downloadSchoolScenarioJson = useCallback(() => {
+    const label = readScenarioLabelForExport();
+    if (label == null) return;
     const scenario = buildSchoolScenarioExportPayload(
       crossPhmax,
       attentionModuleLabels,
-      scenarioLabel,
+      label,
       auditCoherenceWarnings,
     );
     const payload = {
@@ -1055,13 +1113,15 @@ export function PhmaxDashboardPage({
     afterDashboardJsonExport("Stažen scénář celá škola (JSON + autosave modulů).", "Scénář celá škola", {
       offerSchoolScenarioWorkingClear: true,
     });
-  }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, afterDashboardJsonExport]);
+  }, [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, afterDashboardJsonExport, readScenarioLabelForExport]);
 
   const downloadIsHandoffJson = useCallback(() => {
+    const label = readScenarioLabelForExport();
+    if (label == null) return;
     const scenario = buildSchoolScenarioExportPayload(
       crossPhmax,
       attentionModuleLabels,
-      scenarioLabel,
+      label,
       auditCoherenceWarnings,
     );
     const payload = {
@@ -1087,19 +1147,21 @@ export function PhmaxDashboardPage({
       "Handoff JSON",
       { offerSchoolScenarioWorkingClear: true },
     );
-  }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, afterDashboardJsonExport]);
+  }, [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, afterDashboardJsonExport, readScenarioLabelForExport]);
 
   const sendIsHandoff = useCallback(async () => {
+    const label = readScenarioLabelForExport();
+    if (label == null) return;
     const scenario = buildSchoolScenarioExportPayload(
       crossPhmax,
       attentionModuleLabels,
-      scenarioLabel,
+      label,
       auditCoherenceWarnings,
     );
     const payload = buildPhmaxIsHandoffPayload(scenario);
     const result = await postPhmaxIsHandoff(isEndpoint, payload);
     publishNotice(result.ok ? `Handoff odeslán (HTTP ${result.status}).` : result.message, { assertive: true });
-  }, [crossPhmax, attentionModuleLabels, scenarioLabel, auditCoherenceWarnings, isEndpoint, publishNotice]);
+  }, [crossPhmax, attentionModuleLabels, auditCoherenceWarnings, isEndpoint, publishNotice, readScenarioLabelForExport]);
 
   return (
     <div className="app-shell app-shell--gradient dash-page">
@@ -1662,9 +1724,15 @@ export function PhmaxDashboardPage({
                     className="input"
                     value={scenarioLabel}
                     onChange={(e) => persistScenarioLabel(e.target.value)}
+                    disabled={!scenarioInputEnabled || scenarioMutationLocked}
                     placeholder="Celá škola (autosave)"
                   />
                 </label>
+                {scenarioNoticeText ? (
+                  <p className="muted-text" role="status" style={{ marginTop: 8, maxWidth: 520 }}>
+                    {scenarioNoticeText}
+                  </p>
+                ) : null}
                 <label className="field" style={{ marginTop: 8, maxWidth: 520 }}>
                   <span className="field__label">URL endpoint IS (volitelné POST)</span>
                   <input

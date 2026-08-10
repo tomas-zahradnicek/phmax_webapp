@@ -27,6 +27,7 @@ import {
 } from "./scenario-label-school-shadow-establishment";
 import { finalizeScenarioLabelLegacyFenceCertificate } from "./scenario-label-n3-fence-finalize";
 import { prepareScenarioLabelN3LegacyFenceCertificate } from "./scenario-label-n3-prep";
+import { decideScenarioLabelAwareEstablishment } from "./scenario-label-n3-establishment-gate";
 
 export type ScenarioLabelEstablishmentStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -127,6 +128,33 @@ export function establishScenarioLabelSchoolShadowFromLegacy(
   const storage = resolveStorage(deps);
   if (storage == null) {
     return { status: "storage_unavailable" };
+  }
+
+  // Fresh N3 authority gate must precede every legacy establishment mutation.
+  const decision = decideScenarioLabelAwareEstablishment({
+    storage,
+    schoolId: canonical.schoolId,
+  });
+  if (decision.action === "no_op_namespaced_authoritative") {
+    return { status: "skipped_namespaced" };
+  }
+  if (decision.action === "blocked") {
+    if (decision.reason === "storage_unavailable") {
+      return { status: "storage_unavailable" };
+    }
+    return { status: "skipped_authority_blocked" };
+  }
+  if (decision.action === "permit_legacy_prep") {
+    try {
+      // PREP is idempotent; LEGACY_COMMITTED returns already_prepared with zero writes.
+      prepareScenarioLabelN3LegacyFenceCertificate({
+        schoolId: canonical.schoolId,
+        storage,
+      });
+    } catch {
+      // Soft metadata only — never overturn Profile/VZ business success.
+    }
+    return { status: "already_ready" };
   }
 
   const schoolTarget: ScenarioLabelMigrationTarget = {
@@ -259,9 +287,8 @@ export type RunScenarioLabelEstablishmentAfterSchoolReadyResult =
  * Callers: Profile Save/mount runners, VZ afterPersist runner.
  * Fail-soft: unexpected throws are mapped to storage_unavailable-equivalent soft result.
  *
- * N3-PREP: after `already_ready` (no establishment mutation), attempt passive fence
- * preparation. Established mutations already receive FENCE-WRITE certificates.
- * PREP failures are soft metadata only and never change the establishment result.
+ * N3-aware gate routes fresh legacy authority to establishment or PREP, and
+ * returns soft no-op metadata for namespaced/blocked authority.
  */
 export function runScenarioLabelEstablishmentAfterSchoolReady(
   binding: RunScenarioLabelEstablishmentAfterSchoolReadyInput | { readonly status: string },
@@ -275,18 +302,7 @@ export function runScenarioLabelEstablishmentAfterSchoolReady(
   }
 
   try {
-    const result = establishScenarioLabelSchoolShadowFromLegacy(binding.schoolId, deps);
-    if (result.status === "already_ready") {
-      try {
-        prepareScenarioLabelN3LegacyFenceCertificate({
-          schoolId: binding.schoolId,
-          storage: deps.storage,
-        });
-      } catch {
-        // Soft metadata only — PREP never overturns establishment/business outcome.
-      }
-    }
-    return result;
+    return establishScenarioLabelSchoolShadowFromLegacy(binding.schoolId, deps);
   } catch {
     return { status: "storage_unavailable" };
   }
@@ -300,6 +316,7 @@ export function isScenarioLabelEstablishmentSoftFailure(
     result.status === "shadow_dirty" ||
     result.status === "marker_incomplete" ||
     result.status === "storage_unavailable" ||
+    result.status === "skipped_authority_blocked" ||
     result.status === "skipped_identity"
   );
 }

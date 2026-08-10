@@ -22,6 +22,10 @@ import {
   IDENTITY_REGISTRY_SCHEMA_VERSION,
 } from "../data/identity/identity-registry-types";
 import { parseIdentityRegistry, readIdentityRegistry } from "../data/identity/identity-registry-storage";
+import {
+  logicalScenarioLabelDisplayOrNull,
+  readScenarioLabelAwareLogicalForBusiness,
+} from "../data/storage/scenario-label-migration/scenario-label-aware-runtime";
 import type { BackupModuleAdapter, BackupModuleReadResult } from "./backup-types";
 import {
   collectRecordValues,
@@ -316,7 +320,21 @@ function createScenarioLabelAdapter(): BackupModuleAdapter {
     label: "Název scénáře školy",
     schemaVersion: 1,
     storageKeys: [PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY],
-    read: () => readTextKey(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY),
+    read: () => {
+      const authority = readScenarioLabelAwareLogicalForBusiness();
+      const label = logicalScenarioLabelDisplayOrNull(authority);
+      if (label != null) {
+        return { ok: true, hasData: hasMeaningfulValue(label), data: label || null };
+      }
+      return {
+        ok: false,
+        hasData: false,
+        error: {
+          ok: false,
+          code: authority.status === "unavailable" ? "storage_unavailable" : "authority_blocked",
+        },
+      };
+    },
     validateForExport: validateScenarioLabelExport,
   };
 }

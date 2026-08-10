@@ -149,6 +149,11 @@ export type RestorePlan = {
    * Null when no dynamic scenario keys are allowed (missing module, legacy-only, blocked).
    */
   expectedScenarioLabelTarget: ScenarioLabelMigrationTarget | null;
+  /**
+   * N3-AWARE-WIRING: when true, post-verify must commit namespaced fence;
+   * failure rolls back via touchedKeys snapshot (includes prior fence key).
+   */
+  scenarioLabelRequiresNamespacedFence: boolean;
 };
 
 export type BuildRestorePlanResult =

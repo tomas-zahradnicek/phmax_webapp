@@ -1,4 +1,8 @@
 import { APP_VERSION } from "./app-version";
+import {
+  logicalScenarioLabelDisplayOrNull,
+  readScenarioLabelAwareLogicalForBusiness,
+} from "./data/storage/scenario-label-migration/scenario-label-aware-runtime";
 import type { CrossPhmaxExportPayload } from "./phmax-dashboard-cross-phmax-export";
 import { buildCrossPhmaxExportPayload } from "./phmax-dashboard-cross-phmax-export";
 import type { CrossPhmaxSummary } from "./phmax-dashboard-cross-phmax";
@@ -31,8 +35,15 @@ export type SchoolScenarioExportPayload = Omit<CrossPhmaxExportPayload, "schema"
 };
 
 export function readSchoolScenarioLabel(): string {
-  if (typeof localStorage === "undefined") return "";
-  return localStorage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)?.trim() ?? "";
+  return readSchoolScenarioLabelLogicalOrNull() ?? "";
+}
+
+/**
+ * Logical scenario label only when current storage authority is readable.
+ * Callers that export business data must handle null rather than guessing.
+ */
+export function readSchoolScenarioLabelLogicalOrNull(): string | null {
+  return logicalScenarioLabelDisplayOrNull(readScenarioLabelAwareLogicalForBusiness());
 }
 
 function readLsJson(key: string): unknown {
@@ -59,7 +70,11 @@ export function buildSchoolScenarioExportPayload(
     const data = readLsJson(key);
     if (data != null) moduleSnapshots[id] = data;
   }
-  const label = (scenarioLabel ?? readSchoolScenarioLabel()).trim() || "Celá škola (autosave)";
+  const storedLabel = scenarioLabel === undefined ? readSchoolScenarioLabelLogicalOrNull() : scenarioLabel;
+  if (storedLabel == null) {
+    throw new Error("Název scénáře nelze bezpečně ověřit; export scénáře nebyl vytvořen.");
+  }
+  const label = storedLabel.trim() || "Celá škola (autosave)";
   return {
     ...cross,
     schema: "phmax-school-scenario-v1",

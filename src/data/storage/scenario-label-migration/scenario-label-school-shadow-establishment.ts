@@ -60,6 +60,8 @@ export type SchoolShadowEstablishmentResultStatus =
   | "established"
   | "shadow_dirty"
   | "marker_incomplete"
+  | "skipped_namespaced"
+  | "skipped_authority_blocked"
   | "skipped_identity"
   | "storage_unavailable";
 
@@ -68,6 +70,8 @@ export type SchoolShadowEstablishmentResult =
   | { readonly status: "established" }
   | { readonly status: "shadow_dirty" }
   | { readonly status: "marker_incomplete" }
+  | { readonly status: "skipped_namespaced" }
+  | { readonly status: "skipped_authority_blocked" }
   | {
       readonly status: "skipped_identity";
       readonly reason: SchoolShadowEstablishmentSkipReason;
