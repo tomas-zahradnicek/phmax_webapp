@@ -25,16 +25,18 @@ const N3_PROTO_FORBIDDEN_RUNTIME_SYMBOLS = [
 ] as const;
 
 /**
- * Marker parse is needed by N3-FENCE-WRITE finalizer to refuse schema2 / certify v1.
- * Still forbidden everywhere else (no namespaced authority routing).
+ * Marker parse is needed by N3-FENCE-WRITE finalizer and N3-PREP admission
+ * to refuse schema2 / certify or prepare v1. Still forbidden everywhere else
+ * (no namespaced authority routing).
  */
 const N3_PROTO_MARKER_PARSE_SYMBOLS = [
   "parseScenarioLabelN3AuthorityMarker",
   "parseScenarioLabelN3AuthorityMarkerJson",
 ] as const;
 
-const N3_FENCE_WRITE_MARKER_PARSE_ALLOWLIST = new Set([
+const N3_MARKER_PARSE_RUNTIME_ALLOWLIST = new Set([
   "src/data/storage/scenario-label-migration/scenario-label-n3-fence-finalize.ts",
+  "src/data/storage/scenario-label-migration/scenario-label-n3-prep.ts",
 ]);
 
 function readSource(relativePath: string): string {
@@ -72,7 +74,7 @@ describe("N3-PROTO source contract", () => {
     }
   });
 
-  it("zero production call sites for N3-PROTO cutover/routing symbols; marker parse only in fence finalizer", () => {
+  it("zero production call sites for N3-PROTO cutover/routing symbols; marker parse only in fence finalizer + PREP", () => {
     const srcRoot = path.join(repoRoot, "src");
     const hits: string[] = [];
 
@@ -100,12 +102,12 @@ describe("N3-PROTO source contract", () => {
               "parseScenarioLabelN3AuthorityMarkerJson",
               "",
             );
-            if (withoutJson.includes(symbol) && !N3_FENCE_WRITE_MARKER_PARSE_ALLOWLIST.has(rel)) {
+            if (withoutJson.includes(symbol) && !N3_MARKER_PARSE_RUNTIME_ALLOWLIST.has(rel)) {
               hits.push(`${rel}:${symbol}`);
             }
             continue;
           }
-          if (text.includes(symbol) && !N3_FENCE_WRITE_MARKER_PARSE_ALLOWLIST.has(rel)) {
+          if (text.includes(symbol) && !N3_MARKER_PARSE_RUNTIME_ALLOWLIST.has(rel)) {
             hits.push(`${rel}:${symbol}`);
           }
         }

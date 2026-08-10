@@ -26,6 +26,7 @@ import {
   type SchoolShadowEstablishmentResult,
 } from "./scenario-label-school-shadow-establishment";
 import { finalizeScenarioLabelLegacyFenceCertificate } from "./scenario-label-n3-fence-finalize";
+import { prepareScenarioLabelN3LegacyFenceCertificate } from "./scenario-label-n3-prep";
 
 export type ScenarioLabelEstablishmentStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -257,6 +258,10 @@ export type RunScenarioLabelEstablishmentAfterSchoolReadyResult =
  * Shared post-ready orchestration helper.
  * Callers: Profile Save/mount runners, VZ afterPersist runner.
  * Fail-soft: unexpected throws are mapped to storage_unavailable-equivalent soft result.
+ *
+ * N3-PREP: after `already_ready` (no establishment mutation), attempt passive fence
+ * preparation. Established mutations already receive FENCE-WRITE certificates.
+ * PREP failures are soft metadata only and never change the establishment result.
  */
 export function runScenarioLabelEstablishmentAfterSchoolReady(
   binding: RunScenarioLabelEstablishmentAfterSchoolReadyInput | { readonly status: string },
@@ -270,7 +275,18 @@ export function runScenarioLabelEstablishmentAfterSchoolReady(
   }
 
   try {
-    return establishScenarioLabelSchoolShadowFromLegacy(binding.schoolId, deps);
+    const result = establishScenarioLabelSchoolShadowFromLegacy(binding.schoolId, deps);
+    if (result.status === "already_ready") {
+      try {
+        prepareScenarioLabelN3LegacyFenceCertificate({
+          schoolId: binding.schoolId,
+          storage: deps.storage,
+        });
+      } catch {
+        // Soft metadata only — PREP never overturns establishment/business outcome.
+      }
+    }
+    return result;
   } catch {
     return { status: "storage_unavailable" };
   }

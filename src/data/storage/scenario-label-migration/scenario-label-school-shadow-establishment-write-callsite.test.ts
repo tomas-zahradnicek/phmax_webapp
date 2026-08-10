@@ -11,6 +11,7 @@ const HELPER = "runScenarioLabelEstablishmentAfterSchoolReady";
 const ALLOWED_FILES = new Set([
   "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.ts",
   "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.test.ts",
+  "src/data/storage/scenario-label-migration/scenario-label-n3-prep.test.ts",
   "src/school-profile/profile-save-platform-binding.ts",
   "src/school-profile/profile-save-platform-binding.test.ts",
   "src/school-profile/profile-mount-platform-binding.test.ts",

@@ -228,7 +228,7 @@ Backup **omits** authority metadata; logical value only.
 
 ### Roadmap after N3-PROTO
 
-`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` → `N3-PREP` → `N3-AWARE` → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
+`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` ✅ → `N3-PREP` ✅ → `N3-AWARE` → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
 
 N3-PROTO must not jump into any of these runtime phases.
 
@@ -383,7 +383,7 @@ Same soft rule for Profile/VZ establishment metadata and Restore post-verify.
 |---------|-------------|
 | Dashboard / handoff UI | repository finalizer |
 | Level B / post-export | `clearScenarioLabelLifecycle` only |
-| Profile/VZ | establishment only when it **mutates** (`already_ready` = 0 fence writes) |
+| Profile/VZ | establishment only when it **mutates** (`already_ready` = 0 fence writes; PREP owns bootstrap) |
 | Restore | post-verification soft zone only (never pre-verify / never in raw txn) |
 | Console snippet | inline school fence LAST (controlled duplication + contract tests) |
 
@@ -393,11 +393,71 @@ Old N2 tabs/snippets still mutate without updating fence → certificate becomes
 
 ### Explicit mutation may supersede INVALID/VIOLATED
 
-A new compatible fence-aware mutation that fully re-verifies the tuple may issue a fresh certificate. Mount/read/`already_ready` must **not** passively recertify.
+A new compatible fence-aware mutation that fully re-verifies the tuple may issue a fresh certificate. Mount/read/`already_ready` must **not** passively recertify via the mutation finalizer. **N3-PREP** is the separate passive bootstrap path (below).
 
 ### Next
 
-**N3-PREP** — bootstrap certificates for already-stable healthy school states without a new business mutation.
+**N3-PREP** — ACTIVE (below).
+
+## N3-PREP (healthy UNESTABLISHED fence preparation)
+
+**ACTIVE metadata-only phase.** Legacy remains the **sole business source of truth**.
+
+### What it does
+
+For an already-healthy school tuple that still has **no** fence certificate (typical after N2-ADOPT `already_ready` with no later compatible mutation), PREP may write a school-scoped N3 fence certificate:
+
+healthy legacy + school-v2 + v1 synced marker + fence physically missing + assessment `UNESTABLISHED` → **fence last** → read-back + full pure `LEGACY_COMMITTED`.
+
+### What it writes
+
+**Only** the canonical school fence key (`serializeScenarioLabelN3FenceKey`).
+
+### What it does not do
+
+- no legacy / school-v2 / unbound / migration-marker / Identity / AppContext / SchoolYear writes
+- no N2 repair / adopt / shadow copy
+- no schemaVersion 2 / `authority:"namespaced"` marker writes
+- no namespaced business reads / routing
+- no authority cutover / AWARE enforcement
+- no historic boolean `fenceReady` production gate use
+- no unbound fence; unbound residue is ignored
+- no Dashboard / app-bootstrap / Backup / Restore-window / business-read owner
+- Backup still omits fence; Full Reset still clears via `reditelsky-pruvodce:v2:`
+
+### Fence-state policy (stricter than FENCE-WRITE)
+
+| State | PREP |
+|-------|------|
+| `UNESTABLISHED` + healthy + physically missing | may prepare |
+| `LEGACY_COMMITTED` | `already_prepared` — 0 writes |
+| `VIOLATED` | **blocked** — never passively recertify |
+| `INVALID` | **blocked** — never passively replace |
+| `UNAVAILABLE` | soft skip — 0 writes |
+| namespaced / `NAMESPACED_COMMITTED` | `unsupported_authority` — 0 writes |
+
+**UNESTABLISHED alone is insufficient** — PREP also requires the fence key to be physically missing and the full healthy legacy admission invariant.
+
+### Ownership
+
+Single production owner: Profile/VZ **post-school-ready** orchestration (`runScenarioLabelEstablishmentAfterSchoolReady`).
+
+- establishment **mutated** (`established`) → FENCE-WRITE already owns the certificate; PREP not required
+- establishment **`already_ready`** → dedicated `prepareScenarioLabelN3LegacyFenceCertificate` may prepare
+
+Profile mount is allowed only as that existing serialized platform-binding runner (not arbitrary component-body fence code). Dashboard open/render/read and app bootstrap are **not** PREP owners.
+
+### Soft failure
+
+PREP failure is metadata-only and must not claim Profile/VZ/Restore business failure. Legacy business continues until AWARE.
+
+### Relationship to FENCE-WRITE
+
+Mutation finalizer may still supersede `INVALID`/`VIOLATED` after an explicit compatible business mutation. PREP must **not** weaken that path and must **not** reuse the finalizer as its executor.
+
+### Next
+
+**N3-AWARE** — fence-aware business enforcement / routing design (not started).
 
 ## Rollback / deploy safety
 
@@ -418,9 +478,10 @@ N3-FENCE-WRITE adds runtime fence finalization after compatible mutations; **bus
 ## Not implemented
 
 - N3 namespaced-authoritative production read / write / cutover
-- N3-PREP / AWARE / CUTOVER-WRITE / HARDEN
+- N3-AWARE / CUTOVER-WRITE / HARDEN
 - N4 legacy cleanup
 - Cross-module namespacing
 - Copy-on-read / mount ensure / N3 bootstrap-on-read
 - BroadcastChannel / cross-tab lock / tab registry / service worker implementation
-- Automatic fence recovery UX / passive PREP on mount
+- Automatic fence recovery UX for VIOLATED/INVALID (deferred to AWARE)
+- Dashboard / app-bootstrap PREP owners (intentionally not implemented)
