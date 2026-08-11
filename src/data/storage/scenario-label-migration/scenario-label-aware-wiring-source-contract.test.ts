@@ -116,7 +116,7 @@ describe("N3-AWARE-WIRING source contracts", () => {
           hit.includes("scenario-label-restore-authority") ||
           hit.includes("scenario-label-n3-namespaced-fence") ||
           hit.includes("scenario-label-n3-establishment-gate") ||
-          // Inert CUTOVER-CORE executor assesses runtime authority; 0 production callers.
+          // CUTOVER executor assesses runtime authority; sole production owner is establishment runtime.
           hit.includes("scenario-label-n3-cutover");
         expect(allowed, `${symbol} referenced from production file ${hit}`).toBe(true);
       }
@@ -179,7 +179,7 @@ describe("N3-AWARE-WIRING source contracts", () => {
       "src/data/storage/scenario-label-migration/scenario-label-n3-authority-marker.ts",
       "src/data/storage/scenario-label-migration/scenario-label-n3-authority-protocol.ts",
       "src/data/storage/scenario-label-migration/scenario-label-n3-aware-test-helpers.ts",
-      // N3-CUTOVER-CORE inert executor — sole first-schema2-from-legacy path (0 production callers).
+      // N3-CUTOVER executor — sole first-schema2-from-legacy path (1 production owner).
       "src/data/storage/scenario-label-migration/scenario-label-n3-cutover.ts",
     ]);
     for (const rel of walkSrcTsFiles()) {

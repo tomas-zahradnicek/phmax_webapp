@@ -1,5 +1,5 @@
 /**
- * N3-CUTOVER-CORE — inert authority cutover executor.
+ * N3-CUTOVER-CORE — authority cutover executor (activated by N3-CUTOVER-ACTIVATE).
  *
  * Sole legal authority transition:
  *   LEGACY_COMMITTED / LEGACY_READY  →  NAMESPACED_COMMITTED / NAMESPACED_READY
@@ -8,8 +8,8 @@
  * Never writes business legacy / school-v2 keys.
  * Never restores business raws on rollback.
  *
- * Production call sites in this phase: ZERO (see source-contract tests).
- * ACTIVATE is a separate PR.
+ * Production direct callers: EXACTLY 1 —
+ * shared school-ready establishment/PREP runtime (allowCutover path).
  *
  * ---------------------------------------------------------------------------
  * POST-MARKER BUSINESS DRIFT POLICY (fail-closed)
@@ -525,9 +525,10 @@ function verifyNamespacedMarkerReadBack(
 }
 
 /**
- * Execute inert authority cutover for a canonical school target.
+ * Execute authority cutover for a canonical school target.
  *
- * 0 production owners in CUTOVER-CORE. Tests may call directly.
+ * Sole production owner: shared establishment/PREP runtime (ACTIVATE).
+ * Tests may call directly. Do not add additional production callers.
  */
 export function executeScenarioLabelN3AuthorityCutover(
   deps: ExecuteScenarioLabelN3AuthorityCutoverDependencies,

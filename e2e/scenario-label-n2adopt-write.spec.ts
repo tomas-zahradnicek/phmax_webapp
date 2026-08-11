@@ -112,7 +112,9 @@ test.describe("N2-ADOPT-WRITE school-shadow establishment", () => {
     expect(after.v2School).toBe(LABEL);
     expect(after.markerSchool).toContain('"mirrorHealth":"synced"');
     expect(after.markerSchool).toContain('"authoritativePresence":"present"');
-    expect(after.markerSchool).toContain('"authority":"legacy"');
+    // N3-CUTOVER-ACTIVATE: Profile save owner same-run cutover → namespaced.
+    expect(after.markerSchool).toContain('"authority":"namespaced"');
+    expect(after.markerSchool).toContain('"schemaVersion":2');
     expect(after.v2Unbound).toBe(LABEL);
     expect(after.markerUnbound).toBe(before.markerUnbound);
 

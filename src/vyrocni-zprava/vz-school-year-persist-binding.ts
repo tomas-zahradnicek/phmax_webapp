@@ -1,7 +1,8 @@
 import type { VyrocniZpravaStorageSaveResult } from "./vyrocni-zprava-storage";
 import {
-  isScenarioLabelEstablishmentSoftFailure,
+  MSG_SCENARIO_LABEL_CUTOVER_METADATA_STRONG,
   runScenarioLabelEstablishmentAfterSchoolReady,
+  scenarioLabelEstablishmentNoticeKind,
   type RunScenarioLabelEstablishmentAfterSchoolReadyInput,
   type RunScenarioLabelEstablishmentAfterSchoolReadyResult,
 } from "../data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime";
@@ -25,6 +26,15 @@ export const MSG_VZ_SCHOOL_YEAR_METADATA_BINDING_FAILED =
  */
 export const MSG_VZ_SCENARIO_SHADOW_METADATA_SOFT =
   "Výroční zpráva byla uložena, ale nepodařilo se dokončit propojení metadat scénáře. Zobrazené údaje zůstávají v pořádku; zkuste uložení zopakovat nebo otevřít Profil školy.";
+
+function vzEstablishmentMetadataNotice(
+  establishment: RunScenarioLabelEstablishmentAfterSchoolReadyResult,
+): string | null {
+  const kind = scenarioLabelEstablishmentNoticeKind(establishment);
+  if (kind === "strong") return MSG_SCENARIO_LABEL_CUTOVER_METADATA_STRONG;
+  if (kind === "soft") return MSG_VZ_SCENARIO_SHADOW_METADATA_SOFT;
+  return null;
+}
 
 /**
  * 0G-2 gate: SchoolYear metadata binding only after truthful VZ persist success.
@@ -83,11 +93,12 @@ export async function runVzSchoolYearBindingAfterPersist(
     } catch {
       establishment = { status: "storage_unavailable" };
     }
-    if (isScenarioLabelEstablishmentSoftFailure(establishment)) {
+    const notice = vzEstablishmentMetadataNotice(establishment);
+    if (notice != null) {
       return {
         bindingAttempted: true,
         binding,
-        metadataNotice: MSG_VZ_SCENARIO_SHADOW_METADATA_SOFT,
+        metadataNotice: notice,
       };
     }
   }

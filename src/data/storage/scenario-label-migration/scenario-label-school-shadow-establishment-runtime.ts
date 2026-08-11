@@ -1,9 +1,14 @@
 /**
- * N2-ADOPT-WRITE — school-shadow establishment executor (runtime).
+ * N2-ADOPT-WRITE / N3-CUTOVER-ACTIVATE — school-shadow establishment + cutover owner.
  *
- * Desired school state = fresh LEGACY raw only.
- * Unbound key + marker are never read as source and never written.
- * Legacy remains the sole business authority.
+ * Desired school state = fresh LEGACY raw only (establishment).
+ * Unbound key + marker are never read as source and never written by establishment.
+ * Legacy remains business authority until the sole production cutover owner
+ * (`runScenarioLabelEstablishmentAfterSchoolReady` with allowCutover) transitions
+ * metadata to namespaced via `executeScenarioLabelN3AuthorityCutover`.
+ *
+ * `allowCutover` is a lifecycle context flag only (default false). It does NOT
+ * grant eligibility — the CORE executor always fresh-assesses.
  */
 
 import { PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY } from "../../../phmax-school-scenario-export";
@@ -28,12 +33,42 @@ import {
 import { finalizeScenarioLabelLegacyFenceCertificate } from "./scenario-label-n3-fence-finalize";
 import { prepareScenarioLabelN3LegacyFenceCertificate } from "./scenario-label-n3-prep";
 import { decideScenarioLabelAwareEstablishment } from "./scenario-label-n3-establishment-gate";
+import { executeScenarioLabelN3AuthorityCutover } from "./scenario-label-n3-cutover";
+import type { ScenarioLabelN3AuthorityCutoverResult } from "./scenario-label-n3-cutover-types";
 
 export type ScenarioLabelEstablishmentStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
+/** Lifecycle-only: may this orchestration attempt the CORE cutover executor? Default false. */
 export type EstablishScenarioLabelSchoolShadowDependencies = {
   readonly storage?: ScenarioLabelEstablishmentStorage;
+  readonly allowCutover?: boolean;
+  /**
+   * Optional test seam for call-count proofs. Production omits — uses CORE executor.
+    * Never accepts eligibility / fence-ready / authority-ready bypass flags.
+    */
+  readonly executeAuthorityCutover?: (input: {
+    readonly storage: ScenarioLabelEstablishmentStorage;
+    readonly schoolId: EntityId;
+  }) => ScenarioLabelN3AuthorityCutoverResult;
 };
+
+/** Soft / strong cutover metadata notice attached to otherwise-successful orchestration. */
+export type ScenarioLabelCutoverLifecycleAttachment = {
+  readonly attempted: true;
+  readonly status: ScenarioLabelN3AuthorityCutoverResult["status"];
+  readonly notice: "silent" | "soft" | "strong";
+};
+
+export type SchoolShadowEstablishmentResultWithCutover = SchoolShadowEstablishmentResult & {
+  readonly cutover?: ScenarioLabelCutoverLifecycleAttachment;
+};
+
+/**
+ * Strong metadata notice when cutover leaves an incomplete metadata transition.
+ * No technical jargon; does not claim business data loss.
+ */
+export const MSG_SCENARIO_LABEL_CUTOVER_METADATA_STRONG =
+  "Stav uložených dat scénáře se nepodařilo bezpečně dokončit.";
 
 function resolveStorage(
   deps: EstablishScenarioLabelSchoolShadowDependencies,
@@ -112,14 +147,92 @@ function persistSchoolMarker(
   }
 }
 
+function mapCutoverNotice(
+  result: ScenarioLabelN3AuthorityCutoverResult,
+): "silent" | "soft" | "strong" {
+  switch (result.status) {
+    case "cutover_success":
+    case "already_namespaced":
+    case "not_eligible":
+    case "skipped_identity":
+    case "concurrent_drift":
+      return "silent";
+    case "fatal_partial":
+      return "strong";
+    case "rolled_back":
+    case "cutover_degraded":
+    case "storage_unavailable":
+    case "marker_write_failed":
+      return "soft";
+    default: {
+      const _exhaustive: never = result;
+      void _exhaustive;
+      return "soft";
+    }
+  }
+}
+
+function attachCutover(
+  base: SchoolShadowEstablishmentResult,
+  cutover: ScenarioLabelN3AuthorityCutoverResult | null,
+): SchoolShadowEstablishmentResultWithCutover {
+  if (cutover == null) return base;
+  return {
+    ...base,
+    cutover: {
+      attempted: true,
+      status: cutover.status,
+      notice: mapCutoverNotice(cutover),
+    },
+  };
+}
+
+/**
+ * Single-attempt lifecycle helper. Owner decides WHEN; CORE decides WHETHER.
+ * Max one executor call per lifecycle event. Throws are caught by caller.
+ */
+function attemptCutoverAfterLegacyCommitted(input: {
+  readonly storage: ScenarioLabelEstablishmentStorage;
+  readonly schoolId: EntityId;
+  readonly allowCutover: boolean;
+  readonly executeAuthorityCutover: NonNullable<
+    EstablishScenarioLabelSchoolShadowDependencies["executeAuthorityCutover"]
+  >;
+}): ScenarioLabelN3AuthorityCutoverResult | null {
+  if (!input.allowCutover) return null;
+  return input.executeAuthorityCutover({
+    storage: input.storage,
+    schoolId: input.schoolId,
+  });
+}
+
+function resolveCutoverExecutor(
+  deps: EstablishScenarioLabelSchoolShadowDependencies,
+): NonNullable<EstablishScenarioLabelSchoolShadowDependencies["executeAuthorityCutover"]> {
+  return (
+    deps.executeAuthorityCutover ??
+    ((args) =>
+      executeScenarioLabelN3AuthorityCutover({
+        storage: args.storage,
+        schoolId: args.schoolId,
+      }))
+  );
+}
+
 /**
  * Establish / repair school:<id> scenario shadow from fresh legacy.
  * Never touches unbound. Never writes legacy.
+ *
+ * `allowCutover` defaults to false — Restore and direct callers must not create
+ * first schema2. Only `runScenarioLabelEstablishmentAfterSchoolReady` enables it.
  */
 export function establishScenarioLabelSchoolShadowFromLegacy(
   schoolId: unknown,
   deps: EstablishScenarioLabelSchoolShadowDependencies = {},
-): SchoolShadowEstablishmentResult {
+): SchoolShadowEstablishmentResultWithCutover {
+  const allowCutover = deps.allowCutover === true;
+  const executeAuthorityCutover = resolveCutoverExecutor(deps);
+
   const canonical = resolveCanonicalSchoolIdForEstablishment(schoolId);
   if (canonical.status === "skipped") {
     return { status: "skipped_identity", reason: canonical.reason };
@@ -145,16 +258,35 @@ export function establishScenarioLabelSchoolShadowFromLegacy(
     return { status: "skipped_authority_blocked" };
   }
   if (decision.action === "permit_legacy_prep") {
+    let prepStatus: string;
     try {
       // PREP is idempotent; LEGACY_COMMITTED returns already_prepared with zero writes.
-      prepareScenarioLabelN3LegacyFenceCertificate({
+      const prep = prepareScenarioLabelN3LegacyFenceCertificate({
         schoolId: canonical.schoolId,
         storage,
       });
+      prepStatus = prep.status;
     } catch {
       // Soft metadata only — never overturn Profile/VZ business success.
+      return { status: "already_ready" };
     }
-    return { status: "already_ready" };
+
+    if (prepStatus !== "prepared" && prepStatus !== "already_prepared") {
+      return { status: "already_ready" };
+    }
+
+    let cutover: ScenarioLabelN3AuthorityCutoverResult | null = null;
+    try {
+      cutover = attemptCutoverAfterLegacyCommitted({
+        storage,
+        schoolId: canonical.schoolId,
+        allowCutover,
+        executeAuthorityCutover,
+      });
+    } catch {
+      cutover = { status: "storage_unavailable" };
+    }
+    return attachCutover({ status: "already_ready" }, cutover);
   }
 
   const schoolTarget: ScenarioLabelMigrationTarget = {
@@ -260,18 +392,39 @@ export function establishScenarioLabelSchoolShadowFromLegacy(
 
   // Fence LAST only after a real mutation produced a certifiable synced tuple.
   // already_ready returns earlier with ZERO fence writes (PREP owns bootstrap).
-  if (outcome.status === "established") {
-    try {
-      finalizeScenarioLabelLegacyFenceCertificate({
-        storage,
-        schoolId: canonical.schoolId,
-      });
-    } catch {
-      // Soft metadata only — establishment business outcome unchanged.
-    }
+  if (outcome.status !== "established") {
+    return outcome;
   }
 
-  return outcome;
+  let fenceOk = false;
+  try {
+    const fenceResult = finalizeScenarioLabelLegacyFenceCertificate({
+      storage,
+      schoolId: canonical.schoolId,
+    });
+    fenceOk =
+      fenceResult.status === "committed" || fenceResult.status === "already_committed";
+  } catch {
+    // Soft metadata only — establishment business outcome unchanged.
+    fenceOk = false;
+  }
+
+  if (!fenceOk) {
+    return outcome;
+  }
+
+  let cutover: ScenarioLabelN3AuthorityCutoverResult | null = null;
+  try {
+    cutover = attemptCutoverAfterLegacyCommitted({
+      storage,
+      schoolId: canonical.schoolId,
+      allowCutover,
+      executeAuthorityCutover,
+    });
+  } catch {
+    cutover = { status: "storage_unavailable" };
+  }
+  return attachCutover(outcome, cutover);
 }
 
 export type RunScenarioLabelEstablishmentAfterSchoolReadyInput =
@@ -279,16 +432,16 @@ export type RunScenarioLabelEstablishmentAfterSchoolReadyInput =
   | { readonly status: "noop"; readonly schoolId: EntityId };
 
 export type RunScenarioLabelEstablishmentAfterSchoolReadyResult =
-  | SchoolShadowEstablishmentResult
+  | SchoolShadowEstablishmentResultWithCutover
   | { readonly status: "skipped_not_ready" };
 
 /**
- * Shared post-ready orchestration helper.
+ * Shared post-ready orchestration helper — sole production cutover owner.
  * Callers: Profile Save/mount runners, VZ afterPersist runner.
  * Fail-soft: unexpected throws are mapped to storage_unavailable-equivalent soft result.
  *
- * N3-aware gate routes fresh legacy authority to establishment or PREP, and
- * returns soft no-op metadata for namespaced/blocked authority.
+ * Always enables `allowCutover: true` (lifecycle context). CORE still fresh-assesses.
+ * Restore must call `establishScenarioLabelSchoolShadowFromLegacy` directly (default false).
  */
 export function runScenarioLabelEstablishmentAfterSchoolReady(
   binding: RunScenarioLabelEstablishmentAfterSchoolReadyInput | { readonly status: string },
@@ -302,7 +455,10 @@ export function runScenarioLabelEstablishmentAfterSchoolReady(
   }
 
   try {
-    return establishScenarioLabelSchoolShadowFromLegacy(binding.schoolId, deps);
+    return establishScenarioLabelSchoolShadowFromLegacy(binding.schoolId, {
+      ...deps,
+      allowCutover: true,
+    });
   } catch {
     return { status: "storage_unavailable" };
   }
@@ -312,6 +468,9 @@ export function runScenarioLabelEstablishmentAfterSchoolReady(
 export function isScenarioLabelEstablishmentSoftFailure(
   result: RunScenarioLabelEstablishmentAfterSchoolReadyResult,
 ): boolean {
+  if (scenarioLabelEstablishmentNoticeKind(result) !== "none") {
+    return true;
+  }
   return (
     result.status === "shadow_dirty" ||
     result.status === "marker_incomplete" ||
@@ -319,4 +478,27 @@ export function isScenarioLabelEstablishmentSoftFailure(
     result.status === "skipped_authority_blocked" ||
     result.status === "skipped_identity"
   );
+}
+
+/**
+ * Notice severity for platform binding UX.
+ * Cutover soft/strong never overturns Profile/VZ business persistence success.
+ */
+export function scenarioLabelEstablishmentNoticeKind(
+  result: RunScenarioLabelEstablishmentAfterSchoolReadyResult,
+): "none" | "soft" | "strong" {
+  if ("cutover" in result && result.cutover != null) {
+    if (result.cutover.notice === "strong") return "strong";
+    if (result.cutover.notice === "soft") return "soft";
+  }
+  if (
+    result.status === "shadow_dirty" ||
+    result.status === "marker_incomplete" ||
+    result.status === "storage_unavailable" ||
+    result.status === "skipped_authority_blocked" ||
+    result.status === "skipped_identity"
+  ) {
+    return "soft";
+  }
+  return "none";
 }
