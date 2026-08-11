@@ -463,6 +463,8 @@ describe("Restore-2B platform reconcile + verification", () => {
       sameSchool: null,
       canApply: true,
       expectedScenarioLabelTarget: null,
+      scenarioLabelRequiresNamespacedFence: false,
+      scenarioLabelRequiresNamespacedFence: false,
     };
     const transaction: RestoreTransactionContext = { plan: fakePlan, snapshot: {} };
 

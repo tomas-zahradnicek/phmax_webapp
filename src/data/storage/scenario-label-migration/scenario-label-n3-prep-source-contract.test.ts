@@ -82,12 +82,13 @@ describe("N3-PREP source / ownership contracts", () => {
     expect(prep).not.toContain("assessScenarioLabelCutoverReadiness");
   });
 
-  it("already_ready path invokes PREP; established path does not", () => {
+  it("already_ready path invokes PREP via aware gate; established path does not", () => {
     const runtime = readSource(
       "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.ts",
     );
     expect(runtime).toContain("prepareScenarioLabelN3LegacyFenceCertificate");
-    expect(runtime).toContain('result.status === "already_ready"');
+    expect(runtime).toContain("permit_legacy_prep");
+    expect(runtime).toContain('return { status: "already_ready" }');
 
     const alreadyReadyIdx = runtime.indexOf('plan.kind === "already_ready"');
     expect(alreadyReadyIdx).toBeGreaterThan(-1);

@@ -227,7 +227,9 @@ export const SCENARIO_LABEL_N3_AWARE_NO_WRITE_ON_READ = true as const;
 export const SCENARIO_LABEL_N3_AWARE_NO_CUTOVER = true as const;
 export const SCENARIO_LABEL_N3_AWARE_NO_LEGACY_TO_SCHEMA2 = true as const;
 export const SCENARIO_LABEL_N3_AWARE_NO_NAMESPACED_LEGACY_FALLBACK = true as const;
-export const SCENARIO_LABEL_N3_AWARE_CORE_INERT = true as const;
+/** CORE primitives remain; production wiring is active in N3-AWARE-WIRING. */
+export const SCENARIO_LABEL_N3_AWARE_CORE_INERT = false as const;
+export const SCENARIO_LABEL_N3_AWARE_WIRING_ACTIVE = true as const;
 
 export const SCENARIO_LABEL_N3_AWARE_NAMESPACED_WRITE_PHASE_ORDER = [
   "fresh_authority_gate",

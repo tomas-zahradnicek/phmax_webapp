@@ -30,6 +30,16 @@ export function decideScenarioLabelAwareEstablishmentFromAssessment(
       return { action: "blocked", reason: "storage_unavailable" };
 
     case "AUTHORITY_BLOCKED":
+      // Classic N2 adoption input: missing marker + legacy≠school-v2 (often v2 absent).
+      // That is exactly what legacy establishment repairs — not namespaced evidence.
+      // Do NOT open repair for namespaced/malformed/conflict blocked reasons.
+      if (assessment.reason === "ambiguous_marker_loss") {
+        return {
+          action: "permit_legacy_establishment",
+          authority: "legacy",
+          reason: "legacy_repairable",
+        };
+      }
       return { action: "blocked", reason: assessment.reason };
 
     case "UNBOUND":

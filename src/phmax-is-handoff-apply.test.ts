@@ -87,6 +87,26 @@ describe("phmax-is-handoff-apply", () => {
     expect(mem.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBe("KEEP-ME");
   });
 
+  it("refuses supplied scenario before module writes when authority is blocked", () => {
+    const raw = readFileSync(generatedHandoff, "utf8");
+    const payload = JSON.parse(raw) as PhmaxIsHandoffPayload;
+    const mem = new MemoryStorage();
+    mem.setItem(IDENTITY_REGISTRY_LS_KEY, identityJson(SCHOOL_A));
+    mem.setItem(
+      serializeScenarioLabelMigrationMarkerKey({ kind: "school", schoolId: SCHOOL_A }),
+      JSON.stringify({
+        schemaVersion: 2,
+        authority: "namespaced",
+        mirrorHealth: "synced",
+        authoritativePresence: "present",
+      }),
+    );
+
+    expect(() => applyPhmaxIsHandoffToStorage(mem, payload)).toThrow("handoff nebyl použit");
+    expect(mem.getItem(PHMAX_MODULE_AUTOSAVE_LS_KEYS.pv)).toBeNull();
+    expect(mem.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeNull();
+  });
+
   it("buildHandoffLocalStorageWrites excludes scenario label (owned by repository)", () => {
     const raw = readFileSync(generatedHandoff, "utf8");
     const payload = JSON.parse(raw) as PhmaxIsHandoffPayload;
@@ -103,7 +123,7 @@ describe("phmax-is-handoff-apply", () => {
     const fn = page.slice(start, end);
     expect(fn).not.toContain("localStorage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY");
     expect(fn).not.toContain("writeScenarioLabel");
-    expect(fn).toContain("setScenarioLabel(result.scenarioLabel)");
+    expect(fn).toContain("refreshScenarioLabelAwareUi()");
   });
 
   it("konfigurovatelný konzolový snippet obsahuje klíče autosave", () => {
@@ -177,6 +197,37 @@ describe("phmax-is-handoff-apply", () => {
     // Fence setItem comes after marker setItem in the generated fragment.
     expect(fragment.indexOf("localStorage.setItem(fenceKey")).toBeGreaterThan(
       fragment.indexOf("localStorage.setItem(markerKey"),
+    );
+  });
+
+  it("snippet refuses namespaced marker before legacy write", () => {
+    const fragment = buildScenarioLabelLiveApplySnippetFragment("NEW");
+    const store = new Map<string, string>();
+    store.set(IDENTITY_REGISTRY_LS_KEY, identityJson(SCHOOL_B));
+    store.set(
+      serializeScenarioLabelMigrationMarkerKey({ kind: "school", schoolId: SCHOOL_B }),
+      JSON.stringify({
+        schemaVersion: 2,
+        authority: "namespaced",
+        mirrorHealth: "synced",
+        authoritativePresence: "present",
+      }),
+    );
+    vi.stubGlobal("localStorage", {
+      getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
+      setItem: (k: string, v: string) => store.set(k, String(v)),
+      removeItem: (k: string) => store.delete(k),
+    });
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    try {
+      new Function(fragment)();
+    } finally {
+      error.mockRestore();
+      vi.unstubAllGlobals();
+    }
+    expect(store.get(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY)).toBeUndefined();
+    expect(store.has(buildScenarioLabelNamespacedKey({ kind: "school", schoolId: SCHOOL_B }))).toBe(
+      false,
     );
   });
 

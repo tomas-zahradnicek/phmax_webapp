@@ -28,14 +28,14 @@ import {
   PHMAX_MODULE_AUTOSAVE_LS_KEYS,
   PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY,
 } from "./phmax-school-scenario-export";
-import { clearScenarioLabelLifecycle } from "./data/storage/scenario-label-migration/scenario-label-repository";
+import { clearScenarioLabelAwareRuntime } from "./data/storage/scenario-label-migration/scenario-label-aware-runtime";
 
 /**
  * Level B — Calculator Clear inventář.
  * Neobsahuje SchoolProfile, Identity Registry, AppContext ani klíče výroční zprávy.
  *
  * Includes the legacy scenario label key for inventory/documentation completeness.
- * Runtime Level B MUST filter it out and clear via {@link clearScenarioLabelLifecycle}
+ * Runtime Level B MUST filter it out and clear via {@link clearScenarioLabelAwareRuntime}
  * (shadow-aware). Do not call generic removeListedKeys on this full list for scenario.
  */
 export const PHMAX_APP_LOCAL_STORAGE_KEYS: readonly string[] = [
@@ -83,7 +83,7 @@ const DASH_VISIT_PREFIX = "phmax-dash-last-visit-";
 /**
  * Klíče, které školní scénář / IS handoff JSON skutečně nese v `moduleSnapshots`
  * (autosave modulů). Scenario label NENÍ v tomto seznamu — clear musí jít přes
- * {@link clearScenarioLabelLifecycle} (legacy + shadow + markers), ne generic remove-list.
+ * {@link clearScenarioLabelAwareRuntime} (legacy + shadow + markers), ne generic remove-list.
  *
  * Post-export clear = these autosave keys + shadow-aware scenario lifecycle.
  */
@@ -114,10 +114,14 @@ function removeListedKeys(keys: readonly string[]): number {
 function clearScenarioLabelShadowAwareCounted(): number {
   if (typeof localStorage === "undefined") return 0;
   const before = localStorage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY) != null ? 1 : 0;
-  try {
-    clearScenarioLabelLifecycle();
-  } catch {
-    /* ignore — Level B / post-export historically swallow storage errors */
+  const result = clearScenarioLabelAwareRuntime();
+  if (
+    result.status === "fatal_partial" ||
+    result.status === "blocked_authority" ||
+    result.status === "fence_incomplete" ||
+    result.status === "storage_unavailable"
+  ) {
+    throw new Error("Název scénáře nebylo možné bezpečně vymazat; ostatní data kalkulaček byla zpracována.");
   }
   const after = localStorage.getItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY) != null ? 1 : 0;
   return before > after ? 1 : 0;

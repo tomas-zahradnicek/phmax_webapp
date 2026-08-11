@@ -14,6 +14,7 @@ import {
   SCENARIO_LABEL_MIGRATION_RESOURCE_ID,
   type ScenarioLabelMigrationTarget,
 } from "./scenario-label-migration-types";
+import { parseScenarioLabelN3FenceKey } from "./scenario-label-n3-fence-key";
 import type { ScenarioLabelRestoreShadowPlan } from "./scenario-label-restore-target";
 
 function targetsEqual(
@@ -111,6 +112,13 @@ export function isAllowedScenarioLabelRestoreDynamicKey(
   const markerTarget = parseScenarioLabelMigrationMarkerKey(key);
   if (markerTarget) {
     return targetsEqual(markerTarget, expectedTarget);
+  }
+
+  // N3-AWARE-WIRING: canonical school fence may appear in touchedKeys/snapshot
+  // for namespaced Restore rollback — never as a foreign-school / arbitrary commit key.
+  const fenceTarget = parseScenarioLabelN3FenceKey(key);
+  if (fenceTarget) {
+    return targetsEqual(fenceTarget, expectedTarget);
   }
 
   return false;

@@ -29,14 +29,16 @@ function resolveDefaultStorage(): RestoreTransactionStorage | null {
 
 /**
  * Fresh plan at apply time — preview plan from T1 must not be applied blindly.
+ * Passes storage so scenario authority is freshly assessed (T2 wins).
  */
 export function prepareFreshRestorePlan(
   validated: ValidatedAppBackupEnvelope,
   readEnvironment: typeof readCurrentRestoreEnvironment = readCurrentRestoreEnvironment,
   buildPlan: typeof buildAppBackupRestorePlan = buildAppBackupRestorePlan,
+  storage?: RestoreTransactionStorage | null,
 ): RestorePlan {
   const env = readEnvironment();
-  return buildPlan(validated, env);
+  return buildPlan(validated, env, { storage: storage ?? null });
 }
 
 function emptySnapshotTransaction(plan: RestorePlan): RestoreTransactionContext {
@@ -89,7 +91,7 @@ export function applyRestoreStorageTransaction(
   const readEnvironment = dependencies.readEnvironment ?? readCurrentRestoreEnvironment;
   const buildPlan = dependencies.buildPlan ?? buildAppBackupRestorePlan;
 
-  const plan = prepareFreshRestorePlan(validatedBackup, readEnvironment, buildPlan);
+  const plan = prepareFreshRestorePlan(validatedBackup, readEnvironment, buildPlan, storage);
 
   if (!plan.canApply) {
     return {

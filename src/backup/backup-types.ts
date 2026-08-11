@@ -18,7 +18,10 @@ export type AppBackupEnvelope = {
 
 export type BackupValidationResult =
   | { ok: true }
-  | { ok: false; code: "invalid_json" | "invalid_shape" | "storage_unavailable" };
+  | {
+      ok: false;
+      code: "invalid_json" | "invalid_shape" | "storage_unavailable" | "authority_blocked";
+    };
 
 export type BackupValidationFailure = Extract<BackupValidationResult, { ok: false }>;
 

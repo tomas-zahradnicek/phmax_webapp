@@ -558,6 +558,8 @@ describe("Restore-2A storage transaction kernel", () => {
       sameSchool: null,
       canApply: true,
       expectedScenarioLabelTarget: null,
+      scenarioLabelRequiresNamespacedFence: false,
+      scenarioLabelRequiresNamespacedFence: false,
     };
 
     const validation = validateRestorePlanForApply(plan);
@@ -591,6 +593,8 @@ describe("Restore-2A storage transaction kernel", () => {
       sameSchool: null,
       canApply: true,
       expectedScenarioLabelTarget: null,
+      scenarioLabelRequiresNamespacedFence: false,
+      scenarioLabelRequiresNamespacedFence: false,
     };
 
     const validation = validateRestorePlanForApply(plan);
@@ -650,6 +654,8 @@ describe("Restore-2A storage transaction kernel", () => {
       sameSchool: null,
       canApply: true,
       expectedScenarioLabelTarget: null,
+      scenarioLabelRequiresNamespacedFence: false,
+      scenarioLabelRequiresNamespacedFence: false,
     };
 
     const validation = validateRestorePlanForApply(plan);
@@ -683,6 +689,8 @@ describe("Restore-2A storage transaction kernel", () => {
       sameSchool: null,
       canApply: true,
       expectedScenarioLabelTarget: null,
+      scenarioLabelRequiresNamespacedFence: false,
+      scenarioLabelRequiresNamespacedFence: false,
     };
 
     const validation = validateRestorePlanForApply(plan);

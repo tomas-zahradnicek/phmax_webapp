@@ -77,6 +77,18 @@ describe("N3-AWARE-CORE establishment gate (E1–E8)", () => {
     );
   });
 
+  it("E5b ambiguous_marker_loss (legacy≠v2, no marker) → permit N2 establishment", () => {
+    const storage = new MemoryStorage();
+    const keys = schoolKeys();
+    storage.setItem(keys.legacy, "LEGACY-ONLY");
+    // school-v2 absent → classic pre-establishment world
+    expect(decideScenarioLabelAwareEstablishment({ storage, schoolId: SCHOOL_A })).toEqual({
+      action: "permit_legacy_establishment",
+      authority: "legacy",
+      reason: "legacy_repairable",
+    });
+  });
+
   it("E6 conflicting authority → blocked", () => {
     const storage = new MemoryStorage();
     seedConflictingAuthority(storage);

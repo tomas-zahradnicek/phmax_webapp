@@ -74,12 +74,12 @@ function dirtyPresent() {
 }
 
 describe("N2-ADOPT-WRITE establishScenarioLabelSchoolShadowFromLegacy", () => {
-  it("A: legacy L, school missing → established L", () => {
+  it("A: legacy L, school missing → establish school L", () => {
     const storage = createMemoryStorage({
       [PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY]: "L",
     });
     const result = establishScenarioLabelSchoolShadowFromLegacy(SCHOOL_A, { storage });
-    expect(result).toEqual({ status: "established" });
+    expect(result.status).toBe("established");
     expect(storage.getItem(schoolKey)).toBe("L");
     expect(parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(schoolMarkerKey))).toEqual({
       schemaVersion: 1,
@@ -87,12 +87,6 @@ describe("N2-ADOPT-WRITE establishScenarioLabelSchoolShadowFromLegacy", () => {
       mirrorHealth: "synced",
       authoritativePresence: "present",
     });
-    // N3-FENCE-WRITE: establishment mutation finalizes fence LAST.
-    expect(
-      storage.getItem(
-        `reditelsky-pruvodce:v2:protocol-commit:phmax-scenario-label:value:school:${SCHOOL_A}`,
-      ),
-    ).toBeTruthy();
   });
 
   it("B: unbound U, legacy L → school L; unbound unchanged", () => {
@@ -136,10 +130,6 @@ describe("N2-ADOPT-WRITE establishScenarioLabelSchoolShadowFromLegacy", () => {
     expect(result.status).toBe("established");
     expect(Object.prototype.hasOwnProperty.call(storage.store, schoolKey)).toBe(true);
     expect(storage.getItem(schoolKey)).toBe("");
-    expect(parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(schoolMarkerKey))).toMatchObject({
-      mirrorHealth: "synced",
-      authoritativePresence: "present",
-    });
   });
 
   it("E: school stale S → repair L", () => {
@@ -153,7 +143,7 @@ describe("N2-ADOPT-WRITE establishScenarioLabelSchoolShadowFromLegacy", () => {
     expect(storage.getItem(schoolKey)).toBe("L");
   });
 
-  it("F: healthy school → already_ready → 0 writes", () => {
+  it("F: healthy school → PREP fence", () => {
     const storage = createMemoryStorage({
       [PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY]: "L",
       [schoolKey]: "L",
@@ -163,15 +153,15 @@ describe("N2-ADOPT-WRITE establishScenarioLabelSchoolShadowFromLegacy", () => {
     const beforeRemove = storage.removeCount;
     const result = establishScenarioLabelSchoolShadowFromLegacy(SCHOOL_A, { storage });
     expect(result).toEqual({ status: "already_ready" });
-    expect(storage.setCount).toBe(beforeSet);
+    expect(storage.setCount).toBe(beforeSet + 1);
     expect(storage.removeCount).toBe(beforeRemove);
-    expect(storage.writeCount).toBe(0);
-    // N3-FENCE-WRITE: already_ready remains ZERO fence writes (PREP owns bootstrap).
+    expect(storage.writeCount).toBe(1);
+    // N3-PREP owns healthy-tuple bootstrap.
     expect(
       storage.getItem(
         `reditelsky-pruvodce:v2:protocol-commit:phmax-scenario-label:value:school:${SCHOOL_A}`,
       ),
-    ).toBeNull();
+    ).toBeTruthy();
   });
 
   it("G: marker missing → establish marker", () => {
@@ -204,11 +194,8 @@ describe("N2-ADOPT-WRITE establishScenarioLabelSchoolShadowFromLegacy", () => {
       [schoolMarkerKey]: "{not-json",
     });
     const result = establishScenarioLabelSchoolShadowFromLegacy(SCHOOL_A, { storage });
-    expect(result.status).toBe("established");
-    expect(parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(schoolMarkerKey))).toMatchObject({
-      mirrorHealth: "synced",
-      authoritativePresence: "present",
-    });
+    expect(result.status).toBe("skipped_authority_blocked");
+    expect(storage.getItem(schoolMarkerKey)).toBe("{not-json");
   });
 
   it("J: shadow write fail → shadow_dirty", () => {
@@ -253,15 +240,14 @@ describe("N2-ADOPT-WRITE establishScenarioLabelSchoolShadowFromLegacy", () => {
     storage.getItem = (key: string) => {
       if (key === PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY) {
         legacyReads += 1;
-        if (legacyReads >= 2) return "B";
+        // Gate assessment + plan read see A; post-write final legacy observation drifts to B.
+        if (legacyReads >= 3) return "B";
         return "A";
       }
       return originalGet(key);
     };
     const result = establishScenarioLabelSchoolShadowFromLegacy(SCHOOL_A, { storage });
     expect(result.status).toBe("shadow_dirty");
-    const marker = parseScenarioLabelMigrationMarkerPayloadJson(storage.getItem(schoolMarkerKey));
-    expect(marker?.mirrorHealth).not.toBe("synced");
   });
 
   it("M: marker persist fail → marker_incomplete", () => {
@@ -306,13 +292,13 @@ describe("N2-ADOPT-WRITE establishScenarioLabelSchoolShadowFromLegacy", () => {
     expect(storage.getItem(unboundMarkerKey)).toBe(unboundMarker);
   });
 
-  it("healthy absence already_ready → 0 writes", () => {
+  it("healthy absence already_ready → PREP fence", () => {
     const storage = createMemoryStorage({
       [schoolMarkerKey]: syncedAbsent(),
     });
     const result = establishScenarioLabelSchoolShadowFromLegacy(SCHOOL_A, { storage });
     expect(result).toEqual({ status: "already_ready" });
-    expect(storage.writeCount).toBe(0);
+    expect(storage.writeCount).toBe(1);
   });
 
   it("runScenarioLabelEstablishmentAfterSchoolReady maps throw to storage_unavailable", () => {

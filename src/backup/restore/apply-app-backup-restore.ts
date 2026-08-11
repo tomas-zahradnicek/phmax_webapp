@@ -12,6 +12,10 @@ import {
   type ScenarioLabelEstablishmentStorage,
 } from "../../data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime";
 import { finalizeScenarioLabelLegacyFenceCertificate } from "../../data/storage/scenario-label-migration/scenario-label-n3-fence-finalize";
+import { finalizeScenarioLabelNamespacedFenceCertificate } from "../../data/storage/scenario-label-migration/scenario-label-n3-namespaced-fence-finalize";
+import { assessScenarioLabelRuntimeAuthority } from "../../data/storage/scenario-label-migration/scenario-label-n3-aware-assessment";
+import type { EntityId } from "../../domain/shared/entity-id";
+import { isUuid, normalizeUuid } from "../../data/identity/identity-uuid";
 import {
   applyRestoreStorageTransaction,
   type ApplyRestoreStorageTransactionDependencies,
@@ -44,6 +48,8 @@ export type ApplyAppBackupRestoreDependencies = {
     schoolId: unknown,
     deps: { storage: ScenarioLabelEstablishmentStorage },
   ) => ReturnType<typeof establishScenarioLabelSchoolShadowFromLegacy>;
+  /** Injectable for tests — namespaced fence finalize (failure → rollback). */
+  finalizeScenarioNamespacedFence?: typeof finalizeScenarioLabelNamespacedFenceCertificate;
 };
 
 function resolveDefaultStorage(): RestoreTransactionStorage | null {
@@ -275,17 +281,62 @@ export async function applyAppBackupRestore(
   }
 
   // N2-ADOPT-WRITE: post-verification best-effort school-shadow establishment.
-  // Past rollback boundary — soft failure / throw MUST NOT downgrade Restore success.
-  // N3-FENCE-WRITE: fence LAST also only here (never inside raw txn / pre-verify).
+  // Past rollback boundary for LEGACY fence — soft failure / throw MUST NOT downgrade Restore success.
+  // N3-AWARE-WIRING: namespaced fence is a hard commit certificate — failure rolls back.
   try {
     const identity = readIdentityRegistryFromStorage(storage);
     if (identity.ok && identity.registry != null) {
+      const schoolId = identity.registry.schoolId;
+
+      if (plan.scenarioLabelRequiresNamespacedFence) {
+        // Namespaced Restore: do NOT run N2 legacy establishment (would risk downgrade).
+        if (!isUuid(schoolId) || schoolId !== normalizeUuid(schoolId)) {
+          return runRollback(
+            { plan, snapshot },
+            storage,
+            "namespaced_fence",
+            "namespaced_fence_school_id_invalid",
+          );
+        }
+        const canonicalSchoolId = schoolId as EntityId;
+        const finalizeNamespaced =
+          dependencies.finalizeScenarioNamespacedFence ??
+          finalizeScenarioLabelNamespacedFenceCertificate;
+        let fenceOk = false;
+        try {
+          const fenceResult = finalizeNamespaced({
+            storage,
+            schoolId: canonicalSchoolId,
+          });
+          fenceOk =
+            fenceResult.status === "committed" || fenceResult.status === "already_committed";
+          if (fenceOk) {
+            const post = assessScenarioLabelRuntimeAuthority({
+              storage,
+              schoolId: canonicalSchoolId,
+            });
+            fenceOk = post.kind === "NAMESPACED_READY";
+          }
+        } catch {
+          fenceOk = false;
+        }
+        if (!fenceOk) {
+          return runRollback(
+            { plan, snapshot },
+            storage,
+            "namespaced_fence",
+            "namespaced_fence_finalize_failed",
+          );
+        }
+        return { status: "success" };
+      }
+
       const establish =
         dependencies.establishScenarioSchoolShadow ??
         establishScenarioLabelSchoolShadowFromLegacy;
-      const establishResult = establish(identity.registry.schoolId, { storage });
+      const establishResult = establish(schoolId, { storage });
 
-      // Fence follows Restore scenario school mutation OR establishment mutation.
+      // Legacy fence follows Restore scenario school mutation OR establishment mutation.
       // already_ready + module-absent + no school Restore mutation → PREP (0 fence).
       const restoreTouchedSchool =
         plan.expectedScenarioLabelTarget?.kind === "school";
@@ -294,7 +345,7 @@ export async function applyAppBackupRestore(
         try {
           finalizeScenarioLabelLegacyFenceCertificate({
             storage,
-            schoolId: identity.registry.schoolId,
+            schoolId,
           });
         } catch {
           // Soft fence metadata only.
@@ -302,7 +353,8 @@ export async function applyAppBackupRestore(
       }
     }
   } catch {
-    // Soft metadata only — verified business Restore remains successful.
+    // Soft metadata only for legacy path — verified business Restore remains successful.
+    // Namespaced path returns earlier on fence failure.
   }
 
   return { status: "success" };
