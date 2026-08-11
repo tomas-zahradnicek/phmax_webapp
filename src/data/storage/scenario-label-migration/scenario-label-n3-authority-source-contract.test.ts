@@ -14,7 +14,6 @@ const N3_PROTO_SOURCE_FILES = [
 /** Cutover / authority-routing symbols — still forbidden in all production runtime. */
 const N3_PROTO_FORBIDDEN_RUNTIME_SYMBOLS = [
   "classifyScenarioLabelAuthorityState",
-  "assessScenarioLabelN3CutoverReadiness",
   "planScenarioLabelAuthorityCutover",
   "decideScenarioLabelReadRoute",
   "planScenarioLabelNamespacedWrite",
@@ -25,8 +24,17 @@ const N3_PROTO_FORBIDDEN_RUNTIME_SYMBOLS = [
 ] as const;
 
 /**
+ * School-only data-plane cutover readiness — allowed only in inert CUTOVER-CORE executor.
+ * Still forbidden everywhere else (including production owners).
+ */
+const N3_PROTO_CUTOVER_READINESS_SYMBOL = "assessScenarioLabelN3CutoverReadiness";
+const N3_PROTO_CUTOVER_READINESS_ALLOWLIST = new Set([
+  "src/data/storage/scenario-label-migration/scenario-label-n3-cutover.ts",
+]);
+
+/**
  * Marker parse is needed by N3-FENCE-WRITE finalizer, N3-PREP admission,
- * and N3-AWARE-CORE inert executors (still 0 production business consumers).
+ * N3-AWARE-CORE executors, and inert N3-CUTOVER-CORE (still 0 production owners).
  */
 const N3_PROTO_MARKER_PARSE_SYMBOLS = [
   "parseScenarioLabelN3AuthorityMarker",
@@ -40,6 +48,7 @@ const N3_MARKER_PARSE_RUNTIME_ALLOWLIST = new Set([
   "src/data/storage/scenario-label-migration/scenario-label-n3-aware-write.ts",
   "src/data/storage/scenario-label-migration/scenario-label-n3-aware-clear.ts",
   "src/data/storage/scenario-label-migration/scenario-label-n3-namespaced-fence-finalize.ts",
+  "src/data/storage/scenario-label-migration/scenario-label-n3-cutover.ts",
 ]);
 
 function readSource(relativePath: string): string {
@@ -77,7 +86,7 @@ describe("N3-PROTO source contract", () => {
     }
   });
 
-  it("zero production call sites for N3-PROTO cutover/routing symbols; marker parse only in fence/PREP/AWARE-CORE", () => {
+  it("zero production call sites for N3-PROTO cutover/routing symbols; marker parse only in fence/PREP/AWARE/CUTOVER-CORE", () => {
     const srcRoot = path.join(repoRoot, "src");
     const hits: string[] = [];
 
@@ -97,6 +106,12 @@ describe("N3-PROTO source contract", () => {
           if (text.includes(symbol)) {
             hits.push(`${rel}:${symbol}`);
           }
+        }
+        if (
+          text.includes(N3_PROTO_CUTOVER_READINESS_SYMBOL) &&
+          !N3_PROTO_CUTOVER_READINESS_ALLOWLIST.has(rel)
+        ) {
+          hits.push(`${rel}:${N3_PROTO_CUTOVER_READINESS_SYMBOL}`);
         }
         for (const symbol of N3_PROTO_MARKER_PARSE_SYMBOLS) {
           // Prefer exact Json match before bare parse (substring overlap).

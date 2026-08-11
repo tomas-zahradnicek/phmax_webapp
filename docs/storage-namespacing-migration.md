@@ -228,7 +228,7 @@ Backup **omits** authority metadata; logical value only.
 
 ### Roadmap after N3-PROTO
 
-`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` ✅ → `N3-PREP` ✅ → `N3-AWARE-CORE` ✅ → `N3-AWARE-WIRING` ✅ → `N3-CUTOVER-WRITE` → `N3-HARDEN` → `N4`
+`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` ✅ → `N3-PREP` ✅ → `N3-AWARE-CORE` ✅ → `N3-AWARE-WIRING` ✅ → `N3-CUTOVER-CORE` ✅ (inert) → `N3-CUTOVER-ACTIVATE` → `N3-HARDEN` → `N4`
 
 N3-PROTO must not jump into any of these runtime phases.
 
@@ -541,7 +541,72 @@ Atomically wires N3-AWARE-CORE into all authority-impacting production surfaces 
 
 ### Next
 
-**N3-CUTOVER-WRITE** audit / readiness (first production creation of namespaced authority).
+**N3-CUTOVER-CORE** — IMPLEMENTED / INERT (below).
+
+## N3-CUTOVER-CORE IMPLEMENTED / INERT
+
+**INERT.** The authority cutover executor exists with contracts + tests + docs.
+This release does **not** activate cutover. Docs must **not** call CUTOVER active.
+
+### What exists
+
+- `executeScenarioLabelN3AuthorityCutover` — production-grade metadata-only executor
+- explicit result union (`cutover_success` / `already_namespaced` / `not_eligible` / drift / rollback / `cutover_degraded` / `fatal_partial` / …)
+- source-contract: **0 production call sites**
+- unit / concurrency / crash-state matrix (C1–C24)
+
+### What it does **not** do
+
+- **no production owner** (Dashboard, Profile, VZ, Backup, Restore, clear, handoff, repository, establishment, App bootstrap, snippet, Full Reset)
+- **no automatic authority transition**
+- **no same-run PREP→CUTOVER**
+- **no persistent cutover journal** (marker/fence fail-closed state machine is sufficient; crash between marker and fence leaves an intermediate that AWARE fail-closes)
+
+### Eligible state (ALL-OF, fresh)
+
+School target + canonical lowercase UUID only. Runtime `LEGACY_READY`, N3 data `ready_for_cutover`, fence `LEGACY_COMMITTED`, structured `assessScenarioLabelFenceCutoverEligibility` → eligible, exact raw/presence/fence binding proofs.
+
+Never: unbound / unprepared / violated / blocked / storage unavailable / wrong school/resource / dirty marker / raw mismatch.
+
+**Forbidden permission paths:** caller-supplied `fenceReady` boolean (`assessScenarioLabelN3ProductionCutoverEligibility`) and historical N2 `assessScenarioLabelCutoverReadiness` (unbound-capable).
+
+### Write semantics
+
+- mutates **only** metadata: schema2 namespaced marker, then namespaced protocol-commit fence **LAST**
+- **0 business writes** (legacy + school-v2 untouched; `legacyRaw === schoolV2Raw` before/after success)
+- marker read-back + fence read-back required
+- success only when fresh final assessment is `NAMESPACED_READY` **and** fence `NAMESPACED_COMMITTED`
+
+### Failure / drift policy
+
+- pre-marker drift → **0 writes**, `concurrent_drift`
+- post-marker business drift → **never** write namespaced fence; **never** blindly resurrect stale legacy fence certifying old raw A against new raw B → `cutover_degraded` / `fatal_partial`
+- marker/fence write or verify failure with safe coherent legacy proof → metadata rollback → `rolled_back` (not success)
+- unsafe rollback / rollback failure → `cutover_degraded` / `fatal_partial`
+- ordinary rollback restores metadata only — **never** business raws
+
+### Snippet policy (approved decision B)
+
+New generated standalone snippet may continue to **refuse** namespaced scenario mutation. Acceptable IT/ops limitation. Full inline namespaced writer deferred. After future activation, namespaced users may be refused the scenario portion of snippet flow. Old saved snippets remain a compatibility hazard.
+
+### Old-tab residual
+
+Already-open old tabs / saved snippets can still race storage. Fence + AWARE fail-closed detection remains the safety bar (not hard write denial).
+
+### Rollback floors
+
+| Scope | Floor |
+|-------|-------|
+| **Inert CORE deploy** (pre-ACTIVATE) | Trivial/safe — creates **no** namespaced browsers by itself |
+| **After future ACTIVATE** | Known safe floor = **N3-AWARE-WIRING** merge `74d2c32` / PR #43 (or newer). AWARE can read/write namespaced. Rolling to pre-AWARE after namespaced browsers exist is **not** safe. |
+
+### Compatibility
+
+Backup / Restore / clear / establishment behavior **unchanged** in CORE. AWARE-WIRING already supports namespaced logical semantics; executor-created namespaced fixtures are compatible with that model.
+
+### Next
+
+**N3-CUTOVER-ACTIVATE** — wire a single production owner, real E2E on the owner path, still school-only, still metadata-only.
 
 ## Rollback / deploy safety
 
@@ -561,11 +626,13 @@ N3-FENCE-WRITE adds runtime fence finalization after compatible mutations; **bus
 
 ## Not implemented
 
-- N3-CUTOVER-WRITE / HARDEN (first production namespaced authority creation)
-- Full namespaced console-snippet write support (refused safely in AWARE-WIRING)
+- N3-CUTOVER-ACTIVATE (first production cutover owner / automatic authority transition)
+- N3-HARDEN
+- Full namespaced console-snippet write support (refused safely in AWARE-WIRING; policy B retained)
 - N4 legacy cleanup
 - Cross-module namespacing
 - Copy-on-read / mount ensure / N3 bootstrap-on-read
 - BroadcastChannel / cross-tab lock / tab registry / service worker implementation
 - Automatic fence recovery UX for VIOLATED/INVALID (deferred)
 - Dashboard / app-bootstrap PREP owners (intentionally not implemented)
+- Persistent cutover journal (explicitly deferred; marker/fence fail-closed is sufficient for CORE)
