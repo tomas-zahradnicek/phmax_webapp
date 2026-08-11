@@ -130,7 +130,7 @@ async function seedAndGotoProfile(
 }
 
 test.describe("N3-PREP healthy UNESTABLISHED fence preparation", () => {
-  test("E1: healthy school no fence → Profile mount PREP → LEGACY_COMMITTED", async ({
+  test("E1: healthy school no fence → Profile mount PREP → cutover NAMESPACED_COMMITTED", async ({
     page,
   }) => {
     await seedAndGotoProfile(page);
@@ -140,20 +140,23 @@ test.describe("N3-PREP healthy UNESTABLISHED fence preparation", () => {
     const keys = await readPrepKeys(page);
     expect(keys.legacy).toBe(LABEL_A);
     expect(keys.v2School).toBe(LABEL_A);
-    expect(keys.markerSchool).toContain('"authority":"legacy"');
+    expect(keys.markerSchool).toContain('"authority":"namespaced"');
+    expect(keys.markerSchool).toContain('"schemaVersion":2');
     expect(keys.markerSchool).toContain('"mirrorHealth":"synced"');
     const fence = JSON.parse(keys.fenceSchool!) as {
       protocolGeneration: number;
       authority: string;
+      markerSchemaVersion: number;
       committedRaw: { exists: boolean; value?: string };
     };
     expect(fence.protocolGeneration).toBe(3);
-    expect(fence.authority).toBe("legacy");
+    expect(fence.authority).toBe("namespaced");
+    expect(fence.markerSchemaVersion).toBe(2);
     expect(fence.committedRaw).toEqual({ exists: true, value: LABEL_A });
     expect(keys.v2Unbound).toBe("UNBOUND-RESIDUE");
   });
 
-  test("E2: valid fence already exists → idempotent / stable", async ({ page }) => {
+  test("E2: valid legacy fence already exists → ACTIVATE cutover to namespaced", async ({ page }) => {
     const existingFence = JSON.stringify({
       schemaVersion: 1,
       protocolGeneration: 3,
@@ -165,8 +168,16 @@ test.describe("N3-PREP healthy UNESTABLISHED fence preparation", () => {
     });
     await seedAndGotoProfile(page, { fenceJson: existingFence });
     await expect
-      .poll(async () => (await readPrepKeys(page)).fenceSchool, { timeout: 10_000 })
-      .toBe(existingFence);
+      .poll(async () => {
+        const keys = await readPrepKeys(page);
+        return keys.markerSchool?.includes('"authority":"namespaced"') ?? false;
+      }, { timeout: 15_000 })
+      .toBe(true);
+    const keys = await readPrepKeys(page);
+    expect(keys.fenceSchool).not.toBe(existingFence);
+    expect(JSON.parse(keys.fenceSchool!).authority).toBe("namespaced");
+    expect(keys.legacy).toBe(LABEL_A);
+    expect(keys.v2School).toBe(LABEL_A);
   });
 
   test("E3: VIOLATED fence → not replaced", async ({ page }) => {
@@ -253,20 +264,23 @@ test.describe("N3-PREP healthy UNESTABLISHED fence preparation", () => {
     expect(keys.fenceSchool).toBeNull();
   });
 
-  test("E8 + old writer: reload UI legacy; after PREP old N2 → VIOLATED, UI still B", async ({
+  test("E8 + old writer: after namespaced cutover, incompatible legacy mutation stays fail-closed", async ({
     page,
   }) => {
     await seedAndGotoProfile(page);
     await expect
-      .poll(async () => (await readPrepKeys(page)).fenceSchool, { timeout: 15_000 })
-      .toBeTruthy();
+      .poll(async () => {
+        const keys = await readPrepKeys(page);
+        return keys.markerSchool?.includes('"authority":"namespaced"') ?? false;
+      }, { timeout: 15_000 })
+      .toBe(true);
 
     await page.reload({ waitUntil: "load" });
     await gotoProductView(page, "dash");
     const input = await openScenarioLabelInput(page);
     await expect(input).toHaveValue(LABEL_A);
 
-    // Emulate old N2 writer: update legacy+v2+marker without fence.
+    // Emulate old N2 writer: overwrite legacy+v2+v1 marker without namespaced fence update.
     await page.evaluate(
       ({ legacy, v2School, markerSchool, labelB, marker }) => {
         localStorage.setItem(legacy, labelB);
@@ -290,15 +304,11 @@ test.describe("N3-PREP healthy UNESTABLISHED fence preparation", () => {
     await page.reload({ waitUntil: "load" });
     await gotoProductView(page, "dash");
     const inputAfter = await openScenarioLabelInput(page);
-    await expect(inputAfter).toHaveValue(LABEL_B);
+    // AWARE fail-closed: must not silently treat old-writer B as healthy namespaced truth.
+    const value = await inputAfter.inputValue();
+    expect(value).not.toBe(LABEL_B);
     const keys = await readPrepKeys(page);
-    expect(keys.legacy).toBe(LABEL_B);
-    expect(keys.v2School).toBe(LABEL_B);
     expect(keys.fenceSchool).toBeTruthy();
-    const fence = JSON.parse(keys.fenceSchool!) as {
-      committedRaw: { exists: boolean; value?: string };
-    };
-    // Stale cert still certifies A → VIOLATED vs current B (PRE-AWARE: UI remains legacy B).
-    expect(fence.committedRaw).toEqual({ exists: true, value: LABEL_A });
+    expect(JSON.parse(keys.fenceSchool!).authority).toBe("namespaced");
   });
 });

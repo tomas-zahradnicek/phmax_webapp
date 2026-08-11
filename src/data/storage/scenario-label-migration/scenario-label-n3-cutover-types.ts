@@ -1,19 +1,19 @@
 /**
- * N3-CUTOVER-CORE — inert authority cutover contracts.
+ * N3-CUTOVER-ACTIVATE — production authority cutover contracts.
  *
- * Executor exists for unit/integration tests only in this phase.
- * Production owners MUST NOT call cutover (see source-contract).
- * Activation is deferred to N3-CUTOVER-ACTIVATE.
+ * Sole production owner is the shared school-ready establishment/PREP runtime.
+ * Direct production callers of the CORE cutover executor: EXACTLY 1.
+ * Profile / VZ reach cutover only transitively. Restore keeps allowCutover default false.
  */
 
 import type { EntityId } from "../../../domain/shared/entity-id";
 import type { RawStoredText } from "./scenario-label-migration-types";
 
-/** CORE is deployable but inert — 0 production call sites. */
-export const SCENARIO_LABEL_N3_CUTOVER_CORE_INERT = true as const;
+/** CORE executor remains the sole transition implementation; ACTIVATE wires one owner. */
+export const SCENARIO_LABEL_N3_CUTOVER_CORE_INERT = false as const;
 
-/** Production authority transition is NOT active in this phase. */
-export const SCENARIO_LABEL_N3_CUTOVER_PRODUCTION_ACTIVE = false as const;
+/** Production authority transition is ACTIVE via the shared establishment/PREP owner. */
+export const SCENARIO_LABEL_N3_CUTOVER_PRODUCTION_ACTIVE = true as const;
 
 /** No persistent cutover journal — marker/fence fail-closed state machine is the audit trail. */
 export const SCENARIO_LABEL_N3_CUTOVER_NO_PERSISTENT_JOURNAL = true as const;
@@ -34,12 +34,17 @@ export const SCENARIO_LABEL_N3_CUTOVER_CRASH_LIMITATION =
   "no persistent cutover journal; intermediate v2-marker states rely on AWARE fail-closed assessment" as const;
 
 /**
- * After future ACTIVATE, safe deployment rollback floor is N3-AWARE-WIRING
- * (merge 74d2c32 / PR #43 or newer) — that runtime can read/write namespaced state.
+ * Safe post-ACTIVATE deployment rollback floor:
+ * - N3-CUTOVER-CORE merge 620245a / PR #44 (inert executor, no owner), or
+ * - N3-AWARE-WIRING merge 74d2c32 / PR #43 (or newer AWARE-safe).
  * Rolling back to pre-AWARE after namespaced browsers exist is NOT safe.
  */
+export const SCENARIO_LABEL_N3_CUTOVER_ROLLBACK_FLOOR =
+  "N3-CUTOVER-CORE 620245a / N3-AWARE-WIRING 74d2c32 (or newer AWARE-safe)" as const;
+
+/** @deprecated alias — prefer SCENARIO_LABEL_N3_CUTOVER_ROLLBACK_FLOOR */
 export const SCENARIO_LABEL_N3_CUTOVER_FUTURE_ROLLBACK_FLOOR =
-  "N3-AWARE-WIRING merge 74d2c32 PR #43 (or newer)" as const;
+  SCENARIO_LABEL_N3_CUTOVER_ROLLBACK_FLOOR;
 
 /** Snippet policy B: namespaced users may be refused scenario mutation via generated snippet. */
 export const SCENARIO_LABEL_N3_CUTOVER_SNIPPET_POLICY = "B_refuse_namespaced_mutation" as const;

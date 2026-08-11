@@ -1,6 +1,7 @@
 import {
-  isScenarioLabelEstablishmentSoftFailure,
+  MSG_SCENARIO_LABEL_CUTOVER_METADATA_STRONG,
   runScenarioLabelEstablishmentAfterSchoolReady,
+  scenarioLabelEstablishmentNoticeKind,
   type RunScenarioLabelEstablishmentAfterSchoolReadyInput,
   type RunScenarioLabelEstablishmentAfterSchoolReadyResult,
 } from "../data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime";
@@ -19,6 +20,16 @@ export {
   MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED,
   MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED,
 };
+
+function profileEstablishmentMetadataNotice(
+  establishment: RunScenarioLabelEstablishmentAfterSchoolReadyResult,
+  softMessage: string,
+): string | null {
+  const kind = scenarioLabelEstablishmentNoticeKind(establishment);
+  if (kind === "strong") return MSG_SCENARIO_LABEL_CUTOVER_METADATA_STRONG;
+  if (kind === "soft") return softMessage;
+  return null;
+}
 
 /**
  * 0F-2B gate: platform binding is allowed only after truthful persist success.
@@ -69,14 +80,14 @@ export async function runPlatformBindingAfterProfilePersist(
     } catch {
       establishment = { status: "storage_unavailable" };
     }
-    if (isScenarioLabelEstablishmentSoftFailure(establishment)) {
-      return {
-        bindingAttempted: true,
-        binding,
-        metadataNotice: MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED,
-      };
-    }
-    return { bindingAttempted: true, binding, metadataNotice: null };
+    return {
+      bindingAttempted: true,
+      binding,
+      metadataNotice: profileEstablishmentMetadataNotice(
+        establishment,
+        MSG_SCHOOL_PROFILE_PLATFORM_BINDING_FAILED,
+      ),
+    };
   }
 
   // empty (unexpected after persist) and error → same soft metadata notice
@@ -105,14 +116,14 @@ export async function runPlatformBindingOnMount(
     } catch {
       establishment = { status: "storage_unavailable" };
     }
-    if (isScenarioLabelEstablishmentSoftFailure(establishment)) {
-      return {
-        bindingAttempted: true,
-        binding,
-        metadataNotice: MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED,
-      };
-    }
-    return { bindingAttempted: true, binding, metadataNotice: null };
+    return {
+      bindingAttempted: true,
+      binding,
+      metadataNotice: profileEstablishmentMetadataNotice(
+        establishment,
+        MSG_SCHOOL_PROFILE_PLATFORM_MOUNT_BINDING_FAILED,
+      ),
+    };
   }
   if (binding.status === "empty") {
     return { bindingAttempted: true, binding, metadataNotice: null };

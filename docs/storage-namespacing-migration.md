@@ -1,4 +1,4 @@
-# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO / N3-FENCE-PROTO / N3-FENCE-WRITE / N3-PREP / N3-AWARE-CORE / N3-AWARE-WIRING)
+# Storage namespacing migration (N2 / N2-HARDEN / N2-ADOPT / N3-PROTO / N3-FENCE-PROTO / N3-FENCE-WRITE / N3-PREP / N3-AWARE-CORE / N3-AWARE-WIRING / N3-CUTOVER-CORE / N3-CUTOVER-ACTIVATE)
 
 Pilot resource: `phmax-scenario-label` / `value`  
 Legacy authoritative key: `phmax-school-scenario-label`
@@ -228,7 +228,7 @@ Backup **omits** authority metadata; logical value only.
 
 ### Roadmap after N3-PROTO
 
-`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` ✅ → `N3-PREP` ✅ → `N3-AWARE-CORE` ✅ → `N3-AWARE-WIRING` ✅ → `N3-CUTOVER-CORE` ✅ (inert) → `N3-CUTOVER-ACTIVATE` → `N3-HARDEN` → `N4`
+`N3-PROTO` ✅ → `N3-FENCE-PROTO` ✅ → `N3-FENCE-WRITE` ✅ → `N3-PREP` ✅ → `N3-AWARE-CORE` ✅ → `N3-AWARE-WIRING` ✅ → `N3-CUTOVER-CORE` ✅ → `N3-CUTOVER-ACTIVATE` ✅ ACTIVE → `N3-HARDEN` → `N4`
 
 N3-PROTO must not jump into any of these runtime phases.
 
@@ -543,10 +543,10 @@ Atomically wires N3-AWARE-CORE into all authority-impacting production surfaces 
 
 **N3-CUTOVER-CORE** — IMPLEMENTED / INERT (below).
 
-## N3-CUTOVER-CORE IMPLEMENTED / INERT
+## N3-CUTOVER-CORE IMPLEMENTED (executor)
 
-**INERT.** The authority cutover executor exists with contracts + tests + docs.
-This release does **not** activate cutover. Docs must **not** call CUTOVER active.
+**Executor complete.** Production transition is enabled by **N3-CUTOVER-ACTIVATE** (below).
+CORE remains the sole LEGACY→schema2 transition implementation.
 
 ### What exists
 
@@ -606,7 +606,65 @@ Backup / Restore / clear / establishment behavior **unchanged** in CORE. AWARE-W
 
 ### Next
 
-**N3-CUTOVER-ACTIVATE** — wire a single production owner, real E2E on the owner path, still school-only, still metadata-only.
+**N3-CUTOVER-ACTIVATE** — ACTIVE (below).
+
+## N3-CUTOVER-ACTIVATE ACTIVE
+
+**ACTIVE.** This release intentionally enables production authority transition
+`LEGACY_COMMITTED` → `NAMESPACED_COMMITTED` via the existing CORE executor.
+
+### Single owner
+
+- Sole direct production caller of `executeScenarioLabelN3AuthorityCutover`:
+  `runScenarioLabelEstablishmentAfterSchoolReady`
+  (`scenario-label-school-shadow-establishment-runtime.ts`)
+- Profile mount / Profile save / VZ afterPersist reach cutover **transitively** only
+- Dashboard reads remain zero-write; opening `/prehled` alone does **not** create first schema2
+- App bootstrap does **not** cut over
+- Backup / clear / handoff / snippet / Full Reset do **not** call the executor
+
+### `allowCutover` (lifecycle context only)
+
+- Default **`false`** on `establishScenarioLabelSchoolShadowFromLegacy`
+- Shared ready runner always passes **`allowCutover: true`**
+- Restore continues calling establishment with default `false` — Restore must **not** be the first-schema2 creator
+- Flag does **not** grant eligibility / fence readiness / authority permission — CORE still fresh-assesses
+
+### Same-run policy
+
+1. AWARE establishment gate first (namespaced / blocked → 0 PREP / 0 cutover)
+2. Legacy already_ready → PREP; cutover only for `prepared` | `already_prepared`
+3. Legacy newly established → finalize legacy fence; cutover only after successful certification
+4. Max **one** executor attempt per lifecycle event — no same-event retry loop
+5. Business Profile/VZ persistence remains success regardless of cutover metadata result
+6. Success / not_eligible / concurrent_drift / already_namespaced → silent
+7. `rolled_back` / `cutover_degraded` / cutover `storage_unavailable` → soft metadata notice
+8. `fatal_partial` → strong metadata notice (no technical jargon; no false data-loss claim)
+
+### Gradual rollout (intentional)
+
+Browsers that naturally hit Profile mount/save or VZ afterPersist may cut over.
+Calculator / Dashboard-only browsers may remain legacy.
+Mixed population (legacy + namespaced) is supported by AWARE runtime — intended transitional state.
+
+### Snippet policy B
+
+Namespaced standalone snippet mutation remains **REFUSE**.
+Old saved snippets remain a residual compatibility hazard.
+
+### Rollback floor (post-ACTIVATE)
+
+Safe deployment rollback targets:
+
+- **N3-CUTOVER-CORE** merge `620245a` / PR #44 (inert executor, no owner), or
+- **N3-AWARE-WIRING** merge `74d2c32` / PR #43 (or newer AWARE-safe)
+
+Immediate Vercel previous production pointing at CORE is safe.
+**Unsafe:** anything before N3-AWARE-WIRING once namespaced browsers exist.
+
+### Next
+
+**N3-HARDEN** — residual cleanup / recovery UX / telemetry (out of ACTIVATE scope).
 
 ## Rollback / deploy safety
 
@@ -626,13 +684,12 @@ N3-FENCE-WRITE adds runtime fence finalization after compatible mutations; **bus
 
 ## Not implemented
 
-- N3-CUTOVER-ACTIVATE (first production cutover owner / automatic authority transition)
 - N3-HARDEN
-- Full namespaced console-snippet write support (refused safely in AWARE-WIRING; policy B retained)
+- Full namespaced console-snippet write support (refused safely; policy B retained)
 - N4 legacy cleanup
 - Cross-module namespacing
 - Copy-on-read / mount ensure / N3 bootstrap-on-read
 - BroadcastChannel / cross-tab lock / tab registry / service worker implementation
 - Automatic fence recovery UX for VIOLATED/INVALID (deferred)
-- Dashboard / app-bootstrap PREP owners (intentionally not implemented)
-- Persistent cutover journal (explicitly deferred; marker/fence fail-closed is sufficient for CORE)
+- Dashboard / app-bootstrap cutover owners (intentionally not implemented — gradual coverage)
+- Persistent cutover journal (explicitly deferred; marker/fence fail-closed is sufficient)

@@ -578,13 +578,13 @@ describe("N3-PREP owner orchestration", () => {
   it("O1: establishment established → FENCE-WRITE path; PREP not required on that outcome", () => {
     const storage = new MemoryStorage();
     storage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "NEW");
-    // No school v2 → establishment mutates → established + fence via FENCE-WRITE.
+    // Direct establish (allowCutover default false) — legacy fence only, no ACTIVATE cutover.
     const result = establishScenarioLabelSchoolShadowFromLegacy(SCHOOL_A, { storage });
     expect(result.status).toBe("established");
     expect(assessFromStorage(storage).status).toBe("LEGACY_COMMITTED");
   });
 
-  it("O2: already_ready + no fence → PREP via post-ready orchestration", () => {
+  it("O2: already_ready + no fence → PREP then ACTIVATE cutover via post-ready owner", () => {
     const storage = new MemoryStorage();
     seedSyncedPresent(storage, "READY");
     expect(storage.getItem(schoolKeys().fence)).toBeNull();
@@ -592,11 +592,14 @@ describe("N3-PREP owner orchestration", () => {
       { status: "ready", schoolId: SCHOOL_A },
       { storage },
     );
-    expect(result).toEqual({ status: "already_ready" });
-    expect(assessFromStorage(storage).status).toBe("LEGACY_COMMITTED");
+    expect(result.status).toBe("already_ready");
+    expect(result).toMatchObject({
+      cutover: { attempted: true, status: "cutover_success", notice: "silent" },
+    });
+    expect(assessFromStorage(storage).status).toBe("NAMESPACED_COMMITTED");
   });
 
-  it("O3/O4: duplicate post-ready already_ready → second is already_prepared (0 new write)", () => {
+  it("O3/O4: duplicate post-ready → first cutover, second namespaced no-op (0 fence writes)", () => {
     const storage = new MemoryStorage();
     const keys = seedSyncedPresent(storage, "READY");
     runScenarioLabelEstablishmentAfterSchoolReady(
@@ -610,12 +613,12 @@ describe("N3-PREP owner orchestration", () => {
       { status: "ready", schoolId: SCHOOL_A },
       { storage },
     );
-    expect(second).toEqual({ status: "already_ready" });
+    expect(second).toEqual({ status: "skipped_namespaced" });
     expect(writes()).toBe(0);
     expect(storage.getItem(keys.fence)).toBe(afterFirst);
   });
 
-  it("O5: established path does not need PREP after mutation (fence already present)", () => {
+  it("O5: established owner path cutovers; second call is namespaced no-op", () => {
     const storage = new MemoryStorage();
     storage.setItem(PHMAX_SCHOOL_SCENARIO_LABEL_LS_KEY, "EST");
     const established = runScenarioLabelEstablishmentAfterSchoolReady(
@@ -623,27 +626,32 @@ describe("N3-PREP owner orchestration", () => {
       { storage },
     );
     expect(established.status).toBe("established");
-    expect(assessFromStorage(storage).status).toBe("LEGACY_COMMITTED");
-    // Second call is already_ready + PREP already_prepared.
+    expect(established).toMatchObject({
+      cutover: { attempted: true, status: "cutover_success", notice: "silent" },
+    });
+    expect(assessFromStorage(storage).status).toBe("NAMESPACED_COMMITTED");
     const again = runScenarioLabelEstablishmentAfterSchoolReady(
       { status: "ready", schoolId: SCHOOL_A },
       { storage },
     );
-    expect(again).toEqual({ status: "already_ready" });
+    expect(again).toEqual({ status: "skipped_namespaced" });
   });
 
-  it("O6: VZ-equivalent post-ready already_ready → PREP", () => {
+  it("O6: VZ-equivalent post-ready already_ready → PREP then cutover", () => {
     const storage = new MemoryStorage();
     seedSyncedPresent(storage, "VZ");
     const result = runScenarioLabelEstablishmentAfterSchoolReady(
       { status: "noop", schoolId: SCHOOL_A },
       { storage },
     );
-    expect(result).toEqual({ status: "already_ready" });
-    expect(assessFromStorage(storage).status).toBe("LEGACY_COMMITTED");
+    expect(result.status).toBe("already_ready");
+    expect(result).toMatchObject({
+      cutover: { attempted: true, status: "cutover_success", notice: "silent" },
+    });
+    expect(assessFromStorage(storage).status).toBe("NAMESPACED_COMMITTED");
   });
 
-  it("O7: PREP failure leaves establishment already_ready (soft)", () => {
+  it("O7: PREP failure leaves establishment already_ready (soft) and skips cutover", () => {
     const storage = new MemoryStorage();
     // Dirty marker → already_ready is false for establishment; use healthy then break prep.
     // Instead: healthy already_ready path where fence write fails.
@@ -659,6 +667,9 @@ describe("N3-PREP owner orchestration", () => {
     );
     expect(result).toEqual({ status: "already_ready" });
     expect(storage.getItem(keys.fence)).toBeNull();
+    const marker = storage.getItem(keys.marker);
+    expect(marker).toContain('"schemaVersion":1');
+    expect(marker).toContain('"authority":"legacy"');
   });
 
   it("O8–O10: Dashboard/Backup/Restore do not import PREP helper (source-level covered separately)", () => {

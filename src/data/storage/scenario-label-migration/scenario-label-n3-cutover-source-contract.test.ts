@@ -1,10 +1,9 @@
 /**
- * N3-CUTOVER-CORE source contracts:
- * - 0 production call sites
- * - no N2 unbound readiness helper
- * - no boolean fenceReady production-cutover gate
+ * N3-CUTOVER-ACTIVATE source contracts:
+ * - EXACTLY 1 production executor caller (shared establishment/PREP runtime)
+ * - allowCutover lifecycle-only (default false; runner forces true)
  * - first schema2 from legacy only via cutover executor
- * - forbidden production surfaces unchanged
+ * - forbidden surfaces remain cutover-free (except the one approved owner)
  */
 
 import fs from "node:fs";
@@ -37,13 +36,12 @@ function walkSrcTsFiles(): string[] {
   return out;
 }
 
-const CUTOVER_SYMBOLS = [
-  "executeScenarioLabelN3AuthorityCutover",
-] as const;
+const CUTOVER_SYMBOLS = ["executeScenarioLabelN3AuthorityCutover"] as const;
 
-/** Definition site only — types file must not reference the executor symbol. */
-const CUTOVER_DEFINITION_FILES = [
+/** Definition + sole approved production owner. */
+const CUTOVER_ALLOWED_PRODUCTION_FILES = [
   "src/data/storage/scenario-label-migration/scenario-label-n3-cutover.ts",
+  "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.ts",
 ] as const;
 
 const FORBIDDEN_PRODUCTION_SURFACES = [
@@ -51,12 +49,10 @@ const FORBIDDEN_PRODUCTION_SURFACES = [
   "src/App.tsx",
   "src/backup/backup-registry.ts",
   "src/backup/restore/apply-app-backup-restore.ts",
-  "src/backup/restore/build-app-backup-restore-plan.ts",
   "src/phmax-local-storage-clear.ts",
   "src/phmax-school-scenario-export.ts",
   "src/phmax-is-handoff-apply.ts",
   "src/data/storage/scenario-label-migration/scenario-label-repository.ts",
-  "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.ts",
   "src/data/storage/scenario-label-migration/scenario-label-aware-runtime.ts",
   "src/data/storage/scenario-label-migration/scenario-label-n3-aware-write.ts",
   "src/data/storage/scenario-label-migration/scenario-label-n3-aware-clear.ts",
@@ -65,10 +61,12 @@ const FORBIDDEN_PRODUCTION_SURFACES = [
   "src/data/storage/scenario-label-migration/scenario-label-restore-authority-ops.ts",
   "src/data/storage/scenario-label-migration/scenario-label-n3-prep.ts",
   "src/data/storage/scenario-label-migration/scenario-label-n3-fence-finalize.ts",
+  "src/school-profile/profile-save-platform-binding.ts",
+  "src/vyrocni-zprava/vz-school-year-persist-binding.ts",
 ] as const;
 
-describe("N3-CUTOVER-CORE source contracts", () => {
-  it("production cutover call sites === 0 (executor only defined in CORE impl)", () => {
+describe("N3-CUTOVER-ACTIVATE source contracts", () => {
+  it("production cutover call sites === exactly 1 owner + definition", () => {
     const hits: string[] = [];
     for (const rel of walkSrcTsFiles()) {
       const text = readSource(rel);
@@ -79,7 +77,7 @@ describe("N3-CUTOVER-CORE source contracts", () => {
       }
     }
     const unique = [...new Set(hits)].sort();
-    expect(unique).toEqual([...CUTOVER_DEFINITION_FILES].sort());
+    expect(unique).toEqual([...CUTOVER_ALLOWED_PRODUCTION_FILES].sort());
   });
 
   it("forbidden surfaces do not import or call cutover executor", () => {
@@ -89,6 +87,29 @@ describe("N3-CUTOVER-CORE source contracts", () => {
       expect(source, file).not.toContain("executeScenarioLabelN3AuthorityCutover");
       expect(source, file).not.toContain("scenario-label-n3-cutover");
     }
+  });
+
+  it("allowCutover is lifecycle-only with safe default false", () => {
+    const runtime = readSource(
+      "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.ts",
+    );
+    expect(runtime).toContain("allowCutover");
+    expect(runtime).toContain("const allowCutover = deps.allowCutover === true");
+    expect(runtime).toContain("allowCutover: true");
+    // No CORE eligibility bypass knobs on the public deps surface.
+    expect(runtime).toContain("Never accepts eligibility / fence-ready / authority-ready bypass flags");
+    expect(runtime).not.toMatch(/fenceReady\s*\?:/);
+    expect(runtime).not.toContain("authorityReady");
+    expect(runtime).not.toMatch(/\beligible\s*\?:/);
+    expect(runtime).not.toMatch(/schemaVersion\s*\?:/);
+  });
+
+  it("Restore applies establishment without allowCutover true", () => {
+    const restore = readSource("src/backup/restore/apply-app-backup-restore.ts");
+    expect(restore).toContain("establishScenarioLabelSchoolShadowFromLegacy");
+    expect(restore).not.toContain("allowCutover");
+    expect(restore).not.toContain("executeScenarioLabelN3AuthorityCutover");
+    expect(restore).not.toContain("runScenarioLabelEstablishmentAfterSchoolReady");
   });
 
   it("CUTOVER executor does not import/call N2 assessScenarioLabelCutoverReadiness", () => {
@@ -106,18 +127,17 @@ describe("N3-CUTOVER-CORE source contracts", () => {
     expect(cutover).not.toContain("assessScenarioLabelN3ProductionCutoverEligibility");
     expect(cutover).not.toMatch(/fenceReady\s*===?\s*true/);
     expect(cutover).not.toMatch(/if\s*\(\s*fenceReady/);
-    // Must use structured fence cutover eligibility instead.
     expect(cutover).toContain("assessScenarioLabelFenceCutoverEligibility");
     expect(cutover).toContain("assessScenarioLabelN3CutoverReadiness");
     expect(cutover).toContain("assessScenarioLabelRuntimeAuthority");
   });
 
-  it("CUTOVER locks remain inert / inactive", () => {
+  it("ACTIVATE locks mark production transition active", () => {
     const types = readSource(
       "src/data/storage/scenario-label-migration/scenario-label-n3-cutover-types.ts",
     );
-    expect(types).toContain("SCENARIO_LABEL_N3_CUTOVER_CORE_INERT = true");
-    expect(types).toContain("SCENARIO_LABEL_N3_CUTOVER_PRODUCTION_ACTIVE = false");
+    expect(types).toContain("SCENARIO_LABEL_N3_CUTOVER_CORE_INERT = false");
+    expect(types).toContain("SCENARIO_LABEL_N3_CUTOVER_PRODUCTION_ACTIVE = true");
     expect(types).toContain("SCENARIO_LABEL_N3_CUTOVER_NO_PERSISTENT_JOURNAL = true");
     expect(types).toContain("SCENARIO_LABEL_N3_CUTOVER_NO_BUSINESS_WRITES = true");
     expect(types).toContain("SCENARIO_LABEL_N3_CUTOVER_FENCE_WRITTEN_LAST = true");
@@ -132,7 +152,6 @@ describe("N3-CUTOVER-CORE source contracts", () => {
     expect(cutover).toContain('kind !== "LEGACY_READY"');
     expect(cutover).toContain("LEGACY_READY");
 
-    // Preservation writers must still gate on already-namespaced assessment.
     const write = readSource(
       "src/data/storage/scenario-label-migration/scenario-label-n3-aware-write.ts",
     );
@@ -151,7 +170,6 @@ describe("N3-CUTOVER-CORE source contracts", () => {
     );
     expect(restore).not.toContain("executeScenarioLabelN3AuthorityCutover");
 
-    // Inventory: schema2 builders outside pure/protocol/helpers must be known surfaces.
     const allowedBuilders = new Set([
       "src/data/storage/scenario-label-migration/scenario-label-n3-aware-write.ts",
       "src/data/storage/scenario-label-migration/scenario-label-n3-aware-clear.ts",
@@ -175,7 +193,6 @@ describe("N3-CUTOVER-CORE source contracts", () => {
     const cutover = readSource(
       "src/data/storage/scenario-label-migration/scenario-label-n3-cutover.ts",
     );
-    // setItem only for marker + fence keys — no PHMAX legacy setItem/removeItem business path.
     expect(cutover).toContain("storage.setItem(keys.markerKey");
     expect(cutover).toContain("storage.setItem(keys.fenceKey");
     expect(cutover).not.toMatch(
@@ -189,11 +206,14 @@ describe("N3-CUTOVER-CORE source contracts", () => {
     expect(cutover).toContain("Never restores business keys");
   });
 
-  it("establishment / PREP still end PREP — no same-run cutover", () => {
+  it("establishment/PREP owner may same-run cutover after prepared|already_prepared", () => {
     const runtime = readSource(
       "src/data/storage/scenario-label-migration/scenario-label-school-shadow-establishment-runtime.ts",
     );
-    expect(runtime).not.toContain("executeScenarioLabelN3AuthorityCutover");
+    expect(runtime).toContain("executeScenarioLabelN3AuthorityCutover");
     expect(runtime).toContain("prepareScenarioLabelN3LegacyFenceCertificate");
+    expect(runtime).toContain("attemptCutoverAfterLegacyCommitted");
+    expect(runtime).toContain('prepStatus !== "prepared"');
+    expect(runtime).toContain('prepStatus !== "already_prepared"');
   });
 });
