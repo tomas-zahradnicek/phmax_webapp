@@ -210,6 +210,7 @@ function buildPhmaxJsonLdBlocks(
   const rootPath = options.breadcrumbRootPath ?? KALKULACKY_PHMAX_PATH;
   const rootLabel = options.breadcrumbRootLabel ?? PHMAX_PUBLIC_HUB_LABEL;
   const rootUrl = new URL(rootPath, origin).href;
+  const breadcrumbIsHubOnly = Boolean(options.breadcrumbLabel) && canonical === rootUrl;
 
   return {
     software: includeSoftware
@@ -248,20 +249,29 @@ function buildPhmaxJsonLdBlocks(
       ? {
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
-          itemListElement: [
-            {
-              "@type": "ListItem",
-              position: 1,
-              name: rootLabel,
-              item: rootUrl,
-            },
-            {
-              "@type": "ListItem",
-              position: 2,
-              name: options.breadcrumbLabel,
-              item: canonical,
-            },
-          ],
+          itemListElement: breadcrumbIsHubOnly
+            ? [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: options.breadcrumbLabel,
+                  item: canonical,
+                },
+              ]
+            : [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: rootLabel,
+                  item: rootUrl,
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: options.breadcrumbLabel,
+                  item: canonical,
+                },
+              ],
         }
       : null,
     website: options.includeWebSite
