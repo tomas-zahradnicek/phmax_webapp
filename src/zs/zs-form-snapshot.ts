@@ -10,6 +10,7 @@ import {
 import type { ZsHeroExampleKey } from "../zs-hero-example-groups";
 import { clampZsBasicWizardStep, type ZsBasicWizardStep } from "../zs-basic-wizard";
 import { B17_B21 } from "../phmax-zs-logic";
+import { computeZsPha1r, type Pha1rClassRow } from "./zs-pha1r";
 import { sanitizeZsAutosaveSnapshot } from "./zs-snapshot-row-sanitize";
 import {
   computeZsPhmaxTotalFromFields,
@@ -103,6 +104,10 @@ export type ZsFormSnapshotState = {
   p41First: number;
   p41Second: number;
   phaRows: PhaRow[];
+  pha1rClasses: Pha1rClassRow[];
+  schoolEstablishedSec16_9: boolean;
+  schoolAtInstitutionalOrProtectiveCare: boolean;
+  schoolAtHealthcareFacility: boolean;
   phpYear1: number;
   phpYear2: number;
   phpYear3: number;
@@ -133,11 +138,20 @@ export type ZsFormSnapshotState = {
     totalPha: number;
     totalPhp: number;
     tab: ZsTabKey;
+    totalPha1r?: number;
   };
 };
 
 export function buildZsFormSnapshot(state: ZsFormSnapshotState): Record<string, unknown> {
   const recomputedTotalPhmax = computeZsPhmaxTotalFromFields(zsPhmaxFieldsFromFormState(state));
+  const recomputedPha1r = computeZsPha1r({
+    classes: state.pha1rClasses,
+    flags: {
+      schoolEstablishedSec16_9: state.schoolEstablishedSec16_9,
+      schoolAtInstitutionalOrProtectiveCare: state.schoolAtInstitutionalOrProtectiveCare,
+      schoolAtHealthcareFacility: state.schoolAtHealthcareFacility,
+    },
+  });
   return {
     tab: state.tab,
     mode: state.mode,
@@ -175,6 +189,10 @@ export function buildZsFormSnapshot(state: ZsFormSnapshotState): Record<string, 
     p41First: state.p41First,
     p41Second: state.p41Second,
     phaRows: state.phaRows,
+    pha1rClasses: state.pha1rClasses,
+    schoolEstablishedSec16_9: state.schoolEstablishedSec16_9,
+    schoolAtInstitutionalOrProtectiveCare: state.schoolAtInstitutionalOrProtectiveCare,
+    schoolAtHealthcareFacility: state.schoolAtHealthcareFacility,
     phpYear1: state.phpYear1,
     phpYear2: state.phpYear2,
     phpYear3: state.phpYear3,
@@ -204,6 +222,7 @@ export function buildZsFormSnapshot(state: ZsFormSnapshotState): Record<string, 
       totalPhmax: recomputedTotalPhmax,
       totalPha: state.auditTotals.totalPha,
       totalPhp: state.auditTotals.totalPhp,
+      totalPha1r: recomputedPha1r.totalPha1r,
       tab: state.auditTotals.tab,
     },
   };
@@ -246,6 +265,10 @@ export type ZsFormSnapshotSetters = {
   setP41First: (v: number) => void;
   setP41Second: (v: number) => void;
   setPhaRows: (v: PhaRow[]) => void;
+  setPha1rClasses: (v: Pha1rClassRow[]) => void;
+  setSchoolEstablishedSec16_9: (v: boolean) => void;
+  setSchoolAtInstitutionalOrProtectiveCare: (v: boolean) => void;
+  setSchoolAtHealthcareFacility: (v: boolean) => void;
   setPhpYear1: (v: number) => void;
   setPhpYear2: (v: number) => void;
   setPhpYear3: (v: number) => void;
@@ -316,6 +339,10 @@ export function applyZsFormSnapshot(
   setters.setP41First((safe.p41First as number) ?? 0);
   setters.setP41Second((safe.p41Second as number) ?? 0);
   setters.setPhaRows((safe.phaRows as PhaRow[]) ?? []);
+  setters.setPha1rClasses((safe.pha1rClasses as Pha1rClassRow[]) ?? []);
+  setters.setSchoolEstablishedSec16_9(safe.schoolEstablishedSec16_9 === true);
+  setters.setSchoolAtInstitutionalOrProtectiveCare(safe.schoolAtInstitutionalOrProtectiveCare === true);
+  setters.setSchoolAtHealthcareFacility(safe.schoolAtHealthcareFacility === true);
   setters.setPhpYear1((safe.phpYear1 as number) ?? 0);
   setters.setPhpYear2((safe.phpYear2 as number) ?? 0);
   setters.setPhpYear3((safe.phpYear3 as number) ?? 0);

@@ -121,6 +121,10 @@ export function loadZsHeroExample(example: ZsHeroExampleKey | "", ctx: ZsHeroExa
   ctx.applyResetPha();
   ctx.applyResetPhp();
   ctx.resetNv75();
+  s.setPha1rClasses([]);
+  s.setSchoolEstablishedSec16_9(false);
+  s.setSchoolAtInstitutionalOrProtectiveCare(false);
+  s.setSchoolAtHealthcareFacility(false);
   s.setWizardChoice("");
   s.setDataMode("example");
   s.setSelectedExample(example);

@@ -323,6 +323,7 @@ export type ZsStoredAuditTotals = {
   totalPha: number;
   totalPhp: number;
   tab: string;
+  totalPha1r?: number;
 };
 
 export function parseZsSnapshotAuditTotals(snapshot: Record<string, unknown>): ZsStoredAuditTotals | null {
@@ -342,6 +343,7 @@ export function parseZsSnapshotAuditTotals(snapshot: Record<string, unknown>): Z
     totalPha: o.totalPha,
     totalPhp: o.totalPhp,
     tab: o.tab,
+    ...(typeof o.totalPha1r === "number" ? { totalPha1r: o.totalPha1r } : {}),
   };
 }
 

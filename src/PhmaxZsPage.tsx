@@ -73,6 +73,7 @@ import {
   zsPhmaxFieldsFromFormState,
 } from "./zs/zs-compute-phmax-total-from-snapshot";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
+import { computeZsPha1r, type Pha1rClassRow } from "./zs/zs-pha1r";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
 import { createZsPageHandlers } from "./zs/zs-page-handlers";
 import { ZsExpertWizardGuideSection } from "./zs/ZsExpertWizardGuideSection";
@@ -389,6 +390,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const [p41Second, setP41Second] = useState(0);
 
   const [phaRows, setPhaRows] = useState<PhaRow[]>(() => (initialAutosave?.phaRows as PhaRow[]) ?? []);
+  const [pha1rClasses, setPha1rClasses] = useState<Pha1rClassRow[]>([]);
+  const [schoolEstablishedSec16_9, setSchoolEstablishedSec16_9] = useState(false);
+  const [schoolAtInstitutionalOrProtectiveCare, setSchoolAtInstitutionalOrProtectiveCare] = useState(false);
+  const [schoolAtHealthcareFacility, setSchoolAtHealthcareFacility] = useState(false);
 
   const [phpYear1, setPhpYear1] = useState(0);
   const [phpYear2, setPhpYear2] = useState(0);
@@ -458,6 +463,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       setP41First,
       setP41Second,
       setPhaRows,
+      setPha1rClasses,
+      setSchoolEstablishedSec16_9,
+      setSchoolAtInstitutionalOrProtectiveCare,
+      setSchoolAtHealthcareFacility,
       setPhpYear1,
       setPhpYear2,
       setPhpYear3,
@@ -711,6 +720,14 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const phpAdjustedValue = round2(Math.max(0, phpBaseValue - phpExcludedTotal));
   const phpBand = phpExcludedSchool ? { label: "bez nároku", value: 0 } : pickBand(phpAdjustedValue, PHP_TABLE);
   const totalPhp = round2(phpBand.value);
+  const pha1rResult = computeZsPha1r({
+    classes: pha1rClasses,
+    flags: {
+      schoolEstablishedSec16_9,
+      schoolAtInstitutionalOrProtectiveCare,
+      schoolAtHealthcareFacility,
+    },
+  });
 
   const zsMethodologyHighlights: PhmaxZsMethodologyHighlights = useMemo(() => {
     const activeColumnByRowId: Partial<Record<string, string>> = {};
@@ -1074,6 +1091,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
         p41First,
         p41Second,
         phaRows,
+        pha1rClasses,
+        schoolEstablishedSec16_9,
+        schoolAtInstitutionalOrProtectiveCare,
+        schoolAtHealthcareFacility,
         phpYear1,
         phpYear2,
         phpYear3,
@@ -1099,7 +1120,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
         mixedMethodSecondZsClasses,
         mixedMethodSecondSpecialPupils,
         mixedMethodSecondSpecialClasses,
-        auditTotals: { totalPhmax, totalPha, totalPhp, tab },
+        auditTotals: { totalPhmax, totalPha, totalPhp, totalPha1r: pha1rResult.totalPha1r, tab },
       }),
     [
       tab,
@@ -1138,6 +1159,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       p41First,
       p41Second,
       phaRows,
+      pha1rClasses,
+      schoolEstablishedSec16_9,
+      schoolAtInstitutionalOrProtectiveCare,
+      schoolAtHealthcareFacility,
       phpYear1,
       phpYear2,
       phpYear3,
@@ -1166,6 +1191,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       totalPhmax,
       totalPha,
       totalPhp,
+      pha1rResult.totalPha1r,
     ],
   );
 
