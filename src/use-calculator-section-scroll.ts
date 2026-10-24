@@ -18,26 +18,58 @@ export const CALCULATOR_SECTION_SCROLL_FALLBACK_OFFSET_PX = 100;
 export const CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX = 64;
 
 /**
- * Efektivní horní offset. Krátký dock se nemění.
- * Vysoký dock se ořízne tak, aby začátek cíle zůstal nad spodním okrajem viewportu
- * aspoň o MIN_VISIBLE px (mezera 12 px je v tom limitu započtená).
+ * Finální `window.scrollTo` top.
+ * Krátký dock: `documentTop - (dock + mezera)`.
+ * Když by tím začátek cíle spadl pod `viewport - 64 px`, scroll se posune dál,
+ * i kdyby cíl částečně zajel pod vysoký sticky dock.
+ * `maxScrollY` drží výsledek v rozsahu dokumentu.
  */
-export function resolveCalculatorSectionScrollOffset(dockHeight: number | null, viewportHeight: number): number {
-  const raw =
-    dockHeight == null || !Number.isFinite(dockHeight) ? CALCULATOR_SECTION_SCROLL_FALLBACK_OFFSET_PX : dockHeight;
-  const viewport = Number.isFinite(viewportHeight) ? viewportHeight : 0;
-  const maxOffset = Math.max(0, viewport - CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX - CALCULATOR_SECTION_SCROLL_GAP_PX);
-  return Math.min(Math.max(0, raw), maxOffset);
-}
-
-/** Dokumentová souřadnice `window.scrollTo` pro začátek sekce ve viewportu. */
 export function resolveCalculatorSectionScrollTop(
   elementViewportTop: number,
   scrollY: number,
-  offsetPx: number,
+  dockHeight: number | null,
+  viewportHeight: number,
+  maxScrollY?: number | null,
 ): number {
-  const top = elementViewportTop + scrollY - offsetPx - CALCULATOR_SECTION_SCROLL_GAP_PX;
-  return Number.isFinite(top) ? Math.max(0, top) : 0;
+  if (!Number.isFinite(elementViewportTop) || !Number.isFinite(scrollY)) return 0;
+  const documentTop = elementViewportTop + scrollY;
+  const raw =
+    dockHeight == null || !Number.isFinite(dockHeight)
+      ? CALCULATOR_SECTION_SCROLL_FALLBACK_OFFSET_PX
+      : Math.max(0, dockHeight);
+  const viewport = Number.isFinite(viewportHeight) ? viewportHeight : 0;
+  const preferred = documentTop - (raw + CALCULATOR_SECTION_SCROLL_GAP_PX);
+  const visibleTopLimit = Math.max(0, viewport - CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX);
+  const minimumForVisibility = documentTop - visibleTopLimit;
+  let top = Math.max(preferred, minimumForVisibility);
+  if (!Number.isFinite(top)) return 0;
+  top = Math.max(0, top);
+  if (maxScrollY != null && Number.isFinite(maxScrollY)) {
+    top = Math.min(top, Math.max(0, maxScrollY));
+  }
+  return top;
+}
+
+function readMaxScrollY(): number {
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  return Number.isFinite(maxScroll) ? maxScroll : 0;
+}
+
+function scrollElementToSection(element: HTMLElement, readDockHeight: () => number | null) {
+  const apply = () => {
+    const top = resolveCalculatorSectionScrollTop(
+      element.getBoundingClientRect().top,
+      window.scrollY,
+      readDockHeight(),
+      window.innerHeight,
+      readMaxScrollY(),
+    );
+    window.scrollTo({ top, behavior: "smooth" });
+  };
+  apply();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(apply);
+  });
 }
 
 /** Scroll na sekci s offsetem sticky docku; volitelně scroll po změně záložky. */
@@ -48,13 +80,10 @@ export function useCalculatorSectionScroll(tabKey: string, { resolveTabSection }
   const goToSection = useCallback((sectionId: string) => {
     const element = document.querySelector(`[data-section="${sectionId}"]`);
     if (!element || !(element instanceof HTMLElement)) return;
-    const dock = workspaceStickyRef.current;
-    const offset = resolveCalculatorSectionScrollOffset(
-      dock ? dock.offsetHeight : null,
-      window.innerHeight,
-    );
-    const top = resolveCalculatorSectionScrollTop(element.getBoundingClientRect().top, window.scrollY, offset);
-    window.scrollTo({ top, behavior: "smooth" });
+    scrollElementToSection(element, () => {
+      const dock = workspaceStickyRef.current;
+      return dock ? dock.offsetHeight : null;
+    });
   }, []);
 
   useEffect(() => {
@@ -68,14 +97,18 @@ export function useCalculatorSectionScroll(tabKey: string, { resolveTabSection }
         document.querySelector(`[data-section="guide"]`)) as HTMLElement | null;
       if (!el) return;
       const dock = workspaceStickyRef.current;
-      const offset = resolveCalculatorSectionScrollOffset(
-        dock ? dock.getBoundingClientRect().height : null,
-        window.innerHeight,
-      );
+      const dockHeight = dock ? dock.getBoundingClientRect().height : null;
       const rect = el.getBoundingClientRect();
-      if (rect.top < offset + CALCULATOR_SECTION_SCROLL_GAP_PX || rect.bottom > window.innerHeight - 32) {
-        const top = resolveCalculatorSectionScrollTop(rect.top, window.scrollY, offset);
-        window.scrollTo({ top, behavior: "smooth" });
+      const raw =
+        dockHeight == null || !Number.isFinite(dockHeight)
+          ? CALCULATOR_SECTION_SCROLL_FALLBACK_OFFSET_PX
+          : Math.max(0, dockHeight);
+      const clearance = Math.min(
+        raw + CALCULATOR_SECTION_SCROLL_GAP_PX,
+        Math.max(0, window.innerHeight - CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX),
+      );
+      if (rect.top < clearance || rect.bottom > window.innerHeight - 32) {
+        scrollElementToSection(el, () => dockHeight);
       }
     });
   }, [tabKey, resolveTabSection]);

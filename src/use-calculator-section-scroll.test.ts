@@ -4,7 +4,6 @@ import {
   CALCULATOR_SECTION_SCROLL_FALLBACK_OFFSET_PX,
   CALCULATOR_SECTION_SCROLL_GAP_PX,
   CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX,
-  resolveCalculatorSectionScrollOffset,
   resolveCalculatorSectionScrollTop,
 } from "./use-calculator-section-scroll";
 
@@ -12,58 +11,76 @@ const VIEWPORT_800 = 800;
 const ELEMENT_TOP = 400;
 const SCROLL_Y = 200;
 
-function legacyScrollTop(dockHeight: number): number {
-  return Math.max(0, ELEMENT_TOP + SCROLL_Y - dockHeight - CALCULATOR_SECTION_SCROLL_GAP_PX);
+function legacyScrollTop(documentTop: number, dockHeight: number): number {
+  return Math.max(0, documentTop - dockHeight - CALCULATOR_SECTION_SCROLL_GAP_PX);
 }
 
-function targetViewportTop(dockHeight: number | null, viewportHeight: number): number {
-  const offset = resolveCalculatorSectionScrollOffset(dockHeight, viewportHeight);
-  return offset + CALCULATOR_SECTION_SCROLL_GAP_PX;
+function finalTargetTop(documentTop: number, scrollTop: number): number {
+  return documentTop - scrollTop;
 }
 
-describe("resolveCalculatorSectionScrollOffset", () => {
+describe("resolveCalculatorSectionScrollTop", () => {
   it("krátký dock ponechá původní výpočet", () => {
     const dockHeight = 120;
-    const offset = resolveCalculatorSectionScrollOffset(dockHeight, VIEWPORT_800);
-    expect(offset).toBe(dockHeight);
-    expect(resolveCalculatorSectionScrollTop(ELEMENT_TOP, SCROLL_Y, offset)).toBe(legacyScrollTop(dockHeight));
+    const documentTop = ELEMENT_TOP + SCROLL_Y;
+    const scrollTop = resolveCalculatorSectionScrollTop(ELEMENT_TOP, SCROLL_Y, dockHeight, VIEWPORT_800);
+    expect(scrollTop).toBe(legacyScrollTop(documentTop, dockHeight));
+    expect(finalTargetTop(documentTop, scrollTop)).toBe(dockHeight + CALCULATOR_SECTION_SCROLL_GAP_PX);
   });
 
-  it("vysoký dock ořízne offset, aby cíl nezačínal pod viewportem", () => {
+  it("CI geometrie posune scroll aspoň na viditelnost 64 px", () => {
+    const documentTop = 1608.171875;
+    const dockHeight = 717;
+    const scrollTop = resolveCalculatorSectionScrollTop(documentTop, 0, dockHeight, VIEWPORT_800);
+    const minimum = documentTop - (VIEWPORT_800 - CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX);
+    expect(scrollTop).toBeGreaterThanOrEqual(minimum);
+    expect(scrollTop).toBeGreaterThanOrEqual(872.171875);
+    expect(finalTargetTop(documentTop, scrollTop)).toBeLessThanOrEqual(736);
+  });
+
+  it("CI geometrie nepožádá o scroll, který položí cíl na spodní okraj", () => {
+    const documentTop = 1608.171875;
+    const scrollTop = resolveCalculatorSectionScrollTop(documentTop, 0, 717, VIEWPORT_800);
+    expect(scrollTop).not.toBe(808.171875);
+    expect(finalTargetTop(documentTop, scrollTop)).toBeLessThan(VIEWPORT_800);
+  });
+
+  it("vysoký dock zaručí aspoň 64 px cíle a vzdá se plné mezery pod dockem", () => {
+    const documentTop = 2400;
     const dockHeight = 900;
-    const offset = resolveCalculatorSectionScrollOffset(dockHeight, VIEWPORT_800);
-    const start = targetViewportTop(dockHeight, VIEWPORT_800);
-    expect(offset).toBeLessThan(dockHeight);
-    expect(start).toBeLessThan(VIEWPORT_800);
-    expect(VIEWPORT_800 - start).toBeGreaterThanOrEqual(CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX);
-    const scrollY = 2000;
-    const unclamped = Math.max(0, ELEMENT_TOP + scrollY - dockHeight - CALCULATOR_SECTION_SCROLL_GAP_PX);
-    expect(resolveCalculatorSectionScrollTop(ELEMENT_TOP, scrollY, offset)).toBeGreaterThan(unclamped);
-  });
-
-  it("viewport 800 px a dock kolem výšky ZŠ sticky bloku nechá aspoň minimum cíle vidět", () => {
-    const dockHeight = 760;
-    const start = targetViewportTop(dockHeight, VIEWPORT_800);
-    expect(start).toBeLessThan(VIEWPORT_800);
-    expect(VIEWPORT_800 - start).toBeGreaterThanOrEqual(CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX);
+    const scrollTop = resolveCalculatorSectionScrollTop(ELEMENT_TOP, documentTop - ELEMENT_TOP, dockHeight, VIEWPORT_800);
+    const targetTop = finalTargetTop(documentTop, scrollTop);
+    expect(targetTop).toBeLessThanOrEqual(VIEWPORT_800 - CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX);
+    expect(VIEWPORT_800 - targetTop).toBeGreaterThanOrEqual(CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX);
+    expect(targetTop).toBeLessThan(dockHeight + CALCULATOR_SECTION_SCROLL_GAP_PX);
   });
 
   it("velmi malý viewport zůstane nezáporný a konečný", () => {
-    const offset = resolveCalculatorSectionScrollOffset(400, 32);
-    const top = resolveCalculatorSectionScrollTop(ELEMENT_TOP, SCROLL_Y, offset);
-    expect(Number.isFinite(offset)).toBe(true);
-    expect(offset).toBeGreaterThanOrEqual(0);
-    expect(Number.isFinite(top)).toBe(true);
-    expect(top).toBeGreaterThanOrEqual(0);
-    expect(resolveCalculatorSectionScrollTop(Number.NaN, SCROLL_Y, offset)).toBe(0);
+    const scrollTop = resolveCalculatorSectionScrollTop(ELEMENT_TOP, SCROLL_Y, 400, 32);
+    expect(Number.isFinite(scrollTop)).toBe(true);
+    expect(scrollTop).toBeGreaterThanOrEqual(0);
+    expect(resolveCalculatorSectionScrollTop(Number.NaN, SCROLL_Y, 400, 32)).toBe(0);
+  });
+
+  it("cíl u konce dokumentu nepřesáhne maxScrollY", () => {
+    const documentTop = 5000;
+    const maxScrollY = 4200;
+    const scrollTop = resolveCalculatorSectionScrollTop(documentTop, 0, 80, 900, maxScrollY);
+    expect(scrollTop).toBe(maxScrollY);
+    expect(scrollTop).toBeLessThanOrEqual(maxScrollY);
   });
 
   it("chybějící dock použije původní fallback 100 px", () => {
-    const offset = resolveCalculatorSectionScrollOffset(null, VIEWPORT_800);
-    expect(offset).toBe(CALCULATOR_SECTION_SCROLL_FALLBACK_OFFSET_PX);
-    expect(resolveCalculatorSectionScrollTop(ELEMENT_TOP, SCROLL_Y, offset)).toBe(
-      legacyScrollTop(CALCULATOR_SECTION_SCROLL_FALLBACK_OFFSET_PX),
-    );
+    const documentTop = ELEMENT_TOP + SCROLL_Y;
+    const scrollTop = resolveCalculatorSectionScrollTop(ELEMENT_TOP, SCROLL_Y, null, VIEWPORT_800);
+    expect(scrollTop).toBe(legacyScrollTop(documentTop, CALCULATOR_SECTION_SCROLL_FALLBACK_OFFSET_PX));
+  });
+
+  it("běžný nízký offset kalkulačky se nemění", () => {
+    const documentTop = 900;
+    const dockHeight = 96;
+    const scrollTop = resolveCalculatorSectionScrollTop(900, 0, dockHeight, 1000);
+    expect(scrollTop).toBe(legacyScrollTop(documentTop, dockHeight));
   });
 
   it("výběr cílové sekce se nemění", () => {

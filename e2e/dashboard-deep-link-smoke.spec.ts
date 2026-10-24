@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { applyCrossPhmaxSeed, CROSS_PHMAX_LS, defaultCrossPhmaxSeedKeys } from "./cross-phmax-seed";
 import {
   confirmDashboardExportDisclaimer,
@@ -21,66 +21,6 @@ const NV75_STORAGE_KEY = "edu-cz-nv75-deputy-bank-state";
 const NV75_WIZARD_KEY = "phmax-nv75-basic-wizard-step";
 export const IS_ENDPOINT_LS_KEY = "phmax-is-handoff-endpoint";
 export const E2E_IS_HANDOFF_URL = "https://e2e.phmax.local/is-handoff";
-
-/** Zaznamená argumenty window.scrollTo a hned zavolá původní implementaci. */
-async function recordWindowScrollTo(page: Page): Promise<void> {
-  await page.addInitScript(() => {
-    const host = window as Window & { __phmaxScrollToCalls?: unknown[] };
-    if (host.__phmaxScrollToCalls) return;
-    const calls: unknown[] = [];
-    host.__phmaxScrollToCalls = calls;
-    const original = window.scrollTo.bind(window);
-    window.scrollTo = function scrollToRecorder(...args: Parameters<typeof window.scrollTo>) {
-      calls.push(args.length === 1 ? args[0] : { x: args[0], y: args[1] });
-      return original(...args);
-    };
-  });
-}
-
-async function readZsDeepLinkScrollDiagnostic(page: Page): Promise<unknown> {
-  return page.evaluate(() => {
-    const section = document.querySelector<HTMLElement>('[data-section="basic"]');
-    const sectionRect = section?.getBoundingClientRect();
-    const dock = document.querySelector<HTMLElement>(".workflow-dock");
-    const dockRect = dock?.getBoundingClientRect();
-    const sticky = document.querySelector<HTMLElement>("#workspace-results-dock");
-    const stickyRect = sticky?.getBoundingClientRect();
-    const wizardHost = document.querySelector<HTMLElement>("[class*='zs-wizard-step-']");
-    const wizardStepClass = wizardHost
-      ? [...wizardHost.classList].find((name) => name.startsWith("zs-wizard-step-")) ?? null
-      : null;
-    const box = (rect: DOMRect | undefined) =>
-      rect ? { top: rect.top, bottom: rect.bottom, height: rect.height } : null;
-    return {
-      innerWidth: window.innerWidth,
-      innerHeight: window.innerHeight,
-      scrollY: window.scrollY,
-      scrollHeight: document.documentElement.scrollHeight,
-      maxScrollY: document.documentElement.scrollHeight - window.innerHeight,
-      target: sectionRect
-        ? { ...box(sectionRect), documentTop: sectionRect.top + window.scrollY }
-        : null,
-      workflowDock: dock
-        ? { ...box(dockRect), offsetHeight: dock.offsetHeight, position: getComputedStyle(dock).position }
-        : null,
-      stickyDock: sticky
-        ? { ...box(stickyRect), offsetHeight: sticky.offsetHeight, position: getComputedStyle(sticky).position }
-        : null,
-      sessionStorage: {
-        focus: sessionStorage.getItem("phmax-focus-module-inputs"),
-        sectionId: sessionStorage.getItem("phmax-focus-module-section-id"),
-        rowId: sessionStorage.getItem("phmax-focus-module-row-id"),
-        rowKey: sessionStorage.getItem("phmax-focus-module-row-key"),
-      },
-      pathname: location.pathname,
-      wizardStepClass,
-      wizardStepStorage: localStorage.getItem("phmax-zs-basic-wizard-step"),
-      targetWizardStep: section?.getAttribute("data-wizard-step") ?? null,
-      needsAttention: section?.classList.contains("card--needs-attention") ?? false,
-      scrollToCalls: (window as Window & { __phmaxScrollToCalls?: unknown[] }).__phmaxScrollToCalls ?? [],
-    };
-  });
-}
 
 test.describe("Dashboard deep-link", () => {
   test("SŠ – problematický řádek", async ({ page }) => {
@@ -178,19 +118,12 @@ test.describe("Dashboard deep-link", () => {
       },
       { storageKey: ZS_STORAGE_KEY, wizardKey: ZS_WIZARD_KEY },
     );
-    await recordWindowScrollTo(page);
 
     await openDashboardAttentionModule(page, "ZŠ");
 
     const section = page.locator('[data-section="basic"]');
     await expect(section).toBeVisible({ timeout: 8000 });
-    try {
-      await expect(section).toBeInViewport({ timeout: 8000 });
-    } catch (error) {
-      const diagnostic = await readZsDeepLinkScrollDiagnostic(page);
-      console.log(`ZS_DEEP_LINK_SCROLL_DIAGNOSTIC ${JSON.stringify(diagnostic)}`);
-      throw error;
-    }
+    await expect(section).toBeInViewport({ timeout: 8000 });
   });
 
   test("ŠD – chybějící účastníci", async ({ page }) => {
