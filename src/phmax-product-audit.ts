@@ -384,7 +384,7 @@ export function createZsProductAuditProtocol(input: ZsProductAuditInput): PhmaxP
 
   const narrative =
     input.narrative?.trim() ||
-    `Celkový PHmax ze stavu ZŠ kalkulačky: ${input.totals.totalPhmax} h (ověřte vstupy a metodiku v5 v UI).`;
+    `Celkový PHmax ze stavu ZŠ kalkulačky: ${input.totals.totalPhmax} h (ověřte vstupy a metodiku v6 v UI).`;
 
   return {
     meta: {

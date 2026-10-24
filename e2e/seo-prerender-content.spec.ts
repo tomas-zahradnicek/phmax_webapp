@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 const ZS_PATH = "/phmax-zakladni-skola/";
-const ZS_H1 = "Kalkulačka PHmax, PHAmax a PHPmax pro základní školu";
+const ZS_H1 = "Kalkulačka PHmax, PHAmax, PHA1Rmax a PHPmax pro základní školu";
 const LANDING_PATH = "/kalkulacky-phmax/";
 const LANDING_H1 = "Kalkulačky PHmax a nástroje pro ředitele škol";
 const VYROCNI_PATH = "/vyrocni-zprava/";
@@ -56,6 +56,9 @@ test.describe("SEO prerender obsah – bez JavaScriptu", () => {
     await page.goto(ZS_PATH);
     await expect(page.locator("#seo-prerender-content")).toHaveCount(1);
     await expect(page.getByRole("heading", { level: 1, name: ZS_H1 })).toBeVisible();
+    await expect(page.locator("#seo-prerender-content")).toContainText("PHA1Rmax");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/phmax-zakladni-skola$/);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /index,\s*follow/i);
     await expect(page.getByText("Nejčastější otázky")).toBeVisible();
     await expect(page.getByRole("link", { name: "Návod k použití" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Rychlý PHmax pro základní školu" })).toBeVisible();

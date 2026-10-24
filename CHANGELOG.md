@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### ZŠ – metodika v6
+- Podpora PHA1Rmax: výpočet po jednotlivých třídách 1. ročníku, samostatně od PHAmax.
+- Metodika ZŠ verze 6 / říjen 2026 a odkaz na metodickou stránku EDU.CZ.
+- Share, tisk shrnutí a CSV/XLSX uvádějí PHA1Rmax samostatně.
+
 ## 0.3.16 (2026-05-28)
 
 ### UX přehledu

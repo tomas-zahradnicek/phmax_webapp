@@ -60,7 +60,7 @@ export const PHMAX_SEO_MODULE_CONTENT: Record<ProductViewCode, PhmaxModuleSeoCon
     related: [
       { view: "pv", label: "PHmax PV", teaser: "Mateřská škola a předškolní vzdělávání." },
       { view: "sd", label: "PHmax ŠD", teaser: "Školní družina a její účastníci." },
-      { view: "zs", label: "PHmax ZŠ", teaser: "Základní škola – PHmax, PHAmax, PHPmax." },
+      { view: "zs", label: "PHmax ZŠ", teaser: "Základní škola – PHmax, PHAmax, PHA1Rmax a PHPmax." },
       { view: "ss", label: "PHmax SŠ", teaser: "Střední škola podle oborů a tříd." },
       { view: "nv75", label: "NV75", teaser: "Banka odpočtů zástupců ředitele." },
     ],
@@ -145,9 +145,10 @@ export const PHMAX_SEO_MODULE_CONTENT: Record<ProductViewCode, PhmaxModuleSeoCon
   zs: {
     howItWorksTitle: "Jak funguje výpočet PHmax pro základní školu",
     howItWorksParagraphs: [
-      "Modul pracuje s třídami základního vzdělávání, výjimkami (psycholog, zdravotní třídy, tělocvik apod.) a volitelně s PHAmax a PHPmax. Výpočet je orientační podle aktuální metodiky v aplikaci.",
+      "Modul pracuje s třídami základního vzdělávání, výjimkami (psycholog, zdravotní třídy, tělocvik apod.) a samostatně s PHAmax, PHA1Rmax a PHPmax. Výpočet je orientační podle metodiky verze 6 (říjen 2026).",
       "Zadáváte počty tříd a žáků, parametry výjimek a režim PHPmax. Aplikace průběžně přepočítává souhrn v hodinách týdně a upozorňuje na neúplné sekce.",
-      "PHAmax a PHPmax mají vlastní záložky – vhodné při plánování úvazků asistentů pedagoga a dalších rolí podle metodiky.",
+      "PHA1Rmax se stanoví samostatně podle počtu žáků prvního ročníku v jednotlivých třídách. Při alespoň 15 relevantních žácích 1. ročníku v jedné třídě je PHA1Rmax 20 hodin týdně. Do rozhodného počtu se nezapočítávají žáci podle § 38 a § 41.",
+      "PHAmax, PHA1Rmax a PHPmax mají vlastní místa ve výpočtu – vhodné při plánování úvazků asistentů pedagoga a dalších rolí podle metodiky.",
     ],
     whenToUseTitle: "Kdy použít kalkulačku ZŠ",
     whenToUseParagraphs: [
@@ -161,14 +162,14 @@ export const PHMAX_SEO_MODULE_CONTENT: Record<ProductViewCode, PhmaxModuleSeoCon
           "Z vámi zadaných tříd a parametrů podle pravidel v metodice MŠMT implementovaných v kalkulačce. Výsledek je souhrn hodin týdně; detaily uvidíte po sekcích formuláře.",
       },
       {
-        question: "Co je PHAmax a PHPmax?",
+        question: "Co je PHAmax, PHA1Rmax a PHPmax?",
         answer:
-          "PHAmax souvisí s asistenty pedagoga a podpůrnými opatřeními dle metodiky. PHPmax pracuje s průměrným počtem žáků ve třídě podle zvoleného režimu (tříletý průměr apod.).",
+          "PHAmax souvisí s asistenty pedagoga a podpůrnými opatřeními dle metodiky. PHA1Rmax je asistent pedagoga v 1. ročníku a stanoví se po jednotlivých třídách. PHPmax pracuje s průměrným počtem žáků ve třídě podle zvoleného režimu (tříletý průměr apod.).",
       },
       {
         question: "Jaký je rozdíl mezi PHmax a PHAmax?",
         answer:
-          "PHmax je hlavní pedagogická norma pro organizaci výuky. PHAmax a PHPmax doplňují plánování dalších úvazků – v aplikaci mají samostatné záložky a souhrny.",
+          "PHmax je hlavní pedagogická norma pro organizaci výuky. PHAmax, PHA1Rmax a PHPmax doplňují plánování dalších úvazků a zůstávají samostatné.",
       },
       {
         question: "Počítáte také školní družinu?",
@@ -187,7 +188,8 @@ export const PHMAX_SEO_MODULE_CONTENT: Record<ProductViewCode, PhmaxModuleSeoCon
       { view: "dash", label: "Přehled školy", teaser: "Souhrn všech modulů." },
       { view: "pv", label: "PHmax PV", teaser: "Mateřská škola na společném území." },
     ],
-    methodologyNote: "Pásma PHAmax/PHPmax a legislativní odkazy jsou v nápovědách u polí a v panelu metodiky.",
+    methodologyNote:
+      "Metodika stanovení PHmax, PHAmax, PHA1Rmax a PHPmax pro základní vzdělávání, verze 6 / říjen 2026. Pásma a legislativní odkazy jsou v nápovědách u polí a v panelu metodiky.",
   },
   ss: {
     howItWorksTitle: "Jak funguje výpočet PHmax pro střední školu",

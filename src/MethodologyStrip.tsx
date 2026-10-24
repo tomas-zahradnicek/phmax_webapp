@@ -31,7 +31,8 @@ export function MethodologyStrip() {
         </p>
         <ul className="methodology-strip__list">
           <li>
-            <strong>Základní vzdělávání (ZŠ):</strong> {PHMAX_MSMT_METODIKA_BY_ID.zv.versionLabel}; NV č. 123/2018 Sb.;
+            <strong>Základní vzdělávání (ZŠ):</strong> {PHMAX_MSMT_METODIKA_BY_ID.zv.label} –{" "}
+            {PHMAX_MSMT_METODIKA_BY_ID.zv.versionLabel}; NV č. 123/2018 Sb.;
             vyhl. č. 48/2005 Sb.;{" "}
             <a href="https://www.zakonyprolidi.cz/cs/2005-75" target="_blank" rel="noopener noreferrer" className="status-link">
               NV č. 75/2005 Sb.

@@ -120,7 +120,7 @@ export function buildPha1rResultPresentation(input: {
     kind: "computed",
     hoursText,
     eligibleClassCount: result.eligibleClassCount,
-    detail: `Z ${result.eligibleClassCount} způsobilých tříd. Práh je ${PHA1R_MIN_RELEVANT_GRADE1_PUPILS} relevantních žáků 1. ročníku v jedné třídě, ${PHA1R_ELIGIBLE_HOURS} hodin na každou způsobilou třídu.`,
+    detail: `Počet způsobilých tříd: ${result.eligibleClassCount}. Práh je ${PHA1R_MIN_RELEVANT_GRADE1_PUPILS} relevantních žáků 1. ročníku v jedné třídě, ${PHA1R_ELIGIBLE_HOURS} hodin na každou způsobilou třídu.`,
     isError: false,
   };
 }

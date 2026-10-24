@@ -15,6 +15,7 @@ import {
   pha1rRemoveAriaLabel,
   pha1rSec16Label,
 } from "./zs-pha1r-ui";
+import { ZS_PHA1R_PUBLIC_EXPLANATION } from "./zs-pha1r-publication";
 
 export type ZsPha1rSectionProps = {
   classes: Pha1rClassRow[];
@@ -48,6 +49,7 @@ export function ZsPha1rSection({
     <section className="card section-card section-card--pha1r" data-section="pha1r">
       <h2>PHA1Rmax – asistent pedagoga v 1. ročníku</h2>
       <p className="muted-text">{PHA1R_SECTION_LEAD}</p>
+      <p className="muted-text">{ZS_PHA1R_PUBLIC_EXPLANATION}</p>
       <div className="checks">
         {PHA1R_SCHOOL_FLAGS.map((flag) => (
           <label key={flag.key}>

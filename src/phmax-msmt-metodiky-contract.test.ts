@@ -16,7 +16,10 @@ function readSource(rel: string): string {
 describe("MŠMT metodiky PHmax – oficiální odkazy", () => {
   it("obsahuje platné URL ke stažení pro ZV, PV, SŠ a ŠD", () => {
     expect(PHMAX_MSMT_METODIKY_HUB_URL).toContain("metodiky-k-reforme-financovani-regionalniho-skolstvi");
-    expect(PHMAX_MSMT_METODIKA_BY_ID.zv.downloadUrl).toContain("Metodika_vypoctu_PHmax_pro_ZV_2026_v5.pdf");
+    expect(PHMAX_MSMT_METODIKA_BY_ID.zv.downloadUrl).toBe(
+      "https://edu.gov.cz/metodicke_materialy/metodiky-stanoveni-phmax-phamax-pha1rmax-a-phpmax/",
+    );
+    expect(PHMAX_MSMT_METODIKA_BY_ID.zv.format).toBe("page");
     expect(PHMAX_MSMT_METODIKA_BY_ID.pv.downloadUrl).toContain("Metodika_stanoveni_PHmax_pro_MS_2026_v4.pdf");
     expect(PHMAX_MSMT_METODIKA_BY_ID.ss.downloadUrl).toContain("Metodika_vypoctu_PHmax_pro_SS_2026_final_verze_3.docx");
     expect(PHMAX_MSMT_METODIKA_BY_ID.sd.downloadUrl).toContain("msmt.gov.cz/file/50972_1_1/");

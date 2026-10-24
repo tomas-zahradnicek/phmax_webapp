@@ -18,10 +18,8 @@ export function ZsOverviewSection({ totalPhmax, totalPha, totalPhp, totalPha1r }
       data-phmax-pane="summary"
     >
       <h2 className="section-title">Celkový přehled</h2>
-      <p className="muted-text">Výsledky PHmax, PHAmax a PHPmax se stanovují samostatně. Součet níže slouží jen pro orientaci.</p>
       <p className="muted-text">
-        PHmax, PHAmax – asistenti pedagoga a PHPmax – metodický výpočet se stanovují odděleně. Součet níže je přehledový.
-        PHA1Rmax je samostatná hodnota a do přehledového součtu se nezahrnuje.
+        PHmax, PHAmax, PHA1Rmax a PHPmax se stanovují samostatně. Součet níže je přehledový a PHA1Rmax do něj nevstupuje.
       </p>
       <div className="grid four">
         <ResultCard label="PHmax" value={totalPhmax} />

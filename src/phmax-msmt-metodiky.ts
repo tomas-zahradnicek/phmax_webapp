@@ -11,17 +11,18 @@ export type PhmaxMsmtMetodikaDoc = {
   downloadUrl: string;
   /** Volitelná vstupní stránka MŠMT (u SŠ). */
   pageUrl?: string;
-  format: "pdf" | "docx";
+  format: "pdf" | "docx" | "page";
 };
 
 /** Oficiální soubory metodik MŠMT k výpočtu PHmax (2026). */
 export const PHMAX_MSMT_METODIKA_BY_ID: Record<PhmaxMsmtMetodikaId, PhmaxMsmtMetodikaDoc> = {
   zv: {
     id: "zv",
-    label: "Metodika výpočtu PHmax pro základní vzdělávání (ZV)",
-    versionLabel: "verze 5 (2026)",
-    downloadUrl: "https://msmt.gov.cz/uploads/210/Metodika_vypoctu_PHmax_pro_ZV_2026_v5.pdf",
-    format: "pdf",
+    label: "Metodika stanovení PHmax, PHAmax, PHA1Rmax a PHPmax pro základní vzdělávání",
+    versionLabel: "verze 6 / říjen 2026",
+    pageUrl: "https://edu.gov.cz/metodicke_materialy/metodiky-stanoveni-phmax-phamax-pha1rmax-a-phpmax/",
+    downloadUrl: "https://edu.gov.cz/metodicke_materialy/metodiky-stanoveni-phmax-phamax-pha1rmax-a-phpmax/",
+    format: "page",
   },
   pv: {
     id: "pv",
@@ -49,5 +50,7 @@ export const PHMAX_MSMT_METODIKA_BY_ID: Record<PhmaxMsmtMetodikaId, PhmaxMsmtMet
 };
 
 export function msmtMetodikaDownloadLabel(format: PhmaxMsmtMetodikaDoc["format"]): string {
-  return format === "docx" ? "Stáhnout DOCX (MŠMT)" : "Stáhnout PDF (MŠMT)";
+  if (format === "docx") return "Stáhnout DOCX (MŠMT)";
+  if (format === "page") return "Metodická stránka EDU.CZ";
+  return "Stáhnout PDF (MŠMT)";
 }

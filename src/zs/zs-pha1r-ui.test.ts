@@ -169,6 +169,7 @@ describe("PHA1Rmax UI", () => {
 
   it("6. 15 relevantních žáků => 20", () => {
     expect(present([row(1, 15)]).hoursText).toBe("20 hodin týdně");
+    expect(present([row(1, 15)]).detail).toContain("Počet způsobilých tříd: 1");
   });
 
   it("7. dvě třídy po 15 => 40", () => {

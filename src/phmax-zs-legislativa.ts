@@ -8,7 +8,7 @@ export const ZS_LEGIS_PARAGRAPH_TOOLTIPS: Record<string, string> = {
   "zs-16-9":
     "Třídy zřízené podle § 16 odst. 9 školského zákona – zvláštní režim výuky; v metodice ZV samostatné řádky PHmax/PHAmax a smíšené třídy oproti běžné ZŠ.",
   "vyhl48":
-    "Vyhláška č. 48/2005 Sb. o základním vzdělávání – RVP ZV / ZŠS jako podklad pro členění oborů a tabulky v metodice PHmax, PHAmax a PHPmax.",
+    "Vyhláška č. 48/2005 Sb. o základním vzdělávání – RVP ZV / ZŠS jako podklad pro členění oborů a tabulky v metodice PHmax, PHAmax, PHA1Rmax a PHPmax.",
   "nv75":
     "NV č. 75/2005 Sb. – průměrný týdenní rozsah přímé vyučovací a přímé výchovné činnosti učitele (včetně speciálních a § 16 odst. 9 tříd dle příloh).",
   "skolsky-561":

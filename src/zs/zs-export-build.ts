@@ -14,6 +14,8 @@ import { MODE_CONFIG, type CalculatorMode } from "../config/calculator-config";
 import { APP_AUTHOR_DISPLAY_NAME, APP_AUTHOR_EMAIL, APP_AUTHOR_EXPORT_ROWS } from "../calculator-ui-constants";
 import { APP_VERSION } from "../app-version";
 import { buildZsExtendedExportMetaRows } from "./zs-export-rows";
+import type { Pha1rClassRow, Pha1rSchoolFlags } from "./zs-pha1r";
+import { buildZsPha1rExportDetailRows, ZS_METHODIKA_PUBLIC_LABEL } from "./zs-pha1r-publication";
 
 export type ZsExportSummaryRow = readonly [string, string | number];
 
@@ -94,6 +96,8 @@ export type ZsExportBuildInput = {
   phpExcludedIndividual: number;
   phpExcludedSchool: boolean;
   phaRows: PhaRow[];
+  pha1rClasses?: readonly Pha1rClassRow[];
+  pha1rFlags?: Pha1rSchoolFlags;
   psychComputedRows: ZsComputedGroupRow[];
   healthComputedRows: ZsComputedGroupRow[];
   gymComputedRows: ZsGymComputedRow[];
@@ -249,13 +253,17 @@ export function buildZsExtendedCsvRows(input: ZsExportBuildInput): readonly ZsEx
       out.push([`Smíšené ${i + 1} – řádkový výsledek PHmax`, linePhmax]);
     });
   }
+  out.push(["", ""]);
+  for (const row of buildZsPha1rExportDetailRows({ classes: input.pha1rClasses, flags: input.pha1rFlags })) {
+    out.push(row);
+  }
   for (const row of APP_AUTHOR_EXPORT_ROWS) {
     out.push([row[0], row[1]]);
   }
   return out;
 }
 
-export const ZS_EXPORT_METHODIKA_LABEL = "Metodika PHmax/PHAmax/PHPmax pro ZV, verze 5 (březen 2026)";
+export const ZS_EXPORT_METHODIKA_LABEL = ZS_METHODIKA_PUBLIC_LABEL;
 
 export type ZsExportBuildInputParams = Omit<ZsExportBuildInput, "modeLabel" | "methodikaLabel"> & {
   mode: CalculatorMode;

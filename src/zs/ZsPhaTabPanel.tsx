@@ -48,7 +48,7 @@ export function ZsPhaTabPanel({
           <ZsLegisRef citeId="nv123-1" label="NV č. 123/2018 Sb." />, <ZsLegisRef citeId="vyhl48" label="vyhl. č. 48/2005 Sb." />
           ) rozlišujte příznak třídy: AD1 (ostatní zdravotní postižení dle{" "}
           <ZsLegisRef citeId="zs-16-9" label="§ 16 odst. 9" />) vs. AD2 (těžší varianty – tělesné postižení, PVCH,
-          souběžné postižení, autismus). Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v5;
+          souběžné postižení, autismus). Typ řádku ve výběru odpovídá řádkům B35–B44 tabulky pro PHAmax v metodice v6;
           průměr žáků ve skupině stejného typu určí pásmo a hodnotu PHAmax na třídu. Přípravný stupeň ZŠ speciální je
           řádek B45 (samostatná volba).
         </p>

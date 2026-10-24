@@ -7,7 +7,7 @@ export async function runZsExportCsv(
   onNotice: (message: string) => void,
 ): Promise<void> {
   downloadTextFile("kalkulacka-zs-souhrn.csv", exportCsvLocalized(buildZsExtendedCsvRows(input)), "text/csv;charset=utf-8");
-  onNotice("Rozšířený souhrn byl exportován do CSV (vstupy, výstupy, PHAmax a podrobné řádky dle potřeby).");
+  onNotice("Rozšířený souhrn byl exportován do CSV (vstupy, výstupy, PHAmax, PHA1Rmax a podrobné řádky dle potřeby).");
 }
 
 export async function runZsExportXlsx(
