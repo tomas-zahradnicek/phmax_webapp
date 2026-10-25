@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { applyCrossPhmaxSeed, CROSS_PHMAX_LS, defaultCrossPhmaxSeedKeys } from "./cross-phmax-seed";
 import {
   confirmDashboardExportDisclaimer,
@@ -21,6 +21,98 @@ const NV75_STORAGE_KEY = "edu-cz-nv75-deputy-bank-state";
 const NV75_WIZARD_KEY = "phmax-nv75-basic-wizard-step";
 export const IS_ENDPOINT_LS_KEY = "phmax-is-handoff-endpoint";
 export const E2E_IS_HANDOFF_URL = "https://e2e.phmax.local/is-handoff";
+
+/** Zaznamená argumenty window.scrollTo a hned zavolá původní implementaci. */
+async function recordWindowScrollTo(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const host = window as Window & { __phmaxScrollToCalls?: unknown[] };
+    if (host.__phmaxScrollToCalls) return;
+    const calls: unknown[] = [];
+    host.__phmaxScrollToCalls = calls;
+    const original = window.scrollTo.bind(window);
+    let seq = 0;
+    window.scrollTo = function scrollToRecorder(...args: Parameters<typeof window.scrollTo>) {
+      seq += 1;
+      const options = args.length === 1 && args[0] != null && typeof args[0] === "object" ? args[0] : null;
+      calls.push({
+        seq,
+        t: Math.round(performance.now()),
+        form: options ? "options" : "xy",
+        top: options && "top" in options ? options.top : undefined,
+        y: args.length >= 2 ? args[1] : undefined,
+        behavior: options && "behavior" in options ? options.behavior : undefined,
+      });
+      return original(...args);
+    };
+  });
+}
+
+async function readZsDeepLinkGeometry(page: Page): Promise<Record<string, unknown>> {
+  return page.evaluate(() => {
+    const section = document.querySelector<HTMLElement>('[data-section="basic"]');
+    const sectionRect = section?.getBoundingClientRect();
+    const dock = document.querySelector<HTMLElement>(".workflow-dock");
+    const dockRect = dock?.getBoundingClientRect();
+    const sticky = document.querySelector<HTMLElement>("#workspace-results-dock");
+    const stickyRect = sticky?.getBoundingClientRect();
+    const wizardHost = document.querySelector<HTMLElement>("[class*='zs-wizard-step-']");
+    const box = (rect: DOMRect | undefined) =>
+      rect ? { top: rect.top, bottom: rect.bottom, height: rect.height, width: rect.width } : null;
+    const visual = window.visualViewport;
+    return {
+      innerWidth: window.innerWidth,
+      innerHeight: window.innerHeight,
+      devicePixelRatio: window.devicePixelRatio,
+      visualViewport: visual
+        ? { height: visual.height, offsetTop: visual.offsetTop, width: visual.width, scale: visual.scale }
+        : null,
+      scrollY: window.scrollY,
+      scrollHeight: document.documentElement.scrollHeight,
+      maxScrollY: document.documentElement.scrollHeight - window.innerHeight,
+      target: sectionRect
+        ? { ...box(sectionRect), documentTop: sectionRect.top + window.scrollY }
+        : null,
+      workflowDock: dock
+        ? { ...box(dockRect), offsetHeight: dock.offsetHeight, position: getComputedStyle(dock).position }
+        : null,
+      stickyDock: sticky
+        ? { ...box(stickyRect), offsetHeight: sticky.offsetHeight, position: getComputedStyle(sticky).position }
+        : null,
+      scrollBehavior: {
+        documentElement: getComputedStyle(document.documentElement).scrollBehavior,
+        body: getComputedStyle(document.body).scrollBehavior,
+      },
+      pathname: location.pathname,
+      wizardStepClass: wizardHost
+        ? [...wizardHost.classList].find((name) => name.startsWith("zs-wizard-step-")) ?? null
+        : null,
+      wizardStepStorage: localStorage.getItem("phmax-zs-basic-wizard-step"),
+      sessionStorage: {
+        focus: sessionStorage.getItem("phmax-focus-module-inputs"),
+        sectionId: sessionStorage.getItem("phmax-focus-module-section-id"),
+        rowId: sessionStorage.getItem("phmax-focus-module-row-id"),
+        rowKey: sessionStorage.getItem("phmax-focus-module-row-key"),
+      },
+      needsAttention: section?.classList.contains("card--needs-attention") ?? false,
+      scrollToCalls: (window as Window & { __phmaxScrollToCalls?: unknown[] }).__phmaxScrollToCalls ?? [],
+    };
+  });
+}
+
+async function readZsDeepLinkTimelineSample(page: Page, atMs: number): Promise<Record<string, unknown>> {
+  return page.evaluate((mark) => {
+    const section = document.querySelector<HTMLElement>('[data-section="basic"]');
+    const sticky = document.querySelector<HTMLElement>("#workspace-results-dock");
+    const rect = section?.getBoundingClientRect();
+    return {
+      atMs: mark,
+      scrollY: window.scrollY,
+      targetTop: rect ? rect.top : null,
+      stickyDockHeight: sticky ? sticky.offsetHeight : null,
+      pathname: location.pathname,
+    };
+  }, atMs);
+}
 
 test.describe("Dashboard deep-link", () => {
   test("SŠ – problematický řádek", async ({ page }) => {
@@ -118,12 +210,26 @@ test.describe("Dashboard deep-link", () => {
       },
       { storageKey: ZS_STORAGE_KEY, wizardKey: ZS_WIZARD_KEY },
     );
+    await recordWindowScrollTo(page);
 
     await openDashboardAttentionModule(page, "ZŠ");
 
     const section = page.locator('[data-section="basic"]');
     await expect(section).toBeVisible({ timeout: 8000 });
-    await expect(section).toBeInViewport({ timeout: 8000 });
+    const timeline = [await readZsDeepLinkTimelineSample(page, 0)];
+    for (const atMs of [250, 500, 1000, 2000]) {
+      await page.waitForTimeout(atMs - Number(timeline[timeline.length - 1]?.atMs ?? 0));
+      timeline.push(await readZsDeepLinkTimelineSample(page, atMs));
+    }
+    try {
+      await expect(section).toBeInViewport({ timeout: 8000 });
+    } catch (error) {
+      timeline.push(await readZsDeepLinkTimelineSample(page, -1));
+      const diagnostic = await readZsDeepLinkGeometry(page);
+      diagnostic.timeline = timeline.map((sample) => (sample.atMs === -1 ? { ...sample, atMs: "failure" } : sample));
+      console.log(`ZS_DEEP_LINK_SCROLL_DIAGNOSTIC ${JSON.stringify(diagnostic)}`);
+      throw error;
+    }
   });
 
   test("ŠD – chybějící účastníci", async ({ page }) => {
