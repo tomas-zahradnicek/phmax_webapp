@@ -1,10 +1,12 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  CALCULATOR_SECTION_SCROLL_CORRECTION_LIMIT,
   CALCULATOR_SECTION_SCROLL_FALLBACK_OFFSET_PX,
   CALCULATOR_SECTION_SCROLL_GAP_PX,
   CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX,
   resolveCalculatorSectionScrollTop,
+  resolveSectionScrollCorrection,
 } from "./use-calculator-section-scroll";
 
 const VIEWPORT_800 = 800;
@@ -88,7 +90,70 @@ describe("resolveCalculatorSectionScrollTop", () => {
     expect(source).toContain('[data-section="${sectionId}"]');
     expect(source).toContain('[data-section="${targetId}"]');
     expect(source).toContain('[data-section="guide"]');
+    expect(source).toContain("scrollend");
+    expect(source).toContain('behavior: "instant"');
+    expect(source).toContain("CALCULATOR_SECTION_SCROLL_CORRECTION_LIMIT");
     expect(source).not.toContain("pha1r");
     expect(source).not.toContain('"basic"');
+  });
+});
+
+describe("resolveSectionScrollCorrection", () => {
+  const preShiftDocumentTop = 1537.171875;
+  const postShiftDocumentTop = 1608.171875;
+  const dockHeight = 717;
+  const maxScrollY = 3744;
+
+  it("první měření CI geometrie požádá o 808.171875", () => {
+    const scrollTop = resolveCalculatorSectionScrollTop(preShiftDocumentTop, 0, dockHeight, VIEWPORT_800);
+    expect(scrollTop).toBe(808.171875);
+  });
+
+  it("pozdní posun +71 px opraví cíl na horních 736 px", () => {
+    const initial = resolveCalculatorSectionScrollTop(preShiftDocumentTop, 0, dockHeight, VIEWPORT_800);
+    const shiftedTop = postShiftDocumentTop - initial;
+    const correction = resolveSectionScrollCorrection(
+      shiftedTop,
+      initial,
+      dockHeight,
+      VIEWPORT_800,
+      maxScrollY,
+      0,
+    );
+    expect(correction).not.toBeNull();
+    expect(finalTargetTop(postShiftDocumentTop, correction!)).toBeLessThanOrEqual(736);
+  });
+
+  it("beze změny layoutu další scroll nespouští", () => {
+    const scrollTop = resolveCalculatorSectionScrollTop(preShiftDocumentTop, 0, dockHeight, VIEWPORT_800);
+    const settledTop = preShiftDocumentTop - scrollTop;
+    expect(
+      resolveSectionScrollCorrection(settledTop, scrollTop, dockHeight, VIEWPORT_800, maxScrollY, 0),
+    ).toBeNull();
+  });
+
+  it("malý posun, který pořád nechává 64 px viditelných, neopravuje", () => {
+    const scrollTop = 808.171875;
+    const shiftedDocumentTop = 1544.171875;
+    const targetTop = shiftedDocumentTop - scrollTop;
+    expect(targetTop).toBe(VIEWPORT_800 - CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX);
+    expect(
+      resolveSectionScrollCorrection(targetTop, scrollTop, dockHeight, VIEWPORT_800, maxScrollY, 0),
+    ).toBeNull();
+  });
+
+  it("oprava u konce dokumentu respektuje maxScrollY", () => {
+    const correction = resolveSectionScrollCorrection(800.171875, 808.171875, dockHeight, VIEWPORT_800, 820, 0);
+    expect(correction).toBe(820);
+    expect(
+      resolveSectionScrollCorrection(800.171875, 808.171875, dockHeight, VIEWPORT_800, 808.171875, 0),
+    ).toBeNull();
+  });
+
+  it("druhá oprava se už nespustí", () => {
+    expect(CALCULATOR_SECTION_SCROLL_CORRECTION_LIMIT).toBe(1);
+    expect(
+      resolveSectionScrollCorrection(800.171875, 808.171875, dockHeight, VIEWPORT_800, maxScrollY, 1),
+    ).toBeNull();
   });
 });

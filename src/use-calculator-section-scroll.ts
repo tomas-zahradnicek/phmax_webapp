@@ -17,6 +17,12 @@ export const CALCULATOR_SECTION_SCROLL_FALLBACK_OFFSET_PX = 100;
  */
 export const CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX = 64;
 
+/** Jedna oprava po usazení layoutu. Druhé měření už scroll nespouští. */
+export const CALCULATOR_SECTION_SCROLL_CORRECTION_LIMIT = 1;
+
+/** Pojistka, když prohlížeč neohlásí `scrollend`. Primární signál je událost. */
+const SECTION_SCROLL_SETTLE_HANG_MS = 1500;
+
 /**
  * Finální `window.scrollTo` top.
  * Krátký dock: `documentTop - (dock + mezera)`.
@@ -55,21 +61,183 @@ function readMaxScrollY(): number {
   return Number.isFinite(maxScroll) ? maxScroll : 0;
 }
 
+/**
+ * Po dokončení plynulého scrollu: když pozdější layout posune cíl pod
+ * `viewport - 64 px`, vrať nový scrollTop. Jinak null.
+ * `correctionsAlreadyApplied` drží počet oprav na jedné.
+ */
+export function resolveSectionScrollCorrection(
+  elementViewportTop: number,
+  scrollY: number,
+  dockHeight: number | null,
+  viewportHeight: number,
+  maxScrollY: number | null | undefined,
+  correctionsAlreadyApplied: number,
+): number | null {
+  if (correctionsAlreadyApplied >= CALCULATOR_SECTION_SCROLL_CORRECTION_LIMIT) return null;
+  if (!Number.isFinite(elementViewportTop) || !Number.isFinite(scrollY) || !Number.isFinite(viewportHeight)) {
+    return null;
+  }
+  const visibleTopLimit = Math.max(0, viewportHeight - CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX);
+  if (elementViewportTop <= visibleTopLimit) return null;
+  const scrollTop = resolveCalculatorSectionScrollTop(
+    elementViewportTop,
+    scrollY,
+    dockHeight,
+    viewportHeight,
+    maxScrollY,
+  );
+  if (!Number.isFinite(scrollTop) || scrollTop <= scrollY + 0.5) return null;
+  return scrollTop;
+}
+
+let sectionScrollGeneration = 0;
+
+function browserSupportsScrollEnd(): boolean {
+  return "onscrollend" in window;
+}
+
+function waitForProgrammaticScrollSettle(readRequestedTop: () => number): Promise<void> {
+  return new Promise((resolve) => {
+    let finished = false;
+    let hang = 0;
+    let quiet = 0;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      document.removeEventListener("scrollend", onScrollEnd);
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(hang);
+      window.clearTimeout(quiet);
+      resolve();
+    };
+    const scrollArrived = () => {
+      const requested = readRequestedTop();
+      if (!Number.isFinite(requested)) return false;
+      if (window.scrollY >= requested - 1) return true;
+      return window.scrollY >= readMaxScrollY() - 1;
+    };
+    const onScrollEnd = () => {
+      if (!scrollArrived()) return;
+      finish();
+    };
+    const onScroll = () => {
+      window.clearTimeout(quiet);
+      quiet = window.setTimeout(() => {
+        if (scrollArrived()) finish();
+      }, 80);
+    };
+    hang = window.setTimeout(finish, SECTION_SCROLL_SETTLE_HANG_MS);
+    if (browserSupportsScrollEnd()) {
+      document.addEventListener("scrollend", onScrollEnd);
+      return;
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+  });
+}
+
+function nextAnimationFrames(count: number): Promise<void> {
+  return new Promise((resolve) => {
+    const step = (left: number) => {
+      if (left <= 0) {
+        resolve();
+        return;
+      }
+      requestAnimationFrame(() => step(left - 1));
+    };
+    step(count);
+  });
+}
+
 function scrollElementToSection(element: HTMLElement, readDockHeight: () => number | null) {
-  const apply = () => {
-    const top = resolveCalculatorSectionScrollTop(
+  const generation = ++sectionScrollGeneration;
+  let requestedTop = 0;
+  const applySmooth = () => {
+    if (generation !== sectionScrollGeneration) return;
+    requestedTop = resolveCalculatorSectionScrollTop(
       element.getBoundingClientRect().top,
       window.scrollY,
       readDockHeight(),
       window.innerHeight,
       readMaxScrollY(),
     );
-    window.scrollTo({ top, behavior: "smooth" });
+    window.scrollTo({ top: requestedTop, behavior: "smooth" });
   };
-  apply();
+  applySmooth();
   requestAnimationFrame(() => {
-    requestAnimationFrame(apply);
+    requestAnimationFrame(() => {
+      applySmooth();
+      void correctSectionScrollAfterSettle(element, readDockHeight, generation, () => requestedTop);
+    });
   });
+}
+
+function applySectionScrollCorrection(
+  element: HTMLElement,
+  readDockHeight: () => number | null,
+  correctionsAlreadyApplied: number,
+): number | null {
+  const scrollTop = resolveSectionScrollCorrection(
+    element.getBoundingClientRect().top,
+    window.scrollY,
+    readDockHeight(),
+    window.innerHeight,
+    readMaxScrollY(),
+    correctionsAlreadyApplied,
+  );
+  if (scrollTop == null) return null;
+  // `instant` nepřepíše CSS `scroll-behavior: smooth` druhou dlouhou animací.
+  window.scrollTo({ top: scrollTop, behavior: "instant" });
+  return scrollTop;
+}
+
+function watchSectionSlipOnce(
+  element: HTMLElement,
+  readDockHeight: () => number | null,
+  generation: number,
+): void {
+  let done = false;
+  let hang = 0;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    observer.disconnect();
+    window.clearTimeout(hang);
+  };
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[entries.length - 1];
+      if (!entry || entry.isIntersecting) return;
+      finish();
+      if (generation !== sectionScrollGeneration || !element.isConnected) return;
+      applySectionScrollCorrection(element, readDockHeight, 0);
+    },
+    {
+      root: null,
+      rootMargin: `0px 0px -${CALCULATOR_SECTION_SCROLL_MIN_VISIBLE_PX}px 0px`,
+      threshold: 0,
+    },
+  );
+  observer.observe(element);
+  hang = window.setTimeout(finish, SECTION_SCROLL_SETTLE_HANG_MS);
+}
+
+async function correctSectionScrollAfterSettle(
+  element: HTMLElement,
+  readDockHeight: () => number | null,
+  generation: number,
+  readRequestedTop: () => number,
+): Promise<void> {
+  await waitForProgrammaticScrollSettle(readRequestedTop);
+  if (generation !== sectionScrollGeneration || !element.isConnected) return;
+  await nextAnimationFrames(2);
+  if (generation !== sectionScrollGeneration || !element.isConnected) return;
+  const corrected = applySectionScrollCorrection(element, readDockHeight, 0);
+  if (corrected != null) {
+    await nextAnimationFrames(2);
+    return;
+  }
+  watchSectionSlipOnce(element, readDockHeight, generation);
 }
 
 /** Scroll na sekci s offsetem sticky docku; volitelně scroll po změně záložky. */
