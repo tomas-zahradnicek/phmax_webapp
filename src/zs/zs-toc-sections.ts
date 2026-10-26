@@ -22,6 +22,7 @@ export function buildZsTocSections(input: BuildZsTocSectionsInput): readonly Pag
     sections.push({ id: "phmax-summary", label: "Souhrn PHmax" });
   } else if (tab === "pha") {
     sections.push({ id: "pha", label: "PHAmax" });
+    sections.push({ id: "pha1r", label: "PHA1Rmax" });
   } else {
     sections.push({ id: "php", label: "PHPmax" });
   }

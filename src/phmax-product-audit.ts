@@ -323,6 +323,7 @@ export type ZsStoredAuditTotals = {
   totalPha: number;
   totalPhp: number;
   tab: string;
+  totalPha1r?: number;
 };
 
 export function parseZsSnapshotAuditTotals(snapshot: Record<string, unknown>): ZsStoredAuditTotals | null {
@@ -342,6 +343,7 @@ export function parseZsSnapshotAuditTotals(snapshot: Record<string, unknown>): Z
     totalPha: o.totalPha,
     totalPhp: o.totalPhp,
     tab: o.tab,
+    ...(typeof o.totalPha1r === "number" ? { totalPha1r: o.totalPha1r } : {}),
   };
 }
 
@@ -382,7 +384,7 @@ export function createZsProductAuditProtocol(input: ZsProductAuditInput): PhmaxP
 
   const narrative =
     input.narrative?.trim() ||
-    `Celkový PHmax ze stavu ZŠ kalkulačky: ${input.totals.totalPhmax} h (ověřte vstupy a metodiku v5 v UI).`;
+    `Celkový PHmax ze stavu ZŠ kalkulačky: ${input.totals.totalPhmax} h (ověřte vstupy a metodiku v6 v UI).`;
 
   return {
     meta: {

@@ -53,11 +53,11 @@ export function ZsQuickOnboardingGuide({ open, onDismiss, returnFocusRef }: ZsQu
       </p>
       <p>
         V první skupině ukázek jsou čísla z modelových postupů PHmax v metodické příloze (včetně smíšených tříd 570 h).
-        Model <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> a ZŠ speciální (AD1/AD2, řádky B35–B43) je v metodice v5 jako PHAmax – v rozbalovači ukázka „PHAmax“; po načtení se otevře záložka PHAmax.
+        Model <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> a ZŠ speciální (AD1/AD2, řádky B35–B43) je v metodice jako PHAmax – v rozbalovači ukázka „PHAmax“; po načtení se otevře záložka PHAmax.
         Ostatní ukázky doplňují typické situace; údaje můžete po načtení upravit.
       </p>
       <p>
-        <strong>Právní a metodický podklad:</strong> metodika PHmax, PHAmax a PHPmax pro ZV (typicky verze 5 / 2026),{" "}
+        <strong>Právní a metodický podklad:</strong> metodika PHmax, PHAmax, PHA1Rmax a PHPmax pro základní vzdělávání (verze 6 / říjen 2026),{" "}
         <ZsLegisRef citeId="nv123-1" label="NV č. 123/2018 Sb." />, <ZsLegisRef citeId="vyhl48" label="vyhl. č. 48/2005 Sb." />.
         {ZS_EXPORT_ORIENTACNI_UI_DISCLAIMER}
       </p>

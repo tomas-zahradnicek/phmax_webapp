@@ -141,7 +141,7 @@ function computePvPhaMaxFromSnapshot(snapshot: unknown): number | null {
   return any ? round2(phaSum) : null;
 }
 
-type ZsAuditTotals = { totalPhmax: number; totalPha: number; totalPhp: number };
+type ZsAuditTotals = { totalPhmax: number; totalPha: number; totalPhp: number; totalPha1r?: number };
 
 function readZsAuditTotals(snapshot: unknown): ZsAuditTotals | null {
   if (!snapshot || typeof snapshot !== "object") return null;
@@ -154,7 +154,13 @@ function readZsAuditTotals(snapshot: unknown): ZsAuditTotals | null {
   if (typeof totalPhmax !== "number" || !Number.isFinite(totalPhmax)) return null;
   if (typeof totalPha !== "number" || !Number.isFinite(totalPha)) return null;
   if (typeof totalPhp !== "number" || !Number.isFinite(totalPhp)) return null;
-  return { totalPhmax, totalPha, totalPhp };
+  const totalPha1r = o.totalPha1r;
+  return {
+    totalPhmax,
+    totalPha,
+    totalPhp,
+    ...(typeof totalPha1r === "number" && Number.isFinite(totalPha1r) ? { totalPha1r } : {}),
+  };
 }
 
 type ModuleCapacitySlice = {
@@ -164,6 +170,7 @@ type ModuleCapacitySlice = {
   phmax: number | null;
   phamax: number | null;
   phpmax: number | null;
+  pha1rmax: number | null;
 };
 
 function readPvSlice(storage: StorageLike | null): ModuleCapacitySlice {
@@ -180,6 +187,7 @@ function readPvSlice(storage: StorageLike | null): ModuleCapacitySlice {
     phmax: hasRows ? computePvPhmaxTotalFromSnapshot(snapshot) : null,
     phamax: hasRows ? computePvPhaMaxFromSnapshot(snapshot) : null,
     phpmax: null,
+    pha1rmax: null,
   };
 }
 
@@ -195,6 +203,7 @@ function readSdSlice(storage: StorageLike | null): ModuleCapacitySlice {
     phmax,
     phamax: phamax != null && phamax > 0 ? phamax : null,
     phpmax: null,
+    pha1rmax: null,
   };
 }
 
@@ -212,6 +221,7 @@ function readZsSlice(storage: StorageLike | null): ModuleCapacitySlice {
     phmax: hasData ? phmax : null,
     phamax: audit != null && audit.totalPha > 0 ? round2(audit.totalPha) : null,
     phpmax: audit != null && audit.totalPhp > 0 ? round2(audit.totalPhp) : null,
+    pha1rmax: audit != null && typeof audit.totalPha1r === "number" ? round2(audit.totalPha1r) : null,
   };
 }
 
@@ -226,6 +236,7 @@ function readSsSlice(storage: StorageLike | null): ModuleCapacitySlice {
     phmax: hasData ? computeSsPhmaxTotalFromSnapshot(snapshot) : null,
     phamax: hasData ? sumPracticalSchoolPhaMaxFromRows(rows) : null,
     phpmax: null,
+    pha1rmax: null,
   };
 }
 
@@ -303,6 +314,7 @@ function buildAvailableDataLines(data: AnnualReportCalculatorData, storage?: Sto
     if (slice.phmax != null) lines.push(formatCapacityLabel(`PHmax – ${slice.label}`, slice.phmax));
     if (slice.phamax != null) lines.push(formatCapacityLabel(`PHAmax – ${slice.label}`, slice.phamax));
     if (slice.phpmax != null) lines.push(formatCapacityLabel(`PHPmax – ${slice.label}`, slice.phpmax));
+    if (slice.pha1rmax != null) lines.push(formatCapacityLabel(`PHA1Rmax – ${slice.label}`, slice.pha1rmax));
   }
 
   const { values } = data.personnel;

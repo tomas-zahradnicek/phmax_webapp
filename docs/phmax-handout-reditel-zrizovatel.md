@@ -12,7 +12,7 @@ Webová aplikace v prohlížeči pomáhá **spočítat a zkontrolovat orientačn
 | Modul | Pro koho | Co orientačně počítá |
 |-------|----------|----------------------|
 | **PV** | mateřská škola | PHmax / PHAmax po pracovištích, náhled § 1d odst. 3 |
-| **ZŠ** | základní škola | PHmax, PHAmax, PHPmax |
+| **ZŠ** | základní škola | PHmax, PHAmax, PHA1Rmax, PHPmax |
 | **SŠ** | střední škola | PHmax po řádcích, PHAmax PrŠ (vybrané obory, denní forma) |
 | **ŠD** | školní družina | PHmax podle oddělení / souhrnu |
 | **NV75** | zástupce ředitele | banka odpočtů (hodiny, ne PHmax) |

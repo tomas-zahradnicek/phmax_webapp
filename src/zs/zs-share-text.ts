@@ -1,4 +1,5 @@
 import { APP_AUTHOR_CREDIT_LINE } from "../calculator-ui-constants";
+import { buildZsPha1rShareLines } from "./zs-pha1r-publication";
 
 export type ZsShareTextInput = {
   modeLabel: string;
@@ -6,6 +7,8 @@ export type ZsShareTextInput = {
   totalPhmax: number;
   totalPha: number;
   totalPhp: number;
+  totalPha1r?: number;
+  eligiblePha1rClasses?: number;
   warnings: readonly string[];
   inputMode: "own" | "example";
   exportLabel?: string;
@@ -25,6 +28,7 @@ export function buildZsShareText(data: ZsShareTextInput): string {
     `Výsledek PHmax: ${data.totalPhmax}`,
     `Výsledek PHAmax: ${data.totalPha}`,
     `Výsledek PHPmax: ${data.totalPhp}`,
+    ...buildZsPha1rShareLines(data.totalPha1r ?? 0, data.eligiblePha1rClasses ?? 0),
   ];
   if (data.warnings.length) {
     rows.push("", "Upozornění:");

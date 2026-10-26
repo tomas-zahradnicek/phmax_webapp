@@ -57,7 +57,7 @@ export const ZS_QUICK_TOUR_STEPS: readonly CalculatorQuickTourStep[] = [
   },
   {
     title: "Souhrn a záložky",
-    detail: "Dock vpravo: PHmax, PHAmax, PHPmax a mapa průběhu; pojmenované zálohy v Akcích.",
+    detail: "Dock vpravo: PHmax, PHAmax, PHPmax, PHA1Rmax a mapa průběhu; pojmenované zálohy v Akcích.",
     targetId: "workspace-results-dock",
   },
 ];

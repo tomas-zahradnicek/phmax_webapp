@@ -8,6 +8,7 @@ import { comparePhmaxProductVariants, type CompareProductVariantsResult } from "
 import { downloadPhmaxProductAuditJson, downloadPhmaxProductCompareJson } from "../phmax-product-audit-download";
 import type { ZsTabKey } from "./zs-form-snapshot";
 import type { ZsValidationIssue } from "./zs-form-validation";
+import { formatZsAuditPha1rSuffix } from "./zs-pha1r-publication";
 
 export type ZsNamedSnapshotItem = {
   id: string;
@@ -51,6 +52,7 @@ export function exportZsAuditJson(input: {
   totalPhmax: number;
   totalPha: number;
   totalPhp: number;
+  totalPha1r?: number;
   tab: ZsTabKey;
   mode: CalculatorMode;
   exportLabel: string;
@@ -67,7 +69,7 @@ export function exportZsAuditJson(input: {
       validationIssues: input.validationIssues,
       narrative: `${input.tab === "phmax" ? "PHmax" : input.tab === "pha" ? "PHAmax" : "PHPmax"} – ${MODE_CONFIG[input.mode].label}${
         input.exportLabel ? `; export: ${input.exportLabel}` : ""
-      }`,
+      }${formatZsAuditPha1rSuffix(input.totalPha1r)}`,
     }),
     "zs",
   );
@@ -109,7 +111,7 @@ export function compareZsWithNamedSnapshot(input: {
       totalPhmax: stored.totalPhmax,
       breakdown: { totalPha: stored.totalPha, totalPhp: stored.totalPhp },
     },
-    narrative: item.name,
+    narrative: `${item.name}${formatZsAuditPha1rSuffix(stored.totalPha1r)}`,
   });
   const cmp = comparePhmaxProductVariants([
     { id: "current", label: "Aktuální stav", protocol: currentProtocol },
@@ -154,7 +156,7 @@ export function buildZsComparePreview(input: {
       totalPhmax: stored.totalPhmax,
       breakdown: { totalPha: stored.totalPha, totalPhp: stored.totalPhp },
     },
-    narrative: item.name,
+    narrative: `${item.name}${formatZsAuditPha1rSuffix(stored.totalPha1r)}`,
   });
   return comparePhmaxProductVariants([
     { id: "current", label: "Aktuální stav", protocol: currentProtocol },

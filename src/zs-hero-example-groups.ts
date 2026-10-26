@@ -112,7 +112,7 @@ export const ZS_HERO_EXAMPLE_GROUPS: HeroExampleSelectGroup[] = [
     options: [
       {
         value: "priloha_phamax_uplna_zs_sec16_zss",
-        label: "Úplná ZŠ § 16/9 + ZŠ speciální, rozlišení AD1/AD2 (474 h, ř. B35–B44 dle metodiky v5)",
+        label: "Úplná ZŠ § 16/9 + ZŠ speciální, rozlišení AD1/AD2 (474 h, ř. B35–B44 dle metodiky v6)",
         title: ZS_HERO_EXAMPLE_OPTION_TITLES.priloha_phamax_uplna_zs_sec16_zss,
       },
       {

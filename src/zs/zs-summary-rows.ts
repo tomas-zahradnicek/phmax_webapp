@@ -1,4 +1,5 @@
 import { B9_B10, B26_B28, pickBand, type MixedRow } from "../phmax-zs-logic";
+import { buildZsPha1rSummaryRows } from "./zs-pha1r-publication";
 
 export type ZsSummaryRowsInput = {
   basic1Phmax: number;
@@ -29,6 +30,8 @@ export type ZsSummaryRowsInput = {
   extrasPhmax: number;
   totalPhmax: number;
   totalPha: number;
+  totalPha1r?: number;
+  eligiblePha1rClasses?: number;
   phpBaseValue: number;
   phpExcludedTotal: number;
   phpAdjustedValue: number;
@@ -85,5 +88,6 @@ export function buildZsSummaryRows(input: ZsSummaryRowsInput): readonly (readonl
     ["PHPmax – nezapočítávaní žáci", input.phpExcludedTotal],
     ["PHPmax – očištěná hodnota", input.phpAdjustedValue],
     ["Výsledek PHPmax", input.totalPhp],
+    ...buildZsPha1rSummaryRows(input.totalPha1r ?? 0, input.eligiblePha1rClasses ?? 0),
   ];
 }

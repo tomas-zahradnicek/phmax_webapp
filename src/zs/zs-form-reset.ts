@@ -72,11 +72,19 @@ export function applyZsResetNv75(s: ZsFormSnapshotSetters): void {
   s.setNv75TeacherMax(30);
 }
 
+export function clearZsPha1rState(s: ZsFormSnapshotSetters): void {
+  s.setPha1rClasses([]);
+  s.setSchoolEstablishedSec16_9(false);
+  s.setSchoolAtInstitutionalOrProtectiveCare(false);
+  s.setSchoolAtHealthcareFacility(false);
+}
+
 export function applyZsResetAll(s: ZsFormSnapshotSetters): void {
   applyZsResetPhmax(s);
   applyZsResetPha(s);
   applyZsResetPhp(s);
   applyZsResetNv75(s);
+  clearZsPha1rState(s);
   s.setSelectedExample("");
   s.setWizardChoice("");
   s.setDataMode("own");

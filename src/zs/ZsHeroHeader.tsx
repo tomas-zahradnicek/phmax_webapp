@@ -81,7 +81,7 @@ export function ZsHeroHeader({
       viewModeName="zs-view-mode"
       displayDensityName="zs-display-density"
       expertExampleSelectId={ZS_PHA_HERO_EXAMPLE_SELECT_ID}
-      title="Kalkulačka PHmax, PHAmax a PHPmax – základní škola"
+      title="Kalkulačka PHmax, PHAmax, PHA1Rmax a PHPmax – základní škola"
       titleClassName="hero__title hero__title--sd hero__title--zs"
       showMiniLogo
       tabsAside={<HeroSecondaryNavLinks />}
@@ -98,7 +98,7 @@ export function ZsHeroHeader({
       ]}
       aboutContent={
         <p className="calculator-hero-shell__about-text">
-          Orientační výpočet podle metodiky PHmax, PHAmax a PHPmax pro ZŠ (verze 5 / 2026). Ukázky a zálohy scénářů
+          Orientační výpočet podle metodiky PHmax, PHAmax, PHA1Rmax a PHPmax pro ZŠ (verze 6 / říjen 2026). Ukázky a zálohy scénářů
           jsou v horní liště; podrobnosti k modulům v nápovědě.
         </p>
       }

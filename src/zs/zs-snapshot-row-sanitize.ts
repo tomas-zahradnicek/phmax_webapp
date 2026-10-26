@@ -15,6 +15,7 @@ import { MODE_CONFIG, type CalculatorMode } from "../config/calculator-config";
 import { DEFAULT_MODE } from "../config/default-form-state";
 import type { ZsHeroExampleKey } from "../zs-hero-example-groups";
 import { clampZsBasicWizardStep } from "../zs-basic-wizard";
+import { sanitizePha1rClasses, sanitizePha1rSchoolFlags } from "./zs-pha1r";
 
 const BASIC_TYPES = new Set<string>([
   "full_more_than_2",
@@ -185,6 +186,8 @@ export function sanitizeZsAutosaveSnapshot(raw: Record<string, unknown>): Record
     gymRows: sanitizeGymRows(raw.gymRows),
     mixedRows: sanitizeMixedRows(raw.mixedRows),
     phaRows: sanitizePhaRows(raw.phaRows),
+    pha1rClasses: sanitizePha1rClasses(raw.pha1rClasses),
+    ...sanitizePha1rSchoolFlags(raw),
     minorityType: minorityType as keyof typeof B17_B21,
     minority1Classes: num(raw.minority1Classes),
     minority1Pupils: num(raw.minority1Pupils),

@@ -84,7 +84,7 @@ const ROUTE_SEO_H1: Record<ProductViewCode, string> = {
   dash: PHMAX_DOCUMENT_HEAD.dash.applicationName,
   pv: "Kalkulačka PHmax a PHAmax pro mateřskou školu",
   sd: "Kalkulačka PHmax pro školní družinu",
-  zs: "Kalkulačka PHmax, PHAmax a PHPmax pro základní školu",
+  zs: "Kalkulačka PHmax, PHAmax, PHA1Rmax a PHPmax pro základní školu",
   ss: "Kalkulačka PHmax pro střední školu",
   nv75: "Výpočet banky odpočtů zástupců ředitele školy",
 };
@@ -298,7 +298,7 @@ function buildKalkulackyPhmaxRouteContent(): RouteSeoContent {
         heading: "Kalkulačky PHmax podle typu školy",
         items: [
           "Mateřská škola a předškolní vzdělávání – orientační PHmax a PHAmax.",
-          "Základní škola – PHmax, PHAmax a PHPmax včetně detailní metodiky.",
+          "Základní škola – PHmax, PHAmax, PHA1Rmax a PHPmax včetně detailní metodiky.",
           "Střední škola – výpočet podle oborů a tříd.",
           "Školní družina – orientační PHmax pro družinu.",
         ],

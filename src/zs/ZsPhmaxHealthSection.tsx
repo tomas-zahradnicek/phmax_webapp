@@ -36,7 +36,7 @@ export function ZsPhmaxHealthSection({ viewMode, rows, onAdd, onUpdate, onRemove
       >
         <h2>
           ZŠ při zdravotnickém zařízení (mimo psychiatrii){" "}
-          <ZsFieldHint text="Řádky B11–B13 dle metodiky ZV v5. Průměr žáků ve třídě se stanoví jako vyšší z průměru za předchozí školní rok a z údaje k aktuálnímu sběru (stejná logika jako u psychiatrické školy). B11 = 1. stupeň, B12 = 2. stupeň, B13 = společná výuka 1. a 2. stupně." />
+          <ZsFieldHint text="Řádky B11–B13 dle metodiky ZV v6. Průměr žáků ve třídě se stanoví jako vyšší z průměru za předchozí školní rok a z údaje k aktuálnímu sběru (stejná logika jako u psychiatrické školy). B11 = 1. stupeň, B12 = 2. stupeň, B13 = společná výuka 1. a 2. stupně." />
         </h2>
         <p className="muted-text">Nezahrnuje školy při psychiatrické nemocnici – ty mají samostatný režim (B14–B16).</p>
         <TableOuter aria-label="Tabulka ZŠ při zdravotnickém zařízení">

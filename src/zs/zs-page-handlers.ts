@@ -25,6 +25,7 @@ export type ZsPageHandlersInput = {
   totalPhmax: number;
   totalPha: number;
   totalPhp: number;
+  totalPha1r?: number;
   tab: ZsTabKey;
   mode: CalculatorMode;
   exportLabel: string;
@@ -52,6 +53,7 @@ export function createZsPageHandlers(input: ZsPageHandlersInput) {
         totalPhmax: input.totalPhmax,
         totalPha: input.totalPha,
         totalPhp: input.totalPhp,
+        totalPha1r: input.totalPha1r,
         tab: input.tab,
         mode: input.mode,
         exportLabel: input.exportLabel,

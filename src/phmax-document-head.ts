@@ -47,7 +47,7 @@ export const PHMAX_DOCUMENT_HEAD: Record<ProductViewCode, PhmaxDocumentHeadMeta>
   zs: {
     title: "PHmax ZŠ – kalkulačka a orientační výpočet | Ředitelský průvodce",
     description:
-      "Spočítejte orientační PHmax, PHAmax a PHPmax pro základní školu. Pomocná kalkulačka podle aktuální metodiky včetně vysvětlení vstupů.",
+      "Spočítejte orientační PHmax, PHAmax, PHA1Rmax a PHPmax pro základní školu. Pomocná kalkulačka podle metodiky verze 6 (říjen 2026) včetně vysvětlení vstupů.",
     applicationName: "PHmax kalkulačka pro základní školy",
   },
   ss: {

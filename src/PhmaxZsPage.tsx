@@ -73,6 +73,8 @@ import {
   zsPhmaxFieldsFromFormState,
 } from "./zs/zs-compute-phmax-total-from-snapshot";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
+import { computeZsPha1r, validateZsPha1rClasses, type Pha1rClassRow } from "./zs/zs-pha1r";
+import { createEmptyPha1rRow } from "./zs/zs-pha1r-ui";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
 import { createZsPageHandlers } from "./zs/zs-page-handlers";
 import { ZsExpertWizardGuideSection } from "./zs/ZsExpertWizardGuideSection";
@@ -95,6 +97,7 @@ import {
   applyZsResetPhmax,
   applyZsResetPha,
   applyZsResetPhp,
+  clearZsPha1rState,
 } from "./zs/zs-form-reset";
 import {
   getZsInitialPreferredMode,
@@ -389,6 +392,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const [p41Second, setP41Second] = useState(0);
 
   const [phaRows, setPhaRows] = useState<PhaRow[]>(() => (initialAutosave?.phaRows as PhaRow[]) ?? []);
+  const [pha1rClasses, setPha1rClasses] = useState<Pha1rClassRow[]>([]);
+  const [schoolEstablishedSec16_9, setSchoolEstablishedSec16_9] = useState(false);
+  const [schoolAtInstitutionalOrProtectiveCare, setSchoolAtInstitutionalOrProtectiveCare] = useState(false);
+  const [schoolAtHealthcareFacility, setSchoolAtHealthcareFacility] = useState(false);
 
   const [phpYear1, setPhpYear1] = useState(0);
   const [phpYear2, setPhpYear2] = useState(0);
@@ -458,6 +465,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       setP41First,
       setP41Second,
       setPhaRows,
+      setPha1rClasses,
+      setSchoolEstablishedSec16_9,
+      setSchoolAtInstitutionalOrProtectiveCare,
+      setSchoolAtHealthcareFacility,
       setPhpYear1,
       setPhpYear2,
       setPhpYear3,
@@ -711,6 +722,14 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const phpAdjustedValue = round2(Math.max(0, phpBaseValue - phpExcludedTotal));
   const phpBand = phpExcludedSchool ? { label: "bez nároku", value: 0 } : pickBand(phpAdjustedValue, PHP_TABLE);
   const totalPhp = round2(phpBand.value);
+  const pha1rResult = computeZsPha1r({
+    classes: pha1rClasses,
+    flags: {
+      schoolEstablishedSec16_9,
+      schoolAtInstitutionalOrProtectiveCare,
+      schoolAtHealthcareFacility,
+    },
+  });
 
   const zsMethodologyHighlights: PhmaxZsMethodologyHighlights = useMemo(() => {
     const activeColumnByRowId: Partial<Record<string, string>> = {};
@@ -983,6 +1002,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
   ]);
 
   const { add: addPha, update: updatePha, remove: removePha } = createZsRowHandlers(setPhaRows, createEmptyPhaRow);
+  const { add: addPha1r, update: updatePha1r, remove: removePha1r } = createZsRowHandlers(
+    setPha1rClasses,
+    createEmptyPha1rRow,
+  );
   const { add: addPsych, update: updatePsych, remove: removePsych } = createZsRowHandlers(setPsychRows, createEmptyPsychRow);
   const { add: addHealth, update: updateHealth, remove: removeHealth } = createZsRowHandlers(setHealthRows, createEmptyHealthRow);
   const { add: addGym, update: updateGym, remove: removeGym } = createZsRowHandlers(setGymRows, createEmptyGymRow);
@@ -999,6 +1022,11 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const resetPha = () => {
     if (!confirmDestructive(MSG_CONFIRM_ZS_RESET_PHA)) return;
     applyResetPha();
+  };
+
+  const resetPha1r = () => {
+    if (!confirmDestructive("Vymazat zadané údaje PHA1Rmax?")) return;
+    clearZsPha1rState(zsSnapshotSetters);
   };
 
   const applyResetPhp = () => applyZsResetPhp(zsSnapshotSetters);
@@ -1074,6 +1102,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
         p41First,
         p41Second,
         phaRows,
+        pha1rClasses,
+        schoolEstablishedSec16_9,
+        schoolAtInstitutionalOrProtectiveCare,
+        schoolAtHealthcareFacility,
         phpYear1,
         phpYear2,
         phpYear3,
@@ -1099,7 +1131,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
         mixedMethodSecondZsClasses,
         mixedMethodSecondSpecialPupils,
         mixedMethodSecondSpecialClasses,
-        auditTotals: { totalPhmax, totalPha, totalPhp, tab },
+        auditTotals: { totalPhmax, totalPha, totalPhp, totalPha1r: pha1rResult.totalPha1r, tab },
       }),
     [
       tab,
@@ -1138,6 +1170,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       p41First,
       p41Second,
       phaRows,
+      pha1rClasses,
+      schoolEstablishedSec16_9,
+      schoolAtInstitutionalOrProtectiveCare,
+      schoolAtHealthcareFacility,
       phpYear1,
       phpYear2,
       phpYear3,
@@ -1166,6 +1202,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       totalPhmax,
       totalPha,
       totalPhp,
+      pha1rResult.totalPha1r,
     ],
   );
 
@@ -1239,6 +1276,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
     p41First,
     p41Second,
     phaRows,
+    pha1rClasses,
+    schoolEstablishedSec16_9,
+    schoolAtInstitutionalOrProtectiveCare,
+    schoolAtHealthcareFacility,
     phpYear1,
     phpYear2,
     phpYear3,
@@ -1316,6 +1357,8 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       totalPhmax,
       totalPha,
       totalPhp,
+      totalPha1r: pha1rResult.totalPha1r,
+      eligiblePha1rClasses: pha1rResult.eligibleClassCount,
       warnings,
       inputMode: dataMode,
       exportLabel,
@@ -1337,6 +1380,8 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
         totalPhmax,
         totalPha,
         totalPhp,
+        totalPha1r: pha1rResult.totalPha1r,
+        eligiblePha1rClasses: pha1rResult.eligibleClassCount,
         warnings,
         inputMode: dataMode,
         exportLabel,
@@ -1435,6 +1480,8 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
         phpExcludedTotal,
         phpAdjustedValue,
         totalPhp,
+        totalPha1r: pha1rResult.totalPha1r,
+        eligiblePha1rClasses: pha1rResult.eligibleClassCount,
     }),
     [
       basic1Phmax,
@@ -1469,6 +1516,8 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       phpExcludedTotal,
       phpAdjustedValue,
       totalPhp,
+      pha1rResult.totalPha1r,
+      pha1rResult.eligibleClassCount,
     ],
   );
 
@@ -1530,6 +1579,12 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       phpExcludedIndividual,
       phpExcludedSchool,
       phaRows,
+      pha1rClasses,
+      pha1rFlags: {
+        schoolEstablishedSec16_9,
+        schoolAtInstitutionalOrProtectiveCare,
+        schoolAtHealthcareFacility,
+      },
       psychComputedRows,
       healthComputedRows,
       gymComputedRows,
@@ -1591,6 +1646,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       phpExcludedIndividual,
       phpExcludedSchool,
       phaRows,
+      pha1rClasses,
+      schoolEstablishedSec16_9,
+      schoolAtInstitutionalOrProtectiveCare,
+      schoolAtHealthcareFacility,
       psychComputedRows,
       healthComputedRows,
       gymComputedRows,
@@ -1636,6 +1695,21 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
     compare: zsCompareInput,
   });
 
+  const pha1rValidationIssues = useMemo(
+    () => validateZsPha1rClasses(pha1rClasses),
+    [pha1rClasses],
+  );
+  const zsVisibleInputBannerItems = useMemo(
+    () => [
+      ...zsInputBannerItems,
+      ...pha1rValidationIssues.map((item) => ({
+        label: item.label,
+        onFix: () => goToSection("pha1r"),
+      })),
+    ],
+    [goToSection, pha1rValidationIssues, zsInputBannerItems],
+  );
+
   const {
     handleExportCsv,
     handleExportXlsx,
@@ -1652,6 +1726,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
         totalPhmax,
         totalPha,
         totalPhp,
+        totalPha1r: pha1rResult.totalPha1r,
         tab,
         mode,
         exportLabel,
@@ -1667,6 +1742,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       totalPhmax,
       totalPha,
       totalPhp,
+      pha1rResult.totalPha1r,
       tab,
       mode,
       exportLabel,
@@ -2026,10 +2102,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
           />
         ) : null}
 
-        {showZsInputBanner ? (
+        {showZsInputBanner || pha1rValidationIssues.length > 0 ? (
           <CalculatorInputIssueBanner
             {...calculatorInputIssueBannerFromVerdict(zsVerdict, zsScrollToInputs)}
-            items={zsInputBannerItems.length > 1 ? zsInputBannerItems : undefined}
+            items={zsVisibleInputBannerItems.length > 1 ? zsVisibleInputBannerItems : undefined}
           />
         ) : null}
 
@@ -2065,6 +2141,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
             totalPhmax,
             totalPha,
             totalPhp,
+            totalPha1r: pha1rResult.totalPha1r,
             zsVerdictTone: zsVerdict.tone,
             zsVerdictLabel: zsVerdict.label,
             zsVerdictDetail: zsVerdict.detail,
@@ -2109,6 +2186,34 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
                 }
               : null
           }
+          pha1r={
+            tab === "pha"
+              ? {
+                  classes: pha1rClasses,
+                  flags: {
+                    schoolEstablishedSec16_9,
+                    schoolAtInstitutionalOrProtectiveCare,
+                    schoolAtHealthcareFacility,
+                  },
+                  onAdd: addPha1r,
+                  onRemove: removePha1r,
+                  onGrade1Change: (id, value) => updatePha1r(id, "grade1Pupils", value),
+                  onPar38Change: (id, value) => updatePha1r(id, "grade1Par38", value),
+                  onPar41Change: (id, value) => updatePha1r(id, "grade1Par41", value),
+                  onSec16Change: (id, value) => {
+                    setPha1rClasses((prev) =>
+                      prev.map((item) => (item.id === id ? { ...item, establishedSec16_9: value } : item)),
+                    );
+                  },
+                  onFlagChange: (key, value) => {
+                    if (key === "schoolEstablishedSec16_9") setSchoolEstablishedSec16_9(value);
+                    if (key === "schoolAtInstitutionalOrProtectiveCare") setSchoolAtInstitutionalOrProtectiveCare(value);
+                    if (key === "schoolAtHealthcareFacility") setSchoolAtHealthcareFacility(value);
+                  },
+                  onReset: resetPha1r,
+                }
+              : null
+          }
           php={
             tab === "php"
               ? {
@@ -2144,6 +2249,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
           totalPhmax={totalPhmax}
           totalPha={totalPha}
           totalPhp={totalPhp}
+          totalPha1r={pha1rResult.totalPha1r}
         />
 
             </>

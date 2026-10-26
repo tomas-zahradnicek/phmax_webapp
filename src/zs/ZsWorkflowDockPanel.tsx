@@ -16,6 +16,7 @@ export type ZsWorkflowDockPanelProps = {
   totalPhmax: number;
   totalPha: number;
   totalPhp: number;
+  totalPha1r: number;
   zsVerdictTone: "ok" | "warning" | "danger" | "neutral";
   zsVerdictLabel: string;
   zsVerdictDetail: string;
@@ -43,6 +44,7 @@ export function ZsWorkflowDockPanel({
   totalPhmax,
   totalPha,
   totalPhp,
+  totalPha1r,
   zsVerdictTone,
   zsVerdictLabel,
   zsVerdictDetail,
@@ -94,6 +96,7 @@ export function ZsWorkflowDockPanel({
         { label: "PHmax", value: totalPhmax },
         { label: "PHAmax", value: totalPha },
         { label: "PHPmax", value: totalPhp },
+        { label: "PHA1Rmax", value: totalPha1r },
         { label: "Režim", value: formatModeRežimStatValue(MODE_CONFIG[mode].label) },
       ]}
       verdictLabel={zsVerdictLabel}

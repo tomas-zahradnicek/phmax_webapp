@@ -32,7 +32,7 @@ export const ZS_BASIC_WIZARD_STEPS: ReadonlyArray<{
   {
     step: 5,
     label: "Celkový přehled",
-    lead: "Porovnejte PHmax, PHAmax a PHPmax. Poté můžete přepnout záložku PHAmax nebo PHPmax.",
+    lead: "Porovnejte PHmax, PHAmax, PHA1Rmax a PHPmax. Poté můžete přepnout záložku PHAmax nebo PHPmax.",
   },
 ];
 
