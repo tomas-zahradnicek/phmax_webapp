@@ -11,6 +11,34 @@ export type ZsPhmaxBand = {
   value: number;
 };
 
+export type ZsPhmaxCompositionPart = {
+  label: string;
+  hours: number;
+};
+
+/** Hodiny z už spočteného výsledku. Celá čísla bez desetinné čárky. */
+export function formatPhmaxHours(value: number): string {
+  if (Number.isFinite(value) && Math.abs(value - Math.round(value)) < 1e-9) {
+    return String(Math.round(value));
+  }
+  return value.toLocaleString("cs-CZ", { maximumFractionDigits: 4 });
+}
+
+function compositionSentence(
+  parts: readonly ZsPhmaxCompositionPart[] | undefined,
+  totalPhmax: number | undefined,
+): string | null {
+  if (!parts || totalPhmax == null) return null;
+  const ordinary = parts.find((part) => part.label === "Běžné třídy");
+  const extras = parts.filter((part) => part.label !== "Běžné třídy" && part.hours !== 0);
+  if (extras.length === 0) return null;
+  const pieces = [
+    ...(ordinary && ordinary.hours !== 0 ? [`Běžné třídy ${formatPhmaxHours(ordinary.hours)} h`] : []),
+    ...extras.map((part) => `${part.label} ${formatPhmaxHours(part.hours)} h`),
+  ];
+  return `${pieces.join(" + ")} = PHmax ${formatPhmaxHours(totalPhmax)} h`;
+}
+
 export type ZsPhmaxBasicSectionProps = {
   hasBasicIssue: boolean;
   showBasicFirst: boolean;
@@ -41,6 +69,9 @@ export type ZsPhmaxBasicSectionProps = {
   prepSpecialPhmax: number;
   par38Phmax: number;
   par41Phmax: number;
+  /** Už spočtené složky PHmax. Nulové složky kromě běžných tříd se do věty neberou. */
+  compositionParts?: readonly ZsPhmaxCompositionPart[];
+  totalPhmax?: number;
 };
 
 export function ZsPhmaxBasicSection({
@@ -73,7 +104,10 @@ export function ZsPhmaxBasicSection({
   prepSpecialPhmax,
   par38Phmax,
   par41Phmax,
+  compositionParts,
+  totalPhmax,
 }: ZsPhmaxBasicSectionProps) {
+  const composition = compositionSentence(compositionParts, totalPhmax);
   if (!showBasicFirst && !showBasicSecond && !showSchoolVariantFirstOnly) {
     return null;
   }
@@ -183,6 +217,7 @@ export function ZsPhmaxBasicSection({
           <ResultCard label="PHmax – běžné třídy celkem" value={basicPhmax} tone="success" />
         </div>
       )}
+      {composition ? <p className="muted-text">{composition}</p> : null}
     </section>
   );
 }

@@ -7189,7 +7189,7 @@ select:focus {
 }
 
 .calculator-shell--density-compact .ux-collapsible__summary {
-  padding: 8px 12px;
+  padding: 8px 36px 8px 12px;
   font-size: 0.92rem;
 }
 
@@ -8525,10 +8525,45 @@ select:focus {
 
 .ux-collapsible__summary {
   cursor: pointer;
-  padding: 12px 16px;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 12px 40px 12px 16px;
   font-weight: 700;
   font-size: 0.95rem;
   list-style: none;
+}
+
+.ux-collapsible__status {
+  font-weight: 600;
+  color: var(--muted-strong, #475569);
+}
+
+.ux-collapsible__chevron {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-60%) rotate(45deg);
+  pointer-events: none;
+}
+
+.ux-collapsible[open] > .ux-collapsible__summary .ux-collapsible__chevron {
+  transform: translateY(-40%) rotate(-135deg);
+}
+
+.ux-collapsible__summary:hover .ux-collapsible__chevron {
+  opacity: 1;
+}
+
+.ux-collapsible__summary:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.55);
+  outline-offset: 2px;
 }
 
 .ux-collapsible__summary::-webkit-details-marker {

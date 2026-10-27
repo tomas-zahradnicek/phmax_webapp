@@ -5,7 +5,7 @@ import { NumberField, ResultCard } from "../phmax-zs-ui";
 import { round2 } from "../phmax-zs-logic";
 import { ZsLegisRef } from "../PhmaxProductLegisUi";
 import { ZsModuleGate } from "../ZsModuleGate";
-import type { ZsPhmaxBand } from "./ZsPhmaxBasicSection";
+import { formatPhmaxHours, type ZsPhmaxBand } from "./ZsPhmaxBasicSection";
 
 export type ZsPhmaxSec16SectionProps = {
   viewMode: CalculatorViewMode;
@@ -50,8 +50,20 @@ export function ZsPhmaxSec16Section({
 }: ZsPhmaxSec16SectionProps) {
   if (!showFirst && !showSecond) return null;
 
+  const classCount = (showFirst ? firstClasses : 0) + (showSecond ? secondClasses : 0);
+  const pupilCount = (showFirst ? firstPupils : 0) + (showSecond ? secondPupils : 0);
+  const statusText =
+    classCount !== 0 || pupilCount !== 0 || totalPhmax !== 0
+      ? `${classCount} tříd · ${pupilCount} žáků · ${formatPhmaxHours(totalPhmax)} h`
+      : undefined;
+
   return (
-    <ZsModuleGate sectionId="sec16" title="Třídy podle § 16 odst. 9" viewMode={viewMode}>
+    <ZsModuleGate
+      sectionId="sec16"
+      title="Třídy podle § 16 odst. 9"
+      viewMode={viewMode}
+      statusText={statusText}
+    >
       <section
         className="card section-card section-card--module section-card--module-support"
         data-section="sec16"

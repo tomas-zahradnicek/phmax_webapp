@@ -21,7 +21,7 @@ export default defineConfig({
   projects: [
     {
       name: "mobile-chrome",
-      testIgnore: /desktop-toc-smoke\.spec\.ts|seo-prerender-content\.spec\.ts/,
+      testIgnore: /desktop-toc-smoke\.spec\.ts|seo-prerender-content\.spec\.ts|zs-phmax-disclosure-wizard\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 390, height: 844 },
@@ -34,7 +34,7 @@ export default defineConfig({
     {
       name: "desktop-chrome",
       testMatch:
-        /desktop-(toc|module)-smoke\.spec\.ts|dashboard-(deep-link|ux-013|post-deploy)-smoke\.spec\.ts|section-scroll-layout-shift\.spec\.ts|metric-label-casing\.spec\.ts|own-data-ux-smoke\.spec\.ts|vyrocni-zprava-import-smoke\.spec\.ts|vyrocni-zprava-stale-export-guard\.spec\.ts|seo-prerender-content\.spec\.ts/,
+        /desktop-(toc|module)-smoke\.spec\.ts|dashboard-(deep-link|ux-013|post-deploy)-smoke\.spec\.ts|section-scroll-layout-shift\.spec\.ts|metric-label-casing\.spec\.ts|own-data-ux-smoke\.spec\.ts|vyrocni-zprava-import-smoke\.spec\.ts|vyrocni-zprava-stale-export-guard\.spec\.ts|seo-prerender-content\.spec\.ts|zs-phmax-disclosure-wizard\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 1280, height: 800 },
