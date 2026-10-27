@@ -245,6 +245,21 @@ export function ZsPhmaxTabPanel(props: ZsPhmaxTabPanelProps) {
         prepSpecialPhmax={props.prepSpecialPhmax}
         par38Phmax={props.par38Phmax}
         par41Phmax={props.par41Phmax}
+        compositionParts={[
+          { label: "Běžné třídy", hours: props.basicPhmax },
+          { label: "§ 16/9", hours: props.inclPhmax },
+          { label: "Psychiatrie", hours: props.psychPhmax },
+          { label: "Zdravotnické zařízení", hours: props.healthPhmax },
+          { label: "Jazyk menšiny", hours: props.minorityPhmax },
+          { label: "Víceletá gymnázia", hours: props.gymPhmax },
+          { label: "Smíšené třídy", hours: props.mixedForTotal },
+          { label: "ZŠ speciální", hours: props.specialPhmax },
+          { label: "Přípravná třída", hours: props.prepClassPhmax },
+          { label: "Přípravný stupeň", hours: props.prepSpecialPhmax },
+          { label: "§ 38", hours: props.par38Phmax },
+          { label: "§ 41", hours: props.par41Phmax },
+        ]}
+        totalPhmax={props.totalPhmax}
       />
 
       <div className="grid two" data-section="zs-phmax-exceptions">

@@ -3,6 +3,7 @@ import { round2 } from "../phmax-zs-logic";
 import { NumberField, ResultCard } from "../phmax-zs-ui";
 import { ZsLegisRef } from "../PhmaxProductLegisUi";
 import { ZsModuleGate } from "../ZsModuleGate";
+import { formatPhmaxHours } from "./ZsPhmaxBasicSection";
 import { ZsFieldHint } from "./zs-field-hint";
 
 export type ZsPhmaxExtrasSectionProps = {
@@ -72,9 +73,20 @@ export function ZsPhmaxExtrasSection({
 }: ZsPhmaxExtrasSectionProps) {
   const headingIsPrep =
     showPrepClass || showPrepSpecial;
+  const contribution =
+    (showPrepClass ? prepClassPhmax : 0) +
+    (showPrepSpecial ? prepSpecialPhmax : 0) +
+    (showPar38 ? par38Phmax : 0) +
+    (showPar41 ? par41Phmax : 0);
+  const statusText = contribution === 0 ? "bez navýšení" : `${formatPhmaxHours(contribution)} h`;
 
   return (
-    <ZsModuleGate sectionId="extras" title={gateTitle} viewMode={viewMode}>
+    <ZsModuleGate
+      sectionId="extras"
+      title={gateTitle}
+      viewMode={viewMode}
+      statusText={statusText}
+    >
       <section
         className="card section-card section-card--module section-card--module-extras"
         data-section="extras"
