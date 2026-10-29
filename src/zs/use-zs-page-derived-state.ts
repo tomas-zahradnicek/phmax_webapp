@@ -14,6 +14,7 @@ export type ZsPageCompareDerivedInput = Pick<
 
 export type UseZsPageDerivedStateArgs = {
   tab: "phmax" | "pha" | "php";
+  selectedExample: string;
   warnings: string[];
   /** Orientační nápovědy k vyššímu pásmu PHmax (nejsou metodická varování). */
   bandUpgradeHints?: readonly string[];
@@ -24,8 +25,8 @@ export type UseZsPageDerivedStateArgs = {
 };
 
 export function useZsPageDerivedState(args: UseZsPageDerivedStateArgs) {
-  const { tab, warnings, bandUpgradeHints = [], validation, summary, exportParams, compare } = args;
-  const { workspaceStickyRef, goToSection } = useZsSectionScroll(tab);
+  const { tab, selectedExample, warnings, bandUpgradeHints = [], validation, summary, exportParams, compare } = args;
+  const { workspaceStickyRef, goToSection } = useZsSectionScroll(tab, selectedExample);
 
   const validationIssues = useMemo(() => buildZsValidationIssues(validation), [validation]);
 

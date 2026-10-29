@@ -1,5 +1,11 @@
 import type { HeroExampleSelectGroup } from "./HeroExampleSelect";
 import { ZS_LEGIS_PARAGRAPH_TOOLTIPS } from "./phmax-zs-legislativa";
+import {
+  formatZsPha1rExampleExplanation,
+  ZS_PHA1R_HERO_EXAMPLE_KEYS,
+  ZS_PHA1R_HERO_EXAMPLES,
+  type ZsPha1rHeroExampleKey,
+} from "./zs/zs-pha1r-examples";
 
 export type ZsHeroExampleKey =
   | ""
@@ -15,6 +21,7 @@ export type ZsHeroExampleKey =
   | "inkluzivni_skola"
   | "priloha_phamax_uplna_zs_sec16_zss"
   | "pha_zss_prep_b45"
+  | ZsPha1rHeroExampleKey
   | "zdravotnicke_zs"
   | "gymnazium_phmax"
   | "mensina_phmax";
@@ -121,6 +128,14 @@ export const ZS_HERO_EXAMPLE_GROUPS: HeroExampleSelectGroup[] = [
         title: ZS_HERO_EXAMPLE_OPTION_TITLES.pha_zss_prep_b45,
       },
     ],
+  },
+  {
+    label: "PHA1Rmax – příklady pro 1. ročník",
+    options: ZS_PHA1R_HERO_EXAMPLE_KEYS.map((key) => ({
+      value: key,
+      label: ZS_PHA1R_HERO_EXAMPLES[key].label,
+      title: formatZsPha1rExampleExplanation(ZS_PHA1R_HERO_EXAMPLES[key].classes),
+    })),
   },
   {
     label: "PHPmax – ukázky",
