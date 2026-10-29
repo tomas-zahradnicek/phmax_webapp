@@ -5,6 +5,7 @@ import { getVisibleSections } from "../config/field-visibility";
 import type { GymRow, MixedRow, PhaRow } from "../phmax-zs-logic";
 import type { ZsHeroExampleKey } from "../zs-hero-example-groups";
 import type { ZsFormSnapshotSetters, ZsWizardChoice } from "./zs-form-snapshot";
+import { isZsPha1rHeroExample, ZS_PHA1R_HERO_EXAMPLES } from "./zs-pha1r-examples";
 
 export function getZsInitialPreferredMode(): CalculatorMode {
   const preferred = Object.values(MODE_CONFIG).find(
@@ -182,6 +183,13 @@ export function loadZsHeroExample(example: ZsHeroExampleKey | "", ctx: ZsHeroExa
     s.setMode(getZsInitialPhaMode());
     s.setTab("pha");
     s.setPhaRows([{ id: 1, kind: "zssPrep", classes: 1, pupils: 4 }]);
+    return;
+  }
+
+  if (isZsPha1rHeroExample(example)) {
+    s.setMode(getZsInitialPhaMode());
+    s.setTab("pha");
+    s.setPha1rClasses(ZS_PHA1R_HERO_EXAMPLES[example].classes.map((row) => ({ ...row })));
     return;
   }
 

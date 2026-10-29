@@ -74,6 +74,7 @@ import {
 } from "./zs/zs-compute-phmax-total-from-snapshot";
 import { useZsFormAutosave } from "./zs/use-zs-form-autosave";
 import { computeZsPha1r, validateZsPha1rClasses, type Pha1rClassRow } from "./zs/zs-pha1r";
+import { formatZsPha1rExampleExplanation, isZsPha1rHeroExample } from "./zs/zs-pha1r-examples";
 import { createEmptyPha1rRow } from "./zs/zs-pha1r-ui";
 import { createZsRowHandlers } from "./zs/zs-row-handlers";
 import { createZsPageHandlers } from "./zs/zs-page-handlers";
@@ -1687,6 +1688,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
     zsComparePreview,
   } = useZsPageDerivedState({
     tab,
+    selectedExample,
     warnings,
     bandUpgradeHints,
     validation: zsValidationInput,
@@ -2211,6 +2213,13 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
                     if (key === "schoolAtHealthcareFacility") setSchoolAtHealthcareFacility(value);
                   },
                   onReset: resetPha1r,
+                  illustrativeNote: isZsPha1rHeroExample(selectedExample)
+                    ? formatZsPha1rExampleExplanation(pha1rClasses, {
+                        schoolEstablishedSec16_9,
+                        schoolAtInstitutionalOrProtectiveCare,
+                        schoolAtHealthcareFacility,
+                      })
+                    : undefined,
                 }
               : null
           }

@@ -28,6 +28,7 @@ export type ZsPha1rSectionProps = {
   onSec16Change: (id: number, value: boolean) => void;
   onFlagChange: (key: keyof Pha1rSchoolFlags, value: boolean) => void;
   onReset: () => void;
+  illustrativeNote?: string;
 };
 
 export function ZsPha1rSection({
@@ -41,6 +42,7 @@ export function ZsPha1rSection({
   onSec16Change,
   onFlagChange,
   onReset,
+  illustrativeNote,
 }: ZsPha1rSectionProps) {
   const result = buildPha1rResultPresentation({ classes, flags });
   const rows = buildPha1rRowViews({ classes, flags });
@@ -48,6 +50,7 @@ export function ZsPha1rSection({
   return (
     <section className="card section-card section-card--pha1r" data-section="pha1r">
       <h2>PHA1Rmax – asistent pedagoga v 1. ročníku</h2>
+      {illustrativeNote ? <p className="muted-text">{illustrativeNote}</p> : null}
       <p className="muted-text">{PHA1R_SECTION_LEAD}</p>
       <p className="muted-text">{ZS_PHA1R_PUBLIC_EXPLANATION}</p>
       <div className="checks">
