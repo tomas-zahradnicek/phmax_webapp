@@ -28,6 +28,65 @@ export type ZsPhmaxSec16SectionProps = {
   totalPhmax: number;
 };
 
+function Sec16StageCard({
+  title,
+  classesLabel,
+  pupilsLabel,
+  classes,
+  pupils,
+  onClassesChange,
+  onPupilsChange,
+  avg,
+  band,
+  avgLabel,
+  bandLabel,
+  hoursLabel,
+  stageLabel,
+  stagePhmax,
+}: {
+  title: string;
+  classesLabel: string;
+  pupilsLabel: string;
+  classes: number;
+  pupils: number;
+  onClassesChange: (value: number) => void;
+  onPupilsChange: (value: number) => void;
+  avg: number;
+  band: ZsPhmaxBand;
+  avgLabel: string;
+  bandLabel: string;
+  hoursLabel: string;
+  stageLabel: string;
+  stagePhmax: number;
+}) {
+  return (
+    <div className="subcard zs-phmax-stage">
+      <h3>{title}</h3>
+      <div className="zs-phmax-stage__inputs">
+        <p className="zs-phmax-stage__kicker">Zadání</p>
+        <div className="grid two">
+          <NumberField label={classesLabel} value={classes} onChange={onClassesChange} />
+          <NumberField label={pupilsLabel} value={pupils} onChange={onPupilsChange} />
+        </div>
+      </div>
+      <div className="zs-phmax-stage__results zs-phmax-stage__results--derive">
+        <p className="zs-phmax-stage__kicker">Průměr a pásmo</p>
+        <div className="grid two">
+          <ResultCard label={avgLabel} value={round2(avg)} tone="primary" />
+          <ResultCard label={bandLabel} value={band.label} tone="primary" />
+        </div>
+      </div>
+      <div className="zs-phmax-stage__results">
+        <p className="zs-phmax-stage__kicker">Hodiny</p>
+        <div className="grid two">
+          <ResultCard label={hoursLabel} value={band.value} tone="success" />
+          <ResultCard label={stageLabel} value={stagePhmax} tone="success" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ZsPhmaxSec16Section({
   viewMode,
   showFirst,
@@ -90,42 +149,42 @@ export function ZsPhmaxSec16Section({
             </li>
           </ul>
         </FieldWhyPhmaxDetails>
-        <div className="grid two">
+        <div className="grid two zs-phmax-stage-row">
           {showFirst ? (
-            <>
-              <NumberField label="1. stupeň – třídy" value={firstClasses} onChange={onFirstClassesChange} />
-              <NumberField label="1. stupeň – žáci" value={firstPupils} onChange={onFirstPupilsChange} />
-              <ResultCard label="1. stupeň – průměrný počet žáků" value={round2(firstAvg)} tone="primary" />
-              <ResultCard
-                label="1. stupeň – pásmo a PHmax na 1 třídu"
-                value={`${firstBand.label} / ${firstBand.value}`}
-                tone="primary"
-              />
-              <ResultCard label="1. stupeň – výsledek PHmax" value={firstPhmax} tone="success" />
-              <ResultCard
-                label="1. stupeň – počet tříd × PHmax"
-                value={`${firstClasses} × ${firstBand.value}`}
-                tone="success"
-              />
-            </>
+            <Sec16StageCard
+              title="1. stupeň"
+              classesLabel="1. stupeň – třídy"
+              pupilsLabel="1. stupeň – žáci"
+              classes={firstClasses}
+              pupils={firstPupils}
+              onClassesChange={onFirstClassesChange}
+              onPupilsChange={onFirstPupilsChange}
+              avg={firstAvg}
+              band={firstBand}
+              avgLabel="1. stupeň – průměrný počet žáků"
+              bandLabel="1. stupeň – pásmo"
+              hoursLabel="1. stupeň – PHmax na 1 třídu"
+              stageLabel="1. stupeň – výsledek PHmax"
+              stagePhmax={firstPhmax}
+            />
           ) : null}
           {showSecond ? (
-            <>
-              <NumberField label="2. stupeň – třídy" value={secondClasses} onChange={onSecondClassesChange} />
-              <NumberField label="2. stupeň – žáci" value={secondPupils} onChange={onSecondPupilsChange} />
-              <ResultCard label="2. stupeň – průměrný počet žáků" value={round2(secondAvg)} tone="primary" />
-              <ResultCard
-                label="2. stupeň – pásmo a PHmax na 1 třídu"
-                value={`${secondBand.label} / ${secondBand.value}`}
-                tone="primary"
-              />
-              <ResultCard label="2. stupeň – výsledek PHmax" value={secondPhmax} tone="success" />
-              <ResultCard
-                label="2. stupeň – počet tříd × PHmax"
-                value={`${secondClasses} × ${secondBand.value}`}
-                tone="success"
-              />
-            </>
+            <Sec16StageCard
+              title="2. stupeň"
+              classesLabel="2. stupeň – třídy"
+              pupilsLabel="2. stupeň – žáci"
+              classes={secondClasses}
+              pupils={secondPupils}
+              onClassesChange={onSecondClassesChange}
+              onPupilsChange={onSecondPupilsChange}
+              avg={secondAvg}
+              band={secondBand}
+              avgLabel="2. stupeň – průměrný počet žáků"
+              bandLabel="2. stupeň – pásmo"
+              hoursLabel="2. stupeň – PHmax na 1 třídu"
+              stageLabel="2. stupeň – výsledek PHmax"
+              stagePhmax={secondPhmax}
+            />
           ) : null}
         </div>
         {(showFirst && (firstClasses <= 0 || firstPupils <= 0)) ||
@@ -134,31 +193,7 @@ export function ZsPhmaxSec16Section({
             {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} Pro výpočet tříd podle § 16/9 vyplňte třídy i žáky v aktivní části.
           </p>
         ) : null}
-        <div className="grid three section-results-strip">
-          {showFirst ? (
-            <ResultCard
-              methodStepLabel="PHmax § 16/9 – 1. stupeň"
-              label={
-                <>
-                  PHmax <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> – 1. stupeň
-                </>
-              }
-              value={firstPhmax}
-              tone="success"
-            />
-          ) : null}
-          {showSecond ? (
-            <ResultCard
-              methodStepLabel="PHmax § 16/9 – 2. stupeň"
-              label={
-                <>
-                  PHmax <ZsLegisRef citeId="zs-16-9" label="§ 16/9" /> – 2. stupeň
-                </>
-              }
-              value={secondPhmax}
-              tone="success"
-            />
-          ) : null}
+        <div className="zs-phmax-stage-total">
           <ResultCard
             methodStepLabel="PHmax § 16/9 – celkem"
             label={

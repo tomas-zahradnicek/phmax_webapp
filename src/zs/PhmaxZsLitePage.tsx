@@ -424,12 +424,12 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
             <p className="muted-text">{result.message}</p>
           ) : (
             <>
-              <p className="phmax-lite-result__total">
-                PHmax:{" "}
-                <strong>
+              <div className="phmax-lite-result__hero" role="status">
+                <span className="phmax-lite-result__label">PHmax</span>
+                <strong className="phmax-lite-result__value">
                   {formatZsLiteHours(result.phmaxHours)} hodin týdně
                 </strong>
-              </p>
+              </div>
               <p className="phmax-lite-narrative">{result.summaryText}</p>
               <dl className="phmax-lite-staffing">
                 <div>
@@ -467,21 +467,23 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
               </dl>
             </>
           )}
-          <p className="phmax-lite-result__total">
-            {pha1rView.status === "not-entered" ? (
-              pha1rView.headline
+          <div className="phmax-lite-result__aside">
+            <span className="phmax-lite-result__label">PHA1Rmax</span>
+            {pha1rView.status === "computed" || pha1rView.status === "excluded" ? (
+              <strong className="phmax-lite-result__value">{pha1rView.headline}</strong>
             ) : (
-              <strong>{pha1rView.headline}</strong>
+              <p className="muted-text phmax-lite-result__meta">{pha1rView.headline}</p>
             )}
-          </p>
-          {pha1rView.detail ? <p className="muted-text">{pha1rView.detail}</p> : null}
-          {pha1rView.rowLines.length > 0 ? (
-            <ul className="phmax-lite-staffing">
-              {pha1rView.rowLines.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-          ) : null}
+            <p className="muted-text phmax-lite-result__meta">Samostatný výsledek, nesčítá se s PHmax.</p>
+            {pha1rView.detail ? <p className="muted-text">{pha1rView.detail}</p> : null}
+            {pha1rView.rowLines.length > 0 ? (
+              <ul className="phmax-lite-staffing">
+                {pha1rView.rowLines.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
           {handoffNotice ? (
             <p className="muted-text field-validation-warning" role="alert">
               {handoffNotice}
