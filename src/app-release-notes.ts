@@ -11,8 +11,8 @@ export const PHMAX_CURRENT_RELEASE_NOTES: AppReleaseNote = {
   version: APP_VERSION,
   title: `Co je nového (${APP_VERSION})`,
   bullets: [
-    "Dashboard: scénáře ZŠ od 2 záloh, import s dalším krokem, checklist prázdného stavu a tisk školního profilu.",
-    "Přepočet PHmax: jeden zdroj pravdy pro ZŠ, PV, ŠD a SŠ – méně falešných varování koherence na přehledu.",
-    "Přístupnost: assertive toast po importu/exportu, návrat fokusu z draweru Akce, kontrast varování u polí.",
+    "Rychlá kalkulačka ZŠ nově spočítá PHA1Rmax. PHmax a PHA1Rmax jsou dva samostatné údaje a nesčítají se.",
+    "Přenos do plné kalkulačky se před nahrazením uložených údajů zeptá. Neplatné PHA1Rmax se nepřenese a otevření bez přenosu nic nezapíše.",
+    "Formulář ZŠ odděluje zadání od výsledku. Na úzké obrazovce se Obsah a souhrn nepřekrývají.",
   ],
 };

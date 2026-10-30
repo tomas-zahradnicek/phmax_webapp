@@ -20,6 +20,7 @@ Orientační plán většího scope mimo patch release. Neblokuje běžné UX vy
 | **Hotovo (0.3.14)** | Popisky PHmax bez uppercase; dashboard hint záloh ZŠ + IT krok exportu; ZŠ quick tour; handout „Kde zadat co“. |
 | **Hotovo (0.3.15)** | IT checklist exportu (appVersion, scénář, IS docs); kontrakt ZŠ přepočet vs `_phmaxAuditTotals`; E2E kontrakt desktop specy; smoke checklist po 0.3.14. |
 | **Hotovo (0.3.16)** | UX vlna přehledu (scénáře ZŠ, import follow-up, lite→plná, tisk profilu); ZŠ/ PV/ ŠD/ SŠ audit parity přepočtu; a11y (assertive toast, drawer focus, kontrast varování); ZŠ koherence bez ohledu na aktivní záložku. |
+| **Hotovo (0.3.17)** | PHA1Rmax v plné ZŠ i v rychlé kalkulačce, odděleně od PHmax; bezpečný přenos Lite → plná verze; rozložení zadání a výsledku, Obsah a souhrn na úzké obrazovce; výroční zpráva, záloha s náhledem obnovy, trvalé adresy a sitemap. |
 | **Další** | Napojení IS u dodavatele; pilot s řediteli (`docs/pilot-reditel-5min.md`); ruční vyplnění `keyboard-a11y-checklist.md`. |
 | **Blokováno → 0.4.0** | CSV/import podle šablony zřizovatele nebo IS – čeká na schválený formát (viz §2). |
 
