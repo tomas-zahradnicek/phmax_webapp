@@ -192,6 +192,24 @@ a:focus-visible {
     margin-left: auto;
     margin-right: auto;
   }
+
+  /* ZŠ: sdílený kontejner je centrovaný a otevřený rail (right 12px, šířka 248px) ho překrývá.
+     Mezera se počítá od pravého okraje viewportu jen při .page-toc--open.
+     Zavřený rail místo nedrží — kontejner se vrací na běžnou šířku. */
+  .app-shell--zs.app-shell--with-toc:not(:has(.page-toc--rail.page-toc--open)) > .container--app {
+    max-width: min(1450px, 100%);
+  }
+
+  .app-shell--zs.app-shell--with-toc:has(.page-toc--rail.page-toc--open) {
+    --zs-toc-rail-clearance: calc(12px + 248px + 24px);
+    padding-right: max(0px, calc(var(--zs-toc-rail-clearance) - (100vw - 100%) / 2));
+  }
+
+  .app-shell--zs.app-shell--with-toc:has(.page-toc--rail.page-toc--open) > .container--app {
+    max-width: min(1450px, 100%);
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 
 .hero {
@@ -2865,6 +2883,68 @@ input[type="radio"] {
 .section-card--module-support { border-color: rgba(59, 130, 246, 0.18); }
 .section-card--module-support::before { background: linear-gradient(90deg, #2563eb, #38bdf8); }
 .section-card--module-support::after { background: radial-gradient(circle, rgba(56,189,248,0.14), transparent 70%); }
+
+/* ZŠ PHmax, řádek výjimek: samotné § 16/9 na celou šířku.
+   Basic = details.ux-collapsible, expert = section. Dva moduly zůstanou ve dvou sloupcích. */
+.zs-phmax-module-row > details.ux-collapsible:only-child:has([data-section="sec16"]),
+.zs-phmax-module-row > section.section-card--module-support:only-child {
+  grid-column: 1 / -1;
+}
+
+/* ZŠ PHmax: zadání a výpočet ve stupni. Platí jen pro běžné třídy a § 16/9. */
+.zs-phmax-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.zs-phmax-stage-row > .zs-phmax-stage:only-child {
+  grid-column: 1 / -1;
+}
+
+.zs-phmax-stage__kicker {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.zs-phmax-stage__inputs,
+.zs-phmax-stage__results {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.zs-phmax-stage__inputs {
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+}
+
+.zs-phmax-stage__results {
+  background: rgba(240, 253, 244, 0.72);
+  border: 1px solid rgba(22, 163, 74, 0.22);
+}
+
+.zs-phmax-stage__results--derive {
+  background: rgba(239, 246, 255, 0.85);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.zs-phmax-stage-total {
+  margin-top: 16px;
+  max-width: min(100%, 24rem);
+}
+
+@media (max-width: 900px) {
+  .zs-phmax-stage__inputs,
+  .zs-phmax-stage__results {
+    padding: 10px;
+  }
+}
 
 .section-card--module-special { border-color: rgba(168, 85, 247, 0.18); }
 .section-card--module-special::before { background: linear-gradient(90deg, #9333ea, #c084fc); }
@@ -7887,6 +7967,22 @@ select:focus {
   }
 }
 
+/* ZŠ: vedle otevřeného railu je dock 460 px od 1500 px moc brzy.
+   Pole klesnou pod 140 px a karty souhrnu pod 180 px. Vedle formuláře
+   až od 1920 px, kde obojí vychází i s otevřeným Obsahem. Nezávisí na stavu TOC. */
+@media (min-width: 1500px) and (max-width: 1919px) {
+  .app-shell--zs .calculator-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell--zs .calculator-workspace__dock {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
 @media (max-width: 1099px) {
   .calculator-workspace {
     grid-template-columns: 1fr;
@@ -8230,6 +8326,16 @@ select:focus {
 
   body:has(.calculator-mobile-scroll-results) .page-toc--rail.page-toc--open {
     transform: translateY(0);
+  }
+
+  /* Otevřený Obsah a rozbalený souhrn nesmí zakrýt formulář najednou.
+     Zavření Obsahu vrátí souhrn; Skrýt souhrn dál řídí session stav. */
+  body:has(.page-toc--rail.page-toc--open) .calculator-mobile-scroll-results {
+    display: none !important;
+  }
+
+  body:has(.page-toc--rail.page-toc--open):has(.calculator-mobile-scroll-results) {
+    --calculator-mobile-results-height: 0px;
   }
 
   body:has(.calculator-mobile-scroll-results) .calculator-workspace__main,
@@ -11969,6 +12075,68 @@ select:focus {
   max-width: 320px;
 }
 
+/* ZŠ Lite: pole vyplní sloupec mřížky, ale nezaberou celou šířku karty. */
+.phmax-lite-page--zs .phmax-lite-form__field {
+  width: 100%;
+  max-width: min(100%, 40rem);
+}
+
+/* ZŠ Lite: orb hero a rohová dekorace karet přesahují rámeček
+   (right: -40px / -30px) a roztahují scrollWidth. Clip jen na ose x,
+   aby text, tlačítka a svislý přesah dekorace zůstaly. */
+.phmax-lite-page--zs .hero--feature,
+.phmax-lite-page--zs .section-card {
+  overflow-x: clip;
+}
+
+/* ZŠ Lite: PHA1Rmax je uvnitř karty formuláře. Vnořená karta a subcard
+   jen zdvojují rámeček. Tři počty v jednom řádku, § 16/9 pod nimi. */
+.phmax-lite-page--zs .section-card--pha1r {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.phmax-lite-page--zs .section-card--pha1r::before,
+.phmax-lite-page--zs .section-card--pha1r::after {
+  content: none;
+}
+
+.phmax-lite-page--zs .section-card--pha1r .subcard {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.phmax-lite-page--zs .section-card--pha1r .subcard > .grid.two {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.phmax-lite-page--zs .section-card--pha1r .subcard > .grid.two > * {
+  min-width: 0;
+}
+
+.phmax-lite-page--zs .section-card--pha1r .subcard > .grid.two > label:not(.number-field) {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .phmax-lite-page--zs .section-card--pha1r .subcard > .grid.two {
+    grid-template-columns: 1fr;
+  }
+}
+
 .phmax-lite-form__subsection {
   margin-top: 20px;
   padding-top: 16px;
@@ -12040,6 +12208,26 @@ select:focus {
   border: 1px solid #fde68a;
   color: #92400e;
   font-size: 0.88rem;
+}
+
+/* ZŠ Lite: PHA1Rmax je druhý, samostatný výsledek. Hero PHmax zůstává sdílené. */
+.phmax-lite-page--zs .phmax-lite-result__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.phmax-lite-page--zs .phmax-lite-result__aside .phmax-lite-result__value {
+  font-size: 1.25rem;
+}
+
+.phmax-lite-page--zs .phmax-lite-result__aside .phmax-lite-result__meta {
+  margin: 0;
 }
 
 .phmax-lite-narrative p {

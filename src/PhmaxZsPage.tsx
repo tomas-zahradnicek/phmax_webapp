@@ -2006,7 +2006,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
 
   return (
     <div
-      className={`app-shell app-shell--gradient ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${zsPhaBasicWizardActive || zsPhpBasicWizardActive ? " product-basic-wizard-active" : ""}${phmaxPaneShellClass}`}
+      className={`app-shell app-shell--gradient app-shell--zs ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${zsPhaBasicWizardActive || zsPhpBasicWizardActive ? " product-basic-wizard-active" : ""}${phmaxPaneShellClass}`}
     >
       <div className="container container--app">
         <ZsHeroHeader

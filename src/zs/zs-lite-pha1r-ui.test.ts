@@ -172,7 +172,9 @@ describe("ZŠ Lite PHA1Rmax UI", () => {
     expect(html).toContain(ZS_LITE_PHA1R_NOT_ENTERED);
     const details = html.match(/<details\b[^>]*>/)?.[0] ?? "";
     expect(details).not.toContain("open");
-    expect(html).toContain("PHmax:");
+    expect(html).toContain('phmax-lite-result__label">PHmax');
+    expect(html).toContain("phmax-lite-result__aside");
+    expect(html).toContain("nesčítá se s PHmax");
     expect(html).not.toContain("PHA1Rmax: 20 hodin týdně");
   });
 
@@ -309,11 +311,66 @@ describe("ZŠ Lite PHA1Rmax UI", () => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
-    expect(html).toContain("PHmax:");
+    expect(html).toContain('phmax-lite-result__hero');
+    expect(html).toContain('phmax-lite-result__label">PHmax');
     expect(html).toContain(`${phmaxText} hodin týdně`);
+    expect(html).toContain("phmax-lite-result__aside");
     expect(html).toContain(pha1r.headline);
+    expect(html).toContain("nesčítá se s PHmax");
     expect(html).not.toContain(
       `${(phmax.phmaxHours + 20).toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} hodin týdně`,
     );
+    const phmaxAt = html.indexOf("phmax-lite-result__hero");
+    const pha1rAt = html.indexOf("phmax-lite-result__aside");
+    expect(phmaxAt).toBeGreaterThan(-1);
+    expect(pha1rAt).toBeGreaterThan(phmaxAt);
+  });
+
+  it("výluka školy zůstane samostatný PHA1Rmax a neplatný vstup nemá hodinový výsledek", () => {
+    installStorage({
+      [ZS_LITE_LS_KEY]: JSON.stringify({
+        basicType: "full_more_than_2",
+        basic1Classes: 2,
+        basic1Pupils: 40,
+        basic2Classes: 1,
+        basic2Pupils: 20,
+        hasSec16: false,
+        incl1Classes: 0,
+        incl1Pupils: 0,
+        incl2Classes: 0,
+        incl2Pupils: 0,
+        pha1rClasses: [row(1, 20)],
+        schoolEstablishedSec16_9: true,
+        schoolAtInstitutionalOrProtectiveCare: false,
+        schoolAtHealthcareFacility: false,
+      }),
+    });
+    const excluded = liteMarkup();
+    expect(excluded).toContain("PHA1Rmax: 0 hodin týdně");
+    expect(excluded).toContain("základní škola zřízená podle § 16 odst. 9");
+    expect(excluded).toContain("Přenést údaje do plné kalkulačky");
+    expect(excluded).toContain("Otevřít plnou kalkulačku bez přenosu");
+
+    installStorage({
+      [ZS_LITE_LS_KEY]: JSON.stringify({
+        basicType: "full_more_than_2",
+        basic1Classes: 2,
+        basic1Pupils: 40,
+        basic2Classes: 1,
+        basic2Pupils: 20,
+        hasSec16: false,
+        incl1Classes: 0,
+        incl1Pupils: 0,
+        incl2Classes: 0,
+        incl2Pupils: 0,
+        pha1rClasses: [row(1, 10, { grade1Par38: 6, grade1Par41: 6 })],
+        schoolEstablishedSec16_9: false,
+        schoolAtInstitutionalOrProtectiveCare: false,
+        schoolAtHealthcareFacility: false,
+      }),
+    });
+    const invalid = liteMarkup();
+    expect(invalid).toContain("PHA1Rmax nelze vyhodnotit.");
+    expect(invalid).not.toContain('phmax-lite-result__value">PHA1Rmax nelze vyhodnotit.');
   });
 });

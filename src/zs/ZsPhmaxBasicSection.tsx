@@ -74,6 +74,53 @@ export type ZsPhmaxBasicSectionProps = {
   totalPhmax?: number;
 };
 
+function BasicStageCard({
+  title,
+  classes,
+  pupils,
+  onClassesChange,
+  onPupilsChange,
+  avg,
+  band,
+  stagePhmax,
+  stageLabel,
+  warning,
+}: {
+  title: string;
+  classes: number;
+  pupils: number;
+  onClassesChange: (value: number) => void;
+  onPupilsChange: (value: number) => void;
+  avg: number;
+  band: ZsPhmaxBand;
+  stagePhmax: number;
+  stageLabel: string;
+  warning: string | null;
+}) {
+  return (
+    <div className="subcard zs-phmax-stage">
+      <h3>{title}</h3>
+      <div className="zs-phmax-stage__inputs">
+        <p className="zs-phmax-stage__kicker">Zadání</p>
+        <div className="grid two">
+          <NumberField label="Počet tříd" value={classes} onChange={onClassesChange} />
+          <NumberField label="Počet žáků" value={pupils} onChange={onPupilsChange} />
+        </div>
+        {warning ? <p className="muted-text field-validation-warning">{warning}</p> : null}
+      </div>
+      <div className="zs-phmax-stage__results">
+        <p className="zs-phmax-stage__kicker">Výpočet</p>
+        <div className="grid two">
+          <ResultCard label="Průměrný počet žáků ve třídě" value={round2(avg)} tone="primary" />
+          <ResultCard label="Pásmo" value={band.label} tone="primary" />
+          <ResultCard label="PHmax na 1 třídu" value={band.value} tone="primary" />
+          <ResultCard label={stageLabel} value={stagePhmax} tone="success" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ZsPhmaxBasicSection({
   hasBasicIssue,
   showBasicFirst,
@@ -135,51 +182,43 @@ export function ZsPhmaxBasicSection({
         </select>
       )}
 
-      <div className="grid two">
+      <div className="grid two zs-phmax-stage-row">
         {showBasicFirst && (
-          <div className="subcard">
-            <h3>1. stupeň</h3>
-            <div className="grid two">
-              <NumberField label="Počet tříd" value={basic1Classes} onChange={onBasic1ClassesChange} />
-              <NumberField label="Počet žáků" value={basic1Pupils} onChange={onBasic1PupilsChange} />
-              <ResultCard label="Průměrný počet žáků ve třídě" value={round2(basic1Avg)} tone="primary" />
-              <ResultCard
-                label="Pásmo a PHmax na 1 třídu"
-                value={`${basicFirstBand.label} / ${basicFirstBand.value}`}
-                tone="primary"
-              />
-              <ResultCard label="Výsledek PHmax – 1. stupeň" value={basic1Phmax} tone="success" />
-              <ResultCard label="Počet tříd × PHmax" value={`${basic1Classes} × ${basicFirstBand.value}`} tone="success" />
-            </div>
-            {basic1Classes <= 0 || basic1Pupils <= 0 ? (
-              <p className="muted-text field-validation-warning">
-                {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U 1. stupně doplňte počet tříd i počet žáků.
-              </p>
-            ) : null}
-          </div>
+          <BasicStageCard
+            title="1. stupeň"
+            classes={basic1Classes}
+            pupils={basic1Pupils}
+            onClassesChange={onBasic1ClassesChange}
+            onPupilsChange={onBasic1PupilsChange}
+            avg={basic1Avg}
+            band={basicFirstBand}
+            stagePhmax={basic1Phmax}
+            stageLabel="Výsledek PHmax – 1. stupeň"
+            warning={
+              basic1Classes <= 0 || basic1Pupils <= 0
+                ? `${INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U 1. stupně doplňte počet tříd i počet žáků.`
+                : null
+            }
+          />
         )}
 
         {showBasicSecond && (
-          <div className="subcard">
-            <h3>2. stupeň</h3>
-            <div className="grid two">
-              <NumberField label="Počet tříd" value={basic2Classes} onChange={onBasic2ClassesChange} />
-              <NumberField label="Počet žáků" value={basic2Pupils} onChange={onBasic2PupilsChange} />
-              <ResultCard label="Průměrný počet žáků ve třídě" value={round2(basic2Avg)} tone="primary" />
-              <ResultCard
-                label="Pásmo a PHmax na 1 třídu"
-                value={`${basicSecondBand.label} / ${basicSecondBand.value}`}
-                tone="primary"
-              />
-              <ResultCard label="Výsledek PHmax – 2. stupeň" value={basic2Phmax} tone="success" />
-              <ResultCard label="Počet tříd × PHmax" value={`${basic2Classes} × ${basicSecondBand.value}`} tone="success" />
-            </div>
-            {basic2Classes <= 0 || basic2Pupils <= 0 ? (
-              <p className="muted-text field-validation-warning">
-                {INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U 2. stupně doplňte počet tříd i počet žáků.
-              </p>
-            ) : null}
-          </div>
+          <BasicStageCard
+            title="2. stupeň"
+            classes={basic2Classes}
+            pupils={basic2Pupils}
+            onClassesChange={onBasic2ClassesChange}
+            onPupilsChange={onBasic2PupilsChange}
+            avg={basic2Avg}
+            band={basicSecondBand}
+            stagePhmax={basic2Phmax}
+            stageLabel="Výsledek PHmax – 2. stupeň"
+            warning={
+              basic2Classes <= 0 || basic2Pupils <= 0
+                ? `${INLINE_VALIDATION_MSG_POSITIVE_INTEGER} U 2. stupně doplňte počet tříd i počet žáků.`
+                : null
+            }
+          />
         )}
       </div>
 
@@ -211,9 +250,7 @@ export function ZsPhmaxBasicSection({
       </div>
 
       {(showBasicFirst || showBasicSecond) && (
-        <div className="grid three section-results-strip">
-          {showBasicFirst ? <ResultCard label="PHmax – 1. stupeň" value={basic1Phmax} tone="success" /> : null}
-          {showBasicSecond ? <ResultCard label="PHmax – 2. stupeň" value={basic2Phmax} tone="success" /> : null}
+        <div className="zs-phmax-stage-total">
           <ResultCard label="PHmax – běžné třídy celkem" value={basicPhmax} tone="success" />
         </div>
       )}

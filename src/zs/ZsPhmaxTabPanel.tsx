@@ -262,7 +262,7 @@ export function ZsPhmaxTabPanel(props: ZsPhmaxTabPanelProps) {
         totalPhmax={props.totalPhmax}
       />
 
-      <div className="grid two" data-section="zs-phmax-exceptions">
+      <div className="grid two zs-phmax-module-row" data-section="zs-phmax-exceptions">
         <ZsPhmaxSec16Section
           viewMode={viewMode}
           showFirst={hasSection("sec16_first")}
