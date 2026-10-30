@@ -10,8 +10,19 @@ function readSource(relPath: string) {
 
 describe("UX contract: release notes + přístupnost", () => {
   it("Co je nového – footer odkaz bez automatického popupu", () => {
-    expect(readSource("src/app-release-notes.ts")).toContain("PHMAX_CURRENT_RELEASE_NOTES");
-    expect(readSource("src/app-release-notes.ts")).toMatch(/ZsHeroHeader|desktop E2E|dashboard/i);
+    const releaseNotes = readSource("src/app-release-notes.ts");
+    const pkg = JSON.parse(readSource("package.json")) as { version: string };
+    expect(pkg.version).toBe("0.3.17");
+    expect(releaseNotes).toContain("PHMAX_CURRENT_RELEASE_NOTES");
+    expect(releaseNotes).toContain("version: APP_VERSION");
+    expect(releaseNotes).toContain("title: `Co je nového (${APP_VERSION})`");
+    expect(releaseNotes).toContain("Rychlá kalkulačka ZŠ nově spočítá PHA1Rmax.");
+    expect(releaseNotes).toContain("PHmax a PHA1Rmax jsou dva samostatné údaje a nesčítají se.");
+    expect(releaseNotes).toContain("Přenos do plné kalkulačky se před nahrazením uložených údajů zeptá.");
+    expect(releaseNotes).toContain("Neplatné PHA1Rmax se nepřenese");
+    expect(releaseNotes).toContain("otevření bez přenosu nic nezapíše");
+    expect(releaseNotes).toContain("Formulář ZŠ odděluje zadání od výsledku.");
+    expect(releaseNotes).not.toMatch(/ZsHeroHeader|desktop E2E/);
     expect(readSource("src/zs-hero-example-groups.ts")).toContain("ZS_HERO_EXAMPLE_GROUPS");
     expect(readSource("src/FieldHintButton.tsx")).toContain("FieldHintButton");
     expect(readSource("src/AuthorCreditFooter.tsx")).toContain("openWhatsNew");

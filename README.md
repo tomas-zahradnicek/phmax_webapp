@@ -1,15 +1,23 @@
 # PHmax webapp
 
-Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu přímé pedagogické činnosti a souvisejících výpočtů. Přepínání modulů: parametr URL `?view=` nebo přehled na úvodní obrazovce.
+Jedna React aplikace (Vite) s několika kalkulačkami maximálního rozsahu přímé pedagogické činnosti a souvisejících výpočtů. Každý modul má vlastní adresu. Mezi moduly se přechází z přehledu a z navigace aplikace.
 
-| `view` | Modul |
+| Adresa | Modul |
 |--------|--------|
-| `dash` | Přehled a rychlý start |
-| `zs` | Základní školy (PHmax / PHAmax, § 16/9, …) |
-| `pv` | Přípravná třída |
-| `sd` | Školní družina |
-| `ss` | Střední školy (orientační PHmax, PrŠ PHAmax) |
-| `nv75` | NV 75 – zástupce (banka odpočtů) |
+| `/prehled` | Přehled a rychlý start |
+| `/phmax-zakladni-skola` | Základní školy (PHmax / PHAmax, § 16/9, …) |
+| `/phmax-predskolni-vzdelavani` | Přípravná třída |
+| `/phmax-skolni-druzina` | Školní družina |
+| `/phmax-stredni-skola` | Střední školy (orientační PHmax, PrŠ PHAmax) |
+| `/banka-odpoctu-zastupcu-reditele` | NV 75 – zástupce (banka odpočtů) |
+
+Starší odkazy s `?view=` na `/` a `/prehled` se u známých hodnot (`dash`, `pv`, `sd`, `zs`, `ss`, `nv75`) přesměrovávají na adresy výše.
+
+## Verze 0.3.17 (ZŠ)
+
+- **Rychlá kalkulačka ZŠ:** PHA1Rmax odděleně od PHmax, bez součtu. Přenos do plné kalkulačky se ptá před nahrazením a neplatné údaje nepřenese.
+- **Plná ZŠ:** PHA1Rmax po třídách 1. ročníku, ukázky a samostatné uvedení ve sdílení, tisku a CSV/XLSX. Zadání a výsledek jsou oddělené; Obsah a souhrn se na úzké obrazovce nepřekrývají.
+- **Další hotové části:** výroční zpráva s náhledem a DOCX, záloha s náhledem obnovy, trvalé adresy kalkulaček a odkazy na metodiky MŠMT.
 
 ## Verze 0.3.16 (UX)
 

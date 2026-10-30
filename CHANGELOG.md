@@ -2,10 +2,25 @@
 
 ## Unreleased
 
-### ZŠ – metodika v6
-- Podpora PHA1Rmax: výpočet po jednotlivých třídách 1. ročníku, samostatně od PHAmax.
-- Metodika ZŠ verze 6 / říjen 2026 a odkaz na metodickou stránku EDU.CZ.
-- Share, tisk shrnutí a CSV/XLSX uvádějí PHA1Rmax samostatně.
+## 0.3.17 (2026-10-30)
+
+### ZŠ
+- Plná kalkulačka: PHA1Rmax po třídách 1. ročníku, samostatně od PHAmax. Metodika ZŠ verze 6 / říjen 2026 a odkaz na metodickou stránku EDU.CZ.
+- Sdílení, tisk shrnutí a CSV/XLSX uvádějí PHA1Rmax samostatně. V horní liště jsou ukázkové příklady PHA1Rmax.
+- Rychlá kalkulačka: PHA1Rmax odděleně od PHmax, bez součtu.
+- Přenos do plné kalkulačky se ptá před nahrazením uložených údajů. Neplatné PHA1Rmax se nepřenese. Otevření plné kalkulačky bez přenosu nic nezapisuje.
+- Běžné třídy a § 16/9 oddělují zadání od výsledku. Samotné § 16/9 zabere celou šířku řádku.
+- Obsah nechává mezeru u formuláře. Postranní souhrn je vedle formuláře od 1920 px. Na úzké obrazovce otevřený Obsah skryje plovoucí souhrn.
+- Průvodce PHmax má srozumitelnější postup a rozbalování částí.
+
+### Výroční zpráva a data školy
+- Modul výroční zprávy (`/vyrocni-zprava`) včetně náhledu a exportu DOCX.
+- Import s navazujícím postupem a obnova ze zálohy JSON. Nová zpráva nemá předvyplněný školní rok.
+- Záloha aplikace se dá stáhnout a před obnovou prohlédnout. Vymazání kalkulačky nemaže profil školy.
+
+### Veřejné stránky
+- Trvalé adresy kalkulaček, přesměrování starých odkazů `?view=` a soubor sitemap.
+- Stránky pro vyhledávače jsou předrenderované. V nápovědě jsou odkazy na stažení metodik MŠMT.
 
 ## 0.3.16 (2026-05-28)
 

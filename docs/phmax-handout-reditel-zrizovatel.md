@@ -1,6 +1,7 @@
 # PHmax webapp – orientační kalkulačka pro školu
 
-**Verze 0.3.16** · jednostránkový přehled pro ředitele a zřizovatele  
+**Verze 0.3.17** · jednostránkový přehled pro ředitele a zřizovatele
+
 *Dokument je informativní; nejedná se o závazný výkaz ani právní posudek.*
 
 ---
@@ -54,6 +55,7 @@ Přípravná třída ZŠ **není** stejné zadání jako MŠ v modulu PV.
 | Export **scénář celá škola** (JSON) | **Ano** | včetně `coherenceWarnings` pro IT |
 | Export **handoff pro IS** (JSON / POST) | **Ano** | pro integrátora |
 | **Import ze školy** (šablona Excel v2) | **Ano (pilot)** | české sloupce a hodnoty, rozbalovací seznamy; PHA/PHP a výjimky doplníte v kalkulačce po načtení |
+| **ZŠ 0.3.17** – PHA1Rmax v rychlé kalkulačce | **Ano** | PHmax a PHA1Rmax se ukazují samostatně a nesčítají se |
 
 ---
 
@@ -83,4 +85,4 @@ Všechny exporty obsahují **verzi aplikace a datum** a jsou označeny jako **or
 
 **Technická podpora / další dokumentace:** repozitář projektu – `docs/acceptance-pv-zs-nv75.md`, `docs/ss-acceptance-checklist.md`, `CHANGELOG.md`.
 
-*PHmax webapp 0.3.16 · orientační kalkulačka · neoficiální výstup*
+*PHmax webapp 0.3.17 · orientační kalkulačka · neoficiální výstup*
