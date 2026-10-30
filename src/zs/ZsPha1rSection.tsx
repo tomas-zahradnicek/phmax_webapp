@@ -29,6 +29,10 @@ export type ZsPha1rSectionProps = {
   onFlagChange: (key: keyof Pha1rSchoolFlags, value: boolean) => void;
   onReset: () => void;
   illustrativeNote?: string;
+  /** Nadpis sekce. V Lite ho nahrazuje sbalitelný souhrn. */
+  showHeading?: boolean;
+  /** Výsledková karta. V Lite je výsledek v samostatném bloku. */
+  showResultCard?: boolean;
 };
 
 export function ZsPha1rSection({
@@ -43,13 +47,15 @@ export function ZsPha1rSection({
   onFlagChange,
   onReset,
   illustrativeNote,
+  showHeading = true,
+  showResultCard = true,
 }: ZsPha1rSectionProps) {
   const result = buildPha1rResultPresentation({ classes, flags });
   const rows = buildPha1rRowViews({ classes, flags });
 
   return (
     <section className="card section-card section-card--pha1r" data-section="pha1r">
-      <h2>PHA1Rmax – asistent pedagoga v 1. ročníku</h2>
+      {showHeading ? <h2>PHA1Rmax – asistent pedagoga v 1. ročníku</h2> : null}
       {illustrativeNote ? <p className="muted-text">{illustrativeNote}</p> : null}
       <p className="muted-text">{PHA1R_SECTION_LEAD}</p>
       <p className="muted-text">{ZS_PHA1R_PUBLIC_EXPLANATION}</p>
@@ -141,8 +147,10 @@ export function ZsPha1rSection({
           Vymazat údaje PHA1Rmax
         </button>
       </div>
-      <ResultCard label="PHA1Rmax" value={result.hoursText} hint="Asistent pedagoga v 1. ročníku" />
-      {result.kind === "computed" ? <p className="muted-text">{result.detail}</p> : null}
+      {showResultCard ? (
+        <ResultCard label="PHA1Rmax" value={result.hoursText} hint="Asistent pedagoga v 1. ročníku" />
+      ) : null}
+      {showResultCard && result.kind === "computed" ? <p className="muted-text">{result.detail}</p> : null}
     </section>
   );
 }

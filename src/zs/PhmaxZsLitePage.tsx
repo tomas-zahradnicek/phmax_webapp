@@ -3,6 +3,7 @@ import { HeroBrandLogoButton } from "../AppBrandLogo";
 import { AuthorCreditFooter } from "../AuthorCreditFooter";
 import { CALCULATOR_LIMITS_NOTE } from "../calculator-ui-constants";
 import { LiteToFullHint } from "../LiteToFullHint";
+import { CollapsibleSection } from "../CollapsibleSection";
 import { IntegerInput } from "../IntegerInput";
 import { ProductViewPills, type ProductView } from "../ProductViewPills";
 import { writeZsLiteHandoffToFullStorage } from "../phmax-lite-handoff";
@@ -10,8 +11,16 @@ import { writeZsFullUrl } from "../phmax-lite-paths";
 import { CS_HOURS_PER_WEEK_SHORT } from "../cs-format";
 import type { BasicType } from "../phmax-zs-logic";
 import { computeZsLitePhmax } from "./phmax-zs-lite-logic";
-
-const ZS_LITE_LS_KEY = "phmax-zs-lite-v2";
+import {
+  readZsLiteSnapshot,
+  ZS_LITE_LS_KEY,
+  type ZsLiteSnapshot,
+} from "./phmax-zs-lite-snapshot";
+import { ZsPha1rSection } from "./ZsPha1rSection";
+import { createZsRowHandlers } from "./zs-row-handlers";
+import type { Pha1rClassRow, Pha1rSchoolFlags } from "./zs-pha1r";
+import { createEmptyPha1rRow, PHA1R_SECTION_TITLE } from "./zs-pha1r-ui";
+import { presentZsLitePha1r, runZsLiteGuardedTransfer, ZS_LITE_PHA1R_FULL_TAB_NOTE } from "./zs-lite-pha1r-result";
 
 const BASIC_TYPE_OPTIONS: ReadonlyArray<{ value: BasicType; label: string; firstOnly: boolean }> = [
   { value: "full_more_than_2", label: "Úplná ZŠ – více než 2 třídy v některém ročníku", firstOnly: false },
@@ -21,69 +30,6 @@ const BASIC_TYPE_OPTIONS: ReadonlyArray<{ value: BasicType; label: string; first
   { value: "first_only_3", label: "Neúplná ZŠ – 3 třídy 1. stupně", firstOnly: true },
   { value: "first_only_4", label: "Neúplná ZŠ – 4 a více tříd 1. stupně", firstOnly: true },
 ];
-
-type ZsLiteSnapshot = {
-  basicType: BasicType;
-  basic1Classes: number;
-  basic1Pupils: number;
-  basic2Classes: number;
-  basic2Pupils: number;
-  hasSec16: boolean;
-  incl1Classes: number;
-  incl1Pupils: number;
-  incl2Classes: number;
-  incl2Pupils: number;
-};
-
-function isBasicType(v: unknown): v is BasicType {
-  return BASIC_TYPE_OPTIONS.some((o) => o.value === v);
-}
-
-function readZsLiteSnapshot(): ZsLiteSnapshot {
-  try {
-    const raw = localStorage.getItem(ZS_LITE_LS_KEY);
-    if (!raw) {
-      return {
-        basicType: "full_more_than_2",
-        basic1Classes: 0,
-        basic1Pupils: 0,
-        basic2Classes: 0,
-        basic2Pupils: 0,
-        hasSec16: false,
-        incl1Classes: 0,
-        incl1Pupils: 0,
-        incl2Classes: 0,
-        incl2Pupils: 0,
-      };
-    }
-    const p = JSON.parse(raw) as Partial<ZsLiteSnapshot>;
-    return {
-      basicType: isBasicType(p.basicType) ? p.basicType : "full_more_than_2",
-      basic1Classes: typeof p.basic1Classes === "number" && p.basic1Classes >= 0 ? Math.floor(p.basic1Classes) : 0,
-      basic1Pupils: typeof p.basic1Pupils === "number" && p.basic1Pupils >= 0 ? Math.floor(p.basic1Pupils) : 0,
-      basic2Classes: typeof p.basic2Classes === "number" && p.basic2Classes >= 0 ? Math.floor(p.basic2Classes) : 0,
-      basic2Pupils: typeof p.basic2Pupils === "number" && p.basic2Pupils >= 0 ? Math.floor(p.basic2Pupils) : 0,
-      hasSec16: Boolean(p.hasSec16),
-      incl1Classes: typeof p.incl1Classes === "number" && p.incl1Classes >= 0 ? Math.floor(p.incl1Classes) : 0,
-      incl1Pupils: typeof p.incl1Pupils === "number" && p.incl1Pupils >= 0 ? Math.floor(p.incl1Pupils) : 0,
-      incl2Classes: typeof p.incl2Classes === "number" && p.incl2Classes >= 0 ? Math.floor(p.incl2Classes) : 0,
-      incl2Pupils: typeof p.incl2Pupils === "number" && p.incl2Pupils >= 0 ? Math.floor(p.incl2Pupils) : 0,
-    };
-  } catch {
-    return {
-      basicType: "full_more_than_2",
-      basic1Classes: 0,
-      basic1Pupils: 0,
-      basic2Classes: 0,
-      basic2Pupils: 0,
-      hasSec16: false,
-      incl1Classes: 0,
-      incl1Pupils: 0,
-      incl2Classes: 0,
-      incl2Pupils: 0,
-    };
-  }
-}
 
 function formatZsLiteHours(value: number): string {
   return value.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -118,6 +64,26 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
   const [incl1Pupils, setIncl1Pupils] = useState(() => readZsLiteSnapshot().incl1Pupils);
   const [incl2Classes, setIncl2Classes] = useState(() => readZsLiteSnapshot().incl2Classes);
   const [incl2Pupils, setIncl2Pupils] = useState(() => readZsLiteSnapshot().incl2Pupils);
+  const [pha1rClasses, setPha1rClasses] = useState<Pha1rClassRow[]>(() => readZsLiteSnapshot().pha1rClasses);
+  const [schoolEstablishedSec16_9, setSchoolEstablishedSec16_9] = useState(
+    () => readZsLiteSnapshot().schoolEstablishedSec16_9,
+  );
+  const [schoolAtInstitutionalOrProtectiveCare, setSchoolAtInstitutionalOrProtectiveCare] = useState(
+    () => readZsLiteSnapshot().schoolAtInstitutionalOrProtectiveCare,
+  );
+  const [schoolAtHealthcareFacility, setSchoolAtHealthcareFacility] = useState(
+    () => readZsLiteSnapshot().schoolAtHealthcareFacility,
+  );
+  const [pha1rSectionInitiallyOpen] = useState(() => {
+    const snap = readZsLiteSnapshot();
+    return (
+      snap.pha1rClasses.length > 0 ||
+      snap.schoolEstablishedSec16_9 ||
+      snap.schoolAtInstitutionalOrProtectiveCare ||
+      snap.schoolAtHealthcareFacility
+    );
+  });
+  const [handoffNotice, setHandoffNotice] = useState<string | null>(null);
   const [firstOnlyMode, setFirstOnlyMode] = useState(() => {
     const t = readZsLiteSnapshot().basicType;
     return t.startsWith("first_only_");
@@ -140,6 +106,10 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
           incl1Pupils,
           incl2Classes,
           incl2Pupils,
+          pha1rClasses,
+          schoolEstablishedSec16_9,
+          schoolAtInstitutionalOrProtectiveCare,
+          schoolAtHealthcareFacility,
         } satisfies ZsLiteSnapshot),
       );
     } catch {
@@ -156,6 +126,10 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
     incl1Pupils,
     incl2Classes,
     incl2Pupils,
+    pha1rClasses,
+    schoolEstablishedSec16_9,
+    schoolAtInstitutionalOrProtectiveCare,
+    schoolAtHealthcareFacility,
   ]);
 
   const handleBasicTypeChange = useCallback((next: BasicType) => {
@@ -206,22 +180,61 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
     ],
   );
 
-  const openFull = useCallback(() => {
-    if (basic1Classes >= 1 && basic1Pupils >= 1 && (!isFull || (basic2Classes >= 1 && basic2Pupils >= 1))) {
-      writeZsLiteHandoffToFullStorage({
-        basicType,
-        basic1Classes,
-        basic1Pupils,
-        basic2Classes,
-        basic2Pupils,
-        incl1Classes: hasSec16 ? incl1Classes : 0,
-        incl1Pupils: hasSec16 ? incl1Pupils : 0,
-        incl2Classes: hasSec16 && isFull ? incl2Classes : 0,
-        incl2Pupils: hasSec16 && isFull ? incl2Pupils : 0,
-      });
-    }
+  const pha1rFlags: Pha1rSchoolFlags = useMemo(
+    () => ({
+      schoolEstablishedSec16_9,
+      schoolAtInstitutionalOrProtectiveCare,
+      schoolAtHealthcareFacility,
+    }),
+    [schoolEstablishedSec16_9, schoolAtInstitutionalOrProtectiveCare, schoolAtHealthcareFacility],
+  );
+  const pha1rView = useMemo(
+    () => presentZsLitePha1r({ classes: pha1rClasses, flags: pha1rFlags }),
+    [pha1rClasses, pha1rFlags],
+  );
+  const { add: addPha1r, update: updatePha1r, remove: removePha1r } = createZsRowHandlers(
+    setPha1rClasses,
+    createEmptyPha1rRow,
+  );
+  const resetPha1r = useCallback(() => {
+    setPha1rClasses([]);
+    setSchoolEstablishedSec16_9(false);
+    setSchoolAtInstitutionalOrProtectiveCare(false);
+    setSchoolAtHealthcareFacility(false);
+  }, []);
+
+  const browseFull = useCallback(() => {
     onOpenFullVersion();
     writeZsFullUrl("push");
+  }, [onOpenFullVersion]);
+
+  const transferToFull = useCallback(() => {
+    const input = {
+      basicType,
+      basic1Classes,
+      basic1Pupils,
+      basic2Classes,
+      basic2Pupils,
+      incl1Classes: hasSec16 ? incl1Classes : 0,
+      incl1Pupils: hasSec16 ? incl1Pupils : 0,
+      incl2Classes: hasSec16 && isFull ? incl2Classes : 0,
+      incl2Pupils: hasSec16 && isFull ? incl2Pupils : 0,
+      pha1rClasses,
+      schoolEstablishedSec16_9,
+      schoolAtInstitutionalOrProtectiveCare,
+      schoolAtHealthcareFacility,
+    };
+    runZsLiteGuardedTransfer({
+      input,
+      write: () => writeZsLiteHandoffToFullStorage(input),
+      confirm: (message) => window.confirm(message),
+      notify: setHandoffNotice,
+      navigate: () => {
+        setHandoffNotice(null);
+        onOpenFullVersion();
+        writeZsFullUrl("push");
+      },
+    });
   }, [
     onOpenFullVersion,
     basicType,
@@ -235,6 +248,10 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
     incl2Classes,
     incl2Pupils,
     isFull,
+    pha1rClasses,
+    schoolEstablishedSec16_9,
+    schoolAtInstitutionalOrProtectiveCare,
+    schoolAtHealthcareFacility,
   ]);
 
   const visibleBasicOptions = useMemo(
@@ -249,7 +266,7 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
         <div className="hero__orb hero__orb--two" />
         <div className="hero__pills-row">
           <ProductViewPills productView={productView} setProductView={setProductView} />
-          <button type="button" className="btn ghost phmax-lite-hero__full-link" onClick={openFull}>
+          <button type="button" className="btn ghost phmax-lite-hero__full-link" onClick={browseFull}>
             Plná verze metodiky
           </button>
         </div>
@@ -372,7 +389,31 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
               ) : null}
             </>
           ) : null}
-          <LiteToFullHint module="zs" onOpenFull={openFull} />
+          <CollapsibleSection summary={PHA1R_SECTION_TITLE} defaultOpen={pha1rSectionInitiallyOpen}>
+            <ZsPha1rSection
+              showHeading={false}
+              showResultCard={false}
+              classes={pha1rClasses}
+              flags={pha1rFlags}
+              onAdd={addPha1r}
+              onRemove={removePha1r}
+              onGrade1Change={(id, value) => updatePha1r(id, "grade1Pupils", value)}
+              onPar38Change={(id, value) => updatePha1r(id, "grade1Par38", value)}
+              onPar41Change={(id, value) => updatePha1r(id, "grade1Par41", value)}
+              onSec16Change={(id, value) =>
+                setPha1rClasses((prev) =>
+                  prev.map((item) => (item.id === id ? { ...item, establishedSec16_9: value } : item)),
+                )
+              }
+              onFlagChange={(key, value) => {
+                if (key === "schoolEstablishedSec16_9") setSchoolEstablishedSec16_9(value);
+                if (key === "schoolAtInstitutionalOrProtectiveCare") setSchoolAtInstitutionalOrProtectiveCare(value);
+                if (key === "schoolAtHealthcareFacility") setSchoolAtHealthcareFacility(value);
+              }}
+              onReset={resetPha1r}
+            />
+          </CollapsibleSection>
+          <LiteToFullHint module="zs" onOpenFull={browseFull} />
         </section>
 
         <section className="card section-card phmax-lite-result" aria-labelledby="zs-lite-result-heading">
@@ -384,9 +425,9 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
           ) : (
             <>
               <p className="phmax-lite-result__total">
-                PHmax celkem:{" "}
+                PHmax:{" "}
                 <strong>
-                  {formatZsLiteHours(result.phmaxHours)} {CS_HOURS_PER_WEEK_SHORT}
+                  {formatZsLiteHours(result.phmaxHours)} hodin týdně
                 </strong>
               </p>
               <p className="phmax-lite-narrative">{result.summaryText}</p>
@@ -426,8 +467,32 @@ export function PhmaxZsLitePage({ productView, setProductView, onOpenFullVersion
               </dl>
             </>
           )}
-          <button type="button" className="btn primary phmax-lite-result__full-btn" onClick={openFull}>
-            Otevřít plnou verzi (přenese vstupy, PHAmax, PHPmax, export)
+          <p className="phmax-lite-result__total">
+            {pha1rView.status === "not-entered" ? (
+              pha1rView.headline
+            ) : (
+              <strong>{pha1rView.headline}</strong>
+            )}
+          </p>
+          {pha1rView.detail ? <p className="muted-text">{pha1rView.detail}</p> : null}
+          {pha1rView.rowLines.length > 0 ? (
+            <ul className="phmax-lite-staffing">
+              {pha1rView.rowLines.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+          {handoffNotice ? (
+            <p className="muted-text field-validation-warning" role="alert">
+              {handoffNotice}
+            </p>
+          ) : null}
+          <p className="muted-text">{ZS_LITE_PHA1R_FULL_TAB_NOTE}</p>
+          <button type="button" className="btn primary phmax-lite-result__full-btn" onClick={transferToFull}>
+            Přenést údaje do plné kalkulačky
+          </button>
+          <button type="button" className="btn ghost" onClick={browseFull}>
+            Otevřít plnou kalkulačku bez přenosu
           </button>
         </section>
       </main>
