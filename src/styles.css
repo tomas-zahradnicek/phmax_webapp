@@ -10722,6 +10722,12 @@ select:focus {
   display: none !important;
 }
 
+/* Basic + Focus: navigace průvodce je v card--onboarding. Bez ní nelze dojít na vstupy dalších kroků. */
+.calculator-shell--basic.calculator-shell--focus .product-basic-wizard.card--onboarding,
+.calculator-shell--basic.calculator-shell--focus .zs-basic-wizard.card--onboarding {
+  display: block !important;
+}
+
 .calculator-shell--focus .section-card--guide {
   display: none !important;
 }
