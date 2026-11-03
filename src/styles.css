@@ -10408,6 +10408,18 @@ select:focus {
   backdrop-filter: none;
 }
 
+.app-shell--zs .calculator-hero-shell--pro .calculator-hero-work-card__start .hero-zs-example-select,
+.app-shell--zs .calculator-hero-work-card__start .hero-zs-example-select {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  box-shadow: none;
+}
+
+.app-shell--zs .calculator-hero-shell--pro .calculator-hero-work-card__start .hero-zs-example-select .field__label--hero,
+.app-shell--zs .calculator-hero-work-card__start .hero-zs-example-select .field__label--hero {
+  color: #64748b !important;
+}
+
 .calculator-hero-shell--pro .calculator-hero-work-card__start .field__label--hero {
   color: #0e7490 !important;
 }
