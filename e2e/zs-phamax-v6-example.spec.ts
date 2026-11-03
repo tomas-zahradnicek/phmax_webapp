@@ -39,7 +39,7 @@ test.describe("ZŠ PHAmax příklad metodiky v6", () => {
 
     const anchor = page.getByRole("complementary", { name: "Hlavní výsledek výpočtu" });
     await expect(anchor.locator(".result-anchor-card__primary-label")).toHaveText("PHAmax celkem");
-    await expect(anchor.locator(".result-anchor-card__primary-value")).toHaveText("474");
+    await expect(anchor.locator(".result-anchor-card__primary-value")).toHaveText("474 h");
 
     const section = page.locator('[data-section="pha"]');
     await expect(section).toBeVisible();

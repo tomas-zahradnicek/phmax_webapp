@@ -27,8 +27,11 @@ async function loadExample(page: Page, example: string, label: RegExp) {
 }
 
 async function goToWizardStep(page: Page, step: 2 | 3 | 4, label: string) {
-  const button = page.getByRole("button", { name: new RegExp(`^${step}\\s+${label}$`) });
-  await button.click({ force: true });
+  const button = page
+    .getByRole("region", { name: "Průvodce výpočtem PHmax" })
+    .getByRole("button", { name: new RegExp(`^${step}\\s+${label}$`) });
+  await button.evaluate((el) => el.scrollIntoView({ block: "center", inline: "nearest" }));
+  await button.click();
   await expect(page.locator(`.app-shell.zs-wizard-step-${step}`)).toBeVisible();
 }
 
@@ -59,6 +62,13 @@ async function deadSummaries(page: Page): Promise<string[]> {
     }
     return found;
   });
+}
+
+function visiblePhmaxTotal(page: Page): Locator {
+  return page
+    .locator(".calculator-hero-kpi-chips__item")
+    .filter({ has: page.locator(".calculator-hero-kpi-chips__label", { hasText: /^PHmax$/ }) })
+    .locator(".calculator-hero-kpi-chips__value");
 }
 
 async function assertNoHorizontalOverflow(page: Page) {
@@ -157,12 +167,14 @@ test.describe("ZŠ PHmax disclosure wizard", () => {
 
     await goToWizardStep(page, 4, "Souhrn PHmax");
     expect(await deadSummaries(page)).toEqual([]);
-    await expect(page.getByText("934", { exact: true }).first()).toBeVisible();
+    await expect(visiblePhmaxTotal(page)).toBeVisible();
+    await expect(visiblePhmaxTotal(page)).toHaveText("934 h");
     await assertVerticalScroll(page);
 
     await goToWizardStep(page, 2, "Třídy");
     await expect(page.getByText(COMPOSITION)).toBeVisible();
-    await expect(page.getByText("934", { exact: true }).first()).toBeVisible();
+    await expect(visiblePhmaxTotal(page)).toBeVisible();
+    await expect(visiblePhmaxTotal(page)).toHaveText("934 h");
     expect(await deadSummaries(page)).toEqual([]);
     await assertVerticalScroll(page);
   });
@@ -205,7 +217,8 @@ test.describe("ZŠ PHmax disclosure wizard", () => {
       expect(await card.evaluate((el) => Boolean(el.closest("details.ux-collapsible")))).toBe(false);
     }
     await expect(sec16.getByRole("textbox", { name: "1. stupeň – třídy" })).toHaveValue("5");
-    await expect(page.getByText("934", { exact: true }).first()).toBeVisible();
+    await expect(visiblePhmaxTotal(page)).toBeVisible();
+    await expect(visiblePhmaxTotal(page)).toHaveText("934 h");
   });
 
   test("šířky 1920, 1366, 1280, 1024 a 390 nemají vodorovný přetok", async ({ page }) => {

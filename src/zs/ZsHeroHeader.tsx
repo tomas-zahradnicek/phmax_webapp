@@ -12,6 +12,7 @@ import type { ProductView } from "../ProductViewPills";
 import { ZS_PHA_HERO_EXAMPLE_SELECT_ID } from "./zs-pha-basic-wizard";
 import { shortZsHeroModeLabel } from "./zs-hero-mode-label";
 import { ZsHeroToolbar, type ZsHeroToolbarProps } from "./ZsHeroToolbar";
+import { classifyZsHeaderResults, formatZsHeaderMetricValue, type ZsHeaderFacts } from "./zs-header-results";
 
 export type ZsHeroHeaderProps = {
   heroHeaderRef: React.RefObject<HTMLElement | null>;
@@ -36,6 +37,7 @@ export type ZsHeroHeaderProps = {
   mode: CalculatorMode;
   incompleteSections: number;
   toolbar: ZsHeroToolbarProps;
+  headerFacts?: ZsHeaderFacts;
 };
 
 export function ZsHeroHeader({
@@ -61,6 +63,7 @@ export function ZsHeroHeader({
   mode,
   incompleteSections,
   toolbar,
+  headerFacts,
 }: ZsHeroHeaderProps) {
   const modeFullLabel = MODE_CONFIG[mode].label;
   const statusLabel = incompleteSections > 0 ? `${incompleteSections} nevyplněno` : "Vstupy jsou kompletní";
@@ -70,6 +73,7 @@ export function ZsHeroHeader({
     primaryLabel === "PHmax"
       ? []
       : [{ label: "PHmax", value: totalPhmax, variant: "secondary" as const }];
+  const resultMetrics = headerFacts ? classifyZsHeaderResults(headerFacts) : null;
 
   return (
     <CalculatorHeroShell
@@ -86,13 +90,22 @@ export function ZsHeroHeader({
       viewModeName="zs-view-mode"
       displayDensityName="zs-display-density"
       expertExampleSelectId={ZS_PHA_HERO_EXAMPLE_SELECT_ID}
+      showKpiLabels={resultMetrics != null}
       title="Kalkulačka PHmax, PHAmax, PHA1Rmax a PHPmax – základní škola"
       titleClassName="hero__title hero__title--sd hero__title--zs"
       showMiniLogo
       tabsAside={<HeroSecondaryNavLinks />}
       kpis={[
-        { label: primaryLabel, value: zsTabPrimaryValue, variant: "primary" },
-        ...distinctPhmax,
+        ...(resultMetrics
+          ? resultMetrics.map((item, index) => ({
+              label: item.label,
+              value: formatZsHeaderMetricValue(item),
+              variant: index === 0 ? ("primary" as const) : ("secondary" as const),
+            }))
+          : [
+              { label: primaryLabel, value: zsTabPrimaryValue, variant: "primary" as const },
+              ...distinctPhmax,
+            ]),
         {
           label: "Režim",
           value: shortZsHeroModeLabel(mode),
