@@ -8019,6 +8019,13 @@ select:focus {
     backdrop-filter: blur(10px);
   }
 
+  /* ZŠ hero is taller than the other modules. While it still occupies the
+     summary band, let the header stay clickable. The summary returns on scroll. */
+  body.zs-mobile-summary-yields .calculator-mobile-scroll-results {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   .calculator-mobile-scroll-results__hero {
     flex-shrink: 0;
     display: flex;

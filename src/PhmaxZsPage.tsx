@@ -83,6 +83,8 @@ import { buildZsPhmaxTabPanelProps } from "./zs/build-zs-phmax-tab-panel-props";
 import { ZsPhmaxTabPanel } from "./zs/ZsPhmaxTabPanel";
 import { ZsSetupSection } from "./zs/ZsSetupSection";
 import { ZsHeroHeader } from "./zs/ZsHeroHeader";
+import { presentZsHeaderResults, type ZsHeaderFacts } from "./zs/zs-header-results";
+import { useZsMobileSummaryYield } from "./zs/zs-mobile-summary-yield";
 import { CalculatorSchoolProfileBanner } from "./CalculatorSchoolProfileBanner";
 import { usePrefillExportLabelFromSchoolProfile } from "./school-profile/use-prefill-export-label";
 import { ZsQuickOnboardingGuide } from "./zs/ZsQuickOnboardingGuide";
@@ -284,6 +286,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
   const [displayDensity, setDisplayDensity] = useDisplayDensity();
   const [focusMode, setFocusMode] = useCalculatorFocusMode();
   const heroHeaderRef = useRef<HTMLElement>(null);
+  useZsMobileSummaryYield(heroHeaderRef);
   const [viewMode, setViewMode] = useState<"basic" | "expert">(() => {
     try {
       const stored = localStorage.getItem(ZS_VIEW_MODE_LS_KEY);
@@ -1809,6 +1812,18 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
 
   const zsTabPrimaryLabel = tab === "phmax" ? "PHmax celkem" : tab === "pha" ? "PHAmax celkem" : "PHPmax celkem";
   const zsTabPrimaryValue = tab === "phmax" ? totalPhmax : tab === "pha" ? totalPha : totalPhp;
+  const zsHeaderFacts: ZsHeaderFacts = {
+    ...zsValidationInput,
+    totalPhmax,
+    totalPha,
+    totalPhp,
+    totalPha1r: pha1rResult.totalPha1r,
+    phpExcludedSchool,
+    pha1rClassCount: pha1rClasses.length,
+    pha1rInvalid: pha1rValidationIssues.length > 0,
+    pha1rSchoolExcluded: pha1rResult.schoolExcluded,
+  };
+  const zsHeaderPresentation = presentZsHeaderResults(zsHeaderFacts);
   const zsHasData = totalPhmax > 0 || totalPha > 0 || totalPhp > 0;
   const zsIncompleteWhatNow = useMemo(() => {
     const first = validationIssues[0];
@@ -2029,6 +2044,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
           zsTabPrimaryLabel={zsTabPrimaryLabel}
           zsTabPrimaryValue={zsTabPrimaryValue}
           totalPhmax={totalPhmax}
+          headerFacts={zsHeaderFacts}
           mode={mode}
           incompleteSections={incompleteSections}
           toolbar={{
@@ -2127,7 +2143,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
           sticky={{
             anchorRef: heroHeaderRef,
             primaryLabel: zsTabPrimaryLabel,
-            primaryValue: zsTabPrimaryValue,
+            primaryValue: zsHeaderPresentation.primaryText,
             statusText: zsVerdict.label,
             tone: zsVerdict.tone,
             onSave: saveSnapshotManually,
@@ -2140,6 +2156,13 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
             incompleteSections,
             zsTabPrimaryLabel,
             zsTabPrimaryValue,
+            presentedResults: {
+              primary: zsHeaderPresentation.primaryText,
+              phmax: zsHeaderPresentation.text.phmax,
+              pha: zsHeaderPresentation.text.pha,
+              php: zsHeaderPresentation.text.php,
+              pha1r: zsHeaderPresentation.text.pha1r,
+            },
             totalPhmax,
             totalPha,
             totalPhp,

@@ -80,6 +80,9 @@ export type CalculatorHeroShellProps = {
   /** Přehled školy – bez panelu Zobrazení a režimů kalkulačky. */
   showDisplaySettings?: boolean;
 
+  /** Popisky KPI zůstanou viditelné i v expertním režimu. Výchozí chování modulů nemění. */
+  showKpiLabels?: boolean;
+
 };
 
 
@@ -155,6 +158,8 @@ export function CalculatorHeroShell({
   className,
 
   showDisplaySettings = true,
+
+  showKpiLabels = false,
 
 }: CalculatorHeroShellProps) {
 
@@ -235,7 +240,7 @@ export function CalculatorHeroShell({
 
         <CalculatorHeroKpiChips
           kpis={kpis}
-          compact={showDisplaySettings && viewMode === "expert"}
+          compact={showKpiLabels ? false : showDisplaySettings && viewMode === "expert"}
           theme="workspace"
         />
 

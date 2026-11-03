@@ -32,6 +32,14 @@ export type ZsWorkflowDockPanelProps = {
   phmaxTabDone?: boolean;
   phaTabDone?: boolean;
   phpTabDone?: boolean;
+  /** Formatted ZŠ states. Numeric totals stay available for progress flags. */
+  presentedResults?: {
+    primary: React.ReactNode;
+    phmax: React.ReactNode;
+    pha: React.ReactNode;
+    php: React.ReactNode;
+    pha1r: React.ReactNode;
+  };
 };
 
 export function ZsWorkflowDockPanel({
@@ -60,6 +68,7 @@ export function ZsWorkflowDockPanel({
   phmaxTabDone = false,
   phaTabDone = false,
   phpTabDone = false,
+  presentedResults,
 }: ZsWorkflowDockPanelProps) {
   return (
     <CalculatorWorkflowDock
@@ -90,13 +99,13 @@ export function ZsWorkflowDockPanel({
       }
       tone={zsVerdictTone}
       primaryLabel={zsTabPrimaryLabel}
-      primaryValue={zsTabPrimaryValue}
+      primaryValue={presentedResults?.primary ?? zsTabPrimaryValue}
       statusBadge={zsVerdictLabel}
       stats={[
-        { label: "PHmax", value: totalPhmax },
-        { label: "PHAmax", value: totalPha },
-        { label: "PHPmax", value: totalPhp },
-        { label: "PHA1Rmax", value: totalPha1r },
+        { label: "PHmax", value: presentedResults?.phmax ?? totalPhmax },
+        { label: "PHAmax", value: presentedResults?.pha ?? totalPha },
+        { label: "PHPmax", value: presentedResults?.php ?? totalPhp },
+        { label: "PHA1Rmax", value: presentedResults?.pha1r ?? totalPha1r },
         { label: "Režim", value: formatModeRežimStatValue(MODE_CONFIG[mode].label) },
       ]}
       verdictLabel={zsVerdictLabel}
