@@ -7795,12 +7795,10 @@ select:focus {
 @keyframes zs-basic-wizard-step-ahead-next {
   0%,
   100% {
-    transform: translateY(0);
     box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.14);
   }
 
   50% {
-    transform: translateY(-1px);
     box-shadow: 0 0 0 5px rgba(14, 165, 233, 0.22);
   }
 }
@@ -10720,6 +10718,12 @@ select:focus {
 .calculator-shell--focus .page-toc,
 .calculator-shell--focus .page-toc-mobile-trigger {
   display: none !important;
+}
+
+/* Basic + Focus: navigace průvodce je v card--onboarding. Bez ní nelze dojít na vstupy dalších kroků. */
+.calculator-shell--basic.calculator-shell--focus .product-basic-wizard.card--onboarding,
+.calculator-shell--basic.calculator-shell--focus .zs-basic-wizard.card--onboarding {
+  display: block !important;
 }
 
 .calculator-shell--focus .section-card--guide {

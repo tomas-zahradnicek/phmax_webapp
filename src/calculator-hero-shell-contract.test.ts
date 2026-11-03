@@ -18,6 +18,7 @@ describe("CalculatorHeroShell contract (variant A)", () => {
     expect(readSource("src/CalculatorHeroSettingsMenu.tsx")).toContain("Zobrazení");
     expect(readSource("src/CalculatorHeroSettingsMenu.tsx")).toContain("createPortal");
     expect(readSource("src/CalculatorHeroSettingsMenu.tsx")).toContain("hero-toolbar-dropdown-portal-root");
+    expect(readSource("src/CalculatorHeroSettingsMenu.tsx")).not.toContain("key={positionTick}");
     expect(readSource("src/styles.css")).toContain(".calculator-hero-settings__panel--portal");
     expect(readSource("src/styles.css")).toContain(".calculator-hero-shell");
     expect(readSource("src/styles.css")).toContain(".calculator-hero-kpi-chips");
