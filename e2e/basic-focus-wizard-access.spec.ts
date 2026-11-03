@@ -191,6 +191,7 @@ async function expectValueSurvivesDisplayChanges(page: Page, input: Locator, val
   await openDisplaySettings(page);
   await panel().getByRole("checkbox", { name: "Fokus na formulář" }).check();
   await expect(page.locator(".calculator-shell--focus")).toBeVisible();
+  await openDisplaySettings(page);
   await panel().getByRole("radio", { name: "Pohodlné" }).check();
   await expect(input).toHaveValue(value);
   await page.keyboard.press("Escape");

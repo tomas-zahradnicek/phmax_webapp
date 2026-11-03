@@ -56,18 +56,28 @@ export function CalculatorHeroSettingsMenu({
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const coordsRef = useRef<{ top: number; left: number; width: number } | null>(null);
-  const [positionTick, setPositionTick] = useState(0);
+  const portalRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const updatePosition = useCallback(() => {
     const el = triggerRef.current;
     if (!el) return null;
     const rect = el.getBoundingClientRect();
     const width = panelWidth();
-    const left = Math.max(12, Math.min(rect.right - width, window.innerWidth - width - 12));
-    const next = { top: rect.bottom + 6, left, width };
-    coordsRef.current = next;
-    setPositionTick((tick) => tick + 1);
+    const left = Math.round(Math.max(12, Math.min(rect.right - width, window.innerWidth - width - 12)));
+    const panelHeight = portalRef.current?.offsetHeight ?? 0;
+    let top = Math.round(rect.bottom + 6);
+    if (panelHeight > 0) {
+      const overflow = top + panelHeight - (window.innerHeight - 8);
+      if (overflow > 0) {
+        const above = Math.round(rect.top - 6 - panelHeight);
+        top = above >= 8 ? above : Math.max(8, top - overflow);
+      }
+    }
+    const next = { top, left, width };
+    setCoords((prev) =>
+      prev && prev.top === next.top && prev.left === next.left && prev.width === next.width ? prev : next,
+    );
     return next;
   }, []);
 
@@ -184,15 +194,15 @@ export function CalculatorHeroSettingsMenu({
           <span className="calculator-hero-settings__badge">{viewBadge}</span>
         </button>
       </div>
-      {open && coordsRef.current && typeof document !== "undefined"
+      {open && coords && typeof document !== "undefined"
         ? createPortal(
             <div
-              key={positionTick}
+              ref={portalRef}
               className="hero-toolbar-dropdown-portal-root calculator-hero-settings-portal-root"
               style={{
-                top: coordsRef.current.top,
-                left: coordsRef.current.left,
-                width: coordsRef.current.width,
+                top: coords.top,
+                left: coords.left,
+                width: coords.width,
               }}
             >
               {panelContent}
