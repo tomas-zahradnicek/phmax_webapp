@@ -25,7 +25,8 @@ async function visibleInFirstViewport(page: Page, selector: string): Promise<str
     const x = Math.min(Math.max(rect.left + Math.max(rect.width / 2, 1), 1), window.innerWidth - 2);
     const y = Math.min(Math.max(rect.top + Math.min(rect.height / 2, 12), 1), window.innerHeight - 2);
     const hit = document.elementFromPoint(x, y);
-    const inside = rect.width >= 2 && rect.height >= 2 && rect.top >= 0 && rect.bottom <= window.innerHeight;
+    const margin = 16;
+    const inside = rect.width >= 2 && rect.height >= 2 && rect.top >= 0 && rect.bottom <= window.innerHeight - margin;
     const uncovered = Boolean(hit && (el === hit || el.contains(hit)));
     if (inside && uncovered) return "ok";
     const hitName = hit instanceof Element ? hit.tagName + "." + String(hit.className).slice(0, 40) : "none";
@@ -36,6 +37,7 @@ async function visibleInFirstViewport(page: Page, selector: string): Promise<str
 test.describe("ZŠ první krok je hned vidět", () => {
   test("A–C. nadpis kroku a první vstup jsou ve výřezu a primární akce je jedna", async ({ page }) => {
     await openFreshZs(page);
+    await page.evaluate(() => document.fonts.ready);
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize(viewport);
       await page.evaluate(() => window.scrollTo(0, 0));
