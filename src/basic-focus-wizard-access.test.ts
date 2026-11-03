@@ -47,4 +47,13 @@ describe("Basic + Focus wizard access", () => {
     expect(readSource("src/pv/PhmaxPvLitePage.tsx")).not.toContain("product-basic-wizard");
     expect(readSource("src/sd/PhmaxSdLitePage.tsx")).not.toContain("product-basic-wizard");
   });
+
+  it("zvýraznění dalšího kroku nemění polohu tlačítka", () => {
+    const css = readSource("src/styles.css");
+    const start = css.indexOf("@keyframes zs-basic-wizard-step-ahead-next");
+    const end = css.indexOf(".zs-basic-wizard__step {", start);
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+    expect(css.slice(start, end)).not.toMatch(/transform\s*:/);
+  });
 });

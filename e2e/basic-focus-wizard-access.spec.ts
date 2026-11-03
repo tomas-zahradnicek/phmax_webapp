@@ -90,6 +90,9 @@ function shellStep(prefix: string, step: 1 | 2) {
 async function seedModule(page: Page, module: ModuleCase, wizardStep: "1" | "2", focus: "on" | "off") {
   await page.addInitScript(
     ({ module: item, wizardStep: step, focus: focusMode, focusKey, densityKey, coachmarkKey, tourKeys }) => {
+      const marker = `phmax-e2e-seed:${item.wizardKey}:${step}:${focusMode}`;
+      if (sessionStorage.getItem(marker) === "1") return;
+      sessionStorage.setItem(marker, "1");
       localStorage.removeItem(item.storageKey);
       localStorage.setItem(item.viewModeKey, "basic");
       localStorage.setItem(item.wizardKey, step);
@@ -137,39 +140,58 @@ function inputSection(page: Page, section: string) {
 }
 
 async function activateByKeyboard(locator: Locator) {
-  await expectHitTarget(locator);
+  await expect(locator).toBeVisible();
+  await expect(locator).toBeEnabled();
   await locator.focus();
   await expect(locator).toBeFocused();
   await locator.press("Enter");
 }
 
+async function activateByPointer(locator: Locator) {
+  await expectHitTarget(locator);
+  await locator.click();
+}
+
 async function openDisplaySettings(page: Page) {
-  await page.getByRole("button", { name: /Zobrazení/ }).click();
+  const trigger = page.getByRole("button", { name: /Zobrazení/ });
+  if ((await trigger.getAttribute("aria-expanded")) === "true") {
+    await page.keyboard.press("Escape");
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  }
+  await trigger.evaluate((el) => {
+    el.scrollIntoView({ block: "center", behavior: "instant" });
+  });
+  await trigger.click();
   await expect(page.getByRole("region", { name: "Nastavení zobrazení kalkulačky" })).toBeVisible();
 }
 
 async function expectValueSurvivesDisplayChanges(page: Page, input: Locator, value: string) {
+  const panel = () => page.getByRole("region", { name: "Nastavení zobrazení kalkulačky" });
+
   await openDisplaySettings(page);
-  const panel = page.getByRole("region", { name: "Nastavení zobrazení kalkulačky" });
-  await panel.getByRole("radio", { name: "Expertní" }).check();
+  await panel().getByRole("radio", { name: "Expertní" }).check();
   await expect(page.locator(".calculator-shell--expert")).toBeVisible();
   await expect(input).toHaveValue(value);
 
-  await panel.getByRole("radio", { name: "Základní" }).check();
+  await openDisplaySettings(page);
+  await panel().getByRole("radio", { name: "Základní" }).check();
   await expect(page.locator(".calculator-shell--basic")).toBeVisible();
   await expect(input).toHaveValue(value);
 
-  await panel.getByRole("radio", { name: "Kompaktní" }).check();
+  await openDisplaySettings(page);
+  await panel().getByRole("radio", { name: "Kompaktní" }).check();
   await expect(page.locator(".calculator-shell--density-compact")).toBeVisible();
   await expect(input).toHaveValue(value);
 
-  await panel.getByRole("checkbox", { name: "Fokus na formulář" }).uncheck();
+  await openDisplaySettings(page);
+  await panel().getByRole("checkbox", { name: "Fokus na formulář" }).uncheck();
   await expect(page.locator(".calculator-shell--focus")).toHaveCount(0);
   await expect(input).toHaveValue(value);
 
-  await panel.getByRole("checkbox", { name: "Fokus na formulář" }).check();
+  await openDisplaySettings(page);
+  await panel().getByRole("checkbox", { name: "Fokus na formulář" }).check();
   await expect(page.locator(".calculator-shell--focus")).toBeVisible();
-  await panel.getByRole("radio", { name: "Pohodlné" }).check();
+  await panel().getByRole("radio", { name: "Pohodlné" }).check();
   await expect(input).toHaveValue(value);
   await page.keyboard.press("Escape");
 }
@@ -190,7 +212,7 @@ test.describe("Basic + Focus – přístup k průvodci", () => {
       const nextStep = page.getByRole("button", { name: module.inputStepName });
       const back = wizardNav(page).getByRole("button", { name: "Zpět" });
       await expect(back).toBeDisabled();
-      await activateByKeyboard(nextStep);
+      await activateByPointer(nextStep);
 
       await expect(page.locator(shellStep(module.stepPrefix, 2))).toBeVisible();
       const field = module.input(page);
@@ -204,6 +226,7 @@ test.describe("Basic + Focus – přístup k průvodci", () => {
       await expect(inputSection(page, module.inputSection)).toBeHidden();
 
       await activateByKeyboard(nextStep);
+      await expect(page.locator(shellStep(module.stepPrefix, 2))).toBeVisible();
       await expect(field).toHaveValue("4");
       await expectValueSurvivesDisplayChanges(page, field, "4");
 
@@ -233,7 +256,7 @@ test.describe("Basic + Focus – přístup k průvodci", () => {
       await gotoProductView(page, module.id);
       await expect(page.locator(".calculator-shell--basic")).toBeVisible();
       await expect(page.locator(".calculator-shell--focus")).toHaveCount(0);
-      await activateByKeyboard(page.getByRole("button", { name: module.inputStepName }));
+      await activateByPointer(page.getByRole("button", { name: module.inputStepName }));
       await expect(inputSection(page, module.inputSection)).toBeVisible();
       await activateByKeyboard(wizardNav(page).getByRole("button", { name: "Zpět" }));
       await expect(page.locator(shellStep(module.stepPrefix, 1))).toBeVisible();
