@@ -65,6 +65,11 @@ export function ZsHeroHeader({
   const modeFullLabel = MODE_CONFIG[mode].label;
   const statusLabel = incompleteSections > 0 ? `${incompleteSections} nevyplněno` : "Vstupy jsou kompletní";
   const statusTone: CalculatorVerdictTone = incompleteSections > 0 ? "warning" : "ok";
+  const primaryLabel = zsTabPrimaryLabel.replace(" celkem", "");
+  const distinctPhmax =
+    primaryLabel === "PHmax"
+      ? []
+      : [{ label: "PHmax", value: totalPhmax, variant: "secondary" as const }];
 
   return (
     <CalculatorHeroShell
@@ -86,8 +91,8 @@ export function ZsHeroHeader({
       showMiniLogo
       tabsAside={<HeroSecondaryNavLinks />}
       kpis={[
-        { label: zsTabPrimaryLabel.replace(" celkem", ""), value: zsTabPrimaryValue, variant: "primary" },
-        { label: "PHmax", value: totalPhmax, variant: "secondary" },
+        { label: primaryLabel, value: zsTabPrimaryValue, variant: "primary" },
+        ...distinctPhmax,
         {
           label: "Režim",
           value: shortZsHeroModeLabel(mode),
