@@ -10,6 +10,8 @@ type CalculatorViewModeToggleProps = {
   className?: string;
   /** Bez odstavce pod přepínačem (popis v tooltipu nad skupinou). */
   compact?: boolean;
+  labels?: { basic: string; expert: string };
+  titles?: { basic: string; expert: string };
 };
 
 /** Základní / expertní s krátkým vysvětlením aktivního režimu. */
@@ -20,6 +22,8 @@ export function CalculatorViewModeToggle({
   setViewMode,
   className,
   compact = false,
+  labels = { basic: "Základní", expert: "Expertní" },
+  titles = { basic: VIEW_MODE_HINT_BASIC, expert: VIEW_MODE_HINT_EXPERT },
 }: CalculatorViewModeToggleProps) {
   const hintId = `${name}-view-mode-hint`;
   return (
@@ -32,18 +36,18 @@ export function CalculatorViewModeToggle({
         aria-label={`Režim zobrazení ${moduleLabel}`}
         aria-describedby={compact ? undefined : hintId}
       >
-        <label title={VIEW_MODE_HINT_BASIC}>
+        <label title={titles.basic}>
           <input type="radio" name={name} checked={viewMode === "basic"} onChange={() => setViewMode("basic")} />
-          Základní
+          {labels.basic}
         </label>
-        <label title={VIEW_MODE_HINT_EXPERT}>
+        <label title={titles.expert}>
           <input type="radio" name={name} checked={viewMode === "expert"} onChange={() => setViewMode("expert")} />
-          Expertní
+          {labels.expert}
         </label>
       </div>
       {compact ? null : (
         <p id={hintId} className="calculator-view-mode-toggle__hint" role="note">
-          {viewMode === "basic" ? VIEW_MODE_HINT_BASIC : VIEW_MODE_HINT_EXPERT}
+          {viewMode === "basic" ? titles.basic : titles.expert}
         </p>
       )}
     </div>

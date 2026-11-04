@@ -4,10 +4,11 @@ import { CALCULATOR_EXPERT_FIRST_SWITCH_LS_KEY } from "./calculator-ui-constants
 type CalculatorExpertModeNoticeProps = {
   viewMode: "basic" | "expert";
   exampleSelectId?: string;
+  text?: string;
 };
 
 /** Jednorázový banner po prvním přepnutí na Expertní. */
-export function CalculatorExpertModeNotice({ viewMode, exampleSelectId }: CalculatorExpertModeNoticeProps) {
+export function CalculatorExpertModeNotice({ viewMode, exampleSelectId, text }: CalculatorExpertModeNoticeProps) {
   const [visible, setVisible] = React.useState(false);
 
   React.useEffect(() => {
@@ -41,8 +42,12 @@ export function CalculatorExpertModeNotice({ viewMode, exampleSelectId }: Calcul
   return (
     <div className="calculator-expert-notice" role="status" data-testid="calculator-expert-notice">
       <p className="calculator-expert-notice__text">
-        Expertní režim: všechny panely a exporty v jedné liště. Ukázku zvolíte v comboboxu{" "}
-        <strong>Příkladové výpočty</strong> v Akcích, nebo rovnou vyplňte formulář.
+        {text ?? (
+          <>
+            Expertní režim: všechny panely a exporty v jedné liště. Ukázku zvolíte v comboboxu{" "}
+            <strong>Příkladové výpočty</strong> v Akcích, nebo rovnou vyplňte formulář.
+          </>
+        )}
       </p>
       <div className="calculator-expert-notice__actions">
         {exampleSelectId ? (

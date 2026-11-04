@@ -97,12 +97,13 @@ async function seedModule(page: Page, module: ModuleCase, wizardStep: "1" | "2",
       localStorage.setItem(item.viewModeKey, "basic");
       localStorage.setItem(item.wizardKey, step);
       localStorage.setItem(focusKey, focusMode);
-      localStorage.setItem(densityKey, "comfortable");
+      localStorage.setItem(densityKey, item.id === "zs" ? "compact" : "comfortable");
       localStorage.setItem(coachmarkKey, "1");
       for (const key of tourKeys) localStorage.setItem(key, "1");
     },
     {
       module: {
+        id: module.id,
         storageKey: module.storageKey,
         viewModeKey: module.viewModeKey,
         wizardKey: module.wizardKey,
@@ -165,8 +166,33 @@ async function openDisplaySettings(page: Page) {
   await expect(page.getByRole("region", { name: "Nastavení zobrazení kalkulačky" })).toBeVisible();
 }
 
-async function expectValueSurvivesDisplayChanges(page: Page, input: Locator, value: string) {
+async function expectValueSurvivesDisplayChanges(page: Page, input: Locator, value: string, moduleId: ModuleCase["id"]) {
   const panel = () => page.getByRole("region", { name: "Nastavení zobrazení kalkulačky" });
+
+  if (moduleId === "zs") {
+    await openDisplaySettings(page);
+    await expect(panel().getByRole("radio")).toHaveCount(2);
+    await expect(panel().getByRole("radio", { name: "Průvodce" })).toBeChecked();
+    await expect(panel().getByRole("radio", { name: "Kompaktní" })).toHaveCount(0);
+    await expect(panel().getByRole("checkbox", { name: "Fokus na formulář" })).toHaveCount(0);
+    await panel().getByRole("radio", { name: "Všechna pole" }).check();
+    await expect(page.locator(".calculator-shell--expert")).toBeVisible();
+    await expect(page.locator(".calculator-shell--focus")).toHaveCount(0);
+    await expect(page.locator(".calculator-shell--density-compact")).toHaveCount(0);
+    await expect(input).toHaveValue(value);
+
+    await openDisplaySettings(page);
+    await panel().getByRole("radio", { name: "Průvodce" }).check();
+    await expect(page.locator(".calculator-shell--basic")).toBeVisible();
+    await expect(input).toHaveValue(value);
+    const stored = await page.evaluate(() => ({
+      density: localStorage.getItem("phmax-display-density"),
+      focus: localStorage.getItem("phmax-calculator-focus"),
+    }));
+    expect(stored).toEqual({ density: "compact", focus: "on" });
+    await page.keyboard.press("Escape");
+    return;
+  }
 
   await openDisplaySettings(page);
   await panel().getByRole("radio", { name: "Expertní" }).check();
@@ -204,11 +230,20 @@ test.describe("Basic + Focus – přístup k průvodci", () => {
       await seedModule(page, module, "1", "on");
       await gotoProductView(page, module.id);
 
-      const shell = page.locator(".calculator-shell--basic.calculator-shell--focus");
+      const shell =
+        module.id === "zs"
+          ? page.locator(".calculator-shell--basic")
+          : page.locator(".calculator-shell--basic.calculator-shell--focus");
       await expect(shell).toBeVisible();
+      if (module.id === "zs") {
+        await expect(page.locator(".calculator-shell--focus")).toHaveCount(0);
+        await expect(page.locator(".calculator-shell--density-compact")).toHaveCount(0);
+      }
       await expect(page.locator(shellStep(module.stepPrefix, 1))).toBeVisible();
       await expect(inputSection(page, module.inputSection)).toBeHidden();
-      await expect(page.locator(".page-toc").first()).toBeHidden();
+      if (module.id !== "zs") {
+        await expect(page.locator(".page-toc").first()).toBeHidden();
+      }
 
       const nextStep = page.getByRole("button", { name: module.inputStepName });
       const back = wizardNav(page).getByRole("button", { name: "Zpět" });
@@ -229,11 +264,16 @@ test.describe("Basic + Focus – přístup k průvodci", () => {
       await activateByKeyboard(nextStep);
       await expect(page.locator(shellStep(module.stepPrefix, 2))).toBeVisible();
       await expect(field).toHaveValue("4");
-      await expectValueSurvivesDisplayChanges(page, field, "4");
+      await expectValueSurvivesDisplayChanges(page, field, "4", module.id);
 
       await page.reload();
       await expect(page.locator(shellStep(module.stepPrefix, 2))).toBeVisible();
-      await expect(page.locator(".calculator-shell--focus")).toBeVisible();
+      if (module.id === "zs") {
+        await expect(page.locator(".calculator-shell--focus")).toHaveCount(0);
+        await expect(page.locator(".calculator-shell--density-compact")).toHaveCount(0);
+      } else {
+        await expect(page.locator(".calculator-shell--focus")).toBeVisible();
+      }
       await expect(module.input(page)).toHaveValue("4");
     });
   }
@@ -284,11 +324,18 @@ test.describe("Basic + Focus – přístup k průvodci", () => {
         },
       );
       await gotoProductView(page, module.id);
-      await expect(page.locator(".calculator-shell--expert.calculator-shell--focus")).toBeVisible();
-      await expect(page.locator(".product-basic-wizard, .zs-basic-wizard")).toHaveCount(0);
-      await expect(page.locator(".card--onboarding")).toBeHidden();
+      if (module.id === "zs") {
+        await expect(page.locator(".calculator-shell--expert")).toBeVisible();
+        await expect(page.locator(".calculator-shell--focus")).toHaveCount(0);
+        await expect(page.locator(".zs-basic-wizard")).toHaveCount(0);
+        await expect(page.locator(".card--onboarding")).toBeVisible();
+      } else {
+        await expect(page.locator(".calculator-shell--expert.calculator-shell--focus")).toBeVisible();
+        await expect(page.locator(".product-basic-wizard, .zs-basic-wizard")).toHaveCount(0);
+        await expect(page.locator(".card--onboarding")).toBeHidden();
+        await expect(page.locator(".methodology-strip, .ux-methodology").first()).toBeHidden();
+      }
       await expect(inputSection(page, module.inputSection)).toBeVisible();
-      await expect(page.locator(".methodology-strip, .ux-methodology").first()).toBeHidden();
     }
   });
 

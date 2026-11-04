@@ -113,7 +113,7 @@ import { buildZsBandUpgradeHints } from "./zs/zs-band-sensitivity";
 import { buildZsPhaBandUpgradeHints, buildZsPhpBandUpgradeHints } from "./zs/zs-pha-php-band-sensitivity";
 import { ZsCalculatorShell } from "./zs/ZsCalculatorShell";
 import { useDisplayDensity } from "./useDisplayDensity";
-import { calculatorShellClassName } from "./calculator-view-mode";
+import { zsCalculatorShellClassName } from "./zs/zs-display-mode";
 import type { PhmaxZsPhmaxPane } from "./PhmaxZsPhmaxSubNav";
 import {
   readZsBasicWizardStep,
@@ -2021,7 +2021,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
 
   return (
     <div
-      className={`app-shell app-shell--gradient app-shell--zs ${calculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${zsPhaBasicWizardActive || zsPhpBasicWizardActive ? " product-basic-wizard-active" : ""}${phmaxPaneShellClass}`}
+      className={`app-shell app-shell--gradient app-shell--zs ${zsCalculatorShellClassName(viewMode, displayDensity, focusMode)} app-shell--with-toc${validationHighlight ? " app-shell--validation-hint" : ""}${zsBasicWizardActive ? ` zs-basic-wizard-active zs-wizard-step-${zsWizardStep}` : ""}${zsPhaBasicWizardActive || zsPhpBasicWizardActive ? " product-basic-wizard-active" : ""}${phmaxPaneShellClass}`}
     >
       <div className="container container--app">
         <ZsHeroHeader
