@@ -63,6 +63,7 @@ export function ZsBasicWizard({
         <div className="pill pill--step">Průvodce · krok {step} ze {ZS_BASIC_WIZARD_STEP_COUNT}</div>
         {step === 1 ? null : <h2 className="section-title">{meta.label}</h2>}
         <p className="muted-text zs-basic-wizard__lead">{meta.lead}</p>
+        {step === 2 || (step === 3 && hasExceptionModules) ? null : (
         <p className="muted-text zs-basic-wizard__context">
           <strong>Aktivní režim:</strong> {modeLabel}
           {step === 3 && !hasExceptionModules ? (
@@ -72,6 +73,7 @@ export function ZsBasicWizard({
             </>
           ) : null}
         </p>
+        )}
       </div>
 
       {step === 1 ? (

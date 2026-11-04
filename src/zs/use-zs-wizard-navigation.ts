@@ -12,6 +12,11 @@ import {
 } from "../zs-basic-wizard";
 import { buildZsWizardVisibleExceptionIds, ZS_WIZARD_CHOICE_OPTIONS } from "./zs-wizard-choices";
 
+/** V průvodci stačí Zpět / Další. Části PHmax zůstávají ve Všechna pole. */
+export function zsShowPhmaxSubNav(tab: "phmax" | "pha" | "php", zsBasicWizardActive: boolean): boolean {
+  return tab === "phmax" && !zsBasicWizardActive;
+}
+
 type UseZsWizardNavigationInput = {
   tab: "phmax" | "pha" | "php";
   viewMode: "basic" | "expert";
@@ -43,7 +48,7 @@ export function useZsWizardNavigation({
 
   const effectivePhmaxPane: PhmaxZsPhmaxPane =
     zsBasicWizardActive && zsWizardStep >= 2 ? phmaxPaneFromWizardStep(zsWizardStep) : phmaxSubTab;
-  const showPhmaxSubNav = tab === "phmax" && (!zsBasicWizardActive || zsWizardStep >= 2);
+  const showPhmaxSubNav = zsShowPhmaxSubNav(tab, zsBasicWizardActive);
   const phmaxPaneShellClass =
     tab === "phmax" && (!zsBasicWizardActive || zsWizardStep >= 2)
       ? ` phmax-zs-pane-active-${effectivePhmaxPane}`

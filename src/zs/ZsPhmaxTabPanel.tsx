@@ -13,6 +13,7 @@ import type {
   ZsMinorityBandKind,
 } from "../phmax-zs-logic";
 import { ZsPhmaxBasicSection, type ZsPhmaxBand } from "./ZsPhmaxBasicSection";
+import { ZS_EXCEPTIONS_STEP_NOTE } from "../zs-basic-wizard";
 import { ZsPhmaxBreakdownTable } from "./ZsPhmaxBreakdownTable";
 import { ZsPhmaxExtrasSection } from "./ZsPhmaxExtrasSection";
 import { ZsPhmaxGymSection, type ZsPhmaxGymComputedRow } from "./ZsPhmaxGymSection";
@@ -262,6 +263,11 @@ export function ZsPhmaxTabPanel(props: ZsPhmaxTabPanelProps) {
         totalPhmax={props.totalPhmax}
       />
 
+      {viewMode === "expert" && zsWizardHasExceptions ? (
+        <p className="muted-text" data-section="zs-phmax-exceptions-note">
+          {ZS_EXCEPTIONS_STEP_NOTE}
+        </p>
+      ) : null}
       <div className="grid two zs-phmax-module-row" data-section="zs-phmax-exceptions">
         <ZsPhmaxSec16Section
           viewMode={viewMode}
