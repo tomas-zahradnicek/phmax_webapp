@@ -83,6 +83,16 @@ export type CalculatorHeroShellProps = {
   /** Popisky KPI zůstanou viditelné i v expertním režimu. Výchozí chování modulů nemění. */
   showKpiLabels?: boolean;
 
+  showLayoutControls?: boolean;
+
+  viewModeLabels?: { basic: string; expert: string };
+
+  viewModeTitles?: { basic: string; expert: string };
+
+  viewModeHint?: string;
+
+  expertNoticeText?: string;
+
 };
 
 
@@ -161,6 +171,16 @@ export function CalculatorHeroShell({
 
   showKpiLabels = false,
 
+  showLayoutControls = true,
+
+  viewModeLabels,
+
+  viewModeTitles,
+
+  viewModeHint,
+
+  expertNoticeText,
+
 }: CalculatorHeroShellProps) {
 
   const showAbout = (showDisplaySettings ? viewMode === "basic" : true) && aboutContent != null;
@@ -220,6 +240,11 @@ export function CalculatorHeroShell({
               setFocusMode={setFocusMode}
               expertExampleSelectId={expertExampleSelectId}
               tone="header"
+              showLayoutControls={showLayoutControls}
+              viewModeLabels={viewModeLabels}
+              viewModeTitles={viewModeTitles}
+              viewModeHint={viewModeHint}
+              expertNoticeText={expertNoticeText}
             />
           ) : null}
 

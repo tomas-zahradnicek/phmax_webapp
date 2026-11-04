@@ -114,7 +114,7 @@ test.describe("ZŠ první krok je hned vidět", () => {
     await expect(page.getByRole("region", { name: "Průvodce výpočtem PHmax" })).toBeVisible();
 
     await page.getByRole("button", { name: /Zobrazení/ }).click();
-    await page.getByRole("radio", { name: "Expertní" }).check();
+    await page.getByRole("radio", { name: "Všechna pole" }).check();
     await expect(page.locator(".app-shell--zs")).not.toHaveClass(/zs-basic-wizard-active/);
     await expect(page.locator("#zs-mode-select")).toBeVisible();
     await expect(page.locator("#zs-hero-example-select")).toBeAttached();

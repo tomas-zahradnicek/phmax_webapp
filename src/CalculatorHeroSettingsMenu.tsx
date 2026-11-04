@@ -33,6 +33,12 @@ export type CalculatorHeroSettingsMenuProps = {
   expertExampleSelectId?: string;
   /** header = tmavá hlavička shellu, hero = modrý gradient. */
   tone?: "hero" | "header";
+  /** ZŠ má jen přepínač režimu. Ostatní kalkulačky dál ukazují hustotu a Fokus. */
+  showLayoutControls?: boolean;
+  viewModeLabels?: { basic: string; expert: string };
+  viewModeTitles?: { basic: string; expert: string };
+  viewModeHint?: string;
+  expertNoticeText?: string;
 };
 
 /** Režim, rozložení a fokus – mimo hlavní hero řádek (variant A). */
@@ -48,11 +54,20 @@ export function CalculatorHeroSettingsMenu({
   setFocusMode,
   expertExampleSelectId,
   tone = "hero",
+  showLayoutControls = true,
+  viewModeLabels,
+  viewModeTitles,
+  viewModeHint,
+  expertNoticeText,
 }: CalculatorHeroSettingsMenuProps) {
   const viewLegendId = useId();
   const layoutLegendId = useId();
   const panelId = useId();
-  const viewBadge = viewMode === "expert" ? "Expertní" : "Základní";
+  const viewBadge = viewModeLabels
+    ? viewModeLabels[viewMode]
+    : viewMode === "expert"
+      ? "Expertní"
+      : "Základní";
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -137,13 +152,16 @@ export function CalculatorHeroSettingsMenu({
           viewMode={viewMode}
           setViewMode={setViewMode}
           compact
+          labels={viewModeLabels}
+          titles={viewModeTitles}
         />
         <CalculatorHintTooltip
           label="Vysvětlení režimu práce"
-          text={CALCULATOR_VIEW_MODE_HINT_TOOLTIP}
+          text={viewModeHint ?? CALCULATOR_VIEW_MODE_HINT_TOOLTIP}
           firstVisitCoachmark
         />
       </section>
+      {showLayoutControls ? (
       <section className="calculator-hero-settings__group" aria-labelledby={layoutLegendId}>
         <span id={layoutLegendId} className="calculator-hero-settings__legend">
           Rozložení
@@ -158,6 +176,7 @@ export function CalculatorHeroSettingsMenu({
         </div>
         <CalculatorHintTooltip label="Vysvětlení rozložení obrazovky" text={CALCULATOR_LAYOUT_HINT_TOOLTIP} />
       </section>
+      ) : null}
     </div>
   );
 
@@ -210,7 +229,11 @@ export function CalculatorHeroSettingsMenu({
             document.body,
           )
         : null}
-      <CalculatorExpertModeNotice viewMode={viewMode} exampleSelectId={expertExampleSelectId} />
+      <CalculatorExpertModeNotice
+        viewMode={viewMode}
+        exampleSelectId={expertExampleSelectId}
+        text={expertNoticeText}
+      />
     </div>
   );
 }

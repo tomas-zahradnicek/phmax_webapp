@@ -198,7 +198,7 @@ test.describe("ZŠ PHmax disclosure wizard", () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await loadExample(page, EXAMPLE_934, /934 h/);
     await page.getByRole("button", { name: /Zobrazení/ }).click();
-    await page.getByRole("radio", { name: "Expertní" }).check();
+    await page.getByRole("radio", { name: "Všechna pole" }).check();
     const shell = page.locator(".app-shell.calculator-shell");
     await expect(shell).not.toHaveClass(/zs-basic-wizard-active/);
     await expect(shell).toHaveClass(/phmax-zs-pane-active-classes/);

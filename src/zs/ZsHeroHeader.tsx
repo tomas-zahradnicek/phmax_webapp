@@ -11,6 +11,12 @@ import { MODE_CONFIG } from "../config/calculator-config";
 import type { ProductView } from "../ProductViewPills";
 import { ZS_PHA_HERO_EXAMPLE_SELECT_ID } from "./zs-pha-basic-wizard";
 import { shortZsHeroModeLabel } from "./zs-hero-mode-label";
+import {
+  ZS_ALL_FIELDS_NOTICE,
+  ZS_DISPLAY_MODE_HINT,
+  ZS_DISPLAY_MODE_LABELS,
+  ZS_DISPLAY_MODE_TITLES,
+} from "./zs-display-mode";
 import { ZsHeroToolbar, type ZsHeroToolbarProps } from "./ZsHeroToolbar";
 import { classifyZsHeaderResults, formatZsHeaderMetricValue, type ZsHeaderFacts } from "./zs-header-results";
 
@@ -89,6 +95,11 @@ export function ZsHeroHeader({
       moduleLabel="ZŠ"
       viewModeName="zs-view-mode"
       displayDensityName="zs-display-density"
+      showLayoutControls={false}
+      viewModeLabels={ZS_DISPLAY_MODE_LABELS}
+      viewModeTitles={ZS_DISPLAY_MODE_TITLES}
+      viewModeHint={ZS_DISPLAY_MODE_HINT}
+      expertNoticeText={ZS_ALL_FIELDS_NOTICE}
       expertExampleSelectId={ZS_PHA_HERO_EXAMPLE_SELECT_ID}
       showKpiLabels={resultMetrics != null}
       showOwnDataHint={viewMode !== "basic"}
