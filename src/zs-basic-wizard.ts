@@ -17,12 +17,12 @@ export const ZS_BASIC_WIZARD_STEPS: ReadonlyArray<{
   {
     step: 2,
     label: "Třídy",
-    lead: "Zadejte počty tříd a žáků pro běžné třídy ZŠ (řádky B1–B8 metodiky).",
+    lead: "Vyberte kategorii běžných tříd a doplňte počet tříd a žáků u každého stupně.",
   },
   {
     step: 3,
     label: "Výjimky",
-    lead: "Doplňte § 16/9, ZŠ speciální, psychiatrii, gymnázia a další moduly, pokud je škola používá.",
+    lead: "Vyplňte jen moduly, které škola používá. Nepotřebný modul nechte zavřený a s nulami. Pak pokračujte na souhrn.",
   },
   {
     step: 4,
@@ -35,6 +35,9 @@ export const ZS_BASIC_WIZARD_STEPS: ReadonlyArray<{
     lead: "Porovnejte PHmax, PHAmax, PHA1Rmax a PHPmax. Poté můžete přepnout záložku PHAmax nebo PHPmax.",
   },
 ];
+
+/** Krok Výjimky. Nuly v zavřeném modulu se do součtu nepromítnou; vyplněné hodnoty ano. */
+export const ZS_EXCEPTIONS_STEP_NOTE = ZS_BASIC_WIZARD_STEPS[2]!.lead;
 
 const EXCEPTION_SECTION_IDS = [
   "sec16",

@@ -155,6 +155,14 @@ export function ZsPhmaxBasicSection({
   totalPhmax,
 }: ZsPhmaxBasicSectionProps) {
   const composition = compositionSentence(compositionParts, totalPhmax);
+  const shownStages = [
+    ...(showBasicFirst ? [{ classes: basic1Classes, pupils: basic1Pupils }] : []),
+    ...(showBasicSecond ? [{ classes: basic2Classes, pupils: basic2Pupils }] : []),
+  ];
+  const classesComplete = shownStages.length > 0 && shownStages.every((stage) => stage.classes > 0 && stage.pupils > 0);
+  const classesStatus = classesComplete
+    ? "Počty tříd a žáků jsou zadané. Můžete pokračovat na výjimky."
+    : "Doplňte počet tříd a žáků u každého zobrazeného stupně.";
   if (!showBasicFirst && !showBasicSecond && !showSchoolVariantFirstOnly) {
     return null;
   }
@@ -167,20 +175,22 @@ export function ZsPhmaxBasicSection({
       data-phmax-pane="classes"
     >
       <h2>Běžné třídy ZŠ</h2>
+      <label htmlFor="zs-basic-class-category">Kategorie běžných tříd</label>
 
       {showSchoolVariantFirstOnly ? (
-        <select value={basicType} onChange={(e) => onBasicTypeChange(e.target.value as BasicType)}>
+        <select id="zs-basic-class-category" value={basicType} onChange={(e) => onBasicTypeChange(e.target.value as BasicType)}>
           <option value="first_only_1">Neúplná ZŠ – 1 třída 1. stupně</option>
           <option value="first_only_2">Neúplná ZŠ – 2 třídy 1. stupně</option>
           <option value="first_only_3">Neúplná ZŠ – 3 třídy 1. stupně</option>
           <option value="first_only_4">Neúplná ZŠ – 4 a více tříd 1. stupně</option>
         </select>
       ) : (
-        <select value={basicType} onChange={(e) => onBasicTypeChange(e.target.value as BasicType)}>
+        <select id="zs-basic-class-category" value={basicType} onChange={(e) => onBasicTypeChange(e.target.value as BasicType)}>
           <option value="full_more_than_2">Úplná ZŠ – více než 2 třídy v některém ročníku</option>
           <option value="full_max_2">Úplná ZŠ – nejvýše 2 třídy v každém ročníku</option>
         </select>
       )}
+      {shownStages.length > 0 ? <p role="status">{classesStatus}</p> : null}
 
       <div className="grid two zs-phmax-stage-row">
         {showBasicFirst && (
