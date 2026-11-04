@@ -9,7 +9,11 @@ function displayValue(value: string): string {
   return trimmed || "–";
 }
 
-export function CalculatorSchoolProfileBanner() {
+export function CalculatorSchoolProfileBanner({
+  emptyActionClassName = "btn primary",
+}: {
+  emptyActionClassName?: string;
+} = {}) {
   const { profile } = useSchoolProfile();
   const schoolYear = readSchoolYearHintFromStorage();
 
@@ -19,7 +23,7 @@ export function CalculatorSchoolProfileBanner() {
         <p className="calculator-school-profile-banner__warning">
           Profil školy není vyplněn. Doporučujeme jej doplnit, aby bylo možné údaje využívat v dalších modulech a exportech.
         </p>
-        <a className="btn primary" href={PROFIL_SKOLY_PATH}>
+        <a className={emptyActionClassName} href={PROFIL_SKOLY_PATH}>
           Přejít na Profil školy
         </a>
       </section>

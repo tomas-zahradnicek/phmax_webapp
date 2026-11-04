@@ -36,7 +36,7 @@ export type ZsHeroHeaderProps = {
   totalPhmax: number;
   mode: CalculatorMode;
   incompleteSections: number;
-  toolbar: ZsHeroToolbarProps;
+  toolbar: ZsHeroToolbarProps | null;
   headerFacts?: ZsHeaderFacts;
 };
 
@@ -91,6 +91,7 @@ export function ZsHeroHeader({
       displayDensityName="zs-display-density"
       expertExampleSelectId={ZS_PHA_HERO_EXAMPLE_SELECT_ID}
       showKpiLabels={resultMetrics != null}
+      showOwnDataHint={viewMode !== "basic"}
       title="Kalkulačka PHmax, PHAmax, PHA1Rmax a PHPmax – základní škola"
       titleClassName="hero__title hero__title--sd hero__title--zs"
       showMiniLogo
@@ -115,10 +116,12 @@ export function ZsHeroHeader({
         { label: "Stav", value: statusLabel, variant: "status", tone: statusTone },
       ]}
       aboutContent={
-        <p className="calculator-hero-shell__about-text">
-          Orientační výpočet podle metodiky PHmax, PHAmax, PHA1Rmax a PHPmax pro ZŠ (verze 6 / říjen 2026). Ukázky a zálohy scénářů
-          jsou v horní liště; podrobnosti k modulům v nápovědě.
-        </p>
+        viewMode === "basic" ? undefined : (
+          <p className="calculator-hero-shell__about-text">
+            Orientační výpočet podle metodiky PHmax, PHAmax, PHA1Rmax a PHPmax pro ZŠ (verze 6 / říjen 2026). Ukázky a zálohy scénářů
+            jsou v horní liště; podrobnosti k modulům v nápovědě.
+          </p>
+        )
       }
       headerActions={
         <>
@@ -138,7 +141,9 @@ export function ZsHeroHeader({
         </>
       }
       toolbar={
-        <ZsHeroToolbar {...toolbar} suppressOwnDataHint onOpenRychlyPhmax={onOpenRychlyPhmax} />
+        toolbar ? (
+          <ZsHeroToolbar {...toolbar} suppressOwnDataHint={viewMode === "expert"} onOpenRychlyPhmax={onOpenRychlyPhmax} />
+        ) : null
       }
     />
   );

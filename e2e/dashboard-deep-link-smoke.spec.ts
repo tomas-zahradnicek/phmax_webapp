@@ -551,7 +551,7 @@ test.describe("ZŠ hero – pojmenované zálohy", () => {
 });
 
 test.describe("ZŠ wizard scroll", () => {
-  test("krok 2 → 3 posune na první modul výjimek", async ({ page }) => {
+  test("krok 2 → 3 posune na první modul výjimek", async ({ page }, testInfo) => {
     await page.addInitScript(({ storageKey, wizardKey }) => {
       localStorage.setItem(wizardKey, "2");
       localStorage.setItem(
@@ -564,12 +564,44 @@ test.describe("ZŠ wizard scroll", () => {
       );
     }, { storageKey: ZS_STORAGE_KEY, wizardKey: ZS_WIZARD_KEY });
 
-    await gotoProductView(page, "zs");
-    await page.getByRole("button", { name: "3 Výjimky" }).click({ force: true });
+    const viewports = testInfo.project.use.isMobile
+      ? [
+          { width: 390, height: 844 },
+          { width: 768, height: 900 },
+          { width: 1024, height: 800 },
+        ]
+      : [null];
 
-    await expect(page.locator(".phmax-zs-pane-active-exceptions")).toBeVisible({ timeout: 8000 });
-    const target = page.locator('[data-section="zs-phmax-exceptions"]');
-    await target.scrollIntoViewIfNeeded();
-    await expect(target).toBeInViewport({ timeout: 8000 });
+    for (const viewport of viewports) {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoProductView(page, "zs");
+      const wizard = page.getByRole("region", { name: "Průvodce výpočtem PHmax" });
+      const exceptionsStep = wizard.getByRole("button", { name: /^3\s+Výjimky$/ });
+      await exceptionsStep.click();
+
+      const shell = page.locator(".app-shell.zs-wizard-step-3.phmax-zs-pane-active-exceptions");
+      await expect(shell).toBeVisible({ timeout: 8000 });
+      await expect(exceptionsStep).toHaveAttribute("aria-current", "step");
+      await expect(wizard.getByRole("heading", { name: "Výjimky", exact: true })).toBeVisible();
+
+      const exceptionSummary = page.locator('details[data-wizard-step="3"] > summary').filter({ hasText: "Třídy podle" });
+      await expect.poll(async () => exceptionSummary.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        if (box.top < 0 || box.bottom > window.innerHeight) return false;
+        const panel = document.querySelector(".calculator-mobile-scroll-results");
+        const x = Math.min(Math.max(box.left + box.width / 2, 1), window.innerWidth - 2);
+        const y = Math.min(Math.max(box.top + Math.min(box.height / 2, 20), 1), window.innerHeight - 2);
+        const hit = document.elementFromPoint(x, y);
+        const coveredByPanel = panel instanceof HTMLElement && (hit === panel || panel.contains(hit));
+        return Boolean(hit && (hit === el || el.contains(hit)) && !coveredByPanel);
+      }), { timeout: 8000 }).toBe(true);
+
+      const basicValues = await page.locator('[data-section="basic"] input').evaluateAll((els) =>
+        els.map((el) => (el instanceof HTMLInputElement ? el.value : "")),
+      );
+      expect(basicValues[0]).toBe("2");
+      expect(basicValues[1]).toBe("40");
+      await expect.poll(() => page.evaluate(() => localStorage.getItem("phmax-zs-basic-wizard-step"))).toBe("3");
+    }
   });
 });

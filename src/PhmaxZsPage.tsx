@@ -54,9 +54,8 @@ import { buildCalculatorNextAction, formatWhatNowMessage } from "./calculator-ne
 import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
 import { focusCalculatorElementById } from "./calculator-focus-element";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
-import { CalculatorModuleQuickTour } from "./CalculatorModuleQuickTour";
+import { zsWizardOwnsEmptyStart } from "./zs/zs-start-flow";
 import { ZS_PHA_HERO_EXAMPLE_SELECT_ID } from "./zs/zs-pha-basic-wizard";
-import { ZS_QUICK_TOUR_LS_KEY, ZS_QUICK_TOUR_STEPS } from "./phmax-module-quick-tour";
 import {
 } from "./zs/zs-form-validation";
 import {
@@ -81,7 +80,8 @@ import { createZsPageHandlers } from "./zs/zs-page-handlers";
 import { ZsExpertWizardGuideSection } from "./zs/ZsExpertWizardGuideSection";
 import { buildZsPhmaxTabPanelProps } from "./zs/build-zs-phmax-tab-panel-props";
 import { ZsPhmaxTabPanel } from "./zs/ZsPhmaxTabPanel";
-import { ZsSetupSection } from "./zs/ZsSetupSection";
+import { ZsModeSelectField, ZsSetupSection } from "./zs/ZsSetupSection";
+import { ZsHeroToolbar } from "./zs/ZsHeroToolbar";
 import { ZsHeroHeader } from "./zs/ZsHeroHeader";
 import { presentZsHeaderResults, type ZsHeaderFacts } from "./zs/zs-header-results";
 import { useZsMobileSummaryYield } from "./zs/zs-mobile-summary-yield";
@@ -2047,36 +2047,8 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
           headerFacts={zsHeaderFacts}
           mode={mode}
           incompleteSections={incompleteSections}
-          toolbar={{
-            selectedExample,
-            exampleLegend: ZS_GUIDE_NATIVE_TOOLTIP_LEGEND,
-            onExampleChange: (key) => loadExample(key as ExampleKey),
-            onSaveSnapshot: saveSnapshotManually,
-            onExportCsv: handleExportCsv,
-            onExportXlsx: handleExportXlsx,
-            xlsxExportBusy,
-            onPrintSummary: printSummaryWindow,
-            onRestoreSnapshot: restoreSnapshot,
-            exportLabel,
-            setExportLabel,
-            namedSaveName,
-            setNamedSaveName,
-            namedSnapshots,
-            selectedNamedId,
-            setSelectedNamedId,
-            onSaveNamedSnapshot: saveNamedSnapshot,
-            onRestoreNamedSnapshot: restoreNamedSnapshot,
-            onDeleteNamedSnapshot: deleteNamedSnapshot,
-            onCompareWithNamedSnapshot: handleCompareZsWithNamedSnapshot,
-            onExportAuditJson: handleExportZsAuditJson,
-            comparePreview: zsComparePreview,
-            onCopySummary: copySummaryToClipboard,
-            onClearStored: clearStoredSnapshot,
-            onResetAll: resetAll,
-          }}
+          toolbar={null}
         />
-
-        <CalculatorSchoolProfileBanner />
 
         <ErrorBoundary title="Obsah kalkulačky pro základní školy se nepodařilo zobrazit">
         <ZsQuickOnboardingGuide open={zsGuideOpen} onDismiss={dismissZsGuide} returnFocusRef={zsHelpButtonRef} />
@@ -2106,7 +2078,55 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
           visibleSections={visibleSections}
           hasSection={hasSection}
           onStartEmptyForm={resetAll}
+          stepOneControl={
+            <ZsModeSelectField mode={mode} modeOptions={modeOptions} onModeChange={setMode} />
+          }
         />
+
+        <CalculatorSchoolProfileBanner emptyActionClassName="btn ghost" />
+
+        <div className="calculator-hero-work-card zs-supporting-actions">
+          <ZsHeroToolbar
+            selectedExample={selectedExample}
+            exampleLegend={ZS_GUIDE_NATIVE_TOOLTIP_LEGEND}
+            onExampleChange={(key) => loadExample(key as ExampleKey)}
+            onSaveSnapshot={saveSnapshotManually}
+            onExportCsv={handleExportCsv}
+            onExportXlsx={handleExportXlsx}
+            xlsxExportBusy={xlsxExportBusy}
+            onPrintSummary={printSummaryWindow}
+            onRestoreSnapshot={restoreSnapshot}
+            exportLabel={exportLabel}
+            setExportLabel={setExportLabel}
+            namedSaveName={namedSaveName}
+            setNamedSaveName={setNamedSaveName}
+            namedSnapshots={namedSnapshots}
+            selectedNamedId={selectedNamedId}
+            setSelectedNamedId={setSelectedNamedId}
+            onSaveNamedSnapshot={saveNamedSnapshot}
+            onRestoreNamedSnapshot={restoreNamedSnapshot}
+            onDeleteNamedSnapshot={deleteNamedSnapshot}
+            onCompareWithNamedSnapshot={handleCompareZsWithNamedSnapshot}
+            onExportAuditJson={handleExportZsAuditJson}
+            comparePreview={zsComparePreview}
+            onCopySummary={copySummaryToClipboard}
+            onClearStored={clearStoredSnapshot}
+            onResetAll={resetAll}
+            onOpenRychlyPhmax={onOpenRychlyPhmax}
+          />
+        </div>
+
+        {viewMode === "basic" ? (
+          <details className="calculator-hero-shell__about ux-collapsible ux-collapsible--workspace">
+            <summary className="ux-collapsible__summary">ⓘ O modulu a metodice</summary>
+            <div className="ux-collapsible__body calculator-hero-shell__about-body">
+              <p className="calculator-hero-shell__about-text">
+                Orientační výpočet podle metodiky PHmax, PHAmax, PHA1Rmax a PHPmax pro ZŠ (verze 6 / říjen 2026). Ukázky a zálohy
+                scénářů jsou pod průvodcem; podrobnosti k modulům v nápovědě.
+              </p>
+            </div>
+          </details>
+        ) : null}
 
         {viewMode === "expert" ? <ZsExpertOnboardingCard /> : null}
 
@@ -2127,15 +2147,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
           />
         ) : null}
 
-        {viewMode === "basic" ? (
-          <CalculatorModuleQuickTour
-            moduleLabel="ZŠ"
-            storageKey={ZS_QUICK_TOUR_LS_KEY}
-            steps={ZS_QUICK_TOUR_STEPS}
-            exampleSelectId={ZS_PHA_HERO_EXAMPLE_SELECT_ID}
-          />
-        ) : null}
-        <CalculatorNextActionStrip action={zsNextAction} />
+        {zsWizardOwnsEmptyStart(viewMode, zsHasData) ? null : <CalculatorNextActionStrip action={zsNextAction} />}
 
         <ZsCalculatorShell
           workspaceStickyRef={workspaceStickyRef}
@@ -2191,6 +2203,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
           modeOptions={modeOptions}
           onModeChange={setMode}
           SectionLead={SectionLead}
+          hideModeField={zsBasicWizardActive}
         />
 
         {tab === "phmax" ? <ZsPhmaxTabPanel {...zsPhmaxTabPanelProps} /> : null}

@@ -18,7 +18,6 @@ import { OwnDataHint } from "../OwnDataHint";
 import { CompareVariantsPanel } from "../CompareVariantsPanel";
 import type { CompareProductVariantsResult } from "../phmax-product-compare";
 import {
-  HERO_EXAMPLE_FIELD_LABEL,
   HERO_EXPORT_TOOLS_LABEL,
   NAMED_BACKUPS_COMPARE_JSON_LABEL,
 } from "../calculator-ui-constants";
@@ -91,7 +90,7 @@ export function ZsHeroToolbar({
       <div className="calculator-hero-work-card__start">
         <div className="field field--hero-select hero-actions__example hero-zs-example-select">
           <span className="field__label field__label--hero" id="zs-hero-example-label">
-            {HERO_EXAMPLE_FIELD_LABEL}
+            Volitelná ukázka
           </span>
           <HeroExampleSelect
             id="zs-hero-example-select"
@@ -115,7 +114,7 @@ export function ZsHeroToolbar({
           <div className="calculator-hero-work-card__cta">
             <button
               type="button"
-              className="btn primary calculator-hero-work-card__quick-btn"
+              className="btn ghost calculator-hero-work-card__quick-btn"
               onClick={onOpenRychlyPhmax}
             >
               <span className="calculator-hero-work-card__quick-icon" aria-hidden>

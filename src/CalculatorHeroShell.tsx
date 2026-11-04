@@ -272,7 +272,7 @@ export function CalculatorHeroShell({
 
 
 
-        <div className="calculator-hero-work-card">{toolbar}</div>
+        {toolbar != null ? <div className="calculator-hero-work-card">{toolbar}</div> : null}
 
       </div>
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { type ReactNode } from "react";
 import { MODE_CONFIG, type CalculatorMode } from "../config/calculator-config";
 import type { FormSection } from "../config/calculator-config";
 import { ZsBasicWizard } from "../ZsBasicWizard";
@@ -34,6 +34,7 @@ export type ZsWizardShellProps = {
   visibleSections: readonly FormSection[];
   hasSection: (section: FormSection) => boolean;
   onStartEmptyForm?: () => void;
+  stepOneControl?: ReactNode;
 };
 
 export function ZsWizardShell({
@@ -62,6 +63,7 @@ export function ZsWizardShell({
   visibleSections,
   hasSection,
   onStartEmptyForm,
+  stepOneControl,
 }: ZsWizardShellProps) {
   if (zsBasicWizardActive) {
     return (
@@ -77,6 +79,7 @@ export function ZsWizardShell({
         onBack={onBack}
         onNext={onNext}
         onStartEmptyForm={onStartEmptyForm}
+        stepIntro={stepOneControl}
       />
     );
   }

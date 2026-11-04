@@ -1,4 +1,4 @@
-import React from "react";
+import React, { type ReactNode } from "react";
 import {
   ZS_BASIC_WIZARD_STEP_COUNT,
   ZS_BASIC_WIZARD_STEPS,
@@ -30,6 +30,7 @@ type ZsBasicWizardProps = {
   onStepChange: (step: ZsBasicWizardStep) => void;
   onBack: () => void;
   onNext: () => void;
+  stepIntro?: ReactNode;
 };
 
 export function ZsBasicWizard({
@@ -44,6 +45,7 @@ export function ZsBasicWizard({
   onStepChange,
   onBack,
   onNext,
+  stepIntro,
 }: ZsBasicWizardProps) {
   const meta = ZS_BASIC_WIZARD_STEPS[step - 1]!;
   const isFirst = step === 1;
@@ -52,8 +54,14 @@ export function ZsBasicWizard({
   return (
     <section className="card card--onboarding section-card zs-basic-wizard" aria-label="Průvodce výpočtem PHmax">
       <div className="zs-basic-wizard__head">
+        {step === 1 ? (
+          <>
+            <h2 className="section-title">{meta.label}</h2>
+            {stepIntro}
+          </>
+        ) : null}
         <div className="pill pill--step">Průvodce · krok {step} ze {ZS_BASIC_WIZARD_STEP_COUNT}</div>
-        <h2 className="section-title">{meta.label}</h2>
+        {step === 1 ? null : <h2 className="section-title">{meta.label}</h2>}
         <p className="muted-text zs-basic-wizard__lead">{meta.lead}</p>
         <p className="muted-text zs-basic-wizard__context">
           <strong>Aktivní režim:</strong> {modeLabel}
