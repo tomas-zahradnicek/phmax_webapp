@@ -55,7 +55,7 @@ export function ZsWorkflowDockPanel({
   totalPha1r,
   zsVerdictTone,
   zsVerdictLabel,
-  zsVerdictDetail,
+  zsVerdictDetail: _zsVerdictDetail,
   zsDockIssueSummaries,
   zsBasicWizardActive,
   zsWorkflowSteps,
@@ -70,8 +70,19 @@ export function ZsWorkflowDockPanel({
   phpTabDone = false,
   presentedResults,
 }: ZsWorkflowDockPanelProps) {
+  const activeStatLabel = tab === "pha" ? "PHAmax" : tab === "php" ? "PHPmax" : "PHmax";
+  const secondaryMetrics = (
+    [
+      { label: "PHmax", value: presentedResults?.phmax ?? totalPhmax },
+      { label: "PHAmax", value: presentedResults?.pha ?? totalPha },
+      { label: "PHPmax", value: presentedResults?.php ?? totalPhp },
+      { label: "PHA1Rmax", value: presentedResults?.pha1r ?? totalPha1r },
+    ] as const
+  ).filter((stat) => stat.label !== activeStatLabel);
+
   return (
     <CalculatorWorkflowDock
+      className="workflow-dock--zs-summary"
       header={
         <>
           <ZsTabProgressMap
@@ -102,14 +113,11 @@ export function ZsWorkflowDockPanel({
       primaryValue={presentedResults?.primary ?? zsTabPrimaryValue}
       statusBadge={zsVerdictLabel}
       stats={[
-        { label: "PHmax", value: presentedResults?.phmax ?? totalPhmax },
-        { label: "PHAmax", value: presentedResults?.pha ?? totalPha },
-        { label: "PHPmax", value: presentedResults?.php ?? totalPhp },
-        { label: "PHA1Rmax", value: presentedResults?.pha1r ?? totalPha1r },
+        ...secondaryMetrics,
         { label: "Režim", value: formatModeRežimStatValue(MODE_CONFIG[mode].label) },
       ]}
       verdictLabel={zsVerdictLabel}
-      verdictDetail={zsDockIssueSummaries.length > 0 ? "" : zsVerdictDetail}
+      verdictDetail=""
       issueSummaries={zsDockIssueSummaries}
       workflowSteps={zsBasicWizardActive ? [] : zsWorkflowSteps}
       viewMode={viewMode}

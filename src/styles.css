@@ -9267,6 +9267,12 @@ select:focus {
   line-height: 1.45;
 }
 
+/* ZŠ: na úzkém docku je aktivní hodnota v záhlaví sbalení, v těle karty už ne. */
+.workflow-dock--zs-summary .workflow-dock__mobile-fold-body .result-anchor-card__primary-value,
+.workflow-dock--zs-summary .workflow-dock__mobile-fold-body .result-anchor-card__primary-label {
+  display: none;
+}
+
 .workflow-dock__block {
   border: 1px solid color-mix(in srgb, #e2e8f0 45%, transparent);
   border-radius: 10px;
