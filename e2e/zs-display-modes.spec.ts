@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { gotoProductView } from "./smoke-helpers";
+import { ensureDisplayOption, gotoProductView } from "./smoke-helpers";
 
 const VIEWPORTS = [
   { width: 390, height: 844 },
@@ -50,9 +50,8 @@ test.describe("ZŠ dva režimy zobrazení", () => {
     await expect(page.locator(".calculator-shell--density-compact")).toHaveCount(0);
     await expect(page.getByRole("button", { name: /Zobrazení/ })).toContainText("Průvodce");
 
-    await page.getByRole("button", { name: /Zobrazení/ }).click();
+    const guide = await ensureDisplayOption(page, "Průvodce");
     const panel = page.getByRole("region", { name: "Nastavení zobrazení kalkulačky" });
-    const guide = panel.getByRole("radio", { name: "Průvodce" });
     const allFields = panel.getByRole("radio", { name: "Všechna pole" });
     await expect(panel.getByRole("radio")).toHaveCount(2);
     await expect(guide).toBeChecked();
@@ -121,8 +120,7 @@ test.describe("ZŠ dva režimy zobrazení", () => {
     await dockTabs.getByRole("button", { name: "PHmax", exact: true }).click();
     await expect(classes).toHaveValue("2");
 
-    await page.getByRole("button", { name: /Zobrazení/ }).click();
-    await page.getByRole("radio", { name: "Všechna pole" }).check();
+    await (await ensureDisplayOption(page, "Všechna pole")).check();
     await expect(page.locator(".calculator-shell--expert")).toBeVisible();
     await expect(classes).toHaveValue("2");
     await expect(pupils).toHaveValue("40");
@@ -133,5 +131,32 @@ test.describe("ZŠ dva režimy zobrazení", () => {
     await expect(page.locator('[data-section="basic"] input').nth(0)).toHaveValue("2");
     await expect(page.locator('[data-section="basic"] input').nth(1)).toHaveValue("40");
     await expect(page.getByRole("list", { name: "Přehled výsledků" })).toBeVisible();
+  });
+
+  test("menu Zobrazení: Průvodce při zavřeném i otevřeném panelu", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("phmax-zs-view-mode", "basic");
+      localStorage.setItem("phmax-calculator-hint-first-visit-v1", "1");
+    });
+    await page.setViewportSize({ width: 1366, height: 768 });
+    await gotoProductView(page, "zs");
+    const trigger = page.getByRole("button", { name: /Zobrazení/ });
+
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await ensureDisplayOption(page, "Průvodce");
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await expect(page.getByRole("radio", { name: "Průvodce", exact: true })).toBeVisible();
+
+    await trigger.evaluate((button) => {
+      const target = button as HTMLButtonElement & { __displayClicks?: number };
+      target.__displayClicks = 0;
+      button.addEventListener("click", () => {
+        target.__displayClicks = (target.__displayClicks ?? 0) + 1;
+      });
+    });
+    await ensureDisplayOption(page, "Průvodce");
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await expect(page.getByRole("radio", { name: "Průvodce", exact: true })).toBeVisible();
+    expect(await trigger.evaluate((button) => (button as HTMLButtonElement & { __displayClicks?: number }).__displayClicks ?? 0)).toBe(0);
   });
 });

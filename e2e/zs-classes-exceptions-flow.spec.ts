@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { gotoProductView } from "./smoke-helpers";
+import { ensureDisplayOption, gotoProductView } from "./smoke-helpers";
 
 const VIEWPORTS = [
   { width: 390, height: 844 },
@@ -94,8 +94,7 @@ test.describe("ZŠ kroky Třídy a Výjimky", () => {
     await expect(page.locator(".app-shell.zs-wizard-step-4")).toBeVisible();
     await expect(page.locator('[data-section="basic"] input').first()).toHaveValue("2");
 
-    await page.getByRole("button", { name: /Zobrazení/ }).click();
-    await page.getByRole("radio", { name: "Všechna pole" }).check();
+    await (await ensureDisplayOption(page, "Všechna pole")).check();
     await expect(page.locator(".calculator-shell--expert")).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Části výpočtu PHmax" })).toBeVisible();
     await expect(page.locator('[data-section="zs-phmax-exceptions-note"]')).toBeVisible();
@@ -105,11 +104,7 @@ test.describe("ZŠ kroky Třídy a Výjimky", () => {
     await panes.getByRole("button", { name: "Běžné třídy", exact: true }).click();
     await expect(page.locator('[data-section="basic"] input').first()).toHaveValue("2");
 
-    const guideMode = page.getByRole("radio", { name: "Průvodce" });
-    if (!(await guideMode.isVisible())) {
-      await page.getByRole("button", { name: /Zobrazení/ }).click();
-    }
-    await guideMode.check();
+    await (await ensureDisplayOption(page, "Průvodce")).check();
     await expect(page.locator(".zs-basic-wizard-active")).toBeVisible();
 
     const example = page.locator("#zs-hero-example-select");
@@ -122,11 +117,7 @@ test.describe("ZŠ kroky Třídy a Výjimky", () => {
     }
     await expect(page.getByRole("list", { name: "Přehled výsledků" })).toContainText("934 h");
 
-    const allFields = page.getByRole("radio", { name: "Všechna pole" });
-    if (!(await allFields.isVisible())) {
-      await page.getByRole("button", { name: /Zobrazení/ }).click();
-    }
-    await allFields.check();
+    await (await ensureDisplayOption(page, "Všechna pole")).check();
     await expect(page.getByRole("list", { name: "Přehled výsledků" })).toContainText("934 h");
 
     const dockTabs = page.locator(".calculator-workspace-dock .tabs");
