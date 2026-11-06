@@ -123,6 +123,23 @@ function buildZsNamedSnapshotsJson(count: number): string {
   return JSON.stringify({ items });
 }
 
+/**
+ * Vrátí volbu v menu Zobrazení, aniž by otevřené menu zavřela.
+ * Klikne jen když je panel zavřený a volba ještě není dostupná.
+ */
+export async function ensureDisplayOption(page: Page, name: string) {
+  const trigger = page.getByRole("button", { name: /Zobrazení/ });
+  const option = page.getByRole("radio", { name, exact: true });
+  await expect(trigger).toBeVisible();
+  if (await option.isVisible()) return option;
+  if ((await trigger.getAttribute("aria-expanded")) !== "true") {
+    await trigger.click();
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  }
+  await expect(option).toBeVisible();
+  return option;
+}
+
 /** Pojmenované zálohy ZŠ – karta porovnání na Přehledu se zobrazí od 2 záloh. */
 export async function seedZsNamedSnapshot(page: Page, count = 1): Promise<void> {
   const json = buildZsNamedSnapshotsJson(count);
