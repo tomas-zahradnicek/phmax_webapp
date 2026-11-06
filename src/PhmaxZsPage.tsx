@@ -1842,7 +1842,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
         hasData: zsHasData,
         incomplete: incompleteSections > 0,
         incompleteDetail: zsIncompleteWhatNow,
-        onFix: showZsInputBanner ? zsScrollToInputs : undefined,
+        onFix: firstIssueSection ? zsScrollToInputs : undefined,
         onExport: zsHasData ? handleExportCsv : undefined,
         onOpenExamples: () => focusCalculatorElementById(ZS_PHA_HERO_EXAMPLE_SELECT_ID),
       }),
@@ -1851,7 +1851,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
       zsHasData,
       incompleteSections,
       zsIncompleteWhatNow,
-      showZsInputBanner,
+      firstIssueSection,
       zsScrollToInputs,
       handleExportCsv,
     ],
@@ -2059,7 +2059,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
           zsWizardHasExceptions={zsWizardHasExceptions}
           wizardChoice={wizardChoice}
           wizardOptions={zsWizardChoiceOptions}
-          showInputIssueFix={showZsInputBanner}
+          showInputIssueFix={Boolean(firstIssueSection)}
           onScrollToIssue={zsScrollToInputs}
           onWizardChoice={applyWizardChoice}
           onStepChange={goToZsWizardStep}
@@ -2142,7 +2142,10 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
 
         {showZsInputBanner || pha1rValidationIssues.length > 0 ? (
           <CalculatorInputIssueBanner
-            {...calculatorInputIssueBannerFromVerdict(zsVerdict, zsScrollToInputs)}
+            {...calculatorInputIssueBannerFromVerdict(
+              zsVerdict,
+              firstIssueSection ? zsScrollToInputs : undefined,
+            )}
             items={zsVisibleInputBannerItems.length > 1 ? zsVisibleInputBannerItems : undefined}
           />
         ) : null}
