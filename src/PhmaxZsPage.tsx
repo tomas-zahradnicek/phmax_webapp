@@ -54,6 +54,7 @@ import { buildCalculatorNextAction, formatWhatNowMessage } from "./calculator-ne
 import { CalculatorNextActionStrip } from "./CalculatorNextActionStrip";
 import { focusCalculatorElementById } from "./calculator-focus-element";
 import { calculatorInputIssueBannerFromVerdict } from "./calculator-verdict-ui";
+import { zsInputIssueBannerDetail, zsInputIssueBannerLabel } from "./zs/zs-hint-banner-label";
 import { zsWizardOwnsEmptyStart } from "./zs/zs-start-flow";
 import { ZS_PHA_HERO_EXAMPLE_SELECT_ID } from "./zs/zs-pha-basic-wizard";
 import {
@@ -2146,6 +2147,19 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
               zsVerdict,
               firstIssueSection ? zsScrollToInputs : undefined,
             )}
+            label={zsInputIssueBannerLabel({
+              verdictLabel: zsVerdict.label,
+              verdictTone: zsVerdict.tone,
+              firstIssueSection,
+              bandHintCount: bandUpgradeHints.length,
+            })}
+            detail={zsInputIssueBannerDetail({
+              verdictDetail: zsVerdict.detail,
+              verdictTone: zsVerdict.tone,
+              firstIssueSection,
+              bandHints: bandUpgradeHints,
+              visibleItemLabels: zsVisibleInputBannerItems.map((item) => item.label),
+            })}
             items={zsVisibleInputBannerItems.length > 1 ? zsVisibleInputBannerItems : undefined}
           />
         ) : null}
