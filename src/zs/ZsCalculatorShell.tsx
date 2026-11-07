@@ -23,6 +23,7 @@ export type ZsCalculatorShellProps = {
   footer: React.ReactNode;
   tocSections: readonly PageTocSection[];
   tocDesktopDefaultOpen?: boolean;
+  onTocSectionSelect?: (sectionId: string) => boolean;
 };
 
 export function ZsCalculatorShell({
@@ -35,6 +36,7 @@ export function ZsCalculatorShell({
   footer,
   tocSections,
   tocDesktopDefaultOpen,
+  onTocSectionSelect,
 }: ZsCalculatorShellProps) {
   return (
     <CalculatorProductShell
@@ -56,6 +58,7 @@ export function ZsCalculatorShell({
       footer={footer}
       tocSections={tocSections}
       tocDesktopDefaultOpen={tocDesktopDefaultOpen}
+      onTocSectionSelect={onTocSectionSelect}
     />
   );
 }

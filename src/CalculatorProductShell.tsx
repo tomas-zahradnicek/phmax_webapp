@@ -23,6 +23,8 @@ type CalculatorProductShellProps = {
   tocSections?: readonly PageTocSection[];
   /** Výchozí otevření obsahu na desktopu, jen bez uložené volby. */
   tocDesktopDefaultOpen?: boolean;
+  /** true = produkt převzal klik na sekci a TOC sám nescrolluje. */
+  onTocSectionSelect?: (sectionId: string) => boolean;
 };
 
 /**
@@ -43,6 +45,7 @@ export function CalculatorProductShell({
   footer,
   tocSections,
   tocDesktopDefaultOpen = true,
+  onTocSectionSelect,
 }: CalculatorProductShellProps) {
   const dockNode = dockSticky ? (
     <div ref={dockStickyRef} className="workspace-sticky calculator-workspace-dock" id={dockStickyId}>
@@ -69,7 +72,11 @@ export function CalculatorProductShell({
       ) : null}
       {footer}
       {tocSections && tocSections.length > 0 ? (
-        <PageTableOfContents sections={tocSections} desktopDefaultOpen={tocDesktopDefaultOpen} />
+        <PageTableOfContents
+          sections={tocSections}
+          desktopDefaultOpen={tocDesktopDefaultOpen}
+          onSectionSelect={onTocSectionSelect}
+        />
       ) : null}
     </>
   );

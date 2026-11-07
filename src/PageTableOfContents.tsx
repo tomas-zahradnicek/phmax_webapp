@@ -45,6 +45,11 @@ type PageTableOfContentsProps = {
    * Chybějící klíč není uložené zavření.
    */
   desktopDefaultOpen?: boolean;
+  /**
+   * true = volající převzal navigaci sekce a scrollToSection se nespustí.
+   * false nebo chybějící callback ponechá stávající scroll.
+   */
+  onSectionSelect?: (sectionId: string) => boolean;
 };
 
 function getSectionElement(sectionId: string): HTMLElement | null {
@@ -68,6 +73,7 @@ export function PageTableOfContents({
   sections,
   scrollOffset = 96,
   desktopDefaultOpen = true,
+  onSectionSelect,
 }: PageTableOfContentsProps) {
   const isDesktopToc = useMatchMedia(TOC_DESKTOP_QUERY);
   const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
@@ -203,7 +209,8 @@ export function PageTableOfContents({
               className={`page-toc__link${activeId === s.id ? " page-toc__link--active" : ""}`}
               aria-current={activeId === s.id ? "location" : undefined}
               onClick={() => {
-                scrollToSection(s.id, scrollOffset);
+                const handled = onSectionSelect?.(s.id) === true;
+                if (!handled) scrollToSection(s.id, scrollOffset);
                 if (!isDesktopToc) {
                   setTocOpenFromUser(false);
                   returnFocusToTrigger();
