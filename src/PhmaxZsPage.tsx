@@ -2336,6 +2336,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
             </footer>
           }
           tocSections={zsTocSections}
+          tocDesktopDefaultOpen={viewMode === "expert"}
         />
         </ErrorBoundary>
 

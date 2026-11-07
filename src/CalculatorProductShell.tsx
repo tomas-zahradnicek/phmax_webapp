@@ -21,6 +21,8 @@ type CalculatorProductShellProps = {
   dockStickyRef?: React.Ref<HTMLDivElement>;
   footer?: React.ReactNode;
   tocSections?: readonly PageTocSection[];
+  /** Výchozí otevření obsahu na desktopu, jen bez uložené volby. */
+  tocDesktopDefaultOpen?: boolean;
 };
 
 /**
@@ -40,6 +42,7 @@ export function CalculatorProductShell({
   dockStickyRef,
   footer,
   tocSections,
+  tocDesktopDefaultOpen = true,
 }: CalculatorProductShellProps) {
   const dockNode = dockSticky ? (
     <div ref={dockStickyRef} className="workspace-sticky calculator-workspace-dock" id={dockStickyId}>
@@ -65,7 +68,9 @@ export function CalculatorProductShell({
         <div className="calculator-shell__supplement calculator-shell__supplement--after">{afterWorkspace}</div>
       ) : null}
       {footer}
-      {tocSections && tocSections.length > 0 ? <PageTableOfContents sections={tocSections} /> : null}
+      {tocSections && tocSections.length > 0 ? (
+        <PageTableOfContents sections={tocSections} desktopDefaultOpen={tocDesktopDefaultOpen} />
+      ) : null}
     </>
   );
 }

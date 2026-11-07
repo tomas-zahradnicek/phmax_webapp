@@ -4,12 +4,31 @@ import { useMatchMedia } from "./useMatchMedia";
 const TOC_DESKTOP_QUERY = "(min-width: 1200px)";
 const TOC_OPEN_LS_KEY = "phmax-toc-open";
 
-function readDefaultTocOpen(): boolean {
-  if (typeof window === "undefined") return false;
-  const stored = window.localStorage.getItem(TOC_OPEN_LS_KEY);
-  if (stored === "0") return false;
+function readStoredTocOpen(): "0" | "1" | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = window.localStorage.getItem(TOC_OPEN_LS_KEY);
+    if (stored === "0" || stored === "1") return stored;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function resolveTocOpen(desktopDefaultOpen: boolean): boolean {
+  const stored = readStoredTocOpen();
   if (stored === "1") return true;
-  return window.matchMedia(TOC_DESKTOP_QUERY).matches;
+  if (stored === "0") return false;
+  if (typeof window === "undefined") return false;
+  return desktopDefaultOpen && window.matchMedia(TOC_DESKTOP_QUERY).matches;
+}
+
+function persistTocOpen(open: boolean) {
+  try {
+    window.localStorage.setItem(TOC_OPEN_LS_KEY, open ? "1" : "0");
+  } catch {
+    /* ignore */
+  }
 }
 
 export type PageTocSection = {
@@ -21,6 +40,11 @@ type PageTableOfContentsProps = {
   sections: readonly PageTocSection[];
   /** Odsazení scrollu pod sticky lištu (px). */
   scrollOffset?: number;
+  /**
+   * Výchozí otevření na šířce od 1200 px, jen když uživatel ještě nemá phmax-toc-open.
+   * Chybějící klíč není uložené zavření.
+   */
+  desktopDefaultOpen?: boolean;
 };
 
 function getSectionElement(sectionId: string): HTMLElement | null {
@@ -40,13 +64,26 @@ function scrollToSection(sectionId: string, scrollOffset: number) {
  * Sticky obsah stránky: aktivní sekce (scroll spy), výrazná hierarchie, jen
  * mobilní panel s klávesnicí (Escape zavře, Tab cyklí uvnitř).
  */
-export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOfContentsProps) {
+export function PageTableOfContents({
+  sections,
+  scrollOffset = 96,
+  desktopDefaultOpen = true,
+}: PageTableOfContentsProps) {
   const isDesktopToc = useMatchMedia(TOC_DESKTOP_QUERY);
   const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
-  const [tocOpen, setTocOpen] = useState(readDefaultTocOpen);
+  const [tocOpen, setTocOpen] = useState(() => resolveTocOpen(desktopDefaultOpen));
+  const setTocOpenFromUser = (open: boolean) => {
+    persistTocOpen(open);
+    setTocOpen(open);
+  };
   const mobileNavId = useId().replace(/:/g, "");
   const triggerRef = useRef<HTMLButtonElement>(null);
   const navRef = useRef<HTMLElement>(null);
+  const returnFocusToTrigger = () => {
+    window.requestAnimationFrame(() => {
+      triggerRef.current?.focus();
+    });
+  };
 
   const updateActiveFromScroll = useCallback(() => {
     if (sections.length === 0) return;
@@ -88,8 +125,8 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        setTocOpen(false);
-        triggerRef.current?.focus();
+        setTocOpenFromUser(false);
+        returnFocusToTrigger();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -97,9 +134,14 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
   }, [tocOpen]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(TOC_OPEN_LS_KEY, tocOpen ? "1" : "0");
+    const nav = navRef.current;
+    if (nav) nav.inert = !tocOpen;
   }, [tocOpen]);
+
+  useEffect(() => {
+    if (readStoredTocOpen() !== null) return;
+    setTocOpen(resolveTocOpen(desktopDefaultOpen));
+  }, [desktopDefaultOpen]);
 
   useEffect(() => {
     if (!tocOpen || isDesktopToc) return;
@@ -140,8 +182,8 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
   if (sections.length === 0) return null;
 
   const closeToc = () => {
-    setTocOpen(false);
-    triggerRef.current?.focus();
+    setTocOpenFromUser(false);
+    returnFocusToTrigger();
   };
 
   const navBody = (
@@ -163,8 +205,8 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
               onClick={() => {
                 scrollToSection(s.id, scrollOffset);
                 if (!isDesktopToc) {
-                  setTocOpen(false);
-                  triggerRef.current?.focus();
+                  setTocOpenFromUser(false);
+                  returnFocusToTrigger();
                 }
               }}
             >
@@ -192,7 +234,7 @@ export function PageTableOfContents({ sections, scrollOffset = 96 }: PageTableOf
         aria-expanded={tocOpen}
         aria-controls={mobileNavId}
         aria-label={tocOpen ? "Skrýt obsah stránky" : "Zobrazit obsah stránky"}
-        onClick={() => setTocOpen((o) => !o)}
+        onClick={() => setTocOpenFromUser(!tocOpen)}
       >
         {tocOpen ? "Skrýt" : "Obsah"}
       </button>
