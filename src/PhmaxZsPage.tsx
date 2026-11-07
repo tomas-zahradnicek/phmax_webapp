@@ -93,7 +93,7 @@ import { ZsWizardShell } from "./zs/ZsWizardShell";
 import { ZsPhaPhpTabPanels } from "./zs/ZsPhaPhpTabPanels";
 import { ZsExpertOnboardingCard } from "./zs/ZsExpertOnboardingCard";
 import { useZsPageDerivedState } from "./zs/use-zs-page-derived-state";
-import { buildZsTocSections } from "./zs/zs-toc-sections";
+import { buildZsTocSections, zsPhmaxWizardStepForTocSection } from "./zs/zs-toc-sections";
 import { useZsWizardNavigation } from "./zs/use-zs-wizard-navigation";
 import {
   applyZsResetAll,
@@ -1806,6 +1806,17 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
     goToSection,
   });
 
+  const handleZsTocSectionSelect = useCallback(
+    (sectionId: string) => {
+      if (!zsBasicWizardActive) return false;
+      const step = zsPhmaxWizardStepForTocSection(sectionId);
+      if (step == null) return false;
+      goToZsWizardStep(step);
+      return true;
+    },
+    [goToZsWizardStep, zsBasicWizardActive],
+  );
+
   const zsTocSections = useMemo(
     () => buildZsTocSections({ viewMode, tab, zsShowPhmaxExceptionsToc }),
     [tab, viewMode, zsShowPhmaxExceptionsToc],
@@ -2337,6 +2348,7 @@ export function PhmaxZsPage({ productView, setProductView, onOpenRychlyPhmax }: 
           }
           tocSections={zsTocSections}
           tocDesktopDefaultOpen={viewMode === "expert"}
+          onTocSectionSelect={handleZsTocSectionSelect}
         />
         </ErrorBoundary>
 

@@ -1,5 +1,19 @@
 import type { PageTocSection } from "../PageTableOfContents";
 import type { CalculatorViewMode } from "../calculator-view-mode";
+import type { ZsBasicWizardStep } from "../zs-basic-wizard";
+
+const ZS_PHMAX_WIZARD_TOC_STEP: Record<string, ZsBasicWizardStep> = {
+  setup: 1,
+  basic: 2,
+  "zs-phmax-exceptions": 3,
+  "phmax-summary": 4,
+  overview: 5,
+};
+
+/** Krok pěti krokového průvodce PHmax pro id z TOC. Neznámé id vrací null. */
+export function zsPhmaxWizardStepForTocSection(sectionId: string): ZsBasicWizardStep | null {
+  return ZS_PHMAX_WIZARD_TOC_STEP[sectionId] ?? null;
+}
 
 export type BuildZsTocSectionsInput = {
   viewMode: CalculatorViewMode;
