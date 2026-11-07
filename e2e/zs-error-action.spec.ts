@@ -14,7 +14,8 @@ test.describe("ZŠ akce Přejít k chybě", () => {
     await expect(page.getByRole("list", { name: "Přehled výsledků" })).toContainText("Nezadáno");
 
     const banner = page.locator(".calculator-input-issue-banner");
-    await expect(banner).toContainText("Vstupy jsou kompletní");
+    await expect(banner.locator(".calculator-input-issue-banner__label")).toHaveText("Orientační nápověda k vyššímu pásmu");
+    await expect(page.getByRole("list", { name: "Přehled výsledků" })).toContainText("Vstupy jsou kompletní");
     await expect(banner).toContainText("Vyšší pásmo");
     await expect(banner.getByRole("button", { name: "Přejít k chybě" })).toHaveCount(0);
     await expect(page.locator(".zs-basic-wizard").getByRole("button", { name: "Přejít k chybě" })).toHaveCount(0);
