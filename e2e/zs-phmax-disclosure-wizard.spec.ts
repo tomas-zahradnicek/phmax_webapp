@@ -80,15 +80,17 @@ async function assertNoHorizontalOverflow(page: Page) {
 }
 
 async function assertVerticalScroll(page: Page) {
-  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
   const canScroll = await page.evaluate(
     () => document.documentElement.scrollHeight > window.innerHeight + 40,
   );
   expect(canScroll).toBe(true);
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.evaluate(() =>
+    window.scrollTo({ top: document.documentElement.scrollHeight, left: 0, behavior: "instant" }),
+  );
   const scrolled = await page.evaluate(() => window.scrollY);
   expect(scrolled).toBeGreaterThan(20);
-  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
   expect(await page.evaluate(() => window.scrollX)).toBe(0);
 }
 
