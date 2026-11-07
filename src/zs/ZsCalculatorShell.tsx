@@ -22,6 +22,7 @@ export type ZsCalculatorShellProps = {
   afterWorkspace?: React.ReactNode;
   footer: React.ReactNode;
   tocSections: readonly PageTocSection[];
+  tocDesktopDefaultOpen?: boolean;
 };
 
 export function ZsCalculatorShell({
@@ -33,6 +34,7 @@ export function ZsCalculatorShell({
   afterWorkspace,
   footer,
   tocSections,
+  tocDesktopDefaultOpen,
 }: ZsCalculatorShellProps) {
   return (
     <CalculatorProductShell
@@ -53,6 +55,7 @@ export function ZsCalculatorShell({
       afterWorkspace={afterWorkspace}
       footer={footer}
       tocSections={tocSections}
+      tocDesktopDefaultOpen={tocDesktopDefaultOpen}
     />
   );
 }
