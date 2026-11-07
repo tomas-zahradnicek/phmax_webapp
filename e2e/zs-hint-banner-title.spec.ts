@@ -23,7 +23,12 @@ test.describe("ZŠ nadpis banneru nápovědy pásma", () => {
     await expect(page.locator(".calculator-next-action")).toContainText("Vstupy jsou v pořádku");
     await expect(page.locator(".calculator-next-action").getByRole("button", { name: "Export" })).toBeVisible();
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.evaluate(() => {
+      window.scrollTo({
+        top: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
+        behavior: "instant",
+      });
+    });
     await expect(page.locator(".calculator-sticky-context")).toContainText("Vstupy jsou kompletní");
     await expect(page.locator(".calculator-sticky-context").getByRole("button", { name: "Uložit" })).toBeVisible();
     await expect(page.locator(".calculator-sticky-context").getByRole("button", { name: "Export" })).toBeVisible();
