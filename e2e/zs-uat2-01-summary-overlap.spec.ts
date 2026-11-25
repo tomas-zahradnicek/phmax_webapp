@@ -111,6 +111,19 @@ async function openClassesStep(page: Page): Promise<void> {
   await openWizardStep(page, 2);
 }
 
+/** Scrolls only when the control is outside the viewport. A covered on-screen control stays a hit failure. */
+async function placeOnScreen(locator: Locator): Promise<string> {
+  const initial = await hitTarget(locator);
+  if (initial !== "offscreen") return initial;
+  await locator.evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const top = window.scrollY + rect.top - Math.min(160, window.innerHeight * 0.35);
+    window.scrollTo({ top: Math.max(0, top), left: 0, behavior: "instant" });
+    window.dispatchEvent(new Event("scroll"));
+  });
+  return hitTarget(locator);
+}
+
 test.describe("ZŠ UAT2-01 plovoucí souhrn", () => {
   test("Zpět a Další krok jsou dosažitelné na 390, 768, 1024 a 1366", async ({ page }) => {
     test.setTimeout(90_000);
@@ -132,8 +145,8 @@ test.describe("ZŠ UAT2-01 plovoucí souhrn", () => {
         await expect(page.locator("body")).not.toHaveClass(/zs-mobile-summary-yields/);
       }
 
-      await expect.poll(async () => hitTarget(back), { timeout: 2000 }).toBe("ok");
-      await expect.poll(async () => hitTarget(next), { timeout: 2000 }).toBe("ok");
+      await expect.poll(async () => placeOnScreen(back), { timeout: 2000 }).toBe("ok");
+      await expect.poll(async () => placeOnScreen(next), { timeout: 2000 }).toBe("ok");
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
       expect(overflow, `overflow ${viewport.width}`).toBe(false);
 
@@ -150,6 +163,15 @@ test.describe("ZŠ UAT2-01 plovoucí souhrn", () => {
           await expect(summary).toBeHidden();
         }
       }
+
+      await next.click();
+      await expect(guide(page).getByRole("heading", { name: "Výjimky", exact: true })).toBeVisible();
+      const step3Back = guide(page).getByRole("button", { name: "Zpět" });
+      const step3Next = guide(page).getByRole("button", { name: "Další krok" });
+      await expect.poll(async () => placeOnScreen(step3Back), { timeout: 2000 }).toBe("ok");
+      await expect.poll(async () => placeOnScreen(step3Next), { timeout: 2000 }).toBe("ok");
+      await step3Back.click();
+      await expect(guide(page).getByRole("heading", { name: "Třídy", exact: true })).toBeVisible();
     }
   });
 
