@@ -83,7 +83,7 @@ async function pinWizardToTop(page: Page): Promise<void> {
   }
 }
 
-async function openWizardStep(page: Page, step: 2 | 3): Promise<void> {
+async function openWizardStep(page: Page, step: 2 | 3 | 4): Promise<void> {
   await clearLocalStorageKeys(page, [
     "phmax-zs-basic-wizard-step",
     "phmax-zs-view-mode",
@@ -102,9 +102,8 @@ async function openWizardStep(page: Page, step: 2 | 3): Promise<void> {
     style.textContent = "html, body { scroll-behavior: auto !important; }";
     document.head.appendChild(style);
   });
-  await expect(
-    guide(page).getByRole("heading", { name: step === 2 ? "Třídy" : "Výjimky", exact: true }),
-  ).toBeVisible();
+  const heading = step === 2 ? "Třídy" : step === 3 ? "Výjimky" : "Souhrn PHmax";
+  await expect(guide(page).getByRole("heading", { name: heading, exact: true })).toBeVisible();
 }
 
 async function openClassesStep(page: Page): Promise<void> {
@@ -122,6 +121,77 @@ async function placeOnScreen(locator: Locator): Promise<string> {
     window.dispatchEvent(new Event("scroll"));
   });
   return hitTarget(locator);
+}
+
+const MODULE_ABOUT_CONTROLS =
+  ".container--app button, .container--app a, .container--app input, .container--app select, .container--app textarea, .container--app summary";
+
+async function moduleAboutProbe(page: Page) {
+  return page.evaluate((selector) => {
+    const details = [...document.querySelectorAll("details")].find((node) =>
+      (node.querySelector("summary")?.textContent || "").includes("metodice"),
+    );
+    const panel = document.querySelector(".calculator-mobile-scroll-results");
+    const band = panel instanceof HTMLElement ? panel.getBoundingClientRect() : null;
+    const style = panel instanceof HTMLElement ? getComputedStyle(panel) : null;
+    let overlapCount = 0;
+    if (band) {
+      for (const node of document.querySelectorAll(selector)) {
+        if (!(node instanceof HTMLElement) || node.closest(".page-toc, .page-toc-mobile-trigger")) continue;
+        const rect = node.getBoundingClientRect();
+        if (rect.width < 8 || rect.height < 8 || rect.right <= band.left || rect.left >= band.right) continue;
+        if (rect.bottom > band.top && rect.top < band.bottom) overlapCount += 1;
+      }
+    }
+    let summaryHit = false;
+    if (band && panel instanceof HTMLElement) {
+      const x = Math.min(Math.max(band.left + band.width / 2, 1), window.innerWidth - 2);
+      const y = Math.min(Math.max(band.top + band.height / 2, 1), window.innerHeight - 2);
+      const top = document.elementFromPoint(x, y);
+      summaryHit = Boolean(top && (top === panel || panel.contains(top)));
+    }
+    return {
+      scrollY: window.scrollY,
+      overlapCount,
+      yields: document.body.classList.contains("zs-mobile-summary-yields"),
+      visibility: style ? style.visibility : "missing",
+      pointerEvents: style ? style.pointerEvents : "missing",
+      open: details instanceof HTMLDetailsElement ? details.open : false,
+      summaryHit,
+    };
+  }, MODULE_ABOUT_CONTROLS);
+}
+
+/** Geometry of the summary band. Overlap does not read the yield class. */
+async function summaryBandGeometry(page: Page) {
+  return page.evaluate((selector) => {
+    const panel = document.querySelector(".calculator-mobile-scroll-results");
+    const wizard = document.querySelector(".zs-basic-wizard");
+    if (!(panel instanceof HTMLElement) || !(wizard instanceof HTMLElement)) {
+      return { scrollY: window.scrollY, overlapCount: -1, wizardAbove: false, controlHit: false };
+    }
+    const band = panel.getBoundingClientRect();
+    let overlapCount = 0;
+    let controlHit = false;
+    for (const node of document.querySelectorAll(selector)) {
+      if (!(node instanceof HTMLElement) || node.closest(".page-toc, .page-toc-mobile-trigger")) continue;
+      const rect = node.getBoundingClientRect();
+      if (rect.width < 8 || rect.height < 8 || rect.right <= band.left || rect.left >= band.right) continue;
+      if (!(rect.bottom > band.top && rect.top < band.bottom)) continue;
+      overlapCount += 1;
+      if (controlHit) continue;
+      const x = Math.min(Math.max(rect.left + Math.min(8, rect.width / 2), 1), window.innerWidth - 2);
+      const y = Math.min(Math.max((Math.max(rect.top, band.top) + Math.min(rect.bottom, band.bottom)) / 2, 1), window.innerHeight - 2);
+      const top = document.elementFromPoint(x, y);
+      controlHit = Boolean(top && (top === node || node.contains(top)));
+    }
+    return {
+      scrollY: window.scrollY,
+      overlapCount,
+      wizardAbove: wizard.getBoundingClientRect().bottom < band.top,
+      controlHit,
+    };
+  }, MODULE_ABOUT_CONTROLS);
 }
 
 test.describe("ZŠ UAT2-01 plovoucí souhrn", () => {
@@ -181,41 +251,78 @@ test.describe("ZŠ UAT2-01 plovoucí souhrn", () => {
     await pinWizardToTop(page);
     const summary = page.locator(".calculator-mobile-scroll-results");
     await expect(summary).toBeAttached();
+    const covered = await summaryBandGeometry(page);
+    expect(covered.overlapCount).toBeGreaterThan(0);
+    expect(covered.controlHit).toBe(true);
     await expect(page.locator("body")).toHaveClass(/zs-mobile-summary-yields/);
     await expect(summary).toBeHidden();
+    await expect(summary).toHaveCSS("pointer-events", "none");
 
-    const cleared = await page.evaluate(() => {
+    const targets = await page.evaluate((selector) => {
       const panel = document.querySelector(".calculator-mobile-scroll-results");
       const wizard = document.querySelector(".zs-basic-wizard");
-      if (!(panel instanceof HTMLElement) || !(wizard instanceof HTMLElement)) return "missing";
+      if (!(panel instanceof HTMLElement) || !(wizard instanceof HTMLElement)) return null;
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      for (let y = 0; y <= max; y += 120) {
+      let clearY: number | null = null;
+      let overlapY: number | null = null;
+      let stayClearY: number | null = null;
+      let previousOverlapY: number | null = null;
+      for (let y = 0; y <= max; y += 40) {
         window.scrollTo(0, y);
         window.dispatchEvent(new Event("scroll"));
         const band = panel.getBoundingClientRect();
-        if (wizard.getBoundingClientRect().bottom >= band.top) continue;
-        let covered = false;
-        for (const node of document.querySelectorAll(
-          ".container--app button, .container--app a, .container--app input, .container--app select, .container--app textarea, .container--app summary",
-        )) {
+        const wizardAbove = wizard.getBoundingClientRect().bottom < band.top;
+        let overlap = 0;
+        for (const node of document.querySelectorAll(selector)) {
           if (!(node instanceof HTMLElement) || node.closest(".page-toc, .page-toc-mobile-trigger")) continue;
           const rect = node.getBoundingClientRect();
           if (rect.width < 8 || rect.height < 8 || rect.right <= band.left || rect.left >= band.right) continue;
-          if (rect.bottom > band.top && rect.top < band.bottom) {
-            covered = true;
-            break;
-          }
+          if (rect.bottom > band.top && rect.top < band.bottom) overlap += 1;
         }
-        if (!covered) {
-          return document.body.classList.contains("zs-mobile-summary-yields") ? "still-hidden" : "shown";
+        if (!wizardAbove) continue;
+        if (overlap > 0) previousOverlapY = window.scrollY;
+        if (overlap === 0 && clearY === null) {
+          clearY = window.scrollY;
+          overlapY = previousOverlapY;
+        } else if (overlap === 0 && clearY !== null && stayClearY === null && window.scrollY >= clearY + 40) {
+          stayClearY = window.scrollY;
         }
       }
-      return "no-clear-band";
-    });
-    expect(cleared).toBe("shown");
+      return { clearY, overlapY, stayClearY };
+    }, MODULE_ABOUT_CONTROLS);
+    expect(targets?.clearY).toEqual(expect.any(Number));
+    expect(targets?.stayClearY).toEqual(expect.any(Number));
+    const overlapTarget = targets?.overlapY ?? covered.scrollY;
+
+    const go = (top: number) => page.evaluate((y) => {
+      window.scrollTo(0, y);
+      window.dispatchEvent(new Event("scroll"));
+    }, top);
+
+    await go(targets!.clearY!);
+    const cleared = await summaryBandGeometry(page);
+    expect(cleared.overlapCount).toBe(0);
+    expect(cleared.wizardAbove).toBe(true);
+    await expect(page.locator("body")).not.toHaveClass(/zs-mobile-summary-yields/);
     await expect(summary).toBeVisible();
-    await page.mouse.wheel(0, -80);
+    await expect(summary).toHaveCSS("pointer-events", "auto");
+
+    await go(targets!.stayClearY!);
+    const stayed = await summaryBandGeometry(page);
+    expect(stayed.scrollY).not.toBe(cleared.scrollY);
+    expect(stayed.overlapCount).toBe(0);
+    expect(stayed.wizardAbove).toBe(true);
+    await expect(page.locator("body")).not.toHaveClass(/zs-mobile-summary-yields/);
     await expect(summary).toBeVisible();
+
+    await go(overlapTarget);
+    const returned = await summaryBandGeometry(page);
+    expect(returned.scrollY).not.toBe(stayed.scrollY);
+    expect(returned.overlapCount).toBeGreaterThan(0);
+    expect(returned.controlHit).toBe(true);
+    await expect(page.locator("body")).toHaveClass(/zs-mobile-summary-yields/);
+    await expect(summary).toBeHidden();
+    await expect(summary).toHaveCSS("pointer-events", "none");
   });
 
   test("hero-yield, klávesnice a fokus na průvodci", async ({ page }) => {
@@ -346,6 +453,46 @@ test.describe("ZŠ UAT2-01 plovoucí souhrn", () => {
     const dismiss = summary.getByRole("button", { name: "Skrýt souhrn výsledků" });
     await dismiss.click();
     await expect(page.getByRole("button", { name: "Zobrazit souhrn výsledků" })).toBeVisible();
+  });
+
+  test("390×844 krok 4: O modulu a metodice vrátí souhrn, když průnik zmizí", async ({ page }) => {
+    await openWizardStep(page, 4);
+    await page.setViewportSize({ width: 390, height: 844 });
+    const about = page.locator("details").filter({ hasText: "O modulu a metodice" }).first();
+    const summary = page.locator(".calculator-mobile-scroll-results");
+    await expect(about).toBeVisible();
+    await expect(summary).toBeAttached();
+    const placed = await page.evaluate(() => {
+      const details = [...document.querySelectorAll("details")].find((node) =>
+        (node.querySelector("summary")?.textContent || "").includes("metodice"),
+      );
+      const panel = document.querySelector(".calculator-mobile-scroll-results");
+      if (!(details instanceof HTMLElement) || !(panel instanceof HTMLElement)) return false;
+      const rect = details.getBoundingClientRect();
+      const desiredTop = panel.getBoundingClientRect().top - rect.height - 16;
+      window.scrollTo({ top: Math.max(0, window.scrollY + rect.top - desiredTop), left: 0, behavior: "instant" });
+      return true;
+    });
+    expect(placed).toBe(true);
+    await expect.poll(async () => (await moduleAboutProbe(page)).overlapCount, { timeout: 2000 }).toBeGreaterThan(0);
+    const before = await moduleAboutProbe(page);
+    expect(before.open).toBe(false);
+    expect(before.yields).toBe(true);
+    expect(before.visibility).toBe("hidden");
+
+    await about.locator("summary").click();
+
+    await expect.poll(async () => (await moduleAboutProbe(page)).open, { timeout: 2000 }).toBe(true);
+    await expect.poll(async () => (await moduleAboutProbe(page)).overlapCount, { timeout: 2000 }).toBe(0);
+    const afterLayout = await moduleAboutProbe(page);
+    expect(afterLayout.scrollY).toBe(before.scrollY);
+    await expect.poll(async () => (await moduleAboutProbe(page)).yields, { timeout: 2000 }).toBe(false);
+    const after = await moduleAboutProbe(page);
+    expect(after.visibility).toBe("visible");
+    expect(after.pointerEvents).toBe("auto");
+    expect(after.summaryHit).toBe(true);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+    expect(overflow).toBe(false);
   });
 
   test("PV souhrn nemá třídu ústupu ZŠ", async ({ page }) => {
