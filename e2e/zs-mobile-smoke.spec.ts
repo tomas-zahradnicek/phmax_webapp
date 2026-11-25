@@ -48,10 +48,14 @@ test.describe("ZŠ mobilní smoke", () => {
     const displaySettings = page.getByRole("button", { name: /Zobrazení/ });
     const wizardHeading = page.locator(".zs-basic-wizard .section-title");
     const firstInput = page.locator("#zs-mode-select");
+    await page.addStyleTag({ content: "html, body { scroll-behavior: auto !important; }" });
 
     for (const viewport of SUMMARY_VIEWPORTS) {
       await page.setViewportSize(viewport);
-      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.evaluate(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        window.dispatchEvent(new Event("scroll"));
+      });
       await expect(results).toBeVisible();
       await expect(wizardHeading).toHaveText("Typ školy");
       await expect(wizardHeading).toBeInViewport();
@@ -77,12 +81,31 @@ test.describe("ZŠ mobilní smoke", () => {
     }
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await page.evaluate(() => {
-      const hero = document.querySelector(".calculator-hero-shell");
-      const bottom = hero instanceof HTMLElement ? hero.getBoundingClientRect().bottom : window.innerHeight;
-      window.scrollTo(0, window.scrollY + bottom + 24);
-    });
+    const maxScroll = await page.evaluate(() => Math.max(0, document.documentElement.scrollHeight - window.innerHeight));
+    let clearedHeroBand: { y: number; scrollY: number; yields: boolean; visibility: string } | null = null;
+    for (let y = 0; y <= maxScroll; y += 80) {
+      const state = await page.evaluate(async (top) => {
+        window.scrollTo({ top, left: 0, behavior: "instant" });
+        window.dispatchEvent(new Event("scroll"));
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        });
+        window.dispatchEvent(new Event("scroll"));
+        const panel = document.querySelector(".calculator-mobile-scroll-results");
+        const style = panel instanceof HTMLElement ? getComputedStyle(panel) : null;
+        return {
+          y: top,
+          scrollY: window.scrollY,
+          yields: document.body.classList.contains("zs-mobile-summary-yields"),
+          visibility: style ? style.visibility : "missing",
+        };
+      }, y);
+      if (!state.yields && state.visibility === "visible" && Math.abs(state.scrollY - y) <= 1) {
+        clearedHeroBand = state;
+        break;
+      }
+    }
+    expect(clearedHeroBand).not.toBeNull();
     await expect(floatingSummary).toBeVisible();
 
     await floatingSummary.getByRole("button", { name: "Skrýt souhrn výsledků" }).click();
