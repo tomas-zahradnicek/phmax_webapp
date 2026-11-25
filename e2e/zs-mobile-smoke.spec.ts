@@ -77,12 +77,17 @@ test.describe("ZŠ mobilní smoke", () => {
     }
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await page.evaluate(() => {
-      const hero = document.querySelector(".calculator-hero-shell");
-      const bottom = hero instanceof HTMLElement ? hero.getBoundingClientRect().bottom : window.innerHeight;
-      window.scrollTo(0, window.scrollY + bottom + 24);
+    const clearedHeroBand = await page.evaluate(() => {
+      window.scrollTo(0, 0);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      for (let y = 0; y <= max; y += 80) {
+        window.scrollTo(0, y);
+        window.dispatchEvent(new Event("scroll"));
+        if (!document.body.classList.contains("zs-mobile-summary-yields")) return true;
+      }
+      return false;
     });
+    expect(clearedHeroBand).toBe(true);
     await expect(floatingSummary).toBeVisible();
 
     await floatingSummary.getByRole("button", { name: "Skrýt souhrn výsledků" }).click();

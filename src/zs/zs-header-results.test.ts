@@ -15,7 +15,12 @@ import {
   presentZsHeaderResults,
   type ZsHeaderFacts,
 } from "./zs-header-results";
-import { zsMobileSummaryReservePx, zsMobileSummaryShouldYield } from "./zs-mobile-summary-yield";
+import {
+  zsMobileSummaryBandTop,
+  zsMobileSummaryIntersects,
+  zsMobileSummaryReservePx,
+  zsMobileSummaryShouldYield,
+} from "./zs-mobile-summary-yield";
 
 const repoRoot = resolve(__dirname, "../..");
 
@@ -410,11 +415,22 @@ describe("ZŠ results header states", () => {
   it("plovoucí souhrn ustoupí, dokud hero zasahuje do jeho pásma", () => {
     expect(zsMobileSummaryShouldYield(624, 844, 260)).toBe(true);
     expect(zsMobileSummaryShouldYield(200, 844, 260)).toBe(false);
+    expect(zsMobileSummaryShouldYield(793, 900, 243)).toBe(true);
+    expect(zsMobileSummaryShouldYield(607, 900, 243)).toBe(false);
+    expect(readSource("src/zs/zs-mobile-summary-yield.ts")).toContain(".calculator-school-profile-banner");
+    expect(zsMobileSummaryBandTop(900, 79, 669)).toBe(669);
+    expect(zsMobileSummaryShouldYield(809, 900, 900 - zsMobileSummaryBandTop(900, 79, 669))).toBe(true);
+    expect(zsMobileSummaryShouldYield(809, 900, 900 - zsMobileSummaryBandTop(900, 79, 840))).toBe(false);
+    expect(zsMobileSummaryIntersects(820, 860, 840, 880)).toBe(true);
+    expect(zsMobileSummaryIntersects(760, 830, 840, 880)).toBe(false);
+    expect(readSource("src/zs/zs-mobile-summary-yield.ts")).toContain(".container--app button");
+    expect(readSource("src/zs/zs-mobile-summary-yield.ts")).not.toContain("127.0.0.1:7709");
     expect(zsMobileSummaryReservePx(844, null)).toBeGreaterThan(320);
     const css = readSource("src/styles.css");
     const rule = "body.zs-mobile-summary-yields .calculator-mobile-scroll-results";
     const at = css.indexOf(rule);
     expect(at).toBeGreaterThan(css.lastIndexOf("@media (max-width: 1099px)", at));
     expect(css.indexOf("@media (min-width: 1100px)", at)).toBeGreaterThan(at);
+    expect(css.indexOf("body.zs-mobile-summary-yields .calculator-mobile-summary-chip", at)).toBeGreaterThan(at);
   });
 });
