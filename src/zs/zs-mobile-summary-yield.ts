@@ -96,15 +96,34 @@ export function useZsMobileSummaryYield(heroRef: RefObject<HTMLElement | null>):
       observedOverlay = watch(overlayEl, observedOverlay);
     };
 
-    observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(apply) : null;
+    let layoutFrame = 0;
+    const scheduleLayoutApply = () => {
+      if (layoutFrame) return;
+      layoutFrame = requestAnimationFrame(() => {
+        layoutFrame = 0;
+        apply();
+      });
+    };
+    observer = typeof ResizeObserver !== "undefined"
+      ? new ResizeObserver((entries) => {
+          const layoutChanged = entries.some(
+            (entry) => entry.target instanceof HTMLElement && entry.target.classList.contains("container--app"),
+          );
+          if (layoutChanged) scheduleLayoutApply();
+          else apply();
+        })
+      : null;
     const overlayChanges = new MutationObserver(apply);
     apply();
     window.addEventListener("scroll", apply, { passive: true });
     window.addEventListener("resize", apply);
     overlayChanges.observe(document.body, { childList: true });
     if (heroRef.current) observer?.observe(heroRef.current);
+    const layoutRoot = document.querySelector(".container--app");
+    if (layoutRoot) observer?.observe(layoutRoot);
 
     return () => {
+      if (layoutFrame) cancelAnimationFrame(layoutFrame);
       window.removeEventListener("scroll", apply);
       window.removeEventListener("resize", apply);
       overlayChanges.disconnect();
